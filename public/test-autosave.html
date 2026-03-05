@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Save Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow">
+        <h1 class="text-2xl font-bold mb-6">Auto-Save Test Page</h1>
+        
+        <form method="POST" action="#">
+            <div class="space-y-4">
+                <div>
+                    <label class="block font-bold mb-2">Question 1:</label>
+                    <input type="text" 
+                           name="q1" 
+                           class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500"
+                           placeholder="Type here to test auto-save...">
+                </div>
+
+                <div>
+                    <label class="block font-bold mb-2">Question 2:</label>
+                    <input type="text" 
+                           name="q2" 
+                           class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500"
+                           placeholder="Type here to test auto-save...">
+                </div>
+
+                <div>
+                    <label class="block font-bold mb-2">Paragraph:</label>
+                    <textarea name="paragraph_ans" 
+                              rows="4"
+                              class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500"
+                              placeholder="Type here to test auto-save..."></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg font-bold hover:bg-blue-600">
+                    Submit
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <h3 class="font-bold mb-2">Testing Instructions:</h3>
+            <ol class="list-decimal list-inside space-y-1 text-sm">
+                <li>Open Console (F12)</li>
+                <li>Type 1 letter in Question 1</li>
+                <li>Check console for logs</li>
+                <li>Check for green badge at bottom-left</li>
+                <li>Refresh page (F5)</li>
+                <li>Verify data is restored</li>
+            </ol>
+        </div>
+
+        <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h3 class="font-bold mb-2">Console Commands:</h3>
+            <pre class="text-xs bg-gray-800 text-green-400 p-2 rounded overflow-x-auto">
+// Check if AutoSave loaded
+console.log('AutoSave:', typeof AutoSave);
+
+// Check storage key
+console.log('Key:', AutoSave.storageKey);
+
+// View saved data
+console.log('Data:', localStorage.getItem(AutoSave.storageKey));
+
+// Manual save
+AutoSave.saveAnswers();
+
+// Manual restore
+AutoSave.restoreAnswers();
+            </pre>
+        </div>
+    </div>
+
+    <!-- Auto-Save Script -->
+    <script src="auto-save.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // For testing, use a fixed user ID
+            const userId = 123; // Test user ID
+            
+            console.log('Initializing AutoSave with userId:', userId);
+            AutoSave.init('test', userId);
+            
+            // Log when page loads
+            console.log('Test page loaded. Start typing to test auto-save!');
+        });
+    </script>
+</body>
+</html>

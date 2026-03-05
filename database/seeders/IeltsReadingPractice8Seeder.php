@@ -1,0 +1,313 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class IeltsReadingPractice8Seeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $materialId = 8;
+
+        // Clean up existing data for this practice test
+        $existingPassages = \App\Models\IeltsReadingPassage::where('material_id', $materialId)->pluck('id');
+        \App\Models\IeltsReadingQuestion::whereIn('passage_id', $existingPassages)->delete();
+        \App\Models\IeltsReadingPassage::where('material_id', $materialId)->delete();
+
+
+        // ==========================================
+        // PASSAGE 1: Otter
+        // ==========================================
+        $passage1 = \App\Models\IeltsReadingPassage::create([
+            'material_id' => $materialId,
+            'title' => 'Otter',
+            'content' => '
+<p><strong>A</strong> Otters have long, thin bodies and short legs – ideal for pushing through dense undergrowth or hunting in tunnels. An adult male may be up to 4 feet long and 30lbs. Females are smaller typically. The Eurasian otter’s nose is about the smallest among the otter species and has a characteristic shape described as a shallow ‘W’. An otter’s tail (or rudder, or stern) is stout at the base and tapers towards the tip where it flattens. This forms part of the propulsion unit when swimming fast underwater. Otter fur consists of two types of hair: stout guard hairs which form a waterproof outer covering, and under-fur which is dense and fine, equivalent to an otter’s thermal underwear. The fur must be kept in good condition by grooming. Seawater reduces the waterproofing and insulating qualities of otter fur when saltwater in the fur. This is why freshwater pools are important to otters living on the coast. After swimming, they wash the salts off in pools and the squirm on the ground to rub dry against vegetation.</p>
+
+<p><strong>B</strong> The scent is used for hunting on land, for communication and for detecting danger. Otterine sense of smell is likely to be similar in sensitivity to dogs. Otters have small eyes and are probably short-sighted on land. But they do have the ability to modify the shape of the lens in the eye to make it more spherical, and hence overcome the refraction of water. In clear water and good light, otters can hunt fish by sight. The otter’s eyes and nostrils are placed high on its head so that it can see and breathe even when the rest of the body is submerged. Underwater, the cotter holds its legs against the body, except for steering, and the hind end of the body is flexed in a series of vertical undulations. River otters have webbing which extends for much of the length of each digit, though not to the very end. Giant otters and sea otters have even more prominent webs, while the Asian short-clawed otter has no webbing – they hunt for shrimps in ditches and paddy fields so they don’t need the swimming speed. Otter’s ears are tiny for streamlining, but they still have very sensitive hearing and are protected by valves which close them against water pressure.</p>
+
+<p><strong>C</strong> A number of constraints and preferences limit suitable habitats of otters. Water is a must and the rivers must be large enough to support a healthy population of fish. Being such shy and wary creatures, they will prefer territories where man’s activities do not impinge greatly. Of course, there must also be no other otter already in residence – this has only become significant again recently as populations start to recover. Coastal otters have a much more abundant food supply and range for males and females may be just a few kilometres of coastline. Because male range overlaps with two or three females – not bad! Otters will eat anything that they can get hold of – there are records of sparrows and snakes and slugs being gobbled. Apart from fish, the most common prey are crayfish, crabs and water birds. Small mammals are occasionally taken, most commonly rabbits but sometimes even moles.</p>
+
+<p><strong>D</strong> Eurasian otters will breed any time where food is readily available. In places where the condition is more severe, Sweden for example where the lakes are frozen for much of winter, cubs are born in spring. This ensures that they are well grown before severe weather returns. In the Shetlands, cubs are born in summer when fish is more abundant. Though otters can breed every year, some do not. Again, this depends on food availability. Other factors such as food range and quality of the female may have an effect. Gestation for Eurasian otter is 63 days, with the exception of Lutra canadensis whose embryos may undergo delayed implantation. Otters normally give birth in more secure dens to avoid disturbances. Nests are lined with bedding to keep the cub’s warm mummy is away feeding.</p>
+
+<p><strong>E</strong> Otters normally give birth in more secure dens to avoid disturbances. Nests are lined with bedding (reeds, waterside plants, grass) to keep the cub’s warm while is away feeding. Litter Size varies between 1 and 5. For some unknown reason, coastal otters tend to produce smaller litters. At five weeks they open their eyes – a tiny cub of 700g. At seven weeks they’re weaned onto solid food. At ten weeks they leave the nest, blinking into daylight for the first time. After three months they finally meet the water and learn to swim. After eight months they are hunting, though the mother still provides a lot of food herself. Finally, after nine months she can chase them all away with a clear conscience, and relax – until the next fella shows up.</p>
+
+<p><strong>F</strong> The plight of the British otter was recognised in the early 60s, but it wasn’t until the late 70s that the chief cause was discovered. Pesticides, such as dieldrin and aldrin, were first used in1955 in agriculture and other industries – these chemicals are very persistent and had already been recognised as the cause of huge declines in the population of peregrine falcons, sparrow hawks and other predators. The pesticides entered the river systems and the food chain – micro-organisms, fish and finally otters, with every step increasing the concentration of the chemicals. From 1962 the chemicals were phased out, but while some species recovered quickly, otter numbers did not – and continued to fall into the 80s. This was probably due mainly to habitat destruction and road deaths. Acting on populations fragmented by the sudden decimation in the 50s and 60s, the loss of just a handful of otters in one area can make an entire population unviable and spell the end.</p>
+
+<p><strong>G</strong> Otter numbers are recovering all around Britain – populations are growing again in the few areas where they had remained and have expanded from those areas into the rest of the country. This is almost entirely due to legislation, conservation efforts, slowing down and reversing the destruction of suitable otter habitat and reintroductions from captive breeding programs. Releasing captive-bred otters is seen by many as a last resort. The argument runs that where there is no suitable habitat for them they will not survive after release and where there is suitable habitat, natural populations should be able to expand into the area. However, reintroducing animals into a fragmented and fragile population may add just enough impetus for it to stabilise and expand, rather than die out. This is what the Otter Trust accomplished in Norfolk, where the otter population may have been as low as twenty animals at the beginning of the 1980s. The Otter Trust has now finished its captive breeding program entirely, great news because it means it is no longer needed.</p>
+            ',
+            'order' => 1
+        ]);
+
+        // Questions 1-9: Matching Paragraph Information
+        \App\Models\IeltsReadingQuestion::create([
+            'passage_id' => $passage1->id,
+            'question_number' => 1,
+            'question_text' => 'The reading Passage has seven paragraphs A-G. Which paragraph contains the following information?<br>NB You may use any letter more than once.',
+            'type' => 'matching_paragraph_information',
+            'options' => ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
+            'correct_answer' => null,
+            'explanation' => null,
+            'data' => [
+                'start_number' => 0,
+                'sub_questions' => [
+                    ['id' => '1', 'label' => 'A description of how otters regulate vision underwater', 'text' => 'A description of how otters regulate vision underwater', 'correct_answer' => 'B'],
+                    ['id' => '2', 'label' => 'The fit-for-purpose characteristics of otter’s body shape', 'text' => 'The fit-for-purpose characteristics of otter’s body shape', 'correct_answer' => 'A'],
+                    ['id' => '3', 'label' => 'A reference to an underdeveloped sense', 'text' => 'A reference to an underdeveloped sense', 'correct_answer' => 'B'],
+                    ['id' => '4', 'label' => 'An explanation of why agriculture failed in otter conservation efforts', 'text' => 'An explanation of why agriculture failed in otter conservation efforts', 'correct_answer' => 'F'],
+                    ['id' => '5', 'label' => 'A description of some of the otter’s social characteristics', 'text' => 'A description of some of the otter’s social characteristics', 'correct_answer' => 'C'],
+                    ['id' => '6', 'label' => 'A description of how baby otters grow', 'text' => 'A description of how baby otters grow', 'correct_answer' => 'E'],
+                    ['id' => '7', 'label' => 'The conflicting opinions on how to preserve', 'text' => 'The conflicting opinions on how to preserve', 'correct_answer' => 'G'],
+                    ['id' => '8', 'label' => 'A reference to the legislative act', 'text' => 'A reference to the legislative act', 'correct_answer' => 'G'],
+                    ['id' => '9', 'label' => 'An explanation of how otters compensate for heat loss', 'text' => 'An explanation of how otters compensate for heat loss', 'correct_answer' => 'A'],
+                ]
+            ],
+        ]);
+
+        // Questions 10-13: Short Answer Group
+        \App\Models\IeltsReadingQuestion::create([
+            'passage_id' => $passage1->id,
+            'question_number' => 10,
+            'question_text' => 'Answer the questions below. Choose NO MORE THAN THREE WORDS AND/OR A NUMBER from the passage for each answer.',
+            'type' => 'short_answer_group',
+            'options' => null,
+            'correct_answer' => null,
+            'explanation' => null,
+            'data' => [
+                'start_number' => 9,
+                'sub_questions' => [
+                    ['id' => '10', 'label' => 'What affects the outer fur of otters?', 'text' => 'What affects the outer fur of otters?', 'correct_answer' => 'sea water|salt water|salt'],
+                    ['id' => '11', 'label' => 'What skill is not necessary for Asian short-clawed otters?', 'text' => 'What skill is not necessary for Asian short-clawed otters?', 'correct_answer' => 'swimming speed'],
+                    ['id' => '12', 'label' => 'Which type of otters has the shortest range?', 'text' => 'Which type of otters has the shortest range?', 'correct_answer' => 'coastal otters'],
+                    ['id' => '13', 'label' => 'Which type of animals do otters hunt occasionally?', 'text' => 'Which type of animals do otters hunt occasionally?', 'correct_answer' => 'small mammals'],
+                ]
+            ]
+        ]);
+
+        // ==========================================
+        // PASSAGE 2: BIRD MIGRATION 2
+        // ==========================================
+        $passage2 = \App\Models\IeltsReadingPassage::create([
+            'material_id' => $materialId,
+            'title' => 'BIRD MIGRATION 2',
+            'content' => '
+<p><strong>A</strong> Birds have many unique design features that enable them to perform such amazing feats of endurance. They are equipped with lightweight, hollow bones, intricately designed feathers providing both lift and thrust for rapid flight, navigation systems superior to any that man has developed, and an ingenious heat conserving design that, among other things, concentrates all blood circulation beneath layers of warm, waterproof plumage, leaving them fit to face life in the harshest of climates. Their respiratory systems have to perform efficiently during sustained flights at altitude, so they have a system of extracting oxygen from their lungs that far exceeds that of any other animal. During the later stages of the summer breeding season, when food is plentiful, their bodies are able to accumulate considerable layers of fat, in order to provide sufficient energy for their long migratory flights.</p>
+
+<p><strong>B</strong> The fundamental reason that birds migrate is to find adequate food during the winter months when it is in short supply. This particularly applies to birds that breed in the temperate and Arctic regions of the Northern Hemisphere, where food is abundant during the short growing season. Many species can tolerate cold temperatures if food is plentiful, but when food is not available they must migrate. However, intriguing questions remain.</p>
+
+<p><strong>C</strong> One puzzling fact is that many birds journey much further than would be necessary just to find food and good weather. Nobody knows, for instance, why British swallows, which could presumably survive equally well if they spent the winter in equatorial Africa, instead of several thousands of miles further to their preferred winter home in South Africa Cape Province. Another mystery involves the huge migrations performed by arctic terns and mudflat-feeding shorebirds that breed close to Polar Regions. In general, the further north a migrant species breeds, the further south it spends the winter. For arctic terns, this necessitates an annual round trip of 25,000 miles. Yet, en route to their final destination in far-flung southern latitudes, all these individuals overfly other areas of seemingly suitable habitat spanning two hemispheres. While we may not fully understand birds’ reasons for going to particular places, we can marvel at their feats.</p>
+
+<p><strong>D</strong> <img src="/TargetBahasaCourse/public/images/ielts/reading/practice8_map.png" alt="Migration map showing routes" class="w-full my-6 rounded-lg shadow"></p>
+<p>One of the greatest mysteries is how young birds know how to find the traditional wintering areas without parental guidance. Very few adults migrate with juveniles in tow, and youngsters may even have little or no inkling of their parents’ appearance. A familiar example is that of the cuckoo, which lays its eggs in another species’ nest and never encounters its young again. It is mind-boggling to consider that, once raised by its host species, the young cuckoo makes its own way to ancestral wintering grounds in the tropics before returning single-handedly to northern Europe the next season to seek out a mate among its own kind. The obvious implication is that it inherits from its parents an inbuilt route map and direction-finding capability, as well as a mental image of what another cuckoo looks like. Yet nobody has the slightest idea as to how this is possible.</p>
+
+<p><strong>E</strong> Mounting evidence has confirmed that birds use the positions of the sun and stars to obtain compass directions. They seem also to be able to detect the earth’s magnetic field, probably due to having minute crystals of magnetite in the region of their brains. However, true navigation also requires an awareness of position and time, especially when lost. Experiments have shown that after being taken thousands of miles over an unfamiliar landmass, birds are still capable of returning rapidly to nest sites. Such phenomenal powers are the product of computing several sophisticated cues, including an inborn map of the night sky and the pull of the earth’s magnetic field. How the birds use their ‘instruments’ remains unknown, but one thing is clear: they see the world with a superior sensory perception to ours. Most small birds migrate at night and take their direction from the position of the setting sun. however, as well as seeing the sun go down, they also seem to see the plane of polarized light caused by it, which calibrates their compass. Traveling at night provides other benefits. Daytime predators are avoided and the danger of dehydration due to flying for long periods in warm, sunlit skies is reduced. Furthermore, at night the air is generally cool and less turbulent and so conducive to sustained, stable flight.</p>
+
+<p><strong>F</strong> Nevertheless, all journeys involve considerable risk, and part of the skill in arriving safely is setting off at the right time. This means accurate weather forecasting, and utilizing favorable winds. Birds are adept at both, and, in laboratory tests, some have been shown to detect the minute difference in barometric pressure between the floor and ceiling of a room. Often birds react to weather changes before there is any visible sign of them. Lapwings, which feed on grassland, flee west from the Netherlands to the British Isles, France and Spain at the onset of a cold snap. When the ground surface freezes the birds could starve. Yet they return to Holland ahead of a thaw, their arrival linked to a pressure change presaging an improvement in the weather.</p>
+
+<p><strong>G</strong> In one instance a Welsh Manx shearwater carried to America and released was back in its burrow on Skokholm Island, off the Pembrokeshire coast, one day before a letter announcing its release! Conversely, each autumn a small number of North American birds are blown across the Atlantic by fast-moving westerly tail winds. Not only do they arrive safely in Europe, but, based on ringing evidence, some make it back to North America the following spring, after probably spending the winter European migrants in sunny African climes.</p>
+            ',
+            'order' => 2
+        ]);
+
+        // Questions 14-20: Matching Headings
+        \App\Models\IeltsReadingQuestion::create([
+            'passage_id' => $passage2->id,
+            'question_number' => 14,
+            'question_text' => 'Reading passage 2 has seven paragraphs, A-G. Choose the correct heading for each paragraph from the list of headings below.',
+            'type' => 'matching_headings',
+            'options' => [
+                'i' => 'The best moment to migrate',
+                'ii' => 'The unexplained rejection of closer feeding ground',
+                'iii' => 'The influence of weather on the migration route',
+                'iv' => 'Physical characteristics that allow birds to migrate',
+                'v' => 'The main reason why birds migrate',
+                'vi' => 'The best wintering grounds for birds',
+                'vii' => 'Research findings on how birds migrate',
+                'viii' => 'Successful migration despite the trouble of wind',
+                'ix' => 'Contrast between long-distance migration and short-distance migration',
+                'x' => 'Mysterious migration despite lack of teaching'
+            ],
+            'correct_answer' => null,
+            'explanation' => null,
+            'data' => [
+                'start_number' => 13,
+                'box_title' => 'List of headings',
+                'sub_questions' => [
+                    ['id' => '14', 'label' => 'Paragraph A', 'correct_answer' => 'iv'],
+                    ['id' => '15', 'label' => 'Paragraph B', 'correct_answer' => 'v'],
+                    ['id' => '16', 'label' => 'Paragraph C', 'correct_answer' => 'ii'],
+                    ['id' => '17', 'label' => 'Paragraph D', 'correct_answer' => 'x'],
+                    ['id' => '18', 'label' => 'Paragraph E', 'correct_answer' => 'vii'],
+                    ['id' => '19', 'label' => 'Paragraph F', 'correct_answer' => 'i'],
+                    ['id' => '20', 'label' => 'Paragraph G', 'correct_answer' => 'viii'],
+                ]
+            ]
+        ]);
+
+        // Questions 21-22: Multiple Choice (Multiple Correct)
+        \App\Models\IeltsReadingQuestion::create([
+            'passage_id' => $passage2->id,
+            'question_number' => 21,
+            'question_text' => 'Choose TWO letters, A-E. Which TWO of the following statements are true of bird migration?',
+            'type' => 'multiple_choice_multiple',
+            'options' => [
+                'A' => 'Birds often fly further than they need to.',
+                'B' => 'Birds traveling in family groups are safe.',
+                'C' => 'Birds flying at night need less water.',
+                'D' => 'Birds have much sharper eyesight than humans.',
+                'E' => 'Only shorebirds are resistant to strong winds.'
+            ],
+            'correct_answer' => ['A', 'C'],
+            'explanation' => 'A is supported by paragraph C (they overfly seemingly suitable habitats). C is supported by paragraph E (dehydration is reduced at night).',
+            'data' => [
+               'start_number' => 20,
+               'max_selections' => 2
+            ]
+        ]);
+
+        // Questions 23-26: Sentence Completion
+        \App\Models\IeltsReadingQuestion::create([
+            'passage_id' => $passage2->id,
+            'question_number' => 23,
+            'question_text' => 'Complete the sentences below using NO MORE THAN TWO WORDS from the passage.',
+            'type' => 'sentence_completion',
+            'options' => null,
+            'correct_answer' => [
+                '23' => 'parental guidance',
+                '24' => 'compass',
+                '25' => 'predators',
+                '26' => 'visible'
+            ],
+            'explanation' => null,
+            'data' => [
+                'start_number' => 22,
+                'summary_text' => '<div class="space-y-6">
+                    <div class="flex gap-3 text-lg leading-relaxed"><span class="font-bold min-w-[20px]">23.</span> <div>It is a great mystery that young birds like cuckoos can find their wintering grounds without [23]</div></div>
+                    <div class="flex gap-3 text-lg leading-relaxed"><span class="font-bold min-w-[20px]">24.</span> <div>Evidence shows birds can tell directions like a [24] by observing the sun and the stars.</div></div>
+                    <div class="flex gap-3 text-lg leading-relaxed"><span class="font-bold min-w-[20px]">25.</span> <div>One advantage for birds flying at night is that they can avoid contact with [25]</div></div>
+                    <div class="flex gap-3 text-lg leading-relaxed"><span class="font-bold min-w-[20px]">26.</span> <div>Laboratory tests show that birds can detect weather without [26] signs.</div></div>
+                </div>',
+                'placeholders' => [
+                    '23' => 23,
+                    '24' => 24,
+                    '25' => 25,
+                    '26' => 26
+                ]
+            ]
+        ]);
+
+
+         // ==========================================
+        // PASSAGE 3: Communicating Conflict!
+        // ==========================================
+        $passage3 = \App\Models\IeltsReadingPassage::create([
+            'material_id' => $materialId,
+            'title' => 'Communicating Conflict!',
+            'content' => '
+<p><strong>A</strong> As far back as Hippocrates’s time (460-370 B.C.), people have tried to understand other people by characterizing them according to personality type or temperament. Hippocrates believed there were four different body fluids that influenced four basic types of temperament. His work was further developed 500 years later by Galen. These days there is any number of self-assessment tools that relate to the basic descriptions developed by Galen, although we no longer believe the source to be the types of body fluid that dominate our systems.</p>
+
+<p><strong>B</strong> The values in self-assessments that help determine personality style. Learning styles, communication styles, conflict-handling styles, or other aspects of individuals is that they help depersonalize conflict in interpersonal relationships. The depersonalization occurs when you realize that others aren’t trying to be difficult, but they need different or more information than you do. They’re not intending to be rude: they are so focused on the task they forget about greeting people. They would like to work faster but not at the risk of damaging the relationships needed to get the job done. They understand there is a job to do. But it can only be done right with the appropriate information, which takes time to collect. When used appropriately, understanding communication styles can help resolve conflict on teams. Very rarely are conflicts true personality issues. Usually, they are issues of style, information needs, or focus.</p>
+
+<p><strong>C</strong> Hippocrates and later Galen determined there were four basic temperaments: sanguine, phlegmatic, melancholic and choleric. These descriptions were developed centuries ago and are still somewhat apt, although you could update the wording. In today’s world, they translate into the four fairly common communication styles described below:</p>
+
+<p><strong>D</strong> The sanguine person would be the expressive or spirited style of communication. These people speak in pictures. They invest a lot of emotion and energy in their communication and often speak quickly. Putting their whole body into it. They are easily sidetracked onto a story that may or may not illustrate the point they are trying to make. Because of their enthusiasm, they are great team motivators. They are concerned about people and relationships. Their high levels of energy can come on strong at times and their focus is usually on the bigger picture, which means they sometimes miss the details or the proper order of things. These people find conflict or differences of opinion invigorating and love to engage in a spirited discussion. They love change and are constantly looking for new and exciting adventures.</p>
+
+<p><strong>E</strong> The phlegmatic person – cool and persevering – translates into the technical or systematic communication style. This style of communication is focused on facts and technical details. Phlegmatic people have an orderly methodical way of approaching tasks, and their focus is very much on the task, not on the people, emotions, or concerns that the task may evoke. The focus is also more on the details necessary to accomplish a task. Sometimes the details overwhelm the big picture and focus needs to be brought back to the context of the task. People with this style think the facts should speak for themselves, and they are not as comfortable with conflict. They need time to adapt to change and need to understand both the logic of it and the steps involved.</p>
+
+<p><strong>F</strong> The melancholic person who is softhearted and oriented toward doing things for others translates into the considerate or sympathetic communication style. A person with this communication style is focused on people and relationships. They are good listeners and do things for other people – sometimes to the detriment of getting things done for themselves. They want to solicit everyone’s opinion and make sure everyone is comfortable with whatever is required to get the job done. At times this focus on others can distract from the task at hand. Because they are so concerned with the needs of others and smoothing over issues, they do not like conflict. They believe that change threatens the status quo and tends to make people feel uneasy, so people with this communication style, like phlegmatic people, need time to consider the changes in order to adapt to them.</p>
+
+<p><strong>G</strong> The choleric temperament translates into the bold or direct style of communication. People with this style are brief in their communication – the fewer words the better. They are big-picture thinkers and love to be involved in many things at once. They are focused on tasks and outcomes and often forget that the people involved in carrying out the tasks have needs. They don’t do detail work easily and as a result, can often underestimate how much time it takes to achieve the task. Because they are so direct, they often seem forceful and can be very intimidating to others. They usually would welcome someone challenging them. But most other styles are afraid to do so. They also thrive on change, the more the better.</p>
+
+<p><strong>H</strong> A well-functioning team should have all of these communications styles for true effectiveness. All teams need to focus on the task, and they need to take care of relationships in order to achieve those tasks. They need the big picture perspective or the context of their work, and they need the details to be identified and taken care of for success. We all have aspects of each style within us. Some of us can easily move from one style to another and adapt our style to the needs of the situation at hand-whether the focus is on tasks or relationships. For others, a dominant style is very evident, and it is more challenging to see the situation from the perspective of another style. The work environment can influence communication styles either by the type of work that is required or by the predominance of one style reflected in that environment. Some people use one style at work and another at home. The good news about communication styles is that we have the ability to develop flexibility in our styles. The greater the flexibility we have, the more skilled we usually are at handling possible and actual conflicts. Usually, it has to be relevant to us to do so, either because we think it is important or because there are incentives in our environment to encourage it. The key is that we have to want to become flexible with our communication style. As Henry Ford said, "Whether you think you can or you can\'t, you\'re right!"</p>
+            ',
+            'order' => 3
+        ]);
+
+        // Questions 27-34: Matching Headings
+        \App\Models\IeltsReadingQuestion::create([
+            'passage_id' => $passage3->id,
+            'question_number' => 27,
+            'question_text' => 'Reading Passage 3 has eight sections A-H. Choose the correct heading for each section from the list of headings below.',
+            'type' => 'matching_headings',
+            'options' => [
+                'i' => 'Different personality types mentioned',
+                'ii' => 'recommendation of combined styles for group',
+                'iii' => 'Historical explanation of understanding personality',
+                'iv' => 'A lively and positive attitude person depicted',
+                'v' => 'A personality likes a challenge and direct communication',
+                'vi' => 'different characters illustrated',
+                'vii' => 'Functions of understanding communication styles',
+                'viii' => 'Cautious and considerable person cited',
+                'ix' => 'Calm and Factual personality illustrated',
+                'x' => 'Self-assessment determines one’s temperament'
+            ],
+            'correct_answer' => null,
+            'explanation' => null,
+            'data' => [
+                'start_number' => 26,
+                'box_title' => 'List of headings',
+                'sub_questions' => [
+                    ['id' => '27', 'label' => 'Section A', 'correct_answer' => 'iii'],
+                    ['id' => '28', 'label' => 'Section B', 'correct_answer' => 'vii'],
+                    ['id' => '29', 'label' => 'Section C', 'correct_answer' => 'i'],
+                    ['id' => '30', 'label' => 'Section D', 'correct_answer' => 'iv'],
+                    ['id' => '31', 'label' => 'Section E', 'correct_answer' => 'ix'],
+                    ['id' => '32', 'label' => 'Section F', 'correct_answer' => 'viii'],
+                    ['id' => '33', 'label' => 'Section G', 'correct_answer' => 'v'],
+                    ['id' => '34', 'label' => 'Section H', 'correct_answer' => 'ii'],
+                ]
+            ]
+        ]);
+
+        // Questions 35-39: True/False/Not Given
+        \App\Models\IeltsReadingQuestion::create([
+            'passage_id' => $passage3->id,
+            'question_number' => 35,
+            'question_text' => 'Do the following statements agree with the information given in Reading Passage 3? TRUE if the statement is true, FALSE if the statement is false, NOT GIVEN if the information is not given in the passage.',
+            'type' => 'true_false_not_given',
+            'options' => [
+                'TRUE' => 'TRUE',
+                'FALSE' => 'FALSE',
+                'NOT GIVEN' => 'NOT GIVEN'
+            ],
+            'correct_answer' => null,
+            'explanation' => null,
+            'data' => [
+                'start_number' => 34,
+                'sub_questions' => [
+                    ['id' => '35', 'label' => 'it is believed that sanguine people do not like variety', 'text' => 'it is believed that sanguine people do not like variety', 'correct_answer' => 'FALSE'],
+                    ['id' => '36', 'label' => 'Melancholic and phlegmatic people have similar characteristics', 'text' => 'Melancholic and phlegmatic people have similar characteristics', 'correct_answer' => 'TRUE'],
+                    ['id' => '37', 'label' => 'It is the sanguine personality that needed most in the workplace.', 'text' => 'It is the sanguine personality that needed most in the workplace.', 'correct_answer' => 'NOT GIVEN'],
+                    ['id' => '38', 'label' => 'It is possible for someone to change a type of personality.', 'text' => 'It is possible for someone to change a type of personality.', 'correct_answer' => 'TRUE'],
+                    ['id' => '39', 'label' => 'work surrounding can affect which communication style is the most effective.', 'text' => 'work surrounding can affect which communication style is the most effective.', 'correct_answer' => 'TRUE'],
+                ]
+            ]
+        ]);
+
+        // Question 40: Multiple Choice
+        \App\Models\IeltsReadingQuestion::create([
+            'passage_id' => $passage3->id,
+            'question_number' => 40,
+            'question_text' => 'The author thinks self-assessment tools can be able to',
+            'type' => 'multiple_choice',
+            'options' => [
+                'A' => 'assist to develop one’s personality in a certain scenario.',
+                'B' => 'help to understand colleagues and resolve problems',
+                'C' => 'improve the relationship with the boss of the company',
+                'D' => 'change others behaviour and personality'
+            ],
+            'correct_answer' => 'B',
+            'explanation' => 'Section B explains that self-assessments help depersonalize conflict and understand communication styles to resolve conflicts on teams.',
+            'data' => [
+                'start_number' => 39
+            ]
+        ]);
+    }
+}
