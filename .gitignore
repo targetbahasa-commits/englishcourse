@@ -27,3 +27,4 @@ yarn-error.log
 *.blade.php.bak
 *.blade.php.bak2
 /migrate_meeting*.php
+vosk-browser.zip
