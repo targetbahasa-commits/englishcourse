@@ -1,0 +1,145 @@
+<div class="mb-8">
+    <h3 class="text-xl font-bold mb-4">SECTION 1</h3>
+    <h4 class="text-lg font-bold mb-2">Questions 1-10</h4>
+    <p class="mb-1 text-gray-700">Complete the notes below.</p>
+    <p class="mb-6 text-gray-700">Write <strong>ONE WORD AND/OR A NUMBER</strong> for each answer.</p>
+
+    <h4 class="text-2xl font-bold mb-6 text-center">Driving school</h4>
+
+    <div class="border border-gray-200 rounded-lg overflow-hidden">
+        {{-- Example / Answer header --}}
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
+            <div class="p-3 font-bold italic text-gray-600">Example</div>
+            <div class="p-3 font-bold italic text-gray-600">Answer</div>
+        </div>
+
+        {{-- Example row --}}
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+            <div class="p-3 italic text-gray-500">Looking for driving lessons given during the:</div>
+            <div class="p-3 italic text-gray-500">weekends</div>
+        </div>
+
+        {{-- Q1: Address --}}
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+            <div class="p-3 text-gray-700">Address:</div>
+            <div class="p-3 flex items-center flex-wrap gap-1">
+                <strong>1</strong>
+                <span class="inline-block w-32 mx-1">
+                    <input type="text" name="answers[1]" class="w-full border border-gray-400 focus:border-blue-600 outline-none px-2 py-1 text-center font-medium bg-white transition-colors" placeholder="Answer" autocomplete="off" />
+                </span>
+                <span class="text-gray-700">Road</span>
+            </div>
+        </div>
+
+        {{-- Q2: Drive --}}
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+            <div class="p-3 text-gray-700">Drive:</div>
+            <div class="p-3 space-y-2">
+                <p class="text-gray-700">the city center</p>
+                <p class="flex items-center flex-wrap gap-1">
+                    <strong>2</strong>
+                    <span class="inline-block w-32 mx-1">
+                        <input type="text" name="answers[2]" class="w-full border border-gray-400 focus:border-blue-600 outline-none px-2 py-1 text-center font-medium bg-white transition-colors" placeholder="Answer" autocomplete="off" />
+                    </span>
+                    <span class="text-gray-700">above the city</span>
+                </p>
+            </div>
+        </div>
+
+        {{-- Q3: Teacher's name --}}
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+            <div class="p-3 text-gray-700">Teacher's name:</div>
+            <div class="p-3 flex items-center flex-wrap gap-1">
+                <span class="text-gray-700">Allen</span>
+                <strong class="mx-1">3</strong>
+                <span class="inline-block w-32">
+                    <input type="text" name="answers[3]" class="w-full border border-gray-400 focus:border-blue-600 outline-none px-2 py-1 text-center font-medium bg-white transition-colors" placeholder="Answer" autocomplete="off" />
+                </span>
+            </div>
+        </div>
+
+        {{-- Q4: Popular type of car --}}
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+            <div class="p-3 text-gray-700">Popular type of car on roads:</div>
+            <div class="p-3">
+                <strong>4</strong>
+                <span class="inline-block w-36 ml-1">
+                    <input type="text" name="answers[4]" class="w-full border border-gray-400 focus:border-blue-600 outline-none px-2 py-1 text-center font-medium bg-white transition-colors" placeholder="Answer" autocomplete="off" />
+                </span>
+            </div>
+        </div>
+
+        {{-- Q5: Best time to take lessons --}}
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+            <div class="p-3 text-gray-700">Best time to take lessons:</div>
+            <div class="p-3 flex items-center flex-wrap gap-1">
+                <span class="text-gray-700">practice during the</span>
+                <strong class="mx-1">5</strong>
+                <span class="inline-block w-28">
+                    <input type="text" name="answers[5]" class="w-full border border-gray-400 focus:border-blue-600 outline-none px-2 py-1 text-center font-medium bg-white transition-colors" placeholder="Answer" autocomplete="off" />
+                </span>
+            </div>
+        </div>
+
+        {{-- Q6: Safety driving depends on --}}
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+            <div class="p-3 text-gray-700">Safety driving depends on:</div>
+            <div class="p-3 flex items-center flex-wrap gap-1">
+                <span class="text-gray-700">good</span>
+                <strong class="mx-1">6</strong>
+                <span class="inline-block w-32">
+                    <input type="text" name="answers[6]" class="w-full border border-gray-400 focus:border-blue-600 outline-none px-2 py-1 text-center font-medium bg-white transition-colors" placeholder="Answer" autocomplete="off" />
+                </span>
+            </div>
+        </div>
+
+        {{-- Q7: Obtain --}}
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+            <div class="p-3 text-gray-700">Obtain:</div>
+            <div class="p-3 flex items-center flex-wrap gap-1">
+                <span class="text-gray-700">a driving</span>
+                <strong class="mx-1">7</strong>
+                <span class="inline-block w-32">
+                    <input type="text" name="answers[7]" class="w-full border border-gray-400 focus:border-blue-600 outline-none px-2 py-1 text-center font-medium bg-white transition-colors" placeholder="Answer" autocomplete="off" />
+                </span>
+            </div>
+        </div>
+
+        {{-- Q8: Final test fee --}}
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+            <div class="p-3 text-gray-700">Final test fee:</div>
+            <div class="p-3 flex items-center flex-wrap gap-1">
+                <span class="text-gray-700">$</span>
+                <strong class="mx-1">8</strong>
+                <span class="inline-block w-32">
+                    <input type="text" name="answers[8]" class="w-full border border-gray-400 focus:border-blue-600 outline-none px-2 py-1 text-center font-medium bg-white transition-colors" placeholder="Answer" autocomplete="off" />
+                </span>
+            </div>
+        </div>
+
+        {{-- Q9: Duration of test --}}
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+            <div class="p-3 text-gray-700">Duration of test:</div>
+            <div class="p-3 flex items-center flex-wrap gap-1">
+                <span class="text-gray-700">approximately</span>
+                <strong class="mx-1">9</strong>
+                <span class="inline-block w-28">
+                    <input type="text" name="answers[9]" class="w-full border border-gray-400 focus:border-blue-600 outline-none px-2 py-1 text-center font-medium bg-white transition-colors" placeholder="Answer" autocomplete="off" />
+                </span>
+                <span class="text-gray-700">minutes</span>
+            </div>
+        </div>
+
+        {{-- Q10: More advice --}}
+        <div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+            <div class="p-3 text-gray-700">More advice:</div>
+            <div class="p-3 flex items-center flex-wrap gap-1">
+                <span class="text-gray-700">keep a driving</span>
+                <strong class="mx-1">10</strong>
+                <span class="inline-block w-32">
+                    <input type="text" name="answers[10]" class="w-full border border-gray-400 focus:border-blue-600 outline-none px-2 py-1 text-center font-medium bg-white transition-colors" placeholder="Answer" autocomplete="off" />
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
