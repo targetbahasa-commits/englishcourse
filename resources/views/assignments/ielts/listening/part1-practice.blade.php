@@ -34,7 +34,7 @@
         
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-4">
             @for ($i = 1; $i <= 30; $i++)
-                <a href="{{ route('assignments.ielts-academic.listening.part1.practice.test', ['meeting' => $meeting->id, 'set' => $set, 'test' => $i]) }}" 
+                <a href="{{ route('assignments.ielts-academic.listening.practice-index.test', ['set' => $set, 'test' => $i]) }}" 
                    class="group block p-4 bg-gray-50 border border-gray-200 rounded-2xl hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 hover:border-indigo-300 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 text-center">
                     
                     <div class="w-12 h-12 mx-auto bg-white rounded-xl shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-indigo-600 transition-all duration-300">

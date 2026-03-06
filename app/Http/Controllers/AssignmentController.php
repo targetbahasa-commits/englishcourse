@@ -48,6 +48,40 @@ class AssignmentController extends Controller
         return view('assignments.ielts.listening.index', compact('meetings', 'program'));
     }
 
+    public function listeningPracticeIndexPart($set)
+    {
+        $practiceParts = [
+            1 => ['meeting_id' => 146, 'set' => 1],
+            2 => ['meeting_id' => 146, 'set' => 2],
+            3 => ['meeting_id' => 129, 'set' => 1],
+            4 => ['meeting_id' => 130, 'set' => 1],
+        ];
+
+        if (!array_key_exists($set, $practiceParts)) {
+            abort(404);
+        }
+
+        // Pass the outer part number (1-4) as $partNumber so the view shows the correct header
+        return $this->ieltsListeningPart1Practice($practiceParts[$set]['meeting_id'], $practiceParts[$set]['set'], $set);
+    }
+
+    public function listeningPracticeIndexTest($set, $test)
+    {
+        $practiceParts = [
+            1 => ['meeting_id' => 146, 'set' => 1],
+            2 => ['meeting_id' => 146, 'set' => 2],
+            3 => ['meeting_id' => 129, 'set' => 1],
+            4 => ['meeting_id' => 130, 'set' => 1],
+        ];
+
+        if (!array_key_exists($set, $practiceParts)) {
+            abort(404);
+        }
+
+        // Pass the outer part number (1-4) as $partNumber so the view shows the correct header
+        return $this->ieltsListeningPracticeTest($practiceParts[$set]['meeting_id'], $practiceParts[$set]['set'], $test, $set);
+    }
+
     public function listeningPracticeIndex()
     {
         $program = \App\Models\Program::where('slug', 'ielts-academic-listening')->with('meetings')->first();
@@ -1830,7 +1864,7 @@ class AssignmentController extends Controller
     }
 
     // Form View (Consolidated)
-    public function ieltsListeningPart1Practice($meetingId, $set)
+    public function ieltsListeningPart1Practice($meetingId, $set, $partNumber = null)
     {
         $meeting = \App\Models\Meeting::findOrFail($meetingId);
         
@@ -1854,13 +1888,17 @@ class AssignmentController extends Controller
             $meeting->refresh();
         }
 
+        // Override $set with outer part number (1-4) if provided via practice-index routes
+        $set = $partNumber ?? $set;
         return view('assignments.ielts.listening.part1-practice', compact('meeting', 'set'));
     }
 
-    public function ieltsListeningPracticeTest($meetingId, $set, $testId)
+    public function ieltsListeningPracticeTest($meetingId, $set, $testId, $partNumber = null)
     {
         $meeting = \App\Models\Meeting::findOrFail($meetingId);
         
+        // Use the outer part number if provided (for practice-index routes)
+        $set = $partNumber ?? $set;
         // We pass testId to the view so it can be displayed and used for form submission or fetching data later
         return view('assignments.ielts.listening.test-practice', compact('meeting', 'set', 'testId'));
     }

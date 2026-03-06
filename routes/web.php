@@ -147,6 +147,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/assignments/ielts-academic/listening/material/{id}/upload-srt', [App\Http\Controllers\AssignmentController::class, 'uploadIeltsMaterialSrt'])->name('assignments.ielts-academic.listening.material.upload-srt');
     Route::post('/assignments/ielts-academic/listening/material/{id}/upload-answer-key', [App\Http\Controllers\AssignmentController::class, 'uploadIeltsMaterialAnswerKey'])->name('assignments.ielts-academic.listening.material.upload-answer-key');
     Route::get('/assignments/ielts-academic/listening/practice-index', [App\Http\Controllers\AssignmentController::class, 'listeningPracticeIndex'])->name('assignments.ielts-academic.listening.practice.index');
+    Route::get('/assignments/ielts-academic/listening/practice-index/part{set}', [App\Http\Controllers\AssignmentController::class, 'listeningPracticeIndexPart'])->name('assignments.ielts-academic.listening.practice-index.part');
     Route::get('/assignments/ielts-academic/speaking/practice-index', [App\Http\Controllers\AssignmentController::class, 'ieltsSpeakingPracticeIndex'])->name('assignments.ielts-academic.speaking.practice.index');
     Route::get('/assignments/ielts-academic/writing/practice-index', [App\Http\Controllers\AssignmentController::class, 'ieltsWritingPracticeIndex'])->name('assignments.ielts-academic.writing.practice.index');
     Route::get('/assignments/ielts-academic/listening/warm-up/{type}', [App\Http\Controllers\AssignmentController::class, 'ieltsListeningWarmUp'])->name('assignments.ielts-academic.listening.warmup');
@@ -164,6 +165,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Questions Form
     Route::get('/assignments/ielts-academic/listening/practice/{meeting}/part/{set}', [App\Http\Controllers\AssignmentController::class, 'ieltsListeningPart1Practice'])->name('assignments.ielts-academic.listening.part1.practice');
+    Route::get('/assignments/ielts-academic/listening/practice-index/part{set}/test{test}', [App\Http\Controllers\AssignmentController::class, 'listeningPracticeIndexTest'])->name('assignments.ielts-academic.listening.practice-index.test');
     Route::get('/assignments/ielts-academic/listening/practice/{meeting}/part/{set}/test/{test}', [App\Http\Controllers\AssignmentController::class, 'ieltsListeningPracticeTest'])->name('assignments.ielts-academic.listening.part1.practice.test');
     Route::post('/assignments/ielts-academic/listening/practice/{meeting}/part/{set}/test/{test}/submit', [App\Http\Controllers\AssignmentController::class, 'submitIeltsListening'])->name('assignment.ielts.listening.submit');
     Route::post('/assignments/ielts-academic/listening/practice/{meeting}/part/{set}/upload-audio', [App\Http\Controllers\AssignmentController::class, 'uploadIeltsListeningAudio'])->name('assignments.ielts.listening.upload-audio');

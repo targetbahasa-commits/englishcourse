@@ -62,7 +62,7 @@
                         </div>
                     </div>
                     
-                    <a href="{{ route('assignments.ielts-academic.listening.part1.practice', ['meeting' => $data['meeting_id'], 'set' => $data['set']]) }}" class="block w-full py-3 bg-purple-600 text-white text-center rounded-xl font-bold hover:bg-purple-700 transition shadow-sm hover:shadow active:scale-95">
+                    <a href="{{ route('assignments.ielts-academic.listening.practice-index.part', ['set' => $partNum]) }}" class="block w-full py-3 bg-purple-600 text-white text-center rounded-xl font-bold hover:bg-purple-700 transition shadow-sm hover:shadow active:scale-95">
                         Start Part
                     </a>
                 </div>
