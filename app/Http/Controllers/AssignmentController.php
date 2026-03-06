@@ -1857,6 +1857,14 @@ class AssignmentController extends Controller
         return view('assignments.ielts.listening.part1-practice', compact('meeting', 'set'));
     }
 
+    public function ieltsListeningPracticeTest($meetingId, $set, $testId)
+    {
+        $meeting = \App\Models\Meeting::findOrFail($meetingId);
+        
+        // We pass testId to the view so it can be displayed and used for form submission or fetching data later
+        return view('assignments.ielts.listening.test-practice', compact('meeting', 'set', 'testId'));
+    }
+
     public function reorderIeltsListeningMeetings(Request $request)
     {
         $request->validate([
