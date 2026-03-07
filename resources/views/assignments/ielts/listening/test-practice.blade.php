@@ -88,6 +88,54 @@
             drawer.classList.toggle('hidden');
         }
     }
-    </script>
 
+    // Limit Checkbox Selections (Choose TWO, Choose THREE, etc.)
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectionQueues = {};
+
+        // Parse max allowed from name (e.g. "answers_multi[27_28]" -> 28 - 27 + 1 = 2)
+        function getMaxAllowed(name) {
+            const match = name.match(/\[(\d+)_(\d+)\]/);
+            if (match) {
+                return parseInt(match[2], 10) - parseInt(match[1], 10) + 1;
+            }
+            return 2; // Fallback to 2
+        }
+
+        const multiCheckboxes = document.querySelectorAll('input[type="checkbox"][name^="answers_multi["]');
+
+        // Initialize queues
+        multiCheckboxes.forEach(function(checkbox) {
+            const name = checkbox.name;
+            if (!selectionQueues[name]) selectionQueues[name] = [];
+            
+            // Push initially checked elements to queue
+            if (checkbox.checked) {
+                selectionQueues[name].push(checkbox);
+            }
+
+            // Listen to changes
+            checkbox.addEventListener('change', function() {
+                const maxAllowed = getMaxAllowed(name);
+                const queue = selectionQueues[name];
+                
+                if (this.checked) {
+                    queue.push(this);
+                    
+                    // If queue exceeds max, shift the oldest and uncheck it
+                    if (queue.length > maxAllowed) {
+                        const oldest = queue.shift();
+                        oldest.checked = false;
+                    }
+                } else {
+                    // Remove unchecked from queue
+                    const index = queue.indexOf(this);
+                    if (index !== -1) {
+                        queue.splice(index, 1);
+                    }
+                }
+            });
+        });
+    });
+    </script>
 @endsection
