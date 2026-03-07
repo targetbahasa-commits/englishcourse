@@ -313,6 +313,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/assignments/toefl-itp/reading/question', [App\Http\Controllers\AssignmentController::class, 'storeReadingQuestion'])->name('assignments.toefl-itp.reading.question.store');
     Route::post('/assignments/toefl-itp/reading/question/{id}/update', [App\Http\Controllers\AssignmentController::class, 'updateReadingQuestion'])->name('assignments.toefl-itp.reading.question.update');
     Route::post('/assignments/toefl-itp/reading/question/{id}/destroy', [App\Http\Controllers\AssignmentController::class, 'destroyReadingQuestion'])->name('assignments.toefl-itp.reading.question.destroy');
+    Route::get('/assignments/toefl-itp/vocabulary', [App\Http\Controllers\AssignmentController::class, 'toeflItpVocabulary'])->name('assignments.toefl-itp.vocabulary');
     Route::get('/assignments/toefl-itp/mockup', [App\Http\Controllers\AssignmentController::class, 'toeflItpMockup'])->name('assignments.toefl-itp.mockup');
     
     Route::get('/assignments/grammar-writing', [App\Http\Controllers\AssignmentController::class, 'grammarWriting'])->name('assignments.grammar-writing');

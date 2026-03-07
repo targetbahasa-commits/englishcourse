@@ -187,7 +187,7 @@
                 </a>
 
                 <!-- 4. Vocabulary for TOEFL -->
-                <a href="#" class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
+                <a href="{{ route('assignments.toefl-itp.vocabulary') }}" class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
                     <div class="h-32 bg-gradient-to-br from-orange-400 to-orange-600 relative overflow-hidden">
                         <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                         <div class="absolute bottom-4 left-6">

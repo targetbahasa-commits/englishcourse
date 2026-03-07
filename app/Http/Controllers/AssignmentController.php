@@ -8779,6 +8779,11 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         return view('assignments.ielts.mockup.speaking');
     }
 
+    public function toeflItpVocabulary()
+    {
+        return view('assignments.toefl-itp.vocabulary');
+    }
+
     public function toeflItpMockup()
     {
         // Fetch Section 1: Listening Part A questions (Questions 1-30)
