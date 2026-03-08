@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Program;
 use App\Models\Meeting;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class ProgramController extends Controller
 {
@@ -33,17 +34,24 @@ class ProgramController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'period' => 'required|string|max:255',
-            'description' => 'required|string',
-            'is_active' => 'boolean',
-            'price' => 'nullable|numeric|min:0'
+            'name'           => 'required|string|max:255',
+            'period'         => 'required|string|max:255',
+            'description'    => 'required|string',
+            'is_active'      => 'boolean',
+            'price'          => 'nullable|numeric|min:0',
+            'brochure_image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'brochure_pdf'   => 'nullable|mimes:pdf|max:20480',
         ]);
 
-        $validated['slug'] = Str::slug($validated['name']);
-        
-        // Handle boolean cast from form checkboxes
+        $validated['slug']      = Str::slug($validated['name']);
         $validated['is_active'] = $request->has('is_active');
+
+        if ($request->hasFile('brochure_image')) {
+            $validated['brochure_image'] = $request->file('brochure_image')->store('brochures', 'public');
+        }
+        if ($request->hasFile('brochure_pdf')) {
+            $validated['brochure_pdf'] = $request->file('brochure_pdf')->store('brochures', 'public');
+        }
 
         Program::create($validated);
 
@@ -56,24 +64,87 @@ class ProgramController extends Controller
     public function update(Request $request, Program $program)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'period' => 'required|string|max:255',
-            'description' => 'required|string',
-            'is_active' => 'boolean',
-            'price' => 'nullable|numeric|min:0'
+            'name'           => 'required|string|max:255',
+            'period'         => 'required|string|max:255',
+            'description'    => 'required|string',
+            'is_active'      => 'boolean',
+            'price'          => 'nullable|numeric|min:0',
+            'brochure_image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'brochure_pdf'   => 'nullable|mimes:pdf|max:20480',
         ]);
 
-        // Only update slug if name changed
         if ($validated['name'] !== $program->name) {
             $validated['slug'] = Str::slug($validated['name']);
         }
 
-        // Handle boolean cast from form checkboxes
         $validated['is_active'] = $request->has('is_active');
+
+        if ($request->hasFile('brochure_image')) {
+            if ($program->brochure_image) Storage::disk('public')->delete($program->brochure_image);
+            $validated['brochure_image'] = $request->file('brochure_image')->store('brochures', 'public');
+        }
+        if ($request->hasFile('brochure_pdf')) {
+            if ($program->brochure_pdf) Storage::disk('public')->delete($program->brochure_pdf);
+            $validated['brochure_pdf'] = $request->file('brochure_pdf')->store('brochures', 'public');
+        }
+
+        // Delete brochure if checkbox checked
+        if ($request->has('remove_brochure_image') && $program->brochure_image) {
+            Storage::disk('public')->delete($program->brochure_image);
+            $validated['brochure_image'] = null;
+        }
+        if ($request->has('remove_brochure_pdf') && $program->brochure_pdf) {
+            Storage::disk('public')->delete($program->brochure_pdf);
+            $validated['brochure_pdf'] = null;
+        }
 
         $program->update($validated);
 
         return back()->with('success', 'Program updated successfully.');
+    }
+
+    /**
+     * Show the brochure management page for a program.
+     */
+    public function brochure(Program $program)
+    {
+        return view('admin.programs.brochure', compact('program'));
+    }
+
+    /**
+     * Update brochure files (image and/or pdf) for a program.
+     */
+    public function updateBrochure(Request $request, Program $program)
+    {
+        $request->validate([
+            'brochure_image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'brochure_pdf'   => 'nullable|mimes:pdf|max:20480',
+        ]);
+
+        $data = [];
+
+        if ($request->hasFile('brochure_image')) {
+            if ($program->brochure_image) Storage::disk('public')->delete($program->brochure_image);
+            $data['brochure_image'] = $request->file('brochure_image')->store('brochures', 'public');
+        }
+        if ($request->hasFile('brochure_pdf')) {
+            if ($program->brochure_pdf) Storage::disk('public')->delete($program->brochure_pdf);
+            $data['brochure_pdf'] = $request->file('brochure_pdf')->store('brochures', 'public');
+        }
+        if ($request->has('remove_brochure_image') && $program->brochure_image) {
+            Storage::disk('public')->delete($program->brochure_image);
+            $data['brochure_image'] = null;
+        }
+        if ($request->has('remove_brochure_pdf') && $program->brochure_pdf) {
+            Storage::disk('public')->delete($program->brochure_pdf);
+            $data['brochure_pdf'] = null;
+        }
+
+        if (!empty($data)) {
+            $program->update($data);
+        }
+
+        return back()->with('success', 'Brosur berhasil diperbarui!');
     }
 
     /**

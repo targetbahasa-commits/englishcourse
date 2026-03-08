@@ -27,32 +27,26 @@
         <!-- Main Content -->
         <main class="flex-1 md:ml-64 p-8">
             <!-- Header -->
-            <div class="mb-8" x-data="{ showAddModal: false, showDeleteModal: false }">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        </div>
-                        <div>
-                            <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Assignment Programs</h1>
-                            <p class="text-gray-600 mt-1">Choose your program and start your learning journey! 📚</p>
-                        </div>
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     </div>
-                    
-                    @if(Auth::user()->isAdmin())
-                    <!-- Admin Action Buttons -->
-                    <div class="flex gap-3">
-                        <button @click="showAddModal = true" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                            Add Program
-                        </button>
-                        <button @click="showDeleteModal = true" class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            Delete Program
-                        </button>
+                    <div>
+                        <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Assignment Programs</h1>
+                        <p class="text-gray-600 mt-1">Choose your program and start your learning journey! 📚</p>
                     </div>
-                    @endif
                 </div>
+
+                @if(Auth::user()->isAdmin())
+                {{-- Admins manage programs through the Programs admin section --}}
+                <a href="{{ route('programs.index') }}" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors duration-200 shadow-md hover:shadow-lg text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Manage Programs
+                </a>
+                @endif
+            </div>
 
             <!-- Programs Grid -->
             <div class="mb-8">
@@ -115,96 +109,7 @@
                         </a>
                     @endforeach
                     
-                    @if(Auth::user()->isAdmin())
 
-                    <!-- Add Modal -->
-                    <div x-show="showAddModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
-                        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-                            </div>
-                            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                                    <form action="{{ route('programs.store') }}" method="POST">
-                                        {{-- @csrf --}}
-                                        {{-- 222: <form action="{{ route('programs.store') }}" method="POST"> --}}
-                                        {{-- 280: <form action="{{ route('programs.destroy', $program->id) }}" method="POST" onsubmit="return confirm('Are you sure?');"> --}}
-                                        {{-- Disabling temporarily as routes do not exist --}}
-                                    @csrf
-                                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Add New Program</h3>
-                                        <div class="mb-4">
-                                            <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Name</label>
-                                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="name" name="name" type="text" placeholder="Program Name" required>
-                                        </div>
-                                        <div class="mb-4">
-                                            <label class="block text-gray-700 text-sm font-bold mb-2" for="description">Description</label>
-                                            <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="description" name="description" placeholder="Program Description"></textarea>
-                                        </div>
-                                        <div class="mb-4">
-                                            <label class="block text-gray-700 text-sm font-bold mb-2" for="color">Color</label>
-                                            <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="color" name="color">
-                                                <option value="blue">Blue</option>
-                                                <option value="green">Green</option>
-                                                <option value="purple">Purple</option>
-                                                <option value="orange">Orange</option>
-                                                <option value="red">Red</option>
-                                            </select>
-                                        </div>
-                                        <div class="mb-4">
-                                            <label class="block text-gray-700 text-sm font-bold mb-2" for="icon">Icon (Optional, SVG Path)</label>
-                                             <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="icon" name="icon" placeholder="<path d='...'></path>"></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
-                                            Create
-                                        </button>
-                                        <button @click="showAddModal = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                                            Cancel
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Delete Modal -->
-                    <div x-show="showDeleteModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
-                        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-                            </div>
-                            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Delete Program</h3>
-                                    <p class="text-sm text-gray-500 mb-4">Select a program to delete. This action cannot be undone.</p>
-                                    <ul class="divide-y divide-gray-200">
-                                        @foreach($programs as $program)
-                                        <li class="py-4 flex justify-between items-center">
-                                            <div>
-                                                <p class="text-sm font-medium text-gray-900">{{ $program->name }}</p>
-                                                <p class="text-sm text-gray-500">{{ $program->description }}</p>
-                                            </div>
-                                            <form action="{{ route('programs.destroy', $program->id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
-                                            </form>
-                                        </li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                                    <button @click="showDeleteModal = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                                        Close
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
                 </div>
             </div>
         </main>

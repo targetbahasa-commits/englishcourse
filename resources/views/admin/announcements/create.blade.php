@@ -47,7 +47,9 @@
 
                     <!-- Content -->
                     <div>
-                        <label for="content" class="block text-sm font-semibold text-gray-700 mb-1">Announcement Content <span class="text-red-500">*</span></label>
+                        <label for="content" class="inline-flex items-center text-sm font-semibold text-gray-700 mb-1">Announcement Content <span class="text-red-500 ml-0.5">*</span>
+                            @include('components.template-variable-legend')
+                        </label>
                         <textarea id="content" name="content" rows="6" required
                             class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out p-3" 
                             placeholder="Write your announcement details here..."></textarea>

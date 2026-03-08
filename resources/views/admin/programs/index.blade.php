@@ -97,6 +97,17 @@
                                                 IDR {{ number_format($program->price, 0, ',', '.') }}
                                             </span>
                                         @endif
+                                        @php $activeDiscountCount = $program->discounts()->where('is_active', true)->count(); @endphp
+                                        @if($activeDiscountCount > 0)
+                                            <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
+                                                🏷️ {{ $activeDiscountCount }} diskon aktif
+                                            </span>
+                                        @endif
+                                        @if($program->brochure_image || $program->brochure_pdf)
+                                            <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                                                📄 Brosur
+                                            </span>
+                                        @endif
                                     </div>
                                     <div class="text-sm text-gray-500 mt-1 line-clamp-1">{{ $program->description }}</div>
                                 </div>
@@ -142,6 +153,16 @@
                                 {{-- Build Syllabus --}}
                                 <a href="{{ route('programs.syllabus', $program->id) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-transparent hover:border-indigo-100" title="Build Syllabus">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                                </a>
+
+                                {{-- Discount Settings --}}
+                                <a href="{{ route('programs.discounts.index', $program->id) }}" class="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors border border-transparent hover:border-orange-100" title="Pengaturan Diskon">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M17 17h.01M7 17h.01M17 7h.01M3 3l18 18M3 3h18M3 21h18"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9l6 6"/></svg>
+                                </a>
+
+                                {{-- Brochure Upload --}}
+                                <a href="{{ route('programs.brochure', $program->id) }}" class="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors border border-transparent hover:border-purple-100" title="Upload Brosur">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                                 </a>
                                 
                                 {{-- Edit Button --}}

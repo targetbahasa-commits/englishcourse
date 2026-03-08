@@ -124,15 +124,10 @@ Route::middleware([
 
 
 
-    Route::get('/profile', function () {
-        return "Profile Page - Coming Soon";
-    })->name('profile.edit');
-    Route::patch('/profile', function () {
-        return "Profile Update";
-    })->name('profile.update');
-    Route::delete('/profile', function () {
-        return "Profile Delete";
-    })->name('profile.destroy');
+    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('password.update');
+    Route::delete('/profile', [App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Student Evaluation Routes
     Route::get('/evaluate-teacher', [App\Http\Controllers\Student\TeacherEvaluationController::class, 'create'])->name('student.evaluations.create');
@@ -454,6 +449,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('admin/programs/{program}/syllabus', [App\Http\Controllers\Admin\ProgramController::class, 'storeSyllabus'])->name('programs.syllabus.store')->middleware('role:admin');
     Route::put('admin/programs/{program}/syllabus/{meeting}', [App\Http\Controllers\Admin\ProgramController::class, 'updateSyllabus'])->name('programs.syllabus.update')->middleware('role:admin');
     Route::delete('admin/programs/{program}/syllabus/{meeting}', [App\Http\Controllers\Admin\ProgramController::class, 'destroySyllabus'])->name('programs.syllabus.destroy')->middleware('role:admin');
+
+    // Admin Programs Discount Management
+    Route::get('admin/programs/{program}/discounts', [App\Http\Controllers\Admin\ProgramDiscountController::class, 'index'])->name('programs.discounts.index')->middleware('role:admin');
+    Route::post('admin/programs/{program}/discounts', [App\Http\Controllers\Admin\ProgramDiscountController::class, 'store'])->name('programs.discounts.store')->middleware('role:admin');
+    Route::put('admin/programs/{program}/discounts/{discount}', [App\Http\Controllers\Admin\ProgramDiscountController::class, 'update'])->name('programs.discounts.update')->middleware('role:admin');
+    Route::delete('admin/programs/{program}/discounts/{discount}', [App\Http\Controllers\Admin\ProgramDiscountController::class, 'destroy'])->name('programs.discounts.destroy')->middleware('role:admin');
+
+    // Admin Programs Brochure Management
+    Route::get('admin/programs/{program}/brochure', [App\Http\Controllers\Admin\ProgramController::class, 'brochure'])->name('programs.brochure')->middleware('role:admin');
+    Route::post('admin/programs/{program}/brochure', [App\Http\Controllers\Admin\ProgramController::class, 'updateBrochure'])->name('programs.brochure.update')->middleware('role:admin');
 
     Route::get('/admin/scores', [App\Http\Controllers\ScoreController::class, 'index'])->name('admin.scores.index')->middleware('role:admin');
     

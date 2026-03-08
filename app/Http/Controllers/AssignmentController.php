@@ -11,7 +11,7 @@ class AssignmentController extends Controller
     public function index()
     {
         // Exclude internal/helper programs from the main dashboard
-        $programs = \App\Models\Program::whereNotIn('slug', ['ielts-academic-listening'])->get();
+        $programs = \App\Models\Program::whereNotIn('slug', ['ielts-academic-listening', 'ielts-academic-reading'])->get();
         // dd('Hit index method');
         return view('assignments.index', compact('programs'));
     }
@@ -282,18 +282,11 @@ class AssignmentController extends Controller
 
     public function ieltsReadingIndex()
     {
+        // Program is internal and excluded from the main assignments listing.
+        // We pass a plain object so the view does not need a DB record.
         $program = \App\Models\Program::where('slug', 'ielts-academic-reading')->with('meetings')->first();
 
-        if (!$program) {
-             $program = \App\Models\Program::firstOrCreate(
-                ['slug' => 'ielts-academic-reading'],
-                ['name' => 'IELTS Academic Reading', 'period' => 'All Time', 'is_active' => true, 'price' => 0]
-            );
-        }
-
-        // $this->ensureIeltsReadingMeetingsExist($program);
-
-        $meetings = $program->meetings()->orderBy('meeting_number')->get();
+        $meetings = $program ? $program->meetings()->orderBy('meeting_number')->get() : collect();
         return view('assignments.ielts.reading.index', compact('meetings', 'program'));
     }
 

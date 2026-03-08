@@ -79,7 +79,9 @@
 
                     <!-- Content -->
                     <div>
-                        <label for="message_content" class="block text-sm font-semibold text-gray-700 mb-1">Outreach Message Content <span class="text-red-500">*</span></label>
+                        <label for="message_content" class="inline-flex items-center text-sm font-semibold text-gray-700 mb-1">Outreach Message Content <span class="text-red-500 ml-0.5">*</span>
+                            @include('components.template-variable-legend')
+                        </label>
                         <p class="text-xs text-gray-500 mb-2">Write the promotional or recommendation message that the user will see. You can advise them on what class they need based on this score bracket.</p>
                         <textarea id="message_content" name="message_content" rows="6" required
                             class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out p-3" 

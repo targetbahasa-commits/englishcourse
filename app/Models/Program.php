@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Program extends Model
 {
-    protected $fillable = ['name', 'slug', 'period', 'description', 'color', 'icon', 'price', 'is_active'];
+    protected $fillable = ['name', 'slug', 'period', 'description', 'color', 'icon', 'price', 'is_active', 'brochure_image', 'brochure_pdf'];
 
     public function meetings(): HasMany
     {
@@ -23,4 +23,10 @@ class Program extends Model
     {
         return $this->hasMany(ClassPeriod::class);
     }
+
+    public function discounts(): HasMany
+    {
+        return $this->hasMany(ProgramDiscount::class);
+    }
 }
+

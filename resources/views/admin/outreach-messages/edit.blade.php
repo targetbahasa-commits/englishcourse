@@ -80,7 +80,9 @@
 
                     <!-- Content -->
                     <div>
-                        <label for="message_content" class="block text-sm font-semibold text-gray-700 mb-1">Outreach Message Content <span class="text-red-500">*</span></label>
+                        <label for="message_content" class="inline-flex items-center text-sm font-semibold text-gray-700 mb-1">Outreach Message Content <span class="text-red-500 ml-0.5">*</span>
+                            @include('components.template-variable-legend')
+                        </label>
                         <textarea id="message_content" name="message_content" rows="6" required
                             class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out p-3" 
                             placeholder="e.g., Based on your score, we highly recommend our Intensive Foundation Class to master the basics before attempting the more advanced material...">{{ old('message_content', $outreachMessage->message_content) }}</textarea>
