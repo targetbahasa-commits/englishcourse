@@ -83,7 +83,6 @@ Route::middleware([
         // 1. Progress Stats
         // Assuming 'Meeting' model represents the standard grammar meetings
         $totalAssignments = \App\Models\Meeting::count(); 
-        // fallback if 0, maybe hardcode to expected syllabus length if empty? let's stick to dynamic.
         if ($totalAssignments === 0) $totalAssignments = 20; 
 
         $completedAssignments = \App\Models\MeetingScore::where('user_id', $user->id)->count();
@@ -94,31 +93,62 @@ Route::middleware([
         $highestScore = \App\Models\MeetingScore::where('user_id', $user->id)->max('score') ?? 0;
         $totalPoints = \App\Models\MeetingScore::where('user_id', $user->id)->sum('score');
 
-        // 3. Recent Activity
+        // 3. Recent Activity (Class Assignments)
         $recentActivity = \App\Models\MeetingScore::where('user_id', $user->id)
             ->orderByDesc('submitted_at')
             ->limit(5)
             ->get();
 
-        // 4. Chart Data (Standardized for M1-M20)
-        $scores = \App\Models\MeetingScore::where('user_id', $user->id)
-            ->pluck('score', 'meeting_number')
-            ->toArray();
+        // 4. Latest Free Test & Recommendation logic
+        $latestTest = \App\Models\FreeTestResult::where('user_id', $user->id)->latest()->first();
+        $recommendedProgram = null;
+        $targetScore = null;
 
-        $chartData = [];
-        for ($i = 1; $i <= 20; $i++) {
-            $chartData[] = $scores[$i] ?? 0;
+        if ($latestTest) {
+            $outreachMessage = \App\Models\OutreachMessage::with('program')
+                ->where('test_type', $latestTest->test_type)
+                ->where('target_role', $user->role)
+                ->where('min_score', '<=', $latestTest->score)
+                ->where('max_score', '>=', $latestTest->score)
+                ->first();
+
+            if ($outreachMessage && $outreachMessage->program) {
+                $recommendedProgram = $outreachMessage->program;
+            }
+
+            // Simple logic for Target Score based on latest test score
+            $score = $latestTest->score;
+            $isIelts = str_starts_with($latestTest->test_type, 'ielts_') || $latestTest->test_type === 'pte_academic';
+            if ($isIelts) {
+                $targetScore = min(9.0, $score + 1.0); // e.g. 5.5 -> 6.5
+            } else {
+                $targetScore = min(677, $score + 50); // e.g. 450 -> 500
+            }
+        }
+
+        // 5. Upcoming Classes (from User's Class Period)
+        $upcomingClasses = collect();
+        if ($user->classPeriod) {
+            $upcomingClasses = $user->classPeriod->classMeetings()
+                ->where('meeting_date', '>=', now()->toDateString())
+                ->orderBy('meeting_date')
+                ->orderBy('start_time')
+                ->limit(3)
+                ->get();
         }
 
         return view('dashboard', [
             'progressPercentage' => $progressPercentage,
-            'totalCompleted' => $completedAssignments,
-            'totalAssignments' => $totalAssignments,
-            'averageScore' => round($averageScore, 1),
-            'highestScore' => $highestScore,
-            'totalPoints' => $totalPoints,
-            'recentActivity' => $recentActivity,
-            'chartData' => $chartData // Array of 20 values
+            'totalCompleted'     => $completedAssignments,
+            'totalAssignments'   => $totalAssignments,
+            'averageScore'       => round($averageScore, 1),
+            'highestScore'       => $highestScore,
+            'totalPoints'        => $totalPoints,
+            'recentActivity'     => $recentActivity,
+            'latestTest'         => $latestTest,
+            'recommendedProgram' => $recommendedProgram,
+            'targetScore'        => $targetScore,
+            'upcomingClasses'    => $upcomingClasses,
         ]);
     })->name('dashboard');
 

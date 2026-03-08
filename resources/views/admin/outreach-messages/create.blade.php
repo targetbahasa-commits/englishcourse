@@ -47,6 +47,23 @@
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
+
+                        <!-- Recommended Program -->
+                        <div class="md:col-span-2">
+                            <label for="program_id" class="block text-sm font-semibold text-gray-700 mb-1">Recommended Program <span class="text-gray-400 font-normal">(Optional)</span></label>
+                            <select id="program_id" name="program_id" class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out p-3 bg-white">
+                                <option value="">-- No specific program recommendation --</option>
+                                @foreach($programs as $program)
+                                    <option value="{{ $program->id }}" {{ old('program_id') == $program->id ? 'selected' : '' }}>
+                                        {{ $program->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">If a user lands in this score bracket, they will be given a CTA to enroll in this specific program.</p>
+                            @error('program_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

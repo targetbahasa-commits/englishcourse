@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\OutreachMessage;
+use App\Models\Program;
 use Illuminate\Http\Request;
 
 class OutreachMessageController extends Controller
@@ -16,16 +17,18 @@ class OutreachMessageController extends Controller
 
     public function create()
     {
-        return view('admin.outreach-messages.create');
+        $programs = Program::where('is_active', true)->orderBy('name')->get();
+        return view('admin.outreach-messages.create', compact('programs'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'test_type' => 'required|string|max:255',
-            'target_role' => 'required|in:guest,student',
-            'min_score' => 'required|numeric|min:0',
-            'max_score' => 'required|numeric|gte:min_score',
+            'test_type'       => 'required|string|max:255',
+            'target_role'     => 'required|in:guest,student',
+            'program_id'      => 'nullable|exists:programs,id',
+            'min_score'       => 'required|numeric|min:0',
+            'max_score'       => 'required|numeric|gte:min_score',
             'message_content' => 'required|string',
         ]);
 
@@ -37,16 +40,18 @@ class OutreachMessageController extends Controller
 
     public function edit(OutreachMessage $outreachMessage)
     {
-        return view('admin.outreach-messages.edit', compact('outreachMessage'));
+        $programs = Program::where('is_active', true)->orderBy('name')->get();
+        return view('admin.outreach-messages.edit', compact('outreachMessage', 'programs'));
     }
 
     public function update(Request $request, OutreachMessage $outreachMessage)
     {
         $validated = $request->validate([
-            'test_type' => 'required|string|max:255',
-            'target_role' => 'required|in:guest,student',
-            'min_score' => 'required|numeric|min:0',
-            'max_score' => 'required|numeric|gte:min_score',
+            'test_type'       => 'required|string|max:255',
+            'target_role'     => 'required|in:guest,student',
+            'program_id'      => 'nullable|exists:programs,id',
+            'min_score'       => 'required|numeric|min:0',
+            'max_score'       => 'required|numeric|gte:min_score',
             'message_content' => 'required|string',
         ]);
 

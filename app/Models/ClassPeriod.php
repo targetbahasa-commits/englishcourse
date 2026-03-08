@@ -17,6 +17,7 @@ class ClassPeriod extends Model
         'status',
         'learning_mode',
         'batch_type',
+        'max_capacity',
     ];
 
     protected $casts = [

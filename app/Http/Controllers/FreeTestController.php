@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FreeTestResult;
 use App\Models\OutreachMessage;
+use App\Models\Program;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -60,6 +61,16 @@ class FreeTestController extends Controller
             ->where('max_score', '>=', $result->score)
             ->first();
 
-        return view('free-tests.result', compact('result', 'outreachMessage'));
+        // Find a recommended program based on score level
+        $recommendedProgram = null;
+        if ($outreachMessage && $outreachMessage->program_id ?? false) {
+            $recommendedProgram = Program::find($outreachMessage->program_id);
+        }
+        // Fallback: recommend first active program if none found
+        if (!$recommendedProgram) {
+            $recommendedProgram = Program::where('is_active', true)->first();
+        }
+
+        return view('free-tests.result', compact('result', 'outreachMessage', 'recommendedProgram'));
     }
 }

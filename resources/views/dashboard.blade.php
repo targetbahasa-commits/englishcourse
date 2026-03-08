@@ -51,56 +51,80 @@
                 @include('guest.components.free-tests-content')
             @else
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <!-- Completed Assignments -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-blue-50 rounded-xl text-blue-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                        </div>
-                        <span class="text-xs font-bold {{ $progressPercentage >= 50 ? 'text-green-600 bg-green-50' : 'text-orange-600 bg-orange-50' }} px-2 py-1 rounded-full">
-                            {{ round($progressPercentage) }}% Selesai
-                        </span>
-                    </div>
-                    <h3 class="text-3xl font-bold text-gray-800 mb-1">{{ $totalCompleted }}<span class="text-lg text-gray-400 font-normal">/{{ $totalAssignments }}</span></h3>
-                    <p class="text-gray-500 text-sm">Tugas Diselesaikan</p>
-                </div>
+            <!-- Learning Hub Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 
-                <!-- Average Score -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-purple-50 rounded-xl text-purple-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                <!-- Latest Test Score -->
+                <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-lg border-0 p-6 text-white relative overflow-hidden">
+                    <div class="absolute top-0 right-0 -mt-6 -mr-6 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-blue-100 text-sm font-semibold uppercase tracking-wider">Latest Test Score</span>
+                            <div class="p-2 bg-white/20 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
                         </div>
+                        @if($latestTest)
+                            <h3 class="text-4xl font-black mb-1">{{ $latestTest->score + 0 }}</h3>
+                            <p class="text-blue-100 text-sm">{{ strtoupper(str_replace('_', ' ', $latestTest->test_type)) }}</p>
+                        @else
+                            <h3 class="text-2xl font-bold mb-1 mt-2">No tests yet</h3>
+                            <a href="{{ route('dashboard', ['section' => 'guest_free_tests']) }}" class="text-white text-sm underline hover:text-blue-200 mt-2 inline-block">Take a free test</a>
+                        @endif
                     </div>
-                    <h3 class="text-3xl font-bold text-gray-800 mb-1">{{ $averageScore }}</h3>
-                    <p class="text-gray-500 text-sm">Rata-rata Nilai</p>
                 </div>
-                
-                <!-- Highest Score -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+
+                <!-- Target Score & Recommendation -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-green-50 rounded-xl text-green-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                        <span class="text-gray-500 text-sm font-semibold uppercase tracking-wider">Target & Plan</span>
+                        <div class="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         </div>
                     </div>
-                    <h3 class="text-3xl font-bold text-gray-800 mb-1">{{ $highestScore }}</h3>
-                    <p class="text-gray-500 text-sm">Nilai Tertinggi</p>
+                    @if($targetScore)
+                        <div class="flex items-end gap-2 mb-3">
+                            <h3 class="text-3xl font-bold text-gray-800">{{ $targetScore + 0 }}</h3>
+                            <span class="text-sm text-gray-500 mb-1">Target Score</span>
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-500 mb-4 italic">Take a test to see your target.</p>
+                    @endif
+                    
+                    @if($recommendedProgram)
+                        <div class="mt-4 pt-4 border-t border-gray-50">
+                            <p class="text-xs text-gray-400 mb-1">Recommended for you:</p>
+                            <a href="{{ route('assignments') }}" class="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 group">
+                                {{ $recommendedProgram->name }}
+                                <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </a>
+                        </div>
+                    @else
+                        <div class="mt-4 pt-4 border-t border-gray-50">
+                            <a href="{{ route('assignments') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700">View Programs →</a>
+                        </div>
+                    @endif
                 </div>
-                
-                <!-- Total Points -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+
+                <!-- Assignment Progress -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-yellow-50 rounded-xl text-yellow-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span class="text-gray-500 text-sm font-semibold uppercase tracking-wider">Class Progress</span>
+                        <div class="p-2 bg-green-50 text-green-600 rounded-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                         </div>
                     </div>
-                    <h3 class="text-3xl font-bold text-gray-800 mb-1">{{ number_format($totalPoints) }}</h3>
-                    <p class="text-gray-500 text-sm">Total Poin Akumulasi</p>
+                    <div class="flex items-end gap-2 mb-4">
+                        <h3 class="text-3xl font-bold text-gray-800">{{ $totalCompleted }}<span class="text-xl text-gray-400 font-normal">/{{ $totalAssignments }}</span></h3>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2.5 mb-1">
+                        <div class="bg-green-500 h-2.5 rounded-full" style="width: {{ $progressPercentage }}%"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 text-right">{{ round($progressPercentage) }}% Completed</p>
                 </div>
             </div>
 
-            <!-- Charts & Recent Activity -->
+            <!-- Charts & Upcoming Classes -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <!-- Progress Chart -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
@@ -112,39 +136,43 @@
                     </div>
                 </div>
                 
-                <!-- Recent Activity -->
+                <!-- Upcoming Classes -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-lg font-bold text-gray-800">Aktivitas Terbaru</h3>
-                    </div>
-                    <div class="space-y-4">
-                        @forelse($recentActivity as $activity)
-                            <div class="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-xl transition border border-transparent hover:border-gray-100">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white
-                                    {{ $activity->score >= 80 ? 'bg-green-500' : ($activity->score >= 60 ? 'bg-yellow-500' : 'bg-red-500') }}">
-                                    {{ $activity->meeting_number }}
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="text-sm font-bold text-gray-800">Meeting {{ $activity->meeting_number }}</h4>
-                                    <p class="text-xs text-gray-500">{{ $activity->submitted_at->diffForHumans() }}</p>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-lg font-bold {{ $activity->score >= 80 ? 'text-green-600' : ($activity->score >= 60 ? 'text-yellow-600' : 'text-red-600') }}">
-                                        {{ $activity->score }}
-                                    </span>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="text-center py-8 text-gray-400">
-                                <p>Belum ada aktivitas.</p>
-                                <a href="{{ route('assignments.index') }}" class="text-blue-500 text-sm hover:underline mt-2 inline-block">Mulai Belajar</a>
-                            </div>
-                        @endforelse
+                        <h3 class="text-lg font-bold text-gray-800">Upcoming Classes</h3>
                     </div>
                     
-                    @if($recentActivity->count() > 0)
-                        <div class="mt-6 pt-4 border-t border-gray-100 text-center">
-                            <a href="{{ route('assignments.index') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700">Lanjutkan Belajar →</a>
+                    @if(Auth::user()->classPeriod)
+                        <div class="space-y-4">
+                            @forelse($upcomingClasses as $class)
+                                <div class="flex items-start gap-4 p-3 hover:bg-gray-50 rounded-xl transition border border-transparent hover:border-gray-100">
+                                    <div class="w-12 h-12 rounded-xl flex flex-col items-center justify-center bg-blue-50 text-blue-600 flex-shrink-0">
+                                        <span class="text-xs font-bold uppercase">{{ \Carbon\Carbon::parse($class->meeting_date)->format('M') }}</span>
+                                        <span class="text-lg font-black leading-none">{{ \Carbon\Carbon::parse($class->meeting_date)->format('d') }}</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-sm font-bold text-gray-800 line-clamp-1">{{ $class->meeting->title }}</h4>
+                                        <p class="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            {{ \Carbon\Carbon::parse($class->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($class->end_time)->format('H:i') }}
+                                        </p>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-center py-8 text-gray-400 border-2 border-dashed border-gray-100 rounded-xl">
+                                    <div class="text-2xl mb-2">📅</div>
+                                    <p class="text-sm">Tidak ada jadwal kelas terdekat.</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    @else
+                        <div class="text-center py-8 px-4 bg-gray-50 rounded-xl border border-gray-100">
+                            <div class="inline-flex items-center justify-center w-12 h-12 bg-blue-100 text-blue-500 rounded-full mb-3">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                            </div>
+                            <h4 class="text-sm font-bold text-gray-800 mb-1">Daftar Kelas</h4>
+                            <p class="text-xs text-gray-500 mb-4">Anda belum bergabung dalam Batch Kelas manapun.</p>
+                            <a href="{{ route('assignments') }}" class="inline-block px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition">Lihat Program</a>
                         </div>
                     @endif
                 </div>
