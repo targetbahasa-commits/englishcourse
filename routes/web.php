@@ -226,6 +226,9 @@ Route::middleware([
     // Sprint 5: My Progress
     Route::get('/my-progress', [App\Http\Controllers\ProgressController::class, 'index'])->name('student.progress');
 
+    // Sprint 6: Schedule
+    Route::get('/schedule', [App\Http\Controllers\ScheduleController::class, 'index'])->name('student.schedule');
+
 
 
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
