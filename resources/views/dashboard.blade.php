@@ -52,7 +52,27 @@
             @else
             <!-- Stats Cards -->
             <!-- Learning Hub Overview -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+
+                <!-- Program Display -->
+                <div class="bg-gradient-to-br from-indigo-700 to-purple-800 rounded-2xl shadow-lg border-0 p-6 text-white relative overflow-hidden">
+                    <div class="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-indigo-200 text-sm font-semibold uppercase tracking-wider">Active Program</span>
+                            <div class="p-2 bg-white/20 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            </div>
+                        </div>
+                        @if($enrolledProgram)
+                            <h3 class="text-2xl font-black mb-1 leading-tight">{{ $enrolledProgram->name }}</h3>
+                            <p class="text-indigo-200 text-sm mt-2">Class Average: <span class="font-bold text-white">{{ round($averageScore, 1) }}</span> / 100</p>
+                        @else
+                            <h3 class="text-xl font-bold mb-1 mt-2">No Program</h3>
+                            <a href="{{ route('assignments.index') }}" class="text-white text-sm underline hover:text-indigo-200 mt-2 inline-block">Explore Programs</a>
+                        @endif
+                    </div>
+                </div>
                 
                 <!-- Latest Test Score -->
                 <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-lg border-0 p-6 text-white relative overflow-hidden">
@@ -218,6 +238,69 @@
                 </div>
             </div>
             @endif
+            
+            <!-- Sprint 4: Diagnostic Scorecard (Historical) -->
+            @if(isset($diagnosticStats) && array_sum($diagnosticStats) > 0)
+            <div class="mb-8 relative overflow-hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <!-- Background Decoration -->
+                <div class="absolute -right-10 -top-10 w-40 h-40 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full opacity-50"></div>
+                
+                <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            Diagnostic Analytics
+                        </h3>
+                        <p class="text-sm text-gray-500 mt-1">Distribusi performa historis Anda di semua tugas.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Excellent Band -->
+                    <div class="bg-gray-50 rounded-xl p-5 border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
+                        <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 font-semibold uppercase">Excellent (90-100)</p>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-2xl font-black text-gray-800">{{ $diagnosticStats['excellent'] }}</span>
+                                <span class="text-xs text-gray-500">tugas</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Good Band -->
+                    <div class="bg-gray-50 rounded-xl p-5 border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 font-semibold uppercase">Good (70-89)</p>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-2xl font-black text-gray-800">{{ $diagnosticStats['good'] }}</span>
+                                <span class="text-xs text-gray-500">tugas</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Needs Review Band -->
+                    <div class="bg-gray-50 rounded-xl p-5 border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
+                        <div class="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-orange-600 font-semibold uppercase">Needs Review (<70)</p>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-2xl font-black text-gray-800">{{ $diagnosticStats['needs_review'] }}</span>
+                                <span class="text-xs text-gray-500">tugas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
         </main>
     </div>
 

@@ -175,13 +175,33 @@ Route::middleware([
             }
         }
 
-        // 8. Sprint 3: Adaptive Assignments (Identify weakness)
+        // 8. Sprint 3 & 4: Adaptive Assignments & Diagnostic Scorecard
         $lowestScores = \App\Models\MeetingScore::where('user_id', $user->id)
             ->where('score', '<', 70) // Threshold for weakness
             ->orderBy('score', 'asc')
             ->orderBy('submitted_at', 'desc')
             ->limit(2)
             ->get();
+            
+        // 9. Sprint 4: Score Bands for Diagnostic Scorecard
+        $diagnosticStats = [
+            'excellent' => 0, // 90-100
+            'good'      => 0, // 70-89
+            'needs_review' => 0, // < 70
+        ];
+        
+        foreach ($scores as $scoreVal) {
+            if ($scoreVal >= 90) {
+                $diagnosticStats['excellent']++;
+            } elseif ($scoreVal >= 70) {
+                $diagnosticStats['good']++;
+            } else {
+                $diagnosticStats['needs_review']++;
+            }
+        }
+            
+        // Sprint 4: Enrolled Program
+        $enrolledProgram = $user->program;
 
         return view('dashboard', [
             'progressPercentage' => $progressPercentage,
@@ -198,6 +218,8 @@ Route::middleware([
             'chartData'          => $chartData,
             'predictedScore'     => $predictedScore,
             'lowestScores'       => $lowestScores,
+            'enrolledProgram'    => $enrolledProgram,
+            'diagnosticStats'    => $diagnosticStats,
         ]);
     })->name('dashboard');
 

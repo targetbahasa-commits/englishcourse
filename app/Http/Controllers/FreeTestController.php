@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FreeTestResult;
 use App\Models\OutreachMessage;
 use App\Models\Program;
+use App\Jobs\SendOutreachFollowUpJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -46,6 +47,9 @@ class FreeTestController extends Controller
             'score' => $score,
             'evaluation_data' => $evaluationData
         ]);
+
+        // Sprint 4: Dispatch the automated follow-up email job (delayed by 1 minute for realism)
+        SendOutreachFollowUpJob::dispatch($result)->delay(now()->addMinute());
 
         return redirect()->route('free-test.result', $result->id);
     }
