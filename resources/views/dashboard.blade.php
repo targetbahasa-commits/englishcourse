@@ -94,14 +94,14 @@
                     @if($recommendedProgram)
                         <div class="mt-4 pt-4 border-t border-gray-50">
                             <p class="text-xs text-gray-400 mb-1">Recommended for you:</p>
-                            <a href="{{ route('assignments') }}" class="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 group">
+                            <a href="{{ route('assignments.index') }}" class="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 group">
                                 {{ $recommendedProgram->name }}
                                 <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                             </a>
                         </div>
                     @else
                         <div class="mt-4 pt-4 border-t border-gray-50">
-                            <a href="{{ route('assignments') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700">View Programs →</a>
+                            <a href="{{ route('assignments.index') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700">View Programs →</a>
                         </div>
                     @endif
                 </div>
@@ -172,7 +172,7 @@
                             </div>
                             <h4 class="text-sm font-bold text-gray-800 mb-1">Daftar Kelas</h4>
                             <p class="text-xs text-gray-500 mb-4">Anda belum bergabung dalam Batch Kelas manapun.</p>
-                            <a href="{{ route('assignments') }}" class="inline-block px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition">Lihat Program</a>
+                            <a href="{{ route('assignments.index') }}" class="inline-block px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition">Lihat Program</a>
                         </div>
                     @endif
                 </div>

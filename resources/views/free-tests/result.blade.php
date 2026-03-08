@@ -166,13 +166,13 @@
                         {!! nl2br(e($outreachMessage->message_content)) !!}
                     </p>
                     @if($recommendedProgram)
-                    <a href="{{ route('assignments') }}"
+                    <a href="{{ route('assignments.index') }}"
                         class="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-700 font-bold rounded-xl shadow-md hover:shadow-xl hover:bg-gray-50 hover:scale-105 transition-all duration-200 text-sm">
                         Daftar Program: {{ $recommendedProgram->name }}
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                     </a>
                     @else
-                    <a href="{{ route('assignments') }}"
+                    <a href="{{ route('assignments.index') }}"
                         class="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-700 font-bold rounded-xl shadow-md hover:shadow-xl hover:bg-gray-50 transition-all duration-200 text-sm">
                         Lihat Program Tersedia
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
@@ -184,7 +184,7 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
                 <div class="text-4xl mb-3">📚</div>
                 <p class="text-gray-600 mb-4 font-medium">Bagus! Tetap berlatih untuk meningkatkan skor Anda.</p>
-                <a href="{{ route('assignments') }}"
+                <a href="{{ route('assignments.index') }}"
                     class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition text-sm shadow-sm">
                     Lihat Program Belajar
                 </a>
