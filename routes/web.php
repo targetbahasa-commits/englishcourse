@@ -137,6 +137,16 @@ Route::middleware([
                 ->get();
         }
 
+        // 6. Chart Data (Standardized for M1-M20)
+        $scores = \App\Models\MeetingScore::where('user_id', $user->id)
+            ->pluck('score', 'meeting_number')
+            ->toArray();
+
+        $chartData = [];
+        for ($i = 1; $i <= 20; $i++) {
+            $chartData[] = $scores[$i] ?? 0;
+        }
+
         return view('dashboard', [
             'progressPercentage' => $progressPercentage,
             'totalCompleted'     => $completedAssignments,
@@ -149,6 +159,7 @@ Route::middleware([
             'recommendedProgram' => $recommendedProgram,
             'targetScore'        => $targetScore,
             'upcomingClasses'    => $upcomingClasses,
+            'chartData'          => $chartData,
         ]);
     })->name('dashboard');
 
