@@ -88,8 +88,7 @@ $freeLessons = [
 @endphp
 
 <!-- Hero Section -->
-<div class="relative bg-white overflow-hidden rounded-2xl shadow-sm mb-8">
-    <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-indigo-50/50 to-purple-50/50 -z-10"></div>
+<div class="relative bg-white rounded-2xl shadow-sm mb-8">
     <div class="px-4 py-16 text-center">
         <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
             <span class="block text-gray-900">Uji Kemampuan Bahasa Inggrismu</span>
@@ -110,71 +109,79 @@ $freeLessons = [
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- IELTS Academic -->
-        <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 flex flex-col">
-            <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mb-4 text-2xl">🎓</div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2">IELTS Academic</h3>
-            <div class="text-gray-500 mb-6 flex-1 text-xs bg-gray-50 p-3 rounded-xl border border-gray-100 space-y-2">
+        <div class="bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
+            <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-5 text-2xl">🎓</div>
+            <h3 class="text-xl font-bold text-gray-900 mb-4">IELTS Academic</h3>
+            <div class="text-gray-500 mb-8 flex-1 text-xs bg-gray-50/50 p-4 rounded-2xl space-y-3">
                 <p class="font-medium text-gray-700">Bagi yang ingin studi ke luar negeri.</p>
-                <p class="flex items-center gap-1.5"><svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> 15 Menit</p>
-                <p class="flex items-center gap-1.5"><svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Reading & Listening</p>
+                <div class="space-y-2">
+                    <p class="flex items-center gap-2"><svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> 15 Menit</p>
+                    <p class="flex items-center gap-2"><svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Reading & Listening</p>
+                </div>
             </div>
-            <a href="{{ route('free-test.show', 'ielts_academic') }}" class="block w-full text-center bg-blue-600 text-white font-semibold py-2.5 px-4 rounded-xl hover:bg-blue-700 transition">Start Free Test</a>
+            <a href="{{ route('free-test.show', 'ielts_academic') }}" class="block w-full text-center bg-blue-600 text-white font-semibold py-3 px-4 rounded-xl hover:bg-blue-700 transition">Start Free Test</a>
         </div>
 
         <!-- IELTS General -->
-        <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 flex flex-col">
-            <div class="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center mb-4 text-2xl">💼</div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2">IELTS General</h3>
-            <div class="text-gray-500 mb-6 flex-1 text-xs bg-gray-50 p-3 rounded-xl border border-gray-100 space-y-2">
+        <div class="bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
+            <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mb-5 text-2xl">💼</div>
+            <h3 class="text-xl font-bold text-gray-900 mb-4">IELTS General</h3>
+            <div class="text-gray-500 mb-8 flex-1 text-xs bg-gray-50/50 p-4 rounded-2xl space-y-3">
                 <p class="font-medium text-gray-700">Untuk bekerja atau imigrasi.</p>
-                <p class="flex items-center gap-1.5"><svg class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> 15 Menit</p>
-                <p class="flex items-center gap-1.5"><svg class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Reading & Listening</p>
+                <div class="space-y-2">
+                    <p class="flex items-center gap-2"><svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> 15 Menit</p>
+                    <p class="flex items-center gap-2"><svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Reading & Listening</p>
+                </div>
             </div>
-            <a href="{{ route('free-test.show', 'ielts_general') }}" class="block w-full text-center bg-green-600 text-white font-semibold py-2.5 px-4 rounded-xl hover:bg-green-700 transition">Start Free Test</a>
+            <a href="{{ route('free-test.show', 'ielts_general') }}" class="block w-full text-center bg-[#1DA154] text-white font-semibold py-3 px-4 rounded-xl hover:bg-[#168845] transition">Start Free Test</a>
         </div>
 
         <!-- TOEFL ITP -->
-        <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 flex flex-col">
-            <div class="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center mb-4 text-2xl">🏛️</div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2">TOEFL ITP</h3>
-            <div class="text-gray-500 mb-6 flex-1 text-xs bg-gray-50 p-3 rounded-xl border border-gray-100 space-y-2">
+        <div class="bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
+            <div class="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center mb-5 text-2xl">🏛️</div>
+            <h3 class="text-xl font-bold text-gray-900 mb-4">TOEFL ITP</h3>
+            <div class="text-gray-500 mb-8 flex-1 text-xs bg-gray-50/50 p-4 rounded-2xl space-y-3">
                 <p class="font-medium text-gray-700">Model soal institusi lokal/beasiswa.</p>
-                <p class="flex items-center gap-1.5"><svg class="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> 20 Menit</p>
-                <p class="flex items-center gap-1.5"><svg class="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> All Sections</p>
+                <div class="space-y-2">
+                    <p class="flex items-center gap-2"><svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> 20 Menit</p>
+                    <p class="flex items-center gap-2"><svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> All Sections</p>
+                </div>
             </div>
-            <a href="{{ route('free-test.show', 'toefl_itp') }}" class="block w-full text-center bg-purple-600 text-white font-semibold py-2.5 px-4 rounded-xl hover:bg-purple-700 transition">Start Free Test</a>
+            <a href="{{ route('free-test.show', 'toefl_itp') }}" class="block w-full text-center bg-[#9834E8] text-white font-semibold py-3 px-4 rounded-xl hover:bg-[#8022CB] transition">Start Free Test</a>
         </div>
 
         <!-- PTE Academic -->
-        <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 flex flex-col">
-            <div class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center mb-4 text-2xl">💻</div>
-            <h3 class="text-lg font-bold text-gray-900 mb-2">PTE Academic</h3>
-            <div class="text-gray-500 mb-6 flex-1 text-xs bg-gray-50 p-3 rounded-xl border border-gray-100 space-y-2">
+        <div class="bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 flex flex-col">
+            <div class="w-12 h-12 bg-orange-50 rounded-full flex items-center justify-center mb-5 text-2xl">💻</div>
+            <h3 class="text-xl font-bold text-gray-900 mb-4">PTE Academic</h3>
+            <div class="text-gray-500 mb-8 flex-1 text-xs bg-gray-50/50 p-4 rounded-2xl space-y-3">
                 <p class="font-medium text-gray-700">Sistem tes integrated skills.</p>
-                <p class="flex items-center gap-1.5"><svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> 15 Menit</p>
-                <p class="flex items-center gap-1.5"><svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Computer Based</p>
+                <div class="space-y-2">
+                    <p class="flex items-center gap-2"><svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> 15 Menit</p>
+                    <p class="flex items-center gap-2"><svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Computer Based</p>
+                </div>
             </div>
-            <a href="{{ route('free-test.show', 'pte_academic') }}" class="block w-full text-center bg-orange-600 text-white font-semibold py-2.5 px-4 rounded-xl hover:bg-orange-700 transition">Start Free Test</a>
+            <a href="{{ route('free-test.show', 'pte_academic') }}" class="block w-full text-center bg-[#E85C11] text-white font-semibold py-3 px-4 rounded-xl hover:bg-[#CF4906] transition">Start Free Test</a>
         </div>
     </div>
 </div>
 
 <!-- Why Take Our Free Test? -->
-<div class="mb-12 bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-    <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Why Take Our Free Test?</h3>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="mb-12 bg-white rounded-3xl shadow-sm px-8 py-12">
+    <h3 class="text-xl font-bold text-gray-900 mb-8 text-center">Why Take Our Free Test?</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div class="text-center">
-            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">🎯</div>
+            <div class="w-14 h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">🎯</div>
             <h4 class="font-bold text-gray-800 mb-2">Akurat</h4>
             <p class="text-sm text-gray-500">Soal dikurasi sesuai dengan standar tes asli terbaru.</p>
         </div>
         <div class="text-center">
-            <div class="w-12 h-12 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">⚡</div>
+            <div class="w-14 h-14 bg-yellow-50 text-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">⚡</div>
             <h4 class="font-bold text-gray-800 mb-2">Instan</h4>
             <p class="text-sm text-gray-500">Dapatkan estimasi band/skormu segera setelah selesai.</p>
         </div>
         <div class="text-center">
-            <div class="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">📈</div>
+            <div class="w-14 h-14 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">📈</div>
             <h4 class="font-bold text-gray-800 mb-2">Analisis</h4>
             <p class="text-sm text-gray-500">Ketahui kelemahanmu (Misal: Grammar lemah, Vocabulary kurang).</p>
         </div>
