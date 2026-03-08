@@ -144,9 +144,15 @@
                                         <ul class="list-disc pl-4 mt-1 space-y-1">
                                             @foreach($lowestScores as $weakness)
                                                 <li>
-                                                    <a href="{{ route('assignments.grammar-writing.meeting' . $weakness->meeting_number) }}" class="underline hover:text-orange-900 font-medium">
-                                                        Meeting {{ $weakness->meeting_number }}
-                                                    </a> (Score: <span class="font-bold text-red-600">{{ $weakness->score }}</span>)
+                                                    @php $routeName = 'assignments.grammar-writing.meeting' . $weakness->meeting_number; @endphp
+                                                    @if(Route::has($routeName))
+                                                        <a href="{{ route($routeName) }}" class="underline hover:text-orange-900 font-medium">
+                                                            Meeting {{ $weakness->meeting_number }}
+                                                        </a> 
+                                                    @else
+                                                        <span class="font-medium">Meeting {{ $weakness->meeting_number }}</span>
+                                                    @endif
+                                                    (Score: <span class="font-bold text-red-600">{{ $weakness->score }}</span>)
                                                 </li>
                                             @endforeach
                                         </ul>
