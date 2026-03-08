@@ -455,7 +455,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('admin/class-periods', App\Http\Controllers\Admin\ClassPeriodController::class)->names('class-periods')->middleware('role:admin');
     
     // Admin Impersonation Routes
-    Route::get('/admin/impersonate/{role}', [App\Http\Controllers\AdminController::class, 'impersonate'])->name('admin.impersonate')->middleware('role:admin');
+    Route::get('/admin/impersonate/{role}', [App\Http\Controllers\AdminController::class, 'impersonate'])->name('admin.impersonate');
     Route::get('/admin/impersonate-stop', [App\Http\Controllers\AdminController::class, 'stopImpersonate'])->name('admin.impersonate.stop'); // no middleware so impersonated users can return
     
     // Teacher Dashboard
