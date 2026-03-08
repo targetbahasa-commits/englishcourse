@@ -165,8 +165,13 @@
                                                 Riwayat pertemuan belum tersedia.
                                             </td>
                                         </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
+
             </div>
             @endif
 
