@@ -91,6 +91,13 @@
                         <p class="text-sm text-gray-500 mb-4 italic">Take a test to see your target.</p>
                     @endif
                     
+                    @if(isset($predictedScore))
+                        <div class="mt-2 bg-blue-50 border border-blue-100 rounded-lg p-3 flex justify-between items-center">
+                            <span class="text-sm font-semibold text-blue-800">Predicted Score</span>
+                            <span class="text-lg font-bold text-blue-700">{{ $predictedScore }}</span>
+                        </div>
+                    @endif
+                    
                     @if($recommendedProgram)
                         <div class="mt-4 pt-4 border-t border-gray-50">
                             <p class="text-xs text-gray-400 mb-1">Recommended for you:</p>
@@ -121,6 +128,33 @@
                         <div class="bg-green-500 h-2.5 rounded-full" style="width: {{ $progressPercentage }}%"></div>
                     </div>
                     <p class="text-xs text-gray-500 text-right">{{ round($progressPercentage) }}% Completed</p>
+                    
+                    @if(isset($lowestScores) && $lowestScores->count() > 0)
+                        <div class="mt-4 bg-orange-50 border-l-4 border-orange-400 p-3 rounded-r-lg">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-xs font-bold text-orange-800">Review Recommended</h3>
+                                    <div class="mt-1 text-xs text-orange-700">
+                                        Perkuat materi ini untuk menaikkan nilai Anda:
+                                        <ul class="list-disc pl-4 mt-1 space-y-1">
+                                            @foreach($lowestScores as $weakness)
+                                                <li>
+                                                    <a href="{{ route('assignments.grammar-writing.meeting' . $weakness->meeting_number) }}" class="underline hover:text-orange-900 font-medium">
+                                                        Meeting {{ $weakness->meeting_number }}
+                                                    </a> (Score: <span class="font-bold text-red-600">{{ $weakness->score }}</span>)
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
 

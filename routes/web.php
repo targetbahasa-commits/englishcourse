@@ -147,6 +147,42 @@ Route::middleware([
             $chartData[] = $scores[$i] ?? 0;
         }
 
+        // 7. Sprint 3: Progress Prediction Model
+        // Calculate predicted score based on average MeetingScore
+        $predictedScore = null;
+        if ($completedAssignments > 0) {
+            // Rough conversion: Assuming max average score is 100
+            // TOEFL max is ~677, IELTS max is 9.0
+            
+            // Try to guess program type based on latest test if available, or just fallback
+            $isIeltsProgram = false;
+            if ($latestTest) {
+                $isIeltsProgram = str_starts_with($latestTest->test_type, 'ielts_') || $latestTest->test_type === 'pte_academic';
+            } elseif ($user->program && stripos($user->program->name, 'IELTS') !== false) {
+                $isIeltsProgram = true;
+            }
+
+            if ($isIeltsProgram) {
+                // IELTS Mapping (e.g., 80 avg = ~7.0, 90 avg = ~8.0, 100 avg = 9.0)
+                $predictedScore = round(($averageScore / 100) * 9.0 * 2) / 2; // Round to nearest 0.5
+                $predictedScore = number_format(max(1.0, min(9.0, $predictedScore)), 1);
+            } else {
+                // TOEFL Mapping (e.g., 50 avg = 450, 75 avg = 550, 100 avg = 677)
+                // Linear mapping from 0-100 to 310-677
+                $baseToefl = 310;
+                $predictedScore = round($baseToefl + (($averageScore / 100) * (677 - $baseToefl)));
+                $predictedScore = max(310, min(677, $predictedScore));
+            }
+        }
+
+        // 8. Sprint 3: Adaptive Assignments (Identify weakness)
+        $lowestScores = \App\Models\MeetingScore::where('user_id', $user->id)
+            ->where('score', '<', 70) // Threshold for weakness
+            ->orderBy('score', 'asc')
+            ->orderBy('submitted_at', 'desc')
+            ->limit(2)
+            ->get();
+
         return view('dashboard', [
             'progressPercentage' => $progressPercentage,
             'totalCompleted'     => $completedAssignments,
@@ -160,6 +196,8 @@ Route::middleware([
             'targetScore'        => $targetScore,
             'upcomingClasses'    => $upcomingClasses,
             'chartData'          => $chartData,
+            'predictedScore'     => $predictedScore,
+            'lowestScores'       => $lowestScores,
         ]);
     })->name('dashboard');
 
