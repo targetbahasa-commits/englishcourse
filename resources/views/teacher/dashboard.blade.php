@@ -12,39 +12,54 @@
 </head>
 <body class="font-sans antialiased bg-gray-100">
     @include('components.impersonation-banner')
-    <div class="min-h-screen">
-        <!-- Navigation -->
-        <nav class="bg-white shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <div class="flex">
-                        <div class="flex-shrink-0 flex items-center">
-                            <h1 class="text-xl font-bold text-gray-800">Target Bahasa - Teacher</h1>
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        @include('components.sidebar-teacher')
+
+        <!-- Main Content -->
+        <main class="flex-1 md:ml-64 bg-gray-100">
+            <!-- Navigation Header -->
+            <nav class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-20">
+                <div class="px-8 flex justify-between h-16">
+                    <div class="flex items-center">
+                        <h1 class="text-xl font-bold text-gray-800">Target Bahasa - Teacher</h1>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-gray-700 font-medium">{{ Auth::user()->name }}</span>
+                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                            {{ substr(Auth::user()->name, 0, 1) }}
                         </div>
                     </div>
-                    <div class="flex items-center">
-                        <span class="text-gray-700 mr-4">{{ Auth::user()->name }}</span>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="text-sm text-gray-600 hover:text-gray-900">
-                                Logout
-                            </button>
-                        </form>
-                    </div>
                 </div>
-            </div>
-        </nav>
+            </nav>
 
-        <!-- Page Content -->
-        <main class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
+            <!-- Page Content -->
+            <div class="p-8">
                         @if(request('section') === 'guest_free_tests')
                             @include('guest.components.free-tests-content')
                         @else
                         <h2 class="text-2xl font-bold mb-4">Teacher Dashboard</h2>
                         <p class="text-gray-600">Welcome to the teacher dashboard. View student progress and manage your classes here.</p>
+
+                        <!-- Announcements Section -->
+                        @if(isset($announcements) && $announcements->count() > 0)
+                            <div class="mt-6 mb-8 space-y-4">
+                                @foreach($announcements as $announcement)
+                                    <div class="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-5 shadow-sm relative overflow-hidden">
+                                        <div class="flex items-start justify-between">
+                                            <div>
+                                                <h3 class="text-blue-900 font-bold text-lg flex items-center gap-2">
+                                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
+                                                    {{ $announcement->title }}
+                                                </h3>
+                                                <div class="mt-2 text-blue-800 text-sm whitespace-pre-line">{{ $announcement->content }}</div>
+                                            </div>
+                                            <span class="text-xs text-blue-400 font-medium bg-blue-100 px-2 py-1 rounded">{{ $announcement->created_at->diffForHumans() }}</span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
                         
                         <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div class="bg-blue-50 p-6 rounded-lg">
@@ -120,8 +135,6 @@
                         </div>
                         @endif
                     </div>
-                </div>
-            </div>
         </main>
     </div>
 

@@ -8,6 +8,11 @@ class TeacherDashboardController extends Controller
 {
     public function index()
     {
-        return view('teacher.dashboard');
+        $announcements = \App\Models\Announcement::where('is_active', true)
+            ->whereIn('target_role', ['all', 'teacher'])
+            ->latest()
+            ->get();
+            
+        return view('teacher.dashboard', compact('announcements'));
     }
 }

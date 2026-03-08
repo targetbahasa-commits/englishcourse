@@ -118,7 +118,7 @@ $freeLessons = [
                 <p class="flex items-center gap-1.5"><svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> 15 Menit</p>
                 <p class="flex items-center gap-1.5"><svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Reading & Listening</p>
             </div>
-            <a href="#" class="block w-full text-center bg-blue-600 text-white font-semibold py-2.5 px-4 rounded-xl hover:bg-blue-700 transition">Start Free Test</a>
+            <a href="{{ route('free-test.show', 'ielts_academic') }}" class="block w-full text-center bg-blue-600 text-white font-semibold py-2.5 px-4 rounded-xl hover:bg-blue-700 transition">Start Free Test</a>
         </div>
 
         <!-- IELTS General -->
@@ -130,7 +130,7 @@ $freeLessons = [
                 <p class="flex items-center gap-1.5"><svg class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> 15 Menit</p>
                 <p class="flex items-center gap-1.5"><svg class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Reading & Listening</p>
             </div>
-            <a href="#" class="block w-full text-center bg-green-600 text-white font-semibold py-2.5 px-4 rounded-xl hover:bg-green-700 transition">Start Free Test</a>
+            <a href="{{ route('free-test.show', 'ielts_general') }}" class="block w-full text-center bg-green-600 text-white font-semibold py-2.5 px-4 rounded-xl hover:bg-green-700 transition">Start Free Test</a>
         </div>
 
         <!-- TOEFL ITP -->
@@ -142,7 +142,7 @@ $freeLessons = [
                 <p class="flex items-center gap-1.5"><svg class="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> 20 Menit</p>
                 <p class="flex items-center gap-1.5"><svg class="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> All Sections</p>
             </div>
-            <a href="#" class="block w-full text-center bg-purple-600 text-white font-semibold py-2.5 px-4 rounded-xl hover:bg-purple-700 transition">Start Free Test</a>
+            <a href="{{ route('free-test.show', 'toefl_itp') }}" class="block w-full text-center bg-purple-600 text-white font-semibold py-2.5 px-4 rounded-xl hover:bg-purple-700 transition">Start Free Test</a>
         </div>
 
         <!-- PTE Academic -->
@@ -154,7 +154,7 @@ $freeLessons = [
                 <p class="flex items-center gap-1.5"><svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> 15 Menit</p>
                 <p class="flex items-center gap-1.5"><svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Computer Based</p>
             </div>
-            <a href="#" class="block w-full text-center bg-orange-600 text-white font-semibold py-2.5 px-4 rounded-xl hover:bg-orange-700 transition">Start Free Test</a>
+            <a href="{{ route('free-test.show', 'pte_academic') }}" class="block w-full text-center bg-orange-600 text-white font-semibold py-2.5 px-4 rounded-xl hover:bg-orange-700 transition">Start Free Test</a>
         </div>
     </div>
 </div>

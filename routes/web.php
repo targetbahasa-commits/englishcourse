@@ -58,6 +58,11 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
+    
+    // Free Tests (Guest and Student)
+    Route::get('/free-test/{type}', [App\Http\Controllers\FreeTestController::class, 'show'])->name('free-test.show');
+    Route::post('/free-test/{type}/submit', [App\Http\Controllers\FreeTestController::class, 'submit'])->name('free-test.submit');
+    Route::get('/free-test/result/{id}', [App\Http\Controllers\FreeTestController::class, 'result'])->name('free-test.result');
     Route::get('/dashboard', function () {
         $user = auth()->user();
 
@@ -128,6 +133,10 @@ Route::middleware([
     Route::delete('/profile', function () {
         return "Profile Delete";
     })->name('profile.destroy');
+
+    // Student Evaluation Routes
+    Route::get('/evaluate-teacher', [App\Http\Controllers\Student\TeacherEvaluationController::class, 'create'])->name('student.evaluations.create');
+    Route::post('/evaluate-teacher', [App\Http\Controllers\Student\TeacherEvaluationController::class, 'store'])->name('student.evaluations.store');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -427,6 +436,9 @@ Route::middleware(['auth'])->group(function () {
     // Teacher Dashboard
     Route::get('/teacher/dashboard', [App\Http\Controllers\TeacherDashboardController::class, 'index'])->name('teacher.dashboard')->middleware('role:teacher');
     
+    // Teacher Evaluations
+    Route::get('/teacher/evaluations', [App\Http\Controllers\Teacher\EvaluationController::class, 'index'])->name('teacher.evaluations.index')->middleware('role:teacher');
+    
     // Teacher Attendance
     Route::get('/teacher/attendance', [App\Http\Controllers\TeacherAttendanceController::class, 'index'])->name('teacher.attendance.index')->middleware('role:teacher');
     Route::get('/teacher/attendance/meetings/{classPeriod}', [App\Http\Controllers\TeacherAttendanceController::class, 'getMeetings'])->name('teacher.attendance.meetings')->middleware('role:teacher');
@@ -453,6 +465,25 @@ Route::middleware(['auth'])->group(function () {
     
     // Reports
     Route::get('/admin/reports', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('admin.reports.index')->middleware('role:admin');
+    
+    // Teacher Evaluations (Admin)
+    Route::get('/admin/teacher-evaluations', [App\Http\Controllers\Admin\TeacherEvaluationController::class, 'index'])->name('admin.evaluations.index')->middleware('role:admin');
+    
+    // Announcements (Admin)
+    Route::get('admin/announcements', [App\Http\Controllers\Admin\AnnouncementController::class, 'index'])->name('admin.announcements.index')->middleware('role:admin');
+    Route::get('admin/announcements/create', [App\Http\Controllers\Admin\AnnouncementController::class, 'create'])->name('admin.announcements.create')->middleware('role:admin');
+    Route::post('admin/announcements', [App\Http\Controllers\Admin\AnnouncementController::class, 'store'])->name('admin.announcements.store')->middleware('role:admin');
+    Route::get('admin/announcements/{announcement}/edit', [App\Http\Controllers\Admin\AnnouncementController::class, 'edit'])->name('admin.announcements.edit')->middleware('role:admin');
+    Route::put('admin/announcements/{announcement}', [App\Http\Controllers\Admin\AnnouncementController::class, 'update'])->name('admin.announcements.update')->middleware('role:admin');
+    Route::delete('admin/announcements/{announcement}', [App\Http\Controllers\Admin\AnnouncementController::class, 'destroy'])->name('admin.announcements.destroy')->middleware('role:admin');
+    
+    // Outreach Messages (Admin)
+    Route::get('admin/outreach-messages', [App\Http\Controllers\Admin\OutreachMessageController::class, 'index'])->name('admin.outreach-messages.index')->middleware('role:admin');
+    Route::get('admin/outreach-messages/create', [App\Http\Controllers\Admin\OutreachMessageController::class, 'create'])->name('admin.outreach-messages.create')->middleware('role:admin');
+    Route::post('admin/outreach-messages', [App\Http\Controllers\Admin\OutreachMessageController::class, 'store'])->name('admin.outreach-messages.store')->middleware('role:admin');
+    Route::get('admin/outreach-messages/{outreachMessage}/edit', [App\Http\Controllers\Admin\OutreachMessageController::class, 'edit'])->name('admin.outreach-messages.edit')->middleware('role:admin');
+    Route::put('admin/outreach-messages/{outreachMessage}', [App\Http\Controllers\Admin\OutreachMessageController::class, 'update'])->name('admin.outreach-messages.update')->middleware('role:admin');
+    Route::delete('admin/outreach-messages/{outreachMessage}', [App\Http\Controllers\Admin\OutreachMessageController::class, 'destroy'])->name('admin.outreach-messages.destroy')->middleware('role:admin');
     
     // System Settings
     Route::get('/admin/settings', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('admin.settings.index')->middleware('role:admin');
