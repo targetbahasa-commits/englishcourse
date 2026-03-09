@@ -112,11 +112,14 @@ class ScholarshipSearchController extends Controller
         }
 
         $savedScholarshipIds = [];
+        $targetScholarshipId = null;
+        
         if (Auth::check()) {
             $savedScholarshipIds = Auth::user()->savedScholarships()->pluck('scholarships.id')->toArray();
+            $targetScholarshipId = Auth::user()->targetScholarships()->first()->id ?? null;
         }
 
-        return view('scholarships.show', compact('scholarship', 'predictedScore', 'savedScholarshipIds'));
+        return view('scholarships.show', compact('scholarship', 'predictedScore', 'savedScholarshipIds', 'targetScholarshipId'));
     }
 
     /**
@@ -138,5 +141,63 @@ class ScholarshipSearchController extends Controller
             $user->savedScholarships()->attach($scholarship->id);
             return response()->json(['status' => 'saved', 'message' => 'Scholarship saved!']);
         }
+    }
+
+    /**
+     * Set a scholarship as the student's primary target. (AJAX)
+     * For now, a student can only have 1 active target, so we sync.
+     */
+    public function toggleTarget(Scholarship $scholarship)
+    {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $user = Auth::user();
+        $isTarget = $user->targetScholarships()->where('scholarships.id', $scholarship->id)->exists();
+
+        if ($isTarget) {
+            $user->targetScholarships()->detach($scholarship->id);
+            return response()->json(['status' => 'untargeted', 'message' => 'Target removed.']);
+        } else {
+            // Remove previous targets and set new one
+            $user->targetScholarships()->sync([$scholarship->id]);
+            return response()->json(['status' => 'targeted', 'message' => 'Set as your target scholarship!']);
+        }
+    }
+
+    /**
+     * API Endpoint to fetch calendar events (opening & deadlines) for Alpine.js calendar
+     */
+    public function getCalendarEvents(Request $request)
+    {
+        // To optimize, we can optionally accept a month/year parameter,
+        // but for now we'll return upcoming and recent scholarships.
+        $scholarships = Scholarship::where('is_active', true)->get(['id', 'title', 'opening_date', 'deadline']);
+
+        $events = [];
+
+        foreach ($scholarships as $scholarship) {
+            if ($scholarship->opening_date) {
+                $events[] = [
+                    'id' => $scholarship->id,
+                    'title' => 'Open: ' . $scholarship->title,
+                    'date' => $scholarship->opening_date->format('Y-m-d'),
+                    'type' => 'opening', // Will map to Green dot
+                    'url' => route('scholarships.search.show', $scholarship->id)
+                ];
+            }
+            if ($scholarship->deadline) {
+                $events[] = [
+                    'id' => $scholarship->id,
+                    'title' => 'Deadline: ' . $scholarship->title,
+                    'date' => $scholarship->deadline->format('Y-m-d'),
+                    'type' => 'deadline', // Will map to Red dot
+                    'url' => route('scholarships.search.show', $scholarship->id)
+                ];
+            }
+        }
+
+        return response()->json($events);
     }
 }

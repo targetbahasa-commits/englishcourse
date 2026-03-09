@@ -193,4 +193,12 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Scholarship::class, 'saved_scholarships', 'user_id', 'scholarship_id')->withTimestamps();
     }
+
+    /**
+     * Get the scholarships targeted by the user.
+     */
+    public function targetScholarships()
+    {
+        return $this->belongsToMany(Scholarship::class, 'target_scholarships', 'user_id', 'scholarship_id')->withTimestamps();
+    }
 }

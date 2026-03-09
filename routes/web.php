@@ -62,6 +62,9 @@ Route::post('/free-lesson/progress', [App\Http\Controllers\FreeLessonController:
 Route::get('/free-test/register/{type}', [App\Http\Controllers\GuestFreeTestController::class, 'showRegistrationForm'])->name('free-test.register.show');
 Route::post('/free-test/register/{type}', [App\Http\Controllers\GuestFreeTestController::class, 'registerAndStart'])->name('free-test.register.submit');
 
+// Public: Calendar Events API (accessible to guests and students)
+Route::get('/api/scholarships/calendar-events', [App\Http\Controllers\ScholarshipSearchController::class, 'getCalendarEvents'])->name('api.scholarships.calendar-events');
+
 Route::middleware([
     'auth',
     config('jetstream.auth_session'),
@@ -74,8 +77,9 @@ Route::middleware([
     Route::get('/free-test/result/{id}', [App\Http\Controllers\FreeTestController::class, 'result'])->name('free-test.result');
     Route::get('/free-test/result/{id}/certificate', [App\Http\Controllers\FreeTestController::class, 'downloadCertificate'])->name('free-test.certificate.download');
     
-    // Bookmark Scholarship Route
+    // Bookmark and Target Scholarship Routes
     Route::post('/scholarships-search/{scholarship}/save', [App\Http\Controllers\ScholarshipSearchController::class, 'toggleSave'])->name('scholarships.search.save');
+    Route::post('/scholarships-search/{scholarship}/target', [App\Http\Controllers\ScholarshipSearchController::class, 'toggleTarget'])->name('scholarships.search.target');
 
     Route::get('/dashboard', function () {
         $user = auth()->user();
@@ -217,6 +221,9 @@ Route::middleware([
         // Sprint 4: Enrolled Program
         $enrolledProgram = $user->program;
 
+        // Target Scholarship Feature
+        $targetScholarship = $user->targetScholarships()->first();
+
         return view('dashboard', [
             'progressPercentage' => $progressPercentage,
             'totalCompleted'     => $completedAssignments,
@@ -234,6 +241,7 @@ Route::middleware([
             'lowestScores'       => $lowestScores,
             'enrolledProgram'    => $enrolledProgram,
             'diagnosticStats'    => $diagnosticStats,
+            'targetScholarship'  => $targetScholarship,
         ]);
     })->name('dashboard');
 

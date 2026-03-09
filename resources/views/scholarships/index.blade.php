@@ -1,9 +1,7 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Scholarship Search') }}
-        </h2>
-    </x-slot>
+@component('layouts.dashboard')
+    @slot('pageTitle')
+        Scholarship Search
+    @endslot
 
 <div class="px-4 py-8 w-full max-w-7xl mx-auto">
 
@@ -20,14 +18,8 @@
         </div>
         
         <!-- Academic Calendar Mini Widget -->
-        <div class="bg-white border rounded-xl shadow-sm p-4 flex items-center gap-4 min-w-[250px]">
-            <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            </div>
-            <div>
-                <p class="text-sm text-gray-500 font-medium">Academic Calendar</p>
-                <p class="text-lg font-bold text-gray-800">{{ now()->format('F Y') }}</p>
-            </div>
+        <div class="z-30">
+            @include('components.academic-calendar')
         </div>
     </div>
 
@@ -108,7 +100,7 @@
     <!-- Guest Lead Magnet -->
     @guest
         <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl p-6 md:p-8 text-white mb-8 shadow-lg flex flex-col md:flex-row items-center justify-between relative overflow-hidden">
-            <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+            <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
             
             <div class="relative z-10 md:w-2/3 mb-6 md:mb-0">
                 <h3 class="text-2xl font-bold mb-2 flex items-center gap-2">
@@ -274,77 +266,12 @@
 </div>
 
 </div>
-</x-app-layout>
+@endcomponent
 
 @push('scripts')
 <script>
-    // Include Alpine.js if not already in layouts.app
-    if (typeof window.Alpine === 'undefined') {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js';
-        script.defer = true;
-        document.head.appendChild(script);
-    }
-
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('countdown', (deadlineStr) => ({
-            days: '00',
-            hours: '00',
-            minutes: '00',
-            expired: false,
-            init() {
-                const target = new Date(deadlineStr).getTime();
-                
-                const updateTimer = () => {
-                    const now = new Date().getTime();
-                    const distance = target - now;
-                    
-                    if (distance < 0) {
-                        this.expired = true;
-                        return;
-                    }
-                    
-                    this.days = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
-                    this.hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
-                    this.minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
-                };
-                
-                updateTimer(); // run once immediately
-                setInterval(updateTimer, 60000); // update every minute since we only show minutes
-            }
-        }));
-    });
-    
-    // Fallback for browsers executing script before Alpine initialization
-    if (window.Alpine) {
-        window.Alpine.data('countdown', (deadlineStr) => ({
-            days: '00',
-            hours: '00',
-            minutes: '00',
-            expired: false,
-            init() {
-                if(!deadlineStr) return;
-                const target = new Date(deadlineStr).getTime();
-                
-                const updateTimer = () => {
-                    const now = new Date().getTime();
-                    const distance = target - now;
-                    
-                    if (distance < 0) {
-                        this.expired = true;
-                        return;
-                    }
-                    
-                    this.days = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
-                    this.hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
-                    this.minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
-                };
-                
-                updateTimer(); // run once immediately
-                setInterval(updateTimer, 60000); // update every minute since we only show minutes
-            }
-        }));
-    }
+    // Set the API URL for the Alpine.js academicCalendar component
+    window.calendarEventsUrl = '{{ route("api.scholarships.calendar-events") }}';
 
     function toggleBookmark(scholarshipId, btnElement) {
         @guest

@@ -31,7 +31,7 @@
         @endauth
 
         <!-- Main Content -->
-        <main class="flex-1 md:ml-64 p-8">
+        <main class="flex-1 {{ Auth::check() ? 'md:ml-64' : '' }} p-4 md:p-8">
             <!-- Topbar -->
             <div class="flex justify-between items-center mb-8">
                 <div>
@@ -39,13 +39,14 @@
                         {{ $header }}
                     @else
                         <h1 class="text-2xl font-bold text-gray-800">{{ $pageTitle ?? 'Dashboard' }}</h1>
-                        <p class="text-gray-500">{{ $pageDescription ?? 'Welcome back!' }}</p>
+                        <p class="text-gray-500">{{ $pageDescription ?? (Auth::check() ? 'Welcome back!' : 'Explore opportunities') }}</p>
                     @endif
                 </div>
                 
-                <div class="flex items-center gap-6">
+                <div class="flex items-center gap-4 md:gap-6">
+                    @auth
                     <!-- Notifications -->
-                    <button class="relative p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 transition">
+                    <button class="relative p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 transition hidden md:block">
                         <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                         </svg>
@@ -53,16 +54,24 @@
                             <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
                         @endif
                     </button>
+                    @endauth
                     
-                    <!-- User Profile -->
+                    <!-- User Profile / Auth Actions -->
                     <div class="flex items-center gap-3">
-                        <div class="text-right hidden md:block">
-                            <p class="text-sm font-bold text-gray-800">{{ Auth::user()->name }}</p>
-                            <p class="text-xs text-gray-500">{{ ucfirst(Auth::user()->role) }}</p>
-                        </div>
-                        <div class="w-10 h-10 bg-blue-100 rounded-full overflow-hidden flex items-center justify-center text-blue-600 font-bold">
-                            {{ substr(Auth::user()->name, 0, 1) }}
-                        </div>
+                        @auth
+                            <div class="text-right hidden md:block">
+                                <p class="text-sm font-bold text-gray-800">{{ Auth::user()->name }}</p>
+                                <p class="text-xs text-gray-500">{{ ucfirst(Auth::user()->role) }}</p>
+                            </div>
+                            <div class="w-10 h-10 bg-blue-100 rounded-full overflow-hidden flex items-center justify-center text-blue-600 font-bold shrink-0">
+                                {{ substr(Auth::user()->name, 0, 1) }}
+                            </div>
+                        @else
+                            <div class="flex items-center gap-3">
+                                <a href="{{ route('login') }}" class="text-sm font-medium text-gray-600 hover:text-blue-600 transition whitespace-nowrap">Log In</a>
+                                <a href="{{ route('student.register') }}" class="text-sm font-medium text-white bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700 transition shadow-sm whitespace-nowrap">Sign Up</a>
+                            </div>
+                        @endauth
                     </div>
                 </div>
             </div>

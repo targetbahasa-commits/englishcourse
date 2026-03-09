@@ -49,4 +49,12 @@ class Scholarship extends Model
     {
         return $this->belongsToMany(User::class, 'saved_scholarships', 'scholarship_id', 'user_id')->withTimestamps();
     }
+
+    /**
+     * Get the users who have targeted this scholarship.
+     */
+    public function targetedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'target_scholarships', 'scholarship_id', 'user_id')->withTimestamps();
+    }
 }

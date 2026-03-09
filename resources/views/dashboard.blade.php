@@ -104,43 +104,85 @@
                     </div>
                 </div>
 
-                <!-- Target Score & Recommendation -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <!-- Target Score & Scholarship Goal -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-full">
                     <div class="flex justify-between items-start mb-4">
-                        <span class="text-gray-500 text-sm font-semibold uppercase tracking-wider">Target & Plan</span>
+                        <span class="text-gray-500 text-sm font-semibold uppercase tracking-wider">Target & Goal</span>
                         <div class="p-2 bg-purple-50 text-purple-600 rounded-lg">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         </div>
                     </div>
-                    @if($targetScore)
-                        <div class="flex items-end gap-2 mb-3">
-                            <h3 class="text-3xl font-bold text-gray-800">{{ $targetScore + 0 }}</h3>
-                            <span class="text-sm text-gray-500 mb-1">Target Score</span>
+                    
+                    @if(isset($targetScholarship))
+                        <div class="mb-4">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Target Scholarship</h4>
+                            <p class="text-sm font-bold text-gray-800 line-clamp-1 mb-1" title="{{ $targetScholarship->title }}">
+                                {{ $targetScholarship->title }}
+                            </p>
+                            
+                            @if($targetScholarship->deadline)
+                                <div class="flex items-center gap-1.5 text-xs font-semibold text-gray-500 mt-2" x-data="countdown('{{ $targetScholarship->deadline->format('Y-m-d H:i:s') }}')">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span x-show="!expired" class="text-blue-600 bg-blue-50 px-1.5 rounded" x-text="days + ' days left'"></span>
+                                    <span x-show="expired" class="text-red-500 bg-red-50 px-1.5 rounded">Expired</span>
+                                </div>
+                                
+                                {{-- Dynamic Warning Logic --}}
+                                @php
+                                    $daysRemaining = now()->diffInDays($targetScholarship->deadline, false);
+                                    
+                                    $isEligible = true;
+                                    if ($predictedScore) {
+                                        $isIeltsProgram = $enrolledProgram && stripos($enrolledProgram->name, 'IELTS') !== false;
+                                        if($isIeltsProgram && $targetScholarship->min_ielts && $predictedScore < $targetScholarship->min_ielts) {
+                                            $isEligible = false;
+                                        } elseif(!$isIeltsProgram && $targetScholarship->min_toefl && $predictedScore < $targetScholarship->min_toefl) {
+                                            $isEligible = false;
+                                        }
+                                    } else {
+                                        $isEligible = false; // No predicted score yet
+                                    }
+                                @endphp
+                                
+                                @if($daysRemaining >= 0 && $daysRemaining <= 30 && !$isEligible)
+                                    <div class="mt-3 p-2 bg-red-50 border border-red-100 rounded-lg flex items-start">
+                                        <svg class="w-4 h-4 text-red-500 mr-2 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                        <p class="text-xs font-semibold text-red-700 leading-tight">
+                                            Waktu Pendaftaran Kurang dari 1 Bulan. Tingkatkan Intensitas Belajar Anda!
+                                        </p>
+                                    </div>
+                                @endif
+                                
+                            @else
+                                <p class="text-xs text-emerald-600 font-bold mt-1 bg-emerald-50 inline-block px-2 py-0.5 rounded">Always Open</p>
+                            @endif
                         </div>
                     @else
-                        <p class="text-sm text-gray-500 mb-4 italic">Take a test to see your target.</p>
-                    @endif
-                    
-                    @if(isset($predictedScore))
-                        <div class="mt-2 bg-blue-50 border border-blue-100 rounded-lg p-3 flex justify-between items-center">
-                            <span class="text-sm font-semibold text-blue-800">Predicted Score</span>
-                            <span class="text-lg font-bold text-blue-700">{{ $predictedScore }}</span>
-                        </div>
-                    @endif
-                    
-                    @if($recommendedProgram)
-                        <div class="mt-4 pt-4 border-t border-gray-50">
-                            <p class="text-xs text-gray-400 mb-1">Recommended for you:</p>
-                            <a href="{{ route('assignments.index') }}" class="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 group">
-                                {{ $recommendedProgram->name }}
-                                <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-500 italic mb-2">No scholarship target set yet.</p>
+                            <a href="{{ route('scholarships.search.index') }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 group">
+                                Find Scholarships
+                                <svg class="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                             </a>
                         </div>
-                    @else
-                        <div class="mt-4 pt-4 border-t border-gray-50">
-                            <a href="{{ route('assignments.index') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700">View Programs →</a>
-                        </div>
                     @endif
+                    
+                    <div class="mt-auto border-t border-gray-100 pt-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-gray-400 uppercase">Target Score</span>
+                            <span class="text-xs font-bold text-gray-400 uppercase">Predicted</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-2xl font-black text-gray-800">{{ $targetScore ? ($targetScore + 0) : '--' }}</h3>
+                            <h3 class="text-2xl font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100">{{ $predictedScore ?? '--' }}</h3>
+                        </div>
+                        
+                        @if($recommendedProgram && !$enrolledProgram)
+                            <div class="mt-3 text-right">
+                                <a href="{{ route('assignments.index') }}" class="text-[11px] font-bold text-blue-600 hover:underline">Recommended: {{ $recommendedProgram->name }} →</a>
+                            </div>
+                        @endif
+                    </div>
                 </div>
 
                 <!-- Assignment Progress -->
