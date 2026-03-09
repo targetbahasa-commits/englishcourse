@@ -129,7 +129,9 @@
                                     </div>
                                 @endif
                                 <div>
-                                    <div class="font-bold text-gray-900">{{ $teacher->name }}</div>
+                                    <div class="font-bold text-gray-900">
+                                        <a href="{{ route('teachers.show', $teacher) }}" class="hover:text-emerald-600 transition-colors">{{ $teacher->name }}</a>
+                                    </div>
                                     <div class="text-xs text-gray-500">{{ $teacher->email }}</div>
                                 </div>
                             </div>

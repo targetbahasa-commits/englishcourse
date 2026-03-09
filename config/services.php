@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    'whatsapp' => [
+        'gateway' => env('WHATSAPP_GATEWAY', 'fonnte'), // 'fonnte' or 'wablas'
+        'fonnte' => [
+            'token' => env('FONNTE_TOKEN'),
+        ],
+        'wablas' => [
+            'domain' => env('WABLAS_DOMAIN'),
+            'token' => env('WABLAS_TOKEN'),
+        ],
+    ],
+
 ];

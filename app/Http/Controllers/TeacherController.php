@@ -55,6 +55,35 @@ class TeacherController extends Controller
     }
 
     /**
+     * Display the specified teacher's profile.
+     */
+    public function show(User $teacher)
+    {
+        if ($teacher->role !== 'teacher') {
+            return redirect()->route('teachers.index')->with('error', 'The selected user is not a teacher.');
+        }
+
+        $teacher->load(['classes.students', 'students.program']);
+
+        // Fetch recent evaluations
+        $evaluations = \App\Models\TeacherEvaluation::where('teacher_id', $teacher->id)
+            ->with('student')
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get();
+            
+        $averageRating = \App\Models\TeacherEvaluation::where('teacher_id', $teacher->id)->avg('rating') ?? 4.8; // default if no ratings
+
+        // Get upcoming classes taught by this teacher
+        $upcomingClasses = \App\Models\ClassPeriod::where('teacher_id', $teacher->id)
+            ->whereIn('status', ['active', 'upcoming'])
+            ->withCount('users as students_count') // Alias the count so the view can still use 'students_count'
+            ->get();
+
+        return view('admin.teachers.show', compact('teacher', 'evaluations', 'averageRating', 'upcomingClasses'));
+    }
+
+    /**
      * Assign a private student to a teacher from the Quick Actions modal
      */
     public function assignStudent(Request $request)

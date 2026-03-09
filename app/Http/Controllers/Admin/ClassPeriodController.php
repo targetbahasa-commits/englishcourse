@@ -142,6 +142,16 @@ class ClassPeriodController extends Controller
         ]);
 
         $user = User::findOrFail($request->user_id);
+        
+        // Award referral points if this is the user's first time being assigned to a class
+        if (is_null($user->class_period_id) && $user->referred_by_id) {
+            $referrer = User::find($user->referred_by_id);
+            if ($referrer) {
+                // Award 50 points per successful referral
+                $referrer->increment('referral_points', 50);
+            }
+        }
+
         $user->update(['class_period_id' => $classPeriod->id]);
 
         return back()->with('success', 'Student assigned to class period.');

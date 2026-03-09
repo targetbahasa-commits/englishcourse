@@ -49,6 +49,37 @@ class StudentController extends Controller
     }
 
     /**
+     * Display the specified student's profile.
+     */
+    public function show(User $student)
+    {
+        if ($student->role !== 'student') {
+            return redirect()->route('students.index')->with('error', 'User is not a student.');
+        }
+
+        $student->load(['program', 'teacher', 'classPeriod.classMeetings', 'classes']);
+
+        // Fetch their recent activity
+        $recentActivity = \App\Models\MeetingScore::where('user_id', $student->id)
+            ->with('classMeeting.assignment')
+            ->orderByDesc('submitted_at')
+            ->limit(10)
+            ->get();
+
+        // Calculate progress stats
+        $totalAssignments = 20; // Assuming a standard 20-meeting course
+        $completedAssignments = \App\Models\MeetingScore::where('user_id', $student->id)->count();
+        $progressPercentage = $totalAssignments > 0 ? min(100, round(($completedAssignments / $totalAssignments) * 100)) : 0;
+        
+        $averageScore = \App\Models\MeetingScore::where('user_id', $student->id)->avg('score') ?? 0;
+        
+        // Latest Free Test
+        $latestTest = \App\Models\FreeTestResult::where('user_id', $student->id)->latest()->first();
+
+        return view('admin.students.show', compact('student', 'recentActivity', 'progressPercentage', 'completedAssignments', 'totalAssignments', 'averageScore', 'latestTest'));
+    }
+
+    /**
      * Reassign a student to a different teacher.
      */
     public function assignTeacher(Request $request, User $student)

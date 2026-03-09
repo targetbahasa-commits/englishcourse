@@ -145,7 +145,9 @@
                                         </div>
                                     </div>
                                     <div class="ml-4">
-                                        <div class="text-sm font-semibold text-gray-900">{{ $student->name }}</div>
+                                        <div class="text-sm font-semibold text-gray-900">
+                                            <a href="{{ route('students.show', $student) }}" class="hover:text-blue-600 transition-colors">{{ $student->name }}</a>
+                                        </div>
                                         <div class="text-xs text-gray-500 mt-0.5">{{ $student->email }}</div>
                                     </div>
                                 </div>

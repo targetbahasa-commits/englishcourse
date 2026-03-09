@@ -25,6 +25,11 @@ class User extends Authenticatable
         'password',
         'status',
         'profile_photo',
+        'profile_photo',
+        'referral_code',
+        'referral_points',
+        'referred_by_id',
+
         'class_period_id',
         'teacher_id',
         'program_id',
@@ -139,5 +144,37 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the user that referred this user.
+     */
+    public function referrer()
+    {
+        return $this->belongsTo(User::class, 'referred_by_id');
+    }
+
+    /**
+     * Get the users referred by this user.
+     */
+    public function referrals()
+    {
+        return $this->hasMany(User::class, 'referred_by_id');
+    }
+
+    /**
+     * Get the user's reward claims.
+     */
+    public function rewardClaims()
+    {
+        return $this->hasMany(UserRewardClaim::class);
+    }
+
+    /**
+     * Get the social media submissions made by this user.
+     */
+    public function socialMediaSubmissions()
+    {
+        return $this->hasMany(SocialMediaSubmission::class);
     }
 }

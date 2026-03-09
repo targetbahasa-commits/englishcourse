@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Auth\OtpController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -52,6 +54,9 @@ Route::get('/phrasal-verbs-level/{level}', [App\Http\Controllers\FreeLessonContr
 Route::get('/irregular-verbs', [App\Http\Controllers\FreeLessonController::class, 'irregularVerbs'])->name('irregular-verbs');
 Route::post('/free-lesson/progress', [App\Http\Controllers\FreeLessonController::class, 'saveProgress'])->name('free-lesson.progress');
 
+// Free Test Registration for Guests
+Route::get('/free-test/register/{type}', [App\Http\Controllers\GuestFreeTestController::class, 'showRegistrationForm'])->name('free-test.register.show');
+Route::post('/free-test/register/{type}', [App\Http\Controllers\GuestFreeTestController::class, 'registerAndStart'])->name('free-test.register.submit');
 
 Route::middleware([
     'auth',
@@ -63,6 +68,7 @@ Route::middleware([
     Route::get('/free-test/{type}', [App\Http\Controllers\FreeTestController::class, 'show'])->name('free-test.show');
     Route::post('/free-test/{type}/submit', [App\Http\Controllers\FreeTestController::class, 'submit'])->name('free-test.submit');
     Route::get('/free-test/result/{id}', [App\Http\Controllers\FreeTestController::class, 'result'])->name('free-test.result');
+    Route::get('/free-test/result/{id}/certificate', [App\Http\Controllers\FreeTestController::class, 'downloadCertificate'])->name('free-test.certificate.download');
     Route::get('/dashboard', function () {
         $user = auth()->user();
 
@@ -228,6 +234,11 @@ Route::middleware([
 
     // Sprint 6: Schedule
     Route::get('/schedule', [App\Http\Controllers\ScheduleController::class, 'index'])->name('student.schedule');
+
+    // Referral System
+    Route::get('/referrals', [App\Http\Controllers\ReferralController::class, 'index'])->name('student.referrals.index');
+    Route::post('/referrals/claim', [App\Http\Controllers\ReferralController::class, 'claim'])->name('student.referrals.claim');
+    Route::post('/referrals/social-submit', [App\Http\Controllers\ReferralController::class, 'submitSocialMedia'])->name('student.referrals.social.submit');
 
 
 
@@ -597,10 +608,27 @@ Route::middleware(['auth'])->group(function () {
     Route::put('admin/outreach-messages/{outreachMessage}', [App\Http\Controllers\Admin\OutreachMessageController::class, 'update'])->name('admin.outreach-messages.update')->middleware('role:admin');
     Route::delete('admin/outreach-messages/{outreachMessage}', [App\Http\Controllers\Admin\OutreachMessageController::class, 'destroy'])->name('admin.outreach-messages.destroy')->middleware('role:admin');
     
+    // Admin Referral Management
+    Route::get('/admin/referrals', [App\Http\Controllers\Admin\ReferralController::class, 'index'])->name('admin.referrals.index')->middleware('role:admin');
+    Route::put('/admin/referrals/claims/{id}', [App\Http\Controllers\Admin\ReferralController::class, 'updateClaim'])->name('admin.referrals.claims.update')->middleware('role:admin');
+    Route::post('/admin/referrals/rewards', [App\Http\Controllers\Admin\ReferralController::class, 'storeReward'])->name('admin.referrals.rewards.store')->middleware('role:admin');
+    Route::put('/admin/referrals/social/{id}', [App\Http\Controllers\Admin\ReferralController::class, 'updateSocialMedia'])->name('admin.referrals.social.update')->middleware('role:admin');
+    
+    // Admin Free Test Certificates
+    Route::get('/admin/free-test-certificates', [App\Http\Controllers\Admin\FreeTestCertificateController::class, 'index'])->name('admin.free-tests.certificates.index')->middleware('role:admin');
+    Route::put('/admin/free-test-certificates/{id}', [App\Http\Controllers\Admin\FreeTestCertificateController::class, 'update'])->name('admin.free-tests.certificates.update')->middleware('role:admin');
+    
     // System Settings
     Route::get('/admin/settings', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('admin.settings.index')->middleware('role:admin');
     Route::post('/admin/settings', [App\Http\Controllers\Admin\SettingController::class, 'update'])->name('admin.settings.update')->middleware('role:admin');
+
+    // Admin Scholarship Management
+    Route::resource('admin/scholarships', App\Http\Controllers\Admin\ScholarshipController::class)->names('admin.scholarships')->middleware('role:admin');
 });
+
+// OTP Routes for Registration
+Route::post('/otp/send', [OtpController::class, 'send'])->name('otp.send');
+Route::post('/otp/verify', [OtpController::class, 'verify'])->name('otp.verify');
 
 require __DIR__.'/auth.php';
 

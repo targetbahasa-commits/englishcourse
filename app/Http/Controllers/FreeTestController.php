@@ -77,4 +77,31 @@ class FreeTestController extends Controller
 
         return view('free-tests.result', compact('result', 'outreachMessage', 'recommendedProgram'));
     }
+
+    public function downloadCertificate($id)
+    {
+        $result = FreeTestResult::where('user_id', Auth::id())->findOrFail($id);
+        $certificate = \App\Models\FreeTestCertificate::where('test_type', $result->test_type)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$certificate) {
+            return back()->with('error', 'Sertifikat tidak tersedia untuk jenis ujian ini.');
+        }
+
+        // Define the variables to pass to the view
+        $data = [
+            'user' => Auth::user(),
+            'result' => $result,
+            'certificate' => $certificate,
+            'testName' => ucwords(str_replace('_', ' ', $result->test_type)),
+            'date' => $result->created_at->format('d F Y'),
+        ];
+
+        // Generate PDF using DOMPDF
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('free-tests.certificate-pdf', $data)
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('Sertifikat_' . str_replace(' ', '_', $data['testName']) . '_' . Auth::user()->name . '.pdf');
+    }
 }
