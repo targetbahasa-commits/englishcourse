@@ -34,5 +34,6 @@
             </main>
         </div>
         @include('components.student-broadcaster')
+        @stack('scripts')
     </body>
 </html>

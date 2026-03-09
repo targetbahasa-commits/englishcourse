@@ -261,6 +261,12 @@
                             </div>
                             <span class="font-medium text-gray-700">Broadcast Announcement</span>
                         </button>
+                        <a href="{{ route('admin.scholarships.create') }}" class="w-full flex items-center gap-3 p-3 bg-green-50 hover:bg-green-100 rounded-xl transition text-left">
+                            <div class="p-2 bg-green-100 text-green-600 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                            </div>
+                            <span class="font-medium text-gray-700">Add Scholarship</span>
+                        </a>
                     </div>
                 </div>
 
@@ -319,6 +325,49 @@
                             <p class="text-xs text-gray-400">Driver: {{ strtoupper($mailService) }}</p>
                         </div>
                     </div>
+                </div>
+
+                {{-- Scholarships Closing Soon --}}
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:col-span-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">Scholarships Closing Soon</h3>
+                        <a href="{{ route('admin.scholarships.index') }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">View All →</a>
+                    </div>
+                    @if(isset($closingSoonScholarships) && $closingSoonScholarships->isNotEmpty())
+                        <ul class="space-y-3 flex-1">
+                            @foreach($closingSoonScholarships as $s)
+                            <li class="flex items-start gap-3">
+                                <div class="mt-0.5 p-2 rounded-lg shrink-0
+                                    {{ $s->deadline->diffInDays(now()) <= 3 ? 'bg-red-100 text-red-500' : 'bg-amber-100 text-amber-500' }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-gray-800 truncate">{{ $s->title }}</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">
+                                        Closes {{ $s->deadline->format('d M Y') }}
+                                        <span class="
+                                            {{ $s->deadline->diffInDays(now()) <= 3 ? 'text-red-500 font-semibold' : 'text-amber-500' }}">
+                                            ({{ $s->deadline->diffForHumans() }})
+                                        </span>
+                                    </p>
+                                </div>
+                            </li>
+                            @endforeach
+                        </ul>
+                        <a href="{{ route('admin.scholarships.create') }}" class="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-50 hover:bg-green-100 text-green-700 text-sm font-medium rounded-xl transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                            Add New Scholarship
+                        </a>
+                    @else
+                        <div class="flex-1 flex flex-col items-center justify-center py-6 text-center">
+                            <svg class="w-10 h-10 text-gray-200 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p class="text-sm text-gray-400">No scholarships closing in the next 14 days.</p>
+                        </div>
+                        <a href="{{ route('admin.scholarships.create') }}" class="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-50 hover:bg-green-100 text-green-700 text-sm font-medium rounded-xl transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                            Add New Scholarship
+                        </a>
+                    @endif
                 </div>
             </div>
             @endif

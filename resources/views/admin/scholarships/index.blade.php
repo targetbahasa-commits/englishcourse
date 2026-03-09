@@ -16,6 +16,11 @@
 
         <!-- Right: Actions -->
         <div class="grid grid-flow-col sm:auto-cols-max justify-start sm:justify-end gap-2">
+            <!-- Import CSV button -->
+            <a href="{{ route('admin.scholarships.import.form') }}" class="btn bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg px-4 py-2 inline-flex items-center transition shadow-sm">
+                <svg class="w-4 h-4 opacity-60 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                <span class="ml-2 font-medium">Import CSV</span>
+            </a>
             <!-- Add button -->
             <a href="{{ route('admin.scholarships.create') }}" class="btn bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg px-4 py-2 inline-flex items-center transition">
                 <svg class="w-4 h-4 fill-current opacity-50 shrink-0" viewBox="0 0 16 16">
@@ -48,6 +53,7 @@
                         <th scope="col" class="px-6 py-4 font-semibold">Scholarship</th>
                         <th scope="col" class="px-6 py-4 font-semibold">Location</th>
                         <th scope="col" class="px-6 py-4 font-semibold">Level</th>
+                        <th scope="col" class="px-6 py-4 font-semibold">Min. IELTS / TOEFL</th>
                         <th scope="col" class="px-6 py-4 font-semibold">Deadline</th>
                         <th scope="col" class="px-6 py-4 font-semibold">Status</th>
                         <th scope="col" class="px-6 py-4 text-right font-semibold">Actions</th>
@@ -75,10 +81,36 @@
                                 {{ $scholarship->location }}
                             </td>
                             <td class="px-6 py-4">
-                                {{ $scholarship->level_of_study }}
+                                <span class="block">{{ $scholarship->level_of_study }}</span>
+                                @if($scholarship->requires_certification)
+                                    <span class="inline-flex mt-1 items-center px-2 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-800">
+                                        Cert. Req.
+                                    </span>
+                                @else
+                                    <span class="inline-flex mt-1 items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600">
+                                        No Cert. Req.
+                                    </span>
+                                @endif
+                            </td>
+                            <!-- Min Scores column -->
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col gap-1">
+                                    @if($scholarship->min_ielts)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-100 text-indigo-700">IELTS {{ number_format($scholarship->min_ielts, 1) }}+</span>
+                                    @endif
+                                    @if($scholarship->min_toefl)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-100 text-purple-700">TOEFL {{ $scholarship->min_toefl }}+</span>
+                                    @endif
+                                    @if(!$scholarship->min_ielts && !$scholarship->min_toefl)
+                                        <span class="text-xs text-gray-400">—</span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-4">
-                                {{ $scholarship->deadline->format('d M Y') }}
+                                @if($scholarship->opening_date)
+                                    <span class="block text-xs text-gray-500 mb-1">Opens: {{ $scholarship->opening_date->format('d M Y') }}</span>
+                                @endif
+                                <span class="font-medium text-gray-800">{{ $scholarship->deadline->format('d M Y') }}</span>
                                 @if($scholarship->deadline->isPast())
                                     <span class="block text-xs text-red-500 mt-1">Expired</span>
                                 @endif
@@ -94,8 +126,11 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-right">
-                                <a href="{{ route('admin.scholarships.edit', $scholarship) }}" class="text-indigo-600 hover:text-indigo-900 mx-2 transition">Edit</a>
+                            <td class="px-6 py-4 text-right whitespace-nowrap">
+                                @if($scholarship->min_ielts || $scholarship->min_toefl)
+                                    <a href="{{ route('admin.scholarships.match', $scholarship) }}" class="text-green-600 hover:text-green-800 mx-1 transition text-xs font-medium">Smart Match</a>
+                                @endif
+                                <a href="{{ route('admin.scholarships.edit', $scholarship) }}" class="text-indigo-600 hover:text-indigo-900 mx-1 transition">Edit</a>
                                 <form action="{{ route('admin.scholarships.destroy', $scholarship) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this scholarship?');">
                                     @csrf
                                     @method('DELETE')
@@ -105,7 +140,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="7" class="px-6 py-12 text-center text-gray-500">
                                 <div class="flex flex-col items-center justify-center">
                                     <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                                     <span class="text-gray-400">No scholarships found. Let's add one!</span>

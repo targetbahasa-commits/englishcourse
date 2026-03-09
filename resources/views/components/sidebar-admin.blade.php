@@ -1,7 +1,22 @@
 <!-- Admin Sidebar Component -->
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 4px;
+    }
+    .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+        background-color: #94a3b8;
+    }
+</style>
 <aside class="w-64 bg-white shadow-md fixed h-full z-10 hidden md:block">
     <div class="flex flex-col h-full">
-        <div class="flex-1 overflow-y-auto pb-4">
+        <div class="flex-1 overflow-y-auto custom-scrollbar pb-6">
         <div class="p-6 flex items-center gap-3">
             <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">TB</div>
             <span class="text-xl font-bold text-gray-800">Target Bahasa</span>

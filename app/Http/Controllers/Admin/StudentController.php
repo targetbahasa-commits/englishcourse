@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Program;
+use Illuminate\Support\Str;
 
 class StudentController extends Controller
 {
@@ -21,7 +22,8 @@ class StudentController extends Controller
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('email', 'like', "%{$request->search}%");
+                  ->orWhere('email', 'like', "%{$request->search}%")
+                  ->orWhere('phone_number', 'like', "%{$request->search}%");
             });
         }
 
@@ -30,22 +32,44 @@ class StudentController extends Controller
             $query->where('status', $request->status);
         }
 
+        // Missing data filter
+        if ($request->filled('missing')) {
+            if ($request->missing === 'whatsapp') {
+                $query->whereNull('phone_number')->orWhere('phone_number', '');
+            } elseif ($request->missing === 'referral') {
+                $query->whereNull('referral_code')->orWhere('referral_code', '');
+            } elseif ($request->missing === 'both') {
+                $query->where(function ($q) {
+                    $q->whereNull('phone_number')->orWhere('phone_number', ''); 
+                })->where(function ($q) {
+                    $q->whereNull('referral_code')->orWhere('referral_code', ''); 
+                });
+            }
+        }
+
         $students = $query->paginate(15)->withQueryString();
 
         // Pass teachers for the Assign Teacher modal
         $teachers = User::where('role', 'teacher')->where('status', 'active')->get();
 
-        // Calculate simple placeholder dummy metrics for the UI
-        $totalStudents = User::where('role', 'student')->count();
-        $activeStudents = User::where('role', 'student')->where('status', 'active')->count();
+        // Programs for quick edit
+        $programs = Program::orderBy('name')->get();
+
+        // Metrics
+        $totalStudents   = User::where('role', 'student')->count();
+        $activeStudents  = User::where('role', 'student')->where('status', 'active')->count();
+        $missingWa       = User::where('role', 'student')->where(function ($q) { $q->whereNull('phone_number')->orWhere('phone_number', ''); })->count();
+        $missingReferral = User::where('role', 'student')->where(function ($q) { $q->whereNull('referral_code')->orWhere('referral_code', ''); })->count();
 
         $metrics = [
-            'total_students' => $totalStudents,
-            'active_students' => $activeStudents,
-            'average_progress' => 65, // Dummy progress percentage
+            'total_students'    => $totalStudents,
+            'active_students'   => $activeStudents,
+            'missing_wa'        => $missingWa,
+            'missing_referral'  => $missingReferral,
+            'average_progress'  => 65,
         ];
 
-        return view('admin.students.index', compact('students', 'teachers', 'metrics'));
+        return view('admin.students.index', compact('students', 'teachers', 'programs', 'metrics'));
     }
 
     /**
@@ -103,5 +127,61 @@ class StudentController extends Controller
         $student->save();
 
         return back()->with('success', $message);
+    }
+
+    /**
+     * Quick inline update of phone_number and/or referral_code.
+     */
+    public function quickUpdate(Request $request, User $student)
+    {
+        $request->validate([
+            'phone_number'  => 'nullable|string|max:30',
+            'referral_code' => 'nullable|string|max:50|unique:users,referral_code,' . $student->id,
+        ]);
+
+        if ($request->filled('phone_number')) {
+            // Normalise: strip non-digits, then ensure starts with 62
+            $phone = preg_replace('/[^0-9]/', '', $request->phone_number);
+            if (str_starts_with($phone, '0')) {
+                $phone = '62' . substr($phone, 1);
+            }
+            $student->phone_number = $phone;
+        }
+
+        if ($request->filled('referral_code')) {
+            $student->referral_code = strtoupper($request->referral_code);
+        } elseif ($request->referral_code === '') {
+            // If explicitly sent empty, keep current OR generate one
+            if (!$student->referral_code) {
+                $student->referral_code = strtoupper(Str::random(8));
+            }
+        }
+
+        $student->save();
+
+        return back()->with('success', "Updated {$student->name}'s contact info successfully.");
+    }
+
+    /**
+     * Bulk auto-generate referral codes for students who don't have one.
+     */
+    public function bulkGenerateReferralCodes()
+    {
+        $students = User::where('role', 'student')
+            ->where(function ($q) { $q->whereNull('referral_code')->orWhere('referral_code', ''); })
+            ->get();
+
+        $updated = 0;
+        foreach ($students as $student) {
+            do {
+                $code = strtoupper(substr(preg_replace('/[^A-Z0-9]/', '', strtoupper($student->name)), 0, 3) . Str::random(5));
+            } while (User::where('referral_code', $code)->exists());
+
+            $student->referral_code = $code;
+            $student->save();
+            $updated++;
+        }
+
+        return back()->with('success', "Generated referral codes for {$updated} student(s).");
     }
 }

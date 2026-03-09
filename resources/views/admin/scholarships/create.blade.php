@@ -79,6 +79,23 @@
                         <input id="provider" name="provider" type="text" value="{{ old('provider') }}" required class="form-input w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm" placeholder="e.g., Ministry of Finance">
                     </div>
 
+                    <!-- Country -->
+                    <div>
+                        <label for="country" class="block text-sm font-medium text-gray-700 mb-1">Country Category</label>
+                        <select id="country" name="country" class="form-select w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm">
+                            <option value="">Select Region/Country</option>
+                            <option value="Indonesia" {{ old('country') == 'Indonesia' ? 'selected' : '' }}>Indonesia</option>
+                            <option value="UK" {{ old('country') == 'UK' ? 'selected' : '' }}>UK</option>
+                            <option value="USA" {{ old('country') == 'USA' ? 'selected' : '' }}>USA</option>
+                            <option value="Japan" {{ old('country') == 'Japan' ? 'selected' : '' }}>Japan</option>
+                            <option value="Australia" {{ old('country') == 'Australia' ? 'selected' : '' }}>Australia</option>
+                            <option value="Europe" {{ old('country') == 'Europe' ? 'selected' : '' }}>Europe (Other)</option>
+                            <option value="Asia" {{ old('country') == 'Asia' ? 'selected' : '' }}>Asia (Other)</option>
+                            <option value="Global/Online" {{ old('country') == 'Global/Online' ? 'selected' : '' }}>Global / Online</option>
+                            <option value="Others" {{ old('country') == 'Others' ? 'selected' : '' }}>Others</option>
+                        </select>
+                    </div>
+
                     <!-- Location -->
                     <div>
                         <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Study Location (Country/Region) <span class="text-red-500">*</span></label>
@@ -89,6 +106,12 @@
                     <div>
                         <label for="level_of_study" class="block text-sm font-medium text-gray-700 mb-1">Level of Study <span class="text-red-500">*</span></label>
                         <input id="level_of_study" name="level_of_study" type="text" value="{{ old('level_of_study') }}" required class="form-input w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm" placeholder="e.g., S1, S2, S3, Short Course">
+                    </div>
+
+                    <!-- Opening Date -->
+                    <div>
+                        <label for="opening_date" class="block text-sm font-medium text-gray-700 mb-1">Opening Date <span class="text-gray-400">(Optional)</span></label>
+                        <input id="opening_date" name="opening_date" type="date" value="{{ old('opening_date') }}" class="form-input w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm">
                     </div>
 
                     <!-- Deadline -->
@@ -122,12 +145,41 @@
                     <textarea id="benefits" name="benefits" rows="4" required class="form-textarea w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm" placeholder="What does it cover? (e.g., Tuition, Living Allowance)...">{{ old('benefits') }}</textarea>
                 </div>
 
-                <!-- Active Status -->
-                <div class="flex items-center mt-4">
-                    <input id="is_active" name="is_active" type="checkbox" value="1" {{ old('is_active', true) ? 'checked' : '' }} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                    <label for="is_active" class="ml-2 block text-sm text-gray-900 font-medium">
-                        Publish immediately (Visible to students)
-                    </label>
+                <div class="space-y-4 mt-6 p-6 bg-gray-50 rounded-xl border border-gray-200">
+                    <h4 class="text-base font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2">Academic & System Settings</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                        <!-- Min IELTS -->
+                        <div>
+                            <label for="min_ielts" class="block text-sm font-medium text-gray-700 mb-1">Min. IELTS Score</label>
+                            <input id="min_ielts" name="min_ielts" type="number" step="0.5" min="0" max="9" value="{{ old('min_ielts') }}" class="form-input w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm" placeholder="e.g., 6.5">
+                            <p class="text-xs text-gray-500 mt-1">Used for Smart Matching with students.</p>
+                        </div>
+                        
+                        <!-- Min. TOEFL -->
+                        <div>
+                            <label for="min_toefl" class="block text-sm font-medium text-gray-700 mb-1">Min. TOEFL ITP Score</label>
+                            <input id="min_toefl" name="min_toefl" type="number" step="1" min="0" max="677" value="{{ old('min_toefl') }}" class="form-input w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm" placeholder="e.g., 550">
+                            <p class="text-xs text-gray-500 mt-1">Used for Smart Matching with students.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4 border-t border-gray-200 space-y-3">
+                        <!-- Requires Certification -->
+                    <div class="flex items-center">
+                        <input id="requires_certification" name="requires_certification" type="checkbox" value="1" {{ old('requires_certification', true) ? 'checked' : '' }} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="requires_certification" class="ml-2 block text-sm text-gray-900 font-medium">
+                            Requires English Certification (IELTS, TOEFL, etc.)
+                        </label>
+                    </div>
+
+                    <!-- Active Status -->
+                    <div class="flex items-center">
+                        <input id="is_active" name="is_active" type="checkbox" value="1" {{ old('is_active', true) ? 'checked' : '' }} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="is_active" class="ml-2 block text-sm text-gray-900 font-medium">
+                            Publish immediately (Visible to students)
+                        </label>
+                    </div>
                 </div>
             </div>
 

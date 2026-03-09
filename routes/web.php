@@ -14,6 +14,10 @@ Route::get('/', function () {
 // Guest Portal (Free Tests & Lessons)
 Route::get('/free-tests', [App\Http\Controllers\GuestController::class, 'index'])->name('guest.free-tests');
 
+// Public Scholarship Search Routes
+Route::get('/scholarships-search', [App\Http\Controllers\ScholarshipSearchController::class, 'index'])->name('scholarships.search.index');
+Route::get('/scholarships-search/{scholarship}', [App\Http\Controllers\ScholarshipSearchController::class, 'show'])->name('scholarships.search.show')->whereNumber('scholarship');
+
 // Free Lesson Routes (Public Access)
 Route::get('/free-lesson', [App\Http\Controllers\FreeLessonController::class, 'index'])->name('free-lesson');
 Route::get('/vocabulary-a1', [App\Http\Controllers\FreeLessonController::class, 'vocabularyA1'])->name('vocabulary-a1');
@@ -69,6 +73,10 @@ Route::middleware([
     Route::post('/free-test/{type}/submit', [App\Http\Controllers\FreeTestController::class, 'submit'])->name('free-test.submit');
     Route::get('/free-test/result/{id}', [App\Http\Controllers\FreeTestController::class, 'result'])->name('free-test.result');
     Route::get('/free-test/result/{id}/certificate', [App\Http\Controllers\FreeTestController::class, 'downloadCertificate'])->name('free-test.certificate.download');
+    
+    // Bookmark Scholarship Route
+    Route::post('/scholarships-search/{scholarship}/save', [App\Http\Controllers\ScholarshipSearchController::class, 'toggleSave'])->name('scholarships.search.save');
+
     Route::get('/dashboard', function () {
         $user = auth()->user();
 
@@ -253,8 +261,11 @@ Route::middleware([
 });
 
 Route::middleware(['auth'])->group(function () {
+    // Scholarships Routes
+    Route::get('/scholarships', [App\Http\Controllers\ScholarshipController::class, 'index'])->name('scholarships.index');
+    Route::get('/scholarships/{scholarship}', [App\Http\Controllers\ScholarshipController::class, 'show'])->name('scholarships.show');
+
     Route::get('/assignments', [App\Http\Controllers\AssignmentController::class, 'index'])->name('assignments.index');
-    
     // Cleanup Route (Temporary) - Outside this block in next step or just accessed via browser tool logged in?
     // Actually, I'll just remove it from here and put it at the top of the file in a separate replace call if needed, 
     // but the tool allows me to just replace this block.
@@ -531,6 +542,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Admin Students Management
     Route::post('/admin/students/{student}/assign-teacher', [App\Http\Controllers\Admin\StudentController::class, 'assignTeacher'])->name('admin.students.assign_teacher')->middleware('role:admin');
+    Route::post('/admin/students/{student}/quick-update', [App\Http\Controllers\Admin\StudentController::class, 'quickUpdate'])->name('admin.students.quick_update')->middleware('role:admin');
+    Route::post('/admin/students/bulk-generate-referral-codes', [App\Http\Controllers\Admin\StudentController::class, 'bulkGenerateReferralCodes'])->name('admin.students.bulk_generate_referral')->middleware('role:admin');
     Route::resource('admin/students', App\Http\Controllers\Admin\StudentController::class)->names('students')->middleware('role:admin');
 
     Route::get('/admin', [App\Http\Controllers\AdminController::class, 'index'])->name('admin.dashboard')->middleware('role:admin');
@@ -624,6 +637,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Admin Scholarship Management
     Route::resource('admin/scholarships', App\Http\Controllers\Admin\ScholarshipController::class)->names('admin.scholarships')->middleware('role:admin');
+    Route::get('admin/scholarships-import', [App\Http\Controllers\Admin\ScholarshipController::class, 'importForm'])->name('admin.scholarships.import.form')->middleware('role:admin');
+    Route::post('admin/scholarships-import', [App\Http\Controllers\Admin\ScholarshipController::class, 'importProcess'])->name('admin.scholarships.import.process')->middleware('role:admin');
+    Route::get('admin/scholarships/{scholarship}/match', [App\Http\Controllers\Admin\ScholarshipController::class, 'smartMatch'])->name('admin.scholarships.match')->middleware('role:admin');
 });
 
 // OTP Routes for Registration

@@ -104,6 +104,16 @@
                     </button>
                     
                     <div class="flex items-center gap-3">
+                        <div class="bg-white border border-gray-100 rounded-xl shadow-sm px-4 py-2 hidden lg:flex items-center gap-3 mr-2">
+                            <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Academic Calendar</p>
+                                <p class="text-sm font-bold text-gray-800 leading-none">{{ now()->format('F Y') }}</p>
+                            </div>
+                        </div>
+
                         <div class="text-right hidden md:block">
                             <p class="text-sm font-bold text-gray-800">{{ Auth::user()->name }}</p>
                             <p class="text-xs text-gray-500">{{ ucfirst(Auth::user()->role) }}</p>

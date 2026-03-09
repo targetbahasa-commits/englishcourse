@@ -177,4 +177,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(SocialMediaSubmission::class);
     }
+
+    /**
+     * Get the free test results for this user.
+     */
+    public function freeTestResults()
+    {
+        return $this->hasMany(FreeTestResult::class);
+    }
+
+    /**
+     * Get the scholarships saved by the user.
+     */
+    public function savedScholarships()
+    {
+        return $this->belongsToMany(Scholarship::class, 'saved_scholarships', 'user_id', 'scholarship_id')->withTimestamps();
+    }
 }
