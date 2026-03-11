@@ -33,6 +33,7 @@ class GuestFreeTestController extends Controller
         }
 
         $request->validate([
+            'cf-turnstile-response' => ['required', new \App\Rules\Turnstile()],
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255',
             'phone_number' => 'required|string|max:20',
@@ -48,7 +49,7 @@ class GuestFreeTestController extends Controller
                 'email' => $request->email,
                 'phone_number' => $request->phone_number,
                 'password' => Hash::make(Str::random(12)), // Generate a random secure password
-                'role' => 'student',
+                'role' => 'guest',
             ]);
         } else {
             // Optional: update phone number or name if missing, 

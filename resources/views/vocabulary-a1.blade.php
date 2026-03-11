@@ -52,9 +52,13 @@
                 @include('components.sidebar-admin')
             @elseif(Auth::user()->isTeacher())
                 @include('components.sidebar-teacher')
+            @elseif(Auth::user()->role === 'guest')
+                @include('components.sidebar-guest')
             @else
                 @include('components.sidebar-student')
             @endif
+        @else
+            @include('components.sidebar-guest')
         @endauth
 
         <!-- Main Content -->

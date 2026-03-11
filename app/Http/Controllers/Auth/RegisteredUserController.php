@@ -47,21 +47,26 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
+            'cf-turnstile-response' => ['required', new \App\Rules\Turnstile()],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => ['nullable', 'string', 'in:student,teacher'],
-            'phone_number' => ['required', 'string', 'max:20'],
+            'role' => ['nullable', 'string', 'in:student,teacher,guest'],
+            'phone_number' => ['nullable', 'string', 'max:20'],
             'referral_code' => ['nullable', 'string', 'exists:users,referral_code'],
         ]);
 
-        // Check if phone number is verified
-        $otpRecord = \App\Models\Otp::where('phone_number', $request->phone_number)
-            ->where('is_verified', true)
-            ->first();
+        // Require OTP verification only for non-guest roles
+        if ($request->role !== 'guest') {
+            $request->validate(['phone_number' => ['required']]);
+            
+            $otpRecord = \App\Models\Otp::where('phone_number', $request->phone_number)
+                ->where('is_verified', true)
+                ->first();
 
-        if (!$otpRecord) {
-            return back()->withInput()->withErrors(['phone_number' => 'Please verify your WhatsApp number with an OTP first.']);
+            if (!$otpRecord) {
+                return back()->withInput()->withErrors(['phone_number' => 'Please verify your WhatsApp number with an OTP first.']);
+            }
         }
 
         $referredBy = null;

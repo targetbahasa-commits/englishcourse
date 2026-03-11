@@ -88,22 +88,57 @@ $freeLessons = [
 @endphp
 
 <!-- Hero Section -->
-<div class="relative bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-12 overflow-hidden border border-gray-100/50">
-    <!-- Decorative Elements -->
-    <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
-        <div class="absolute -top-[20%] -right-[10%] w-[50%] h-[140%] rounded-full bg-gradient-to-br from-blue-50/50 to-purple-50/50 blur-3xl transform rotate-12"></div>
-        <div class="absolute -bottom-[20%] -left-[10%] w-[40%] h-[120%] rounded-full bg-gradient-to-tr from-green-50/50 to-blue-50/50 blur-3xl transform -rotate-12"></div>
-    </div>
+<div x-data="{
+        currentSlide: 0,
+        images: [
+            'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80&w=2070', // Oxford/Campus path
+            'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?auto=format&fit=crop&q=80&w=2070', // Library
+            'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=2070', // Graduates on campus
+            'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?auto=format&fit=crop&q=80&w=2074'  // Classic architecture
+        ],
+        init() {
+            setInterval(() => {
+                this.currentSlide = (this.currentSlide + 1) % this.images.length;
+            }, 6000);
+        }
+    }" 
+    class="relative bg-gray-900 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.15)] mb-12 overflow-hidden border border-gray-800">
     
-    <div class="relative z-10 px-6 py-20 md:py-24 text-center max-w-4xl mx-auto">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-600 border border-blue-100 mb-6 uppercase tracking-wider">
+    <!-- Slideshow Backgrounds -->
+    <div 
+        class="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ease-in-out z-0"
+        style="background-image: url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80&w=2070')"
+        :class="currentSlide === 0 ? 'opacity-40' : 'opacity-0'" 
+    ></div>
+    <div 
+        class="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ease-in-out z-0"
+        style="background-image: url('https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?auto=format&fit=crop&q=80&w=2070')"
+        :class="currentSlide === 1 ? 'opacity-40' : 'opacity-0'" 
+    ></div>
+    <div 
+        class="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ease-in-out z-0"
+        style="background-image: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=2070')"
+        :class="currentSlide === 2 ? 'opacity-40' : 'opacity-0'" 
+    ></div>
+    <div 
+        class="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ease-in-out z-0"
+        style="background-image: url('https://images.unsplash.com/photo-1629532599283-7d5eb1d2b70f?auto=format&fit=crop&q=80&w=2070')"
+        :class="currentSlide === 3 ? 'opacity-40' : 'opacity-0'" 
+    ></div>
+    
+    <!-- Gradient Overlay for enhanced readability -->
+    <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent z-10"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-gray-900/60 via-transparent to-transparent z-10"></div>
+    
+    <div class="relative z-20 px-6 py-20 md:py-24 text-center max-w-4xl mx-auto">
+        <span class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-white/20 text-white border border-white/30 backdrop-blur-md mb-6 uppercase tracking-wider shadow-lg">
             Target Bahasa Course
         </span>
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6">
-            <span class="block text-gray-900 mb-2">Uji Kemampuan Bahasa Inggrismu</span>
-            <span class="block bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent pb-2">Secara Gratis!</span>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 drop-shadow-2xl">
+            <span class="block text-white mb-2">Uji Kemampuan Bahasa Inggrismu</span>
+            <span class="block bg-gradient-to-r from-blue-300 via-indigo-300 to-purple-300 bg-clip-text text-transparent pb-2 drop-shadow-lg">Secara Gratis!</span>
         </h1>
-        <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-500 leading-relaxed font-medium">
+        <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-200 leading-relaxed font-medium drop-shadow-md">
             Ketahui estimasi skormu sebelum mengambil tes resmi atau pelajari materi dasar secara cuma-cuma. Pilih jenis layanan di bawah ini dan mulai tingkatkan kemampuanmu sekarang.
         </p>
     </div>
@@ -308,112 +343,4 @@ $freeLessons = [
     </div>
 </div>
 
-<!-- Free Lessons Section -->
-<div>
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-4 border-b border-gray-100">
-        <div>
-            <h2 class="text-3xl font-bold text-gray-900 mb-2 tracking-tight">Free Mini Lessons</h2>
-            <p class="text-gray-500 text-lg">Materi gratis step-by-step untuk memperkuat fondasi bahasa Inggris kamu.</p>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        @foreach($freeLessons as $lesson)
-            @php
-                $colorClasses = [
-                    'blue' => [
-                        'bg' => 'bg-blue-50', 
-                        'text' => 'text-blue-600', 
-                        'border' => 'border-blue-100 hover:border-blue-300',
-                        'icon_bg' => 'bg-blue-100/50',
-                        'btn' => 'bg-blue-600 hover:bg-blue-700'
-                    ],
-                    'green' => [
-                        'bg' => 'bg-emerald-50', 
-                        'text' => 'text-emerald-600', 
-                        'border' => 'border-emerald-100 hover:border-emerald-300',
-                        'icon_bg' => 'bg-emerald-100/50',
-                        'btn' => 'bg-emerald-600 hover:bg-emerald-700'
-                    ],
-                    'purple' => [
-                        'bg' => 'bg-purple-50', 
-                        'text' => 'text-purple-600', 
-                        'border' => 'border-purple-100 hover:border-purple-300',
-                        'icon_bg' => 'bg-purple-100/50',
-                        'btn' => 'bg-purple-600 hover:bg-purple-700'
-                    ],
-                    'orange' => [
-                        'bg' => 'bg-orange-50', 
-                        'text' => 'text-orange-600', 
-                        'border' => 'border-orange-100 hover:border-orange-300',
-                        'icon_bg' => 'bg-orange-100/50',
-                        'btn' => 'bg-orange-600 hover:bg-orange-700'
-                    ],
-                    'red' => [
-                        'bg' => 'bg-rose-50', 
-                        'text' => 'text-rose-600', 
-                        'border' => 'border-rose-100 hover:border-rose-300',
-                        'icon_bg' => 'bg-rose-100/50',
-                        'btn' => 'bg-rose-600 hover:bg-rose-700'
-                    ],
-                    'teal' => [
-                        'bg' => 'bg-teal-50', 
-                        'text' => 'text-teal-600', 
-                        'border' => 'border-teal-100 hover:border-teal-300',
-                        'icon_bg' => 'bg-teal-100/50',
-                        'btn' => 'bg-teal-600 hover:bg-teal-700'
-                    ],
-                    'indigo' => [
-                        'bg' => 'bg-indigo-50', 
-                        'text' => 'text-indigo-600', 
-                        'border' => 'border-indigo-100 hover:border-indigo-300',
-                        'icon_bg' => 'bg-indigo-100/50',
-                        'btn' => 'bg-indigo-600 hover:bg-indigo-700'
-                    ],
-                    'pink' => [
-                        'bg' => 'bg-pink-50', 
-                        'text' => 'text-pink-600', 
-                        'border' => 'border-pink-100 hover:border-pink-300',
-                        'icon_bg' => 'bg-pink-100/50',
-                        'btn' => 'bg-pink-600 hover:bg-pink-700'
-                    ],
-                    'yellow' => [
-                        'bg' => 'bg-amber-50', 
-                        'text' => 'text-amber-600', 
-                        'border' => 'border-amber-100 hover:border-amber-300',
-                        'icon_bg' => 'bg-amber-100/50',
-                        'btn' => 'bg-amber-500 hover:bg-amber-600'
-                    ],
-                    'cyan' => [
-                        'bg' => 'bg-cyan-50', 
-                        'text' => 'text-cyan-600', 
-                        'border' => 'border-cyan-100 hover:border-cyan-300',
-                        'icon_bg' => 'bg-cyan-100/50',
-                        'btn' => 'bg-cyan-600 hover:bg-cyan-700'
-                    ],
-                ];
-                $colors = $colorClasses[$lesson['color']] ?? $colorClasses['blue'];
-            @endphp
-            
-            <a href="{{ $lesson['route'] }}" class="group bg-white rounded-2xl p-6 border {{ $colors['border'] }} hover:shadow-lg transition-all duration-300 flex flex-col h-full transform hover:-translate-y-1">
-                <div class="flex items-start justify-between mb-4">
-                    <div class="w-12 h-12 rounded-xl {{ $colors['bg'] }} {{ $colors['text'] }} flex items-center justify-center font-bold text-lg shadow-sm border {{ $colors['border'] }}">
-                        {{ substr($lesson['title'], 0, 1) }}
-                    </div>
-                    <div class="w-8 h-8 rounded-full {{ $colors['icon_bg'] }} {{ $colors['text'] }} flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg class="w-4 h-4" transform="rotate(-45)" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                    </div>
-                </div>
-                
-                <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover:{{ $colors['text'] }} transition-colors">{{ $lesson['title'] }}</h3>
-                <p class="text-gray-500 text-sm leading-relaxed mb-6">{{ $lesson['description'] }}</p>
-                
-                <div class="mt-auto flex items-center gap-2 text-sm font-semibold {{ $colors['text'] }}">
-                    Belajar Sekarang
-                    <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                </div>
-            </a>
-        @endforeach
-    </div>
-</div>
 

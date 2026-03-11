@@ -1,4 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
+
+@section('pageTitle', strtoupper(str_replace('_', ' ', $result->test_type)) . ' Free Simulation Result')
 
 @section('content')
 {{-- Print Stylesheet --}}

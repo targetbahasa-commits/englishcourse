@@ -1,4 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
+
+@section('pageTitle', strtoupper(str_replace('_', ' ', $type)) . ' Free Simulation')
 
 @section('content')
 <div class="py-12">

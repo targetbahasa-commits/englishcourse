@@ -14,9 +14,18 @@ Route::get('/', function () {
 // Guest Portal (Free Tests & Lessons)
 Route::get('/free-tests', [App\Http\Controllers\GuestController::class, 'index'])->name('guest.free-tests');
 
+// Authenticated Guest Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/guest/my-english', [App\Http\Controllers\GuestController::class, 'myEnglish'])->name('guest.my-english');
+});
+
 // Public Scholarship Search Routes
 Route::get('/scholarships-search', [App\Http\Controllers\ScholarshipSearchController::class, 'index'])->name('scholarships.search.index');
 Route::get('/scholarships-search/{scholarship}', [App\Http\Controllers\ScholarshipSearchController::class, 'show'])->name('scholarships.search.show')->whereNumber('scholarship');
+
+// Overseas Job Vacancies Public Routes
+Route::get('/overseas-jobs', [App\Http\Controllers\JobVacancySearchController::class, 'index'])->name('overseas-jobs.index');
+Route::get('/overseas-jobs/{jobVacancy}', [App\Http\Controllers\JobVacancySearchController::class, 'show'])->name('overseas-jobs.show')->whereNumber('jobVacancy');
 
 // Free Lesson Routes (Public Access)
 Route::get('/free-lesson', [App\Http\Controllers\FreeLessonController::class, 'index'])->name('free-lesson');
@@ -93,9 +102,9 @@ Route::middleware([
             return redirect()->route('teacher.dashboard');
         }
 
-        // If the user is a guest, direct them to the free tests dashboard layout.
+        // If the user is a guest, direct them to the free tests page.
         if ($user->role === 'guest') {
-            return redirect()->route('dashboard', ['section' => 'guest_free_tests']);
+            return redirect()->route('guest.free-tests');
         }
 
         // 1. Progress Stats
@@ -648,6 +657,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('admin/scholarships-import', [App\Http\Controllers\Admin\ScholarshipController::class, 'importForm'])->name('admin.scholarships.import.form')->middleware('role:admin');
     Route::post('admin/scholarships-import', [App\Http\Controllers\Admin\ScholarshipController::class, 'importProcess'])->name('admin.scholarships.import.process')->middleware('role:admin');
     Route::get('admin/scholarships/{scholarship}/match', [App\Http\Controllers\Admin\ScholarshipController::class, 'smartMatch'])->name('admin.scholarships.match')->middleware('role:admin');
+
+    // Admin Scholarship News Management
+    Route::resource('admin/scholarship-news', App\Http\Controllers\Admin\ScholarshipNewsController::class)->names('admin.scholarship-news')->middleware('role:admin');
+
+    // Admin Job Vacancies Management
+    Route::resource('admin/job-vacancies', App\Http\Controllers\Admin\JobVacancyController::class)->names('admin.job-vacancies')->middleware('role:admin');
 });
 
 // OTP Routes for Registration

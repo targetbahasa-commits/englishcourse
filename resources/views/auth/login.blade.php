@@ -233,7 +233,7 @@
                     <!-- Login Link -->
                     <p class="text-center text-sm text-gray-600 pt-6 border-t border-gray-100">
                         Already have a guest account? 
-                        <a href="{{ route('student.login') }}" class="font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-all">
+                        <a href="{{ route('guest.login') }}" class="font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-all">
                             Log in here
                         </a>
                     </p>

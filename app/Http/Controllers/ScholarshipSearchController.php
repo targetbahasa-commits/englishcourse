@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Scholarship;
+use App\Models\ScholarshipNews;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -86,8 +87,14 @@ class ScholarshipSearchController extends Controller
             $savedScholarshipIds = Auth::user()->savedScholarships()->pluck('scholarships.id')->toArray();
         }
 
+        // Latest scholarship news from DB
+        $latestNews = ScholarshipNews::where('is_active', true)
+            ->latest('published_at')
+            ->take(3)
+            ->get();
+
         return view('scholarships.index', compact(
-            'scholarships', 'countries', 'degreeLevels', 'fundingTypes', 'majors', 'predictedScore', 'savedScholarshipIds'
+            'scholarships', 'countries', 'degreeLevels', 'fundingTypes', 'majors', 'predictedScore', 'savedScholarshipIds', 'latestNews'
         ));
     }
 

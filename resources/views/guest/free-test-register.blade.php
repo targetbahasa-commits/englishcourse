@@ -66,6 +66,8 @@
                     </div>
                 </div>
 
+                <x-turnstile />
+
                 <div class="pt-2">
                     <button type="submit" class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors transform hover:-translate-y-0.5">
                         Lanjut & Mulai Tes <span class="ml-2">→</span>

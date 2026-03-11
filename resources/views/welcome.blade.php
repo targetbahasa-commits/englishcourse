@@ -78,27 +78,7 @@
                     <p class="text-gray-600 dark:text-gray-300 mt-2 font-medium">Please select your designated role to continue</p>
                 </div>
 
-                <div class="space-y-4">
-                    <!-- Admin -->
-                    <div class="group relative px-6 py-5 bg-white/60 dark:bg-gray-800/60 rounded-2xl border border-white/50 dark:border-gray-700/50 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 shadow-sm hover:shadow-md">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-4">
-                                <div class="p-3 bg-gradient-to-br from-rose-100 to-red-100 dark:from-rose-500/20 dark:to-red-500/20 rounded-xl text-rose-600 dark:text-rose-400 shadow-inner">
-                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Administrator</h3>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">System management & oversight</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex gap-3">
-                            <a href="{{ route('login') }}" class="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-all transform active:scale-95">
-                                Sign In
-                                <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                            </a>
-                        </div>
-                    </div>
+                    <!-- Admin section was deliberately removed to hide it from public view -->
 
                     <!-- Teacher -->
                     <div x-data="{ teacherCopied: false }" class="group relative px-6 py-5 bg-white/60 dark:bg-gray-800/60 rounded-2xl border border-white/50 dark:border-gray-700/50 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 shadow-sm hover:shadow-md">
@@ -123,9 +103,6 @@
                         <div class="flex gap-3">
                             <a href="{{ route('teacher.login') }}" class="w-full flex justify-center py-2.5 px-4 rounded-xl shadow-sm text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform active:scale-95">
                                 Sign In
-                            </a>
-                            <a href="{{ route('teacher.register') }}" class="w-full flex justify-center py-2.5 px-4 border-2 border-indigo-100 dark:border-gray-600 rounded-xl shadow-sm text-sm font-bold text-indigo-700 dark:text-gray-200 bg-white/50 dark:bg-gray-700 hover:bg-indigo-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform active:scale-95">
-                                Register
                             </a>
                         </div>
                     </div>
@@ -172,8 +149,8 @@
                                     <p class="text-xs text-gray-500 dark:text-gray-400">View access</p>
                                 </div>
                             </div>
-                            <!-- Copy Link Button for Guest (using generic login route for now) -->
-                            <button @click="navigator.clipboard.writeText('{{ route('login') }}'); guestCopied = true; setTimeout(() => guestCopied = false, 2000)" 
+                            <!-- Copy Link Button for Guest -->
+                            <button @click="navigator.clipboard.writeText('{{ route('guest.login') }}'); guestCopied = true; setTimeout(() => guestCopied = false, 2000)" 
                                     class="p-2 text-amber-500 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-800/50 rounded-lg transition-colors" 
                                     title="Copy Guest Login Link">
                                 <svg x-show="!guestCopied" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
@@ -181,8 +158,11 @@
                             </button>
                         </div>
                         <div class="flex gap-3">
-                            <a href="{{ route('login') }}" class="w-full flex justify-center py-2.5 px-4 rounded-xl shadow-sm text-sm font-bold text-white bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-all transform active:scale-95">
-                                Login as Guest
+                            <a href="{{ route('guest.login') }}" class="w-full flex justify-center py-2.5 px-4 rounded-xl shadow-sm text-sm font-bold text-white bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-all transform active:scale-95">
+                                Sign In
+                            </a>
+                            <a href="{{ route('login') }}" class="w-full flex justify-center py-2.5 px-4 border-2 border-amber-100 dark:border-gray-600 rounded-xl shadow-sm text-sm font-bold text-amber-700 dark:text-gray-200 bg-white/50 dark:bg-gray-700 hover:bg-amber-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-all transform active:scale-95">
+                                Register
                             </a>
                         </div>
                     </div>

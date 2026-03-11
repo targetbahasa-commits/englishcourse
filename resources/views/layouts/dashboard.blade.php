@@ -25,13 +25,17 @@
                 @include('components.sidebar-admin')
             @elseif(Auth::user()->isTeacher())
                 @include('components.sidebar-teacher')
+            @elseif(Auth::user()->role === 'guest')
+                @include('components.sidebar-guest')
             @else
                 @include('components.sidebar-student')
             @endif
+        @else
+            @include('components.sidebar-guest')
         @endauth
 
         <!-- Main Content -->
-        <main class="flex-1 {{ Auth::check() ? 'md:ml-64' : '' }} p-4 md:p-8">
+        <main class="flex-1 md:ml-64 p-4 md:p-8">
             <!-- Topbar -->
             <div class="flex justify-between items-center mb-8">
                 <div>
@@ -100,7 +104,8 @@
                     </div>
                 @endif
 
-                {{ $slot }}
+                {{ $slot ?? '' }}
+                @yield('content')
             </div>
         </main>
     </div>

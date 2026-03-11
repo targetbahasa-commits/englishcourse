@@ -92,7 +92,7 @@
             <div class="w-full max-w-md mt-16 lg:mt-0">
                 <!-- Header -->
                 <div class="mb-10 text-center lg:text-left">
-                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Welcome Back! 👋</h2>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Welcome Back!</h2>
                     <p class="text-gray-500 text-sm">Please sign in to your student account.</p>
                 </div>
 
@@ -143,6 +143,9 @@
                         <label for="remember_me" class="ml-2 text-sm font-medium text-gray-600 cursor-pointer select-none">Remember me for 30 days</label>
                     </div>
 
+                    <x-turnstile />
+                    <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2 text-sm text-red-500 text-center" />
+
                     <!-- Submit Button -->
                     <button type="submit" class="w-full relative py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 focus:outline-none focus:ring-4 focus:ring-blue-600/20 active:scale-[0.98] transition-all duration-300 group overflow-hidden">
                         <span class="relative z-10 flex items-center justify-center gap-2">
@@ -156,7 +159,7 @@
                     <!-- Register Link -->
                     <p class="text-center text-sm text-gray-600 mt-8">
                         Don't have an account? 
-                        <a href="{{ route('login') }}" class="font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-all">
+                        <a href="{{ route('student.register') }}" class="font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-all">
                             Register now
                         </a>
                     </p>

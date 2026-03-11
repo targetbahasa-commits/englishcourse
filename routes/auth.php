@@ -16,12 +16,25 @@ Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
-    Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::post('register', [RegisteredUserController::class, 'store'])
+        ->middleware('throttle:auth');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
+
+    // Guest Account Login (View)
+    Route::get('guest/login', [AuthenticatedSessionController::class, 'createGuest'])
+        ->name('guest.login');
+
+    // Guest Magic Link logic
+    Route::post('guest/login/magic-link', [\App\Http\Controllers\Auth\GuestMagicLinkController::class, 'sendLink'])
+        ->name('guest.login.magic-link')
+        ->middleware('throttle:auth');
+    
+    Route::get('guest/login/verify/{user}', [\App\Http\Controllers\Auth\GuestMagicLinkController::class, 'verifyLink'])
+        ->name('guest.login.verify');
 
     // Teacher Routes
     Route::get('teacher/register', [RegisteredUserController::class, 'createTeacher'])

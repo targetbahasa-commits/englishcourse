@@ -27,6 +27,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'cf-turnstile-response' => ['required', new \App\Rules\Turnstile()],
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
         ];

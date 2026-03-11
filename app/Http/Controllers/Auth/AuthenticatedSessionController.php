@@ -24,6 +24,11 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login-teacher');
     }
 
+    public function createGuest(): View
+    {
+        return view('auth.login-guest');
+    }
+
     public function createStudent(): View
     {
         return view('auth.login-student');

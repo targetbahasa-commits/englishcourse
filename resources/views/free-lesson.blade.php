@@ -15,11 +15,19 @@
 <body class="font-sans antialiased bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
-        @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isTeacher()))
-            @include('components.admin-sidebar')
+        @auth
+            @if(Auth::user()->isAdmin())
+                @include('components.sidebar-admin')
+            @elseif(Auth::user()->isTeacher())
+                @include('components.sidebar-teacher')
+            @elseif(Auth::user()->role === 'guest')
+                @include('components.sidebar-guest')
+            @else
+                @include('components.sidebar-student')
+            @endif
         @else
-            @include('components.sidebar-student')
-        @endif
+            @include('components.sidebar-guest')
+        @endauth
 
         <!-- Main Content -->
         <main class="flex-1 md:ml-64 p-8">

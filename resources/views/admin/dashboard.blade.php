@@ -132,7 +132,7 @@
                         id: {{ $student->id }},
                         name: '{{ addslashes($student->name) }}',
                         role: '{{ $student->role }}',
-                        program: '{{ addslashes($student->program_name ?? '-') }}',
+                        program: '{{ $student->role === 'guest' ? 'Free Test' : addslashes($student->program_name ?? 'No Program Assigned') }}',
                         last_activity: {{ $student->last_activity }},
                     },
                     @endforeach
@@ -180,7 +180,8 @@
                                 <tr class="text-gray-400 text-sm border-b border-gray-100">
                                     <th class="pb-3 font-medium">Student Name</th>
                                     <th class="pb-3 font-medium">Status</th>
-                                    <th class="pb-3 font-medium">Role/Program</th>
+                                    <th class="pb-3 font-medium">Role</th>
+                                    <th class="pb-3 font-medium">Program</th>
                                     <th class="pb-3 font-medium">Last Seen</th>
                                     <th class="pb-3 font-medium text-right">Action</th>
                                 </tr>
@@ -210,7 +211,9 @@
                                         </td>
                                         <td class="py-4 text-sm text-gray-700">
                                             <span class="block font-medium capitalize" x-text="student.role"></span>
-                                            <span class="block text-xs text-gray-400" x-text="student.program"></span>
+                                        </td>
+                                        <td class="py-4 text-sm text-gray-700">
+                                            <span class="block text-xs text-gray-500" x-text="student.program"></span>
                                         </td>
                                         <td class="py-4">
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100" x-text="formatTime(student.last_activity)">
@@ -227,7 +230,7 @@
                                     </tr>
                                 </template>
                                 <tr x-show="filteredStudents.length === 0" x-cloak>
-                                    <td colspan="5" class="py-8 text-center text-gray-400">
+                                    <td colspan="6" class="py-8 text-center text-gray-400">
                                         No active students found in the last 24 hours.
                                     </td>
                                 </tr>
