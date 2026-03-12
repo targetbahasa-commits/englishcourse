@@ -76,6 +76,10 @@
                                 $routeName = route('assignments.toefl-itp');
                             } elseif ($program->name === 'IELTS Academic') {
                                 $routeName = route('assignments.ielts-academic');
+                            } elseif ($program->name === 'PTE Academic') {
+                                $routeName = route('assignments.pte-academic');
+                            } elseif ($program->name === 'IELTS General') {
+                                $routeName = route('assignments.ielts-general');
                             }
                         @endphp
                         

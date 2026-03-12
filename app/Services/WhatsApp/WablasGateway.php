@@ -20,4 +20,10 @@ class WablasGateway implements WhatsAppGatewayInterface
         Log::info('Wablas Gateway is configured as a placeholder. Add implementation in App\Services\WhatsApp\WablasGateway.php');
         return true;
     }
+
+    public function sendMessage(string $phoneNumber, string $message): bool
+    {
+        Log::info('Wablas Gateway sendMessage is a placeholder. Add implementation.');
+        return env('APP_ENV') === 'local';
+    }
 }

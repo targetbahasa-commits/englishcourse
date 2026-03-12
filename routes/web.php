@@ -289,6 +289,8 @@ Route::middleware(['auth'])->group(function () {
     // Let's just remove it from here and add it at line 5.
     
     Route::get('/ielts/academic', [App\Http\Controllers\AssignmentController::class, 'ieltsAcademic'])->name('assignments.ielts-academic');
+    Route::get('/assignments/pte-academic', [App\Http\Controllers\AssignmentController::class, 'pteAcademic'])->name('assignments.pte-academic');
+    Route::get('/assignments/ielts-general', [App\Http\Controllers\AssignmentController::class, 'ieltsGeneral'])->name('assignments.ielts-general');
 
     // IELTS Academic Listening Routes
     Route::get('/assignments/ielts-academic/listening', [App\Http\Controllers\AssignmentController::class, 'ieltsListeningIndex'])->name('assignments.ielts-academic.listening.index');
@@ -630,6 +632,12 @@ Route::middleware(['auth'])->group(function () {
     Route::put('admin/announcements/{announcement}', [App\Http\Controllers\Admin\AnnouncementController::class, 'update'])->name('admin.announcements.update')->middleware('role:admin');
     Route::delete('admin/announcements/{announcement}', [App\Http\Controllers\Admin\AnnouncementController::class, 'destroy'])->name('admin.announcements.destroy')->middleware('role:admin');
     
+    // Broadcast Messages (Admin)
+    Route::resource('admin/broadcast-messages', App\Http\Controllers\Admin\BroadcastMessageController::class)
+         ->names('admin.broadcast-messages')
+         ->middleware('role:admin')
+         ->except(['edit', 'update', 'destroy']);
+    
     // Outreach Messages (Admin)
     Route::get('admin/outreach-messages', [App\Http\Controllers\Admin\OutreachMessageController::class, 'index'])->name('admin.outreach-messages.index')->middleware('role:admin');
     Route::get('admin/outreach-messages/create', [App\Http\Controllers\Admin\OutreachMessageController::class, 'create'])->name('admin.outreach-messages.create')->middleware('role:admin');
@@ -665,9 +673,16 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('admin/job-vacancies', App\Http\Controllers\Admin\JobVacancyController::class)->names('admin.job-vacancies')->middleware('role:admin');
 });
 
+// 2-Way Messaging & Inbox
+Route::middleware(['auth'])->group(function () {
+    Route::get('/inbox', [App\Http\Controllers\InboxController::class, 'index'])->name('inbox.index');
+    Route::post('/inbox', [App\Http\Controllers\InboxController::class, 'store'])->name('inbox.store');
+    Route::post('/inbox/{id}/read', [App\Http\Controllers\InboxController::class, 'markAsRead'])->name('inbox.read');
+});
+
 // OTP Routes for Registration
-Route::post('/otp/send', [OtpController::class, 'send'])->name('otp.send');
-Route::post('/otp/verify', [OtpController::class, 'verify'])->name('otp.verify');
+Route::post('/otp/send', [App\Http\Controllers\Auth\OtpController::class, 'send'])->name('otp.send');
+Route::post('/otp/verify', [App\Http\Controllers\Auth\OtpController::class, 'verify'])->name('otp.verify');
 
 require __DIR__.'/auth.php';
 

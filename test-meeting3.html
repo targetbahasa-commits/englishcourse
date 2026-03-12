@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="ferxn4G3dltrJv1ue6tWwhEbXlw02JVJPvBRrPFL">
+    <title>Admin - Laravel</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
+    <!-- Scripts -->
+    <link rel="preload" as="style" href="http://localhost:8888/build/assets/app-C2VNiWAU.css" /><link rel="modulepreload" as="script" href="http://localhost:8888/build/assets/app-CPXZ0630.js" /><link rel="stylesheet" href="http://localhost:8888/build/assets/app-C2VNiWAU.css" /><script type="module" src="http://localhost:8888/build/assets/app-CPXZ0630.js"></script>    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+    </head>
+<body class="font-sans antialiased bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <!-- Admin Sidebar Component -->
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 4px;
+    }
+    .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+        background-color: #94a3b8;
+    }
+</style>
+<aside class="w-64 bg-white shadow-md fixed h-full z-10 hidden md:block">
+    <div class="flex flex-col h-full">
+        <div class="flex-1 overflow-y-auto custom-scrollbar pb-6">
+        <div class="p-6 flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">TB</div>
+            <span class="text-xl font-bold text-gray-800">Target Bahasa</span>
+        </div>
+        
+        <div class="px-4 py-4">
+    <p class="text-xs font-semibold text-gray-400 mb-3">MAIN MENU</p>
+    <nav class="space-y-0.5">
+        <a href="http://localhost:8888/admin" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-4.5 h-4.5 flex-shrink-0 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            <span>Dashboard</span>
+        </a>
+        <a href="http://localhost:8888/admin/users" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <span>Users</span>
+        </a>
+        <a href="http://localhost:8888/admin/teachers" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            <span>Teachers</span>
+        </a>
+        <a href="http://localhost:8888/admin/students" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <span>Students</span>
+        </a>
+        <a href="http://localhost:8888/admin/programs" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            <span>Programs</span>
+        </a>
+        <a href="http://localhost:8888/admin/attendance" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <span>Attendance</span>
+        </a>
+        <a href="http://localhost:8888/assignments" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span>Assignments</span>
+        </a>
+        <a href="http://localhost:8888/free-lesson" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            <span>Free Lesson</span>
+        </a>
+        <a href="http://localhost:8888/admin?section=guest_free_tests" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+            <span>Guest Free Tests</span>
+        </a>
+        <a href="http://localhost:8888/admin/class-periods" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <span>Class Periods</span>
+        </a>
+        <a href="http://localhost:8888/admin/announcements" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
+            <span>Announcements</span>
+        </a>
+        <a href="http://localhost:8888/admin/broadcast-messages" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76"></path></svg>
+            <span>Broadcast Messages</span>
+        </a>
+        <a href="http://localhost:8888/admin/outreach-messages" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+            <span>Outreach Messages</span>
+        </a>
+        <a href="http://localhost:8888/admin/reports" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            <span>Reports</span>
+        </a>
+        <a href="http://localhost:8888/admin/teacher-evaluations" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+            <span>Teacher Evaluations</span>
+        </a>
+        <a href="http://localhost:8888/admin/referrals" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
+            <span>Referral Management</span>
+        </a>
+        <a href="http://localhost:8888/admin/scholarships" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"></path></svg>
+            <span>Scholarships</span>
+        </a>
+        <a href="http://localhost:8888/admin/scholarship-news" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2.5 2.5 0 00-2.5-2.5H15"></path></svg>
+            <span>Scholarship News</span>
+        </a>
+        <a href="http://localhost:8888/admin/job-vacancies" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            <span>Overseas Jobs</span>
+        </a>
+        <a href="http://localhost:8888/admin/free-test-certificates" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            <span>Certificates</span>
+        </a>
+        <a href="http://localhost:8888/admin/settings" class="flex items-center gap-2.5 px-3 py-2.5 text-gray-500 hover:bg-gray-50 border-l-4 border-transparent rounded-xl text-base font-medium transition">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <span>System Settings</span>
+        </a>
+    </nav>
+</div>
+        </div>
+
+    <div class="mt-auto px-6 py-4 border-t border-gray-100 bg-white flex-shrink-0">
+        <p class="text-xs font-semibold text-gray-400 mb-3">ACCOUNT</p>
+        <nav class="space-y-0.5">
+            <a href="http://localhost:8888/profile" class="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-gray-50 rounded-xl text-base font-medium transition">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                Profile
+            </a>
+            <form method="POST" action="http://localhost:8888/logout">
+                <input type="hidden" name="_token" value="ferxn4G3dltrJv1ue6tWwhEbXlw02JVJPvBRrPFL" autocomplete="off">                <button type="submit" class="flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 rounded-xl text-base font-medium transition w-full text-left">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    Log Out
+                </button>
+            </form>
+        </nav>
+    </div>
+    </div>
+</aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 md:ml-64">
+            <style>
+    /* Custom Scrollbar - Forced Visibility */
+    div.custom-scrollbar::-webkit-scrollbar {
+        width: 10px !important;
+        height: 10px !important;
+        display: block !important;
+    }
+    div.custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9 !important; /* slate-100 */
+        border-radius: 4px;
+    }
+    div.custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #94a3b8 !important; /* slate-400 */
+        border-radius: 4px;
+        border: 2px solid #f1f5f9 !important;
+    }
+    div.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: #64748b !important; /* slate-500 */
+    }
+    /* Firefox */
+    div.custom-scrollbar {
+        scrollbar-width: auto !important;
+        scrollbar-color: #94a3b8 #f1f5f9 !important;
+    }
+    /* Force white background for this page */
+    
+    
+    body {
+        background-color: white !important;
+    }
+    
+    /* TOEFL Listening Answer Styling */
+    
+    
+    
+
+    /* Student Result Feedback Overrides */
+    .answer-label.is-correct {
+        background-color: #dcfce7 !important; /* green-100 */
+        border: 2px solid #22c55e !important; /* green-500 */
+    }
+    .answer-label.is-correct span {
+        color: #15803d !important; /* green-700 */
+        font-weight: bold;
+    }
+    
+    .answer-label.is-wrong {
+        background-color: #fef2f2 !important; /* red-50 */
+        border: 2px solid #ef4444 !important; /* red-500 */
+    }
+    .answer-label.is-wrong span {
+        color: #991b1b !important; /* red-800 */
+    }
+</style>
+
+<div class="container mx-auto px-4 py-8 relative bg-white min-h-screen">
+    
+    
+    <div class="bg-white max-w-7xl mx-auto rounded-xl shadow-lg border border-gray-100 p-8 md:p-12 relative overflow-hidden">
+        
+        
+        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
+
+        
+        <div class="mb-10 border-b border-gray-100 pb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Latihan Soal</h1>
+                <div class="flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                    TOEFL Listening
+                </div>
+            </div>
+            
+            <div class="bg-gray-50 rounded-lg p-6 border border-gray-100">
+                <p class="mb-3 text-gray-700 leading-relaxed"><strong class="text-gray-900">Focus:</strong> listening to dialogs that involve agreement and disagreement, and answering questions about them.</p>
+                <p class="mb-0 text-gray-700 leading-relaxed"><strong class="text-gray-900">Directions:</strong> listen to the following dialogs. Decide which choice <span class="bg-white px-2 py-0.5 rounded border border-gray-200 text-sm font-mono">(A)</span>, <span class="bg-white px-2 py-0.5 rounded border border-gray-200 text-sm font-mono">(B)</span>, or <span class="bg-white px-2 py-0.5 rounded border border-gray-200 text-sm font-mono">(C)</span> best answers the question and mark the appropriate answer. The first one is done as an example.</p>
+            </div>
+        </div>
+
+        
+        
+                    
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <p class="text-blue-800 font-semibold">
+                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Latihan 1
+                </p>
+            </div>
+
+            
+            <div class="fixed top-0 left-0 right-0 z-50 bg-white shadow-lg">
+                <div class="max-w-7xl mx-auto">
+                    <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-b-2 border-indigo-200">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-md">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 012.828 2.828"></path></svg>
+                            </div>
+                            <span class="text-lg font-bold text-indigo-900">Audio Session - Latihan 1</span>
+                        </div>
+                        
+                        
+                        <div class="flex-1 flex items-center gap-3 max-w-3xl">
+                            
+                            <button type="button" onclick="skipAudio(-10)" 
+                                    class="p-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Mundur 10 detik">
+                                <svg class="w-5 h-5 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path>
+                                </svg>
+                            </button>
+
+                            
+                            <button type="button" id="playPauseBtn" onclick="togglePlayPause()" 
+                                    class="p-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex-shrink-0">
+                                <svg id="playIcon" class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                                <svg id="pauseIcon" class="w-6 h-6 text-white hidden" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                                </svg>
+                            </button>
+
+                            
+                            <div class="flex-1 flex flex-col gap-1">
+                                
+                                <div class="flex justify-between text-xs text-indigo-700 font-medium">
+                                    <span id="currentTime">0:00</span>
+                                    <span id="duration">0:00</span>
+                                </div>
+                                
+                                
+                                <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="progressContainer">
+                                    <div id="progressBar" class="absolute h-full bg-indigo-600 rounded-full transition-all" style="width: 0%"></div>
+                                    <div id="progressHandle" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
+                                </div>
+                            </div>
+
+                            
+                            <button type="button" onclick="skipAudio(10)" 
+                                    class="p-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Maju 10 detik">
+                                <svg class="w-5 h-5 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"></path>
+                                </svg>
+                            </button>
+
+                            
+                            
+                            
+                            <audio id="mainAudio" class="hidden" preload="auto">
+                                <source src="" type="audio/mpeg">
+                            </audio>
+                        </div>
+
+                        
+                                                    <div class="flex gap-2">
+                                <button type="button" 
+                                        onclick="document.getElementById('uploadSrtModal').classList.remove('hidden')" 
+                                        class="px-3 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    Upload SRT
+                                </button>
+                                
+                                <button type="button" 
+                                        onclick="console.log('Upload button clicked'); document.getElementById('uploadAudioModal').classList.remove('hidden');" 
+                                        class="px-3 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                    Upload Audio
+                                </button>
+                            </div>
+                                            </div>
+                    
+                                    </div>
+            </div>
+            </div>
+
+            
+            <div class="h-20 mb-8"></div>
+
+
+
+            
+            <div id="editTranscriptModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Edit Transcript (Set 1)</h3>
+                    <form action="http://localhost:8888/assignments/toefl-itp/listening/3/practice/1/update-transcript" method="POST">
+                        <input type="hidden" name="_token" value="ferxn4G3dltrJv1ue6tWwhEbXlw02JVJPvBRrPFL" autocomplete="off">                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">English Script</label>
+                            <textarea name="transcript_en" rows="6" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                            <p class="text-gray-500 text-xs mt-1">Use newline for paragraphs.</p>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Indonesian Translation</label>
+                            <textarea name="transcript_id" rows="6" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                        </div>
+                        <div class="flex justify-end gap-2">
+                            <button type="button" onclick="document.getElementById('editTranscriptModal').classList.add('hidden')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Cancel</button>
+                            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    
+    
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const audio = document.getElementById('mainAudio');
+                    const playPauseBtn = document.getElementById('playPauseBtn');
+                    const playIcon = document.getElementById('playIcon');
+                    const pauseIcon = document.getElementById('pauseIcon');
+                    const progressBar = document.getElementById('progressBar');
+                    const progressHandle = document.getElementById('progressHandle');
+                    const progressContainer = document.getElementById('progressContainer');
+                    const currentTimeDisplay = document.getElementById('currentTime');
+                    const durationDisplay = document.getElementById('duration');
+
+                    if (!audio || !progressContainer) {
+                        console.error('Audio player elements not found');
+                        return;
+                    }
+
+                    let isDragging = false;
+
+                    // Format time in MM:SS
+                    function formatTime(seconds) {
+                        if (isNaN(seconds)) return '0:00';
+                        const mins = Math.floor(seconds / 60);
+                        const secs = Math.floor(seconds % 60);
+                        return `${mins}:${secs.toString().padStart(2, '0')}`;
+                    }
+
+                    // Toggle play/pause
+                    window.togglePlayPause = function() {
+                        if (audio.paused) {
+                            audio.play();
+                            playIcon.classList.add('hidden');
+                            pauseIcon.classList.remove('hidden');
+                        } else {
+                            audio.pause();
+                            playIcon.classList.remove('hidden');
+                            pauseIcon.classList.add('hidden');
+                        }
+                    };
+
+                    // Skip audio by seconds
+                    window.skipAudio = function(seconds) {
+                        if (audio && audio.duration) {
+                            const newTime = Math.max(0, Math.min(audio.duration, audio.currentTime + seconds));
+                            console.log(`Attempting skip: Current=${audio.currentTime}, Target=${newTime}`);
+                            
+                            // Check if seekable
+                            if (audio.seekable.length > 0) {
+                                const ranges = [];
+                                for(let i=0; i<audio.seekable.length; i++) {
+                                    ranges.push(`${audio.seekable.start(i)}-${audio.seekable.end(i)}`);
+                                }
+                                console.log('Seekable ranges:', ranges.join(', '));
+                            } else {
+                                console.warn('Audio reports no seekable ranges');
+                            }
+
+                            audio.currentTime = newTime;
+                            
+                            // Check immediately after
+                            setTimeout(() => {
+                                console.log(`After skip: Current=${audio.currentTime}`);
+                            }, 100);
+                        }
+                    };
+
+                    // Seek to position when clicking or dragging progress bar
+                    function seekAudio(event) {
+                        if (!audio.duration) return;
+                        
+                        const rect = progressContainer.getBoundingClientRect();
+                        const clientX = event.clientX || (event.touches ? event.touches[0].clientX : 0);
+                        const clickX = clientX - rect.left;
+                        const width = rect.width;
+                        
+                        // Validasi koordinat
+                        console.log(`Seek Debug: ClientX=${clientX}, RectLeft=${rect.left}, ClickX=${clickX}, Width=${width}`);
+                        
+                        if (width === 0) {
+                            console.warn('Progress bar width is 0, cannot calculate percentage');
+                            return;
+                        }
+
+                        let percentage = clickX / width;
+                        percentage = Math.max(0, Math.min(1, percentage));
+                        
+                        const newTime = percentage * audio.duration;
+                        console.log(`Seek Calc: %=${percentage.toFixed(4)}, TargetTime=${newTime.toFixed(2)}`);
+                        
+                        audio.currentTime = newTime;
+                    }
+
+                    // Mouse down on progress bar
+                    progressContainer.addEventListener('mousedown', (e) => {
+                        isDragging = true;
+                        seekAudio(e);
+                        e.preventDefault();
+                    });
+
+                    // Mouse move - drag to seek
+                    document.addEventListener('mousemove', (e) => {
+                        if (isDragging) {
+                            seekAudio(e);
+                        }
+                    });
+
+                    // Mouse up - stop dragging
+                    document.addEventListener('mouseup', () => {
+                        if (isDragging) {
+                            isDragging = false;
+                        }
+                    });
+
+                    // Touch support for mobile
+                    progressContainer.addEventListener('touchstart', (e) => {
+                        isDragging = true;
+                        const touch = e.touches[0];
+                        seekAudio(touch);
+                        e.preventDefault();
+                    });
+
+                    document.addEventListener('touchmove', (e) => {
+                        if (isDragging) {
+                            const touch = e.touches[0];
+                            seekAudio(touch);
+                        }
+                    });
+
+                    document.addEventListener('touchend', () => {
+                        if (isDragging) {
+                            isDragging = false;
+                        }
+                    });
+
+                    // Update progress bar and time display
+                    audio.addEventListener('timeupdate', () => {
+                        if (audio.duration && !isDragging) {
+                            const percentage = (audio.currentTime / audio.duration) * 100;
+                            progressBar.style.width = percentage + '%';
+                            progressHandle.style.left = percentage + '%';
+                            currentTimeDisplay.textContent = formatTime(audio.currentTime);
+                        }
+                    });
+
+                    // Set duration when metadata is loaded
+                    audio.addEventListener('loadedmetadata', () => {
+                        durationDisplay.textContent = formatTime(audio.duration);
+                        console.log('Audio loaded. Duration:', audio.duration);
+                    });
+
+                    // Reset play button when audio ends
+                    audio.addEventListener('ended', () => {
+                        playIcon.classList.remove('hidden');
+                        pauseIcon.classList.add('hidden');
+                    });
+
+                    // Keyboard shortcuts
+                    document.addEventListener('keydown', (e) => {
+                        if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                            e.preventDefault();
+                            window.togglePlayPause();
+                        } else if (e.code === 'ArrowLeft') {
+                            e.preventDefault();
+                            window.skipAudio(-10);
+                        } else if (e.code === 'ArrowRight') {
+                            e.preventDefault();
+                            window.skipAudio(10);
+                        }
+                    });
+
+                    console.log('Audio player initialized successfully');
+                });
+            </script>
+
+
+
+        
+                <form method="POST" action="http://localhost:8888/assignments/toefl-itp/listening/3/submit">
+            <input type="hidden" name="_token" value="ferxn4G3dltrJv1ue6tWwhEbXlw02JVJPvBRrPFL" autocomplete="off">            <input type="hidden" name="set_number" value="1">
+            
+            
+            <p class="mb-4 text-gray-700 font-medium h7-instruction">Putar audio, ulangi jika perlu hingga semua alike-sound jawaban bergaris bawah.</p>
+
+            
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0">
+                
+            
+                        <script>
+                console.log('--- DEBUG TIMESTAMP PARSING ---');
+                const timestamps = [];
+                console.log('Timestamps Map:', timestamps);
+                
+                // Debug Transcript Text (First 50 blocks)
+                                console.log('-------------------------------');
+            </script>
+
+            
+            <div class="space-y-0 divide-y divide-gray-100">
+                                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+                        <div class="flex items-baseline gap-3">
+                            <div class="flex-none flex items-center justify-end gap-2 w-8">
+                                <span class="font-bold text-gray-500 text-xl">1.</span>
+                            </div>
+                                                            <button type="button" 
+                                        onclick="openEditQuestionModal({&quot;id&quot;:147,&quot;meeting_number&quot;:3,&quot;question_number&quot;:1,&quot;audio_file&quot;:null,&quot;question_text&quot;:&quot;&quot;,&quot;option_a&quot;:&quot;presence&quot;,&quot;option_b&quot;:&quot;presents&quot;,&quot;option_c&quot;:&quot;N\/A&quot;,&quot;option_d&quot;:&quot;N\/A&quot;,&quot;correct_answer&quot;:&quot;B&quot;,&quot;created_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;transcript_en&quot;:null,&quot;transcript_id&quot;:null,&quot;set_number&quot;:1})" 
+                                        class="absolute top-3 right-10 w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                                        title="Edit Question">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                                                                    <div class="flex flex-col gap-2 flex-1">
+                                                                                                                                            <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="false" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_147" 
+                                                   value="A" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">A</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">presence</span>
+                                        </label>
+                                                                                                                                                                                <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="true" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_147" 
+                                                   value="B" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">B</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">presents</span>
+                                        </label>
+                                                                                                                                                                                                                                        </div>
+                        </div>
+                    </div>
+                                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+                        <div class="flex items-baseline gap-3">
+                            <div class="flex-none flex items-center justify-end gap-2 w-8">
+                                <span class="font-bold text-gray-500 text-xl">2.</span>
+                            </div>
+                                                            <button type="button" 
+                                        onclick="openEditQuestionModal({&quot;id&quot;:148,&quot;meeting_number&quot;:3,&quot;question_number&quot;:2,&quot;audio_file&quot;:null,&quot;question_text&quot;:&quot;&quot;,&quot;option_a&quot;:&quot;overdue&quot;,&quot;option_b&quot;:&quot;overdo&quot;,&quot;option_c&quot;:&quot;N\/A&quot;,&quot;option_d&quot;:&quot;N\/A&quot;,&quot;correct_answer&quot;:&quot;B&quot;,&quot;created_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;transcript_en&quot;:null,&quot;transcript_id&quot;:null,&quot;set_number&quot;:1})" 
+                                        class="absolute top-3 right-10 w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                                        title="Edit Question">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                                                                    <div class="flex flex-col gap-2 flex-1">
+                                                                                                                                            <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="false" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_148" 
+                                                   value="A" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">A</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">overdue</span>
+                                        </label>
+                                                                                                                                                                                <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="true" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_148" 
+                                                   value="B" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">B</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">overdo</span>
+                                        </label>
+                                                                                                                                                                                                                                        </div>
+                        </div>
+                    </div>
+                                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+                        <div class="flex items-baseline gap-3">
+                            <div class="flex-none flex items-center justify-end gap-2 w-8">
+                                <span class="font-bold text-gray-500 text-xl">3.</span>
+                            </div>
+                                                            <button type="button" 
+                                        onclick="openEditQuestionModal({&quot;id&quot;:149,&quot;meeting_number&quot;:3,&quot;question_number&quot;:3,&quot;audio_file&quot;:null,&quot;question_text&quot;:&quot;&quot;,&quot;option_a&quot;:&quot;pain&quot;,&quot;option_b&quot;:&quot;pane&quot;,&quot;option_c&quot;:&quot;N\/A&quot;,&quot;option_d&quot;:&quot;N\/A&quot;,&quot;correct_answer&quot;:&quot;B&quot;,&quot;created_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;transcript_en&quot;:null,&quot;transcript_id&quot;:null,&quot;set_number&quot;:1})" 
+                                        class="absolute top-3 right-10 w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                                        title="Edit Question">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                                                                    <div class="flex flex-col gap-2 flex-1">
+                                                                                                                                            <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="false" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_149" 
+                                                   value="A" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">A</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">pain</span>
+                                        </label>
+                                                                                                                                                                                <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="true" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_149" 
+                                                   value="B" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">B</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">pane</span>
+                                        </label>
+                                                                                                                                                                                                                                        </div>
+                        </div>
+                    </div>
+                                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+                        <div class="flex items-baseline gap-3">
+                            <div class="flex-none flex items-center justify-end gap-2 w-8">
+                                <span class="font-bold text-gray-500 text-xl">4.</span>
+                            </div>
+                                                            <button type="button" 
+                                        onclick="openEditQuestionModal({&quot;id&quot;:150,&quot;meeting_number&quot;:3,&quot;question_number&quot;:4,&quot;audio_file&quot;:null,&quot;question_text&quot;:&quot;&quot;,&quot;option_a&quot;:&quot;where&quot;,&quot;option_b&quot;:&quot;wear&quot;,&quot;option_c&quot;:&quot;N\/A&quot;,&quot;option_d&quot;:&quot;N\/A&quot;,&quot;correct_answer&quot;:&quot;A&quot;,&quot;created_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;transcript_en&quot;:null,&quot;transcript_id&quot;:null,&quot;set_number&quot;:1})" 
+                                        class="absolute top-3 right-10 w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                                        title="Edit Question">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                                                                    <div class="flex flex-col gap-2 flex-1">
+                                                                                                                                            <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="true" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_150" 
+                                                   value="A" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">A</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">where</span>
+                                        </label>
+                                                                                                                                                                                <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="false" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_150" 
+                                                   value="B" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">B</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">wear</span>
+                                        </label>
+                                                                                                                                                                                                                                        </div>
+                        </div>
+                    </div>
+                                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+                        <div class="flex items-baseline gap-3">
+                            <div class="flex-none flex items-center justify-end gap-2 w-8">
+                                <span class="font-bold text-gray-500 text-xl">5.</span>
+                            </div>
+                                                            <button type="button" 
+                                        onclick="openEditQuestionModal({&quot;id&quot;:151,&quot;meeting_number&quot;:3,&quot;question_number&quot;:5,&quot;audio_file&quot;:null,&quot;question_text&quot;:&quot;&quot;,&quot;option_a&quot;:&quot;fined&quot;,&quot;option_b&quot;:&quot;find&quot;,&quot;option_c&quot;:&quot;N\/A&quot;,&quot;option_d&quot;:&quot;N\/A&quot;,&quot;correct_answer&quot;:&quot;B&quot;,&quot;created_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;transcript_en&quot;:null,&quot;transcript_id&quot;:null,&quot;set_number&quot;:1})" 
+                                        class="absolute top-3 right-10 w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                                        title="Edit Question">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                                                                    <div class="flex flex-col gap-2 flex-1">
+                                                                                                                                            <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="false" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_151" 
+                                                   value="A" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">A</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">fined</span>
+                                        </label>
+                                                                                                                                                                                <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="true" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_151" 
+                                                   value="B" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">B</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">find</span>
+                                        </label>
+                                                                                                                                                                                                                                        </div>
+                        </div>
+                    </div>
+                                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+                        <div class="flex items-baseline gap-3">
+                            <div class="flex-none flex items-center justify-end gap-2 w-8">
+                                <span class="font-bold text-gray-500 text-xl">6.</span>
+                            </div>
+                                                            <button type="button" 
+                                        onclick="openEditQuestionModal({&quot;id&quot;:152,&quot;meeting_number&quot;:3,&quot;question_number&quot;:6,&quot;audio_file&quot;:null,&quot;question_text&quot;:&quot;&quot;,&quot;option_a&quot;:&quot;right&quot;,&quot;option_b&quot;:&quot;write&quot;,&quot;option_c&quot;:&quot;N\/A&quot;,&quot;option_d&quot;:&quot;N\/A&quot;,&quot;correct_answer&quot;:&quot;A&quot;,&quot;created_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;transcript_en&quot;:null,&quot;transcript_id&quot;:null,&quot;set_number&quot;:1})" 
+                                        class="absolute top-3 right-10 w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                                        title="Edit Question">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                                                                    <div class="flex flex-col gap-2 flex-1">
+                                                                                                                                            <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="true" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_152" 
+                                                   value="A" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">A</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">right</span>
+                                        </label>
+                                                                                                                                                                                <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="false" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_152" 
+                                                   value="B" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">B</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">write</span>
+                                        </label>
+                                                                                                                                                                                                                                        </div>
+                        </div>
+                    </div>
+                            </div>
+
+            
+            <div class="space-y-0 divide-y divide-gray-100">
+                                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+                        <div class="flex items-baseline gap-3">
+                            <div class="flex-none flex items-center justify-end gap-2 w-8">
+                                <span class="font-bold text-gray-500 text-xl">7.</span>
+                            </div>
+                                                            <button type="button" 
+                                        onclick="openEditQuestionModal({&quot;id&quot;:153,&quot;meeting_number&quot;:3,&quot;question_number&quot;:7,&quot;audio_file&quot;:null,&quot;question_text&quot;:&quot;&quot;,&quot;option_a&quot;:&quot;board&quot;,&quot;option_b&quot;:&quot;bored&quot;,&quot;option_c&quot;:&quot;N\/A&quot;,&quot;option_d&quot;:&quot;N\/A&quot;,&quot;correct_answer&quot;:&quot;B&quot;,&quot;created_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;transcript_en&quot;:null,&quot;transcript_id&quot;:null,&quot;set_number&quot;:1})" 
+                                        class="absolute top-3 right-10 w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                                        title="Edit Question">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                                                                    <div class="flex flex-col gap-2 flex-1">
+                                                                                                                                            <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="false" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_153" 
+                                                   value="A" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">A</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">board</span>
+                                        </label>
+                                                                                                                                                                                <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="true" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_153" 
+                                                   value="B" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">B</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">bored</span>
+                                        </label>
+                                                                                                                                                                                                                                        </div>
+                        </div>
+                    </div>
+                                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+                        <div class="flex items-baseline gap-3">
+                            <div class="flex-none flex items-center justify-end gap-2 w-8">
+                                <span class="font-bold text-gray-500 text-xl">8.</span>
+                            </div>
+                                                            <button type="button" 
+                                        onclick="openEditQuestionModal({&quot;id&quot;:154,&quot;meeting_number&quot;:3,&quot;question_number&quot;:8,&quot;audio_file&quot;:null,&quot;question_text&quot;:&quot;&quot;,&quot;option_a&quot;:&quot;brakes&quot;,&quot;option_b&quot;:&quot;breaks&quot;,&quot;option_c&quot;:&quot;N\/A&quot;,&quot;option_d&quot;:&quot;N\/A&quot;,&quot;correct_answer&quot;:&quot;B&quot;,&quot;created_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;transcript_en&quot;:null,&quot;transcript_id&quot;:null,&quot;set_number&quot;:1})" 
+                                        class="absolute top-3 right-10 w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                                        title="Edit Question">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                                                                    <div class="flex flex-col gap-2 flex-1">
+                                                                                                                                            <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="false" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_154" 
+                                                   value="A" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">A</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">brakes</span>
+                                        </label>
+                                                                                                                                                                                <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="true" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_154" 
+                                                   value="B" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">B</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">breaks</span>
+                                        </label>
+                                                                                                                                                                                                                                        </div>
+                        </div>
+                    </div>
+                                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+                        <div class="flex items-baseline gap-3">
+                            <div class="flex-none flex items-center justify-end gap-2 w-8">
+                                <span class="font-bold text-gray-500 text-xl">9.</span>
+                            </div>
+                                                            <button type="button" 
+                                        onclick="openEditQuestionModal({&quot;id&quot;:155,&quot;meeting_number&quot;:3,&quot;question_number&quot;:9,&quot;audio_file&quot;:null,&quot;question_text&quot;:&quot;&quot;,&quot;option_a&quot;:&quot;sail&quot;,&quot;option_b&quot;:&quot;sale&quot;,&quot;option_c&quot;:&quot;N\/A&quot;,&quot;option_d&quot;:&quot;N\/A&quot;,&quot;correct_answer&quot;:&quot;B&quot;,&quot;created_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;transcript_en&quot;:null,&quot;transcript_id&quot;:null,&quot;set_number&quot;:1})" 
+                                        class="absolute top-3 right-10 w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                                        title="Edit Question">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                                                                    <div class="flex flex-col gap-2 flex-1">
+                                                                                                                                            <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="false" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_155" 
+                                                   value="A" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">A</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">sail</span>
+                                        </label>
+                                                                                                                                                                                <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="true" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_155" 
+                                                   value="B" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">B</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">sale</span>
+                                        </label>
+                                                                                                                                                                                                                                        </div>
+                        </div>
+                    </div>
+                                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+                        <div class="flex items-baseline gap-3">
+                            <div class="flex-none flex items-center justify-end gap-2 w-8">
+                                <span class="font-bold text-gray-500 text-xl">10.</span>
+                            </div>
+                                                            <button type="button" 
+                                        onclick="openEditQuestionModal({&quot;id&quot;:156,&quot;meeting_number&quot;:3,&quot;question_number&quot;:10,&quot;audio_file&quot;:null,&quot;question_text&quot;:&quot;&quot;,&quot;option_a&quot;:&quot;site&quot;,&quot;option_b&quot;:&quot;sight&quot;,&quot;option_c&quot;:&quot;N\/A&quot;,&quot;option_d&quot;:&quot;N\/A&quot;,&quot;correct_answer&quot;:&quot;A&quot;,&quot;created_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;transcript_en&quot;:null,&quot;transcript_id&quot;:null,&quot;set_number&quot;:1})" 
+                                        class="absolute top-3 right-10 w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                                        title="Edit Question">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                                                                    <div class="flex flex-col gap-2 flex-1">
+                                                                                                                                            <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="true" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_156" 
+                                                   value="A" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">A</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">site</span>
+                                        </label>
+                                                                                                                                                                                <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="false" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_156" 
+                                                   value="B" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">B</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">sight</span>
+                                        </label>
+                                                                                                                                                                                                                                        </div>
+                        </div>
+                    </div>
+                                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+                        <div class="flex items-baseline gap-3">
+                            <div class="flex-none flex items-center justify-end gap-2 w-8">
+                                <span class="font-bold text-gray-500 text-xl">11.</span>
+                            </div>
+                                                            <button type="button" 
+                                        onclick="openEditQuestionModal({&quot;id&quot;:157,&quot;meeting_number&quot;:3,&quot;question_number&quot;:11,&quot;audio_file&quot;:null,&quot;question_text&quot;:&quot;&quot;,&quot;option_a&quot;:&quot;rose&quot;,&quot;option_b&quot;:&quot;rows&quot;,&quot;option_c&quot;:&quot;N\/A&quot;,&quot;option_d&quot;:&quot;N\/A&quot;,&quot;correct_answer&quot;:&quot;B&quot;,&quot;created_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;transcript_en&quot;:null,&quot;transcript_id&quot;:null,&quot;set_number&quot;:1})" 
+                                        class="absolute top-3 right-10 w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                                        title="Edit Question">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                                                                    <div class="flex flex-col gap-2 flex-1">
+                                                                                                                                            <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="false" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_157" 
+                                                   value="A" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">A</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">rose</span>
+                                        </label>
+                                                                                                                                                                                <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="true" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_157" 
+                                                   value="B" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">B</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">rows</span>
+                                        </label>
+                                                                                                                                                                                                                                        </div>
+                        </div>
+                    </div>
+                                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+                        <div class="flex items-baseline gap-3">
+                            <div class="flex-none flex items-center justify-end gap-2 w-8">
+                                <span class="font-bold text-gray-500 text-xl">12.</span>
+                            </div>
+                                                            <button type="button" 
+                                        onclick="openEditQuestionModal({&quot;id&quot;:158,&quot;meeting_number&quot;:3,&quot;question_number&quot;:12,&quot;audio_file&quot;:null,&quot;question_text&quot;:&quot;&quot;,&quot;option_a&quot;:&quot;aloud&quot;,&quot;option_b&quot;:&quot;allowed&quot;,&quot;option_c&quot;:&quot;N\/A&quot;,&quot;option_d&quot;:&quot;N\/A&quot;,&quot;correct_answer&quot;:&quot;B&quot;,&quot;created_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;updated_at&quot;:&quot;2026-03-11T15:20:15.000000Z&quot;,&quot;transcript_en&quot;:null,&quot;transcript_id&quot;:null,&quot;set_number&quot;:1})" 
+                                        class="absolute top-3 right-10 w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                                        title="Edit Question">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                                                                    <div class="flex flex-col gap-2 flex-1">
+                                                                                                                                            <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="false" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_158" 
+                                                   value="A" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">A</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">aloud</span>
+                                        </label>
+                                                                                                                                                                                <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all "
+                                            data-is-correct="true" >
+                                            
+                                            <input type="radio" 
+                                                   name="question_158" 
+                                                   value="B" 
+                                                   class="sr-only peer"
+                                                                                                      required>
+                                            
+                                            
+                                            <div class="flex items-center justify-center mr-3 flex-none">
+                                                <div class="w-8 h-8 shrink-0 aspect-square rounded-full border border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center">
+                                                    <span class="text-base font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">B</span>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <span class="text-xl text-gray-800 font-medium peer-checked:text-red-600 peer-checked:font-semibold group-hover/option:text-red-500 transition-colors">allowed</span>
+                                        </label>
+                                                                                                                                                                                                                                        </div>
+                        </div>
+                    </div>
+                            </div>
+
+            </div>
+            </div>
+
+            <div class="mt-8 flex flex-col gap-6">
+                
+                             
+            <div class="flex justify-end gap-4">
+                 <a href="http://localhost:8888/assignments/toefl-itp/listening/3" class="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Back to Set Selection
+                </a>
+                <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
+                    Submit Answers
+                </button>
+            </div>
+        </form>
+            </div>
+</div>
+        </main>
+    </div>
+
+        
+            <div id="uploadSrtModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center"
+             onclick="if(event.target === this) this.classList.add('hidden')">
+            <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 relative transform transition-all">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900">Upload Transcript (.srt)</h3>
+                    <button type="button" onclick="document.getElementById('uploadSrtModal').classList.add('hidden')" 
+                            class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <form action="http://localhost:8888/assignments/toefl-itp/listening/3/upload-srt?set=1" 
+                      method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <input type="hidden" name="_token" value="ferxn4G3dltrJv1ue6tWwhEbXlw02JVJPvBRrPFL" autocomplete="off">                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Target Language</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="language" value="en" checked class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                                <span class="text-gray-700">English Script 🇺🇸</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="language" value="id" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+                                <span class="text-gray-700">Indonesian 🇮🇩</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            SRT File (.srt - Max 2MB)
+                        </label>
+                        <div class="relative border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-indigo-500 transition-colors text-center cursor-pointer" onclick="document.getElementById('srtFileInput').click()">
+                            <input type="file" id="srtFileInput" name="srt_file" accept=".srt"
+                                   class="hidden" onchange="document.getElementById('srtFileName').textContent = this.files[0].name">
+                            <svg class="w-10 h-10 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span class="text-sm text-gray-500" id="srtFileName">Click to select file</span>
+                        </div>
+                    </div>
+
+                    <div class="relative py-2">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-200"></div>
+                        </div>
+                        <div class="relative flex justify-center">
+                            <span class="px-2 bg-white text-sm text-gray-500 font-semibold">OR PASTE TEXT</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                           Paste SRT Content Directly
+                        </label>
+                        <textarea name="srt_content" rows="4" 
+                                  class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none placeholder-gray-400 text-sm font-mono"
+                                  placeholder="1
+00:00:10,000 --> 00:00:15,000
+Start translating here..."></textarea>
+                    </div>
+
+                    <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                        <p class="text-xs text-yellow-800">
+                            <strong>Note:</strong> Auto-parsing will remove timestamps (<code>00:00:10 --> ...</code>) and keep only the text dialog.
+                        </p>
+                    </div>
+
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="document.getElementById('uploadSrtModal').classList.add('hidden')"
+                                class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="flex-1 px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors">
+                            Upload & Parse
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    
+    
+            <div id="uploadAudioModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center"
+             onclick="if(event.target === this) this.classList.add('hidden')">
+            <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900">Upload Audio File</h3>
+                    <button type="button" onclick="document.getElementById('uploadAudioModal').classList.add('hidden')" 
+                            class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <form action="http://localhost:8888/assignments/toefl-itp/listening/3/practice/1/upload-audio" 
+                      method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <input type="hidden" name="_token" value="ferxn4G3dltrJv1ue6tWwhEbXlw02JVJPvBRrPFL" autocomplete="off">                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Audio File (MP3, WAV, OGG - Max 10MB)
+                        </label>
+                        <input type="file" name="audio_file" accept=".mp3,.wav,.ogg,audio/*" required
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none">
+                    </div>
+
+                    
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="document.getElementById('uploadAudioModal').classList.add('hidden')"
+                                class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="flex-1 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
+                            Upload
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+            <button onclick="openCreateQuestionModal()" 
+                class="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 hover:scale-110 transition-all duration-200 flex items-center justify-center z-40 group"
+                title="Add New Question">
+            <svg class="w-8 h-8 group-hover:rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+        </button>
+    
+    
+    <div id="questionModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeQuestionModal()"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <form action="http://localhost:8888/assignments/toefl-itp/listening/question" method="POST" enctype="multipart/form-data" id="questionForm">
+                    <input type="hidden" name="_token" value="ferxn4G3dltrJv1ue6tWwhEbXlw02JVJPvBRrPFL" autocomplete="off">                    
+                    <input type="hidden" name="id" id="question_id">
+                    <input type="hidden" name="meeting_number" value="3">
+                    
+                                            <input type="hidden" name="set_number" value="1">
+                                        
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                <h3 class="text-lg leading-6 font-bold text-gray-900" id="modalTitle">
+                                    New Question
+                                </h3>
+                                <div class="mt-4 space-y-4">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Question Number</label>
+                                            <input type="number" name="question_number" id="question_number" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Correct Answer</label>
+                                            <div class="mt-1 flex rounded-md shadow-sm">
+                                                 
+                                                 <input type="hidden" name="correct_answer" id="correct_answer" required>
+                                                 <div class="flex gap-2 w-full">
+                                                                                                             <button type="button" onclick="selectAnswer('A')" 
+                                                                id="btn_answer_A"
+                                                                class="flex-1 py-1 px-2 border rounded-md text-sm font-semibold transition-colors hover:bg-gray-50 focus:outline-none answer-btn">
+                                                            A
+                                                        </button>
+                                                                                                             <button type="button" onclick="selectAnswer('B')" 
+                                                                id="btn_answer_B"
+                                                                class="flex-1 py-1 px-2 border rounded-md text-sm font-semibold transition-colors hover:bg-gray-50 focus:outline-none answer-btn">
+                                                            B
+                                                        </button>
+                                                                                                             <button type="button" onclick="selectAnswer('C')" 
+                                                                id="btn_answer_C"
+                                                                class="flex-1 py-1 px-2 border rounded-md text-sm font-semibold transition-colors hover:bg-gray-50 focus:outline-none answer-btn">
+                                                            C
+                                                        </button>
+                                                                                                             <button type="button" onclick="selectAnswer('D')" 
+                                                                id="btn_answer_D"
+                                                                class="flex-1 py-1 px-2 border rounded-md text-sm font-semibold transition-colors hover:bg-gray-50 focus:outline-none answer-btn">
+                                                            D
+                                                        </button>
+                                                                                                      </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Audio File (MP3/WAV)</label>
+                                        <div class="mt-1 flex rounded-md shadow-sm">
+                                            <label class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-l-md text-gray-700 bg-gray-50 hover:bg-gray-100">
+                                                Choose File
+                                                <input type="file" name="audio_file" accept=".mp3,.wav" class="hidden" onchange="document.getElementById('audio_file_name').textContent = this.files[0] ? this.files[0].name : 'No file chosen'">
+                                            </label>
+                                            <span class="inline-flex items-center px-4 py-2 border border-l-0 border-gray-300 shadow-sm text-sm text-gray-500 rounded-r-md w-full bg-white truncate" id="audio_file_name">
+                                                No file chosen
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Question Text</label>
+                                        <textarea name="question_text" id="question_text" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Type the question content here..."></textarea>
+                                    </div>
+
+                                    <div class="space-y-3">
+                                                                                    <div>
+                                                <label class="block text-sm font-medium text-gray-700">Option A</label>
+                                                <div class="flex">
+                                                    <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm font-bold">
+                                                        A
+                                                    </span>
+                                                    <input type="text" name="option_a" id="option_a" required class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                                </div>
+                                            </div>
+                                                                                    <div>
+                                                <label class="block text-sm font-medium text-gray-700">Option B</label>
+                                                <div class="flex">
+                                                    <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm font-bold">
+                                                        B
+                                                    </span>
+                                                    <input type="text" name="option_b" id="option_b" required class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                                </div>
+                                            </div>
+                                                                                    <div>
+                                                <label class="block text-sm font-medium text-gray-700">Option C</label>
+                                                <div class="flex">
+                                                    <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm font-bold">
+                                                        C
+                                                    </span>
+                                                    <input type="text" name="option_c" id="option_c" required class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                                </div>
+                                            </div>
+                                                                                    <div>
+                                                <label class="block text-sm font-medium text-gray-700">Option D</label>
+                                                <div class="flex">
+                                                    <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm font-bold">
+                                                        D
+                                                    </span>
+                                                    <input type="text" name="option_d" id="option_d" required class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                                </div>
+                                            </div>
+                                                                            </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                            Save Question
+                        </button>
+                        <button type="button" onclick="closeQuestionModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectAnswer(ans) {
+            document.getElementById('correct_answer').value = ans;
+            // Update visual state
+            document.querySelectorAll('.answer-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+                btn.classList.add('bg-white', 'text-gray-700', 'border-gray-300');
+            });
+            const selectedBtn = document.getElementById('btn_answer_' + ans);
+            if(selectedBtn) {
+                 selectedBtn.classList.remove('bg-white', 'text-gray-700', 'border-gray-300');
+                 selectedBtn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+            }
+        }
+
+        function openCreateQuestionModal() {
+            document.getElementById('questionForm').reset();
+            document.getElementById('question_id').value = '';
+            document.getElementById('modalTitle').textContent = 'New Question';
+            document.getElementById('audio_file_name').textContent = 'No file chosen';
+            
+            // Clear correct answer selection
+            document.getElementById('correct_answer').value = '';
+            document.querySelectorAll('.answer-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+                btn.classList.add('bg-white', 'text-gray-700', 'border-gray-300');
+            });
+            // Default select A? No, force user to select.
+            
+            // Auto-fill next number if possible? 
+            // Simple logic: find max number on page + 1?
+            // For now, leave blank.
+            
+            document.getElementById('questionModal').classList.remove('hidden');
+        }
+
+        function openEditQuestionModal(question) {
+            document.getElementById('questionForm').reset();
+            document.getElementById('question_id').value = question.id;
+            document.getElementById('modalTitle').textContent = 'Edit Question ' + question.question_number;
+            document.getElementById('question_number').value = question.question_number;
+            document.getElementById('question_text').value = question.question_text || '';
+            document.getElementById('option_a').value = question.option_a;
+            document.getElementById('option_b').value = question.option_b;
+            document.getElementById('option_c').value = question.option_c;
+            document.getElementById('option_d').value = question.option_d;
+            document.getElementById('audio_file_name').textContent = 'Keep current audio';
+            
+            selectAnswer(question.correct_answer);
+            
+            document.getElementById('questionModal').classList.remove('hidden');
+        }
+
+        function closeQuestionModal() {
+            document.getElementById('questionModal').classList.add('hidden');
+        }
+
+        // Global function for delete button
+        function removeSetClicked() {
+            // Available sets from PHP/Blade data
+            const availableSets = [1,2,3];
+            
+            // Prompt user to select which set to remove
+            if (availableSets.length === 0) {
+                alert('Tidak ada latihan untuk dihapus.');
+                return;
+            }
+            
+            let setNumber = prompt(
+                'Masukkan nomor latihan yang ingin dihapus:\n\nLatihan yang tersedia: ' + availableSets.join(', '),
+                availableSets[availableSets.length - 1]
+            );
+            
+            if (setNumber === null) return; // User cancelled
+            
+            setNumber = parseInt(setNumber);
+            
+            if (!availableSets.includes(setNumber)) {
+                alert('Nomor latihan tidak valid. Silakan pilih dari: ' + availableSets.join(', '));
+                return;
+            }
+            
+            if (confirm('Hapus Latihan ' + setNumber + '? Semua soal di dalamnya akan dihapus.')) {
+                document.getElementById('removeSetNumber').value = setNumber;
+                document.getElementById('removeSetForm').submit();
+            }
+        }
+    </script>
+    </body>
+</html>

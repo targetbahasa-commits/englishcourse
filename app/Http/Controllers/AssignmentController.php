@@ -27,6 +27,16 @@ class AssignmentController extends Controller
         return view('ielts.writing.index');
     }
 
+    public function pteAcademic()
+    {
+        return view('assignments.pte-academic');
+    }
+
+    public function ieltsGeneral()
+    {
+        return view('assignments.ielts-general');
+    }
+
     public function ieltsListeningIndex()
     {
         $program = \App\Models\Program::where('slug', 'ielts-academic-listening')->with('meetings')->first();

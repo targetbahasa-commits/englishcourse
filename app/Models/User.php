@@ -154,6 +154,21 @@ class User extends Authenticatable
         return $this->belongsTo(User::class, 'referred_by_id');
     }
 
+    public function hasUnreadInbox(): bool
+    {
+        $hasUnreadNotifications = $this->unreadNotifications()->exists();
+        $hasUnreadDirect = \App\Models\DirectMessage::where('receiver_id', $this->id)
+            ->whereNull('read_at')->exists();
+        
+        if ($this->role === 'admin') {
+            $hasUnreadAdmin = \App\Models\DirectMessage::whereNull('receiver_id')
+                ->whereNull('read_at')->exists();
+            return $hasUnreadNotifications || $hasUnreadDirect || $hasUnreadAdmin;
+        }
+
+        return $hasUnreadNotifications || $hasUnreadDirect;
+    }
+
     /**
      * Get the users referred by this user.
      */

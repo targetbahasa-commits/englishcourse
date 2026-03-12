@@ -47,4 +47,29 @@ class FonnteGateway implements WhatsAppGatewayInterface
             return false;
         }
     }
+
+    public function sendMessage(string $phoneNumber, string $message): bool
+    {
+        if (empty($this->token)) {
+            Log::warning('Fonnte token is missing. Message not sent to ' . $phoneNumber);
+            return env('APP_ENV') === 'local'; 
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => $this->token,
+            ])->post('https://api.fonnte.com/send', [
+                'target' => $phoneNumber,
+                'message' => $message,
+                'delay' => '1',
+                'countryCode' => '62',
+            ]);
+
+            return $response->successful();
+
+        } catch (\Exception $e) {
+            Log::error('Fonnte Exception: ' . $e->getMessage());
+            return false;
+        }
+    }
 }

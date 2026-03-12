@@ -33,6 +33,9 @@
         @else
             @include('components.sidebar-student')
         @endif
+                    </nav>
+                </div>
+            @endif
 
             <div class="absolute bottom-8 px-6 w-full">
                  <form method="POST" action="{{ route('logout') }}">
