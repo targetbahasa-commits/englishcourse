@@ -132,7 +132,7 @@ Route::middleware([
         $targetScore = null;
 
         if ($latestTest) {
-            $outreachMessage = \App\Models\OutreachMessage::with('program')
+            $outreachMessage = \App\Models\OutreachMessage::query()->with('program')
                 ->where('test_type', $latestTest->test_type)
                 ->where('target_role', $user->role)
                 ->where('min_score', '<=', $latestTest->score)
@@ -301,6 +301,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/assignments/ielts-academic/listening/practice-index', [App\Http\Controllers\AssignmentController::class, 'listeningPracticeIndex'])->name('assignments.ielts-academic.listening.practice.index');
     Route::get('/assignments/ielts-academic/listening/practice-index/part{set}', [App\Http\Controllers\AssignmentController::class, 'listeningPracticeIndexPart'])->name('assignments.ielts-academic.listening.practice-index.part');
     Route::get('/assignments/ielts-academic/speaking/practice-index', [App\Http\Controllers\AssignmentController::class, 'ieltsSpeakingPracticeIndex'])->name('assignments.ielts-academic.speaking.practice.index');
+    Route::get('/assignments/ielts-academic/speaking/practice-index/part{part}', [App\Http\Controllers\AssignmentController::class, 'ieltsSpeakingPracticeIndexPart'])->name('assignments.ielts-academic.speaking.practice-index.part');
     Route::get('/assignments/ielts-academic/writing/practice-index', [App\Http\Controllers\AssignmentController::class, 'ieltsWritingPracticeIndex'])->name('assignments.ielts-academic.writing.practice.index');
     Route::get('/assignments/ielts-academic/listening/warm-up/{type}', [App\Http\Controllers\AssignmentController::class, 'ieltsListeningWarmUp'])->name('assignments.ielts-academic.listening.warmup');
     Route::get('/api/dictionary/lookup', [App\Http\Controllers\ToeflDictionaryController::class, 'lookup'])->name('api.dictionary.lookup');
@@ -578,6 +579,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/impersonate/{role}', [App\Http\Controllers\AdminController::class, 'impersonate'])->name('admin.impersonate');
     Route::get('/admin/impersonate-stop', [App\Http\Controllers\AdminController::class, 'stopImpersonate'])->name('admin.impersonate.stop'); // no middleware so impersonated users can return
     
+    // Admin Remote View
+    Route::get('/admin/remote-view/{user}', [App\Http\Controllers\RemoteViewController::class, 'adminView'])->name('admin.remote-view');
+    
     // Teacher Dashboard
     Route::get('/teacher/dashboard', [App\Http\Controllers\TeacherDashboardController::class, 'index'])->name('teacher.dashboard')->middleware('role:teacher');
     
@@ -589,6 +593,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/teacher/attendance/meetings/{classPeriod}', [App\Http\Controllers\TeacherAttendanceController::class, 'getMeetings'])->name('teacher.attendance.meetings')->middleware('role:teacher');
     Route::get('/teacher/attendance/records/{classMeeting}', [App\Http\Controllers\TeacherAttendanceController::class, 'getAttendance'])->name('teacher.attendance.records')->middleware('role:teacher');
     Route::post('/teacher/attendance/store', [App\Http\Controllers\TeacherAttendanceController::class, 'store'])->name('teacher.attendance.store')->middleware('role:teacher');
+    
+    // Teacher Remote View
+    Route::get('/teacher/remote-view/{user}', [App\Http\Controllers\RemoteViewController::class, 'teacherView'])->name('teacher.remote-view')->middleware('role:teacher');
     
     // Admin Programs Management
     Route::resource('admin/programs', App\Http\Controllers\Admin\ProgramController::class)->names('programs')->middleware('role:admin');

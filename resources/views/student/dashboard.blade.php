@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     <!-- Scripts -->
-    @vite(['resources/css/app.css'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
@@ -338,9 +338,10 @@
             const canvasId = `chart-${program.slug}`;
             const canvas = document.getElementById(canvasId);
             
-            if (!canvas) return;
+            if (!canvas || !canvas.getContext) return;
             
             const ctx = canvas.getContext('2d');
+            if (!ctx) return;
             const labels = Array.from({length: program.total_meetings}, (_, i) => `M${i + 1}`);
             const colors = programColors[program.slug] || { border: '#6B7280', bg: 'rgba(107, 114, 128, 0.1)' };
 
@@ -421,5 +422,6 @@
             });
         });
     </script>
+    @include('components.student-broadcaster')
 </body>
 </html>

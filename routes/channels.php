@@ -16,3 +16,9 @@ Broadcast::channel('monitoring', function ($user) {
     }
     return false;
 });
+
+// Private channel for WebRTC signaling
+Broadcast::channel('remote-view.{id}', function ($user, $id) {
+    // Both the target user AND admins/teachers can join
+    return (int) $user->id === (int) $id || in_array($user->role, ['admin', 'teacher']);
+});

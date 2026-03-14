@@ -80,8 +80,8 @@
                 </div>
 
                 <!-- Turnstile -->
-                <x-turnstile />
-                <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2 text-sm text-red-500 text-center" />
+                {{-- <x-turnstile /> --}}
+                {{-- <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2 text-sm text-red-500 text-center" /> --}}
 
                 <!-- Submit Button -->
                 <button type="submit" class="w-full relative py-3.5 mt-2 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/40 focus:outline-none focus:ring-4 focus:ring-indigo-600/20 active:scale-[0.98] transition-all duration-300">

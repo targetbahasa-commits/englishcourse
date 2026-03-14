@@ -283,9 +283,8 @@
                 return str_contains(strtolower($t['slug']), 'lesson'); 
             });
             
-            $practices = collect($topics)->filter(function($t) { 
-                return !str_contains(strtolower($t['slug']), 'lesson'); 
-            });
+            // Current Part 1 content is lesson-based, so render all topics.
+            $practices = collect($topics);
             @endphp
 
 

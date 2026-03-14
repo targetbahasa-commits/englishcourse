@@ -36,7 +36,11 @@
     
     <!-- Header with Back Button -->
     <div class="mb-8">
+        @if(isset($topic['parent_title']))
+        <a href="{{ route('assignments.ielts-academic.speaking.practice', ['topic' => request()->query('topic')]) }}" class="inline-flex items-center text-gray-600 hover:text-orange-500 transition-colors mb-4">
+        @else
         <a href="{{ route('assignments.ielts-academic.speaking.index', ['part' => $topic['part'] ?? 1]) }}" class="inline-flex items-center text-gray-600 hover:text-orange-500 transition-colors mb-4">
+        @endif
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             Back to Selection
         </a>

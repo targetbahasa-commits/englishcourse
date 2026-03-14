@@ -1,13 +1,32 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container mx-auto px-4 py-8" x-data="{ activeTab: null }">
+<div class="container mx-auto px-4 py-8" x-data="{ 
+    selectedType: null,
+    items: [],
+    loading: false,
+    async selectType(type) {
+        this.selectedType = type;
+        this.loading = true;
+        try {
+            const response = await fetch(`{{ route('assignments.ielts-academic.writing.practice.index') }}?type=${type}`, {
+                headers: { 'Accept': 'application/json' }
+            });
+            // Since we're rendering server-side, we reload the page instead
+            window.location.href = `{{ route('assignments.ielts-academic.writing.practice.index') }}?type=${type}`;
+        } catch (error) {
+            console.error('Error loading items:', error);
+            this.loading = false;
+        }
+    }
+}">
+
     <!-- Header -->
     <div class="mb-8">
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
                 <div class="p-3 bg-gradient-to-br from-teal-400 to-teal-600 rounded-2xl shadow-lg">
-                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
                 </div>
@@ -17,190 +36,119 @@
                 </div>
             </div>
             
-            <a href="{{ route('assignments.ielts-academic') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg" x-show="activeTab === null">
+            <a href="{{ route('assignments.ielts-academic') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg" x-show="!({{ count($items) > 0 ? 'true' : 'false' }})">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back to IELTS
             </a>
-             <button @click="activeTab = null" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors duration-200" x-show="activeTab !== null" x-cloak>
+            <a href="{{ route('assignments.ielts-academic.writing.practice.index') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors duration-200" x-show="{{ count($items) > 0 ? 'true' : 'false' }}" x-cloak>
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back to Selection
-            </button>
+            </a>
         </div>
     </div>
 
-    <!-- Selection View -->
-    <div x-show="activeTab === null" class="mb-8" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100">
+    <!-- Main Selection Grid (7 Practice Types) -->
+    <div x-show="!({{ count($items) > 0 ? 'true' : 'false' }})" class="mb-12" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">Select Practice Type</h2>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <!-- Task 1 Card -->
-            <div @click="activeTab = 1" class="cursor-pointer bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition group relative flex flex-col h-full border border-gray-100 transform hover:scale-105 duration-300">
-                <div class="flex justify-between items-start mb-6">
-                    <span class="px-4 py-1.5 bg-teal-100 text-teal-600 rounded-full text-sm font-bold uppercase tracking-wide">
-                        Task 1
-                    </span>
-                </div>
-                
-                <div class="flex-1 mb-6 text-center">
-                    <div class="w-20 h-20 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-teal-600 group-hover:text-white transition-colors duration-300">
-                        <span class="font-bold text-3xl">1</span>
-                    </div>
-                    <h3 class="font-bold text-xl text-gray-800 mb-2">Academic Report</h3>
-                    <p class="text-gray-500 text-sm">Describe visual information (graphs, charts, maps).</p>
-                </div>
-                
-                <button class="block w-full py-3 bg-teal-600 text-white text-center rounded-xl font-bold hover:bg-teal-700 transition shadow-sm hover:shadow active:scale-95">
-                    View Practices
-                </button>
-            </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Line Chart Card -->
+            <button @click="selectType('line')" class="text-left p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition group relative flex flex-col h-full border border-blue-100 transform hover:scale-105 hover:-translate-y-1 duration-300">
+                <span class="text-4xl mb-4">📈</span>
+                <h3 class="font-bold text-lg text-gray-800 mb-2">Line Chart</h3>
+                <p class="text-gray-500 text-sm flex-1">Analyze trends over time.</p>
+                <span class="mt-4 inline-block px-3 py-1 bg-blue-100 text-blue-600 text-xs font-semibold rounded-full">20 Practices</span>
+            </button>
 
-            <!-- Task 2 Card -->
-             <div @click="activeTab = 2" class="cursor-pointer bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition group relative flex flex-col h-full border border-gray-100 transform hover:scale-105 duration-300">
-                <div class="flex justify-between items-start mb-6">
-                    <span class="px-4 py-1.5 bg-emerald-100 text-emerald-600 rounded-full text-sm font-bold uppercase tracking-wide">
-                        Task 2
-                    </span>
-                </div>
-                
-                <div class="flex-1 mb-6 text-center">
-                    <div class="w-20 h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
-                        <span class="font-bold text-3xl">2</span>
-                    </div>
-                    <h3 class="font-bold text-xl text-gray-800 mb-2">Essay Writing</h3>
-                    <p class="text-gray-500 text-sm">Write a discursive essay in response to a prompt.</p>
-                </div>
-                
-                <button class="block w-full py-3 bg-emerald-600 text-white text-center rounded-xl font-bold hover:bg-emerald-700 transition shadow-sm hover:shadow active:scale-95">
-                    View Practices
-                </button>
-            </div>
+            <!-- Bar Chart Card -->
+            <button @click="selectType('bar')" class="text-left p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition group relative flex flex-col h-full border border-emerald-100 transform hover:scale-105 hover:-translate-y-1 duration-300">
+                <span class="text-4xl mb-4">📊</span>
+                <h3 class="font-bold text-lg text-gray-800 mb-2">Bar Chart</h3>
+                <p class="text-gray-500 text-sm flex-1">Compare categories.</p>
+                <span class="mt-4 inline-block px-3 py-1 bg-emerald-100 text-emerald-600 text-xs font-semibold rounded-full">20 Practices</span>
+            </button>
+
+            <!-- Pie Chart Card -->
+            <button @click="selectType('pie')" class="text-left p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition group relative flex flex-col h-full border border-purple-100 transform hover:scale-105 hover:-translate-y-1 duration-300">
+                <span class="text-4xl mb-4">🥧</span>
+                <h3 class="font-bold text-lg text-gray-800 mb-2">Pie Chart</h3>
+                <p class="text-gray-500 text-sm flex-1">Understand proportions.</p>
+                <span class="mt-4 inline-block px-3 py-1 bg-purple-100 text-purple-600 text-xs font-semibold rounded-full">20 Practices</span>
+            </button>
+
+            <!-- Table Card -->
+            <button @click="selectType('table')" class="text-left p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition group relative flex flex-col h-full border border-orange-100 transform hover:scale-105 hover:-translate-y-1 duration-300">
+                <span class="text-4xl mb-4">📋</span>
+                <h3 class="font-bold text-lg text-gray-800 mb-2">Table</h3>
+                <p class="text-gray-500 text-sm flex-1">Interpret tabular data.</p>
+                <span class="mt-4 inline-block px-3 py-1 bg-orange-100 text-orange-600 text-xs font-semibold rounded-full">20 Practices</span>
+            </button>
+
+            <!-- Mixed Chart Card -->
+            <button @click="selectType('mixed')" class="text-left p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition group relative flex flex-col h-full border border-pink-100 transform hover:scale-105 hover:-translate-y-1 duration-300">
+                <span class="text-4xl mb-4">📉</span>
+                <h3 class="font-bold text-lg text-gray-800 mb-2">Mixed Chart</h3>
+                <p class="text-gray-500 text-sm flex-1">Combine chart types.</p>
+                <span class="mt-4 inline-block px-3 py-1 bg-pink-100 text-pink-600 text-xs font-semibold rounded-full">20 Practices</span>
+            </button>
+
+            <!-- Flowchart Card -->
+            <button @click="selectType('flowchart')" class="text-left p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition group relative flex flex-col h-full border border-indigo-100 transform hover:scale-105 hover:-translate-y-1 duration-300">
+                <span class="text-4xl mb-4">🔄</span>
+                <h3 class="font-bold text-lg text-gray-800 mb-2">Flowchart</h3>
+                <p class="text-gray-500 text-sm flex-1">Describe processes.</p>
+                <span class="mt-4 inline-block px-3 py-1 bg-indigo-100 text-indigo-600 text-xs font-semibold rounded-full">20 Practices</span>
+            </button>
+
+            <!-- Mapping Diagram Card -->
+            <button @click="selectType('mapping')" class="text-left p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition group relative flex flex-col h-full border border-rose-100 transform hover:scale-105 hover:-translate-y-1 duration-300">
+                <span class="text-4xl mb-4">🗺️</span>
+                <h3 class="font-bold text-lg text-gray-800 mb-2">Mapping</h3>
+                <p class="text-gray-500 text-sm flex-1">Analyze spatial changes.</p>
+                <span class="mt-4 inline-block px-3 py-1 bg-rose-100 text-rose-600 text-xs font-semibold rounded-full">20 Practices</span>
+            </button>
         </div>
     </div>
 
-    <!-- Task 1 List -->
-    <div x-show="activeTab === 1" class="mb-12" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0">
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
-                    <span class="w-2 h-8 bg-teal-500 rounded-full mr-3"></span>
-                    Task 1: Academic Report
-                </h2>
-                <p class="text-gray-600 mt-1 ml-5">Describe visual information (graphs, charts, maps).</p>
-            </div>
-            @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
-                <button onclick="openCreateModal(1)" class="flex items-center gap-2 px-4 py-2 bg-teal-100 text-teal-700 hover:bg-teal-200 rounded-lg font-medium transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Add Task 1 Practice
-                </button>
-            @endif
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach($practicesTask1 as $meeting)
-                @include('assignments.ielts.writing.partials.meeting_card', ['meeting' => $meeting, 'task' => 1, 'type' => 'Practice'])
-            @endforeach
-        </div>
-    </div>
-
-    <!-- Task 2 List -->
-    <div x-show="activeTab === 2" class="mb-12" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0">
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
-                    <span class="w-2 h-8 bg-emerald-500 rounded-full mr-3"></span>
-                    Task 2: Essay Writing
-                </h2>
-                <p class="text-gray-600 mt-1 ml-5">Write a discursive essay in response to a prompt.</p>
-            </div>
-            @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
-                <button onclick="openCreateModal(2)" class="flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-lg font-medium transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Add Task 2 Practice
-                </button>
-            @endif
+    <!-- Practice Items Display -->
+    <div x-show="selectedType !== null || {{ count($items) > 0 ? 'true' : 'false' }}" class="mb-12" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100">
+        @if(count($items) > 0)
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">
+                <span x-text="selectedType ? selectedType.charAt(0).toUpperCase() + selectedType.slice(1).replace(/([A-Z])/g, ' $1') : ''"></span> 
+                @if(request('type'))
+                    {{ ucfirst(request('type')) }}
+                @endif
+                Practice Items
+            </h2>
+            <span class="text-gray-600 font-medium">{{ count($items) }} available practices</span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach($practicesTask2 as $meeting)
-                @include('assignments.ielts.writing.partials.meeting_card', ['meeting' => $meeting, 'task' => 2, 'type' => 'Practice'])
-            @endforeach
+            @forelse($items as $item)
+                <a href="{{ route('assignments.ielts-academic.writing.meeting', ['task' => 1, 'id' => $item->id]) }}" class="block p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300 border-l-4 border-blue-500 hover:border-blue-600 group">
+                    <div class="flex items-start justify-between mb-3">
+                        <h3 class="font-bold text-gray-800 flex-1 group-hover:text-blue-600 transition">{{ $item->title }}</h3>
+                        <span class="ml-2 text-2xl">📝</span>
+                    </div>
+                    <p class="text-gray-600 text-sm line-clamp-2 mb-4">{{ $item->prompt }}</p>
+                    <div class="pt-4 border-t border-gray-100 flex items-center justify-between">
+                        <span class="text-xs text-gray-500 font-medium">Meeting #{{ $item->meeting_number }}</span>
+                        <span class="text-xs font-semibold text-blue-500 group-hover:text-blue-700 transition">Start Practice →</span>
+                    </div>
+                </a>
+            @empty
+                <div class="col-span-full bg-blue-50 border border-blue-200 rounded-lg p-8 text-center">
+                    <p class="text-gray-600 mb-2">No practice items available for this type yet.</p>
+                    <p class="text-sm text-gray-500">Check back soon for more content.</p>
+                </div>
+            @endforelse
         </div>
+        @endif
     </div>
+
 </div>
 
-<!-- Create Modal -->
-<div id="createMeetingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4">Add New Practice (Task <span id="modalTaskTypeDisplay">1</span>)</h3>
-        <form action="{{ route('assignments.ielts.writing.store') }}" method="POST">
-            @csrf
-            <input type="hidden" name="task_type" id="modalTaskTypeInput" value="1">
-            <input type="hidden" name="category" value="practice">
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Practice Number</label>
-                    <input type="number" name="meeting_number" required class="w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                    <input type="text" name="title" required class="w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Prompt / Question</label>
-                    <textarea name="prompt" rows="4" required class="w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"></textarea>
-                </div>
-            </div>
-            <div class="mt-6 flex justify-end gap-3">
-                <button type="button" onclick="document.getElementById('createMeetingModal').classList.add('hidden')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Create Practice</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-
-<!-- Edit Modal -->
-<div id="editMeetingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6">
-        <h3 class="text-xl font-bold mb-4">Edit Practice</h3>
-        <form id="editForm" method="POST">
-            @csrf
-            @method('PUT')
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                    <input type="text" id="edit_title" name="title" required class="w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Prompt / Question</label>
-                    <textarea id="edit_prompt" name="prompt" rows="4" required class="w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"></textarea>
-                </div>
-            </div>
-            <div class="mt-6 flex justify-end gap-3">
-                <button type="button" onclick="document.getElementById('editMeetingModal').classList.add('hidden')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Changes</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-    function openCreateModal(taskType) {
-        document.getElementById('modalTaskTypeDisplay').innerText = taskType;
-        document.getElementById('modalTaskTypeInput').value = taskType;
-        document.getElementById('createMeetingModal').classList.remove('hidden');
-    }
-    
-    function editMeeting(meeting) {
-        document.getElementById('edit_title').value = meeting.title;
-        document.getElementById('edit_prompt').value = meeting.prompt;
-        
-        let form = document.getElementById('editForm');
-        form.action = "/assignments/ielts-academic/writing/" + meeting.id;
-        
-        document.getElementById('editMeetingModal').classList.remove('hidden');
-    }
-</script>
 @endsection

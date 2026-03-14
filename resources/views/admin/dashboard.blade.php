@@ -225,13 +225,19 @@
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100" x-text="formatTime(student.last_activity)">
                                             </span>
                                         </td>
-                                        <td class="py-4 text-right">
+                                        <td class="py-4 text-right flex flex-col gap-2 items-end">
                                             <template x-if="student.role === 'student'">
                                                 <a :href="`/admin/students/${student.id}`" class="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition inline-block">View Details</a>
                                             </template>
                                             <template x-if="student.role === 'guest'">
                                                 <a :href="`/admin/users/${student.id}`" class="px-3 py-1.5 text-xs font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-lg transition shadow-sm inline-block">Manage Guest</a>
                                             </template>
+                                            <a :href="`/admin/remote-view/${student.id}`" target="_blank" class="px-3 py-1.5 text-xs font-medium text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition shadow-sm inline-block">
+                                                <div class="flex items-center gap-1.5">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                                    View Screen
+                                                </div>
+                                            </a>
                                         </td>
                                     </tr>
                                 </template>

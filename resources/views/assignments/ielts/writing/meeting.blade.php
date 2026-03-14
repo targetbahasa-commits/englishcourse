@@ -1,8 +1,9 @@
 @extends('layouts.admin')
 
-@section('head')
+@push('styles')
     <script src="{{ asset('js/auto-save.js') }}?v={{ time() }}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -11,7 +12,7 @@
     <script>
         window.APP_VERSION = '{{ now()->timestamp }}';
     </script>
-@endsection
+@endpush
 
 @section('content')
 <script>
@@ -435,8 +436,8 @@
             <div class="p-6 overflow-y-auto flex-1 prose max-w-none">
                 @if($task == 1)
                     <h3 class="text-lg font-bold mb-4">The chart below shows...</h3>
-                    <div class="w-full h-64 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 mb-6 border-2 border-dashed border-gray-200">
-                        [Visual Data Placeholder: Graph/Chart]
+                    <div class="w-full h-80 bg-white rounded-xl flex items-center justify-center mb-6 relative" style="min-height: 300px;">
+                        <canvas id="meetingChart" class="w-full h-full"></canvas>
                     </div>
                     <p>Summarize the information by selecting and reporting the main features, and make comparisons where relevant.</p>
                 @else
@@ -918,5 +919,182 @@
     @include('assignments.ielts.writing.practice_toolbar')
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        // Only run chart initialization if the canvas is present
+        const canvas = document.getElementById('meetingChart');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const meetingNum = {{ $meeting->meeting_number ?? 0 }};
+        const viewType = '{{ $meeting->view_type ?? '' }}';
+
+        // Helper to hide canvas label if it's a table/process/map that requires HTML
+        const showHtmlRender = (html) => {
+            const container = canvas.parentElement;
+            canvas.style.display = 'none';
+            
+            let contentDiv = document.getElementById('htmlContentData');
+            if (!contentDiv) {
+                contentDiv = document.createElement('div');
+                contentDiv.id = 'htmlContentData';
+                contentDiv.className = 'w-full h-full overflow-auto p-4 flex items-center justify-center';
+                container.appendChild(contentDiv);
+            }
+            contentDiv.innerHTML = html;
+        };
+
+        if (meetingNum === 1) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Science', 'Arts', 'Engineering', 'Business', 'IT'],
+                    datasets: [
+                        { label: '2010', data: [12000, 15000, 8000, 18000, 5000], backgroundColor: '#3b82f6' },
+                        { label: '2020', data: [18000, 11000, 15000, 22000, 13000], backgroundColor: '#10b981' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'University Subject Enrolments (2010 vs 2020)' } } }
+            });
+        } else if (meetingNum === 2) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1999', '2004', '2009', '2014', '2019'],
+                    datasets: [
+                        { label: 'USA', data: [35, 60, 75, 87, 92], borderColor: '#3b82f6', tension: 0.1, fill: false, borderWidth: 3 },
+                        { label: 'Canada', data: [28, 55, 71, 85, 90], borderColor: '#ef4444', tension: 0.1, fill: false, borderWidth: 3 },
+                        { label: 'Mexico', data: [5, 12, 25, 45, 65], borderColor: '#10b981', tension: 0.1, fill: false, borderWidth: 3 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Internet Usage Over Time (% of Population)' } }, scales: { y: { min: 0, max: 100 } } }
+            });
+        } else if (meetingNum === 3) {
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Agriculture', 'Industry', 'Domestic'],
+                    datasets: [{ data: [70, 20, 10], backgroundColor: ['#10b981', '#f59e0b', '#3b82f6'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Global Water Usage by Sector' } } }
+            });
+        } else if (meetingNum === 4) {
+            showHtmlRender(`
+                <table class="w-full text-left border-collapse">
+                    <thead><tr class="bg-blue-100"><th class="p-3 border">Country</th><th class="p-3 border">2015 (Millions)</th><th class="p-3 border">2020 (Millions)</th></tr></thead>
+                    <tbody>
+                        <tr><td class="p-3 border font-bold">France</td><td class="p-3 border">84.5</td><td class="p-3 border">11.7</td></tr>
+                        <tr class="bg-gray-50"><td class="p-3 border font-bold">Spain</td><td class="p-3 border">68.2</td><td class="p-3 border">18.9</td></tr>
+                        <tr><td class="p-3 border font-bold">USA</td><td class="p-3 border">77.5</td><td class="p-3 border">19.4</td></tr>
+                        <tr class="bg-gray-50"><td class="p-3 border font-bold">China</td><td class="p-3 border">56.9</td><td class="p-3 border">15.2</td></tr>
+                    </tbody>
+                </table>
+            `);
+        } else if (meetingNum === 5) {
+            showHtmlRender(`
+                <div class="text-center">
+                    <h3 class="font-bold text-lg mb-4 text-gray-700">Process Diagram: Paper Recycling</h3>
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="p-3 bg-blue-100 rounded border border-blue-300 w-48 font-semibold">1. Collection</div>
+                        <i class="fas fa-arrow-down text-gray-400"></i>
+                        <div class="p-3 bg-blue-100 rounded border border-blue-300 w-48 font-semibold">2. Sorting</div>
+                        <i class="fas fa-arrow-down text-gray-400"></i>
+                        <div class="p-3 bg-blue-100 rounded border border-blue-300 w-48 font-semibold">3. Pulping</div>
+                        <i class="fas fa-arrow-down text-gray-400"></i>
+                        <div class="p-3 bg-blue-100 rounded border border-blue-300 w-48 font-semibold">4. De-inking</div>
+                        <i class="fas fa-arrow-down text-gray-400"></i>
+                        <div class="p-3 bg-blue-100 rounded border border-blue-300 w-48 font-semibold">5. Making New Paper</div>
+                    </div>
+                </div>
+            `);
+        } else if (meetingNum === 6) {
+            showHtmlRender(`
+                <div class="text-center h-full flex flex-col justify-center">
+                    <h3 class="font-bold text-lg mb-4 text-gray-700">Map: Town Centre Changes (1990 vs 2020)</h3>
+                    <p class="text-gray-500">[Interactive Map Rendering Not Supported in Demo - Provide Textual Features]</p>
+                    <div class="grid grid-cols-2 gap-4 mt-4 w-full">
+                        <div class="p-4 border-2 border-dashed bg-gray-50"><b>1990:</b> Many old houses, narrow roads, small local shops.</div>
+                        <div class="p-4 border-2 border-dashed bg-blue-50"><b>2020:</b> Old houses replaced by apartments, widened roads, large supermarket added.</div>
+                    </div>
+                </div>
+            `);
+        } else if (meetingNum === 7) {
+             new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Country A', 'Country B', 'Country C'],
+                    datasets: [
+                        { label: 'Coal', data: [40, 20, 15], backgroundColor: '#475569' },
+                        { label: 'Gas', data: [30, 45, 25], backgroundColor: '#f59e0b' },
+                        { label: 'Nuclear', data: [20, 15, 40], backgroundColor: '#3b82f6' },
+                        { label: 'Renewables', data: [10, 20, 20], backgroundColor: '#10b981' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Energy Sources by Country (%)' } }, scales: { x: { stacked: true }, y: { stacked: true, min: 0, max: 100 } } }
+            });
+        } else if (meetingNum === 8) {
+             new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1970', '1980', '1990', '2000', '2010', '2020'],
+                    datasets: [
+                        { label: 'UK', data: [11.5, 10.2, 9.8, 8.5, 7.8, 5.2], borderColor: '#3b82f6', tension: 0.1, fill: false, borderWidth: 3 },
+                        { label: 'Sweden', data: [9.2, 7.5, 6.0, 5.8, 5.2, 3.4], borderColor: '#10b981', tension: 0.1, fill: false, borderWidth: 3 },
+                        { label: 'Italy', data: [4.2, 5.5, 7.0, 7.5, 6.5, 5.0], borderColor: '#ef4444', tension: 0.1, fill: false, borderWidth: 3 },
+                        { label: 'Portugal', data: [1.5, 2.5, 4.0, 5.5, 4.8, 4.2], borderColor: '#f59e0b', tension: 0.1, fill: false, borderWidth: 3 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'CO₂ Emissions per Capita (Metric Tons)' } } }
+            });
+        } else if (meetingNum === 9) {
+            showHtmlRender(`
+                <table class="w-full text-left border-collapse">
+                    <thead><tr class="bg-indigo-100"><th class="p-3 border">Category</th><th class="p-3 border">UK (%)</th><th class="p-3 border">New Zealand (%)</th></tr></thead>
+                    <tbody>
+                        <tr><td class="p-3 border font-bold">Food</td><td class="p-3 border">23%</td><td class="p-3 border">25%</td></tr>
+                        <tr class="bg-gray-50"><td class="p-3 border font-bold">Housing</td><td class="p-3 border">18%</td><td class="p-3 border">21%</td></tr>
+                        <tr><td class="p-3 border font-bold">Transport</td><td class="p-3 border">15%</td><td class="p-3 border">14%</td></tr>
+                        <tr class="bg-gray-50"><td class="p-3 border font-bold">Leisure</td><td class="p-3 border">11%</td><td class="p-3 border">9%</td></tr>
+                        <tr><td class="p-3 border font-bold">Clothing</td><td class="p-3 border">8%</td><td class="p-3 border">6%</td></tr>
+                    </tbody>
+                </table>
+            `);
+        } else if (meetingNum === 10) {
+            showHtmlRender(`
+                <div class="flex h-full w-full gap-4 items-center justify-center p-2">
+                    <div class="w-1/2 h-full"><canvas id="mixedChart1"></canvas></div>
+                    <div class="w-1/2 h-full"><canvas id="mixedChart2"></canvas></div>
+                </div>
+            `);
+            new Chart(document.getElementById('mixedChart1').getContext('2d'), {
+                type: 'pie',
+                data: { labels: ['Car', 'Bus', 'Train', 'Walk/Bike'], datasets: [{ data: [55, 20, 15, 10], backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Primary Commuting Methods' } } }
+            });
+            new Chart(document.getElementById('mixedChart2').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['< 5 Miles', '5 - 15 Miles', '> 15 Miles'],
+                    datasets: [
+                        { label: 'Car', data: [40, 60, 80], backgroundColor: '#ef4444' },
+                        { label: 'Public Transport', data: [20, 30, 15], backgroundColor: '#3b82f6' },
+                        { label: 'Walk/Bike', data: [40, 10, 5], backgroundColor: '#10b981' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Methods by Distance' } } }
+            });
+        } else {
+            // Fallback or Image placeholder
+            showHtmlRender(`
+                <div class="text-center text-gray-400">
+                    <i class="fas fa-chart-line text-4xl mb-3 block"></i>
+                    <p>Chart data for this specific lesson is not mapped yet.</p>
+                </div>
+            `);
+        }
+    }, 200);
+});
+</script>
 
 @endsection

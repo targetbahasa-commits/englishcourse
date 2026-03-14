@@ -26,19 +26,24 @@
             <!-- Left Side: Back Button + Title -->
             <div class="flex items-center gap-4 min-w-0">
                 <!-- Back Button Logic -->
-                @if((isset($meeting) && $meeting->id == 45) || ($meeting->meeting_number >= 1010 && $meeting->meeting_number <= 1019))
+                @if(isset($meeting) && $meeting->category === 'practice_item')
+                    <!-- always use backUrl for practice items (keeps the "type" query param) -->
+                    <a href="{{ $backUrl ?? route('assignments.ielts-academic.writing.practice.index') }}" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors shrink-0">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    </a>
+                @elseif((isset($meeting) && $meeting->id == 45) || ($meeting->meeting_number >= 1010 && $meeting->meeting_number <= 1029))
                     <a href="{{ route('assignments.ielts-academic.writing.meeting', ['task' => 1, 'id' => 9]) }}" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors shrink-0">
                         <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     </a>
-                @elseif((isset($meeting) && $meeting->id == 54) || ($meeting->meeting_number >= 1020 && $meeting->meeting_number <= 1029))
+                @elseif((isset($meeting) && $meeting->id == 54) || ($meeting->meeting_number >= 1030 && $meeting->meeting_number <= 1049))
                     <a href="{{ route('assignments.ielts-academic.writing.meeting', ['task' => 1, 'id' => 10]) }}" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors shrink-0">
-                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        <svg class="w-5 h-5 text_gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     </a>
-                @elseif((isset($meeting) && $meeting->id == 64) || ($meeting->meeting_number >= 1030 && $meeting->meeting_number <= 1039))
+                @elseif((isset($meeting) && $meeting->id == 64) || ($meeting->meeting_number >= 1050 && $meeting->meeting_number <= 1069))
                     <a href="{{ route('assignments.ielts-academic.writing.meeting', ['task' => 1, 'id' => 11]) }}" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors shrink-0">
                         <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     </a>
-                @elseif((isset($meeting) && $meeting->id == 74) || ($meeting->meeting_number >= 1040 && $meeting->meeting_number <= 1049))
+                @elseif((isset($meeting) && $meeting->id == 74) || ($meeting->meeting_number >= 1070 && $meeting->meeting_number <= 1089))
                     <a href="{{ route('assignments.ielts-academic.writing.meeting', ['task' => 1, 'id' => 12]) }}" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors shrink-0">
                         <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     </a>
@@ -88,55 +93,75 @@
             </div>
 
             <div class="overflow-x-auto">
-                @if($meeting->meeting_number >= 1010 && $meeting->meeting_number <= 1019)
+                @if($meeting->meeting_number == 111 || ($meeting->meeting_number >= 1010 && $meeting->meeting_number <= 1029))
                     <!-- Line Chart -->
-                    <div class="relative h-[800px] w-full min-w-[300px]" style="height: 800px;">
+                    <div class="relative h-[580px] w-full min-w-[300px]" style="height: 580px;">
                         <canvas id="practiceLineChart"></canvas>
                     </div>
-                @elseif($meeting->meeting_number >= 1020 && $meeting->meeting_number <= 1029)
+                @elseif(($meeting->meeting_number >= 1030 && $meeting->meeting_number <= 1049) || $meeting->id == 67)
                     <!-- Bar Chart -->
-                    <div class="relative h-[800px] w-full min-w-[300px]" style="height: 800px;">
+                    <div class="relative h-[580px] w-full min-w-[300px]" style="height: 580px;">
                         <canvas id="practiceBarChart"></canvas>
                     </div>
-                @elseif($meeting->meeting_number >= 1030 && $meeting->meeting_number <= 1039)
+                @elseif($meeting->meeting_number >= 1050 && $meeting->meeting_number <= 1069)
                     <!-- Pie Chart -->
-                    <div class="relative h-[800px] w-full flex justify-center min-w-[300px]" style="height: 800px;">
-                        <canvas id="practicePieChart"></canvas>
-                    </div>
-                @elseif($meeting->meeting_number >= 1040 && $meeting->meeting_number <= 1049)
+                    @php
+                        $doublePieIds = range(1054, 1069); // 5th-20th pie items (based on sequential meeting numbers)
+                    @endphp
+                    @if(in_array($meeting->meeting_number, $doublePieIds))
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="relative h-[520px] w-full min-w-[300px]" style="height: 520px;">
+                                <canvas id="practicePieChart1"></canvas>
+                            </div>
+                            <div class="relative h-[520px] w-full min-w-[300px]" style="height: 520px;">
+                                <canvas id="practicePieChart2"></canvas>
+                            </div>
+                        </div>
+                    @else
+                        <div class="relative h-[580px] w-full flex justify-center min-w-[300px]" style="height: 580px;">
+                            <canvas id="practicePieChart"></canvas>
+                        </div>
+                    @endif
+                @elseif($meeting->meeting_number >= 1070 && $meeting->meeting_number <= 1089)
                     <!-- Table -->
                     <div id="practiceTableContainer" class="overflow-x-auto rounded-xl shadow-lg border border-gray-100 hidden">
                         <!-- Table will be injected here by JS -->
                     </div>
-                @elseif($meeting->meeting_number >= 1050 && $meeting->meeting_number <= 1059)
+                @elseif($meeting->meeting_number >= 1090 && $meeting->meeting_number <= 1109)
                     <!-- Mixed -->
                     <div id="practiceMixedContainer" class="w-full flex flex-col gap-8 justify-center items-center h-auto min-h-[600px] p-4">
                         <!-- Canvases injected by JS -->
                     </div>
-                @elseif($meeting->meeting_number >= 1060 && $meeting->meeting_number <= 1069)
+                @elseif($meeting->meeting_number >= 1110 && $meeting->meeting_number <= 1129)
                     <!-- Flow Chart -->
                     <!-- Flow Chart -->
                     <div class="flex justify-center items-center py-4">
-                        @if($meeting->meeting_number == 1060)
+                        @if($meeting->meeting_number == 1110)
                              <img src="{{ asset('images/practice/cement_production.png') }}" alt="Cement and Concrete Production Process" class="max-w-full h-auto rounded-lg shadow-sm border border-gray-200">
-                        @elseif($meeting->meeting_number == 1061)
+                        @elseif($meeting->meeting_number == 1111)
                              <img src="{{ asset('images/practice/coconut_oil_production.png') }}" alt="Coconut Oil Manufacturing Process" class="max-w-full h-auto rounded-lg shadow-sm border border-gray-200">
-                        @elseif($meeting->meeting_number == 1062)
+                        @elseif($meeting->meeting_number == 1112)
                              <img src="{{ asset('images/practice/glass_container_production.png') }}" alt="Glass Container Production Process" class="max-w-full h-auto rounded-lg shadow-sm border border-gray-200">
-                        @elseif($meeting->meeting_number == 1063)
+                        @elseif($meeting->meeting_number == 1113)
                              <img src="{{ asset('images/practice/sheep_cloning_process.png') }}" alt="Sheep Embryo Cloning Process" class="max-w-full h-auto rounded-lg shadow-sm border border-gray-200">
-                        @elseif($meeting->meeting_number == 1064)
+                        @elseif($meeting->meeting_number == 1114)
                              <img src="{{ asset('images/practice/water_treatment_process.jpg') }}" alt="Water Treatment Process" class="max-w-full h-auto rounded-lg shadow-sm border border-gray-200">
-                        @elseif($meeting->meeting_number == 1065)
+                        @elseif($meeting->meeting_number == 1115)
                              <img src="{{ asset('images/practice/hydroelectric_power_process.png') }}" alt="Hydroelectric Power Generation Process" class="max-w-full h-auto rounded-lg shadow-sm border border-gray-200">
-                        @elseif($meeting->meeting_number == 1066)
+                        @elseif($meeting->meeting_number == 1116)
                              <img src="{{ asset('images/practice/frog_life_cycle.png') }}" alt="Life Cycle of a Frog" class="max-w-full h-auto rounded-lg shadow-sm border border-gray-200">
-                        @elseif($meeting->meeting_number == 1067)
+                        @elseif($meeting->meeting_number == 1117)
                              <img src="{{ asset('images/practice/silkworm_life_cycle.png') }}" alt="Life Cycle of the Silkworm" class="max-w-full h-auto rounded-lg shadow-sm border border-gray-200">
-                        @elseif($meeting->meeting_number == 1068)
+                        @elseif($meeting->meeting_number == 1118)
                              <img src="{{ asset('images/practice/water_cycle.png') }}" alt="Water Cycle" class="max-w-full h-auto rounded-lg shadow-sm border border-gray-200">
-                        @elseif($meeting->meeting_number == 1069)
+                            @elseif($meeting->meeting_number == 1119)
                              <img src="{{ asset('images/practice/milk_production.png') }}" alt="Milk Production Process" class="max-w-full h-auto rounded-lg shadow-sm border border-gray-200">
+                            @elseif($meeting->meeting_number == 1125)
+                                @php
+                                    $seaTurtlePngPath = public_path('images/practice/sea_turtle_life_cycle.png');
+                                    $seaTurtlePngVersion = file_exists($seaTurtlePngPath) ? filemtime($seaTurtlePngPath) : time();
+                                @endphp
+                                <img src="{{ asset('images/practice/sea_turtle_life_cycle.png') }}?v={{ $seaTurtlePngVersion }}" alt="Life Cycle of Sea Turtles" class="max-w-full h-auto rounded-lg shadow-sm border border-gray-200">
                         @else 
                              <!-- Fallback/Placeholder -->
                             <div class="text-center p-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
@@ -144,7 +169,7 @@
                             </div>
                         @endif
                     </div>
-                @elseif($meeting->meeting_number >= 1070 && $meeting->meeting_number <= 1079)
+                @elseif($meeting->meeting_number >= 1130 && $meeting->meeting_number <= 1149)
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
                         @php
                             $imageUrl = null;
@@ -153,16 +178,16 @@
                             } else {
                                 // Fallback to hardcoded paths
                                 $mapImages = [
-                                    1070 => 'images/practice/paradise_island.png',
-                                    1071 => 'images/practice/happy_valley_shopping_center.png',
-                                    1072 => 'images/practice/felixstone.png',
-                                    1073 => 'images/practice/seaville.png',
-                                    1074 => 'images/practice/islip_town_centre.png',
-                                    1075 => 'images/practice/ryemouth_village.png',
-                                    1076 => 'images/practice/science_park.png',
-                                    1077 => 'images/practice/meadowside_fonton.png',
-                                    1078 => 'images/practice/university_sports_centre.png',
-                                    1079 => 'images/practice/beachfront_area.png',
+                                    1130 => 'images/practice/paradise_island.png',
+                                    1131 => 'images/practice/happy_valley_shopping_center.png',
+                                    1132 => 'images/practice/felixstone.png',
+                                    1133 => 'images/practice/seaville.png',
+                                    1134 => 'images/practice/islip_town_centre.png',
+                                    1135 => 'images/practice/ryemouth_village.png',
+                                    1136 => 'images/practice/science_park.png',
+                                    1137 => 'images/practice/meadowside_fonton.png',
+                                    1138 => 'images/practice/university_sports_centre.png',
+                                    1139 => 'images/practice/beachfront_area.png',
                                 ];
                                 if(isset($mapImages[$meeting->meeting_number])) {
                                     $imageUrl = asset($mapImages[$meeting->meeting_number]);
@@ -783,11 +808,451 @@ document.addEventListener('DOMContentLoaded', () => {
                     ['Private companies', '10%', '35%', '25%', '30%']
                 ]
             }
+        ],
+        1090: [ // Reference-based: Online shopping (Pie + Bar)
+            {
+                type: 'pie',
+                title: '% of U.S. Adults who shop Online (2015)',
+                labels: ['Weekly', 'A few times a month', 'Less Often', 'Never'],
+                datasets: [{
+                    data: [15, 28, 37, 20],
+                    backgroundColor: ['#4f81bd', '#c0504d', '#9bbb59', '#8064a2']
+                }],
+                scales: {}
+            },
+            {
+                type: 'bar',
+                title: 'Shopping preferences of US Adults who Purchase Online',
+                labels: ['All Online Shoppers', 'Weekly online shoppers', 'Monthly online shoppers', 'Less frequent online shoppers'],
+                datasets: [
+                    { label: 'Buy online', data: [34, 62, 42, 18], backgroundColor: '#4f81bd' },
+                    { label: 'Buy in physical store', data: [65, 37, 58, 82], backgroundColor: '#c0504d' }
+                ],
+                scales: { y: { text: 'Percentage (%)', min: 0, max: 90 } }
+            }
+        ],
+        1091: [ // Reference-based: History graduates (Pie + Table)
+            {
+                type: 'pie',
+                title: 'Destination of History Graduates after Undergraduate Degree',
+                labels: ['Full-time work', 'Part-time work', 'Full-time postgrad study', 'Part-time postgrad study', 'Unemployed', 'Unknown'],
+                datasets: [{
+                    data: [56, 15, 7, 4, 12, 6],
+                    backgroundColor: ['#5a5a5a', '#b3b3b3', '#8f8f8f', '#1f1f1f', '#d0d0d0', '#a0a0a0']
+                }],
+                scales: {}
+            },
+            {
+                type: 'table',
+                title: 'Employment Sectors of History Graduates',
+                headers: ['Employment Sectors', 'Percentage', 'Average Income in Pounds Sterling'],
+                rows: [
+                    ['Solicitor', '18%', '57,000'],
+                    ['History Teacher', '30%', '32,000'],
+                    ['Archaeologist', '6%', '29,000'],
+                    ['Historian', '9%', '49,000'],
+                    ['Other', '37%', '30,000']
+                ]
+            }
+        ],
+        1092: [
+            {
+                type: 'pie',
+                title: 'Primary Transport Mode of City Commuters',
+                labels: ['Car', 'Bus', 'Train', 'Bike/Walk'],
+                datasets: [{ data: [46, 24, 18, 12], backgroundColor: ['#4f81bd', '#c0504d', '#9bbb59', '#8064a2'] }],
+                scales: {}
+            },
+            {
+                type: 'bar',
+                title: 'Commuter Preference by Frequency Group',
+                labels: ['All commuters', 'Daily commuters', 'Weekly commuters', 'Occasional commuters'],
+                datasets: [
+                    { label: 'Use public transport', data: [44, 58, 47, 29], backgroundColor: '#4f81bd' },
+                    { label: 'Use private vehicle', data: [56, 42, 53, 71], backgroundColor: '#c0504d' }
+                ],
+                scales: { y: { text: 'Percentage (%)', min: 0, max: 90 } }
+            }
+        ],
+        1093: [
+            {
+                type: 'pie',
+                title: 'Postgraduate Destination of Science Graduates',
+                labels: ['Full-time work', 'Part-time work', 'Further study', 'Unemployed', 'Unknown'],
+                datasets: [{ data: [52, 18, 16, 9, 5], backgroundColor: ['#5a5a5a', '#b3b3b3', '#8f8f8f', '#1f1f1f', '#d0d0d0'] }],
+                scales: {}
+            },
+            {
+                type: 'table',
+                title: 'Employment Sectors of Science Graduates',
+                headers: ['Employment Sectors', 'Percentage', 'Average Income in Pounds Sterling'],
+                rows: [
+                    ['Engineering', '26%', '54,000'],
+                    ['Teaching', '22%', '35,000'],
+                    ['Laboratory', '14%', '38,000'],
+                    ['Research', '11%', '47,000'],
+                    ['Other', '27%', '33,000']
+                ]
+            }
+        ],
+        1094: [
+            {
+                type: 'bar',
+                title: 'Average Monthly Household Utility Spending',
+                labels: ['Electricity', 'Water', 'Internet', 'Gas'],
+                datasets: [
+                    { label: '2018', data: [78, 31, 44, 52], backgroundColor: '#4f81bd' },
+                    { label: '2025', data: [92, 36, 58, 49], backgroundColor: '#c0504d' }
+                ],
+                scales: { y: { text: 'USD' } }
+            },
+            {
+                type: 'table',
+                title: 'Utility Tariff Structure (2025)',
+                headers: ['Utility', 'Base Tariff', 'Peak Tariff', 'Average Bill'],
+                rows: [
+                    ['Electricity', '$0.14/kWh', '$0.22/kWh', '$92'],
+                    ['Water', '$1.9/m3', '$2.4/m3', '$36'],
+                    ['Internet', '$42/month', '$58/month', '$58'],
+                    ['Gas', '$0.10/kWh', '$0.16/kWh', '$49']
+                ]
+            }
+        ],
+        1095: [
+            {
+                type: 'pie',
+                title: 'Preferred Grocery Purchase Channel',
+                labels: ['In-store only', 'Mostly in-store', 'Mostly online', 'Online only'],
+                datasets: [{ data: [33, 29, 24, 14], backgroundColor: ['#4f81bd', '#c0504d', '#9bbb59', '#8064a2'] }],
+                scales: {}
+            },
+            {
+                type: 'bar',
+                title: 'Grocery Buying Preference by Age Group',
+                labels: ['18-29', '30-44', '45-60', '60+'],
+                datasets: [
+                    { label: 'Prefer online', data: [61, 49, 31, 18], backgroundColor: '#4f81bd' },
+                    { label: 'Prefer physical store', data: [39, 51, 69, 82], backgroundColor: '#c0504d' }
+                ],
+                scales: { y: { text: 'Percentage (%)', min: 0, max: 90 } }
+            }
+        ],
+        1096: [
+            {
+                type: 'pie',
+                title: 'Destination of IT Graduates',
+                labels: ['Full-time work', 'Contract work', 'Postgraduate study', 'Unemployed', 'Unknown'],
+                datasets: [{ data: [58, 17, 11, 8, 6], backgroundColor: ['#5a5a5a', '#b3b3b3', '#8f8f8f', '#1f1f1f', '#d0d0d0'] }],
+                scales: {}
+            },
+            {
+                type: 'table',
+                title: 'Employment Sectors of IT Graduates',
+                headers: ['Employment Sectors', 'Percentage', 'Average Income in Pounds Sterling'],
+                rows: [
+                    ['Software Engineer', '32%', '61,000'],
+                    ['Data Analyst', '21%', '49,000'],
+                    ['IT Support', '15%', '34,000'],
+                    ['Cybersecurity', '10%', '58,000'],
+                    ['Other', '22%', '36,000']
+                ]
+            }
+        ],
+        1097: [
+            {
+                type: 'bar',
+                title: 'Annual Tourist Arrivals by Region',
+                labels: ['Europe', 'Asia', 'Americas', 'Africa'],
+                datasets: [
+                    { label: '2019 (millions)', data: [128, 142, 98, 44], backgroundColor: '#4f81bd' },
+                    { label: '2025 (millions)', data: [136, 161, 107, 53], backgroundColor: '#c0504d' }
+                ],
+                scales: { y: { text: 'Millions' } }
+            },
+            {
+                type: 'table',
+                title: 'Average Tourist Spending per Trip (2025)',
+                headers: ['Region', 'Leisure', 'Business', 'Total Average'],
+                rows: [
+                    ['Europe', '$810', '$1,120', '$930'],
+                    ['Asia', '$730', '$1,060', '$860'],
+                    ['Americas', '$790', '$1,180', '$940'],
+                    ['Africa', '$620', '$980', '$770']
+                ]
+            }
+        ],
+        1098: [
+            {
+                type: 'pie',
+                title: 'Device Used for Online Learning',
+                labels: ['Laptop', 'Desktop', 'Tablet', 'Phone'],
+                datasets: [{ data: [49, 18, 16, 17], backgroundColor: ['#4f81bd', '#c0504d', '#9bbb59', '#8064a2'] }],
+                scales: {}
+            },
+            {
+                type: 'bar',
+                title: 'Preferred Learning Mode by User Group',
+                labels: ['All users', 'Daily users', 'Weekly users', 'Occasional users'],
+                datasets: [
+                    { label: 'Prefer online mode', data: [57, 69, 55, 33], backgroundColor: '#4f81bd' },
+                    { label: 'Prefer classroom mode', data: [43, 31, 45, 67], backgroundColor: '#c0504d' }
+                ],
+                scales: { y: { text: 'Percentage (%)', min: 0, max: 90 } }
+            }
+        ],
+        1099: [
+            {
+                type: 'pie',
+                title: 'Destination of Business Graduates',
+                labels: ['Full-time work', 'Part-time work', 'Postgraduate study', 'Unemployed', 'Unknown'],
+                datasets: [{ data: [54, 19, 10, 11, 6], backgroundColor: ['#5a5a5a', '#b3b3b3', '#8f8f8f', '#1f1f1f', '#d0d0d0'] }],
+                scales: {}
+            },
+            {
+                type: 'table',
+                title: 'Employment Sectors of Business Graduates',
+                headers: ['Employment Sectors', 'Percentage', 'Average Income in Pounds Sterling'],
+                rows: [
+                    ['Finance', '24%', '56,000'],
+                    ['Sales', '21%', '41,000'],
+                    ['Marketing', '17%', '45,000'],
+                    ['Operations', '13%', '43,000'],
+                    ['Other', '25%', '34,000']
+                ]
+            }
+        ],
+        1100: [
+            {
+                type: 'bar',
+                title: 'Electricity Generation by Source',
+                labels: ['Solar', 'Wind', 'Hydro', 'Gas', 'Coal'],
+                datasets: [
+                    { label: '2015 (TWh)', data: [32, 51, 88, 142, 171], backgroundColor: '#4f81bd' },
+                    { label: '2025 (TWh)', data: [94, 116, 101, 138, 102], backgroundColor: '#c0504d' }
+                ],
+                scales: { y: { text: 'TWh' } }
+            },
+            {
+                type: 'table',
+                title: 'Average Carbon Emission by Source (2025)',
+                headers: ['Source', 'gCO2/kWh', 'Share of Grid', 'Trend'],
+                rows: [
+                    ['Solar', '48', '17%', 'Up'],
+                    ['Wind', '14', '21%', 'Up'],
+                    ['Hydro', '24', '18%', 'Stable'],
+                    ['Gas', '450', '25%', 'Down'],
+                    ['Coal', '820', '19%', 'Down']
+                ]
+            }
+        ],
+        1101: [
+            {
+                type: 'pie',
+                title: 'How People Access News',
+                labels: ['Mobile apps', 'TV', 'Web portals', 'Print media'],
+                datasets: [{ data: [38, 27, 23, 12], backgroundColor: ['#4f81bd', '#c0504d', '#9bbb59', '#8064a2'] }],
+                scales: {}
+            },
+            {
+                type: 'bar',
+                title: 'Trust Level by News Channel',
+                labels: ['All adults', '18-29', '30-49', '50+'],
+                datasets: [
+                    { label: 'Trust digital sources', data: [41, 63, 44, 23], backgroundColor: '#4f81bd' },
+                    { label: 'Trust traditional sources', data: [59, 37, 56, 77], backgroundColor: '#c0504d' }
+                ],
+                scales: { y: { text: 'Percentage (%)', min: 0, max: 90 } }
+            }
+        ],
+        1102: [
+            {
+                type: 'pie',
+                title: 'Destination of Arts Graduates',
+                labels: ['Full-time work', 'Freelance', 'Postgraduate study', 'Unemployed', 'Unknown'],
+                datasets: [{ data: [43, 21, 14, 15, 7], backgroundColor: ['#5a5a5a', '#b3b3b3', '#8f8f8f', '#1f1f1f', '#d0d0d0'] }],
+                scales: {}
+            },
+            {
+                type: 'table',
+                title: 'Employment Sectors of Arts Graduates',
+                headers: ['Employment Sectors', 'Percentage', 'Average Income in Pounds Sterling'],
+                rows: [
+                    ['Design', '23%', '39,000'],
+                    ['Teaching', '19%', '34,000'],
+                    ['Media', '16%', '42,000'],
+                    ['Administration', '12%', '31,000'],
+                    ['Other', '30%', '29,000']
+                ]
+            }
+        ],
+        1103: [
+            {
+                type: 'bar',
+                title: 'Hospital Patient Visits by Department',
+                labels: ['Emergency', 'Cardiology', 'Pediatrics', 'Orthopedics'],
+                datasets: [
+                    { label: '2020 (thousand)', data: [122, 74, 83, 61], backgroundColor: '#4f81bd' },
+                    { label: '2025 (thousand)', data: [138, 81, 90, 69], backgroundColor: '#c0504d' }
+                ],
+                scales: { y: { text: 'Thousand visits' } }
+            },
+            {
+                type: 'table',
+                title: 'Average Waiting Time and Cost (2025)',
+                headers: ['Department', 'Avg Waiting Time', 'Avg Cost per Visit', 'Satisfaction'],
+                rows: [
+                    ['Emergency', '56 min', '$120', '78%'],
+                    ['Cardiology', '38 min', '$190', '84%'],
+                    ['Pediatrics', '31 min', '$95', '88%'],
+                    ['Orthopedics', '42 min', '$170', '81%']
+                ]
+            }
+        ],
+        1104: [
+            {
+                type: 'pie',
+                title: 'Household Waste Composition',
+                labels: ['Organic', 'Plastic', 'Paper', 'Glass/Metal'],
+                datasets: [{ data: [41, 24, 22, 13], backgroundColor: ['#4f81bd', '#c0504d', '#9bbb59', '#8064a2'] }],
+                scales: {}
+            },
+            {
+                type: 'bar',
+                title: 'Waste Processing Method by Area',
+                labels: ['Urban', 'Suburban', 'Rural', 'National Avg'],
+                datasets: [
+                    { label: 'Recycled', data: [48, 39, 31, 41], backgroundColor: '#4f81bd' },
+                    { label: 'Landfilled', data: [52, 61, 69, 59], backgroundColor: '#c0504d' }
+                ],
+                scales: { y: { text: 'Percentage (%)', min: 0, max: 90 } }
+            }
+        ],
+        1105: [
+            {
+                type: 'pie',
+                title: 'Destination of Language Graduates',
+                labels: ['Full-time work', 'Part-time work', 'Further study', 'Unemployed', 'Unknown'],
+                datasets: [{ data: [49, 20, 13, 12, 6], backgroundColor: ['#5a5a5a', '#b3b3b3', '#8f8f8f', '#1f1f1f', '#d0d0d0'] }],
+                scales: {}
+            },
+            {
+                type: 'table',
+                title: 'Employment Sectors of Language Graduates',
+                headers: ['Employment Sectors', 'Percentage', 'Average Income in Pounds Sterling'],
+                rows: [
+                    ['Translation', '25%', '44,000'],
+                    ['Teaching', '29%', '33,000'],
+                    ['Tourism', '14%', '31,000'],
+                    ['Publishing', '8%', '36,000'],
+                    ['Other', '24%', '30,000']
+                ]
+            }
+        ],
+        1106: [
+            {
+                type: 'bar',
+                title: 'Quarterly E-commerce Revenue by Category',
+                labels: ['Electronics', 'Fashion', 'Home Goods', 'Beauty'],
+                datasets: [
+                    { label: 'Q1 (million USD)', data: [84, 63, 52, 41], backgroundColor: '#4f81bd' },
+                    { label: 'Q4 (million USD)', data: [102, 71, 64, 56], backgroundColor: '#c0504d' }
+                ],
+                scales: { y: { text: 'Million USD' } }
+            },
+            {
+                type: 'table',
+                title: 'Average Basket Value and Return Rate',
+                headers: ['Category', 'Avg Basket Value', 'Return Rate', 'YoY Growth'],
+                rows: [
+                    ['Electronics', '$189', '7.2%', '11%'],
+                    ['Fashion', '$74', '13.4%', '8%'],
+                    ['Home Goods', '$96', '6.3%', '14%'],
+                    ['Beauty', '$52', '4.9%', '16%']
+                ]
+            }
+        ],
+        1107: [
+            {
+                type: 'pie',
+                title: 'Preferred Banking Channel',
+                labels: ['Mobile app', 'Online web', 'Branch visit', 'Phone banking'],
+                datasets: [{ data: [44, 27, 21, 8], backgroundColor: ['#4f81bd', '#c0504d', '#9bbb59', '#8064a2'] }],
+                scales: {}
+            },
+            {
+                type: 'bar',
+                title: 'Channel Preference by Customer Segment',
+                labels: ['All customers', 'Premium', 'Standard', 'Senior'],
+                datasets: [
+                    { label: 'Prefer digital banking', data: [71, 83, 74, 39], backgroundColor: '#4f81bd' },
+                    { label: 'Prefer in-person banking', data: [29, 17, 26, 61], backgroundColor: '#c0504d' }
+                ],
+                scales: { y: { text: 'Percentage (%)', min: 0, max: 90 } }
+            }
+        ],
+        1108: [
+            {
+                type: 'pie',
+                title: 'Destination of Engineering Graduates',
+                labels: ['Full-time work', 'Part-time work', 'Postgraduate study', 'Unemployed', 'Unknown'],
+                datasets: [{ data: [61, 12, 15, 7, 5], backgroundColor: ['#5a5a5a', '#b3b3b3', '#8f8f8f', '#1f1f1f', '#d0d0d0'] }],
+                scales: {}
+            },
+            {
+                type: 'table',
+                title: 'Employment Sectors of Engineering Graduates',
+                headers: ['Employment Sectors', 'Percentage', 'Average Income in Pounds Sterling'],
+                rows: [
+                    ['Civil Engineering', '20%', '52,000'],
+                    ['Mechanical Engineering', '23%', '55,000'],
+                    ['Software Engineering', '27%', '63,000'],
+                    ['Manufacturing', '11%', '46,000'],
+                    ['Other', '19%', '37,000']
+                ]
+            }
+        ],
+        1109: [
+            {
+                type: 'bar',
+                title: 'Public School Enrollment by Level',
+                labels: ['Primary', 'Lower Secondary', 'Upper Secondary', 'Vocational'],
+                datasets: [
+                    { label: '2016 (thousand)', data: [690, 472, 328, 119], backgroundColor: '#4f81bd' },
+                    { label: '2025 (thousand)', data: [721, 496, 351, 164], backgroundColor: '#c0504d' }
+                ],
+                scales: { y: { text: 'Thousand students' } }
+            },
+            {
+                type: 'table',
+                title: 'Teacher-Student Ratio and Graduation Rate (2025)',
+                headers: ['Level', 'Teacher-Student Ratio', 'Graduation Rate', 'Average Annual Cost'],
+                rows: [
+                    ['Primary', '1:24', '96%', '$2,100'],
+                    ['Lower Secondary', '1:22', '92%', '$2,600'],
+                    ['Upper Secondary', '1:20', '89%', '$3,200'],
+                    ['Vocational', '1:17', '86%', '$3,800']
+                ]
+            }
         ]
     };
 
+    // Safety fallback: if any mixed meeting key is missing, map 1090-1109 to 1050-1059.
+    for (let id = 1090; id <= 1109; id += 1) {
+        if (!mixedConfigs[id]) {
+            const sourceId = 1050 + ((id - 1090) % 10);
+            mixedConfigs[id] = mixedConfigs[sourceId];
+        }
+    }
+
     // --- Line Chart Data Configs ---
     const lineConfigs = {
+        111: { // Population Statistics (fallback for meeting 111)
+            title: 'Population Statistics',
+            labels: ['2010', '2012', '2014', '2016', '2018'],
+            datasets: [
+                { label: 'Total Population (millions)', data: [62, 65, 68, 70, 73], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 4, pointBackgroundColor: '#3b82f6', pointRadius: 5, tension: 0.4, fill: true }
+            ]
+        },
         1010: { // Solar vs Coal (Original)
             title: 'Energy Production (TWh)',
             labels: ['2010', '2012', '2014', '2016', '2018', '2020'],
@@ -873,12 +1338,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: 'Platinum', data: [1050, 980, 950, 850, 850, 900], borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.1)', borderWidth: 4, pointBackgroundColor: '#6366f1', pointRadius: 5, tension: 0.4, fill: true },
                 { label: 'Palladium', data: [690, 610, 870, 1030, 1500, 2300], borderColor: '#ec4899', backgroundColor: 'rgba(236, 72, 153, 0.1)', borderWidth: 4, pointBackgroundColor: '#ec4899', pointRadius: 5, tension: 0.4, fill: true }
             ]
-        }
+        },
+        // additional line chart practices
+        1020: { title: 'Radio and Television Audiences (UK Oct–Dec 1992)', labels: ['6am','9am','12pm','3pm','6pm','9pm','12am'], datasets: [{ label:'Radio (%)', data:[20,30,25,35,45,50,40], borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.1)', borderWidth:4, pointRadius:4, tension:0.4, fill:true }, { label:'Television (%)', data:[10,25,40,55,65,70,60], borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)', borderWidth:4, pointRadius:4, tension:0.4, fill:true }] },
+        1021: { title: 'Channel One News Viewing Figures', labels: ['Jan','Apr','Jul','Oct'], datasets: [{ label:'1pm', data:[2,3,2.5,3], borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.1)', borderWidth:4, pointRadius:4, tension:0.4, fill:true }, { label:'6pm', data:[4,5,4.5,5], borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', borderWidth:4, pointRadius:4, tension:0.4, fill:true }, { label:'9:30pm', data:[3,3.5,3,3.5], borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.1)', borderWidth:4, pointRadius:4, tension:0.4, fill:true }, { label:'11pm', data:[2.5,2,2.2,2], borderColor:'#6366f1', backgroundColor:'rgba(99,102,241,0.1)', borderWidth:4, pointRadius:4, tension:0.4, fill:true }] },
+        1022: { title: 'Tourist Attractions in Scotland', labels: ['2010','2012','2014','2016'], datasets: [{ label:'Aquarium', data:[15,18,20,22], borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.1)', borderWidth:4, pointRadius:4, tension:0.4, fill:true }, { label:'Castle', data:[25,23,24,26], borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)', borderWidth:4, pointRadius:4, tension:0.4, fill:true }, { label:'Zoo', data:[10,12,15,17], borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', borderWidth:4, pointRadius:4, tension:0.4, fill:true }, { label:'Festival', data:[5,8,12,15], borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.1)', borderWidth:4, pointRadius:4, tension:0.4, fill:true }] },
+        1023: { title: 'Daily Energy Consumption Fluctuations', labels: ['0h','6h','12h','18h','24h'], datasets: [{ label:'Residential', data:[30,20,50,40,30], borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.1)', borderWidth:4, pointRadius:4, tension:0.4, fill:true }, { label:'Industrial', data:[40,60,30,50,40], borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)', borderWidth:4, pointRadius:4, tension:0.4, fill:true }] },
+        1024: { title: 'Internet Usage by Age Group', labels: ['Morning','Afternoon','Evening','Night'], datasets: [{ label:'18-25', data:[20,35,50,40], borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.1)', borderWidth:4, pointRadius:4, tension:0.4, fill:true }, { label:'26-40', data:[15,30,45,35], borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', borderWidth:4, pointRadius:4, tension:0.4, fill:true }, { label:'41-60', data:[10,20,30,25], borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.1)', borderWidth:4, pointRadius:4, tension:0.4, fill:true }] },
+        1025: { title: 'Temperature Variations Over a Week', labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets: [{ label:'Morning (Naik)', data:[15,16,18,19,20,21,22], borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }, { label:'Afternoon (Turun)', data:[28,27,26,25,24,23,22], borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }, { label:'Evening (Stabil)', data:[20,20,20,20,20,20,20], borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }, { label:'Night (Fluktuasi)', data:[18,21,19,22,18,20,17], borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }] },
+        1026: { title: 'Stock Market Index Changes', labels: ['9am','11am','1pm','3pm','5pm'], datasets: [ { label:'NASDAQ', data:[25, 30, 28, 32, 35], borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }, { label:'Dow Jones', data:[30, 28, 29, 27, 25], borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }, { label:'S&P 500', data:[20, 22, 24, 23, 26], borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }, { label:'FTSE 100', data:[15, 18, 17, 19, 18], borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }, { label:'CAC 40', data:[12, 14, 16, 15, 17], borderColor:'#8b5cf6', backgroundColor:'rgba(139,92,246,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true } ] },
+        1027: { title: 'Water Usage Throughout the Day', labels: ['0h','4h','8h','12h','16h','20h','24h'], datasets: [{ label:'Residential (Fluktuasi)', data:[50,30,40,80,70,60,55], borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }, { label:'Commercial (Naik)', data:[40,45,50,55,60,65,70], borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }, { label:'Industrial (Stabil)', data:[60,58,60,59,61,60,59], borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }, { label:'Agricultural (Turun)', data:[70,65,60,55,50,45,40], borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }] },
+        1028: { title: 'Flight Departures by Time of Day', labels: ['6am','9am','12pm','3pm','6pm','9pm'], datasets: [ { label:'Domestic (Naik)', data:[5,10,15,20,25,30], borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }, { label:'International (Fluktuasi)', data:[3,7,5,18,15,8], borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }, { label:'Regional (Stabil)', data:[8,9,8,9,8,9], borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }, { label:'Cargo (Turun)', data:[12,10,8,6,4,2], borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true } ] },
+        1029: { title: 'Retail Store Footfall', labels: ['8am','10am','12pm','2pm','4pm','6pm','8pm'], datasets: [ { label:'Weekday (Fluktuasi)', data:[20,40,30,80,60,50,30], borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }, { label:'Weekend (Naik)', data:[15,20,30,40,50,55,60], borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }, { label:'Holiday (Stabil)', data:[25,25,25,25,25,25,25], borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true }, { label:'Peak Hours (Turun)', data:[90,80,70,60,50,40,30], borderColor:'#8b5cf6', backgroundColor:'rgba(139,92,246,0.1)', borderWidth:4, pointRadius:4, tension:0, fill:true } ] }
     };
 
     // --- Bar Chart Data Configs ---
     const barConfigs = {
-        1020: { // Trade Volume (Original)
+        1030: { // Trade Volume (Original)
             title: 'Trade Volume (Billion USD)',
             labels: ['USA', 'China', 'India', 'Russia', 'Japan'],
             datasets: [
@@ -886,7 +1362,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: 'Import', data: [800, 600, 400, 200, 500], backgroundColor: 'rgba(239, 68, 68, 0.8)', borderColor: '#dc2626', borderWidth: 2 }
             ]
         },
-        1021: { // Graduate Employment
+        1031: { // Graduate Employment
             title: 'Graduate Employment Rates by Field (%)',
             labels: ['Science', 'Engineering', 'Arts', 'Business', 'Law'],
             datasets: [
@@ -894,7 +1370,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: '2020', data: [90, 95, 65, 75, 82], backgroundColor: 'rgba(239, 68, 68, 0.8)', borderColor: '#dc2626', borderWidth: 2 }
             ]
         },
-        1022: { // Tourism
+        1032: { // Tourism
             title: 'Annual Tourist Arrivals (Millions)',
             labels: ['France', 'USA', 'Spain', 'China', 'Italy'],
             datasets: [
@@ -902,7 +1378,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: '2019', data: [91, 80, 84, 66, 65], backgroundColor: 'rgba(239, 68, 68, 0.8)', borderColor: '#dc2626', borderWidth: 2 }
             ]
         },
-        1023: { // Screen Time
+        1033: { // Screen Time
             title: 'Average Daily Screen Time (Hours)',
             labels: ['Teens', 'Young Adults', 'Adults', 'Seniors'],
             datasets: [
@@ -910,7 +1386,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: 'Desktop', data: [2.0, 3.5, 4.0, 2.0], backgroundColor: 'rgba(239, 68, 68, 0.8)', borderColor: '#dc2626', borderWidth: 2 }
             ]
         },
-        1024: { // Renewable Energy
+        1034: { // Renewable Energy
             title: 'Renewable Energy Capacity (GW)',
             labels: ['Wind', 'Solar', 'Hydro', 'Biomass'],
             datasets: [
@@ -919,7 +1395,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: '2025 (Projected)', data: [1100, 1200, 1300, 150], backgroundColor: 'rgba(16, 185, 129, 0.8)', borderColor: '#059669', borderWidth: 2 }
             ]
         },
-        1025: { // Gender Pay Gap
+        1035: { // Gender Pay Gap
             title: 'Average Hourly Earnings ($)',
             labels: ['Healthcare', 'Education', 'Finance', 'Tech', 'Construction'],
             datasets: [
@@ -928,7 +1404,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: 'Industry Avg', data: [33.5, 29.5, 41.5, 46, 27], backgroundColor: 'rgba(245, 158, 11, 0.8)', borderColor: '#d97706', borderWidth: 2 }
             ]
         },
-        1026: { // Household Waste
+        1036: { // Household Waste
             title: 'Weekly Household Waste (kg)',
             labels: ['Paper', 'Plastic', 'Glass', 'Metal', 'Organic'],
             datasets: [
@@ -937,7 +1413,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: 'Compost', data: [4, 0.5, 0.1, 0, 7], backgroundColor: 'rgba(245, 158, 11, 0.8)', borderColor: '#d97706', borderWidth: 2 }
             ]
         },
-        1027: { // Transportation Mode
+        1037: { // Transportation Mode
             title: 'Commuting Method to Work (%)',
             labels: ['Car', 'Bus', 'Train', 'Bike', 'Walk'],
             datasets: [
@@ -947,7 +1423,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: 'City D', data: [10, 20, 40, 20, 10], backgroundColor: 'rgba(139, 92, 246, 0.8)', borderColor: '#7c3aed', borderWidth: 2 }
             ]
         },
-        1028: { // Housing Types
+        1038: { // Housing Types
             title: 'Housing Preferences by Age Group (%)',
             labels: ['Young Adults', 'Families', 'Retirees'],
             datasets: [
@@ -957,7 +1433,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: 'Townhouse', data: [10, 10, 10], backgroundColor: 'rgba(245, 158, 11, 0.8)', borderColor: '#d97706', borderWidth: 2 }
             ]
         },
-        1029: { // Olympic Medals
+        1039: { // Olympic Medals
             title: 'Olympic Medals Won (Top 5 Countries)',
             labels: ['USA', 'China', 'Japan', 'GB', 'ROC'],
             datasets: [
@@ -966,10 +1442,105 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: 'Bronze', data: [33, 18, 17, 22, 23], backgroundColor: '#b45309', borderColor: '#78350f', borderWidth: 2 },
                 { label: 'Total', data: [113, 88, 58, 65, 71], backgroundColor: '#3b82f6', borderColor: '#2563eb', borderWidth: 2 }
             ]
+        },
+        1040: { // Manufacturing Output by Country
+            title: 'Manufacturing Output by Country',
+            labels: ['Country A','Country B','Country C','Country D'],
+            datasets: [
+                { label: '2010', data: [50,60,70,80], backgroundColor: 'rgba(59,130,246,0.8)', borderColor: '#2563eb', borderWidth: 2 },
+                { label: '2020', data: [60,70,80,90], backgroundColor: 'rgba(239,68,68,0.8)', borderColor: '#dc2626', borderWidth: 2 }
+            ]
+        },
+        1041: { // Retail Sales by Category
+            title: 'Retail Sales by Category',
+            labels: ['Electronics','Clothing','Food','Furniture','Toys'],
+            datasets: [
+                { label: '2019', data: [20,30,25,15,10], backgroundColor: 'rgba(59,130,246,0.8)', borderColor: '#2563eb', borderWidth: 2 },
+                { label: '2021', data: [25,35,20,18,12], backgroundColor: 'rgba(239,68,68,0.8)', borderColor: '#dc2626', borderWidth: 2 }
+            ]
+        },
+        1042: { // Annual Coffee Consumption
+            title: 'Annual Coffee Consumption (kg per capita)',
+            labels: ['Country A','Country B','Country C','Country D'],
+            datasets: [
+                { label: '2015', data: [4,5,3,6], backgroundColor:'rgba(59,130,246,0.8)',borderColor:'#2563eb',borderWidth:2 },
+                { label: '2020', data: [5,6,4,7], backgroundColor:'rgba(239,68,68,0.8)',borderColor:'#dc2626',borderWidth:2 }
+            ]
+        },
+        1043: { // Internet Connectivity
+            title: 'Internet Connectivity Speed by Region',
+            labels: ['North','South','East','West'],
+            datasets:[
+                { label:'Average Mbps', data:[50,60,55,45], backgroundColor:'rgba(59,130,246,0.8)',borderColor:'#2563eb',borderWidth:2 }
+            ]
+        },
+        1044: { // Public Transport Usage
+            title: 'Public Transportation Usage Trends',
+            labels: ['Bus','Train','Metro','Tram'],
+            datasets:[
+                { label:'Users (Millions)', data:[30,40,50,20], backgroundColor:'rgba(239,68,68,0.8)',borderColor:'#dc2626',borderWidth:2 }
+            ]
+        },
+        1045: { // Movie Box Office
+            title: 'Movie Box Office Revenue by Genre',
+            labels: ['Action','Comedy','Drama','Horror','Sci-Fi'],
+            datasets:[
+                { label:'Revenue ($M)', data:[120,90,80,60,100], backgroundColor:'rgba(59,130,246,0.8)',borderColor:'#2563eb',borderWidth:2 }
+            ]
+        },
+        1046: { // Life Expectancy
+            title: 'Average Life Expectancy by Country',
+            labels: ['Country A','Country B','Country C','Country D','Country E'],
+            datasets:[
+                { label:'Years', data:[78,80,75,82,79], backgroundColor:'rgba(16,185,129,0.8)',borderColor:'#059669',borderWidth:2 }
+            ]
+        },
+        1047: { // Fast Food Growth
+            title: 'Fast Food Restaurant Growth',
+            labels: ['2010','2012','2014','2016','2018'],
+            datasets:[
+                { label:'McDonalds', data:[800, 950, 1100, 1300, 1500], backgroundColor:'rgba(59,130,246,0.8)',borderColor:'#2563eb',borderWidth:2 },
+                { label:'KFC', data:[600, 750, 900, 1050, 1200], backgroundColor:'rgba(239,68,68,0.8)',borderColor:'#dc2626',borderWidth:2 },
+                { label:'Subway', data:[500, 620, 740, 860, 980], backgroundColor:'rgba(16,185,129,0.8)',borderColor:'#059669',borderWidth:2 },
+                { label:'Burger King', data:[400, 520, 640, 760, 880], backgroundColor:'rgba(245,158,11,0.8)',borderColor:'#d97706',borderWidth:2 }
+            ]
+        },
+        1048: { // University Funding
+            title: 'University Funding by Department (%)',
+            labels: ['Science','Arts','Business','Engineering','Medicine'],
+            datasets:[
+                { label:'2018', data:[22, 18, 19, 21, 20], backgroundColor:'rgba(59,130,246,0.8)',borderColor:'#2563eb',borderWidth:2 },
+                { label:'2019', data:[23, 17, 20, 20, 20], backgroundColor:'rgba(239,68,68,0.8)',borderColor:'#dc2626',borderWidth:2 },
+                { label:'2020', data:[24, 16, 21, 19, 20], backgroundColor:'rgba(16,185,129,0.8)',borderColor:'#059669',borderWidth:2 }
+            ]
+        },
+        1049: { // Vehicle Ownership
+            title: 'Vehicle Ownership Across Age Groups',
+            labels: ['18-25','26-35','36-45','46-55','56+'],
+            datasets:[
+                { label:'Cars', data:[50,60,70,65,55], backgroundColor:'rgba(59,130,246,0.8)',borderColor:'#2563eb',borderWidth:2 },
+                { label:'Motorcycles', data:[30,40,50,45,35], backgroundColor:'rgba(239,68,68,0.8)',borderColor:'#dc2626',borderWidth:2 },
+                { label:'Bicycles', data:[20,15,10,12,18], backgroundColor:'rgba(16,185,129,0.8)',borderColor:'#059669',borderWidth:2 },
+                { label:'Public Transport Passes', data:[10,15,20,25,30], backgroundColor:'rgba(245,158,11,0.8)',borderColor:'#d97706',borderWidth:2 }
+            ]
+        },
+        67: { // Custom for Meeting 67
+            title: 'Market Share by Product Category (%)',
+            labels: ['Electronics', 'Clothing', 'Food', 'Furniture', 'Books'],
+            datasets: [
+                { label: 'Company A', data: [20, 30, 25, 15, 10], backgroundColor: 'rgba(59, 130, 246, 0.8)', borderColor: '#2563eb', borderWidth: 2 },
+                { label: 'Company B', data: [25, 20, 30, 20, 15], backgroundColor: 'rgba(239, 68, 68, 0.8)', borderColor: '#dc2626', borderWidth: 2 },
+                { label: 'Company C', data: [15, 25, 20, 25, 20], backgroundColor: 'rgba(16, 185, 129, 0.8)', borderColor: '#059669', borderWidth: 2 },
+                { label: 'Company D', data: [30, 15, 15, 20, 25], backgroundColor: 'rgba(245, 158, 11, 0.8)', borderColor: '#d97706', borderWidth: 2 },
+                { label: 'Company E', data: [10, 10, 10, 20, 30], backgroundColor: 'rgba(139, 92, 246, 0.8)', borderColor: '#7c3aed', borderWidth: 2 }
+            ]
         }
     };
 
     // --- Pie Chart Data Configs ---
+    // palettes for double pie charts (left normal, right different)
+    const pieLightPalette = ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+    const pieDarkPalette  = ['#5c3d2e', '#dc2626', '#6b7280', '#000000', '#fde047', '#86efac', '#06b6d4'];
     const pieConfigs = {
         1030: { // Household Spending (Original)
             title: 'Average Household Spending',
@@ -1072,6 +1643,419 @@ document.addEventListener('DOMContentLoaded', () => {
             }]
         }
     };
+
+    const doublePieConfigs = {
+        // 5th-20th pie practices (meeting 1054-1069)
+        1054: {
+            left: {
+                title: 'Reasons for cycling to work',
+                labels: ['Health and fitness', 'Less pollution', 'No parking problems', 'No costs', 'Faster than driving'],
+                datasets: [{ data: [35, 25, 15, 10, 15], backgroundColor: ['#f97316', '#fde047', '#22c55e', '#a16207', '#4b5563'], borderWidth: 2, borderColor: '#ffffff' }]
+            },
+            right: {
+                title: 'Reasons for driving to work',
+                labels: ['Comfort', 'Distance to work', 'Reliability', 'Safer at night', 'Transporting items'],
+                datasets: [{ data: [28, 22, 18, 18, 14], backgroundColor: ['#2563eb', '#7c3aed', '#facc15', '#14b8a6', '#ef4444'], borderWidth: 2, borderColor: '#ffffff' }]
+            }
+        },
+        1055: {
+            left: {
+                title: 'Why people prefer public transport',
+                labels: ['Cost', 'No parking', 'Less stress', 'Eco-friendly', 'Relaxing'],
+                datasets: [{ data: [30, 20, 18, 17, 15], backgroundColor: ['#10b981', '#6b7280', '#f97316', '#0ea5e9', '#8b5cf6'], borderWidth: 2, borderColor: '#ffffff' }]
+            },
+            right: {
+                title: 'Why people prefer private cars',
+                labels: ['Convenience', 'Privacy', 'Flexible schedule', 'Faster routes', 'Comfort'],
+                datasets: [{ data: [35, 18, 17, 15, 15], backgroundColor: ['#3b82f6', '#f59e0b', '#ef4444', '#22c55e', '#a855f7'], borderWidth: 2, borderColor: '#ffffff' }]
+            }
+        },
+        1056: {
+            left: {
+                title: 'Reasons to shop online',
+                labels: ['Convenience', 'Variety', 'Better prices', 'Reviews', 'No travel'],
+                datasets: [{ data: [33, 25, 20, 12, 10], backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#64748b'], borderWidth: 2, borderColor: '#ffffff' }]
+            },
+            right: {
+                title: 'Reasons to shop in-store',
+                labels: ['See product', 'Immediate pickup', 'Try before buy', 'No shipping', 'Social experience'],
+                datasets: [{ data: [28, 22, 18, 16, 16], backgroundColor: ['#ef4444', '#f97316', '#6366f1', '#0ea5e9', '#a16207'], borderWidth: 2, borderColor: '#ffffff' }]
+            }
+        },
+        1057: {
+            left: {
+                title: 'Reasons for drinking coffee',
+                labels: ['Energy boost', 'Taste', 'Routine', 'Social', 'Warmth'],
+                datasets: [{ data: [35, 20, 18, 15, 12], backgroundColor: ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6'], borderWidth: 2, borderColor: '#ffffff' }]
+            },
+            right: {
+                title: 'Reasons for drinking tea',
+                labels: ['Relaxing', 'Health benefits', 'Taste', 'Tradition', 'Variety'],
+                datasets: [{ data: [30, 22, 18, 16, 14], backgroundColor: ['#10b981', '#0ea5e9', '#f97316', '#6366f1', '#a855f7'], borderWidth: 2, borderColor: '#ffffff' }]
+            }
+        },
+        1058: {
+            left: {
+                title: 'Preferred summer vacation',
+                labels: ['Beach', 'City tour', 'Nature', 'Adventure sports', 'Cruise'],
+                datasets: [{ data: [35, 25, 20, 10, 10], backgroundColor: ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'], borderWidth: 2, borderColor: '#ffffff' }]
+            },
+            right: {
+                title: 'Preferred winter vacation',
+                labels: ['Skiing', 'City markets', 'Relaxing resort', 'Cultural tour', 'Family visit'],
+                datasets: [{ data: [25, 20, 20, 18, 17], backgroundColor: ['#1d4ed8', '#9333ea', '#eab308', '#047857', '#dc2626'], borderWidth: 2, borderColor: '#ffffff' }]
+            }
+        },
+        1059: {
+            left: {
+                title: 'Why people stream movies at home',
+                labels: ['Cost', 'Convenience', 'Variety', 'No ads', 'Comfort'],
+                datasets: [{ data: [30, 25, 20, 15, 10], backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'], borderWidth: 2, borderColor: '#ffffff' }]
+            },
+            right: {
+                title: 'Why people go to the cinema',
+                labels: ['Big screen', 'Sound quality', 'Social', 'New releases', 'Experience'],
+                datasets: [{ data: [28, 22, 18, 16, 16], backgroundColor: ['#1f2937', '#0f766e', '#7c3aed', '#c2410c', '#065f46'], borderWidth: 2, borderColor: '#ffffff' }]
+            }
+        },
+        1060: {
+            left: {
+                title: 'Why people eat fast food',
+                labels: ['Speed', 'Taste', 'Price', 'Convenience', 'Availability'],
+                datasets: [{ data: [32, 25, 20, 15, 8], backgroundColor: ['#ef4444', '#f97316', '#3b82f6', '#10b981', '#8b5cf6'], borderWidth: 2, borderColor: '#ffffff' }]
+            },
+            right: {
+                title: 'Why people cook at home',
+                labels: ['Healthier', 'Cost saving', 'Family time', 'Custom recipes', 'Control ingredients'],
+                datasets: [{ data: [30, 22, 18, 16, 14], backgroundColor: ['#1d4ed8', '#16a34a', '#7c3aed', '#9333ea', '#dc2626'], borderWidth: 2, borderColor: '#ffffff' }]
+            }
+        },
+        1061: {
+            left: {
+                title: 'Why some people prefer online learning',
+                labels: ['Flexibility', 'Cost', 'Access', 'Self pace', 'Variety'],
+                datasets: [{ data: [34, 22, 18, 14, 12], backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'], borderWidth: 2, borderColor: '#ffffff' }]
+            },
+            right: {
+                title: 'Why some prefer classroom learning',
+                labels: ['Interaction', 'Structure', 'Networking', 'Immediate feedback', 'Motivation'],
+                datasets: [{ data: [28, 24, 18, 16, 14], backgroundColor: ['#1f2937', '#0f766e', '#7c3aed', '#c2410c', '#065f46'], borderWidth: 2, borderColor: '#ffffff' }]
+            }
+        },
+        1062: {
+            left: {
+                title: 'Reasons for choosing smartphones',
+                labels: ['Brand', 'Camera', 'Battery', 'Price', 'Features'],
+                datasets: [{ data: [30, 25, 20, 15, 10], backgroundColor: ['#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#ef4444'], borderWidth: 2, borderColor: '#ffffff' }]
+            },
+            right: {
+                title: 'Reasons for choosing tablets',
+                labels: ['Screen size', 'Portability', 'Battery', 'Price', 'Apps'],
+                datasets: [{ data: [27, 24, 18, 16, 15], backgroundColor: ['#1d4ed8', '#16a34a', '#7c3aed', '#9333ea', '#dc2626'], borderWidth: 2, borderColor: '#ffffff' }]
+            }
+        },
+        1063: {
+            left: {
+                title: 'Popular music formats',
+                labels: ['Streaming', 'CDs', 'Vinyl', 'Downloads', 'Radio'],
+                datasets: [{ data: [40, 20, 10, 15, 15], backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'], borderWidth: 2, borderColor: '#ffffff' }]
+            },
+            right: {
+                title: 'Why people listen to music',
+                labels: ['Relax', 'Focus', 'Workout', 'Celebrate', 'Social'],
+                datasets: [{ data: [30, 25, 18, 15, 12], backgroundColor: ['#10b981', '#3b82f6', '#f97316', '#ef4444', '#a855f7'], borderWidth: 2, borderColor: '#ffffff' }]
+            }
+        },
+        1064: {
+            left: {
+                title: 'Reasons for exercising at a gym',
+                labels: ['Equipment', 'Classes', 'Motivation', 'Social', 'Comfort'],
+                datasets: [{ data: [30, 22, 18, 15, 15], backgroundColor: ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'], borderWidth: 2, borderColor: '#ffffff' }]
+            },
+            right: {
+                title: 'Reasons for exercising outdoors',
+                labels: ['Fresh air', 'Scenery', 'Cost free', 'Flexibility', 'Sunlight'],
+                datasets: [{ data: [28, 24, 20, 14, 14], backgroundColor: ['#10b981', '#0ea5e9', '#f97316', '#6366f1', '#a855f7'], borderWidth: 2, borderColor: '#ffffff' }]
+            }
+        },
+        1065: {
+            left: {
+                title: 'Why people study alone',
+                labels: ['Focus', 'Schedule', 'Pace', 'Less distraction', 'Comfort'],
+                datasets: [{ data: [32, 24, 18, 15, 11], backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'], borderWidth: 2, borderColor: '#ffffff' }]
+            },
+            right: {
+                title: 'Why people study in groups',
+                labels: ['Discussion', 'Motivation', 'Help', 'Accountability', 'Fun'],
+                datasets: [{ data: [28, 26, 18, 14, 14], backgroundColor: ['#ef4444', '#f97316', '#0ea5e9', '#6366f1', '#a855f7'], borderWidth: 2, borderColor: '#ffffff' }]
+            }
+        },
+        1066: {
+            left: {
+                title: 'Why people own dogs',
+                labels: ['Companionship', 'Security', 'Exercise', 'Loyalty', 'Fun'],
+                datasets: [{ data: [30, 25, 18, 15, 12], backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'], borderWidth: 2, borderColor: '#ffffff' }]
+            },
+            right: {
+                title: 'Why people own cats',
+                labels: ['Low maintenance', 'Quiet', 'Independent', 'Companionship', 'Cleanliness'],
+                datasets: [{ data: [28, 22, 20, 15, 15], backgroundColor: ['#10b981', '#3b82f6', '#f97316', '#ef4444', '#6366f1'], borderWidth: 2, borderColor: '#ffffff' }]
+            }
+        },
+        1067: {
+            left: {
+                title: 'Commuting by public transport',
+                labels: ['Cost', 'Reliability', 'Convenience', 'Crowding', 'Safety'],
+                datasets: [{ data: [32, 22, 20, 14, 12], backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'], borderWidth: 2, borderColor: '#ffffff' }]
+            },
+            right: {
+                title: 'Commuting by car',
+                labels: ['Privacy', 'Flexibility', 'Comfort', 'Speed', 'Cost'],
+                datasets: [{ data: [30, 24, 18, 16, 12], backgroundColor: ['#ef4444', '#f97316', '#0ea5e9', '#6366f1', '#a855f7'], borderWidth: 2, borderColor: '#ffffff' }]
+            }
+        },
+        1068: {
+            left: {
+                title: 'Favorite sweet snacks',
+                labels: ['Chocolate', 'Ice Cream', 'Cookies', 'Cake', 'Candy'],
+                datasets: [{ data: [30, 25, 20, 15, 10], backgroundColor: ['#ef4444', '#f97316', '#3b82f6', '#10b981', '#8b5cf6'], borderWidth: 2, borderColor: '#ffffff' }]
+            },
+            right: {
+                title: 'Favorite savory snacks',
+                labels: ['Chips', 'Nuts', 'Pretzels', 'Crackers', 'Popcorn'],
+                datasets: [{ data: [28, 24, 18, 15, 15], backgroundColor: ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#6366f1'], borderWidth: 2, borderColor: '#ffffff' }]
+            }
+        },
+        1069: {
+            left: {
+                title: 'Most important health priority',
+                labels: ['Exercise', 'Diet', 'Sleep', 'Stress', 'Hydration'],
+                datasets: [{ data: [30, 25, 20, 15, 10], backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'], borderWidth: 2, borderColor: '#ffffff' }]
+            },
+            right: {
+                title: 'Secondary health focus',
+                labels: ['Mental health', 'Routine check-ups', 'Social life', 'Hygiene', 'Vaccinations'],
+                datasets: [{ data: [25, 20, 18, 17, 20], backgroundColor: ['#10b981', '#3b82f6', '#f97316', '#ef4444', '#6366f1'], borderWidth: 2, borderColor: '#ffffff' }]
+            }
+        }
+    };
+
+    // apply light/dark palettes to all double‐pie configs so the right chart
+    // uses the same color hues as the left but in a darker shade
+    for (const id in doublePieConfigs) {
+        const entry = doublePieConfigs[id];
+        if (entry.left && entry.left.datasets && entry.left.datasets[0]) {
+            entry.left.datasets[0].backgroundColor = pieLightPalette;
+        }
+        if (entry.right && entry.right.datasets && entry.right.datasets[0]) {
+            entry.right.datasets[0].backgroundColor = pieDarkPalette;
+        }
+    }
+
+    const morePieConfigs = {
+        1050: { // Average Household Spending (Pie)
+            title: 'Average Household Spending',
+            labels: ['Housing', 'Food', 'Transport', 'Entertainment', 'Savings'],
+            datasets: [{
+                data: [35, 25, 15, 15, 10],
+                backgroundColor: ['#ef4444', '#3b82f6', '#f59e0b', '#10b981', '#8b5cf6'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1051: { // Energy Sources
+            title: 'Energy Generated by Source',
+            labels: ['Wind', 'Solar', 'Hydro', 'Fossil', 'Nuclear'],
+            datasets: [{
+                data: [25, 20, 30, 15, 10],
+                backgroundColor: ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#6366f1'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1052: { // Mobile OS Share
+            title: 'Mobile OS Market Share',
+            labels: ['Android', 'iOS', 'Others'],
+            datasets: [{
+                data: [72, 25, 3],
+                backgroundColor: ['#10b981', '#2563eb', '#9ca3af'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1053: { // Browser Market Share
+            title: 'Web Browser Market Share',
+            labels: ['Chrome', 'Safari', 'Edge', 'Firefox', 'Other'],
+            datasets: [{
+                data: [65, 18, 5, 3, 9],
+                backgroundColor: ['#3b82f6', '#06b6d4', '#2563eb', '#f97316', '#64748b'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1054: { // Education Attainment
+            title: 'Educational Attainment (Adults 25-64)',
+            labels: ['Below Upper Secondary', 'Upper Secondary', 'Tertiary'],
+            datasets: [{
+                data: [20, 45, 35],
+                backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1055: { // Transport Modes
+            title: 'Transport Mode Usage',
+            labels: ['Car', 'Bus', 'Train', 'Bicycle', 'Walking'],
+            datasets: [{
+                data: [45, 20, 15, 10, 10],
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1056: { // Meal Preferences
+            title: 'Preferred Meal Type',
+            labels: ['Vegetarian', 'Vegan', 'Meat', 'Seafood', 'Other'],
+            datasets: [{
+                data: [25, 10, 40, 15, 10],
+                backgroundColor: ['#10b981', '#22c55e', '#3b82f6', '#f97316', '#a855f7'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1057: { // Social Media Platforms
+            title: 'Social Media Platform Use',
+            labels: ['Facebook', 'Instagram', 'Twitter', 'TikTok', 'LinkedIn'],
+            datasets: [{
+                data: [30, 25, 15, 20, 10],
+                backgroundColor: ['#3b82f6', '#ec4899', '#0ea5e9', '#f97316', '#0ea5e9'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1058: { // Vacation Types
+            title: 'Preferred Vacation Type',
+            labels: ['Beach', 'City', 'Nature', 'Cruise', 'Adventure'],
+            datasets: [{
+                data: [35, 20, 25, 10, 10],
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1059: { // Device Ownership
+            title: 'Device Ownership',
+            labels: ['Smartphone', 'Tablet', 'Laptop', 'Desktop'],
+            datasets: [{
+                data: [65, 25, 45, 35],
+                backgroundColor: ['#3b82f6', '#a855f7', '#10b981', '#f97316'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1060: { // Meal Delivery Usage
+            title: 'Meal Delivery Service Usage',
+            labels: ['Daily', 'Weekly', 'Monthly', 'Rarely'],
+            datasets: [{
+                data: [15, 35, 30, 20],
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1061: { // Exercise Habits
+            title: 'Exercise Frequency',
+            labels: ['Daily', '3-4 times/wk', '1-2 times/wk', 'Rarely'],
+            datasets: [{
+                data: [20, 30, 25, 25],
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1062: { // Music Genre Preference
+            title: 'Music Genre Preference',
+            labels: ['Pop', 'Rock', 'Hip-Hop', 'Classical', 'Jazz'],
+            datasets: [{
+                data: [30, 25, 20, 15, 10],
+                backgroundColor: ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1063: { // Book Genre Popularity
+            title: 'Book Genre Popularity',
+            labels: ['Fiction', 'Non-fiction', 'Mystery', 'Sci-Fi', 'Romance'],
+            datasets: [{
+                data: [30, 25, 15, 15, 15],
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1064: { // Movie Genre Preference
+            title: 'Movie Genre Preference',
+            labels: ['Action', 'Comedy', 'Drama', 'Horror', 'Animation'],
+            datasets: [{
+                data: [25, 20, 25, 15, 15],
+                backgroundColor: ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1065: { // Pet Ownership
+            title: 'Pet Ownership',
+            labels: ['Dogs', 'Cats', 'Fish', 'Birds', 'Others'],
+            datasets: [{
+                data: [35, 30, 15, 10, 10],
+                backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1066: { // Vegetable Preference
+            title: 'Preferred Vegetables',
+            labels: ['Tomato', 'Potato', 'Carrot', 'Broccoli', 'Spinach'],
+            datasets: [{
+                data: [25, 20, 20, 20, 15],
+                backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#8b5cf6'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1067: { // Drink Preference
+            title: 'Drink Preference',
+            labels: ['Water', 'Tea', 'Coffee', 'Soda', 'Juice'],
+            datasets: [{
+                data: [25, 20, 25, 15, 15],
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1068: { // Weekly Screen Time
+            title: 'Weekly Screen Time Distribution',
+            labels: ['TV', 'Phone', 'Tablet', 'Laptop', 'Other'],
+            datasets: [{
+                data: [35, 30, 15, 15, 5],
+                backgroundColor: ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        1069: { // Coffee Consumption
+            title: 'Coffee Consumption Frequency',
+            labels: ['Daily', 'Weekly', 'Monthly', 'Rarely'],
+            datasets: [{
+                data: [30, 40, 20, 10],
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        }
+    };
+
+    Object.assign(pieConfigs, morePieConfigs);
 
     // --- Table Data Configs ---
     const tableConfigs = {
@@ -1179,52 +2163,375 @@ document.addEventListener('DOMContentLoaded', () => {
                 ['Note Ultra', '6.9"', '5000mAh', '108']
             ],
             badges: {}
+        },
+        1070: {
+            title: 'Population Statistics',
+            headers: ['Year', 'Population (millions)', 'Annual Growth (%)'],
+            rows: [
+                ['2010', '62', '1.2'],
+                ['2012', '65', '1.3'],
+                ['2014', '68', '1.2'],
+                ['2016', '70', '1.1'],
+                ['2018', '73', '1.0']
+            ],
+            badges: { 2: { '1.2': 'green', '1.3': 'green', '1.1': 'yellow', '1.0': 'yellow' } }
+        },
+        1071: {
+            title: 'Annual Revenue by Sector',
+            headers: ['Sector', '2018 ($m)', '2020 ($m)', '2022 ($m)'],
+            rows: [
+                ['Manufacturing', '245', '261', '289'],
+                ['Technology', '198', '244', '318'],
+                ['Retail', '176', '184', '211'],
+                ['Energy', '154', '169', '193'],
+                ['Healthcare', '133', '148', '172']
+            ],
+            badges: { 3: { '289': 'green', '318': 'green', '211': 'blue', '193': 'blue', '172': 'yellow' } }
+        },
+        1072: {
+            title: 'Nutritional Content of Foods',
+            headers: ['Food Item', 'Calories', 'Protein (g)', 'Fat (g)', 'Carbs (g)'],
+            rows: [
+                ['Oatmeal', '68', '2.4', '1.4', '12.0'],
+                ['Boiled Egg', '155', '13.0', '11.0', '1.1'],
+                ['Greek Yogurt', '97', '9.0', '4.0', '3.9'],
+                ['Banana', '89', '1.1', '0.3', '22.8'],
+                ['Grilled Salmon', '208', '20.0', '13.0', '0.0']
+            ],
+            badges: { 1: { '208': 'orange', '155': 'yellow', '97': 'blue', '89': 'blue', '68': 'green' } }
+        },
+        1073: {
+            title: 'Travel Destinations',
+            headers: ['Destination', 'Avg Cost ($)', 'Visitors (m)', 'Satisfaction'],
+            rows: [
+                ['Kyoto', '1450', '8.2', '4.7/5'],
+                ['Barcelona', '1320', '9.5', '4.6/5'],
+                ['Dubai', '1760', '12.1', '4.5/5'],
+                ['Vancouver', '1580', '7.4', '4.8/5'],
+                ['Cape Town', '1210', '6.8', '4.7/5']
+            ],
+            badges: { 3: { '4.8/5': 'green', '4.7/5': 'green', '4.6/5': 'blue', '4.5/5': 'yellow' } }
+        },
+        1074: {
+            title: 'Internet Speeds by Country',
+            headers: ['Country', 'Avg Speed (Mbps)', 'Global Rank'],
+            rows: [
+                ['Singapore', '284.9', '1'],
+                ['United Arab Emirates', '269.1', '2'],
+                ['Hong Kong', '266.5', '3'],
+                ['South Korea', '254.3', '4'],
+                ['Chile', '247.8', '5'],
+                ['United States', '226.4', '9']
+            ],
+            badges: { 2: { '1': 'green', '2': 'green', '3': 'blue', '4': 'blue', '5': 'yellow', '9': 'yellow' } }
+        },
+        1075: {
+            title: 'Top Tech Companies',
+            headers: ['Company', 'Market Cap ($tn)', 'HQ', 'Founded', 'Employees'],
+            rows: [
+                ['Apple', '3.1', 'USA', '1976', '161k'],
+                ['Microsoft', '2.9', 'USA', '1975', '221k'],
+                ['Alphabet', '1.9', 'USA', '1998', '182k'],
+                ['Amazon', '1.8', 'USA', '1994', '1.53m'],
+                ['TSMC', '0.7', 'Taiwan', '1987', '73k']
+            ],
+            badges: { 1: { '3.1': 'green', '2.9': 'green', '1.9': 'blue', '1.8': 'blue', '0.7': 'yellow' } }
+        },
+        1076: {
+            title: 'Weather and Climate Data',
+            headers: ['Month', 'Temp (°C)', 'Rainfall (mm)', 'Humidity (%)'],
+            rows: [
+                ['January', '6', '78', '74'],
+                ['March', '11', '66', '69'],
+                ['May', '18', '54', '63'],
+                ['July', '28', '22', '49'],
+                ['September', '23', '38', '58'],
+                ['November', '10', '81', '77']
+            ],
+            badges: { 3: { '74': 'blue', '69': 'blue', '63': 'yellow', '49': 'orange', '58': 'yellow', '77': 'blue' } }
+        },
+        1077: {
+            title: 'Vehicle Sales Data',
+            headers: ['Vehicle Type', 'Units Sold', 'Market Share', 'Trend'],
+            rows: [
+                ['SUV', '84,000', '34%', 'Up'],
+                ['Sedan', '51,000', '21%', 'Down'],
+                ['Pickup', '47,500', '19%', 'Stable'],
+                ['Hybrid', '32,000', '13%', 'Rapid Up'],
+                ['Electric', '28,500', '11%', 'Rapid Up']
+            ],
+            badges: { 3: { 'Up': 'green', 'Down': 'red', 'Stable': 'yellow', 'Rapid Up': 'green' } }
+        },
+        1078: {
+            title: 'Coffee Production Statistics',
+            headers: ['Country', 'Output (m bags)', 'Global Share', 'Main Variety', 'Export Ratio'],
+            rows: [
+                ['Brazil', '66.4', '37%', 'Arabica', '82%'],
+                ['Vietnam', '30.2', '17%', 'Robusta', '91%'],
+                ['Colombia', '12.6', '7%', 'Arabica', '74%'],
+                ['Indonesia', '11.9', '6%', 'Robusta', '68%']
+            ],
+            badges: { 4: { '82%': 'green', '91%': 'green', '74%': 'blue', '68%': 'yellow' } }
+        },
+        1079: {
+            title: 'Smartphone Technical Specifications',
+            headers: ['Model', 'Screen', 'Battery', 'Camera (MP)', 'Price ($)'],
+            rows: [
+                ['Nova X', '6.1', '3200', '12', '699'],
+                ['Apex Pro', '6.7', '4300', '48', '999'],
+                ['Pixel Air', '6.3', '4355', '50', '899'],
+                ['Galaxy Ultra', '6.8', '5000', '108', '1199'],
+                ['Zen Lite', '6.0', '4100', '64', '749']
+            ],
+            badges: { 4: { '699': 'green', '749': 'green', '899': 'blue', '999': 'yellow', '1199': 'orange' } }
+        },
+        1080: {
+            title: 'Hotel Amenities and Ratings',
+            headers: ['Hotel Chain', 'Free Wi-Fi', 'Pool', 'Breakfast', 'Guest Rating'],
+            rows: [
+                ['Harbor Stay', 'Yes', 'Yes', 'Included', '4.6'],
+                ['City Nest', 'Yes', 'No', 'Optional', '4.2'],
+                ['Royal Crest', 'Yes', 'Yes', 'Included', '4.8'],
+                ['Budget Inn', 'Yes', 'No', 'Not Included', '3.9']
+            ],
+            badges: { 4: { '4.8': 'green', '4.6': 'green', '4.2': 'blue', '3.9': 'yellow' } }
+        },
+        1081: {
+            title: 'Student Test Scores by Subject',
+            headers: ['Subject', 'Midterm Avg', 'Final Avg', 'Pass Rate'],
+            rows: [
+                ['Mathematics', '74', '79', '88%'],
+                ['Science', '71', '76', '84%'],
+                ['English', '78', '82', '91%'],
+                ['History', '69', '74', '80%'],
+                ['Economics', '73', '77', '86%']
+            ],
+            badges: { 3: { '91%': 'green', '88%': 'green', '86%': 'blue', '84%': 'blue', '80%': 'yellow' } }
+        },
+        1082: {
+            title: 'Annual Rainfall and Precipitation',
+            headers: ['Region', 'Spring (mm)', 'Summer (mm)', 'Winter (mm)'],
+            rows: [
+                ['North Coast', '210', '124', '298'],
+                ['Central Plain', '165', '98', '244'],
+                ['Highlands', '189', '132', '276'],
+                ['South Basin', '142', '86', '201']
+            ],
+            badges: { 3: { '298': 'blue', '276': 'blue', '244': 'yellow', '201': 'yellow' } }
+        },
+        1083: {
+            title: 'E-commerce Sales Performance',
+            headers: ['Retailer', 'Revenue ($m)', 'Orders (k)', 'Margin', 'Growth'],
+            rows: [
+                ['ShopLink', '420', '980', '18%', '12%'],
+                ['CartHub', '365', '910', '16%', '9%'],
+                ['NovaMall', '298', '760', '14%', '15%'],
+                ['Urban Basket', '255', '690', '13%', '7%']
+            ],
+            badges: { 4: { '15%': 'green', '12%': 'green', '9%': 'blue', '7%': 'yellow' } }
+        },
+        1084: {
+            title: 'University Degree Statistics',
+            headers: ['Degree Type', 'Graduates', 'Employment Rate', 'Median Salary ($)'],
+            rows: [
+                ['Engineering', '1,240', '93%', '58,000'],
+                ['Business', '1,860', '89%', '51,000'],
+                ['Computer Science', '980', '95%', '62,000'],
+                ['Arts', '1,120', '78%', '39,000'],
+                ['Health Sciences', '840', '94%', '56,000']
+            ],
+            badges: { 2: { '95%': 'green', '94%': 'green', '93%': 'green', '89%': 'blue', '78%': 'yellow' } }
+        },
+        1085: {
+            title: 'Sales of Fairtrade-labelled coffee and bananas (1999 & 2004)',
+            doubleTables: [
+                {
+                    headers: ['Coffee', '1999 (millions of euros)', '2004 (millions of euros)'],
+                    rows: [
+                        ['UK', '1.5', '20'],
+                        ['Switzerland', '3', '6'],
+                        ['Denmark', '1.8', '2'],
+                        ['Belgium', '1', '1.7'],
+                        ['Sweden', '0.8', '1']
+                    ]
+                },
+                {
+                    headers: ['Bananas', '1999 (millions of euros)', '2004 (millions of euros)'],
+                    rows: [
+                        ['UK', '15', '47'],
+                        ['Switzerland', '1', '5.5'],
+                        ['Denmark', '0.6', '4'],
+                        ['Belgium', '1.8', '1'],
+                        ['Sweden', '2', '0.9']
+                    ]
+                }
+            ]
+        },
+        1086: {
+            title: 'Energy production and household use (2010 & 2020)',
+            doubleTables: [
+                {
+                    headers: ['Energy source', '2010 (TWh)', '2020 (TWh)'],
+                    rows: [
+                        ['Solar', '18', '74'],
+                        ['Wind', '42', '96'],
+                        ['Hydro', '88', '102'],
+                        ['Coal', '210', '128'],
+                        ['Gas', '156', '149']
+                    ]
+                },
+                {
+                    headers: ['Household use', '2010 (%)', '2020 (%)'],
+                    rows: [
+                        ['Lighting', '18', '12'],
+                        ['Cooling/Heating', '42', '39'],
+                        ['Cooking', '21', '19'],
+                        ['Entertainment', '11', '16'],
+                        ['Other', '8', '14']
+                    ]
+                }
+            ]
+        },
+        1087: {
+            title: 'Mobile OS users and app revenue (2018 & 2023)',
+            doubleTables: [
+                {
+                    headers: ['Operating system', '2018 (millions)', '2023 (millions)'],
+                    rows: [
+                        ['Android', '1850', '2620'],
+                        ['iOS', '980', '1410'],
+                        ['HarmonyOS', '0', '280'],
+                        ['Others', '230', '95']
+                    ]
+                },
+                {
+                    headers: ['App category', '2018 ($bn)', '2023 ($bn)'],
+                    rows: [
+                        ['Games', '48', '79'],
+                        ['Productivity', '16', '33'],
+                        ['Social Media', '21', '46'],
+                        ['Streaming', '14', '37']
+                    ]
+                }
+            ]
+        },
+        1088: {
+            title: 'Tourist arrivals and tourism receipts (2012 & 2022)',
+            doubleTables: [
+                {
+                    headers: ['Country', '2012 (millions)', '2022 (millions)'],
+                    rows: [
+                        ['France', '83', '79'],
+                        ['Spain', '57', '71'],
+                        ['Thailand', '22', '39'],
+                        ['Japan', '8', '32'],
+                        ['Turkey', '36', '51']
+                    ]
+                },
+                {
+                    headers: ['Country', '2012 ($bn)', '2022 ($bn)'],
+                    rows: [
+                        ['France', '56', '68'],
+                        ['Spain', '57', '76'],
+                        ['Thailand', '34', '59'],
+                        ['Japan', '14', '44'],
+                        ['Turkey', '29', '51']
+                    ]
+                }
+            ]
+        },
+        1089: {
+            title: 'Public transport usage and accident totals (2015 & 2025)',
+            doubleTables: [
+                {
+                    headers: ['Transport mode', '2015 (million trips)', '2025 (million trips)'],
+                    rows: [
+                        ['Bus', '420', '510'],
+                        ['Metro', '310', '448'],
+                        ['Tram', '126', '174'],
+                        ['Commuter rail', '204', '282']
+                    ]
+                },
+                {
+                    headers: ['Transport mode', '2015 (incidents)', '2025 (incidents)'],
+                    rows: [
+                        ['Bus', '142', '96'],
+                        ['Metro', '48', '31'],
+                        ['Tram', '27', '19'],
+                        ['Commuter rail', '61', '44']
+                    ]
+                }
+            ]
         }
     };
     
     // Logic to render specific table based on ID existing in DOM
     const tableContainer = document.getElementById('practiceTableContainer');
     if (tableContainer) {
-        const config = tableConfigs[meetingId] || tableConfigs[1040];
+        const tableFallbackIds = Object.keys(tableConfigs)
+            .map(Number)
+            .filter(id => id >= 1070 && id <= 1089)
+            .sort((left, right) => left - right);
+        const fallbackId = tableFallbackIds[Math.abs(meetingId) % tableFallbackIds.length] || 1070;
+        const config = tableConfigs[meetingId] || tableConfigs[fallbackId];
         setInstruction(config.title || 'Table Data', 'table');
         
-        let html = `
-            <table class="min-w-full text-base text-center text-gray-800 whitespace-nowrap">
-                <thead class="bg-gradient-to-r from-blue-600 to-indigo-600 font-extrabold uppercase text-white tracking-wider shadow-md">
-                    <tr>`;
-        
-        config.headers.forEach(header => {
-            html += `<th class="px-4 py-3 text-lg">${header}</th>`;
-        });
-        
-        html += `   </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 font-bold">`;
-                
-        config.rows.forEach((row, rowIndex) => {
-            const rowClass = rowIndex % 2 === 0 ? 'row-indigo' : 'row-fuchsia';
-            html += `<tr class="${rowClass} row-hover-yellow transition-colors duration-150">`;
-            row.forEach((cell, index) => {
-                let cellContent = cell;
-                if (config.badges && config.badges[index] && config.badges[index][cell]) {
-                    const color = config.badges[index][cell];
-                    const bgClass = color === 'red' ? 'bg-red-100 text-red-800' :
-                                    color === 'orange' ? 'bg-orange-100 text-orange-800' :
-                                    color === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
-                                    color === 'green' ? 'bg-green-100 text-green-800' :
-                                    color === 'blue' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800';
-                    cellContent = `<span class="px-3 py-1.5 ${bgClass} rounded-full text-sm font-extrabold">${cell}</span>`;
-                }
-                
-                const alignClass = index === 0 ? 'text-left text-indigo-700' : '';
-                html += `<td class="px-4 py-3 text-lg ${alignClass}">${cellContent}</td>`;
+        const renderSingleTable = (tableData, useNeutralTheme = false) => {
+            const tableClass = useNeutralTheme
+                ? 'min-w-full text-base text-center text-gray-800 whitespace-nowrap border-2 border-gray-500'
+                : 'min-w-full text-base text-center text-gray-800 whitespace-nowrap';
+            const theadClass = useNeutralTheme
+                ? 'bg-gray-200 font-extrabold uppercase text-gray-900 tracking-wide'
+                : 'bg-gradient-to-r from-blue-600 to-indigo-600 font-extrabold uppercase text-white tracking-wider shadow-md';
+            const tbodyClass = useNeutralTheme
+                ? 'font-bold'
+                : 'divide-y divide-gray-100 font-bold';
+
+            let tableHtml = `<table class="${tableClass}"><thead class="${theadClass}"><tr>`;
+
+            tableData.headers.forEach(header => {
+                tableHtml += `<th class="px-4 py-3 text-lg border border-gray-400">${header}</th>`;
             });
 
-            html += `</tr>`;
-        });
-        
-        html += `   </tbody>
-            </table>`;
+            tableHtml += `</tr></thead><tbody class="${tbodyClass}">`;
+
+            tableData.rows.forEach((row, rowIndex) => {
+                const rowClass = useNeutralTheme
+                    ? (rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50')
+                    : (rowIndex % 2 === 0 ? 'row-indigo' : 'row-fuchsia');
+                tableHtml += `<tr class="${rowClass} ${useNeutralTheme ? '' : 'row-hover-yellow transition-colors duration-150'}">`;
+                row.forEach((cell, index) => {
+                    let cellContent = cell;
+                    if (tableData.badges && tableData.badges[index] && tableData.badges[index][cell]) {
+                        const color = tableData.badges[index][cell];
+                        const bgClass = color === 'red' ? 'bg-red-100 text-red-800' :
+                                        color === 'orange' ? 'bg-orange-100 text-orange-800' :
+                                        color === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
+                                        color === 'green' ? 'bg-green-100 text-green-800' :
+                                        color === 'blue' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800';
+                        cellContent = `<span class="px-3 py-1.5 ${bgClass} rounded-full text-sm font-extrabold">${cell}</span>`;
+                    }
+
+                    const alignClass = index === 0 ? 'text-left text-indigo-700' : '';
+                    tableHtml += `<td class="px-4 py-3 text-lg border border-gray-300 ${alignClass}">${cellContent}</td>`;
+                });
+                tableHtml += `</tr>`;
+            });
+
+            tableHtml += `</tbody></table>`;
+            return tableHtml;
+        };
+
+        let html = '';
+        if (Array.isArray(config.doubleTables) && config.doubleTables.length > 0) {
+            html = '<div class="space-y-6">';
+            config.doubleTables.forEach((tableData) => {
+                html += renderSingleTable(tableData, true);
+            });
+            html += '</div>';
+        } else {
+            html = renderSingleTable(config);
+        }
             
         tableContainer.innerHTML = html;
         tableContainer.classList.remove('hidden');
@@ -1250,6 +2557,9 @@ document.addEventListener('DOMContentLoaded', () => {
             options: { 
                 responsive: true, 
                 maintainAspectRatio: false, 
+                elements: {
+                    line: { tension: 0 }
+                },
                 plugins: { 
                     title: { display: true, text: config.title, font: { size: 16 } },
                     legend: { position: 'bottom', labels: { font: { size: 14 } } }
@@ -1265,7 +2575,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const barCanvas = document.getElementById('practiceBarChart');
     if (barCanvas) {
         // Fallback to 1020 if config not found
-        const config = barConfigs[meetingId] || barConfigs[1020];
+        const config = barConfigs[meetingId] || barConfigs[1030];
         setInstruction(config.title, 'chart');
 
         new Chart(barCanvas.getContext('2d'), {
@@ -1288,10 +2598,55 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Double-pie chart support for a range of pie practices (e.g., 5th-20th pie item)
+    const doublePieConfig = doublePieConfigs[meetingId];
+
+    if (doublePieConfig) {
+        const pieCanvas1 = document.getElementById('practicePieChart1');
+        const pieCanvas2 = document.getElementById('practicePieChart2');
+
+        if (pieCanvas1 && pieCanvas2) {
+            setInstruction(`${doublePieConfig.left.title} & ${doublePieConfig.right.title}`, 'chart');
+
+            new Chart(pieCanvas1.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: doublePieConfig.left.labels,
+                    datasets: doublePieConfig.left.datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: doublePieConfig.left.title, font: { size: 16 } },
+                        legend: { position: 'bottom', labels: { font: { size: 14 } } }
+                    }
+                }
+            });
+
+            new Chart(pieCanvas2.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: doublePieConfig.right.labels,
+                    datasets: doublePieConfig.right.datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: doublePieConfig.right.title, font: { size: 16 } },
+                        legend: { position: 'bottom', labels: { font: { size: 14 } } }
+                    }
+                }
+            });
+        }
+        return;
+    }
+
     const pieCanvas = document.getElementById('practicePieChart');
     if (pieCanvas) {
         // Fallback to 1030 if config not found
-        const config = pieConfigs[meetingId] || pieConfigs[1030];
+        const config = pieConfigs[meetingId] || pieConfigs[1050];
         setInstruction(config.title, 'chart');
 
         new Chart(pieCanvas.getContext('2d'), {
@@ -1314,7 +2669,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Logic to render Mixed Charts (Multi-Chart Support)
     const mixedContainer = document.getElementById('practiceMixedContainer');
     if (mixedContainer) {
-        const configs = mixedConfigs[meetingId] || mixedConfigs[1050]; // Now an array of chart objects
+        const configs = mixedConfigs[meetingId] || mixedConfigs[1090] || mixedConfigs[1050] || [];
+        if (!Array.isArray(configs) || configs.length === 0) {
+            mixedContainer.innerHTML = '<p class="text-gray-500 text-center py-10">No mixed chart data available for this practice item.</p>';
+            return;
+        }
         
         // Use first title or generic text
         const title = configs[0].title || 'statistical data';
@@ -1398,52 +2757,54 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Logic for Flow Chart (1060-1069)
-    if (meetingId >= 1060 && meetingId <= 1069) {
-        if (meetingId === 1060) {
+    // Logic for Flow Chart (1110-1129)
+    if (meetingId >= 1110 && meetingId <= 1129) {
+        if (meetingId === 1110) {
             setInstruction('the stages and equipment used in the cement-making process, and how cement is used to produce concrete for building purposes', 'diagram');
-        } else if (meetingId === 1061) {
+        } else if (meetingId === 1111) {
             setInstruction('the mass manufacturing of coconut oil', 'process diagram');
-        } else if (meetingId === 1062) {
+        } else if (meetingId === 1112) {
             setInstruction('how glass containers are made. The steps of the process are numbered 1 to 9', 'process diagram');
-        } else if (meetingId === 1063) {
+        } else if (meetingId === 1113) {
             setInstruction('the process by which sheep embryos are cloned', 'diagram');
-        } else if (meetingId === 1064) {
+        } else if (meetingId === 1114) {
             setInstruction('the process of the water treatment', 'diagram');
-        } else if (meetingId === 1065) {
+        } else if (meetingId === 1115) {
             setInstruction('the process by which electricity is generated in two types of hydroelectric power station', 'diagram');
-        } else if (meetingId === 1066) {
+        } else if (meetingId === 1116) {
             setInstruction('the life cycle of a frog', 'diagram');
-        } else if (meetingId === 1067) {
+        } else if (meetingId === 1117) {
             setInstruction('the life cycle of the silkworm and the stages in the production of silk cloth', 'diagrams');
-        } else if (meetingId === 1068) {
+        } else if (meetingId === 1118) {
             setInstruction('the water cycle, which is the continuous movement of water on, above and below the surface of the Earth', 'diagram');
-        } else if (meetingId === 1069) {
+        } else if (meetingId === 1119) {
             setInstruction('the process by which milk and related products are produced', 'diagram');
+        } else if (meetingId === 1125) {
+            setInstruction('the life cycle of sea turtles, from hatching through open ocean migration to adulthood and nesting', 'diagram');
         }
     }
 
-    // Logic for Maps (1070-1079)
-    if (meetingId >= 1070 && meetingId <= 1079) {
-            if (meetingId === 1070) {
+        // Logic for Maps (1130-1139)
+        if (meetingId >= 1130 && meetingId <= 1139) {
+              if (meetingId === 1130) {
             setInstruction('Paradise Island in the past and at present', 'maps');
-        } else if (meetingId === 1071) {
+           } else if (meetingId === 1131) {
             setInstruction('Happy Valley Shopping Center in 1982 and 2012', 'maps');
-        } else if (meetingId === 1072) {
+           } else if (meetingId === 1132) {
             setInstruction('Felixstone in 1967 and 2001', 'maps');
-        } else if (meetingId === 1073) {
+           } else if (meetingId === 1133) {
             setInstruction('the coastal village of Seaville in 1980 and 2010', 'diagrams');
-        } else if (meetingId === 1074) {
+           } else if (meetingId === 1134) {
              setInstruction('the centre of a small town called Islip as it is now, and plans for its development', 'maps');
-        } else if (meetingId === 1075) {
+           } else if (meetingId === 1135) {
              setInstruction('the development of the village of Ryemouth between 1995 and present', 'maps');
-        } else if (meetingId === 1076) {
+           } else if (meetingId === 1136) {
              setInstruction('a science park in 2008 and the same park today', 'maps');
-        } else if (meetingId === 1077) {
+           } else if (meetingId === 1137) {
              setInstruction('the changes that have taken place in Meadowside village and Fonton, a neighbouring town, since 1962', 'maps');
-        } else if (meetingId === 1078) {
+           } else if (meetingId === 1138) {
              setInstruction('the layout of a university sports centre now, and how it will look after redevelopment', 'maps');
-        } else if (meetingId === 1079) {
+           } else if (meetingId === 1139) {
              setInstruction('a beachfront area in Australia in 1950 and today', 'maps');
         }
     }

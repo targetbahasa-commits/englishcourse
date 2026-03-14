@@ -33,7 +33,7 @@ class GuestFreeTestController extends Controller
         }
 
         $request->validate([
-            'cf-turnstile-response' => ['required', new \App\Rules\Turnstile()],
+            // 'cf-turnstile-response' => ['required', new \App\Rules\Turnstile()],
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255',
             'phone_number' => 'required|string|max:20',

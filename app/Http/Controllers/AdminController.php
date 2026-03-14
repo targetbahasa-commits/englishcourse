@@ -20,7 +20,7 @@ class AdminController extends Controller
             ->whereNotNull('user_id')
             ->where('last_activity', '>=', $threshold)
             ->join('users', 'sessions.user_id', '=', 'users.id')
-            ->whereIn('users.role', ['student', 'guest'])
+            ->whereIn('users.role', ['teacher', 'student', 'guest'])
             ->leftJoin('programs', 'users.program_id', '=', 'programs.id')
             ->select(
                 'users.id', 

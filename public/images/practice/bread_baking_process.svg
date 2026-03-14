@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 850" width="1200" height="850">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#f9edcc"/>
+    <stop offset="100%" stop-color="#eddcaa"/>
+  </linearGradient>
+  <marker id="at" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1a8080"/></marker>
+  <marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#20608a"/></marker>
+  <marker id="ap" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#503a8a"/></marker>
+  <marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a06010"/></marker>
+  <marker id="ad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+</defs>
+
+<!-- BACKGROUND -->
+<rect width="1200" height="850" fill="url(#bg)"/>
+
+<!-- ============================================================
+     PANEL 1  sponge-and-dough  (teal)  x=5 w=284  xc=147
+     ============================================================ -->
+<rect x="5" y="5" width="284" height="530" rx="12" fill="#3cbfbf" stroke="#1a8080" stroke-width="1.5"/>
+<text x="147" y="27" text-anchor="middle" font-size="15" font-weight="bold" font-family="Arial,sans-serif" fill="white">sponge-and-dough</text>
+<text x="20" y="52" font-size="10.5" font-style="italic" font-family="Arial" fill="white">flour, water, and yeast</text>
+<line x1="147" y1="56" x2="147" y2="69" stroke="white" stroke-width="1.8" marker-end="url(#at)"/>
+<rect x="17" y="71" width="258" height="46" rx="6" fill="white" stroke="#1a8080" stroke-width="1.5"/>
+<text x="146" y="99" text-anchor="middle" font-size="13" font-weight="bold" font-family="Arial" fill="#1a1a2e">mixing the sponge</text>
+<line x1="146" y1="117" x2="146" y2="130" stroke="#1a8080" stroke-width="2" marker-end="url(#at)"/>
+<rect x="17" y="132" width="258" height="46" rx="6" fill="white" stroke="#1a8080" stroke-width="1.5"/>
+<text x="146" y="160" text-anchor="middle" font-size="13" font-weight="bold" font-family="Arial" fill="#1a1a2e">sponge fermentation</text>
+<line x1="146" y1="178" x2="146" y2="194" stroke="#1a8080" stroke-width="2" marker-end="url(#at)"/>
+<text x="157" y="188" font-size="9.5" font-style="italic" font-family="Arial" fill="white">+ remaining ingredients</text>
+<rect x="17" y="196" width="258" height="46" rx="6" fill="white" stroke="#1a8080" stroke-width="1.5"/>
+<text x="146" y="224" text-anchor="middle" font-size="13" font-weight="bold" font-family="Arial" fill="#1a1a2e">mixing the dough</text>
+<line x1="146" y1="242" x2="146" y2="255" stroke="#1a8080" stroke-width="2" marker-end="url(#at)"/>
+<rect x="17" y="257" width="258" height="46" rx="6" fill="white" stroke="#1a8080" stroke-width="1.5"/>
+<text x="146" y="285" text-anchor="middle" font-size="13" font-weight="bold" font-family="Arial" fill="#1a1a2e">dividing</text>
+<line x1="146" y1="303" x2="146" y2="316" stroke="#1a8080" stroke-width="2" marker-end="url(#at)"/>
+<rect x="17" y="318" width="258" height="46" rx="6" fill="white" stroke="#1a8080" stroke-width="1.5"/>
+<text x="146" y="346" text-anchor="middle" font-size="13" font-weight="bold" font-family="Arial" fill="#1a1a2e">rounding</text>
+<line x1="146" y1="364" x2="146" y2="534" stroke="#1a8080" stroke-width="2" marker-end="url(#at)"/>
+
+<!-- ============================================================
+     PANEL 2  straight-dough  (sky-blue)  x=299 w=282  xc=440
+     ============================================================ -->
+<rect x="299" y="5" width="282" height="530" rx="12" fill="#5a9ed4" stroke="#20608a" stroke-width="1.5"/>
+<text x="440" y="27" text-anchor="middle" font-size="15" font-weight="bold" font-family="Arial,sans-serif" fill="white">straight-dough</text>
+<text x="314" y="52" font-size="10.5" font-style="italic" font-family="Arial" fill="white">all ingredients</text>
+<line x1="440" y1="56" x2="440" y2="69" stroke="white" stroke-width="1.8" marker-end="url(#ab)"/>
+<rect x="311" y="71" width="258" height="46" rx="6" fill="white" stroke="#20608a" stroke-width="1.5"/>
+<text x="440" y="99" text-anchor="middle" font-size="13" font-weight="bold" font-family="Arial" fill="#1a1a2e">mixing the dough</text>
+<line x1="440" y1="117" x2="440" y2="130" stroke="#20608a" stroke-width="2" marker-end="url(#ab)"/>
+<rect x="311" y="132" width="258" height="46" rx="6" fill="white" stroke="#20608a" stroke-width="1.5"/>
+<text x="440" y="160" text-anchor="middle" font-size="13" font-weight="bold" font-family="Arial" fill="#1a1a2e">bulk fermentation</text>
+<line x1="440" y1="178" x2="440" y2="191" stroke="#20608a" stroke-width="2" marker-end="url(#ab)"/>
+<rect x="311" y="193" width="258" height="46" rx="6" fill="white" stroke="#20608a" stroke-width="1.5"/>
+<text x="440" y="221" text-anchor="middle" font-size="13" font-weight="bold" font-family="Arial" fill="#1a1a2e">dividing</text>
+<line x1="440" y1="239" x2="440" y2="252" stroke="#20608a" stroke-width="2" marker-end="url(#ab)"/>
+<rect x="311" y="254" width="258" height="46" rx="6" fill="white" stroke="#20608a" stroke-width="1.5"/>
+<text x="440" y="282" text-anchor="middle" font-size="13" font-weight="bold" font-family="Arial" fill="#1a1a2e">rounding</text>
+<line x1="440" y1="300" x2="440" y2="534" stroke="#20608a" stroke-width="2" marker-end="url(#ab)"/>
+
+<!-- ============================================================
+     PANEL 3  "no-time"  (purple)  x=591 w=282  xc=732
+     ============================================================ -->
+<rect x="591" y="5" width="282" height="530" rx="12" fill="#8a7bbf" stroke="#503a8a" stroke-width="1.5"/>
+<text x="732" y="27" text-anchor="middle" font-size="15" font-weight="bold" font-family="Arial,sans-serif" fill="white">"no-time"</text>
+<text x="606" y="52" font-size="10.5" font-style="italic" font-family="Arial" fill="white">all ingredients</text>
+<line x1="732" y1="56" x2="732" y2="69" stroke="white" stroke-width="1.8" marker-end="url(#ap)"/>
+<rect x="603" y="71" width="258" height="60" rx="6" fill="white" stroke="#503a8a" stroke-width="1.5"/>
+<text x="732" y="96" text-anchor="middle" font-size="12" font-weight="bold" font-family="Arial" fill="#1a1a2e">high intensity mixing</text>
+<text x="732" y="113" text-anchor="middle" font-size="12" font-weight="bold" font-family="Arial" fill="#1a1a2e">and conditioning</text>
+<line x1="732" y1="131" x2="732" y2="144" stroke="#503a8a" stroke-width="2" marker-end="url(#ap)"/>
+<rect x="603" y="146" width="258" height="46" rx="6" fill="white" stroke="#503a8a" stroke-width="1.5"/>
+<text x="732" y="174" text-anchor="middle" font-size="13" font-weight="bold" font-family="Arial" fill="#1a1a2e">floor time</text>
+<line x1="732" y1="192" x2="732" y2="205" stroke="#503a8a" stroke-width="2" marker-end="url(#ap)"/>
+<rect x="603" y="207" width="258" height="46" rx="6" fill="white" stroke="#503a8a" stroke-width="1.5"/>
+<text x="732" y="235" text-anchor="middle" font-size="13" font-weight="bold" font-family="Arial" fill="#1a1a2e">developing</text>
+<line x1="732" y1="253" x2="732" y2="266" stroke="#503a8a" stroke-width="2" marker-end="url(#ap)"/>
+<rect x="603" y="268" width="258" height="46" rx="6" fill="white" stroke="#503a8a" stroke-width="1.5"/>
+<text x="732" y="296" text-anchor="middle" font-size="13" font-weight="bold" font-family="Arial" fill="#1a1a2e">dividing and panning</text>
+<line x1="732" y1="314" x2="732" y2="534" stroke="#503a8a" stroke-width="2" marker-end="url(#ap)"/>
+
+<!-- ============================================================
+     PANEL 4  continuous bread making  (orange)  x=883 w=312  xc=1039
+     ============================================================ -->
+<rect x="883" y="5" width="312" height="530" rx="12" fill="#d49020" stroke="#a06010" stroke-width="1.5"/>
+<text x="1039" y="21" text-anchor="middle" font-size="14" font-weight="bold" font-family="Arial,sans-serif" fill="white">continuous</text>
+<text x="1039" y="38" text-anchor="middle" font-size="14" font-weight="bold" font-family="Arial,sans-serif" fill="white">bread making</text>
+<rect x="895" y="47" width="288" height="60" rx="6" fill="white" stroke="#a06010" stroke-width="1.5"/>
+<text x="1039" y="71" text-anchor="middle" font-size="12" font-weight="bold" font-family="Arial" fill="#1a1a2e">adding brew</text>
+<text x="1039" y="88" text-anchor="middle" font-size="12" font-weight="bold" font-family="Arial" fill="#1a1a2e">ingredients</text>
+<line x1="1039" y1="107" x2="1039" y2="120" stroke="#a06010" stroke-width="2" marker-end="url(#ao)"/>
+<rect x="895" y="122" width="288" height="46" rx="6" fill="white" stroke="#a06010" stroke-width="1.5"/>
+<text x="1039" y="150" text-anchor="middle" font-size="13" font-weight="bold" font-family="Arial" fill="#1a1a2e">mixing the brew</text>
+<line x1="1039" y1="168" x2="1039" y2="181" stroke="#a06010" stroke-width="2" marker-end="url(#ao)"/>
+<rect x="895" y="183" width="288" height="46" rx="6" fill="white" stroke="#a06010" stroke-width="1.5"/>
+<text x="1039" y="211" text-anchor="middle" font-size="13" font-weight="bold" font-family="Arial" fill="#1a1a2e">fermenting the brew</text>
+<line x1="1039" y1="229" x2="1039" y2="242" stroke="#a06010" stroke-width="2" marker-end="url(#ao)"/>
+<rect x="895" y="244" width="288" height="60" rx="6" fill="white" stroke="#a06010" stroke-width="1.5"/>
+<text x="1039" y="268" text-anchor="middle" font-size="12" font-weight="bold" font-family="Arial" fill="#1a1a2e">metering the</text>
+<text x="1039" y="285" text-anchor="middle" font-size="12" font-weight="bold" font-family="Arial" fill="#1a1a2e">dry ingredients</text>
+<line x1="1039" y1="304" x2="1039" y2="317" stroke="#a06010" stroke-width="2" marker-end="url(#ao)"/>
+<rect x="895" y="319" width="288" height="46" rx="6" fill="white" stroke="#a06010" stroke-width="1.5"/>
+<text x="1039" y="347" text-anchor="middle" font-size="13" font-weight="bold" font-family="Arial" fill="#1a1a2e">premixing</text>
+<line x1="1039" y1="365" x2="1039" y2="378" stroke="#a06010" stroke-width="2" marker-end="url(#ao)"/>
+<rect x="895" y="380" width="288" height="46" rx="6" fill="white" stroke="#a06010" stroke-width="1.5"/>
+<text x="1039" y="408" text-anchor="middle" font-size="13" font-weight="bold" font-family="Arial" fill="#1a1a2e">dividing and panning</text>
+<line x1="1039" y1="426" x2="1039" y2="534" stroke="#a06010" stroke-width="2" marker-end="url(#ao)"/>
+
+<!-- ============================================================
+     CONVERGENCE BAR
+     ============================================================ -->
+<rect x="5" y="539" width="1190" height="22" rx="5" fill="#7a5a10" opacity="0.22"/>
+<text x="600" y="555" text-anchor="middle" font-size="11.5" font-style="italic" font-family="Arial,sans-serif" fill="#3a2000">&#9660;  all four methods converge to the same shared industrial production line  &#9660;</text>
+
+<!-- ============================================================
+     WIDE DIVIDING-AND-PANNING BOX
+     ============================================================ -->
+<line x1="146"  y1="561" x2="146"  y2="566" stroke="#555" stroke-width="1.5" marker-end="url(#ad)"/>
+<line x1="440"  y1="561" x2="440"  y2="566" stroke="#555" stroke-width="1.5" marker-end="url(#ad)"/>
+<line x1="732"  y1="561" x2="732"  y2="566" stroke="#555" stroke-width="1.5" marker-end="url(#ad)"/>
+<line x1="1039" y1="561" x2="1039" y2="566" stroke="#555" stroke-width="1.5" marker-end="url(#ad)"/>
+<rect x="5" y="568" width="1190" height="48" rx="8" fill="#fffde7" stroke="#888" stroke-width="2"/>
+<text x="600" y="597" text-anchor="middle" font-size="15" font-weight="bold" font-family="Arial,sans-serif" fill="#1a1a2e">dividing  and  panning</text>
+<line x1="600" y1="616" x2="600" y2="630" stroke="#555" stroke-width="2" marker-end="url(#ad)"/>
+
+<!-- ============================================================
+     SHARED ROW 1 — left to right
+     intermediate proofing | molding | panning
+     ============================================================ -->
+<rect x="5" y="632" width="380" height="52" rx="8" fill="#fff9ed" stroke="#888" stroke-width="2"/>
+<text x="195" y="654" text-anchor="middle" font-size="13.5" font-weight="bold" font-family="Arial" fill="#1a1a2e">intermediate</text>
+<text x="195" y="673" text-anchor="middle" font-size="13.5" font-weight="bold" font-family="Arial" fill="#1a1a2e">proofing</text>
+<line x1="385" y1="658" x2="398" y2="658" stroke="#555" stroke-width="2.5" marker-end="url(#ad)"/>
+<rect x="400" y="632" width="380" height="52" rx="8" fill="#fff9ed" stroke="#888" stroke-width="2"/>
+<text x="590" y="663" text-anchor="middle" font-size="14" font-weight="bold" font-family="Arial" fill="#1a1a2e">molding</text>
+<line x1="780" y1="658" x2="793" y2="658" stroke="#555" stroke-width="2.5" marker-end="url(#ad)"/>
+<rect x="795" y="632" width="400" height="52" rx="8" fill="#fff9ed" stroke="#888" stroke-width="2"/>
+<text x="995" y="663" text-anchor="middle" font-size="14" font-weight="bold" font-family="Arial" fill="#1a1a2e">panning</text>
+<line x1="995" y1="684" x2="995" y2="700" stroke="#555" stroke-width="2.5" marker-end="url(#ad)"/>
+
+<!-- ============================================================
+     SHARED ROW 2 — right to left
+     final proofing | baking | depanning
+     ============================================================ -->
+<rect x="795" y="702" width="400" height="52" rx="8" fill="#fff9ed" stroke="#888" stroke-width="2"/>
+<text x="995" y="733" text-anchor="middle" font-size="14" font-weight="bold" font-family="Arial" fill="#1a1a2e">final proofing</text>
+<line x1="795" y1="728" x2="782" y2="728" stroke="#555" stroke-width="2.5" marker-end="url(#ad)"/>
+<rect x="400" y="702" width="380" height="52" rx="8" fill="#fff9ed" stroke="#888" stroke-width="2"/>
+<text x="590" y="733" text-anchor="middle" font-size="14" font-weight="bold" font-family="Arial" fill="#1a1a2e">baking</text>
+<line x1="400" y1="728" x2="387" y2="728" stroke="#555" stroke-width="2.5" marker-end="url(#ad)"/>
+<rect x="5" y="702" width="380" height="52" rx="8" fill="#fff9ed" stroke="#888" stroke-width="2"/>
+<text x="195" y="733" text-anchor="middle" font-size="14" font-weight="bold" font-family="Arial" fill="#1a1a2e">depanning</text>
+<line x1="195" y1="754" x2="195" y2="770" stroke="#555" stroke-width="2.5" marker-end="url(#ad)"/>
+
+<!-- ============================================================
+     DISTRIBUTION FOOTER
+     ============================================================ -->
+<rect x="5" y="772" width="1190" height="50" rx="9" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2.5"/>
+<text x="600" y="802" text-anchor="middle" font-size="15" font-weight="bold" font-family="Arial,sans-serif" fill="#1b5e20">packaged bread  →  quality inspection  →  distribution to retailers</text>
+<text x="1195" y="843" text-anchor="end" font-size="9" font-family="Arial" fill="#999">IELTS Writing Task 1 – Industrial Process Diagram</text>
+
+</svg>

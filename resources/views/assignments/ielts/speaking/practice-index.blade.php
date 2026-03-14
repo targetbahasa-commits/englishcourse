@@ -46,7 +46,7 @@
                     <p class="text-gray-500 text-sm">Short questions about yourself and familiar topics.</p>
                 </div>
                 
-                <a href="{{ route('assignments.ielts-academic.speaking.index', ['part' => 1]) }}" class="block w-full py-3 bg-orange-600 text-white text-center rounded-xl font-bold hover:bg-orange-700 transition shadow-sm hover:shadow active:scale-95">
+                <a href="{{ route('assignments.ielts-academic.speaking.practice-index.part', ['part' => 1]) }}" class="block w-full py-3 bg-orange-600 text-white text-center rounded-xl font-bold hover:bg-orange-700 transition shadow-sm hover:shadow active:scale-95">
                     Start Practice
                 </a>
             </div>
@@ -67,7 +67,7 @@
                     <p class="text-gray-500 text-sm">Speak for 1-2 minutes on a given topic.</p>
                 </div>
                 
-                <a href="{{ route('assignments.ielts-academic.speaking.index', ['part' => 2]) }}" class="block w-full py-3 bg-pink-600 text-white text-center rounded-xl font-bold hover:bg-pink-700 transition shadow-sm hover:shadow active:scale-95">
+                <a href="{{ route('assignments.ielts-academic.speaking.practice-index.part', ['part' => 2]) }}" class="block w-full py-3 bg-pink-600 text-white text-center rounded-xl font-bold hover:bg-pink-700 transition shadow-sm hover:shadow active:scale-95">
                     Start Practice
                 </a>
             </div>
@@ -88,7 +88,7 @@
                     <p class="text-gray-500 text-sm">In-depth discussion related to the Part 2 topic.</p>
                 </div>
                 
-                <a href="{{ route('assignments.ielts-academic.speaking.index', ['part' => 3]) }}" class="block w-full py-3 bg-purple-600 text-white text-center rounded-xl font-bold hover:bg-purple-700 transition shadow-sm hover:shadow active:scale-95">
+                <a href="{{ route('assignments.ielts-academic.speaking.practice-index.part', ['part' => 3]) }}" class="block w-full py-3 bg-purple-600 text-white text-center rounded-xl font-bold hover:bg-purple-700 transition shadow-sm hover:shadow active:scale-95">
                     Start Practice
                 </a>
             </div>
