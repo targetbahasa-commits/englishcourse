@@ -1,27 +1,27 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="min-h-screen bg-slate-900 relative overflow-hidden py-8 font-sans">
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden py-8 font-sans">
     {{-- Background Decoration --}}
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
-        <div class="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-indigo-600/20 blur-3xl"></div>
-        <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-amber-600/10 blur-3xl"></div>
-        <div class="absolute top-[20%] left-[20%] w-[300px] h-[300px] rounded-full bg-white/5 blur-2xl"></div>
+        <div class="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-indigo-200/40 blur-3xl"></div>
+        <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-purple-200/30 blur-3xl"></div>
+        <div class="absolute top-[20%] left-[20%] w-[300px] h-[300px] rounded-full bg-blue-100/40 blur-2xl"></div>
     </div>
 
     <div class="container mx-auto px-4 relative z-10 max-w-5xl">
         {{-- Navigation --}}
         <div class="mb-8 flex items-center justify-between">
             <a href="{{ route('assignments.ielts-academic.listening.index') }}" 
-               class="inline-flex items-center text-slate-400 hover:text-white transition-colors group text-sm font-medium tracking-wide">
-                <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center mr-3 group-hover:bg-amber-500/20 transition-all">
+               class="inline-flex items-center text-gray-500 hover:text-indigo-600 transition-colors group text-sm font-medium tracking-wide">
+                <div class="w-8 h-8 rounded-full bg-blue-100/40 flex items-center justify-center mr-3 group-hover:bg-indigo-100 transition-all">
                     <svg class="w-4 h-4 transform group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
                 </div>
                 <span>Back to Skills</span>
             </a>
-            <div class="text-slate-500 text-xs font-bold tracking-widest uppercase">IELTS Listening • Warm Up</div>
+            <div class="text-gray-500 text-xs font-bold tracking-widest uppercase">IELTS Listening • Warm Up</div>
         </div>
 
         {{-- Main Interface Card --}}

@@ -61,7 +61,7 @@
             <h2 class="text-2xl font-bold text-gray-800">Warm-Up Practice</h2>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
             @php
                 $warmUpPractices = [
                     'Spelling' => 'text-amber-600 bg-amber-50',
@@ -70,6 +70,7 @@
                     'Numbers' => 'text-amber-600 bg-amber-50',
                     'Names' => 'text-amber-600 bg-amber-50',
                     'Geographical Names' => 'text-amber-600 bg-amber-50',
+                    'Direction' => 'text-amber-600 bg-amber-50',
                 ];
             @endphp
 
@@ -88,6 +89,8 @@
                         $link = route('assignments.ielts-academic.listening.warmup', 'names');
                     } elseif ($title === 'Geographical Names') {
                         $link = route('assignments.ielts-academic.listening.warmup', 'geographical-names');
+                    } elseif ($title === 'Direction') {
+                        $link = route('assignments.ielts-academic.listening.warmup', 'direction');
                     }
                 @endphp
                 <a href="{{ $link }}" class="bg-white p-4 rounded-2xl shadow-sm hover:shadow-md transition group border border-amber-100 hover:border-amber-300 flex flex-col items-center justify-center text-center h-32">
@@ -128,6 +131,7 @@
                     8 => 'Short Answer',
                     9 => 'Map & Plan Labelling',
                     10 => 'Diagrams & Flowcharts',
+                    11 => 'Mixed Exercise',
                 ];
             @endphp
 

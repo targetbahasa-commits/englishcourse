@@ -12,11 +12,16 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="font-sans antialiased bg-[#F3F4FF] p-8">
+<body class="font-sans antialiased bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-8">
     @include('components.impersonation-banner')
-    @include('components.program-sidebar')
+    @include('components.program-sidebar', ['programSidebarAlwaysVisible' => true])
 
-<div class="container mx-auto px-4 py-8 max-w-5xl">
+<div x-data="{ sidebarOpen: true }"
+    @program-sidebar-change.window="sidebarOpen = !!($event.detail && $event.detail.open)"
+    class="transition-all duration-300"
+    :class="sidebarOpen ? 'lg:ml-72' : 'lg:ml-0'">
+<div class="container mx-auto px-4 py-8 max-w-5xl transition-all duration-300"
+    :class="sidebarOpen ? '' : 'max-w-7xl'">
     <!-- Header -->
     <div class="mb-8">
         <div class="flex items-center justify-between mb-4">
@@ -48,12 +53,11 @@
 
     @if($id == 6 && !request()->has('practice'))
     <!-- Practice Selection Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <!-- Practice 1 Card (Enabled) -->
-        <a href="{{ route('assignments.ielts-academic.listening.material', ['id' => 6, 'practice' => 1]) }}" 
-           target="_blank"
-           class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-purple-400 transform hover:-translate-y-1">
-            <div class="p-8 relative">
+          <a href="{{ route('assignments.ielts-academic.listening.material', ['id' => 6, 'practice' => 1]) }}"
+              class="group block h-full bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-purple-400 transform hover:-translate-y-1">
+                <div class="p-8 relative h-full flex flex-col">
                 <!-- Badge -->
                 <div class="absolute top-4 right-4">
                     <span class="px-3 py-1 bg-gradient-to-r from-purple-500 to-purple-600 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">
@@ -93,7 +97,7 @@
                 </div>
                 
                 <!-- Button -->
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between mt-auto">
                     <span class="text-purple-600 font-semibold group-hover:text-purple-700 flex items-center gap-2">
                         Start Practice
                         <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,8 +109,8 @@
         </a>
 
         <!-- Practice 2 Card (Hotel Information) -->
-        <a href="?practice=2" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-purple-300 transition-all duration-300 hover:-translate-y-2">
-            <div class="p-8 relative">
+        <a href="?practice=2" class="group block h-full bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-purple-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative h-full flex flex-col">
                 <!-- Badge -->
                 <div class="absolute top-4 right-4">
                     <span class="px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">
@@ -144,7 +148,7 @@
                 </div>
                 
                 <!-- Button -->
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between mt-auto">
                     <span class="text-purple-600 font-semibold group-hover:text-purple-700 flex items-center gap-2">
                         Start Practice
                         <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,8 +160,8 @@
         </a>
 
         <!-- Practice 3 Card (Apartment for Rent) -->
-        <a href="?practice=3" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-blue-300 transition-all duration-300 hover:-translate-y-2">
-            <div class="p-8 relative">
+        <a href="?practice=3" class="group block h-full bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-blue-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative h-full flex flex-col">
                 <!-- Badge -->
                 <div class="absolute top-4 right-4">
                     <span class="px-3 py-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">
@@ -195,8 +199,264 @@
                 </div>
                 
                 <!-- Button -->
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between mt-auto">
                     <span class="text-blue-600 font-semibold group-hover:text-blue-700 flex items-center gap-2">
+                        Start Practice
+                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Practice 4 Card (John Kepler's Memo) -->
+        <a href="?practice=4" class="group block h-full bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-amber-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative h-full flex flex-col">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">
+                        Practice 4
+                    </span>
+                </div>
+
+                <div class="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors">John Kepler's Memo</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">Complete memo notes questions 11-20 for the music examination preparation.</p>
+                </div>
+
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span>10 Questions</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>~12 mins</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between mt-auto">
+                    <span class="text-amber-600 font-semibold group-hover:text-amber-700 flex items-center gap-2">
+                        Start Practice
+                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Practice 5 Card (Restaurant Menu) -->
+        <a href="?practice=5" class="group block h-full bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-teal-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative h-full flex flex-col">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">
+                        Practice 5
+                    </span>
+                </div>
+
+                <div class="w-16 h-16 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10"></path>
+                    </svg>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-teal-600 transition-colors">Restaurant Menu</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">Part A multiple choice and Part B form completion about menu choices.</p>
+                </div>
+
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <span>6 Questions</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>~10 mins</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between mt-auto">
+                    <span class="text-teal-600 font-semibold group-hover:text-teal-700 flex items-center gap-2">
+                        Start Practice
+                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Practice 6 Card (Sentence Completion - Listening 1) -->
+        <a href="?practice=6" class="group block h-full bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-indigo-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative h-full flex flex-col">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-indigo-500 to-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">
+                        Practice 6
+                    </span>
+                </div>
+
+                <div class="w-16 h-16 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">Game Restrictions (Listening 1)</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">Complete the sentence completion questions 1-6.</p>
+                </div>
+
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <span>6 Questions</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>~8 mins</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between mt-auto">
+                    <span class="text-indigo-600 font-semibold group-hover:text-indigo-700 flex items-center gap-2">
+                        Start Practice
+                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Practice 7 Card (Sentence Completion - Listening 2) -->
+        <a href="?practice=7" class="group block h-full bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-rose-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative h-full flex flex-col">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">
+                        Practice 7
+                    </span>
+                </div>
+
+                <div class="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-rose-600 transition-colors">TV Viewing Debate (Listening 2)</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">Complete the sentence completion questions 7-12.</p>
+                </div>
+
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <span>6 Questions</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>~8 mins</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between mt-auto">
+                    <span class="text-rose-600 font-semibold group-hover:text-rose-700 flex items-center gap-2">
+                        Start Practice
+                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Practice 8 Card (Sentence Completion - Listening 1) -->
+        <a href="?practice=8" class="group block h-full bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-emerald-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative h-full flex flex-col">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">
+                        Practice 8
+                    </span>
+                </div>
+
+                <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">Sarah's Diet Problem (Listening 1)</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">Complete the sentence completion questions 1-7.</p>
+                </div>
+
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <span>7 Questions</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>~9 mins</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between mt-auto">
+                    <span class="text-emerald-600 font-semibold group-hover:text-emerald-700 flex items-center gap-2">
+                        Start Practice
+                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Practice 9 Card (Sentence Completion - Listening 2) -->
+        <a href="?practice=9" class="group block h-full bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-amber-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative h-full flex flex-col">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">
+                        Practice 9
+                    </span>
+                </div>
+
+                <div class="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors">Tina's Weight Gain (Listening 2)</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">Complete the sentence completion questions 8-13.</p>
+                </div>
+
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <span>6 Questions</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>~8 mins</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between mt-auto">
+                    <span class="text-amber-600 font-semibold group-hover:text-amber-700 flex items-center gap-2">
                         Start Practice
                         <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
@@ -207,9 +467,10 @@
         </a>
     </div>
     @elseif($id == 6 && request()->has('practice'))
-    @if(request()->get('practice') == 1)
+    @if(request()->get('practice') == 1 || request()->get('practice') == 4)
     <!-- Practice 1 Content -->
     <div class="space-y-8">
+        @if(request()->get('practice') == 1)
         <!-- Question Block -->
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-indigo-500 p-8 relative overflow-hidden">
             <!-- Decorative Background Element -->
@@ -404,6 +665,135 @@
                     </table>
                 </div>
             </div>
+            @endif
+
+            @if(request()->get('practice') == 4)
+            <!-- Question Block 3 -->
+            <div class="mt-8 bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 p-8 relative overflow-hidden">
+                <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+
+                <div class="relative z-10 mb-8">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Questions 11-20</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 leading-tight">John Kepler's Memo</h3>
+                </div>
+
+                <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                    <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div>
+                        <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                        <p class="text-amber-700 text-sm">Complete the memo. Write <span class="font-bold">NO MORE THAN THREE WORDS AND/OR A NUMBER</span> for each answer.</p>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden bg-white rounded-xl border border-gray-200 shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <tbody class="divide-y divide-gray-100">
+                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                                <td class="p-3 text-gray-800 text-lg font-medium w-1/2">Exam at</td>
+                                <td class="p-3 w-1/2">
+                                    <div class="flex items-center gap-3 flex-wrap">
+                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">11</span>
+                                        <input type="text" name="q11" class="flex-1 min-w-[180px] bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Answer...">
+                                        <span class="text-gray-900 text-lg">Primary School</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                                <td class="p-3 text-gray-800 text-lg font-medium">Arrive at the school by</td>
+                                <td class="p-3">
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">12</span>
+                                        <input type="text" name="q12" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Answer...">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                                <td class="p-3 text-gray-800 text-lg font-medium">Tuning: four strings C, G,</td>
+                                <td class="p-3">
+                                    <div class="flex items-center gap-3 flex-wrap">
+                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">13</span>
+                                        <input type="text" name="q13" class="w-36 bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="...">
+                                        <span class="text-gray-900 text-lg">, A</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                                <td class="p-3 text-gray-800 text-lg font-medium">Take: a spare bow / a cleaning cloth / a</td>
+                                <td class="p-3">
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">14</span>
+                                        <input type="text" name="q14" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Answer...">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                                <td class="p-3 text-gray-800 text-lg font-medium">Also, take own music</td>
+                                <td class="p-3">
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">15</span>
+                                        <input type="text" name="q15" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Answer...">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                                <td class="p-3 text-gray-800 text-lg font-medium align-top">Order of three-part exam</td>
+                                <td class="p-3 space-y-3">
+                                    <div class="text-gray-900 text-lg">First part: sight-reading</div>
+                                    <div class="flex items-center gap-2 flex-wrap text-gray-900 text-lg">
+                                        <span>Second part:</span>
+                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">16</span>
+                                        <input type="text" name="q16" class="min-w-[180px] bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 placeholder-gray-300" placeholder="Answer...">
+                                        <span>prepared pieces of music</span>
+                                    </div>
+                                    <div class="text-gray-900 text-lg">Third part: <span class="inline-block align-middle ml-2 w-40 border-b-2 border-gray-300"></span></div>
+                                </td>
+                            </tr>
+                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                                <td class="p-3 text-gray-800 text-lg font-medium">Marking of first and third parts is out of</td>
+                                <td class="p-3">
+                                    <div class="flex items-center gap-3 flex-wrap">
+                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">17</span>
+                                        <input type="text" name="q17" class="w-40 bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="...">
+                                        <span class="text-gray-900 text-lg">%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                                <td class="p-3 text-gray-800 text-lg font-medium">Examiner looking for</td>
+                                <td class="p-3">
+                                    <div class="flex items-center gap-3 flex-wrap text-gray-900 text-lg">
+                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">18</span>
+                                        <input type="text" name="q18" class="w-44 bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 placeholder-gray-300" placeholder="...">
+                                        <span>and fluency</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                                <td class="p-3 text-gray-800 text-lg font-medium">Results made available on the Woodlands</td>
+                                <td class="p-3">
+                                    <div class="flex items-center gap-3 flex-wrap text-gray-900 text-lg">
+                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">19</span>
+                                        <input type="text" name="q19" class="w-44 bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 placeholder-gray-300" placeholder="...">
+                                        <span>and through the mail</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                                <td class="p-3 text-gray-800 text-lg font-medium">Aim for 2009: Grade</td>
+                                <td class="p-3">
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">20</span>
+                                        <input type="text" name="q20" class="w-40 bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Answer...">
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @endif
             
             <!-- Bottom Spacer for Audio Player -->
             <div class="h-24"></div>
@@ -417,7 +807,7 @@
                     <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-md flex-shrink-0">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"></path></svg>
                     </div>
-                    <span class="text-sm font-bold text-indigo-900 line-clamp-1 hidden sm:inline">Audio Session - Latihan 1</span>
+                    <span class="text-sm font-bold text-indigo-900 line-clamp-1 hidden sm:inline">Audio Session - Practice {{ request()->get('practice') }}</span>
                 </div>
 
                 <!-- Controls -->
@@ -467,11 +857,11 @@
                     @if(Auth::user()->isAdmin())
                        <!-- Upload Buttons (Admin Only) -->
                        <div class="flex items-center gap-2">
-                           <button onclick="document.getElementById('uploadSrtModal').classList.remove('hidden')" class="px-3 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm" title="Upload SRT">
+                           <button onclick="const modal=document.getElementById('uploadSrtModal'); modal.classList.remove('hidden'); modal.classList.add('flex');" class="px-3 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm" title="Upload SRT">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                 Upload SRT
                             </button>
-                           <button onclick="document.getElementById('uploadAudioModal').classList.remove('hidden')" class="px-3 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm" title="Upload Audio">
+                           <button onclick="const modal=document.getElementById('uploadAudioModal'); modal.classList.remove('hidden'); modal.classList.add('flex');" class="px-3 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm" title="Upload Audio">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                                 Upload Audio
                             </button>
@@ -490,7 +880,7 @@
         </div>
         
         {{-- Transcript Drawer (Collapsible) --}}
-        <div id="transcriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex flex-col transition-all duration-300 ease-in-out shadow-md">
+        <div id="transcriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
             <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                 {{-- English Column --}}
                 <div class="flex flex-col h-full bg-slate-50">
@@ -847,11 +1237,11 @@
                 @if(Auth::user()->isAdmin())
                    <!-- Upload Buttons (Admin Only) -->
                    <div class="flex items-center gap-2">
-                       <button onclick="document.getElementById('uploadSrtModal').classList.remove('hidden')" class="px-3 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm" title="Upload SRT">
+                       <button onclick="const modal=document.getElementById('uploadSrtModal'); modal.classList.remove('hidden'); modal.classList.add('flex');" class="px-3 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm" title="Upload SRT">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             Upload SRT
                         </button>
-                       <button onclick="document.getElementById('uploadAudioModal').classList.remove('hidden')" class="px-3 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm" title="Upload Audio">
+                       <button onclick="const modal=document.getElementById('uploadAudioModal'); modal.classList.remove('hidden'); modal.classList.add('flex');" class="px-3 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm" title="Upload Audio">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                             Upload Audio
                         </button>
@@ -870,7 +1260,7 @@
     </div>
     
         {{-- Transcript Drawer (Collapsible) --}}
-        <div id="transcriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex flex-col transition-all duration-300 ease-in-out shadow-md">
+        <div id="transcriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
             <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                 {{-- English Column --}}
                 <div class="flex flex-col h-full bg-slate-50">
@@ -1213,11 +1603,11 @@
                     @if(Auth::user()->isAdmin())
                        <!-- Upload Buttons (Admin Only) -->
                        <div class="flex items-center gap-2">
-                           <button onclick="document.getElementById('uploadSrtModal').classList.remove('hidden')" class="px-3 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm" title="Upload SRT">
+                           <button onclick="const modal=document.getElementById('uploadSrtModal'); modal.classList.remove('hidden'); modal.classList.add('flex');" class="px-3 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm" title="Upload SRT">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                 Upload SRT
                             </button>
-                           <button onclick="document.getElementById('uploadAudioModal').classList.remove('hidden')" class="px-3 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm" title="Upload Audio">
+                           <button onclick="const modal=document.getElementById('uploadAudioModal'); modal.classList.remove('hidden'); modal.classList.add('flex');" class="px-3 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm" title="Upload Audio">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                                 Upload Audio
                             </button>
@@ -1236,7 +1626,7 @@
         </div>
         
         {{-- Transcript Drawer (Collapsible) --}}
-        <div id="transcriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex flex-col transition-all duration-300 ease-in-out shadow-md">
+        <div id="transcriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
             <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                 {{-- English Column --}}
                 <div class="flex flex-col h-full bg-slate-50">
@@ -1294,6 +1684,2848 @@
             </div>
         </div>
     </div>
+    @elseif(request()->get('practice') == 5)
+    <div class="space-y-8">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-teal-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-teal-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+            <div class="relative z-10 mb-8">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-teal-100 text-teal-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Part A</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Choose the correct letter, A, B, or C</h3>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">1. Where are they sitting?</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q1" value="A" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>next to the window</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q1" value="B" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>next to the door</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q1" value="C" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>in the centre of the room</span></label>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">2. What is Dan having as a starter?</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q2" value="A" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>tomato soup</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q2" value="B" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>green salad</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q2" value="C" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>He isn't having a starter.</span></label>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">3. When did Lucy last eat?</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q3" value="A" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>in the morning</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q3" value="B" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>at lunchtime</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q3" value="C" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>in the afternoon</span></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-cyan-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-cyan-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+            <div class="relative z-10 mb-8">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Part B</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Form Completion</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the form below</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Write <span class="font-bold">NO MORE THAN THREE WORDS</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="max-w-2xl mx-auto bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h4 class="text-xl font-bold text-center text-gray-900 mb-5">Menu</h4>
+                <div class="space-y-4 text-gray-800">
+                    <div class="grid grid-cols-[120px_1fr] gap-3 items-start">
+                        <span class="font-semibold">Starters:</span>
+                        <div class="space-y-2">
+                            <div>tomato soup</div>
+                            <div>seafood chowder</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-[120px_1fr] gap-3 items-start">
+                        <span class="font-semibold">Mains:</span>
+                        <div class="space-y-2">
+                            <div><span class="font-semibold mr-2">4.</span><input type="text" name="q4" class="w-72 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"></div>
+                            <div>roast lamb with potatoes</div>
+                            <div>bacon and egg pie</div>
+                            <div><span class="font-semibold mr-2">5.</span><input type="text" name="q5" class="w-72 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"></div>
+                            <div>spaghetti bolognaise</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-[120px_1fr] gap-3 items-start">
+                        <span class="font-semibold">Desserts:</span>
+                        <div class="space-y-2">
+                            <div>apple pie</div>
+                            <div><span class="font-semibold mr-2">6.</span><input type="text" name="q6" class="w-72 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 6)
+    <div class="space-y-8">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-indigo-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+            <div class="relative z-10 mb-8">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Sentence Completion</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the sentences below</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Write <span class="font-bold">NO MORE THAN TWO WORDS</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-5 text-lg text-gray-800 leading-relaxed">
+                <div>1. Paul can't buy the game because he is not <input type="text" name="q1" class="w-64 border-b-2 border-gray-300 focus:border-indigo-500 outline-none">.</div>
+                <div>2. The game contains <input type="text" name="q2" class="w-64 border-b-2 border-gray-300 focus:border-indigo-500 outline-none"> scenes that young people shouldn't see.</div>
+                <div>3. Children may get injured if they mimic the game's violence in <input type="text" name="q3" class="w-64 border-b-2 border-gray-300 focus:border-indigo-500 outline-none">.</div>
+                <div>4. Games that are not designed for young people should have an <input type="text" name="q4" class="w-64 border-b-2 border-gray-300 focus:border-indigo-500 outline-none">.</div>
+                <div>5. Paul thinks that <input type="text" name="q5" class="w-64 border-b-2 border-gray-300 focus:border-indigo-500 outline-none"> should decide which games to buy for their children.</div>
+                <div>6. Paul's friends agree that restrictions on games should be just like restrictions on <input type="text" name="q6" class="w-64 border-b-2 border-gray-300 focus:border-indigo-500 outline-none">.</div>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 7)
+    <div class="space-y-8">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-rose-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-rose-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+            <div class="relative z-10 mb-8">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-rose-100 text-rose-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Sentence Completion</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the sentences below</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Write <span class="font-bold">NO MORE THAN TWO WORDS</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-5 text-lg text-gray-800 leading-relaxed">
+                <div>7. The television show that Carla is watching is about <input type="text" name="q7" class="w-64 border-b-2 border-gray-300 focus:border-rose-500 outline-none">.</div>
+                <div>8. Jack and Sally agree that it is not appropriate for <input type="text" name="q8" class="w-64 border-b-2 border-gray-300 focus:border-rose-500 outline-none"> to see that type of show.</div>
+                <div>9. Carla believes that violent crime shows should not be shown to <input type="text" name="q9" class="w-64 border-b-2 border-gray-300 focus:border-rose-500 outline-none">.</div>
+                <div>10. There's a possibility people may attempt to repeat a <input type="text" name="q10" class="w-64 border-b-2 border-gray-300 focus:border-rose-500 outline-none"> that they saw on television.</div>
+                <div>11. Jack believes that <input type="text" name="q11" class="w-64 border-b-2 border-gray-300 focus:border-rose-500 outline-none"> should not have restrictions on their television viewing.</div>
+                <div>12. The three friends decide to <input type="text" name="q12" class="w-64 border-b-2 border-gray-300 focus:border-rose-500 outline-none"> about this topic.</div>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 8)
+    <div class="space-y-8">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-emerald-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-emerald-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+            <div class="relative z-10 mb-8">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Sentence Completion</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the sentences below</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Write <span class="font-bold">NO MORE THAN THREE WORDS</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-5 text-lg text-gray-800 leading-relaxed">
+                <div>1. Sarah said she didn't <input type="text" name="q1" class="w-64 border-b-2 border-gray-300 focus:border-emerald-500 outline-none"> in reply to the three previous invitations for dinner.</div>
+                <div>2. Anna said that Sarah doesn't agree to meet her <input type="text" name="q2" class="w-64 border-b-2 border-gray-300 focus:border-emerald-500 outline-none"> these days.</div>
+                <div>3. Carolyn and Blair think that Sarah doesn't want to eat <input type="text" name="q3" class="w-64 border-b-2 border-gray-300 focus:border-emerald-500 outline-none">.</div>
+                <div>4. Anna saw Sarah in the supermarket and thought she <input type="text" name="q4" class="w-64 border-b-2 border-gray-300 focus:border-emerald-500 outline-none">.</div>
+                <div>5. Anna said that Sarah didn't buy any <input type="text" name="q5" class="w-64 border-b-2 border-gray-300 focus:border-emerald-500 outline-none">.</div>
+                <div>6. Blair is worried that Sarah might diet until she has to spend time <input type="text" name="q6" class="w-64 border-b-2 border-gray-300 focus:border-emerald-500 outline-none">.</div>
+                <div>7. The friends decide to invite Sarah to a party and <input type="text" name="q7" class="w-64 border-b-2 border-gray-300 focus:border-emerald-500 outline-none"> about her dieting problem.</div>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 9)
+    <div class="space-y-8">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+            <div class="relative z-10 mb-8">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Sentence Completion</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the sentences below</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Write <span class="font-bold">NO MORE THAN THREE WORDS</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-5 text-lg text-gray-800 leading-relaxed">
+                <div>8. Helen says that Tina is <input type="text" name="q8" class="w-64 border-b-2 border-gray-300 focus:border-amber-500 outline-none"> now, despite gaining weight.</div>
+                <div>9. Helen thinks that Tina's weight gain might be because she isn't <input type="text" name="q9" class="w-64 border-b-2 border-gray-300 focus:border-amber-500 outline-none"> as she was before.</div>
+                <div>10. Donna says that Tina stopped gymnastics training so that she can <input type="text" name="q10" class="w-64 border-b-2 border-gray-300 focus:border-amber-500 outline-none">.</div>
+                <div>11. Helen thinks that Tina will notice her weight gain is unhealthy and make changes to <input type="text" name="q11" class="w-64 border-b-2 border-gray-300 focus:border-amber-500 outline-none">.</div>
+                <div>12. Donna says Tina doesn't need to be concerned about her weight if she <input type="text" name="q12" class="w-64 border-b-2 border-gray-300 focus:border-amber-500 outline-none">.</div>
+                <div>13. Peter suggests they give her an invitation to go with them for <input type="text" name="q13" class="w-64 border-b-2 border-gray-300 focus:border-amber-500 outline-none">.</div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @elseif($id == 8)
+    @if(!request()->has('practice'))
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <a href="?practice=1" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-teal-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 1</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-teal-600 transition-colors">Marketplace Safety Tips</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Short-answer questions 1-7.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>7 Questions</span><span>~10 mins</span></div>
+                <span class="text-teal-600 font-semibold group-hover:text-teal-700 flex items-center gap-2">Start Listening 1 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=2" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-indigo-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-indigo-500 to-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 2</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">Personal Security Advice</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Short-answer questions 8-16.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>9 Questions</span><span>~12 mins</span></div>
+                <span class="text-indigo-600 font-semibold group-hover:text-indigo-700 flex items-center gap-2">Start Listening 2 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+    </div>
+    @elseif(request()->get('practice') == 1)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-teal-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-teal-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-teal-100 text-teal-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Short Answer</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the short-answer questions</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Write <span class="font-bold">NO MORE THAN TWO WORDS AND/OR A NUMBER</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm text-lg leading-relaxed text-gray-800 space-y-5">
+                <div>
+                    <p class="font-medium mb-2">What combination of things in a marketplace makes thieves happy?</p>
+                    <ul class="list-disc pl-8 space-y-2">
+                        <li><span class="font-semibold">1.</span> <input type="text" name="q1" class="w-64 border-b-2 border-gray-300 focus:border-teal-500 outline-none"></li>
+                        <li>tourists</li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="font-medium mb-2">Which two examples of essential documents are named by the speaker?</p>
+                    <ul class="list-disc pl-8 space-y-2">
+                        <li><span class="font-semibold">2.</span> <input type="text" name="q2" class="w-64 border-b-2 border-gray-300 focus:border-teal-500 outline-none"></li>
+                        <li><span class="font-semibold">3.</span> <input type="text" name="q3" class="w-64 border-b-2 border-gray-300 focus:border-teal-500 outline-none"></li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="font-medium mb-2">Which three minor items are said to be alright in a waist bag?</p>
+                    <ul class="list-disc pl-8 space-y-2">
+                        <li><span class="font-semibold">4.</span> <input type="text" name="q4" class="w-64 border-b-2 border-gray-300 focus:border-teal-500 outline-none"></li>
+                        <li><span class="font-semibold">5.</span> <input type="text" name="q5" class="w-64 border-b-2 border-gray-300 focus:border-teal-500 outline-none"></li>
+                        <li>cheap reading glasses</li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="font-medium mb-2">What information about prices did the tour guide give for when people bargain in the bazaar?</p>
+                    <ul class="list-disc pl-8 space-y-2">
+                        <li>The initial price will be <span class="font-semibold">6.</span> <input type="text" name="q6" class="w-64 border-b-2 border-gray-300 focus:border-teal-500 outline-none">.</li>
+                        <li>A fair price is about <span class="font-semibold">7.</span> <input type="text" name="q7" class="w-52 border-b-2 border-gray-300 focus:border-teal-500 outline-none"> of the initial price.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 2)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-indigo-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Short Answer</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the short-answer questions</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Write <span class="font-bold">NO MORE THAN TWO WORDS</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm text-lg leading-relaxed text-gray-800 space-y-5">
+                <div>
+                    <p class="font-medium mb-2">When you get a debit card, what advice does the speaker give in relation to the PIN? Don't:</p>
+                    <ul class="list-disc pl-8 space-y-2">
+                        <li>use an <span class="font-semibold">8.</span> <input type="text" name="q8" class="w-64 border-b-2 border-gray-300 focus:border-indigo-500 outline-none">.</li>
+                        <li>tell anyone what your number is.</li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="font-medium mb-2">Who must you notify if you lose your card?</p>
+                    <ul class="list-disc pl-8 space-y-2">
+                        <li><span class="font-semibold">9.</span> <input type="text" name="q9" class="w-64 border-b-2 border-gray-300 focus:border-indigo-500 outline-none"></li>
+                        <li><span class="font-semibold">10.</span> <input type="text" name="q10" class="w-64 border-b-2 border-gray-300 focus:border-indigo-500 outline-none"></li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="font-medium mb-2">Which scams does the speaker tell you to beware of?</p>
+                    <ul class="list-disc pl-8 space-y-2">
+                        <li><span class="font-semibold">11.</span> <input type="text" name="q11" class="w-56 border-b-2 border-gray-300 focus:border-indigo-500 outline-none"> scams</li>
+                        <li><span class="font-semibold">12.</span> <input type="text" name="q12" class="w-56 border-b-2 border-gray-300 focus:border-indigo-500 outline-none"> scams</li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="font-medium mb-2">What three kinds of possessions are said to be attractive to thieves in College Hall?</p>
+                    <ul class="list-disc pl-8 space-y-2">
+                        <li><span class="font-semibold">13.</span> <input type="text" name="q13" class="w-64 border-b-2 border-gray-300 focus:border-indigo-500 outline-none"></li>
+                        <li>MP3 players</li>
+                        <li><span class="font-semibold">14.</span> <input type="text" name="q14" class="w-64 border-b-2 border-gray-300 focus:border-indigo-500 outline-none"></li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="font-medium mb-2">Which car safety devices does the speaker suggest car owners should buy?</p>
+                    <ul class="list-disc pl-8 space-y-2">
+                        <li>a <span class="font-semibold">15.</span> <input type="text" name="q15" class="w-64 border-b-2 border-gray-300 focus:border-indigo-500 outline-none"></li>
+                        <li>or</li>
+                        <li>a <span class="font-semibold">16.</span> <input type="text" name="q16" class="w-64 border-b-2 border-gray-300 focus:border-indigo-500 outline-none"></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @elseif($id == 7)
+    @if(!request()->has('practice'))
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <a href="?practice=1" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-rose-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-rose-500 to-red-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 1</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-rose-100 to-red-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-rose-600 transition-colors">Kitesurfing Safety Summary</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Complete the summary questions 1-8.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>8 Questions</span><span>~10 mins</span></div>
+                <span class="text-rose-600 font-semibold group-hover:text-rose-700 flex items-center gap-2">Start Listening 1 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=2" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-indigo-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-indigo-500 to-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 2</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">Rock Climbing Safety Summary</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Complete the summary questions 9-16.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>8 Questions</span><span>~10 mins</span></div>
+                <span class="text-indigo-600 font-semibold group-hover:text-indigo-700 flex items-center gap-2">Start Listening 2 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=3" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-amber-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 3</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors">Assessment Schedule (Listening 1)</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Multiple choice (1-3) and table completion (4-10).</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>10 Questions</span><span>~12 mins</span></div>
+                <span class="text-amber-600 font-semibold group-hover:text-amber-700 flex items-center gap-2">Start Soal 3 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=4" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-cyan-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 4</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h16"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-cyan-600 transition-colors">Assessment Schedule (Listening 2)</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Sentence completion (1-4) and value table (5-10).</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>10 Questions</span><span>~12 mins</span></div>
+                <span class="text-cyan-600 font-semibold group-hover:text-cyan-700 flex items-center gap-2">Start Soal 4 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+    </div>
+    @elseif(request()->get('practice') == 1)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-rose-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-rose-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-rose-100 text-rose-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Summary Completion</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the summary</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Write <span class="font-bold">NO MORE THAN ONE WORD AND/OR A NUMBER</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm text-lg leading-relaxed text-gray-800 space-y-4">
+                <p>
+                    A growing number of people are <span class="font-semibold">(1)</span>
+                    <input type="text" name="q1" class="w-44 border-b-2 border-gray-300 focus:border-rose-500 outline-none">
+                    all over the world, resulting in a number of serious and even <span class="font-semibold">(2)</span>
+                    <input type="text" name="q2" class="w-40 border-b-2 border-gray-300 focus:border-rose-500 outline-none">
+                    accidents every year.
+                </p>
+                <p>
+                    You should get proper training in basic skills, the use of safety devices, and <span class="font-semibold">(3)</span>
+                    <input type="text" name="q3" class="w-40 border-b-2 border-gray-300 focus:border-rose-500 outline-none">
+                    techniques. Make sure you have <span class="font-semibold">(4)</span>
+                    <input type="text" name="q4" class="w-40 border-b-2 border-gray-300 focus:border-rose-500 outline-none">
+                    clothing, such as a helmet and life jacket. Don't try kitesurfing unless you can swim.
+                </p>
+                <p>
+                    Once you have done your training, there are two <span class="font-semibold">(5)</span>
+                    <input type="text" name="q5" class="w-36 border-b-2 border-gray-300 focus:border-rose-500 outline-none">
+                    things that you should remember. First, choose a good place to practise, without a lot of other people around and with few natural <span class="font-semibold">(6)</span>
+                    <input type="text" name="q6" class="w-36 border-b-2 border-gray-300 focus:border-rose-500 outline-none">
+                    . Second, always check the <span class="font-semibold">(7)</span>
+                    <input type="text" name="q7" class="w-36 border-b-2 border-gray-300 focus:border-rose-500 outline-none">
+                    . Avoid strong winds, which might result in <span class="font-semibold">(8)</span>
+                    <input type="text" name="q8" class="w-36 border-b-2 border-gray-300 focus:border-rose-500 outline-none">
+                    . That usually causes serious injuries.
+                </p>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 2)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-indigo-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Summary Completion</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the summary</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Write <span class="font-bold">NO MORE THAN ONE WORD AND/OR A NUMBER</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm text-lg leading-relaxed text-gray-800 space-y-4">
+                <p>
+                    A growing number of people are <span class="font-semibold">(9)</span>
+                    <input type="text" name="q9" class="w-44 border-b-2 border-gray-300 focus:border-indigo-500 outline-none">
+                    climbing all over the world, resulting in a number of <span class="font-semibold">(10)</span>
+                    <input type="text" name="q10" class="w-40 border-b-2 border-gray-300 focus:border-indigo-500 outline-none">
+                    falls every year.
+                </p>
+                <p>
+                    You should get proper training in basic skills, the use of safety devices, and emergency <span class="font-semibold">(11)</span>
+                    <input type="text" name="q11" class="w-40 border-b-2 border-gray-300 focus:border-indigo-500 outline-none">
+                    . Make sure you have protective equipment, such as a helmet and <span class="font-semibold">(12)</span>
+                    <input type="text" name="q12" class="w-40 border-b-2 border-gray-300 focus:border-indigo-500 outline-none">
+                    . Don't try rock climbing unless you have first practised on a training wall.
+                </p>
+                <p>
+                    Once you have done your <span class="font-semibold">(13)</span>
+                    <input type="text" name="q13" class="w-36 border-b-2 border-gray-300 focus:border-indigo-500 outline-none">
+                    , there are two vital things that you should remember. First, choose a good place to practise, without a lot of other people around and with few <span class="font-semibold">(14)</span>
+                    <input type="text" name="q14" class="w-36 border-b-2 border-gray-300 focus:border-indigo-500 outline-none">
+                    hazards. Second, always check the <span class="font-semibold">(15)</span>
+                    <input type="text" name="q15" class="w-36 border-b-2 border-gray-300 focus:border-indigo-500 outline-none">
+                    . Avoid storms with rain, snow, and strong gusts that might cause a climber to <span class="font-semibold">(16)</span>
+                    <input type="text" name="q16" class="w-36 border-b-2 border-gray-300 focus:border-indigo-500 outline-none">
+                    .
+                </p>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 3)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Assessment Schedule</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Questions 1-3:</p>
+                    <p class="text-amber-700 text-sm">Choose the correct letter, <span class="font-bold">A, B, or C</span>.</p>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">1. Ms. Potts prefers to work with</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q1" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>a computer.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q1" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>a pencil and paper.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q1" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>spreadsheets.</span></label>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">2. She believes it is essential to have</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q2" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>a good system.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q2" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>good old days.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q2" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>one major assessment.</span></label>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">3. John thinks continuous assessment</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q3" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>makes him sick.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q3" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>affects his performance.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q3" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>is fair.</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Questions 4-10:</p>
+                    <p class="text-amber-700 text-sm">Complete the table below. Write <span class="font-bold">NO MORE THAN TWO WORDS AND/OR A NUMBER</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto bg-white rounded-xl border border-gray-200 shadow-sm">
+                <table class="w-full border-collapse text-sm md:text-base">
+                    <thead>
+                        <tr class="bg-amber-700 text-white">
+                            <th class="p-4 text-left font-semibold w-40">Month</th>
+                            <th class="p-4 text-left font-semibold">Assessment Schedule</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr><td class="p-4 font-semibold">January</td><td class="p-4">No assessment - summer holiday</td></tr>
+                        <tr><td class="p-4 font-semibold">February</td><td class="p-4"><span class="font-semibold mr-1">4.</span><input type="text" name="q4" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none"> ; set essay topics</td></tr>
+                        <tr><td class="p-4 font-semibold">March</td><td class="p-4">Field trip; <span class="font-semibold mr-1">5.</span><input type="text" name="q5" class="w-52 border-b-2 border-gray-300 focus:border-amber-500 outline-none"> with photographs</td></tr>
+                        <tr><td class="p-4 font-semibold">April</td><td class="p-4"><span class="font-semibold mr-1">6.</span><input type="text" name="q6" class="w-52 border-b-2 border-gray-300 focus:border-amber-500 outline-none"> with visual aids. <span class="italic">Break.</span></td></tr>
+                        <tr><td class="p-4 font-semibold">May</td><td class="p-4">A series of <span class="font-semibold mr-1">7.</span><input type="text" name="q7" class="w-52 border-b-2 border-gray-300 focus:border-amber-500 outline-none"> (short-answer questions)</td></tr>
+                        <tr><td class="p-4 font-semibold">June</td><td class="p-4">Mid-year exams</td></tr>
+                        <tr><td class="p-4 font-semibold">July</td><td class="p-4"><span class="italic">Break.</span> <span class="font-semibold mr-1">8.</span><input type="text" name="q8" class="w-52 border-b-2 border-gray-300 focus:border-amber-500 outline-none"></td></tr>
+                        <tr><td class="p-4 font-semibold">August</td><td class="p-4"><span class="font-semibold mr-1">9.</span><input type="text" name="q9" class="w-52 border-b-2 border-gray-300 focus:border-amber-500 outline-none"></td></tr>
+                        <tr><td class="p-4 font-semibold">September</td><td class="p-4"><span class="font-semibold mr-1">10.</span><input type="text" name="q10" class="w-52 border-b-2 border-gray-300 focus:border-amber-500 outline-none"> . <span class="italic">Break.</span></td></tr>
+                        <tr><td class="p-4 font-semibold">October</td><td class="p-4">Test</td></tr>
+                        <tr><td class="p-4 font-semibold">November</td><td class="p-4">Final exam</td></tr>
+                        <tr><td class="p-4 font-semibold">December</td><td class="p-4">No assessment - summer holiday</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 4)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-cyan-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-cyan-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Assessment Schedule</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Questions 1-4:</p>
+                    <p class="text-amber-700 text-sm">Complete the sentences below. Write <span class="font-bold">NO MORE THAN THREE WORDS OR NUMBERS</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-4 text-gray-800 text-lg">
+                <div><span class="font-semibold" style="color:#2563eb;">1.</span> Jim thinks he won't have a social life because of <input type="text" name="q1" class="w-64 border-b-2 border-gray-300 focus:border-cyan-500 outline-none">.</div>
+                <div><span class="font-semibold" style="color:#2563eb;">2.</span> Last year, Jim enjoyed the <input type="text" name="q2" class="w-64 border-b-2 border-gray-300 focus:border-cyan-500 outline-none">.</div>
+                <div><span class="font-semibold" style="color:#2563eb;">3.</span> The <input type="text" name="q3" class="w-64 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"> is scheduled for September.</div>
+                <div><span class="font-semibold" style="color:#2563eb;">4.</span> There are <input type="text" name="q4a" class="w-24 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"> books and <input type="text" name="q4b" class="w-24 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"> articles on the reading list.</div>
+            </div>
+
+            <div class="mt-8 mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Questions 5-10:</p>
+                    <p class="text-amber-700 text-sm">Complete the table below. Write <span class="font-bold">NO MORE THAN ONE WORD OR A NUMBER</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto bg-white rounded-xl border border-gray-200 shadow-sm">
+                <table class="w-full border-collapse text-sm md:text-base">
+                    <thead>
+                        <tr class="bg-cyan-700 text-white">
+                            <th class="p-4 text-left font-semibold w-40">Month</th>
+                            <th class="p-4 text-left font-semibold">Assessment Schedule</th>
+                            <th class="p-4 text-center font-semibold w-32">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr><td class="p-4 font-semibold">January</td><td class="p-4">No assessment - summer holiday</td><td class="p-4 text-center">-</td></tr>
+                        <tr><td class="p-4 font-semibold">February</td><td class="p-4">Quiz; set essay topics</td><td class="p-4 text-center"><span class="font-semibold mr-1" style="color:#2563eb;">5.</span><input type="text" name="q5" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center">%</td></tr>
+                        <tr><td class="p-4 font-semibold">March</td><td class="p-4">Field trip; poster with photographs</td><td class="p-4 text-center"><span class="font-semibold mr-1" style="color:#2563eb;">6.</span><input type="text" name="q6" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center">%</td></tr>
+                        <tr><td class="p-4 font-semibold">April</td><td class="p-4">Oral presentation with visual aids. <span class="italic">Break.</span></td><td class="p-4 text-center"><span class="font-semibold mr-1" style="color:#2563eb;">7.</span><input type="text" name="q7" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center">%</td></tr>
+                        <tr><td class="p-4 font-semibold">May</td><td class="p-4">A series of quizzes (short-answer questions)</td><td class="p-4 text-center">10%</td></tr>
+                        <tr><td class="p-4 font-semibold">June</td><td class="p-4">Mid-year exams</td><td class="p-4 text-center"><span class="font-semibold mr-1" style="color:#2563eb;">8.</span><input type="text" name="q8" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center">%</td></tr>
+                        <tr><td class="p-4 font-semibold">July</td><td class="p-4"><span class="italic">Break.</span> 5,000-word essay</td><td class="p-4 text-center">10%</td></tr>
+                        <tr><td class="p-4 font-semibold">August</td><td class="p-4">Research projects</td><td class="p-4 text-center"><span class="font-semibold mr-1" style="color:#2563eb;">9.</span><input type="text" name="q9" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center">%</td></tr>
+                        <tr><td class="p-4 font-semibold">September</td><td class="p-4">Seminar. <span class="italic">Break.</span></td><td class="p-4 text-center">5%</td></tr>
+                        <tr><td class="p-4 font-semibold">October</td><td class="p-4">Test</td><td class="p-4 text-center"><span class="font-semibold mr-1" style="color:#2563eb;">10.</span><input type="text" name="q10" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center">%</td></tr>
+                        <tr><td class="p-4 font-semibold">November</td><td class="p-4">Final exam</td><td class="p-4 text-center">20%</td></tr>
+                        <tr><td class="p-4 font-semibold">December</td><td class="p-4">No assessment - summer holiday</td><td class="p-4 text-center">-</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @elseif($id == 9)
+    @if(!request()->has('practice'))
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <a href="?practice=1" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-teal-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 1</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L6 20.75M3 13.25l3.75-3.75M14 6l4-4m0 0l2 2m-2-2L9 11l-2 5 5-2 9-9z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-teal-600 transition-colors">Town Map Labelling</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Label the map and write the correct letters B-G for questions 1-2.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <span>2 Questions</span>
+                    <span>~6 mins</span>
+                </div>
+                <span class="text-teal-600 font-semibold group-hover:text-teal-700 flex items-center gap-2">Start Listening 1 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=2" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-sky-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-sky-500 to-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 2</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-sky-100 to-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h10"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-sky-600 transition-colors">City Map Labelling</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Label the second map and write the correct letters B-H for questions 3-7.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <span>5 Questions</span>
+                    <span>~10 mins</span>
+                </div>
+                <span class="text-sky-600 font-semibold group-hover:text-sky-700 flex items-center gap-2">Start Listening 2 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=3" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-violet-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-violet-500 to-purple-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 3</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-violet-100 to-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16v14H4zM8 9h8m-8 3h6"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-violet-600 transition-colors">Camera Diagram Labels</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Konten lama: choose 4 answers and label questions 1-4.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <span>4 Questions</span>
+                    <span>~8 mins</span>
+                </div>
+                <span class="text-violet-600 font-semibold group-hover:text-violet-700 flex items-center gap-2">Start Soal 3 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=4" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-fuchsia-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 4</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-fuchsia-100 to-pink-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-fuchsia-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h12"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-fuchsia-600 transition-colors">Equipment Case Labels</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Konten lama: choose 4 answers and label questions 5-8.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <span>4 Questions</span>
+                    <span>~8 mins</span>
+                </div>
+                <span class="text-fuchsia-600 font-semibold group-hover:text-fuchsia-700 flex items-center gap-2">Start Soal 4 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=5" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-amber-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 5</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors">Station Plan Labeling</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Choose SIX answers A-I for questions 1-6.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <span>6 Questions</span>
+                    <span>~10 mins</span>
+                </div>
+                <span class="text-amber-600 font-semibold group-hover:text-amber-700 flex items-center gap-2">Start Soal 5 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=6" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-emerald-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 6</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h10"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">Shopping Plan Labeling</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Choose SIX answers A-I for questions 7-12.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <span>6 Questions</span>
+                    <span>~10 mins</span>
+                </div>
+                <span class="text-emerald-600 font-semibold group-hover:text-emerald-700 flex items-center gap-2">Start Soal 6 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+    </div>
+    @elseif(request()->get('practice') == 1 || request()->get('practice') == 2 || request()->get('practice') == 3 || request()->get('practice') == 4)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 {{ request()->get('practice') == 1 ? 'border-teal-500' : (request()->get('practice') == 2 ? 'border-sky-500' : (request()->get('practice') == 3 ? 'border-violet-500' : 'border-fuchsia-500')) }} p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 {{ request()->get('practice') == 1 ? 'bg-teal-50' : (request()->get('practice') == 2 ? 'bg-sky-50' : (request()->get('practice') == 3 ? 'bg-violet-50' : 'bg-fuchsia-50')) }} rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 {{ request()->get('practice') == 1 ? 'bg-teal-100 text-teal-700' : (request()->get('practice') == 2 ? 'bg-sky-100 text-sky-700' : (request()->get('practice') == 3 ? 'bg-violet-100 text-violet-700' : 'bg-fuchsia-100 text-fuchsia-700')) }} text-xs font-bold uppercase tracking-wider rounded-full">{{ request()->get('practice') == 1 ? 'Listening 1' : (request()->get('practice') == 2 ? 'Listening 2' : (request()->get('practice') == 3 ? 'Soal 3' : 'Soal 4')) }}</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Diagram Labeling</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">{{ request()->get('practice') == 1 ? 'Label the map (Questions 1-2)' : (request()->get('practice') == 2 ? 'Label the map (Questions 3-7)' : (request()->get('practice') == 3 ? 'Label the camera diagram (Questions 1-4)' : 'Label the equipment case diagram (Questions 5-8)')) }}</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">{{ request()->get('practice') == 1 ? "Label the map below. Write the correct letters, B-G, next to Questions 1 and 2. 'A' is already given as an example." : (request()->get('practice') == 2 ? "Label the map below. Write the correct letters, B-H, next to Questions 3-7. 'A' is already given as an example." : (request()->get('practice') == 3 ? 'Label the diagram below. Choose 4 answers from the box and write the correct letter next to questions 1-4.' : 'Label the diagram below. Choose 4 answers from the box and write the correct letter next to questions 5-8.')) }}</p>
+                </div>
+            </div>
+
+            @if(request()->get('practice') == 1)
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="rounded-xl border border-teal-200 overflow-hidden">
+                    <div class="bg-teal-50 px-4 py-2 text-sm font-semibold text-teal-700">Available Letters</div>
+                    <div class="divide-y divide-teal-100 text-sm">
+                        <div class="px-4 py-2">Use letters <span class="font-semibold">B, C, D, E, F, G</span>.</div>
+                        <div class="px-4 py-2 text-gray-600">A is already used as the example.</div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl border border-gray-200 p-4">
+                    <div class="text-sm font-semibold text-gray-700 mb-3">Listening 1 Map</div>
+                    <img src="{{ asset('images/listening/material9/map-listening1.png') }}" alt="Listening 1 town map" class="w-full h-[26rem] object-contain bg-white border border-gray-200 rounded-lg p-3">
+                </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-center gap-3"><label class="w-40 text-sm text-gray-700">1. Katie's house</label><select name="q1" class="flex-1 rounded-lg border-gray-300 focus:border-teal-500 focus:ring-teal-500"><option value="">Select letter</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-40 text-sm text-gray-700">2. Helen's house</label><select name="q2" class="flex-1 rounded-lg border-gray-300 focus:border-teal-500 focus:ring-teal-500"><option value="">Select letter</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
+            </div>
+
+            <div class="mt-8 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-amber-800 font-medium">Listening 1 - Check: Check your answers.</div>
+            @elseif(request()->get('practice') == 2)
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="rounded-xl border border-sky-200 overflow-hidden">
+                    <div class="bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700">Available Letters</div>
+                    <div class="divide-y divide-sky-100 text-sm">
+                        <div class="px-4 py-2">Use letters <span class="font-semibold">B, C, D, E, F, G, H</span>.</div>
+                        <div class="px-4 py-2 text-gray-600">A is already used as the example.</div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl border border-gray-200 p-4">
+                    <div class="text-sm font-semibold text-gray-700 mb-3">Listening 2 Map</div>
+                    <img src="{{ asset('images/listening/material9/map-listening2.png') }}" alt="Listening 2 city map" class="w-full h-[26rem] object-contain bg-white border border-gray-200 rounded-lg p-3">
+                </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-center gap-3"><label class="w-40 text-sm text-gray-700">3. restaurant</label><select name="q3" class="flex-1 rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500"><option value="">Select letter</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-40 text-sm text-gray-700">4. chemist</label><select name="q4" class="flex-1 rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500"><option value="">Select letter</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-40 text-sm text-gray-700">5. library</label><select name="q5" class="flex-1 rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500"><option value="">Select letter</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-40 text-sm text-gray-700">6. service station</label><select name="q6" class="flex-1 rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500"><option value="">Select letter</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-40 text-sm text-gray-700">7. town hall</label><select name="q7" class="flex-1 rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500"><option value="">Select letter</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div>
+            </div>
+            @elseif(request()->get('practice') == 3)
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="rounded-xl border border-violet-200 overflow-hidden">
+                    <div class="bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-700">Answer Box (A-H)</div>
+                    <div class="divide-y divide-violet-100 text-sm">
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">A</span>filter</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">B</span>lens</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">C</span>focusing ring</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">D</span>hand grip</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">E</span>on / off button</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">F</span>microphone</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">G</span>rubber cup</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">H</span>tripod socket</div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl border border-gray-200 p-4">
+                    <div class="text-sm font-semibold text-gray-700 mb-3">Camera Diagram</div>
+                    <img src="{{ asset('images/listening/material9/listening1-camera.png') }}" alt="Camera diagram labels" class="w-full h-[26rem] object-contain bg-white border border-gray-200 rounded-lg p-3">
+                </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-center gap-3"><label class="w-40 text-sm text-gray-700">1.</label><select name="q1" class="flex-1 rounded-lg border-gray-300 focus:border-violet-500 focus:ring-violet-500"><option value="">Select letter</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-40 text-sm text-gray-700">2.</label><select name="q2" class="flex-1 rounded-lg border-gray-300 focus:border-violet-500 focus:ring-violet-500"><option value="">Select letter</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-40 text-sm text-gray-700">3.</label><select name="q3" class="flex-1 rounded-lg border-gray-300 focus:border-violet-500 focus:ring-violet-500"><option value="">Select letter</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-40 text-sm text-gray-700">4.</label><select name="q4" class="flex-1 rounded-lg border-gray-300 focus:border-violet-500 focus:ring-violet-500"><option value="">Select letter</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div>
+            </div>
+            @else
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="rounded-xl border border-fuchsia-200 overflow-hidden">
+                    <div class="bg-fuchsia-50 px-4 py-2 text-sm font-semibold text-fuchsia-700">Answer Box (A-G)</div>
+                    <div class="divide-y divide-fuchsia-100 text-sm">
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">A</span>bulbs</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">B</span>cord</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">C</span>microphone</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">D</span>battery charger</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">E</span>lens</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">F</span>battery</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">G</span>camera</div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl border border-gray-200 p-4">
+                    <div class="text-sm font-semibold text-gray-700 mb-3">Equipment Case Diagram</div>
+                    <img src="{{ asset('images/listening/material9/listening2-equipment-case.png') }}" alt="Equipment case diagram labels" class="w-full h-[26rem] object-contain bg-white border border-gray-200 rounded-lg p-3">
+                </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-center gap-3"><label class="w-40 text-sm text-gray-700">5.</label><select name="q5" class="flex-1 rounded-lg border-gray-300 focus:border-fuchsia-500 focus:ring-fuchsia-500"><option value="">Select letter</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-40 text-sm text-gray-700">6.</label><select name="q6" class="flex-1 rounded-lg border-gray-300 focus:border-fuchsia-500 focus:ring-fuchsia-500"><option value="">Select letter</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-40 text-sm text-gray-700">7.</label><select name="q7" class="flex-1 rounded-lg border-gray-300 focus:border-fuchsia-500 focus:ring-fuchsia-500"><option value="">Select letter</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-40 text-sm text-gray-700">8.</label><select name="q8" class="flex-1 rounded-lg border-gray-300 focus:border-fuchsia-500 focus:ring-fuchsia-500"><option value="">Select letter</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
+            </div>
+            @endif
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 5)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Plan Labeling</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Label the station plan (Questions 1-6)</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Choose <span class="font-bold">SIX</span> answers from the box and write the correct letters, <span class="font-bold">A-I</span>, next to questions 1-6.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-gray-50 rounded-xl border border-gray-200 p-5">
+                    <div class="text-sm font-semibold text-gray-700 mb-3">Plan</div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="h-20 border-2 border-gray-300 rounded-lg flex items-start justify-start p-2 text-lg font-bold text-gray-600">1</div>
+                        <div class="h-20 border-2 border-gray-300 rounded-lg flex items-start justify-start p-2 text-lg font-bold text-gray-600">2</div>
+                        <div class="h-20 border-2 border-gray-300 rounded-lg flex items-start justify-start p-2 text-lg font-bold text-gray-600">3</div>
+                        <div class="h-20 border-2 border-gray-300 rounded-lg col-span-2"></div>
+                        <div class="h-20 border-2 border-gray-300 rounded-lg flex items-start justify-start p-2 text-lg font-bold text-gray-600">4</div>
+                        <div class="h-20 border-2 border-gray-300 rounded-lg"></div>
+                        <div class="h-20 border-2 border-gray-300 rounded-lg"></div>
+                        <div class="h-20 border-2 border-gray-300 rounded-lg flex items-start justify-start p-2 text-lg font-bold text-gray-600">5</div>
+                        <div class="h-20 border-2 border-gray-300 rounded-lg"></div>
+                        <div class="h-20 border-2 border-gray-300 rounded-lg col-span-2 flex items-start justify-start p-2 text-lg font-bold text-gray-600">6</div>
+                        <div class="h-20 border-2 border-gray-300 rounded-lg"></div>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-amber-200 overflow-hidden">
+                    <div class="bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700">Answer Box (A-I)</div>
+                    <div class="divide-y divide-amber-100 text-sm">
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">A</span>cafe</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">B</span>information desk</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">C</span>baggage lockers</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">D</span>open-air bike parking</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">E</span>bike lockers</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">F</span>covered bike parking</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">G</span>ticket office</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">H</span>ticket machines</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">I</span>tourist information</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-center gap-3"><label class="w-12 text-sm text-gray-700">1.</label><select name="q1" class="flex-1 rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"><option value="">A-I</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-12 text-sm text-gray-700">4.</label><select name="q4" class="flex-1 rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"><option value="">A-I</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-12 text-sm text-gray-700">2.</label><select name="q2" class="flex-1 rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"><option value="">A-I</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-12 text-sm text-gray-700">5.</label><select name="q5" class="flex-1 rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"><option value="">A-I</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-12 text-sm text-gray-700">3.</label><select name="q3" class="flex-1 rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"><option value="">A-I</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-12 text-sm text-gray-700">6.</label><select name="q6" class="flex-1 rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"><option value="">A-I</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option></select></div>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 6)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-emerald-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-emerald-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Plan Labeling</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Label the shopping plan (Questions 7-12)</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Choose <span class="font-bold">SIX</span> answers from the box and write the correct letters, <span class="font-bold">A-I</span>, next to questions 7-12.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-gray-50 rounded-xl border border-gray-200 p-5">
+                    <div class="text-sm font-semibold text-gray-700 mb-3">Plan</div>
+                    <div class="grid grid-cols-4 gap-2">
+                        <div class="h-16 border-2 border-gray-300 rounded-lg"></div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg"></div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg"></div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg flex items-start p-1 font-bold text-gray-600">12</div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg"></div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg"></div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg"></div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg flex items-start p-1 font-bold text-gray-600">11</div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg flex items-start p-1 font-bold text-gray-600">10</div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg flex items-start p-1 font-bold text-gray-600">9</div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg"></div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg"></div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg"></div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg flex items-start p-1 font-bold text-gray-600">8</div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg"></div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg"></div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg"></div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg flex items-start p-1 font-bold text-gray-600">7</div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg"></div>
+                        <div class="h-16 border-2 border-gray-300 rounded-lg"></div>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-emerald-200 overflow-hidden">
+                    <div class="bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">Answer Box (A-I)</div>
+                    <div class="divide-y divide-emerald-100 text-sm">
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">A</span>jewellery store</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">B</span>supermarket</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">C</span>menswear store</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">D</span>Music-Music store</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">E</span>baby clothes store</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">F</span>electronics store</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">G</span>food court</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">H</span>video store</div>
+                        <div class="px-4 py-2"><span class="font-semibold mr-2">I</span>bookstore</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-center gap-3"><label class="w-12 text-sm text-gray-700">7.</label><select name="q7" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">A-I</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-12 text-sm text-gray-700">10.</label><select name="q10" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">A-I</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-12 text-sm text-gray-700">8.</label><select name="q8" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">A-I</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-12 text-sm text-gray-700">11.</label><select name="q11" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">A-I</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-12 text-sm text-gray-700">9.</label><select name="q9" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">A-I</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option></select></div>
+                <div class="flex items-center gap-3"><label class="w-12 text-sm text-gray-700">12.</label><select name="q12" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">A-I</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option></select></div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @elseif($id == 1)
+    @if(!request()->has('practice'))
+    <!-- Material 1: Practice Selection Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <a href="?practice=1" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-rose-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 1</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-rose-600 transition-colors">School Tuck Shops</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Multiple choice questions 1-7 about healthy food in schools.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <span>7 Questions</span>
+                    <span>~10 mins</span>
+                </div>
+                <span class="text-rose-600 font-semibold group-hover:text-rose-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=2" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-orange-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 2</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-orange-100 to-amber-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">Healthy Lifestyle Talk</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Multiple choice questions 8-15 about nutrition and exercise advice.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <span>8 Questions</span>
+                    <span>~12 mins</span>
+                </div>
+                <span class="text-orange-600 font-semibold group-hover:text-orange-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=3" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-emerald-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 3</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h10M7 16h6M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">Relay Race Matching</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Matching questions 1-24 about teams, colours, positions, and race-day announcements.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <span>24 Questions</span>
+                    <span>~20 mins</span>
+                </div>
+                <span class="text-emerald-600 font-semibold group-hover:text-emerald-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=4" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-sky-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-sky-500 to-cyan-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 4</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-sky-100 to-cyan-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h10M7 16h10"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-sky-600 transition-colors">Teacher Matching (1-4)</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Choose A-F to match teacher information for questions 1-4.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <span>4 Questions</span>
+                    <span>~7 mins</span>
+                </div>
+                <span class="text-sky-600 font-semibold group-hover:text-sky-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=5" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-violet-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 5</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-violet-100 to-fuchsia-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-violet-600 transition-colors">Teacher Matching (5-8)</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Choose A-F to match teacher information for questions 5-8.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <span>4 Questions</span>
+                    <span>~7 mins</span>
+                </div>
+                <span class="text-violet-600 font-semibold group-hover:text-violet-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=6" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-amber-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 6</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors">Olympic Timeline (1-7)</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Classification questions about the history of the Olympic Games.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <span>7 Questions</span>
+                    <span>~9 mins</span>
+                </div>
+                <span class="text-amber-600 font-semibold group-hover:text-amber-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=7" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-lime-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-lime-500 to-emerald-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 7</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-lime-100 to-emerald-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-lime-600 transition-colors">Flight History (8-14)</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Classification questions about key milestones in flight development.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <span>7 Questions</span>
+                    <span>~9 mins</span>
+                </div>
+                <span class="text-lime-600 font-semibold group-hover:text-lime-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+    </div>
+    @elseif(request()->get('practice') == 1 || request()->get('practice') == 2 || request()->get('practice') == 3)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 {{ request()->get('practice') == 1 ? 'border-rose-500' : (request()->get('practice') == 2 ? 'border-orange-500' : 'border-emerald-500') }} p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 {{ request()->get('practice') == 1 ? 'bg-rose-50' : (request()->get('practice') == 2 ? 'bg-orange-50' : 'bg-emerald-50') }} rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 {{ request()->get('practice') == 1 ? 'bg-rose-100 text-rose-700' : (request()->get('practice') == 2 ? 'bg-orange-100 text-orange-700' : 'bg-emerald-100 text-emerald-700') }} text-xs font-bold uppercase tracking-wider rounded-full">{{ request()->get('practice') == 1 ? 'Listening 1' : (request()->get('practice') == 2 ? 'Listening 2' : 'Listening 3') }}</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">{{ request()->get('practice') == 3 ? 'Matching' : 'Multiple Choice' }}</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">{{ request()->get('practice') == 1 ? 'School Tuck Shops - Multiple Choice' : (request()->get('practice') == 2 ? 'Healthy Lifestyle - Multiple Choice' : 'Relay Race - Matching Information') }}</h3>
+            </div>
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">{!! request()->get('practice') == 3 ? 'Choose your answers from the box and write the correct letters for each question.' : 'Choose the correct letter, <span class="font-bold">A, B, or C</span>.' !!}</p>
+                </div>
+            </div>
+            <div class="space-y-6">
+                @if(request()->get('practice') == 1)
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">1. What are they doing in school tuck shops?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q1" value="A" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>selling more wholesome food</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q1" value="B" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>selling more junk food</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q1" value="C" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>offering more meat pies and sausage rolls</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">2. What do most adults think about this?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q2" value="A" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>It's a bad idea.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q2" value="B" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>It's a good idea.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q2" value="C" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>Tuck shops should sell more cream doughnuts.</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">3. Which opinion is NOT expressed?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q3" value="A" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>Children should be free to decide what they eat.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q3" value="B" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>There should be more sport at school.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q3" value="C" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>The school is responsible for teaching healthy eating to children.</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">4. What will some of the children do?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q4" value="A" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>bring healthy food from home</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q4" value="B" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>buy junk food on the way to school</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q4" value="C" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>bring junk food from home</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">5. How much does it cost for chicken and chips?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q5" value="A" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>$4.00</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q5" value="B" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>$4.50</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q5" value="C" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>$2.50</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">6. How could parents be educated about healthy eating?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q6" value="A" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>magazine advertisements</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q6" value="B" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>public meetings</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q6" value="C" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>advertisements on television</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">7. How can schools help children eat healthily?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q7" value="A" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>check children's lunchboxes</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q7" value="B" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>sell mainly healthy food</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q7" value="C" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>ban junk food in school</span></label></div></div>
+                @elseif(request()->get('practice') == 2)
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">8. Mr. White is a</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q8" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>nutritionist.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q8" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>school principal.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q8" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>health expert.</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">9. The children will be happier and healthier by</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q9" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>eating less fruit and vegetables.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q9" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>eating greater amounts of fast food.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q9" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>eating greater amounts of fruit and vegetables.</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">10. How many servings of vegetables per day do health specialists recommend?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q10" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>five</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q10" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>two</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q10" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>three</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">11. What happens to people when they don't eat breakfast?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q11" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>They feel tired.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q11" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>They usually eat a banana late in the morning.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q11" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>They don't feel hungry at lunchtime.</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">12. Which food item is NOT suggested for lunch?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q12" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>a wholesome sandwich</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q12" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>steamed vegetables</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q12" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>fried chicken</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">13. What recommendations does the speaker make for summer?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q13" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>select green, white, and purple vegetables</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q13" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>make a salad with uncooked vegetables</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q13" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>use a high-fat cooking method</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">14. How much exercise per day does she recommend for young people?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q14" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>30 minutes</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q14" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>13 minutes</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q14" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>20 minutes</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">15. What should children do if they can't walk or bike to school?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q15" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>take a taxi</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q15" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>play sports with friends</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q15" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>join a chess club</span></label></div></div>
+                @else
+                @if(!request()->has('section'))
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <a href="?practice=3&section=1" class="group block bg-white rounded-2xl shadow-md border border-emerald-100 hover:border-emerald-300 hover:shadow-xl transition-all duration-300 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                            <span class="text-xs text-gray-500">Q1-Q12</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-emerald-600">Teams, Colours, and Events</h4>
+                        <p class="text-sm text-gray-600">Matching set about athletes, colleges, and race event times.</p>
+                    </a>
+                    <a href="?practice=3&section=2" class="group block bg-white rounded-2xl shadow-md border border-cyan-100 hover:border-cyan-300 hover:shadow-xl transition-all duration-300 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                            <span class="text-xs text-gray-500">Q13-Q24</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-cyan-600">Positions and After-Race Phrases</h4>
+                        <p class="text-sm text-gray-600">Matching set about positions before the race and announcements after the race.</p>
+                    </a>
+                </div>
+                @elseif(request()->get('section') == 1)
+                <div class="bg-white border border-gray-200 rounded-xl p-6">
+                    <p class="text-lg font-semibold text-gray-900 mb-2">Questions 1 - 4</p>
+                    <p class="text-gray-600 mb-4">Choose your answers from the box. Write the correct letters, A - D, next to questions 1 - 4.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="rounded-xl border border-emerald-200 overflow-hidden">
+                            <div class="bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">Athletes</div>
+                            <div class="divide-y divide-emerald-100 text-sm">
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">A</span>Andy</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">B</span>Pete</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">C</span>Robbie</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">D</span>Dave</div>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3"><label class="w-28 text-sm text-gray-700">1. first runner</label><select name="q1" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-28 text-sm text-gray-700">2. second runner</label><select name="q2" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-28 text-sm text-gray-700">3. third runner</label><select name="q3" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-28 text-sm text-gray-700">4. fourth runner</label><select name="q4" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-6">
+                    <p class="text-lg font-semibold text-gray-900 mb-2">Questions 5 - 7</p>
+                    <p class="text-gray-600 mb-4">Choose your answers from the box. Write the correct letters, A - C, next to questions 5 - 7.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="rounded-xl border border-emerald-200 overflow-hidden">
+                            <div class="bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">Teams</div>
+                            <div class="divide-y divide-emerald-100 text-sm">
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">A</span>Lancaster College</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">B</span>Ashgrove College</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">C</span>Highland Park</div>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3"><label class="w-24 text-sm text-gray-700">5. green</label><select name="q5" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-24 text-sm text-gray-700">6. red</label><select name="q6" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-24 text-sm text-gray-700">7. white</label><select name="q7" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option></select></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-6">
+                    <p class="text-lg font-semibold text-gray-900 mb-2">Questions 8 - 12</p>
+                    <p class="text-gray-600 mb-4">Choose your answers from the box. Write the correct letters, A - E, next to questions 8 - 12.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="rounded-xl border border-emerald-200 overflow-hidden">
+                            <div class="bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">Events</div>
+                            <div class="divide-y divide-emerald-100 text-sm">
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">A</span>hurdles</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">B</span>high jump</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">C</span>100-metre sprint</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">D</span>long jump</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">E</span>400-metre relay</div>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3"><label class="w-28 text-sm text-gray-700">8. 1 p.m.</label><select name="q8" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-28 text-sm text-gray-700">9. 1:30 p.m.</label><select name="q9" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-28 text-sm text-gray-700">10. 3 p.m.</label><select name="q10" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-28 text-sm text-gray-700">11. 4:30 p.m.</label><select name="q11" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-28 text-sm text-gray-700">12. 5 p.m.</label><select name="q12" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select></div>
+                        </div>
+                    </div>
+                </div>
+
+                @elseif(request()->get('section') == 2)
+                <div class="bg-white border border-gray-200 rounded-xl p-6">
+                    <div class="mb-2 text-xs font-bold uppercase tracking-wide text-emerald-700">Listening 2</div>
+                    <p class="text-lg font-semibold text-gray-900 mb-2">Questions 13 - 18</p>
+                    <p class="text-gray-700 mb-1">What do the athletes say before the race about people's positions?</p>
+                    <p class="text-gray-600 mb-4">Choose your answers from the box. Write the correct letters, A - G, next to questions 13 - 18.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="rounded-xl border border-emerald-200 overflow-hidden">
+                            <div class="bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">People</div>
+                            <div class="divide-y divide-emerald-100 text-sm">
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">A</span>Catherine</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">B</span>Elizabeth</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">C</span>Thomas</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">D</span>Jeremy</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">E</span>Tony</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">F</span>Felicity</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">G</span>Matt</div>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3"><label class="w-44 text-sm text-gray-700">13. on the start line</label><select name="q13" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-44 text-sm text-gray-700">14. beside the first jump</label><select name="q14" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-44 text-sm text-gray-700">15. at the registration table</label><select name="q15" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-44 text-sm text-gray-700">16. in the timekeeper's tent</label><select name="q16" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-44 text-sm text-gray-700">17. beside the water jump</label><select name="q17" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-44 text-sm text-gray-700">18. at the First Aid tent</label><select name="q18" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-6">
+                    <p class="text-lg font-semibold text-gray-900 mb-2">Questions 19 - 24</p>
+                    <p class="text-gray-700 mb-1">What is said after the race?</p>
+                    <p class="text-gray-600 mb-4">Choose your answers from the box. Write the correct letters, A - K, next to questions 19 - 24.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="rounded-xl border border-emerald-200 overflow-hidden">
+                            <div class="bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">Phrases</div>
+                            <div class="divide-y divide-emerald-100 text-sm">
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">A</span>everyone</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">B</span>next week</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">C</span>next year</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">D</span>to the winners</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">E</span>in the kitchen</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">F</span>in the club rooms</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">G</span>in the shower block</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">H</span>to all the helpers</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">I</span>to see</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">J</span>to eat</div>
+                                <div class="px-4 py-2"><span class="font-semibold mr-2">K</span>in the car park</div>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3"><label class="w-44 text-sm text-gray-700">19. Congratulations</label><select name="q19" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option><option>J</option><option>K</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-44 text-sm text-gray-700">20. Well done</label><select name="q20" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option><option>J</option><option>K</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-44 text-sm text-gray-700">21. There's tea and coffee</label><select name="q21" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option><option>J</option><option>K</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-44 text-sm text-gray-700">22. There's plenty</label><select name="q22" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option><option>J</option><option>K</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-44 text-sm text-gray-700">23. Thank you</label><select name="q23" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option><option>J</option><option>K</option></select></div>
+                            <div class="flex items-center gap-3"><label class="w-44 text-sm text-gray-700">24. See you</label><select name="q24" class="flex-1 rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option><option>I</option><option>J</option><option>K</option></select></div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                @endif
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 4)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-sky-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-sky-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-sky-100 text-sky-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 4</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Matching</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">What do the students say about each teacher?</h3>
+            </div>
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Choose your answers from the box and write the correct letters, <span class="font-bold">A-F</span>, next to questions <span class="font-bold">1-4</span>. 'F' has already been done as an example.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="rounded-xl border border-sky-200 overflow-hidden bg-sky-50/50">
+                    <div class="divide-y divide-sky-100 text-base">
+                        <div class="px-4 py-3"><span class="font-semibold mr-2">A</span>Mr. Smith</div>
+                        <div class="px-4 py-3"><span class="font-semibold mr-2">B</span>Miss Williams</div>
+                        <div class="px-4 py-3"><span class="font-semibold mr-2">C</span>Mr. Jones</div>
+                        <div class="px-4 py-3"><span class="font-semibold mr-2">D</span>Mrs. Brown</div>
+                        <div class="px-4 py-3"><span class="font-semibold mr-2">E</span>Mr. Harris</div>
+                        <div class="px-4 py-3"><span class="font-semibold mr-2">F</span>Ms. Taylor</div>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between rounded-lg border border-gray-200 p-3 bg-white"><span class="text-gray-700 italic">Example: teaches art history</span><span class="font-bold text-lg">F</span></div>
+                    <div class="flex items-center gap-3"><label class="w-72 text-sm text-gray-700">1. is new to the school</label><select name="q1" class="flex-1 rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-72 text-sm text-gray-700">2. teaches geography</label><select name="q2" class="flex-1 rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-72 text-sm text-gray-700">3. only teaches the upper classes</label><select name="q3" class="flex-1 rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-72 text-sm text-gray-700">4. is often sick</label><select name="q4" class="flex-1 rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option></select></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 5)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-violet-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-violet-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-violet-100 text-violet-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 5</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Matching</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">What do the students say about each teacher?</h3>
+            </div>
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Choose your answers from the box and write the correct letters, <span class="font-bold">A-F</span>, next to questions <span class="font-bold">5-8</span>. 'F' has already been done as an example.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="rounded-xl border border-violet-200 overflow-hidden bg-violet-50/50">
+                    <div class="divide-y divide-violet-100 text-base">
+                        <div class="px-4 py-3"><span class="font-semibold mr-2">A</span>Ms. Palmer</div>
+                        <div class="px-4 py-3"><span class="font-semibold mr-2">B</span>Mr. Turner</div>
+                        <div class="px-4 py-3"><span class="font-semibold mr-2">C</span>Dr. Reed</div>
+                        <div class="px-4 py-3"><span class="font-semibold mr-2">D</span>Mrs. Fisher</div>
+                        <div class="px-4 py-3"><span class="font-semibold mr-2">E</span>Miss Edwards</div>
+                        <div class="px-4 py-3"><span class="font-semibold mr-2">F</span>Mr. Green</div>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between rounded-lg border border-gray-200 p-3 bg-white"><span class="text-gray-700 italic">Example: teaches German</span><span class="font-bold text-lg">F</span></div>
+                    <div class="flex items-center gap-3"><label class="w-72 text-sm text-gray-700">5. teaches art history</label><select name="q5" class="flex-1 rounded-lg border-gray-300 focus:border-violet-500 focus:ring-violet-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-72 text-sm text-gray-700">6. no longer works at the school</label><select name="q6" class="flex-1 rounded-lg border-gray-300 focus:border-violet-500 focus:ring-violet-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-72 text-sm text-gray-700">7. is very strict</label><select name="q7" class="flex-1 rounded-lg border-gray-300 focus:border-violet-500 focus:ring-violet-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-72 text-sm text-gray-700">8. teaches drama</label><select name="q8" class="flex-1 rounded-lg border-gray-300 focus:border-violet-500 focus:ring-violet-500"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option></select></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 6)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Classification</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Olympic Games Timeline</h3>
+            </div>
+
+            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Complete the classification questions. Write the correct letter, <span class="font-bold">A, B, or C</span>, next to questions 1-7.</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h4 class="text-xl font-bold text-gray-900 mb-4">Questions 1-7</h4>
+                <p class="text-gray-700 mb-3">When did the following events take place?</p>
+                <div class="space-y-2 text-gray-800 mb-6">
+                    <div><span class="font-semibold inline-block w-6">A</span> before 394 A.D.</div>
+                    <div><span class="font-semibold inline-block w-6">B</span> between 1830 and 1896</div>
+                    <div><span class="font-semibold inline-block w-6">C</span> after 1896</div>
+                </div>
+                <p class="text-gray-700 mb-4">Write the correct letter, A, B, or C, next to questions 1-7.</p>
+
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3"><label class="w-[32rem] text-gray-800">1. women permitted to compete</label><select name="q1" class="flex-1 rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"><option value="">A-C</option><option>A</option><option>B</option><option>C</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-[32rem] text-gray-800">2. wrestling added as an Olympic sport</label><select name="q2" class="flex-1 rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"><option value="">A-C</option><option>A</option><option>B</option><option>C</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-[32rem] text-gray-800">3. Winter Games first held</label><select name="q3" class="flex-1 rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"><option value="">A-C</option><option>A</option><option>B</option><option>C</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-[32rem] text-gray-800">4. seven sports with 84 separate events</label><select name="q4" class="flex-1 rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"><option value="">A-C</option><option>A</option><option>B</option><option>C</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-[32rem] text-gray-800">5. International Olympic Committee founded</label><select name="q5" class="flex-1 rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"><option value="">A-C</option><option>A</option><option>B</option><option>C</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-[32rem] text-gray-800">6. 11,000 athletes from 202 nations</label><select name="q6" class="flex-1 rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"><option value="">A-C</option><option>A</option><option>B</option><option>C</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-[32rem] text-gray-800">7. first Games held after revival campaign</label><select name="q7" class="flex-1 rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"><option value="">A-C</option><option>A</option><option>B</option><option>C</option></select></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 7)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-lime-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-lime-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-lime-100 text-lime-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Classification</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Flight Development Timeline</h3>
+            </div>
+
+            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Complete the classification questions. Write the correct letter, <span class="font-bold">A, B, or C</span>, next to questions 8-14.</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h4 class="text-xl font-bold text-gray-900 mb-4">Questions 8-14</h4>
+                <p class="text-gray-700 mb-3">When did the following events take place?</p>
+                <div class="space-y-2 text-gray-800 mb-6">
+                    <div><span class="font-semibold inline-block w-6">A</span> before 1900</div>
+                    <div><span class="font-semibold inline-block w-6">B</span> between 1900 and 1910</div>
+                    <div><span class="font-semibold inline-block w-6">C</span> after 1910</div>
+                </div>
+                <p class="text-gray-700 mb-4">Write the correct letter, A, B, or C, next to questions 8-14.</p>
+
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3"><label class="w-[32rem] text-gray-800">8. Wright brothers flew 35 metres</label><select name="q8" class="flex-1 rounded-lg border-gray-300 focus:border-lime-500 focus:ring-lime-500"><option value="">A-C</option><option>A</option><option>B</option><option>C</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-[32rem] text-gray-800">9. first flight by jet plane</label><select name="q9" class="flex-1 rounded-lg border-gray-300 focus:border-lime-500 focus:ring-lime-500"><option value="">A-C</option><option>A</option><option>B</option><option>C</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-[32rem] text-gray-800">10. hot-air balloon flew with animal 'passengers'</label><select name="q10" class="flex-1 rounded-lg border-gray-300 focus:border-lime-500 focus:ring-lime-500"><option value="">A-C</option><option>A</option><option>B</option><option>C</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-[32rem] text-gray-800">11. helicopter flew for 14 minutes</label><select name="q11" class="flex-1 rounded-lg border-gray-300 focus:border-lime-500 focus:ring-lime-500"><option value="">A-C</option><option>A</option><option>B</option><option>C</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-[32rem] text-gray-800">12. gliders were flown successfully</label><select name="q12" class="flex-1 rounded-lg border-gray-300 focus:border-lime-500 focus:ring-lime-500"><option value="">A-C</option><option>A</option><option>B</option><option>C</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-[32rem] text-gray-800">13. first manned helicopter flight</label><select name="q13" class="flex-1 rounded-lg border-gray-300 focus:border-lime-500 focus:ring-lime-500"><option value="">A-C</option><option>A</option><option>B</option><option>C</option></select></div>
+                    <div class="flex items-center gap-3"><label class="w-[32rem] text-gray-800">14. Cayley tried to solve the mystery of flight</label><select name="q14" class="flex-1 rounded-lg border-gray-300 focus:border-lime-500 focus:ring-lime-500"><option value="">A-C</option><option>A</option><option>B</option><option>C</option></select></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @elseif($id == 5)
+    @if(!request()->has('practice'))
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 items-stretch">
+        <a href="?practice=1" class="group block h-full bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-indigo-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative h-full flex flex-col">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 1</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors min-h-[56px]">Exam Entry Form</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6 flex-1">Table completion about music examination entry form.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>10 Questions</span><span>~12 mins</span></div>
+                <div class="mt-auto">
+                    <span class="text-indigo-600 font-semibold group-hover:text-indigo-700 flex items-center gap-2">Start Soal 1 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+                </div>
+            </div>
+        </a>
+
+        <a href="?practice=3" class="group block h-full bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-sky-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative h-full flex flex-col">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-sky-500 to-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 3</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-sky-100 to-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-sky-600 transition-colors min-h-[56px]">Phone Features Table</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6 flex-1">Complete table by writing Y to show features for each phone.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>Matrix Task</span><span>~8 mins</span></div>
+                <div class="mt-auto">
+                    <span class="text-sky-600 font-semibold group-hover:text-sky-700 flex items-center gap-2">Start Soal 3 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+                </div>
+            </div>
+        </a>
+
+        <a href="?practice=4" class="group block h-full bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-cyan-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative h-full flex flex-col">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 4</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-cyan-100 to-teal-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-cyan-600 transition-colors min-h-[56px]">Phone Company Rates Table</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6 flex-1">Complete rate table and plans for Listening 2.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>8 Questions</span><span>~10 mins</span></div>
+                <div class="mt-auto">
+                    <span class="text-cyan-600 font-semibold group-hover:text-cyan-700 flex items-center gap-2">Start Soal 4 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+                </div>
+            </div>
+        </a>
+
+        <a href="?practice=5" class="group block h-full bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-cyan-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative h-full flex flex-col">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 5</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-cyan-100 to-teal-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-cyan-600 transition-colors min-h-[56px]">Restaurant Menu (Listening 2)</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6 flex-1">Part A multiple choice (7-9) and Part B menu form completion (10-14).</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>8 Questions</span><span>~10 mins</span></div>
+                <div class="mt-auto">
+                    <span class="text-cyan-600 font-semibold group-hover:text-cyan-700 flex items-center gap-2">Start Soal 5 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+                </div>
+            </div>
+        </a>
+    </div>
+    @elseif(request()->get('practice') == 1)
+    <!-- Table Completion: Material 5 -->
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-indigo-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Table Completion</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Woodlands School of Music - Examination Entry Form 2008</h3>
+            </div>
+
+            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Complete the form. Write <span class="font-bold">NO MORE THAN THREE WORDS AND/OR A NUMBER</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="overflow-hidden bg-white rounded-xl border border-gray-200 shadow-sm">
+                <table class="w-full border-collapse text-sm md:text-base">
+                    <thead>
+                        <tr class="bg-indigo-700 text-white">
+                            <th class="p-4 text-left font-semibold w-[52%]">Field</th>
+                            <th class="p-4 text-left font-semibold">Answer</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="p-4 text-gray-700 font-medium">Candidate's name</td>
+                            <td class="p-4 text-gray-900"><span class="text-gray-500 mr-2">Example</span> <span class="font-semibold italic">John Kepler</span></td>
+                        </tr>
+                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                            <td class="p-4 text-gray-700 font-medium">Grade exam this weekend</td>
+                            <td class="p-4">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">1</span>
+                                    <span class="text-gray-600">Grade</span>
+                                    <input type="text" name="q1" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                            <td class="p-4 text-gray-700 font-medium">Grade attained in 2007</td>
+                            <td class="p-4">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">2</span>
+                                    <span class="text-gray-600">Grade</span>
+                                    <input type="text" name="q2" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                            <td class="p-4 text-gray-700 font-medium">Instrument</td>
+                            <td class="p-4">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">3</span>
+                                    <input type="text" name="q3" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                            <td class="p-4 text-gray-700 font-medium">Date and time of examination</td>
+                            <td class="p-4 space-y-3">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">4</span>
+                                    <span class="text-gray-600">Date: Saturday, July</span>
+                                    <input type="text" name="q4" class="w-32 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">5</span>
+                                    <span class="text-gray-600">Time:</span>
+                                    <input type="text" name="q5" class="w-40 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                            <td class="p-4 text-gray-700 font-medium">Examination fee</td>
+                            <td class="p-4">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">6</span>
+                                    <span class="text-gray-700 font-semibold">$</span>
+                                    <input type="text" name="q6" class="w-40 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                            <td class="p-4 text-gray-700 font-medium">Examination room</td>
+                            <td class="p-4 space-y-3">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">7</span>
+                                    <span class="text-gray-600">Room</span>
+                                    <input type="text" name="q7" class="w-36 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">8</span>
+                                    <span class="text-gray-600">in</span>
+                                    <input type="text" name="q8" class="w-36 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
+                                    <span class="text-gray-600">Block</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                            <td class="p-4 text-gray-700 font-medium">Candidate's choice of three pieces</td>
+                            <td class="p-4 space-y-3">
+                                <div class="text-gray-700">List A <span class="ml-6">No. 1</span></div>
+                                <div class="flex items-center gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">9</span>
+                                    <span class="text-gray-700">List B</span>
+                                    <span class="text-gray-600">No.</span>
+                                    <input type="text" name="q9" class="w-40 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
+                                </div>
+                                <div class="text-gray-700">List C <span class="ml-6">No. 6</span></div>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                            <td class="p-4 text-gray-700 font-medium">Number of scales candidates must play</td>
+                            <td class="p-4">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">10</span>
+                                    <input type="text" name="q10" class="w-48 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @elseif(request()->get('practice') == 3)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-sky-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-sky-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-sky-100 text-sky-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Table Completion</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Mobile Phone Features Comparison</h3>
+            </div>
+
+            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Complete the table. Write <span class="font-bold">Y</span> in the table to show the features for each phone.</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto bg-white rounded-xl border border-gray-200 shadow-sm">
+                <table class="w-full border-collapse text-sm md:text-base">
+                    <thead>
+                        <tr class="bg-sky-700 text-white">
+                            <th class="p-4 text-left font-semibold">Phone</th>
+                            <th class="p-4 text-center font-semibold">Games</th>
+                            <th class="p-4 text-center font-semibold">Camera</th>
+                            <th class="p-4 text-center font-semibold">Internet connectivity</th>
+                            <th class="p-4 text-center font-semibold">Voice recorder</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @foreach(['LUNA 500', 'AQUILA 50', 'HERMES 580', 'RIVA A65'] as $idx => $phone)
+                        <tr class="hover:bg-sky-50/40 transition-colors">
+                            <td class="p-4 font-semibold text-gray-800">{{ $phone }}</td>
+                            <td class="p-4 text-center"><input type="checkbox" name="p3_{{ $idx }}_games" class="w-5 h-5 text-sky-600 border-gray-300 rounded"></td>
+                            <td class="p-4 text-center"><input type="checkbox" name="p3_{{ $idx }}_camera" class="w-5 h-5 text-sky-600 border-gray-300 rounded"></td>
+                            <td class="p-4 text-center"><input type="checkbox" name="p3_{{ $idx }}_internet" class="w-5 h-5 text-sky-600 border-gray-300 rounded"></td>
+                            <td class="p-4 text-center"><input type="checkbox" name="p3_{{ $idx }}_voice" class="w-5 h-5 text-sky-600 border-gray-300 rounded"></td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @elseif(request()->get('practice') == 4)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-cyan-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-cyan-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Table Completion</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Phone Company Rates Table</h3>
+            </div>
+
+            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Complete the table. Write <span class="font-bold">NO MORE THAN TWO WORDS AND/OR A NUMBER</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto bg-white rounded-xl border border-gray-200 shadow-sm">
+                <table class="w-full border-collapse text-sm md:text-base">
+                    <thead>
+                        <tr class="bg-cyan-700 text-white">
+                            <th class="p-4 text-left font-semibold">Plan</th>
+                            <th class="p-4 text-center font-semibold">Monthly Fee</th>
+                            <th class="p-4 text-center font-semibold">Call Rate (per min)</th>
+                            <th class="p-4 text-center font-semibold">Data Quota</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr class="hover:bg-cyan-50/40 transition-colors">
+                            <td class="p-4 font-semibold text-gray-800">Basic Plan</td>
+                            <td class="p-4 text-center text-gray-900">$ <input type="text" name="q7" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"></td>
+                            <td class="p-4 text-center text-gray-900"><input type="text" name="q8" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"> cents</td>
+                            <td class="p-4 text-center text-gray-900">2 GB</td>
+                        </tr>
+                        <tr class="hover:bg-cyan-50/40 transition-colors">
+                            <td class="p-4 font-semibold text-gray-800">Family Plan</td>
+                            <td class="p-4 text-center text-gray-900">$35</td>
+                            <td class="p-4 text-center text-gray-900">10 cents</td>
+                            <td class="p-4 text-center text-gray-900"><input type="text" name="q9" class="w-24 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"></td>
+                        </tr>
+                        <tr class="hover:bg-cyan-50/40 transition-colors">
+                            <td class="p-4 font-semibold text-gray-800">Business Plan</td>
+                            <td class="p-4 text-center text-gray-900">$ <input type="text" name="q10" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"></td>
+                            <td class="p-4 text-center text-gray-900">5 cents</td>
+                            <td class="p-4 text-center text-gray-900">Unlimited</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-8 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h4 class="text-lg font-semibold text-gray-900 mb-4">Questions 11-14</h4>
+                <div class="space-y-4 text-gray-800">
+                    <div>11. Customers on the Basic Plan get <input type="text" name="q11" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"> free text messages each month.</div>
+                    <div>12. The Family Plan includes free calls after <input type="text" name="q12" class="w-40 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"> p.m.</div>
+                    <div>13. Business users can add international calls for an extra $<input type="text" name="q13" class="w-24 border-b-2 border-gray-300 focus:border-cyan-500 outline-none">.</div>
+                    <div>14. All plans require a minimum contract of <input type="text" name="q14" class="w-32 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"> months.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 5)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-cyan-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-cyan-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Part A + Part B</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Restaurant Conversation - Menu Choices</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Part A:</p>
+                    <p class="text-amber-700 text-sm">Choose the correct letter, <span class="font-bold">A, B, or C</span> for questions 7-9.</p>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">7. What is the name of the couple?</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q7" value="A" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">A.</span>Mr. and Mrs. Watson</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q7" value="B" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">B.</span>Mr. and Mrs. Williams</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q7" value="C" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">C.</span>Mr. and Mrs. Wilson</span></label>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">8. Where do they decide to sit?</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q8" value="A" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">A.</span>next to the window</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q8" value="B" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">B.</span>next to the door</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q8" value="C" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">C.</span>in the centre of the room</span></label>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">9. What number is their table?</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q9" value="A" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">A.</span>14</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q9" value="B" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">B.</span>24</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q9" value="C" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">C.</span>34</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Part B:</p>
+                    <p class="text-amber-700 text-sm">Complete the form below. Write <span class="font-bold">NO MORE THAN THREE WORDS</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="max-w-2xl mx-auto bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <h4 class="text-xl font-bold text-center text-gray-900 mb-5">Menu</h4>
+                <div class="space-y-4 text-gray-800">
+                    <div class="grid grid-cols-[120px_1fr] gap-3 items-start">
+                        <span class="font-semibold">Starters:</span>
+                        <div class="space-y-2">
+                            <div>green salad</div>
+                            <div><span class="font-semibold mr-2">10.</span><input type="text" name="q10" class="w-72 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-[120px_1fr] gap-3 items-start">
+                        <span class="font-semibold">Mains:</span>
+                        <div class="space-y-2">
+                            <div><span class="font-semibold mr-2">11.</span><input type="text" name="q11" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"> <span class="ml-2">with potatoes</span></div>
+                            <div><span class="font-semibold mr-2">12.</span><input type="text" name="q12" class="w-72 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-[120px_1fr] gap-3 items-start">
+                        <span class="font-semibold">Desserts:</span>
+                        <div><span class="font-semibold mr-2">13.</span><input type="text" name="q13" class="w-72 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"></div>
+                    </div>
+                    <div class="grid grid-cols-[120px_1fr] gap-3 items-start">
+                        <span class="font-semibold">Drinks:</span>
+                        <div class="space-y-2">
+                            <div>coffee</div>
+                            <div><span class="font-semibold mr-2">14.</span><input type="text" name="q14" class="w-72 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @elseif($id == 10)
+    @if(!request()->has('practice'))
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <a href="?practice=1" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-amber-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 1</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors">Glass Recycling Process</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Flow-chart completion questions 1-10.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>10 Questions</span><span>~12 mins</span></div>
+                <span class="text-amber-600 font-semibold group-hover:text-amber-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=2" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-cyan-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 2</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-cyan-600 transition-colors">Can Recycling Process</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Flow-chart completion questions 11-20.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>10 Questions</span><span>~12 mins</span></div>
+                <span class="text-cyan-600 font-semibold group-hover:text-cyan-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=3" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-amber-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 3</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors">Soft Drink Factory Production Line</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Flow-chart completion questions 1-6.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>6 Questions</span><span>~10 mins</span></div>
+                <span class="text-amber-600 font-semibold group-hover:text-amber-700 flex items-center gap-2">Start Soal 3 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=4" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-cyan-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 4</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-cyan-600 transition-colors">Chewing Gum Factory Production Line</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Flow-chart completion questions 7-13.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>7 Questions</span><span>~10 mins</span></div>
+                <span class="text-cyan-600 font-semibold group-hover:text-cyan-700 flex items-center gap-2">Start Soal 4 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+    </div>
+    @elseif(request()->get('practice') == 1)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Flow-Chart Completion</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Glass Recycling Process</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Complete the flow chart. Write <span class="font-bold">NO MORE THAN TWO WORDS</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="max-w-3xl mx-auto space-y-4">
+                <div class="text-center text-gray-700">Glass bottles and jars cleaned in <input type="text" name="q1" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center"> water</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">Collected in public <input type="text" name="q2" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center"> or picked up by</div>
+                <div class="text-center text-gray-700"><input type="text" name="q3" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center"> companies</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">Taken to a <input type="text" name="q4" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center"></div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">EITHER bottles <input type="text" name="q5" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center"> and refilled</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">OR glass <input type="text" name="q6" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center"> into small pieces</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">Glass mixed with <input type="text" name="q7" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center">, and limestone</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">Melted in a <input type="text" name="q8" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center"></div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">EITHER made into new <input type="text" name="q9" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center"> and <input type="text" name="q9b" class="w-36 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center"></div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">OR used to make tiles or <input type="text" name="q10" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center"></div>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 2)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-cyan-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-cyan-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Flow-Chart Completion</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Can Recycling Process</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Complete the flow chart. Write <span class="font-bold">NO MORE THAN TWO WORDS</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="max-w-3xl mx-auto space-y-4">
+                <div class="text-center text-gray-700">Cans collected in <input type="text" name="q11" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"> or picked up from houses by trucks</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">Checked for <input type="text" name="q12" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center">, or other materials</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">Taken to a <input type="text" name="q13" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"></div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">Cut into <input type="text" name="q14" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"> by a machine</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700"><input type="text" name="q15" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"> in a hot furnace</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">Poured into <input type="text" name="q16" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"> to cool</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">Heated and <input type="text" name="q17" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"> thin</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">Made into <input type="text" name="q18" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"> by another machine</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">Painted, dried, and <input type="text" name="q19" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"></div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">Filled with <input type="text" name="q20" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"> and <input type="text" name="q20b" class="w-36 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"></div>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 3)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Flow-Chart Completion</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Soft Drink Factory Production Line</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Complete the flow chart. Write <span class="font-bold">ONE WORD</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="max-w-3xl mx-auto space-y-4">
+                <div class="text-center text-gray-700">water is filtered and sterilised in a large tank and then <span class="font-semibold">1.</span> <input type="text" name="q1" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center"> for quality</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">the <span class="font-semibold">2.</span> <input type="text" name="q2" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center"> flavours are made using a secret company recipe</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">these flavours are mixed with sugar to make <span class="font-semibold">3.</span> <input type="text" name="q3" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center"> which is sterilised and then added to the water</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700"><span class="font-semibold">4.</span> <input type="text" name="q4" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center"> are added when the drink is mixed with carbon dioxide in a carbonator</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">the drink is <span class="font-semibold">5.</span> <input type="text" name="q5" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center"> in bottles and cans</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">the bottles are labelled</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">the soft drinks are <span class="font-semibold">6.</span> <input type="text" name="q6" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none text-center"> around the country</div>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 4)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-cyan-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-cyan-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Flow-Chart Completion</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Chewing Gum Factory Production Line</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Instructions:</p>
+                    <p class="text-amber-700 text-sm">Complete the flow chart. Write <span class="font-bold">ONE WORD</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="max-w-3xl mx-auto space-y-4">
+                <div class="text-center text-gray-700">gum is <span class="font-semibold">7.</span> <input type="text" name="q7" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"> from trees</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">it is <span class="font-semibold">8.</span> <input type="text" name="q8" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"> and dried and the resulting product arrives at the factory</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">this is heated and <span class="font-semibold">9.</span> <input type="text" name="q9" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center">, an important step to make sure the gum is clean</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">sugar syrup, <span class="font-semibold">10.</span> <input type="text" name="q10" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center">, and colours are added to the hot gum</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">the gum is mixed until smooth in a round machine</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">another machine <span class="font-semibold">11.</span> <input type="text" name="q11" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"> out the gum and then it is cooled before being cut into pieces</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">foil-wrapped pieces of gum are <span class="font-semibold">12.</span> <input type="text" name="q12" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"> in packets</div>
+                <div class="text-center text-2xl text-gray-500">↓</div>
+                <div class="text-center text-gray-700">the packets are <span class="font-semibold">13.</span> <input type="text" name="q13" class="w-44 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"> and boxed for distribution around the country</div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @elseif($id == 11)
+    @if(!request()->has('practice'))
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <a href="?practice=1" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-emerald-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 1</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">Comparison of Three Digital Cameras</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Part A notes completion (1-9) and Part B table completion (10-14).</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>14 Questions</span><span>~15 mins</span></div>
+                <span class="text-emerald-600 font-semibold group-hover:text-emerald-700 flex items-center gap-2">Start Listening 1 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=2" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-indigo-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-indigo-500 to-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 2</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">Comparison of Three Notebook Computers</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Part B matching questions (24-26) with options A-G.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>3 Questions</span><span>~8 mins</span></div>
+                <span class="text-indigo-600 font-semibold group-hover:text-indigo-700 flex items-center gap-2">Start Listening 2 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=3" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-amber-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 3</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors">Assessment Schedule (Listening 1)</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Multiple choice (1-3) and table completion (4-10).</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>10 Questions</span><span>~12 mins</span></div>
+                <span class="text-amber-600 font-semibold group-hover:text-amber-700 flex items-center gap-2">Start Soal 3 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=4" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-cyan-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 4</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h16"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-cyan-600 transition-colors">Assessment Schedule (Listening 2)</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Sentence completion (1-4) and value table (5-10).</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>10 Questions</span><span>~12 mins</span></div>
+                <span class="text-cyan-600 font-semibold group-hover:text-cyan-700 flex items-center gap-2">Start Soal 4 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=5" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-teal-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 5</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-teal-600 transition-colors">Internet Safety Discussion (Listening 1)</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Short-answer questions 1-4 and sentence completion 5-9.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>9 Questions</span><span>~12 mins</span></div>
+                <span class="text-teal-600 font-semibold group-hover:text-teal-700 flex items-center gap-2">Start Soal 5 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=6" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-emerald-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-emerald-500 to-green-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 6</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-green-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h10M7 16h6M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">Social Networking Risks (Listening 2)</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Short-answer questions 10-12 and sentence completion 13-17.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>8 Questions</span><span>~11 mins</span></div>
+                <span class="text-emerald-600 font-semibold group-hover:text-emerald-700 flex items-center gap-2">Start Soal 6 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=7" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-lime-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-lime-500 to-emerald-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 7</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-lime-100 to-emerald-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-lime-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h7"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-lime-700 transition-colors">Tourism Effects (Listening 1)</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Multiple choice questions 1-2 and note completion 3-7.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>7 Questions</span><span>~10 mins</span></div>
+                <span class="text-lime-700 font-semibold group-hover:text-lime-800 flex items-center gap-2">Start Soal 7 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+
+        <a href="?practice=8" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-sky-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-sky-500 to-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 8</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-sky-100 to-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-sky-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-sky-700 transition-colors">Tourism Pollution (Listening 2)</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Multiple choice questions 8-10 and matching 11-14.</p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>7 Questions</span><span>~10 mins</span></div>
+                <span class="text-sky-700 font-semibold group-hover:text-sky-800 flex items-center gap-2">Start Soal 8 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+            </div>
+        </a>
+    </div>
+    @elseif(request()->get('practice') == 1)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-emerald-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-emerald-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Comparison of Three Digital Cameras</h3>
+            </div>
+
+            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Part A:</p>
+                    <p class="text-amber-700 text-sm">Complete the notes. Write <span class="font-bold">NO MORE THAN THREE WORDS</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div class="space-y-6 text-gray-800">
+                    <div>
+                        <h4 class="font-bold text-gray-900 mb-2">CF Superzoom:</h4>
+                        <div class="space-y-2 pl-5">
+                            <div>has <span class="font-semibold mr-1">1.</span><input type="text" name="q1" class="w-52 border-b-2 border-gray-300 focus:border-emerald-500 outline-none"> zoom</div>
+                            <div>has <span class="font-semibold mr-1">2.</span><input type="text" name="q2" class="w-52 border-b-2 border-gray-300 focus:border-emerald-500 outline-none"> screen size</div>
+                            <div>is <span class="font-semibold mr-1">3.</span><input type="text" name="q3" class="w-52 border-b-2 border-gray-300 focus:border-emerald-500 outline-none"> model</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-gray-900 mb-2">Photo-Pal A23:</h4>
+                        <div class="space-y-2 pl-5">
+                            <div>has <span class="font-semibold mr-1">4.</span><input type="text" name="q4" class="w-52 border-b-2 border-gray-300 focus:border-emerald-500 outline-none"> megapixel count</div>
+                            <div>screen is <span class="font-semibold mr-1">5.</span><input type="text" name="q5" class="w-52 border-b-2 border-gray-300 focus:border-emerald-500 outline-none"> size for viewing photos</div>
+                            <div>warranty is <span class="font-semibold mr-1">6.</span><input type="text" name="q6" class="w-52 border-b-2 border-gray-300 focus:border-emerald-500 outline-none"> that for CF Superzoom</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-gray-900 mb-2">QT Easishot:</h4>
+                        <div class="space-y-2 pl-5">
+                            <div>is <span class="font-semibold mr-1">7.</span><input type="text" name="q7" class="w-52 border-b-2 border-gray-300 focus:border-emerald-500 outline-none"> model</div>
+                            <div>has <span class="font-semibold mr-1">8.</span><input type="text" name="q8" class="w-52 border-b-2 border-gray-300 focus:border-emerald-500 outline-none"> megapixel count</div>
+                            <div>screen is <span class="font-semibold mr-1">9.</span><input type="text" name="q9" class="w-52 border-b-2 border-gray-300 focus:border-emerald-500 outline-none"> size</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Part B:</p>
+                    <p class="text-amber-700 text-sm">Complete the table. Write <span class="font-bold">NO MORE THAN TWO WORDS AND/OR A NUMBER</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto bg-white rounded-xl border border-gray-200 shadow-sm">
+                <table class="w-full border-collapse text-sm md:text-base">
+                    <thead>
+                        <tr class="bg-emerald-700 text-white">
+                            <th class="p-4 text-left font-semibold">Specifications</th>
+                            <th class="p-4 text-center font-semibold">CF Superzoom</th>
+                            <th class="p-4 text-center font-semibold">Photo-Pal A23</th>
+                            <th class="p-4 text-center font-semibold">QT Easishot</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr>
+                            <td class="p-4 font-semibold text-gray-800">Megapixels</td>
+                            <td class="p-4 text-center">12</td>
+                            <td class="p-4 text-center"><span class="font-semibold mr-1">10.</span><input type="text" name="q10" class="w-28 border-b-2 border-gray-300 focus:border-emerald-500 outline-none text-center"></td>
+                            <td class="p-4 text-center">7</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-semibold text-gray-800">Zoom range</td>
+                            <td class="p-4 text-center"><span class="font-semibold mr-1">11.</span><input type="text" name="q11" class="w-28 border-b-2 border-gray-300 focus:border-emerald-500 outline-none text-center"></td>
+                            <td class="p-4 text-center">4x</td>
+                            <td class="p-4 text-center">3x</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-semibold text-gray-800">Screen size</td>
+                            <td class="p-4 text-center">3.5 inches</td>
+                            <td class="p-4 text-center">3 inches</td>
+                            <td class="p-4 text-center"><span class="font-semibold mr-1">12.</span><input type="text" name="q12" class="w-28 border-b-2 border-gray-300 focus:border-emerald-500 outline-none text-center"></td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-semibold text-gray-800">Standard warranty</td>
+                            <td class="p-4 text-center"><span class="font-semibold mr-1">13.</span><input type="text" name="q13" class="w-28 border-b-2 border-gray-300 focus:border-emerald-500 outline-none text-center"></td>
+                            <td class="p-4 text-center">1-year warranty</td>
+                            <td class="p-4 text-center"><span class="font-semibold mr-1">14.</span><input type="text" name="q14" class="w-28 border-b-2 border-gray-300 focus:border-emerald-500 outline-none text-center"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 2)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-indigo-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Comparison of Three Notebook Computers</h3>
+            </div>
+
+            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Part B:</p>
+                    <p class="text-amber-700 text-sm">Complete the matching questions. Write <span class="font-bold">ONE letter from A-G</span> beside each number.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                    <div class="space-y-2 text-gray-800 text-lg">
+                        <div><span class="font-bold mr-3">A</span>has a 266 MB graphic card</div>
+                        <div><span class="font-bold mr-3">B</span>has a 15-inch screen</div>
+                        <div><span class="font-bold mr-3">C</span>costs $1,950</div>
+                        <div><span class="font-bold mr-3">D</span>has a 2.5 GB hard drive</div>
+                        <div><span class="font-bold mr-3">E</span>costs $1,295</div>
+                        <div><span class="font-bold mr-3">F</span>has a 3-year warranty</div>
+                        <div><span class="font-bold mr-3">G</span>costs $899</div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-5">
+                    <div class="flex items-center gap-3 text-xl text-gray-900">
+                        <span class="font-bold">24.</span>
+                        <span>the Speedy Z</span>
+                        <input type="text" name="q24" maxlength="1" class="ml-auto w-16 uppercase text-center border-b-2 border-gray-300 focus:border-indigo-500 outline-none" placeholder="A-G">
+                    </div>
+                    <div class="flex items-center gap-3 text-xl text-gray-900">
+                        <span class="font-bold">25.</span>
+                        <span>the Maestro Supalite</span>
+                        <input type="text" name="q25" maxlength="1" class="ml-auto w-16 uppercase text-center border-b-2 border-gray-300 focus:border-indigo-500 outline-none" placeholder="A-G">
+                    </div>
+                    <div class="flex items-center gap-3 text-xl text-gray-900">
+                        <span class="font-bold">26.</span>
+                        <span>the Genius XT</span>
+                        <input type="text" name="q26" maxlength="1" class="ml-auto w-16 uppercase text-center border-b-2 border-gray-300 focus:border-indigo-500 outline-none" placeholder="A-G">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 3)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Assessment Schedule</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Questions 1-3:</p>
+                    <p class="text-amber-700 text-sm">Choose the correct letter, <span class="font-bold">A, B, or C</span>.</p>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">1. Ms. Potts prefers to work with</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q1" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>a computer.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q1" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>a pencil and paper.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q1" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>spreadsheets.</span></label>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">2. She believes it is essential to have</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q2" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>a good system.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q2" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>good old days.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q2" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>one major assessment.</span></label>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">3. John thinks continuous assessment</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q3" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>makes him sick.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q3" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>affects his performance.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q3" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>is fair.</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Questions 4-10:</p>
+                    <p class="text-amber-700 text-sm">Complete the table below. Write <span class="font-bold">NO MORE THAN TWO WORDS AND/OR A NUMBER</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto bg-white rounded-xl border border-gray-200 shadow-sm">
+                <table class="w-full border-collapse text-sm md:text-base">
+                    <thead>
+                        <tr class="bg-amber-700 text-white">
+                            <th class="p-4 text-left font-semibold w-40">Month</th>
+                            <th class="p-4 text-left font-semibold">Assessment Schedule</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr><td class="p-4 font-semibold">January</td><td class="p-4">No assessment - summer holiday</td></tr>
+                        <tr><td class="p-4 font-semibold">February</td><td class="p-4"><span class="font-semibold mr-1">4.</span><input type="text" name="q4" class="w-44 border-b-2 border-gray-300 focus:border-amber-500 outline-none"> ; set essay topics</td></tr>
+                        <tr><td class="p-4 font-semibold">March</td><td class="p-4">Field trip; <span class="font-semibold mr-1">5.</span><input type="text" name="q5" class="w-52 border-b-2 border-gray-300 focus:border-amber-500 outline-none"> with photographs</td></tr>
+                        <tr><td class="p-4 font-semibold">April</td><td class="p-4"><span class="font-semibold mr-1">6.</span><input type="text" name="q6" class="w-52 border-b-2 border-gray-300 focus:border-amber-500 outline-none"> with visual aids. <span class="italic">Break.</span></td></tr>
+                        <tr><td class="p-4 font-semibold">May</td><td class="p-4">A series of <span class="font-semibold mr-1">7.</span><input type="text" name="q7" class="w-52 border-b-2 border-gray-300 focus:border-amber-500 outline-none"> (short-answer questions)</td></tr>
+                        <tr><td class="p-4 font-semibold">June</td><td class="p-4">Mid-year exams</td></tr>
+                        <tr><td class="p-4 font-semibold">July</td><td class="p-4"><span class="italic">Break.</span> <span class="font-semibold mr-1">8.</span><input type="text" name="q8" class="w-52 border-b-2 border-gray-300 focus:border-amber-500 outline-none"></td></tr>
+                        <tr><td class="p-4 font-semibold">August</td><td class="p-4"><span class="font-semibold mr-1">9.</span><input type="text" name="q9" class="w-52 border-b-2 border-gray-300 focus:border-amber-500 outline-none"></td></tr>
+                        <tr><td class="p-4 font-semibold">September</td><td class="p-4"><span class="font-semibold mr-1">10.</span><input type="text" name="q10" class="w-52 border-b-2 border-gray-300 focus:border-amber-500 outline-none"> . <span class="italic">Break.</span></td></tr>
+                        <tr><td class="p-4 font-semibold">October</td><td class="p-4">Test</td></tr>
+                        <tr><td class="p-4 font-semibold">November</td><td class="p-4">Final exam</td></tr>
+                        <tr><td class="p-4 font-semibold">December</td><td class="p-4">No assessment - summer holiday</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 4)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-cyan-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-cyan-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Assessment Schedule</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Questions 1-4:</p>
+                    <p class="text-amber-700 text-sm">Complete the sentences below. Write <span class="font-bold">NO MORE THAN THREE WORDS OR NUMBERS</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-4 text-gray-800 text-lg">
+                <div><span class="font-semibold" style="color:#2563eb;">1.</span> Jim thinks he won't have a social life because of <input type="text" name="q1" class="w-64 border-b-2 border-gray-300 focus:border-cyan-500 outline-none">.</div>
+                <div><span class="font-semibold" style="color:#2563eb;">2.</span> Last year, Jim enjoyed the <input type="text" name="q2" class="w-64 border-b-2 border-gray-300 focus:border-cyan-500 outline-none">.</div>
+                <div><span class="font-semibold" style="color:#2563eb;">3.</span> The <input type="text" name="q3" class="w-64 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"> is scheduled for September.</div>
+                <div><span class="font-semibold" style="color:#2563eb;">4.</span> There are <input type="text" name="q4a" class="w-24 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"> books and <input type="text" name="q4b" class="w-24 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"> articles on the reading list.</div>
+            </div>
+
+            <div class="mt-8 mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Questions 5-10:</p>
+                    <p class="text-amber-700 text-sm">Complete the table below. Write <span class="font-bold">NO MORE THAN ONE WORD OR A NUMBER</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto bg-white rounded-xl border border-gray-200 shadow-sm">
+                <table class="w-full border-collapse text-sm md:text-base">
+                    <thead>
+                        <tr class="bg-cyan-700 text-white">
+                            <th class="p-4 text-left font-semibold w-40">Month</th>
+                            <th class="p-4 text-left font-semibold">Assessment Schedule</th>
+                            <th class="p-4 text-center font-semibold w-32">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr><td class="p-4 font-semibold">January</td><td class="p-4">No assessment - summer holiday</td><td class="p-4 text-center">-</td></tr>
+                        <tr><td class="p-4 font-semibold">February</td><td class="p-4">Quiz; set essay topics</td><td class="p-4 text-center"><span class="font-semibold mr-1" style="color:#2563eb;">5.</span><input type="text" name="q5" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center">%</td></tr>
+                        <tr><td class="p-4 font-semibold">March</td><td class="p-4">Field trip; poster with photographs</td><td class="p-4 text-center"><span class="font-semibold mr-1" style="color:#2563eb;">6.</span><input type="text" name="q6" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center">%</td></tr>
+                        <tr><td class="p-4 font-semibold">April</td><td class="p-4">Oral presentation with visual aids. <span class="italic">Break.</span></td><td class="p-4 text-center"><span class="font-semibold mr-1" style="color:#2563eb;">7.</span><input type="text" name="q7" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center">%</td></tr>
+                        <tr><td class="p-4 font-semibold">May</td><td class="p-4">A series of quizzes (short-answer questions)</td><td class="p-4 text-center">10%</td></tr>
+                        <tr><td class="p-4 font-semibold">June</td><td class="p-4">Mid-year exams</td><td class="p-4 text-center"><span class="font-semibold mr-1" style="color:#2563eb;">8.</span><input type="text" name="q8" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center">%</td></tr>
+                        <tr><td class="p-4 font-semibold">July</td><td class="p-4"><span class="italic">Break.</span> 5,000-word essay</td><td class="p-4 text-center">10%</td></tr>
+                        <tr><td class="p-4 font-semibold">August</td><td class="p-4">Research projects</td><td class="p-4 text-center"><span class="font-semibold mr-1" style="color:#2563eb;">9.</span><input type="text" name="q9" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center">%</td></tr>
+                        <tr><td class="p-4 font-semibold">September</td><td class="p-4">Seminar. <span class="italic">Break.</span></td><td class="p-4 text-center">5%</td></tr>
+                        <tr><td class="p-4 font-semibold">October</td><td class="p-4">Test</td><td class="p-4 text-center"><span class="font-semibold mr-1" style="color:#2563eb;">10.</span><input type="text" name="q10" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center">%</td></tr>
+                        <tr><td class="p-4 font-semibold">November</td><td class="p-4">Final exam</td><td class="p-4 text-center">20%</td></tr>
+                        <tr><td class="p-4 font-semibold">December</td><td class="p-4">No assessment - summer holiday</td><td class="p-4 text-center">-</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 5)
+    <div class="mb-8">
+        <div class="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-3xl p-8 border border-teal-100 mb-6">
+            <h1 class="text-3xl font-black text-gray-900 mb-3 tracking-tight">Exercise 5: Internet Safety Discussion (Listening 1)</h1>
+            <p class="text-gray-700 text-base mb-2">Questions 1-4: Answer the questions below. Write NO MORE THAN THREE WORDS for each answer.</p>
+            <p class="text-gray-700 text-base">Questions 5-9: Complete the notes below. Write NO MORE THAN TWO WORDS for each answer.</p>
+        </div>
+
+        <div class="bg-white rounded-3xl p-8 shadow-lg border border-gray-100 mb-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Questions 1-4</h2>
+            <ol class="space-y-5 text-gray-800 leading-relaxed" style="list-style: decimal; padding-left: 1.5rem;">
+                <li>What made Yousef decide to use social media less?
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+                <li>Who does Sarah say is often responsible for online scams?
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+                <li>What does Sarah suggest people should use before opening suspicious links?
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+                <li>What kind of websites are becoming harder to distinguish from genuine ones?
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+            </ol>
+        </div>
+
+        <div class="bg-white rounded-3xl p-8 shadow-lg border border-gray-100">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Questions 5-9</h2>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">How to stay safe online:</h3>
+            <ol class="space-y-5 text-gray-800 leading-relaxed" style="list-style: decimal; padding-left: 1.5rem;" start="5">
+                <li>Never share your ____, even with friends.
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+                <li>Use a ____ password for every account.
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+                <li>Always check if the website uses ____ before entering personal data.
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+                <li>Think before posting, as your online image can affect your ____.
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+                <li>If you receive strange emails, report them to your internet ____.
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+            </ol>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 6)
+    <div class="mb-8">
+        <div class="bg-gradient-to-r from-emerald-50 to-green-50 rounded-3xl p-8 border border-emerald-100 mb-6">
+            <h1 class="text-3xl font-black text-gray-900 mb-3 tracking-tight">Exercise 6: Social Networking Risks (Listening 2)</h1>
+            <p class="text-gray-700 text-base mb-2">Questions 10-12: Answer the questions below. Write NO MORE THAN THREE WORDS for each answer.</p>
+            <p class="text-gray-700 text-base">Questions 13-17: Complete the notes below. Write NO MORE THAN TWO WORDS for each answer.</p>
+        </div>
+
+        <div class="bg-white rounded-3xl p-8 shadow-lg border border-gray-100 mb-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Questions 10-12</h2>
+            <ol class="space-y-5 text-gray-800 leading-relaxed" style="list-style: decimal; padding-left: 1.5rem;" start="10">
+                <li>How many social networking users does the speaker say there are globally?
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+                <li>What is one major danger of fake profile scams?
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+                <li>What can happen to students if they post inappropriate comments?
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+            </ol>
+        </div>
+
+        <div class="bg-white rounded-3xl p-8 shadow-lg border border-gray-100">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Questions 13-17</h2>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Online safety tips from the speaker:</h3>
+            <ol class="space-y-5 text-gray-800 leading-relaxed" style="list-style: decimal; padding-left: 1.5rem;" start="13">
+                <li>Keep your privacy settings at the highest ____.
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+                <li>Avoid posting details about your ____ activities.
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+                <li>Do not add online contacts you do not know in ____.
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+                <li>Use ____ tools to check where profile photos appear online.
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+                <li>Report suspicious users to the platform ____ team.
+                    <input type="text" class="w-full mt-2 p-2 border rounded" placeholder="Your answer">
+                </li>
+            </ol>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 7)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-lime-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-lime-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-lime-100 text-lime-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Tourism: Benefits and Local Impact</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Questions 1-2:</p>
+                    <p class="text-amber-700 text-sm">Choose the correct answer, <span class="font-bold">A, B, or C</span>.</p>
+                </div>
+            </div>
+
+            <div class="space-y-6 mb-8">
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">1. What are the two levels of tourism that are talked about?</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-lime-50 cursor-pointer transition-colors"><input type="radio" name="q1" value="A" class="w-5 h-5 text-lime-600 border-gray-300 focus:ring-lime-500"><span><span class="font-bold mr-2">A.</span>environmental and social</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-lime-50 cursor-pointer transition-colors"><input type="radio" name="q1" value="B" class="w-5 h-5 text-lime-600 border-gray-300 focus:ring-lime-500"><span><span class="font-bold mr-2">B.</span>positive and negative</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-lime-50 cursor-pointer transition-colors"><input type="radio" name="q1" value="C" class="w-5 h-5 text-lime-600 border-gray-300 focus:ring-lime-500"><span><span class="font-bold mr-2">C.</span>global and local</span></label>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">2. How much air travel is a result of tourism?</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-lime-50 cursor-pointer transition-colors"><input type="radio" name="q2" value="A" class="w-5 h-5 text-lime-600 border-gray-300 focus:ring-lime-500"><span><span class="font-bold mr-2">A.</span>16%</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-lime-50 cursor-pointer transition-colors"><input type="radio" name="q2" value="B" class="w-5 h-5 text-lime-600 border-gray-300 focus:ring-lime-500"><span><span class="font-bold mr-2">B.</span>60%</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-lime-50 cursor-pointer transition-colors"><input type="radio" name="q2" value="C" class="w-5 h-5 text-lime-600 border-gray-300 focus:ring-lime-500"><span><span class="font-bold mr-2">C.</span>66%</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Questions 3-7:</p>
+                    <p class="text-amber-700 text-sm">Write <span class="font-bold">NO MORE THAN THREE WORDS</span> for each answer.</p>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <p class="text-gray-800 leading-8">
+                    It is also important to consider the effects of tourism on a
+                    <span class="font-semibold mr-1">3.</span><input type="text" name="q3" class="w-44 border-b-2 border-gray-300 focus:border-lime-500 outline-none">
+                    region and its people and economy.
+                    <span class="font-semibold mr-1">4.</span><input type="text" name="q4" class="w-44 border-b-2 border-gray-300 focus:border-lime-500 outline-none">
+                    creates a variety of jobs for all sorts of people. It also enables people to learn new skills and start their own small businesses. An additional benefit is that both tourists and local people can gain a
+                    <span class="font-semibold mr-1">5.</span><input type="text" name="q5" class="w-44 border-b-2 border-gray-300 focus:border-lime-500 outline-none">
+                    of other cultures and customs. Ideally, the money that is earned by tourism in a particular area will be used to improve
+                    <span class="font-semibold mr-1">6.</span><input type="text" name="q6" class="w-44 border-b-2 border-gray-300 focus:border-lime-500 outline-none">
+                    and health services for people in that area. Such income can also be used to build better
+                    <span class="font-semibold mr-1">7.</span><input type="text" name="q7" class="w-44 border-b-2 border-gray-300 focus:border-lime-500 outline-none">
+                    and rubbish disposal systems and to protect wildlife in the region.
+                </p>
+            </div>
+        </div>
+    </div>
+    @elseif(request()->get('practice') == 8)
+    <div class="space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl border-t-4 border-sky-500 p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-sky-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="relative z-10 mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="px-3 py-1 bg-sky-100 text-sky-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 leading-tight">Tourism: Water Use and Pollution</h3>
+            </div>
+
+            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Questions 8-10:</p>
+                    <p class="text-amber-700 text-sm">Choose the correct answer, <span class="font-bold">A, B, or C</span>.</p>
+                </div>
+            </div>
+
+            <div class="space-y-6 mb-8">
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">8. How much water does a tropical golf course use?</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q8" value="A" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">A.</span>the same amount as 60,000 villagers</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q8" value="B" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">B.</span>more than 60,000 villagers</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q8" value="C" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">C.</span>less than 60,000 villagers</span></label>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">9. What is a typical 'peak season' population increase?</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q9" value="A" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">A.</span>twenty times</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q9" value="B" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">B.</span>seven times</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q9" value="C" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">C.</span>ten times</span></label>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-5">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">10. What happens if pollution is not well managed?</h4>
+                    <div class="space-y-3 pl-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q10" value="A" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">A.</span>There are too many swimming pools.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q10" value="B" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">B.</span>Fewer tourists visit.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q10" value="C" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">C.</span>Poor countries need modern facilities.</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <p class="text-amber-800 font-medium mb-1">Questions 11-14:</p>
+                    <p class="text-amber-700 text-sm">Write the correct letter, <span class="font-bold">A, B, C, or D</span>, next to each statement.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Which kind of pollution affects these places?</h4>
+                    <div class="space-y-3 text-gray-800 text-lg">
+                        <div><span class="font-bold mr-3">A</span>the Taj Mahal</div>
+                        <div><span class="font-bold mr-3">B</span>Yellowstone Park</div>
+                        <div><span class="font-bold mr-3">C</span>the Caribbean</div>
+                        <div><span class="font-bold mr-3">D</span>the Philippines</div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-5">
+                    <div class="flex items-center gap-3 text-base text-gray-900">
+                        <span class="font-bold">11.</span>
+                        <span>Destruction of reefs and beaches</span>
+                        <input type="text" name="q11" maxlength="1" class="ml-auto w-16 uppercase text-center border-b-2 border-gray-300 focus:border-sky-500 outline-none" placeholder="A-D">
+                    </div>
+                    <div class="flex items-center gap-3 text-base text-gray-900">
+                        <span class="font-bold">12.</span>
+                        <span>Rubbish problems</span>
+                        <input type="text" name="q12" maxlength="1" class="ml-auto w-16 uppercase text-center border-b-2 border-gray-300 focus:border-sky-500 outline-none" placeholder="A-D">
+                    </div>
+                    <div class="flex items-center gap-3 text-base text-gray-900">
+                        <span class="font-bold">13.</span>
+                        <span>Air pollution and acid rain</span>
+                        <input type="text" name="q13" maxlength="1" class="ml-auto w-16 uppercase text-center border-b-2 border-gray-300 focus:border-sky-500 outline-none" placeholder="A-D">
+                    </div>
+                    <div class="flex items-center gap-3 text-base text-gray-900">
+                        <span class="font-bold">14.</span>
+                        <span>Noise pollution</span>
+                        <input type="text" name="q14" maxlength="1" class="ml-auto w-16 uppercase text-center border-b-2 border-gray-300 focus:border-sky-500 outline-none" placeholder="A-D">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     @endif
 
     @else
@@ -1313,12 +4545,12 @@
     
     {{-- Upload SRT Modal (Admin Only) --}}
     @if(Auth::user()->isAdmin())
-        <div id="uploadSrtModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center"
-             onclick="if(event.target === this) this.classList.add('hidden')">
+           <div id="uploadSrtModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] items-center justify-center"
+               onclick="if(event.target === this) { this.classList.add('hidden'); this.classList.remove('flex'); }">
             <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-2xl font-bold text-gray-900">Upload SRT Transcript</h3>
-                    <button type="button" onclick="document.getElementById('uploadSrtModal').classList.add('hidden')" 
+                    <button type="button" onclick="const modal=document.getElementById('uploadSrtModal'); modal.classList.add('hidden'); modal.classList.remove('flex');" 
                             class="text-gray-400 hover:text-gray-600">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -1375,7 +4607,7 @@ Start translating here..."></textarea>
                     </div>
 
                     <div class="flex gap-3 pt-4">
-                        <button type="button" onclick="document.getElementById('uploadSrtModal').classList.add('hidden')"
+                        <button type="button" onclick="const modal=document.getElementById('uploadSrtModal'); modal.classList.add('hidden'); modal.classList.remove('flex');"
                                 class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors">
                             Cancel
                         </button>
@@ -1389,12 +4621,12 @@ Start translating here..."></textarea>
         </div>
         
         {{-- Upload Audio Modal (Admin Only) --}}
-        <div id="uploadAudioModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center"
-             onclick="if(event.target === this) this.classList.add('hidden')">
+           <div id="uploadAudioModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] items-center justify-center"
+               onclick="if(event.target === this) { this.classList.add('hidden'); this.classList.remove('flex'); }">
             <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-2xl font-bold text-gray-900">Upload Audio File</h3>
-                    <button type="button" onclick="document.getElementById('uploadAudioModal').classList.add('hidden')" 
+                    <button type="button" onclick="const modal=document.getElementById('uploadAudioModal'); modal.classList.add('hidden'); modal.classList.remove('flex');" 
                             class="text-gray-400 hover:text-gray-600">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -1422,7 +4654,7 @@ Start translating here..."></textarea>
                     @endif
 
                     <div class="flex gap-3 pt-4">
-                        <button type="button" onclick="document.getElementById('uploadAudioModal').classList.add('hidden')"
+                        <button type="button" onclick="const modal=document.getElementById('uploadAudioModal'); modal.classList.add('hidden'); modal.classList.remove('flex');"
                                 class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors">
                             Cancel
                         </button>
@@ -1435,6 +4667,7 @@ Start translating here..."></textarea>
             </div>
         </div>
     @endif
+</div>
 </div>
 </body>
 </html>
@@ -1572,7 +4805,13 @@ Start translating here..."></textarea>
         window.toggleTranscriptDrawer = function() {
             const transcriptDrawer = document.getElementById('transcriptDrawer');
             if (transcriptDrawer) {
-                transcriptDrawer.classList.toggle('hidden');
+                if (transcriptDrawer.classList.contains('hidden')) {
+                    transcriptDrawer.classList.remove('hidden');
+                    transcriptDrawer.classList.add('flex');
+                } else {
+                    transcriptDrawer.classList.add('hidden');
+                    transcriptDrawer.classList.remove('flex');
+                }
             }
         };
     });

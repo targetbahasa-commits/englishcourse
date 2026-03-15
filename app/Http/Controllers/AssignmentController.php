@@ -60,36 +60,38 @@ class AssignmentController extends Controller
 
     public function listeningPracticeIndexPart($set)
     {
-        $practiceParts = [
-            1 => ['meeting_id' => 146, 'set' => 1],
-            2 => ['meeting_id' => 146, 'set' => 2],
-            3 => ['meeting_id' => 129, 'set' => 1],
-            4 => ['meeting_id' => 130, 'set' => 1],
-        ];
+        $validParts = [1, 2, 3, 4];
 
-        if (!array_key_exists($set, $practiceParts)) {
+        if (!in_array((int) $set, $validParts)) {
             abort(404);
         }
 
-        // Pass the outer part number (1-4) as $partNumber so the view shows the correct header
-        return $this->ieltsListeningPart1Practice($practiceParts[$set]['meeting_id'], $practiceParts[$set]['set'], $set);
+        // part1-practice view does not use $meeting, so we skip the DB lookup
+        return view('assignments.ielts.listening.part1-practice', ['set' => (int) $set]);
     }
 
     public function listeningPracticeIndexTest($set, $test)
     {
         $practiceParts = [
-            1 => ['meeting_id' => 146, 'set' => 1],
-            2 => ['meeting_id' => 146, 'set' => 2],
-            3 => ['meeting_id' => 129, 'set' => 1],
-            4 => ['meeting_id' => 130, 'set' => 1],
+            1 => ['meeting_title' => 'IELTS Listening Practice Set 1'],
+            2 => ['meeting_title' => 'IELTS Listening Practice Set 2'],
+            3 => ['meeting_title' => 'IELTS Listening Practice Set 3'],
+            4 => ['meeting_title' => 'IELTS Listening Practice Set 4'],
         ];
 
-        if (!array_key_exists($set, $practiceParts)) {
+        if (!array_key_exists((int) $set, $practiceParts)) {
             abort(404);
         }
 
-        // Pass the outer part number (1-4) as $partNumber so the view shows the correct header
-        return $this->ieltsListeningPracticeTest($practiceParts[$set]['meeting_id'], $practiceParts[$set]['set'], $test, $set);
+        $program = \App\Models\Program::where('slug', 'ielts-academic-listening')->first();
+        $meeting = \App\Models\Meeting::firstOrCreate(
+            ['program_id' => $program->id, 'meeting_number' => (int) $set],
+            ['title' => $practiceParts[(int) $set]['meeting_title']]
+        );
+
+        $set = (int) $set;
+        $testId = $test;
+        return view('assignments.ielts.listening.test-practice', compact('meeting', 'set', 'testId'));
     }
 
     public function listeningPracticeIndex()
@@ -127,6 +129,7 @@ class AssignmentController extends Controller
             8 => 'Short Answer',
             9 => 'Map & Plan Labelling',
             10 => 'Diagrams & Flowcharts',
+            11 => 'Mixed Exercise',
         ];
 
         if (!array_key_exists($id, $materials)) {
@@ -148,7 +151,8 @@ class AssignmentController extends Controller
 
     public function ieltsListeningWarmUp($type)
     {
-        $validTypes = ['spelling', 'times-dates', 'addresses', 'numbers', 'names', 'geographical-names'];
+        $validTypes = ['spelling', 'times-dates', 'addresses', 'numbers', 'names', 'geographical-names', 'direction'];
+        $practice = (int) request()->get('practice', 1);
 
         if (!in_array($type, $validTypes)) {
             abort(404);
@@ -162,6 +166,7 @@ class AssignmentController extends Controller
             'numbers' => 'audio/ielts/listening/warmup/numbers_practice_1.mp3',
             'names' => 'audio/ielts/listening/warmup/names_practice_1.mp3',
             'geographical-names' => 'audio/ielts/listening/warmup/geographical_names_practice_1.mp3',
+            'direction' => 'audio/ielts/listening/warmup/direction_practice_1.mp3',
         ];
 
         $titles = [
@@ -171,6 +176,7 @@ class AssignmentController extends Controller
             'numbers' => 'Numbers Practice',
             'names' => 'Names Practice',
             'geographical-names' => 'Geographical Names Practice',
+            'direction' => 'Direction Practice',
         ];
 
         $descriptions = [
@@ -180,7 +186,15 @@ class AssignmentController extends Controller
             'numbers' => 'Listen and write down the numbers (and letters) you hear.',
             'names' => 'Listen and write down the names you hear.',
             'geographical-names' => 'Listen and write down the geographical names you hear.',
+            'direction' => 'Listen and write down the directions or location instructions you hear.',
         ];
+
+        if ($type === 'names' && $practice === 2) {
+            $practiceAudio = 'audio/ielts/listening/warmup/names_practice_2.mp3';
+            $audioFiles['names'] = file_exists(public_path($practiceAudio)) ? $practiceAudio : $audioFiles['names'];
+            $titles['names'] = 'Names Practice 2';
+            $descriptions['names'] = 'Listen and tick the surnames you hear.';
+        }
 
         $section = (object) [
             'audio_file' => $audioFiles[$type] ?? 'audio/ielts/listening/warmup/default.mp3',

@@ -37,6 +37,9 @@
                 const webrtcChannel = window.Echo.private('remote-view.' + userId);
                 let peerConnection = null;
                 let localStream = null;
+                let lastRequestFromId = null;
+                let lastRequestAt = 0;
+                let pollingTimer = null;
                 const config = {
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
@@ -55,7 +58,14 @@
                     document.head.appendChild(script);
                 }
 
-                webrtcChannel.listenForWhisper('RequestScreen', (e) => {
+                const handleIncomingRequest = (e) => {
+                    const now = Date.now();
+                    if (lastRequestFromId === e.fromId && (now - lastRequestAt) < 1500) {
+                        return;
+                    }
+                    lastRequestFromId = e.fromId;
+                    lastRequestAt = now;
+
                     if (peerConnection) {
                         peerConnection.close();
                     }
@@ -85,10 +95,24 @@
                             backdrop: `rgba(0,0,123,0.4)`
                         }).then((result) => {
                             if (result.isConfirmed) {
+                                if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+                                    Swal.fire({
+                                        title: 'Screen Sharing Not Available',
+                                        html: 'Browser screen sharing requires a secure context (HTTPS). Please open this site using HTTPS and try again.',
+                                        icon: 'error',
+                                    });
+                                    webrtcChannel.whisper('ScreenRejected', { target: e.fromId });
+                                    return;
+                                }
+
                                 webrtcChannel.whisper('ScreenAccepted', { target: e.fromId });
                                 
                                 navigator.mediaDevices.getDisplayMedia({ video: { cursor: "always" }, audio: false })
                                     .then(stream => {
+                                        if (!stream.getVideoTracks || stream.getVideoTracks().length === 0) {
+                                            throw new Error('No video track captured from screen share.');
+                                        }
+
                                         localStream = stream;
                                         peerConnection = new RTCPeerConnection(config);
                                         
@@ -152,6 +176,32 @@
                     };
                     
                     handleRequest();
+                };
+
+                const pollPendingRequest = () => {
+                    window.axios.get('{{ route('remote-view.pending-request') }}')
+                        .then((res) => {
+                            if (!res.data || !res.data.pending || !res.data.request) {
+                                return;
+                            }
+
+                            const req = res.data.request;
+                            handleIncomingRequest(req);
+
+                            if (req.request_id) {
+                                window.axios.post('{{ route('remote-view.pending-request.ack') }}', {
+                                    request_id: req.request_id,
+                                }).catch(() => {});
+                            }
+                        })
+                        .catch(() => {});
+                };
+
+                webrtcChannel.listenForWhisper('RequestScreen', (e) => {
+                    handleIncomingRequest(e);
+                })
+                .listen('.RemoteScreenRequested', (e) => {
+                    handleIncomingRequest(e);
                 })
                 .listenForWhisper('Answer', (e) => {
                     if (peerConnection) {
@@ -185,6 +235,15 @@
                          peerConnection.close();
                          peerConnection = null;
                      }
+                });
+
+                pollPendingRequest();
+                pollingTimer = setInterval(pollPendingRequest, 4000);
+
+                window.addEventListener('beforeunload', () => {
+                    if (pollingTimer) {
+                        clearInterval(pollingTimer);
+                    }
                 });
             }
         };

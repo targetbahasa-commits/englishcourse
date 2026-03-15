@@ -1,4 +1,9 @@
-<div x-data="{ programSidebarOpen: false }">
+@php
+    $programSidebarAlwaysVisible = $programSidebarAlwaysVisible ?? false;
+@endphp
+
+<div x-data="{ programSidebarOpen: {{ $programSidebarAlwaysVisible ? 'true' : 'false' }} }"
+    x-effect="window.dispatchEvent(new CustomEvent('program-sidebar-change', { detail: { open: programSidebarOpen } }))">
     <button @click="programSidebarOpen = true" x-show="!programSidebarOpen" 
             class="fixed top-6 left-6 z-40 p-2.5 bg-white rounded-xl shadow-lg border border-gray-100 text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center group"
             title="Open Menu">
@@ -15,11 +20,11 @@
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
          @click="programSidebarOpen = false"
-         class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 backdrop-blur-sm" 
+                 class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 backdrop-blur-sm {{ $programSidebarAlwaysVisible ? 'lg:hidden' : '' }}" 
          style="display: none;"></div>
 
-    <aside class="fixed inset-y-0 left-0 bg-white shadow-2xl w-72 z-50 transform transition-transform duration-300 ease-in-out flex flex-col pt-0 h-full overflow-hidden"
-           :class="programSidebarOpen ? 'translate-x-0' : '-translate-x-full'">
+        <aside class="fixed inset-y-0 left-0 bg-white shadow-2xl w-72 z-50 transform transition-transform duration-300 ease-in-out flex flex-col pt-0 h-full overflow-hidden"
+            :class="programSidebarOpen ? 'translate-x-0' : '-translate-x-full'">
         
         <div class="p-6 flex items-center justify-between border-b border-gray-100 bg-gray-50 flex-shrink-0">
             <div class="flex items-center gap-3">

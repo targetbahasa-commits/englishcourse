@@ -210,5 +210,7 @@
             }))
         })
     </script>
+
+    @include('components.student-broadcaster')
 </body>
 </html>

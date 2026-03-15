@@ -596,6 +596,9 @@ Route::middleware(['auth'])->group(function () {
     
     // Teacher Remote View
     Route::get('/teacher/remote-view/{user}', [App\Http\Controllers\RemoteViewController::class, 'teacherView'])->name('teacher.remote-view')->middleware('role:teacher');
+    Route::post('/remote-view/request-screen', [App\Http\Controllers\RemoteViewController::class, 'requestScreen'])->name('remote-view.request-screen');
+    Route::get('/remote-view/pending-request', [App\Http\Controllers\RemoteViewController::class, 'pendingRequest'])->name('remote-view.pending-request');
+    Route::post('/remote-view/pending-request/ack', [App\Http\Controllers\RemoteViewController::class, 'acknowledgePendingRequest'])->name('remote-view.pending-request.ack');
     
     // Admin Programs Management
     Route::resource('admin/programs', App\Http\Controllers\Admin\ProgramController::class)->names('programs')->middleware('role:admin');

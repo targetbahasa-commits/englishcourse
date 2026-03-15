@@ -66,7 +66,7 @@
         <div class="w-full h-full max-w-7xl max-h-[85vh] aspect-video bg-gray-950 rounded-2xl shadow-2xl border border-gray-800 flex flex-col items-center justify-center relative overflow-hidden group">
             
             <!-- Video Element (Hidden until live) -->
-            <video id="remoteVideo" autoplay playsinline x-show="status === 'live'" class="w-full h-full object-contain bg-black z-20" style="display: none;"></video>
+            <video id="remoteVideo" autoplay playsinline muted x-show="status === 'live'" class="w-full h-full object-contain bg-black z-20" style="display: none;"></video>
 
             <!-- Placeholder overlays -->
             <div x-show="status !== 'live'" class="absolute inset-0 flex items-center justify-center bg-gray-900/80 backdrop-blur-sm z-10 transition-opacity">
@@ -130,6 +130,7 @@
                 peerConnection: null,
                 localStream: null,
                 micActive: false,
+                noTrackTimer: null,
                 config: {
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
@@ -188,6 +189,18 @@
                         })
                         .listenForWhisper('Offer', (e) => {
                             this.status = 'live';
+                            if (this.noTrackTimer) {
+                                clearTimeout(this.noTrackTimer);
+                            }
+                            this.noTrackTimer = setTimeout(() => {
+                                const videoEl = document.getElementById('remoteVideo');
+                                const hasTrack = !!(videoEl && videoEl.srcObject && videoEl.srcObject.getVideoTracks && videoEl.srcObject.getVideoTracks().length > 0);
+                                if (!hasTrack) {
+                                    this.status = 'requesting';
+                                    alert('Request accepted, but no screen track was received. Ask the teacher to retry and ensure screen sharing is allowed in the browser.');
+                                }
+                            }, 7000);
+
                             if (!this.peerConnection) {
                                  this.setupPeerConnection();
                             }
@@ -234,9 +247,14 @@
                 requestScreen() {
                     if(!this.echoChannel) return;
                     this.status = 'requesting';
-                    this.echoChannel.whisper('RequestScreen', {
-                        fromId: {{ auth()->id() }},
-                        fromName: '{!! addslashes(auth()->user()->name) !!}'
+                    window.axios.post('{{ route('remote-view.request-screen') }}', {
+                        target_id: this.targetId,
+                    }).catch(() => {
+                        // Fallback to whisper in case broadcast endpoint fails.
+                        this.echoChannel.whisper('RequestScreen', {
+                            fromId: {{ auth()->id() }},
+                            fromName: '{!! addslashes(auth()->user()->name) !!}'
+                        });
                     });
                 },
 
@@ -256,6 +274,7 @@
                         const videoEl = document.getElementById('remoteVideo');
                         if (videoEl && videoEl.srcObject !== event.streams[0]) {
                             videoEl.srcObject = event.streams[0];
+                            videoEl.play().catch(() => {});
                         }
                     };
                     
