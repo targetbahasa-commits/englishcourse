@@ -10,6 +10,22 @@ use Illuminate\Support\Str;
 
 class GuestFreeTestController extends Controller
 {
+    private function extractAttributionData(Request $request): array
+    {
+        return $request->only([
+            'utm_source',
+            'utm_medium',
+            'utm_campaign',
+            'utm_content',
+            'utm_term',
+            'acquisition_referrer',
+            'acquisition_landing_path',
+            'acquisition_source_page',
+            'acquisition_variant',
+            'acquisition_last_cta',
+        ]);
+    }
+
     public function showRegistrationForm($type)
     {
         $validTypes = ['ielts_academic', 'ielts_general', 'toefl_itp', 'pte_academic'];
@@ -37,7 +53,19 @@ class GuestFreeTestController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255',
             'phone_number' => 'required|string|max:20',
+            'utm_source' => 'nullable|string|max:100',
+            'utm_medium' => 'nullable|string|max:100',
+            'utm_campaign' => 'nullable|string|max:150',
+            'utm_content' => 'nullable|string|max:150',
+            'utm_term' => 'nullable|string|max:150',
+            'acquisition_referrer' => 'nullable|string|max:1000',
+            'acquisition_landing_path' => 'nullable|string|max:255',
+            'acquisition_source_page' => 'nullable|string|max:100',
+            'acquisition_variant' => 'nullable|string|max:50',
+            'acquisition_last_cta' => 'nullable|string|max:100',
         ]);
+
+        $attributionData = $this->extractAttributionData($request);
 
         // Check if user exists
         $user = User::where('email', $request->email)->first();
@@ -50,12 +78,24 @@ class GuestFreeTestController extends Controller
                 'phone_number' => $request->phone_number,
                 'password' => Hash::make(Str::random(12)), // Generate a random secure password
                 'role' => 'guest',
-            ]);
+            ] + $attributionData);
         } else {
             // Optional: update phone number or name if missing, 
             // but we leave it simple for now and rely on existing data.
+            $updates = [];
+
             if (!$user->phone_number) {
-                 $user->update(['phone_number' => $request->phone_number]);
+                $updates['phone_number'] = $request->phone_number;
+            }
+
+            foreach ($attributionData as $field => $value) {
+                if ($value && empty($user->{$field})) {
+                    $updates[$field] = $value;
+                }
+            }
+
+            if (!empty($updates)) {
+                $user->update($updates);
             }
         }
 

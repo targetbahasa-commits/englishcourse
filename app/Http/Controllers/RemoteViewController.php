@@ -15,6 +15,11 @@ class RemoteViewController extends Controller
         return 'remote_screen_request:' . $targetId;
     }
 
+    private function signalQueueCacheKey(int $targetId): string
+    {
+        return 'remote_signal_queue:' . $targetId;
+    }
+
     /**
      * Display the remote view page for Admins.
      */
@@ -52,6 +57,8 @@ class RemoteViewController extends Controller
     {
         $request->validate([
             'target_id' => 'required|integer|exists:users,id',
+            'target_path' => ['nullable', 'string', 'regex:#^/assignments/ielts-academic/writing/(1|2)/meeting/[0-9]+$#'],
+            'target_title' => 'nullable|string|max:120',
         ]);
 
         $actor = $request->user();
@@ -66,16 +73,21 @@ class RemoteViewController extends Controller
             abort(403, 'Teachers cannot request screen from admins/teachers.');
         }
 
+        $targetPath = $request->input('target_path');
+        $targetTitle = $request->input('target_title');
+
         $payload = [
             'request_id' => (string) Str::uuid(),
             'fromId' => $actor->id,
             'fromName' => $actor->name,
+            'target_path' => $targetPath,
+            'target_title' => $targetTitle,
             'created_at' => now()->toIso8601String(),
         ];
 
         Cache::put($this->pendingRequestCacheKey($target->id), $payload, now()->addMinutes(2));
 
-        broadcast(new RemoteScreenRequested($target->id, $actor->id, $actor->name))->toOthers();
+        broadcast(new RemoteScreenRequested($target->id, $actor->id, $actor->name, $targetPath, $targetTitle))->toOthers();
 
         return response()->json([
             'success' => true,
@@ -115,5 +127,56 @@ class RemoteViewController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Queue a WebRTC signaling message for polling fallback.
+     */
+    public function sendSignal(Request $request)
+    {
+        $request->validate([
+            'target_id' => 'required|integer|exists:users,id',
+            'type' => 'required|string|in:ScreenAccepted,ScreenRejected,Offer,Answer,IceCandidate,ScreenStopped,CloseSession,Log',
+            'payload' => 'nullable|array',
+        ]);
+
+        $actor = $request->user();
+        $target = User::findOrFail((int) $request->input('target_id'));
+        $payload = $request->input('payload', []);
+
+        $signal = [
+            'signal_id' => $payload['signal_id'] ?? (string) Str::uuid(),
+            'type' => $request->input('type'),
+            'fromId' => $actor->id,
+            'fromName' => $actor->name,
+            'payload' => $payload,
+            'created_at' => now()->toIso8601String(),
+        ];
+
+        $key = $this->signalQueueCacheKey($target->id);
+        $queue = Cache::get($key, []);
+        if (!is_array($queue)) {
+            $queue = [];
+        }
+
+        $queue[] = $signal;
+        $queue = array_slice($queue, -100);
+        Cache::put($key, $queue, now()->addMinutes(2));
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Retrieve and clear queued signaling messages for polling fallback.
+     */
+    public function pendingSignals(Request $request)
+    {
+        $userId = (int) $request->user()->id;
+        $key = $this->signalQueueCacheKey($userId);
+        $signals = Cache::pull($key, []);
+
+        return response()->json([
+            'signals' => is_array($signals) ? $signals : [],
+        ]);
     }
 }

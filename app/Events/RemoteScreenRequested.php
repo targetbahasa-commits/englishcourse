@@ -14,14 +14,18 @@ class RemoteScreenRequested implements ShouldBroadcastNow
 
     public int $fromId;
     public string $fromName;
+    public ?string $targetPath;
+    public ?string $targetTitle;
 
     protected int $targetId;
 
-    public function __construct(int $targetId, int $fromId, string $fromName)
+    public function __construct(int $targetId, int $fromId, string $fromName, ?string $targetPath = null, ?string $targetTitle = null)
     {
         $this->targetId = $targetId;
         $this->fromId = $fromId;
         $this->fromName = $fromName;
+        $this->targetPath = $targetPath;
+        $this->targetTitle = $targetTitle;
     }
 
     public function broadcastOn(): array

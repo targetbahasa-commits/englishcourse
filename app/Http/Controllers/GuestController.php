@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class GuestController extends Controller
 {
@@ -109,23 +109,29 @@ class GuestController extends Controller
 
     public function myEnglish()
     {
-        $user = auth()->user();
-        
-        // Ensure only guests access this (optional extra layer of protection)
-        if ($user->role !== 'guest') {
+        $user = Auth::user();
+
+        if ($user && $user->role !== 'guest') {
             return redirect()->route('dashboard');
         }
 
-        // Fetch user's test history
-        $latestTest = \App\Models\FreeTestResult::where('user_id', $user->id)
-                                                  ->orderByDesc('created_at')
-                                                  ->first();
+        $viewerNeedsLogin = !$user;
 
-        $history = \App\Models\FreeTestResult::where('user_id', $user->id)
-                                               ->orderByDesc('created_at')
-                                               ->get();
+        $latestTest = null;
+        $history = collect();
+        $hasData = false;
 
-        $hasData = $latestTest ? true : false;
+        if ($user) {
+            $latestTest = \App\Models\FreeTestResult::where('user_id', $user->id)
+                ->orderByDesc('created_at')
+                ->first();
+
+            $history = \App\Models\FreeTestResult::where('user_id', $user->id)
+                ->orderByDesc('created_at')
+                ->get();
+
+            $hasData = (bool) $latestTest;
+        }
         
         // Defaults
         $cefrLevel = 'Belum Ada Data';
@@ -228,7 +234,7 @@ class GuestController extends Controller
 
         return view('guest.my-english', compact(
             'hasData', 'latestTest', 'history', 'cefrLevel', 'cefrDescription', 
-            'estimatedIelts', 'estimatedToefl', 'nextSteps', 'recommendedProgram', 'radarData'
+            'estimatedIelts', 'estimatedToefl', 'nextSteps', 'recommendedProgram', 'radarData', 'viewerNeedsLogin'
         ));
     }
 }

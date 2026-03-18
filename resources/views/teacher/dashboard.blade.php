@@ -25,6 +25,7 @@
                         <h1 class="text-xl font-bold text-gray-800">Target Bahasa - Teacher</h1>
                     </div>
                     <div class="flex items-center gap-4">
+                        @include('components.topbar-action-icons')
                         <span class="text-gray-700 font-medium">{{ Auth::user()->name }}</span>
                         <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
                             {{ substr(Auth::user()->name, 0, 1) }}
@@ -88,6 +89,11 @@
                                         </span>
                                     </div>
                                     <div class="flex gap-3">
+                                        <select x-model="quickTask" class="form-control rounded-lg text-sm border-gray-200">
+                                            <option value="1">Task 1</option>
+                                            <option value="2">Task 2</option>
+                                        </select>
+                                        <input type="number" x-model="quickMeetingId" min="1" placeholder="Meeting ID" class="form-control rounded-lg text-sm border-gray-200 w-28">
                                         <input type="text" x-model="search" placeholder="Search student..." class="form-control rounded-lg text-sm border-gray-200">
                                     </div>
                                 </div>
@@ -127,6 +133,9 @@
                                                                     View Screen
                                                                 </div>
                                                             </a>
+                                                            <a :href="buildRemoteViewUrl(student.id, true)" target="_blank" :class="hasQuickWritingTarget() ? 'text-emerald-700 bg-emerald-100 hover:bg-emerald-200' : 'text-gray-500 bg-gray-100 hover:bg-gray-200'" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition inline-block">
+                                                                Request Writing Now
+                                                            </a>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -150,6 +159,8 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('monitoringDashboard', () => ({
                 search: '',
+                quickTask: '2',
+                quickMeetingId: '',
                 students: {},
                 
                 init() {
@@ -196,6 +207,29 @@
                         return s.name.toLowerCase().includes(this.search.toLowerCase()) || 
                                s.title.toLowerCase().includes(this.search.toLowerCase());
                     }).sort((a,b) => b.timestamp - a.timestamp);
+                },
+
+                hasQuickWritingTarget() {
+                    const meeting = parseInt(this.quickMeetingId, 10);
+                    const task = parseInt(this.quickTask, 10);
+                    return Number.isInteger(meeting) && meeting > 0 && (task === 1 || task === 2);
+                },
+
+                buildRemoteViewUrl(studentId, autoRequest = false) {
+                    if (!this.hasQuickWritingTarget()) {
+                        return `/teacher/remote-view/${studentId}`;
+                    }
+
+                    const query = new URLSearchParams({
+                        task: String(this.quickTask),
+                        meeting: String(parseInt(this.quickMeetingId, 10)),
+                    });
+
+                    if (autoRequest) {
+                        query.set('auto_request', '1');
+                    }
+
+                    return `/teacher/remote-view/${studentId}?${query.toString()}`;
                 },
 
                 formatTime(date) {

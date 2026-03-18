@@ -38,6 +38,21 @@
         <div class="flex items-center gap-4">
             <!-- Controls -->
             <div class="flex items-center gap-3 bg-gray-700/50 p-1.5 rounded-lg border border-gray-600">
+                <div class="flex items-center gap-2 px-2">
+                    <label class="text-xs text-gray-300">Task</label>
+                    <select x-model="writingTask" class="h-9 rounded-md border border-gray-600 bg-gray-800 text-xs text-gray-100 px-2 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+                        <option value="1">Task 1</option>
+                        <option value="2">Task 2</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2 px-2">
+                    <label class="text-xs text-gray-300">Meeting</label>
+                    <input type="number" min="1" x-model="writingMeetingId" placeholder="33" class="h-9 w-20 rounded-md border border-gray-600 bg-gray-800 text-xs text-gray-100 px-2 focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+                </div>
+                <button type="button" @click="openLiveDraftMonitor()" :disabled="!canBuildWritingTarget()" :class="{'opacity-40 cursor-not-allowed': !canBuildWritingTarget()}" class="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-md shadow-sm transition">
+                    Open Live Draft
+                </button>
+                <div class="h-6 w-px bg-gray-600 mx-1"></div>
                 <button type="button" @click="toggleMic()" :class="micActive ? 'bg-indigo-600 hover:bg-indigo-500 shadow-[0_0_15px_rgba(79,70,229,0.5)]' : 'bg-gray-600 hover:bg-gray-500'" class="px-4 py-2 text-white text-sm font-semibold rounded-md shadow-sm transition flex items-center gap-2">
                     <svg x-show="!micActive" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
                     <svg x-show="micActive" class="w-4 h-4 animate-pulse text-red-300" style="display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
@@ -121,16 +136,27 @@
     </main>
 
     <script>
+        @php
+            $liveDraftRouteTemplate = auth()->user()->role === 'admin'
+                ? route('admin.live-draft.ielts-writing', ['user' => $user->id, 'task' => '__TASK__', 'meetingId' => '__MEETING__'])
+                : route('teacher.live-draft.ielts-writing', ['user' => $user->id, 'task' => '__TASK__', 'meetingId' => '__MEETING__']);
+        @endphp
+
         document.addEventListener('alpine:init', () => {
             Alpine.data('remoteView', () => ({
                 status: 'awaiting', // awaiting, requesting, accepted, rejected, live, stopped
                 targetName: '{!! addslashes($user->name) !!}',
                 targetId: {{ $user->id }},
+                writingTask: '2',
+                writingMeetingId: '',
                 echoChannel: null,
                 peerConnection: null,
                 localStream: null,
                 micActive: false,
                 noTrackTimer: null,
+                rejectionReason: '',
+                signalPollingTimer: null,
+                processedSignalIds: new Set(),
                 config: {
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
@@ -160,7 +186,7 @@
                         'requesting': `Waiting for ${this.targetName} to accept the prompt and choose a screen to share.`,
                         'accepted': `${this.targetName} accepted. Initializing WebRTC handshake...`,
                         'live': `Viewing ${this.targetName}'s screen in real-time.`,
-                        'rejected': `${this.targetName} dismissed or denied the screen share request.`,
+                        'rejected': this.rejectionReason || `${this.targetName} dismissed or denied the screen share request.`,
                         'stopped': `${this.targetName} stopped sharing their screen.`
                     };
                     return map[this.status] || '';
@@ -168,77 +194,301 @@
 
                 iceCandidateQueue: [],
 
+                createSignalId() {
+                    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+                        return window.crypto.randomUUID();
+                    }
+
+                    return `signal-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+                },
+
+                serializeDescription(description) {
+                    if (!description) {
+                        return null;
+                    }
+
+                    return {
+                        type: description.type,
+                        sdp: description.sdp,
+                    };
+                },
+
+                normalizeDescription(description) {
+                    if (!description) {
+                        return null;
+                    }
+
+                    if (typeof description === 'string') {
+                        try {
+                            return JSON.parse(description);
+                        } catch (_) {
+                            return null;
+                        }
+                    }
+
+                    if (description.type && description.sdp) {
+                        return {
+                            type: description.type,
+                            sdp: description.sdp,
+                        };
+                    }
+
+                    return null;
+                },
+
+                serializeCandidate(candidate) {
+                    if (!candidate) {
+                        return null;
+                    }
+
+                    return {
+                        candidate: candidate.candidate,
+                        sdpMid: candidate.sdpMid,
+                        sdpMLineIndex: candidate.sdpMLineIndex,
+                        usernameFragment: candidate.usernameFragment ?? null,
+                    };
+                },
+
+                normalizeCandidate(candidate) {
+                    if (!candidate) {
+                        return null;
+                    }
+
+                    if (typeof candidate === 'string') {
+                        try {
+                            return JSON.parse(candidate);
+                        } catch (_) {
+                            return null;
+                        }
+                    }
+
+                    if (candidate.candidate) {
+                        return candidate;
+                    }
+
+                    return null;
+                },
+
+                shouldProcessSignal(signalId) {
+                    if (!signalId) {
+                        return true;
+                    }
+
+                    if (this.processedSignalIds.has(signalId)) {
+                        return false;
+                    }
+
+                    this.processedSignalIds.add(signalId);
+                    if (this.processedSignalIds.size > 300) {
+                        const firstValue = this.processedSignalIds.values().next().value;
+                        if (firstValue) {
+                            this.processedSignalIds.delete(firstValue);
+                        }
+                    }
+
+                    return true;
+                },
+
+                sendSignalFallback(type, payload = {}) {
+                    const signalId = payload.signal_id || this.createSignalId();
+                    const fullPayload = { ...payload, signal_id: signalId };
+
+                    window.axios.post('{{ route('remote-view.signal') }}', {
+                        target_id: this.targetId,
+                        type,
+                        payload: fullPayload,
+                    }).catch(() => {});
+
+                    return fullPayload;
+                },
+
+                whisperAndSignal(type, payload = {}) {
+                    const fullPayload = this.sendSignalFallback(type, payload);
+                    if (this.echoChannel) {
+                        this.echoChannel.whisper(type, fullPayload);
+                    }
+                    return fullPayload;
+                },
+
+                handleAccepted(e = {}) {
+                    if (!this.shouldProcessSignal(e.signal_id)) {
+                        return;
+                    }
+                    this.rejectionReason = '';
+                    this.status = 'accepted';
+                },
+
+                handleRejected(e = {}) {
+                    if (!this.shouldProcessSignal(e.signal_id)) {
+                        return;
+                    }
+                    this.rejectionReason = e.reason || '';
+                    this.status = 'rejected';
+                },
+
+                handleStopped() {
+                    this.status = 'stopped';
+                    if(this.peerConnection) {
+                        this.peerConnection.close();
+                        this.peerConnection = null;
+                    }
+                    const videoEl = document.getElementById('remoteVideo');
+                    if(videoEl) videoEl.srcObject = null;
+                },
+
+                handleOffer(e = {}) {
+                    if (!this.shouldProcessSignal(e.signal_id)) {
+                        return;
+                    }
+
+                    const offer = this.normalizeDescription(e.offer);
+                    if (!offer) {
+                        alert('Offer handling error: Invalid SDP payload.');
+                        return;
+                    }
+
+                    this.status = 'live';
+                    if (this.noTrackTimer) {
+                        clearTimeout(this.noTrackTimer);
+                    }
+                    this.noTrackTimer = setTimeout(() => {
+                        const videoEl = document.getElementById('remoteVideo');
+                        const hasTrack = !!(videoEl && videoEl.srcObject && videoEl.srcObject.getVideoTracks && videoEl.srcObject.getVideoTracks().length > 0);
+                        if (!hasTrack) {
+                            this.status = 'requesting';
+                            alert('Request accepted, but no screen track was received. Ask the teacher to retry and ensure screen sharing is allowed in the browser.');
+                        }
+                    }, 7000);
+
+                    if (!this.peerConnection) {
+                         this.setupPeerConnection();
+                    }
+                    this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
+                        .then(() => this.peerConnection.createAnswer())
+                        .then(answer => this.peerConnection.setLocalDescription(answer))
+                        .then(() => {
+                            this.whisperAndSignal('Answer', {
+                                answer: this.serializeDescription(this.peerConnection.localDescription),
+                                target: this.targetId
+                            });
+                            while(this.iceCandidateQueue.length > 0) {
+                                let c = this.iceCandidateQueue.shift();
+                                this.peerConnection.addIceCandidate(new RTCIceCandidate(c)).catch(console.error);
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Error handling offer: ", err);
+                            alert("Offer handling error: " + err.message);
+                        });
+                },
+
+                handleIceCandidate(e = {}) {
+                    if (!this.shouldProcessSignal(e.signal_id)) {
+                        return;
+                    }
+
+                    const candidate = this.normalizeCandidate(e.candidate);
+                    if (!candidate) {
+                        return;
+                    }
+
+                    if (this.peerConnection) {
+                        if (this.peerConnection.remoteDescription && this.peerConnection.remoteDescription.type) {
+                            this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
+                        } else {
+                            this.iceCandidateQueue.push(candidate);
+                        }
+                    }
+                },
+
+                handleLog(e = {}) {
+                    console.log("Remote Log:", e.message);
+                    if(e.isError) {
+                        alert("Student Side Error: " + e.message);
+                        this.status = 'awaiting';
+                    }
+                },
+
+                pollPendingSignals() {
+                    window.axios.get('{{ route('remote-view.pending-signals') }}')
+                        .then((res) => {
+                            const signals = Array.isArray(res.data?.signals) ? res.data.signals : [];
+                            signals.forEach((signal) => {
+                                const payload = signal.payload || {};
+                                const eventPayload = { ...payload, fromId: signal.fromId, fromName: signal.fromName };
+                                if (signal.type === 'ScreenAccepted') this.handleAccepted(eventPayload);
+                                if (signal.type === 'ScreenRejected') this.handleRejected(eventPayload);
+                                if (signal.type === 'ScreenStopped') this.handleStopped();
+                                if (signal.type === 'Offer') this.handleOffer(eventPayload);
+                                if (signal.type === 'IceCandidate') this.handleIceCandidate(eventPayload);
+                                if (signal.type === 'Log') this.handleLog(eventPayload);
+                            });
+                        })
+                        .catch(() => {});
+                },
+
+                canBuildWritingTarget() {
+                    const meeting = parseInt(this.writingMeetingId, 10);
+                    const task = parseInt(this.writingTask, 10);
+                    return Number.isInteger(meeting) && meeting > 0 && (task === 1 || task === 2);
+                },
+
+                buildWritingTarget() {
+                    if (!this.canBuildWritingTarget()) {
+                        return null;
+                    }
+
+                    const task = parseInt(this.writingTask, 10);
+                    const meeting = parseInt(this.writingMeetingId, 10);
+                    return {
+                        path: `/assignments/ielts-academic/writing/${task}/meeting/${meeting}`,
+                        title: `IELTS Writing Task ${task} - Meeting ${meeting}`,
+                        monitorUrl: @json($liveDraftRouteTemplate)
+                            .replace('__TASK__', String(task))
+                            .replace('__MEETING__', String(meeting)),
+                    };
+                },
+
+                openLiveDraftMonitor() {
+                    const target = this.buildWritingTarget();
+                    if (!target) {
+                        alert('Isi Task dan Meeting dulu.');
+                        return;
+                    }
+
+                    window.open(target.monitorUrl, '_blank', 'noopener');
+                },
+
                 init() {
+                    const query = new URLSearchParams(window.location.search);
+                    const queryTask = query.get('task');
+                    const queryMeeting = query.get('meeting');
+                    const autoRequest = query.get('auto_request') === '1';
+
+                    if (queryTask === '1' || queryTask === '2') {
+                        this.writingTask = queryTask;
+                    }
+
+                    if (queryMeeting && /^\d+$/.test(queryMeeting)) {
+                        this.writingMeetingId = queryMeeting;
+                    }
+
                     if (typeof window.Echo !== 'undefined') {
                         this.echoChannel = window.Echo.private('remote-view.' + this.targetId);
                         
-                        this.echoChannel.listenForWhisper('ScreenAccepted', (e) => {
-                            this.status = 'accepted';
-                        })
-                        .listenForWhisper('ScreenRejected', (e) => {
-                            this.status = 'rejected';
-                        })
-                        .listenForWhisper('ScreenStopped', (e) => {
-                            this.status = 'stopped';
-                            if(this.peerConnection) {
-                                this.peerConnection.close();
-                                this.peerConnection = null;
-                            }
-                            const videoEl = document.getElementById('remoteVideo');
-                            if(videoEl) videoEl.srcObject = null;
-                        })
-                        .listenForWhisper('Offer', (e) => {
-                            this.status = 'live';
-                            if (this.noTrackTimer) {
-                                clearTimeout(this.noTrackTimer);
-                            }
-                            this.noTrackTimer = setTimeout(() => {
-                                const videoEl = document.getElementById('remoteVideo');
-                                const hasTrack = !!(videoEl && videoEl.srcObject && videoEl.srcObject.getVideoTracks && videoEl.srcObject.getVideoTracks().length > 0);
-                                if (!hasTrack) {
-                                    this.status = 'requesting';
-                                    alert('Request accepted, but no screen track was received. Ask the teacher to retry and ensure screen sharing is allowed in the browser.');
-                                }
-                            }, 7000);
+                        this.echoChannel.listenForWhisper('ScreenAccepted', (e) => this.handleAccepted(e))
+                        .listenForWhisper('ScreenRejected', (e) => this.handleRejected(e))
+                        .listenForWhisper('ScreenStopped', () => this.handleStopped())
+                        .listenForWhisper('Offer', (e) => this.handleOffer(e))
+                        .listenForWhisper('IceCandidate', (e) => this.handleIceCandidate(e))
+                        .listenForWhisper('Log', (e) => this.handleLog(e));
 
-                            if (!this.peerConnection) {
-                                 this.setupPeerConnection();
-                            }
-                            this.peerConnection.setRemoteDescription(new RTCSessionDescription(e.offer))
-                                .then(() => this.peerConnection.createAnswer())
-                                .then(answer => this.peerConnection.setLocalDescription(answer))
-                                .then(() => {
-                                    this.echoChannel.whisper('Answer', {
-                                        answer: this.peerConnection.localDescription,
-                                        target: this.targetId
-                                    });
-                                    // Process any queued ICE candidates
-                                    while(this.iceCandidateQueue.length > 0) {
-                                        let c = this.iceCandidateQueue.shift();
-                                        this.peerConnection.addIceCandidate(new RTCIceCandidate(c)).catch(console.error);
-                                    }
-                                })
-                                .catch(err => {
-                                    console.error("Error handling offer: ", err);
-                                    alert("Offer handling error: " + err.message);
-                                });
-                        })
-                        .listenForWhisper('IceCandidate', (e) => {
-                            if (this.peerConnection) {
-                                if (this.peerConnection.remoteDescription && this.peerConnection.remoteDescription.type) {
-                                    this.peerConnection.addIceCandidate(new RTCIceCandidate(e.candidate)).catch(console.error);
-                                } else {
-                                    this.iceCandidateQueue.push(e.candidate);
-                                }
-                            }
-                        })
-                        .listenForWhisper('Log', (e) => {
-                            console.log("Remote Log:", e.message);
-                            if(e.isError) {
-                                alert("Student Side Error: " + e.message);
-                                this.status = 'awaiting';
-                            }
-                        });
+                        this.pollPendingSignals();
+                        this.signalPollingTimer = setInterval(() => this.pollPendingSignals(), 1200);
+
+                        if (autoRequest) {
+                            setTimeout(() => this.requestScreen(), 350);
+                        }
                     } else {
                         console.error('Laravel Echo is not defined.');
                     }
@@ -246,14 +496,28 @@
 
                 requestScreen() {
                     if(!this.echoChannel) return;
+                    this.rejectionReason = '';
                     this.status = 'requesting';
-                    window.axios.post('{{ route('remote-view.request-screen') }}', {
+
+                    const writingTarget = this.buildWritingTarget();
+                    const payload = {
                         target_id: this.targetId,
+                    };
+
+                    if (writingTarget) {
+                        payload.target_path = writingTarget.path;
+                        payload.target_title = writingTarget.title;
+                    }
+
+                    window.axios.post('{{ route('remote-view.request-screen') }}', {
+                        ...payload,
                     }).catch(() => {
                         // Fallback to whisper in case broadcast endpoint fails.
                         this.echoChannel.whisper('RequestScreen', {
                             fromId: {{ auth()->id() }},
-                            fromName: '{!! addslashes(auth()->user()->name) !!}'
+                            fromName: '{!! addslashes(auth()->user()->name) !!}',
+                            target_path: payload.target_path || null,
+                            target_title: payload.target_title || null,
                         });
                     });
                 },
@@ -263,8 +527,8 @@
                     
                     this.peerConnection.onicecandidate = event => {
                         if (event.candidate) {
-                            this.echoChannel.whisper('IceCandidate', {
-                                candidate: event.candidate,
+                            this.whisperAndSignal('IceCandidate', {
+                                candidate: this.serializeCandidate(event.candidate),
                                 target: this.targetId
                             });
                         }
@@ -305,8 +569,8 @@
                                     this.peerConnection.createOffer()
                                         .then(offer => this.peerConnection.setLocalDescription(offer))
                                         .then(() => {
-                                            this.echoChannel.whisper('Offer', {
-                                                offer: this.peerConnection.localDescription,
+                                            this.whisperAndSignal('Offer', {
+                                                offer: this.serializeDescription(this.peerConnection.localDescription),
                                                 target: this.targetId
                                             });
                                         })
@@ -322,13 +586,16 @@
 
                 closeSession() {
                     if(this.echoChannel) {
-                        this.echoChannel.whisper('CloseSession', { target: this.targetId });
+                        this.whisperAndSignal('CloseSession', { target: this.targetId });
                     }
                     if(this.localStream) {
                         this.localStream.getTracks().forEach(track => track.stop());
                     }
                     if(this.peerConnection) {
                         this.peerConnection.close();
+                    }
+                    if (this.signalPollingTimer) {
+                        clearInterval(this.signalPollingTimer);
                     }
                     window.close();
                 }

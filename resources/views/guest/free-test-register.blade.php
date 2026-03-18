@@ -24,6 +24,7 @@
             
             <form class="space-y-6 relative z-10" action="{{ route('free-test.register.submit', $type) }}" method="POST">
                 @csrf
+                <x-marketing-attribution />
                 
                 @if ($errors->any())
                     <div class="bg-red-50 text-red-600 rounded-xl p-4 text-sm font-medium border border-red-100">

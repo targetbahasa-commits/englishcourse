@@ -5,13 +5,18 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\DirectMessage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Notifications\DatabaseNotification;
 
 class InboxController extends Controller
 {
     public function index()
     {
         $user = Auth::user();
-        $notifications = collect();
+        $notifications = DatabaseNotification::query()
+            ->where('notifiable_type', get_class($user))
+            ->where('notifiable_id', $user->id)
+            ->latest()
+            ->get();
         $inboxMessages = collect();
         $sentMessages = collect();
 
@@ -28,9 +33,7 @@ class InboxController extends Controller
                 ->latest()
                 ->get();
         } else {
-            // Students and Teachers see broadcasts (notifications), replies from admin, and messages they sent
-            $notifications = $user->notifications;
-            
+            // Students and Teachers see broadcasts, replies from admin, and messages they sent.
             $inboxMessages = DirectMessage::with('sender')
                 ->where('receiver_id', $user->id)
                 ->latest()
@@ -76,7 +79,10 @@ class InboxController extends Controller
         $type = $request->input('type');
 
         if ($type === 'notification') {
-            $notification = Auth::user()->notifications()->find($id);
+            $notification = DatabaseNotification::query()
+                ->where('notifiable_type', get_class(Auth::user()))
+                ->where('notifiable_id', Auth::id())
+                ->find($id);
             if ($notification) {
                 $notification->markAsRead();
             }

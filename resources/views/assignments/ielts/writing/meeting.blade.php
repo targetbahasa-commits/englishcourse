@@ -1097,4 +1097,115 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+@if(auth()->check() && in_array(auth()->user()->role, ['student', 'guest']))
+@php
+    $crdtRoomId = 'ielts-writing:' . $meeting->id . ':task:' . (int) $task . ':user:' . auth()->id();
+@endphp
+<script type="module">
+    import * as Y from 'https://esm.sh/yjs@13.6.18';
+    import { WebsocketProvider } from 'https://esm.sh/y-websocket@1.5.3';
+
+    const wsUrl = @json(env('CRDT_WS_URL', 'wss://demos.yjs.dev'));
+    const roomId = @json($crdtRoomId);
+
+    const statusPill = document.createElement('div');
+    statusPill.id = 'crdtWriterStatus';
+    statusPill.className = 'fixed bottom-6 left-6 z-[85] text-xs font-semibold px-3 py-2 rounded-full bg-amber-100 text-amber-700 shadow';
+    statusPill.textContent = 'CRDT: connecting...';
+    document.body.appendChild(statusPill);
+
+    const setStatus = (text, css) => {
+        statusPill.textContent = text;
+        statusPill.className = `fixed bottom-6 left-6 z-[85] text-xs font-semibold px-3 py-2 rounded-full shadow ${css}`;
+    };
+
+    const waitForEssayTextarea = () => {
+        const found = document.querySelector('textarea[x-model="essay"]');
+        if (found) {
+            return Promise.resolve(found);
+        }
+
+        return new Promise((resolve) => {
+            const timer = setInterval(() => {
+                const el = document.querySelector('textarea[x-model="essay"]');
+                if (el) {
+                    clearInterval(timer);
+                    resolve(el);
+                }
+            }, 100);
+        });
+    };
+
+    const doc = new Y.Doc();
+    const provider = new WebsocketProvider(wsUrl, roomId, doc, { connect: true });
+    const yEssay = doc.getText('essay');
+
+    provider.on('status', (event) => {
+        if (event.status === 'connected') {
+            setStatus('CRDT: live sync on', 'bg-emerald-100 text-emerald-700');
+        } else {
+            setStatus('CRDT: reconnecting...', 'bg-amber-100 text-amber-700');
+        }
+    });
+
+    const textarea = await waitForEssayTextarea();
+    let applyingRemote = false;
+    let applyTimer = null;
+    let pushTimer = null;
+
+    const syncTextareaFromY = () => {
+        const nextValue = yEssay.toString();
+        if (textarea.value === nextValue) {
+            return;
+        }
+
+        applyingRemote = true;
+        textarea.value = nextValue;
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        applyingRemote = false;
+    };
+
+    const pushTextareaToY = () => {
+        if (applyingRemote) {
+            return;
+        }
+
+        const current = yEssay.toString();
+        const next = textarea.value || '';
+        if (current === next) {
+            return;
+        }
+
+        doc.transact(() => {
+            yEssay.delete(0, yEssay.length);
+            yEssay.insert(0, next);
+        }, 'local-essay-input');
+    };
+
+    yEssay.observe(() => {
+        clearTimeout(applyTimer);
+        applyTimer = setTimeout(syncTextareaFromY, 40);
+    });
+
+    textarea.addEventListener('input', () => {
+        clearTimeout(pushTimer);
+        pushTimer = setTimeout(pushTextareaToY, 120);
+    });
+
+    // Seed initial value once when the shared doc is empty.
+    setTimeout(() => {
+        if (yEssay.length === 0 && textarea.value && textarea.value.trim().length > 0) {
+            pushTextareaToY();
+        } else {
+            syncTextareaFromY();
+        }
+    }, 300);
+
+    window.addEventListener('beforeunload', () => {
+        provider.destroy();
+        doc.destroy();
+    });
+</script>
+@endif
+
 @endsection

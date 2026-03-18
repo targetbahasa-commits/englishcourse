@@ -135,7 +135,7 @@
         <div class="p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-4">Create New Class Period</h2>
             
-            <form method="POST" action="{{ route('class-periods.store') }}" class="space-y-4">
+            <form method="POST" action="{{ route('class-periods.store') }}" class="space-y-4" x-data="classPeriodDateForm()">
                 @csrf
                 
                 <div>
@@ -148,20 +148,23 @@
                     <p class="text-xs text-gray-500 mt-1">Select the curriculum program for this batch.</p>
                 </div>
 
-                <div>
-                    <x-input-label for="name" value="Period Name" />
-                    <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" placeholder="e.g. September 2024 Batch" required />
-                </div>
-                
+                <input type="hidden" name="batch_type" value="regular">
+
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <x-input-label for="start_date" value="Start Date" />
-                        <x-text-input id="start_date" name="start_date" type="date" class="mt-1 block w-full" />
+                        <x-text-input id="start_date" name="start_date" type="date" class="mt-1 block w-full" x-model="startDate" @change="syncName" required />
                     </div>
                     <div>
                         <x-input-label for="end_date" value="End Date" />
-                        <x-text-input id="end_date" name="end_date" type="date" class="mt-1 block w-full" />
+                        <x-text-input id="end_date" name="end_date" type="date" class="mt-1 block w-full" x-model="endDate" @change="syncName" required />
                     </div>
+                </div>
+
+                <div>
+                    <x-input-label for="name" value="Period Name (Auto)" />
+                    <x-text-input id="name" name="name" type="text" class="mt-1 block w-full bg-gray-50" x-model="periodName" readonly required />
+                    <p class="text-xs text-gray-500 mt-1">Nama batch dibuat otomatis berdasarkan tanggal periode.</p>
                 </div>
                 
                  <div>
@@ -200,4 +203,33 @@
             </form>
         </div>
     </x-modal>
+
+    <script>
+        function classPeriodDateForm() {
+            return {
+                startDate: '',
+                endDate: '',
+                periodName: '',
+                syncName() {
+                    if (!this.startDate || !this.endDate) {
+                        this.periodName = '';
+                        return;
+                    }
+
+                    const start = new Date(this.startDate + 'T00:00:00');
+                    const end = new Date(this.endDate + 'T00:00:00');
+
+                    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+                        this.periodName = '';
+                        return;
+                    }
+
+                    const locale = 'id-ID';
+                    const startLabel = start.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
+                    const endLabel = end.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
+                    this.periodName = `Batch ${startLabel} - ${endLabel}`;
+                }
+            };
+        }
+    </script>
 @endsection

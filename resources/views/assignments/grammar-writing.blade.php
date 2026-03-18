@@ -34,13 +34,7 @@
                 </div>
                 
                 <div class="flex items-center gap-6">
-                    <button class="relative p-2 bg-white rounded-full shadow-sm hover:bg-gray-50">
-                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-                    </button>
-                    <button class="relative p-2 bg-white rounded-full shadow-sm hover:bg-gray-50">
-                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                        <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
-                    </button>
+                    @include('components.topbar-action-icons')
                     
                     <div class="flex items-center gap-3">
                         <div class="text-right hidden md:block">
@@ -54,21 +48,101 @@
                 </div>
             </div>
 
+            @if(session('success'))
+                @php
+                    $successState = session('success_state');
+                    $successClass = 'border-green-200 bg-green-50 text-green-800';
+                    $successTitle = 'Meeting Opened';
+                    if ($successState === 'locked') {
+                        $successClass = 'border-red-200 bg-red-50 text-red-800';
+                        $successTitle = 'Meeting Locked';
+                    } elseif ($successState === 'batch') {
+                        $successClass = 'border-blue-200 bg-blue-50 text-blue-800';
+                        $successTitle = 'Batch Updated';
+                    }
+                @endphp
+                <div id="success-flash" class="mb-6 rounded-xl border px-4 py-3 text-sm font-medium shadow-sm transition-opacity duration-500 {{ $successClass }}">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                        <span class="mt-0.5">
+                            @if($successState === 'locked')
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            @elseif($successState === 'batch')
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            @else
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            @endif
+                        </span>
+                        <div>
+                            <p class="font-bold text-xs uppercase tracking-wide">{{ $successTitle }}</p>
+                            <p>{{ session('success') }}</p>
+                        </div>
+                    </div>
+                        <button type="button" id="success-flash-close" class="opacity-70 hover:opacity-100 transition" aria-label="Close success message">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div id="error-flash" class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-800 text-sm font-medium shadow-sm transition-opacity duration-500">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                            <span class="mt-0.5">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </span>
+                            <div>
+                                <p class="font-bold text-xs uppercase tracking-wide">Action Failed</p>
+                                <p>{{ session('error') }}</p>
+                            </div>
+                        </div>
+                        <button type="button" id="error-flash-close" class="opacity-70 hover:opacity-100 transition" aria-label="Close error message">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            @endif
+
             <!-- Header & Period -->
             <div class="flex justify-between items-center mb-8">
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">Grammar for Writing</h2>
                     <p class="text-gray-500 text-sm">Manage meetings and class period.</p>
+                    <p class="text-xs mt-2">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-100">
+                            Active Batch: {{ $selectedClassPeriod->name ?? ($program->period ?: 'Not selected') }}
+                        </span>
+                    </p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <form action="{{ route('assignments.grammar-writing.period') }}" method="POST" class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
-                        @csrf
-                        <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                        <input type="text" name="period" value="{{ $program->period }}" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-blue-500" placeholder="e.g. September 2024">
-                        <button type="submit" class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        </button>
-                    </form>
+                    @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                        <form action="{{ route('assignments.grammar-writing.period') }}" method="POST" class="js-submit-guard flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
+                            @csrf
+                            <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
+                            <select name="period" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 min-w-[220px]">
+                                @if($program->classPeriods->isEmpty())
+                                    <option value="{{ $program->period }}" selected>{{ $program->period ?: 'No batch available' }}</option>
+                                @else
+                                    @foreach($program->classPeriods->sortByDesc('start_date') as $classPeriod)
+                                        <option value="{{ $classPeriod->name }}" {{ $program->period === $classPeriod->name ? 'selected' : '' }}>
+                                            {{ $classPeriod->name }}
+                                        </option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <button type="submit" class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition" title="Apply batch" data-loading-label="Applying">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            </button>
+                        </form>
+                    @else
+                        <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
+                            <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
+                            <span class="px-3 py-2 bg-gray-50 rounded-lg text-sm text-gray-700 min-w-[220px]">
+                                {{ $selectedClassPeriod->name ?? ($program->period ?: 'Not selected') }}
+                            </span>
+                        </div>
+                    @endif
                     
                     <a href="{{ route('assignments.index') }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
@@ -86,9 +160,12 @@
                             {{ $meeting->is_locked ? 'LOCKED' : 'OPEN' }}
                         </span>
                         @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
-                        <form action="{{ route('assignments.meeting.toggle-lock', $meeting) }}" method="POST">
+                        <form action="{{ route('assignments.meeting.toggle-lock', $meeting) }}" method="POST" class="js-submit-guard">
                             @csrf
-                            <button type="submit" class="text-gray-400 hover:text-gray-600 transition" title="Toggle Lock">
+                            @if(!empty($selectedClassPeriod))
+                                <input type="hidden" name="class_period_id" value="{{ $selectedClassPeriod->id }}">
+                            @endif
+                            <button type="submit" class="text-gray-400 hover:text-gray-600 transition" title="Toggle Lock" data-loading-label="Saving">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     @if($meeting->is_locked)
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
@@ -166,22 +243,12 @@
                     </p>
                     
                     @if(!$meeting->is_locked)
-                        @if($meeting->meeting_number == 1)
-                            <a href="{{ route('assignments.grammar-writing.meeting1') }}" class="block w-full py-2 bg-blue-600 text-white text-center rounded-xl font-bold hover:bg-blue-700 transition">Start</a>
-                        @elseif($meeting->meeting_number == 2)
-                            <a href="{{ route('assignments.grammar-writing.meeting2') }}" class="block w-full py-2 bg-blue-600 text-white text-center rounded-xl font-bold hover:bg-blue-700 transition">Start</a>
-                        @elseif($meeting->meeting_number == 3)
-                            <a href="{{ route('assignments.grammar-writing.meeting3') }}" class="block w-full py-2 bg-blue-600 text-white text-center rounded-xl font-bold hover:bg-blue-700 transition">Start</a>
-                        @elseif($meeting->meeting_number == 4)
-                            <a href="{{ route('assignments.grammar-writing.meeting4') }}" class="block w-full py-2 bg-blue-600 text-white text-center rounded-xl font-bold hover:bg-blue-700 transition">Start</a>
-                        @elseif($meeting->meeting_number == 5)
-                            <a href="{{ route('assignments.grammar-writing.meeting5') }}" class="block w-full py-2 bg-blue-600 text-white text-center rounded-xl font-bold hover:bg-blue-700 transition">Start</a>
-                        @elseif($meeting->meeting_number == 6)
-                            <a href="{{ route('assignments.grammar-writing.meeting6') }}" class="block w-full py-2 bg-blue-600 text-white text-center rounded-xl font-bold hover:bg-blue-700 transition">Start</a>
-                        @elseif($meeting->meeting_number == 7)
-                            <a href="{{ route('assignments.grammar-writing.meeting7') }}" class="block w-full py-2 bg-blue-600 text-white text-center rounded-xl font-bold hover:bg-blue-700 transition">Start</a>
-                        @elseif($meeting->meeting_number == 8)
-                            <a href="{{ route('assignments.grammar-writing.meeting8') }}" class="block w-full py-2 bg-blue-600 text-white text-center rounded-xl font-bold hover:bg-blue-700 transition">Start</a>
+                        @php
+                            $meetingRouteName = 'assignments.grammar-writing.meeting' . $meeting->meeting_number;
+                            $hasMeetingRoute = \Illuminate\Support\Facades\Route::has($meetingRouteName);
+                        @endphp
+                        @if($hasMeetingRoute)
+                            <a href="{{ route($meetingRouteName) }}" class="js-start-link block w-full py-2 bg-blue-600 text-white text-center rounded-xl font-bold hover:bg-blue-700 transition">Start</a>
                         @else
                             <a href="#" class="block w-full py-2 bg-gray-400 text-white text-center rounded-xl font-bold hover:bg-gray-500 transition cursor-not-allowed">Start</a>
                         @endif
@@ -193,5 +260,64 @@
             </div>
         </main>
     </div>
+
+    <script>
+        (function () {
+            const setupFlash = (flashId, closeId, timeoutMs) => {
+                const flash = document.getElementById(flashId);
+                if (!flash) return;
+
+                const hideFlash = () => {
+                    flash.classList.add('opacity-0');
+                    setTimeout(() => {
+                        flash.remove();
+                    }, 500);
+                };
+
+                const closeButton = document.getElementById(closeId);
+                if (closeButton) {
+                    closeButton.addEventListener('click', hideFlash);
+                }
+
+                setTimeout(hideFlash, timeoutMs);
+            };
+
+            const setupSubmitGuards = () => {
+                document.querySelectorAll('form.js-submit-guard').forEach((form) => {
+                    form.addEventListener('submit', () => {
+                        const button = form.querySelector('button[type="submit"]');
+                        if (!button || button.disabled) return;
+
+                        button.disabled = true;
+                        button.classList.add('opacity-60', 'cursor-not-allowed');
+
+                        const loadingLabel = button.getAttribute('data-loading-label') || 'Saving';
+                        button.setAttribute('aria-busy', 'true');
+                        button.innerHTML = `<span class="inline-flex items-center gap-2 text-xs font-semibold"><svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-opacity="0.25" stroke-width="3"></circle><path d="M22 12a10 10 0 00-10-10" stroke-width="3"></path></svg>${loadingLabel}</span>`;
+                    });
+                });
+            };
+
+            const setupStartLinkGuards = () => {
+                document.querySelectorAll('a.js-start-link').forEach((link) => {
+                    link.addEventListener('click', (event) => {
+                        if (link.dataset.loading === 'true') {
+                            event.preventDefault();
+                            return;
+                        }
+
+                        link.dataset.loading = 'true';
+                        link.classList.add('opacity-70', 'cursor-wait', 'pointer-events-none');
+                        link.innerHTML = '<span class="inline-flex items-center gap-2"><svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-opacity="0.25" stroke-width="3"></circle><path d="M22 12a10 10 0 00-10-10" stroke-width="3"></path></svg>Opening...</span>';
+                    });
+                });
+            };
+
+            setupFlash('success-flash', 'success-flash-close', 4000);
+            setupFlash('error-flash', 'error-flash-close', 6000);
+            setupSubmitGuards();
+            setupStartLinkGuards();
+        })();
+    </script>
 </body>
 </html>

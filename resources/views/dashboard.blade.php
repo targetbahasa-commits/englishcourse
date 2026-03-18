@@ -34,12 +34,7 @@
                 </div>
                 
                 <div class="flex items-center gap-6">
-                    <a href="{{ route('inbox.index') }}" class="relative p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 transition border border-gray-100 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                        @if(Auth::check() && Auth::user()->hasUnreadInbox())
-                            <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
-                        @endif
-                    </a>
+                    @include('components.topbar-action-icons')
                     <div class="flex items-center gap-3">
                         <div class="bg-white border border-gray-100 rounded-xl px-4 py-2 hidden lg:flex items-center gap-3 mr-2 shadow-sm">
                             <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">

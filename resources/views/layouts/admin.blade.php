@@ -29,6 +29,7 @@
     </div>
 
     @yield('modals')
+    @include('components.student-broadcaster')
     @stack('scripts')
 </body>
 </html>

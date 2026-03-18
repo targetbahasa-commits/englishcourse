@@ -1,7 +1,16 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto" x-data="{ tab: 'inbox' }">
+@php
+    $initialTab = request('tab');
+    if (!in_array($initialTab, ['notifications', 'messages', 'sent'], true)) {
+        $initialTab = 'messages';
+    }
+
+    $unreadNotificationCount = $notifications->whereNull('read_at')->count();
+    $unreadMessageCount = $inboxMessages->whereNull('read_at')->count();
+@endphp
+<div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto" x-data="{ tab: @js($initialTab) }">
     <!-- Header -->
     <div class="mb-8 flex justify-between items-end">
         <div>
@@ -24,99 +33,95 @@
     @endif
 
     <!-- Tabs -->
-    <div class="flex space-x-1 border-b border-gray-200 mb-6">
-        <button @click="tab = 'inbox'" :class="{'border-blue-500 text-blue-600': tab === 'inbox', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'inbox'}" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
-            Inbox
-            @php $unreadCount = $user->unreadNotifications->count() + $inboxMessages->whereNull('read_at')->count(); @endphp
-            @if($unreadCount > 0)
-                <span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ $unreadCount }}</span>
+    <div class="flex flex-wrap gap-6 border-b border-gray-200 mb-6">
+        <button @click="tab = 'notifications'" :class="{'border-blue-500 text-blue-600': tab === 'notifications', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'notifications'}" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
+            Notifications
+            @if($unreadNotificationCount > 0)
+                <span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ $unreadNotificationCount }}</span>
             @endif
         </button>
-        <button @click="tab = 'sent'" :class="{'border-blue-500 text-blue-600': tab === 'sent', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'sent'}" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ml-8">
+        <button @click="tab = 'messages'" :class="{'border-blue-500 text-blue-600': tab === 'messages', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'messages'}" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
+            Messages
+            @if($unreadMessageCount > 0)
+                <span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ $unreadMessageCount }}</span>
+            @endif
+        </button>
+        <button @click="tab = 'sent'" :class="{'border-blue-500 text-blue-600': tab === 'sent', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'sent'}" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
             Sent Messages
         </button>
     </div>
 
-    <!-- Inbox List -->
-    <div x-show="tab === 'inbox'" class="space-y-4">
-        @php
-            $allItems = collect();
-            foreach($notifications as $notif) {
-                $allItems->push(['type' => 'notification', 'item' => $notif, 'date' => $notif->created_at]);
-            }
-            foreach($inboxMessages as $msg) {
-                $allItems->push(['type' => 'direct', 'item' => $msg, 'date' => $msg->created_at]);
-            }
-            $sortedItems = $allItems->sortByDesc('date');
-        @endphp
+    <div x-show="tab === 'notifications'" class="space-y-4">
+        @forelse($notifications as $item)
+            <div class="bg-white p-5 rounded-xl shadow-sm border {{ is_null($item->read_at) ? 'border-blue-200 bg-blue-50/30' : 'border-gray-100' }}">
+                <div class="flex justify-between items-start gap-4">
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-900">{{ $item->data['title'] ?? 'Broadcast Announcement' }}</h3>
+                            <p class="text-sm text-gray-600 mt-1 whitespace-pre-wrap">{{ $item->data['content'] ?? '' }}</p>
+                            <div class="mt-2 text-xs text-gray-400 font-medium">From: Administrator • {{ $item->created_at->diffForHumans() }}</div>
+                        </div>
+                    </div>
+                    @if(is_null($item->read_at))
+                        <form action="{{ route('inbox.read', $item->id) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="type" value="notification">
+                            <button type="submit" class="text-xs text-blue-600 hover:underline font-semibold bg-white px-3 py-1.5 rounded-lg border border-blue-200">Mark as Read</button>
+                        </form>
+                    @endif
+                </div>
+            </div>
+        @empty
+            <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
+                <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                <h3 class="text-lg font-medium text-gray-900">No notifications</h3>
+                <p class="text-gray-500 text-sm mt-1">You don't have any broadcast notifications.</p>
+            </div>
+        @endforelse
+    </div>
 
-        @forelse($sortedItems as $row)
-            @php 
-                $type = $row['type'];
-                $item = $row['item']; 
-            @endphp
-            
-            @if($type === 'notification')
-                <div class="bg-white p-5 rounded-xl shadow-sm border {{ is_null($item->read_at) ? 'border-blue-200 bg-blue-50/30' : 'border-gray-100' }}">
-                    <div class="flex justify-between items-start">
-                        <div class="flex gap-4">
-                            <div class="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-gray-900">{{ $item->data['title'] ?? 'Broadcast Announcement' }}</h3>
-                                <p class="text-sm text-gray-600 mt-1 whitespace-pre-wrap">{{ $item->data['content'] ?? '' }}</p>
-                                <div class="mt-2 text-xs text-gray-400 font-medium">From: Administrator • {{ $item->created_at->diffForHumans() }}</div>
+    <div x-show="tab === 'messages'" class="space-y-4">
+        @forelse($inboxMessages as $item)
+            <div class="bg-white p-5 rounded-xl shadow-sm border {{ is_null($item->read_at) ? 'border-blue-200 bg-blue-50/30' : 'border-gray-100' }}">
+                <div class="flex justify-between items-start gap-4">
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 font-bold">
+                            {{ substr($item->sender->name ?? 'A', 0, 1) }}
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-900">{{ $item->subject }}</h3>
+                            <p class="text-sm text-gray-600 mt-1 whitespace-pre-wrap">{{ $item->content }}</p>
+                            <div class="mt-2 text-xs text-gray-400 font-medium flex gap-2 items-center">
+                                <span>From: <strong class="text-gray-600">{{ $item->sender->name ?? 'Unknown User' }}</strong> ({{ ucfirst($item->sender->role ?? 'user') }})</span>
+                                <span>• {{ $item->created_at->diffForHumans() }}</span>
                             </div>
                         </div>
+                    </div>
+                    <div class="flex flex-col items-end gap-2">
                         @if(is_null($item->read_at))
                             <form action="{{ route('inbox.read', $item->id) }}" method="POST">
                                 @csrf
-                                <input type="hidden" name="type" value="notification">
+                                <input type="hidden" name="type" value="direct">
                                 <button type="submit" class="text-xs text-blue-600 hover:underline font-semibold bg-white px-3 py-1.5 rounded-lg border border-blue-200">Mark as Read</button>
                             </form>
                         @endif
+                        @if($user->role === 'admin')
+                            <button @click="$dispatch('open-compose', { receiver: '{{ $item->sender_id }}', replyTo: '{{ addslashes($item->subject) }}' })" class="text-xs text-gray-600 hover:text-gray-900 font-semibold flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                                Reply
+                            </button>
+                        @endif
                     </div>
                 </div>
-            @else
-                <div class="bg-white p-5 rounded-xl shadow-sm border {{ is_null($item->read_at) ? 'border-blue-200 bg-blue-50/30' : 'border-gray-100' }}">
-                    <div class="flex justify-between items-start">
-                        <div class="flex gap-4">
-                            <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 font-bold">
-                                {{ substr($item->sender->name ?? 'A', 0, 1) }}
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-gray-900">{{ $item->subject }}</h3>
-                                <p class="text-sm text-gray-600 mt-1 whitespace-pre-wrap">{{ $item->content }}</p>
-                                <div class="mt-2 text-xs text-gray-400 font-medium flex gap-2 items-center">
-                                    <span>From: <strong class="text-gray-600">{{ $item->sender->name ?? 'Unknown User' }}</strong> ({{ ucfirst($item->sender->role ?? 'user') }})</span>
-                                    <span>• {{ $item->created_at->diffForHumans() }}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex flex-col items-end gap-2">
-                            @if(is_null($item->read_at))
-                                <form action="{{ route('inbox.read', $item->id) }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="type" value="direct">
-                                    <button type="submit" class="text-xs text-blue-600 hover:underline font-semibold bg-white px-3 py-1.5 rounded-lg border border-blue-200">Mark as Read</button>
-                                </form>
-                            @endif
-                            @if($user->role === 'admin')
-                                <button @click="$dispatch('open-compose', { receiver: '{{ $item->sender_id }}', replyTo: '{{ addslashes($item->subject) }}' })" class="text-xs text-gray-600 hover:text-gray-900 font-semibold flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
-                                    Reply
-                                </button>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @endif
+            </div>
         @empty
             <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
                 <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
-                <h3 class="text-lg font-medium text-gray-900">Your inbox is empty</h3>
-                <p class="text-gray-500 text-sm mt-1">You don't have any notifications or direct messages.</p>
+                <h3 class="text-lg font-medium text-gray-900">Your messages are empty</h3>
+                <p class="text-gray-500 text-sm mt-1">You don't have any direct messages yet.</p>
             </div>
         @endforelse
     </div>

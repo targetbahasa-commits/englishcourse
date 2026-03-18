@@ -38,6 +38,23 @@
         <!-- Upload Form -->
         <form action="{{ route('admin.scholarships.import.process') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
             @csrf
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Import Mode</label>
+                    <select name="import_mode" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-400 focus:ring-indigo-400">
+                        <option value="scholarship" {{ old('import_mode') === 'scholarship' ? 'selected' : '' }}>Scholarship</option>
+                        <option value="event" {{ old('import_mode') === 'event' ? 'selected' : '' }}>Event / Kompetisi (Review)</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <label class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700">
+                        <input type="checkbox" name="publish_now" value="1" {{ old('publish_now') ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                        Publish sebagai Active
+                    </label>
+                </div>
+            </div>
+            <p class="-mt-1 text-xs text-amber-700">Default disimpan sebagai review (inactive). Jika publish diaktifkan, data tetap akan melewati quality gate.</p>
+
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">CSV File <span class="text-red-500">*</span></label>
                 <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg bg-gray-50 hover:bg-white transition"
@@ -67,7 +84,7 @@
         <!-- Format Guide -->
         <div class="border-t border-gray-100 pt-5">
             <h3 class="text-sm font-semibold text-gray-700 mb-3">Required CSV Format</h3>
-            <p class="text-xs text-gray-500 mb-3">The first row must be a header row. Columns must appear in this exact order:</p>
+            <p class="text-xs text-gray-500 mb-3">Header fleksibel sudah didukung. Untuk hasil terbaik, gunakan urutan kolom berikut:</p>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-xs border border-gray-200 rounded-lg overflow-hidden">
                     <thead class="bg-gray-50">

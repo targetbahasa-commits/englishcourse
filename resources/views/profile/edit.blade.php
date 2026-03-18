@@ -20,6 +20,8 @@
             @include('components.sidebar-admin')
         @elseif(Auth::user()->isTeacher())
             @include('components.sidebar-teacher')
+        @elseif(Auth::user()->isGuest())
+            @include('components.sidebar-guest')
         @else
             @include('components.sidebar-student')
         @endif
@@ -201,37 +203,7 @@
                         </form>
                     </div>
 
-                    {{-- Delete Account (Admin only) --}}
-                    @if(Auth::user()->isAdmin())
-                    <div class="bg-white rounded-2xl shadow-sm border border-red-100 p-6" x-data="{ open: false }">
-                        <h3 class="text-lg font-semibold text-red-600 mb-1">Delete Account</h3>
-                        <p class="text-gray-500 text-sm mb-4">Once deleted, all data will be permanently removed.</p>
-                        <button @click="open = true" class="px-6 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-medium rounded-xl transition border border-red-200">
-                            Delete My Account
-                        </button>
 
-                        {{-- Confirm Modal --}}
-                        <div x-show="open" x-cloak class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                            <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md mx-4">
-                                <h4 class="text-xl font-bold text-gray-800 mb-2">Are you sure?</h4>
-                                <p class="text-gray-500 text-sm mb-6">This action is irreversible. Please enter your password to confirm.</p>
-                                <form method="POST" action="{{ route('profile.destroy') }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <input type="password" name="password" placeholder="Enter your password"
-                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-red-400 outline-none text-sm mb-4">
-                                    @error('password', 'userDeletion')
-                                        <p class="mb-3 text-sm text-red-600">{{ $message }}</p>
-                                    @enderror
-                                    <div class="flex gap-3">
-                                        <button type="submit" class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-xl transition">Delete Account</button>
-                                        <button type="button" @click="open = false" class="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition">Cancel</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
 
                 </div>
             </div>

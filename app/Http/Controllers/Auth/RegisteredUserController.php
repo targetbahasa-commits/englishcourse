@@ -15,6 +15,22 @@ use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
+    private function extractAttributionData(Request $request): array
+    {
+        return $request->only([
+            'utm_source',
+            'utm_medium',
+            'utm_campaign',
+            'utm_content',
+            'utm_term',
+            'acquisition_referrer',
+            'acquisition_landing_path',
+            'acquisition_source_page',
+            'acquisition_variant',
+            'acquisition_last_cta',
+        ]);
+    }
+
     /**
      * Display the registration view.
      */
@@ -54,7 +70,19 @@ class RegisteredUserController extends Controller
             'role' => ['nullable', 'string', 'in:student,teacher,guest'],
             'phone_number' => ['nullable', 'string', 'max:20'],
             'referral_code' => ['nullable', 'string', 'exists:users,referral_code'],
+            'utm_source' => ['nullable', 'string', 'max:100'],
+            'utm_medium' => ['nullable', 'string', 'max:100'],
+            'utm_campaign' => ['nullable', 'string', 'max:150'],
+            'utm_content' => ['nullable', 'string', 'max:150'],
+            'utm_term' => ['nullable', 'string', 'max:150'],
+            'acquisition_referrer' => ['nullable', 'string', 'max:1000'],
+            'acquisition_landing_path' => ['nullable', 'string', 'max:255'],
+            'acquisition_source_page' => ['nullable', 'string', 'max:100'],
+            'acquisition_variant' => ['nullable', 'string', 'max:50'],
+            'acquisition_last_cta' => ['nullable', 'string', 'max:100'],
         ]);
+
+        $attributionData = $this->extractAttributionData($request);
 
         // Require OTP verification only for non-guest roles
         if ($request->role !== 'guest') {
@@ -91,7 +119,7 @@ class RegisteredUserController extends Controller
             'role' => $request->role ?? 'student',
             'referral_code' => $newReferralCode,
             'referred_by_id' => $referredBy,
-        ]);
+        ] + $attributionData);
 
         event(new Registered($user));
 

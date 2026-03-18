@@ -44,6 +44,7 @@
                         <h1 class="text-xl font-bold text-gray-800">Target Bahasa - Teacher</h1>
                     </div>
                     <div class="flex items-center gap-4">
+                        @include('components.topbar-action-icons')
                         <span class="text-gray-700 font-medium">{{ Auth::user()->name }}</span>
                         <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
                             {{ substr(Auth::user()->name, 0, 1) }}

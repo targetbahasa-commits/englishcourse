@@ -118,5 +118,7 @@
             </div>
         </main>
     </div>
+
+    @include('components.student-broadcaster')
 </body>
 </html>

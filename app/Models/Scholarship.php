@@ -31,6 +31,11 @@ class Scholarship extends Model
         'min_toefl',
         'min_gpa',
         'max_age',
+        'ingest_source_type',
+        'ingest_source_ref',
+        'ingest_parser',
+        'ingested_at',
+        'ingest_quality_pass',
     ];
 
     protected $casts = [
@@ -40,6 +45,8 @@ class Scholarship extends Model
         'is_active' => 'boolean',
         'majors' => 'array',
         'has_work_contract' => 'boolean',
+        'ingested_at' => 'datetime',
+        'ingest_quality_pass' => 'boolean',
     ];
 
     /**

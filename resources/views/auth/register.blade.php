@@ -1,6 +1,8 @@
 <x-guest-layout>
     <form method="POST" action="{{ route('register') }}">
         @csrf
+        <input type="hidden" name="role" value="student">
+        <x-marketing-attribution />
 
         <!-- Name -->
         <div>

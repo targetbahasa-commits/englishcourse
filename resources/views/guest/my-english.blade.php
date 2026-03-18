@@ -16,11 +16,24 @@
                 <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
             </div>
             <h2 class="text-2xl font-bold text-gray-900 mb-4">Belum Ada Data Kemampuan</h2>
-            <p class="text-gray-500 max-w-md mx-auto mb-8">Anda belum menyelesaikan Free Test apapun. Ambil tes sekarang untuk mengetahui level bahasa Inggris Anda secara gratis!</p>
-            <a href="{{ route('guest.free-tests') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white font-bold px-6 py-3 rounded-full hover:bg-blue-700 transition shadow-md hover:shadow-lg">
-                Ambil Free Test Sekarang
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-            </a>
+            @if($viewerNeedsLogin)
+                <p class="text-gray-500 max-w-md mx-auto mb-8">Login sebagai guest untuk melihat riwayat hasil free test Anda. Jika belum pernah tes, Anda bisa mulai dari halaman Guest Free Tests.</p>
+                <div class="flex flex-col items-center justify-center gap-3 sm:flex-row">
+                    <a href="{{ route('login') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white font-bold px-6 py-3 rounded-full hover:bg-blue-700 transition shadow-md hover:shadow-lg">
+                        Log In Untuk Lihat Hasil
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                    <a href="{{ route('guest.free-tests') }}" class="inline-flex items-center gap-2 bg-white text-blue-600 font-bold px-6 py-3 rounded-full border border-blue-200 hover:bg-blue-50 transition shadow-sm">
+                        Ambil Free Test
+                    </a>
+                </div>
+            @else
+                <p class="text-gray-500 max-w-md mx-auto mb-8">Anda belum menyelesaikan Free Test apapun. Ambil tes sekarang untuk mengetahui level bahasa Inggris Anda secara gratis.</p>
+                <a href="{{ route('guest.free-tests') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white font-bold px-6 py-3 rounded-full hover:bg-blue-700 transition shadow-md hover:shadow-lg">
+                    Ambil Free Test Sekarang
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </a>
+            @endif
         </div>
     @else
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

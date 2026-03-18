@@ -1,13 +1,13 @@
 <!-- Idioms Slide-over/Panel -->
 <template x-if="isIdiomsOpen">
-    <div class="fixed inset-y-0 right-0 w-80 z-[60] flex pointer-events-none">
+    <div class="fixed inset-y-0 left-0 w-80 z-[60] flex pointer-events-none">
         <div class="w-full h-full pointer-events-auto transition-transform transform bg-white shadow-2xl flex flex-col items-start"
              x-transition:enter="transform transition ease-in-out duration-300 sm:duration-500"
-             x-transition:enter-start="translate-x-full"
+             x-transition:enter-start="-translate-x-full"
              x-transition:enter-end="translate-x-0"
              x-transition:leave="transform transition ease-in-out duration-300 sm:duration-500"
              x-transition:leave-start="translate-x-0"
-             x-transition:leave-end="translate-x-full">
+             x-transition:leave-end="-translate-x-full">
                  
                  <!-- Header -->
                  <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 w-full flex items-center justify-between bg-orange-50">
@@ -53,14 +53,14 @@
 
 <!-- Collocations Slide-over/Panel -->
 <template x-if="isCollocationsOpen">
-    <div class="fixed inset-y-0 right-0 w-80 z-[60] flex pointer-events-none">
+    <div class="fixed inset-y-0 left-0 w-80 z-[60] flex pointer-events-none">
         <div class="w-full h-full pointer-events-auto transition-transform transform bg-white shadow-2xl flex flex-col items-start"
              x-transition:enter="transform transition ease-in-out duration-300 sm:duration-500"
-             x-transition:enter-start="translate-x-full"
+             x-transition:enter-start="-translate-x-full"
              x-transition:enter-end="translate-x-0"
              x-transition:leave="transform transition ease-in-out duration-300 sm:duration-500"
              x-transition:leave-start="translate-x-0"
-             x-transition:leave-end="translate-x-full">
+             x-transition:leave-end="-translate-x-full">
                  
                  <!-- Header -->
                  <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 w-full flex items-center justify-between bg-teal-50">

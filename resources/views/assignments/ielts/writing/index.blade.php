@@ -48,6 +48,43 @@
                 Back to IELTS
             </a>
         </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-red-50 text-red-700 font-semibold border border-red-100 text-xs">
+                Active Batch: {{ $selectedClassPeriod->name ?? ($batchProgram->period ?? 'Not selected') }}
+            </span>
+
+            @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                <form action="{{ route('assignments.batch-period') }}" method="POST" class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
+                    @csrf
+                    <input type="hidden" name="program_id" value="{{ $batchProgram?->id }}">
+                    <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
+                    <select name="period" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-red-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
+                        @if(!$batchProgram)
+                            <option value="" selected>No program found</option>
+                        @elseif($batchProgram->classPeriods->isEmpty())
+                            <option value="{{ $batchProgram->period }}" selected>{{ $batchProgram->period ?: 'No batch available' }}</option>
+                        @else
+                            @foreach($batchProgram->classPeriods->sortByDesc('start_date') as $classPeriod)
+                                <option value="{{ $classPeriod->name }}" {{ $batchProgram->period === $classPeriod->name ? 'selected' : '' }}>
+                                    {{ $classPeriod->name }}
+                                </option>
+                            @endforeach
+                        @endif
+                    </select>
+                    <button type="submit" class="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed" title="Apply batch" {{ !$batchProgram ? 'disabled' : '' }}>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </button>
+                </form>
+            @else
+                <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
+                    <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
+                    <span class="text-sm text-gray-800 px-2 py-1 bg-gray-50 rounded-lg">
+                        {{ $selectedClassPeriod->name ?? ($batchProgram->period ?? 'Not selected') }}
+                    </span>
+                </div>
+            @endif
+        </div>
     </div>
 
     @if(session('success'))

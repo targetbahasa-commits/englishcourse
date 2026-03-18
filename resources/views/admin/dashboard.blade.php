@@ -28,12 +28,7 @@
                 </div>
                 
                 <div class="flex items-center gap-6">
-                    <a href="{{ route('inbox.index') }}" class="relative p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 transition border border-gray-100 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                        @if(Auth::check() && Auth::user()->hasUnreadInbox())
-                            <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
-                        @endif
-                    </a>
+                    @include('components.topbar-action-icons', ['notificationHref' => route('admin.announcements.index'), 'notificationUnread' => false])
                     @if(Auth::user()->role === 'admin')
                     <div x-data="{ open: false }" class="relative">
                         <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm">
@@ -53,13 +48,13 @@
                             <div class="px-4 py-2 border-b border-gray-50 mb-1">
                                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Switch Dashboard</p>
                             </div>
-                            <a href="{{ route('admin.impersonate', 'teacher') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center justify-between">
+                            <a href="{{ route('admin.impersonate', 'teacher') }}" class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
                                 Teacher <div class="w-2 h-2 rounded-full bg-purple-500"></div>
                             </a>
-                            <a href="{{ route('admin.impersonate', 'student') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center justify-between">
+                            <a href="{{ route('admin.impersonate', 'student') }}" class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
                                 Student <div class="w-2 h-2 rounded-full bg-blue-500"></div>
                             </a>
-                            <a href="{{ route('admin.impersonate', 'guest') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition flex items-center justify-between">
+                            <a href="{{ route('admin.impersonate', 'guest') }}" class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
                                 Guest <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
                             </a>
                         </div>
@@ -129,9 +124,169 @@
                 </div>
             </div>
 
+            <div class="mb-8 rounded-3xl border border-amber-100 bg-white p-6 shadow-sm">
+                @include('admin.partials.campaign-pulse-header')
+
+                <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div class="rounded-2xl border border-blue-100 bg-blue-50 p-5">
+                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-blue-600/70">Tracked Signups</div>
+                        <div class="mt-2 text-3xl font-black text-blue-900">{{ $trackedSignupsLast30Days ?? 0 }}</div>
+                        <p class="mt-2 text-sm text-blue-800/80">User guest + student dengan UTM atau source page tersimpan pada window aktif.</p>
+                    </div>
+                    <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-5">
+                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-emerald-600/70">Tracked 7 Days</div>
+                        <div class="mt-2 text-3xl font-black text-emerald-900">{{ $trackedSignupsLast7Days ?? 0 }}</div>
+                        <p class="mt-2 text-sm text-emerald-800/80">Momentum recent acquisition untuk lihat campaign yang masih jalan.</p>
+                    </div>
+                    <div class="rounded-2xl border border-amber-100 bg-amber-50 p-5">
+                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-amber-700/70">WHV Attributed</div>
+                        <div class="mt-2 text-3xl font-black text-amber-900">{{ $whvAttributedUsers ?? 0 }}</div>
+                        <p class="mt-2 text-sm text-amber-900/75">Signup yang membawa source page `whv_applications`.</p>
+                    </div>
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div class="rounded-2xl border border-slate-100 bg-slate-50 p-5">
+                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-slate-700/70">Tracked Leads</div>
+                        <div class="mt-2 text-3xl font-black text-slate-900">{{ $trackedLeadsTotal ?? 0 }}</div>
+                        <p class="mt-2 text-sm text-slate-700/80">Jumlah lead attribution pada window aktif.</p>
+                    </div>
+                    <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-5">
+                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700/70">Converted Leads</div>
+                        <div class="mt-2 text-3xl font-black text-emerald-900">{{ $trackedLeadsConverted ?? 0 }}</div>
+                        <p class="mt-2 text-sm text-emerald-800/80">Lead attribution dengan status converted.</p>
+                    </div>
+                    <div class="rounded-2xl border border-blue-100 bg-blue-50 p-5">
+                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-blue-700/70">Lead CVR</div>
+                        <div class="mt-2 text-3xl font-black text-blue-900">
+                            {{ ($trackedLeadsTotal ?? 0) > 0 ? number_format((($trackedLeadsConverted ?? 0) / $trackedLeadsTotal) * 100, 1) : '0.0' }}%
+                        </div>
+                        <p class="mt-2 text-sm text-blue-800/80">Conversion rate lead attribution ke status converted.</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 grid gap-6 lg:grid-cols-2">
+                    <!-- Program Performance -->
+                    <div class="overflow-hidden rounded-2xl border border-gray-100">
+                        <div class="border-b border-gray-100 bg-gray-50 px-5 py-4">
+                            <h3 class="text-sm font-bold text-gray-800">Program Performance</h3>
+                        </div>
+                        @if(isset($programPerformance) && $programPerformance->isNotEmpty())
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-white text-xs uppercase tracking-[0.12em] text-gray-400">
+                                        <tr>
+                                            <th class="px-5 py-3 font-semibold">Program</th>
+                                            <th class="px-5 py-3 font-semibold text-right">Students</th>
+                                            <th class="px-5 py-3 font-semibold text-right">Active</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100 bg-white">
+                                        @foreach($programPerformance as $prog)
+                                            <tr class="hover:bg-gray-50 transition">
+                                                <td class="px-5 py-4 font-semibold text-gray-800">{{ $prog->name }}</td>
+                                                <td class="px-5 py-4 text-right text-gray-600">{{ $prog->students_count ?? 0 }}</td>
+                                                <td class="px-5 py-4 text-right">
+                                                    <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
+                                                        {{ $prog->active_students_count ?? 0 }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="px-5 py-10 text-sm text-gray-400">No program data available.</div>
+                        @endif
+                    </div>
+
+                    <!-- Teacher Activity -->
+                    <div class="overflow-hidden rounded-2xl border border-gray-100">
+                        <div class="border-b border-gray-100 bg-gray-50 px-5 py-4">
+                            <h3 class="text-sm font-bold text-gray-800">Top Teachers</h3>
+                        </div>
+                        @if(isset($teacherActivitySummary) && $teacherActivitySummary->isNotEmpty())
+                            <div class="space-y-2 p-5">
+                                @foreach($teacherActivitySummary as $teacher)
+                                    <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition">
+                                        <div>
+                                            <div class="text-sm font-semibold text-gray-800">{{ $teacher->name }}</div>
+                                            <div class="text-xs text-gray-500">{{ $teacher->program_count ?? 0 }} program{{ $teacher->program_count !== 1 ? 's' : '' }}</div>
+                                        </div>
+                                        <div class="text-2xl font-black text-blue-600">{{ $teacher->program_count ?? 0 }}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="px-5 py-10 text-sm text-gray-400">No teacher data available.</div>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+                    <div class="overflow-hidden rounded-2xl border border-gray-100">
+                        <div class="border-b border-gray-100 bg-gray-50 px-5 py-4">
+                            <h3 class="text-sm font-bold text-gray-800">Top campaign sources</h3>
+                        </div>
+                        @if(isset($campaignSignups) && $campaignSignups->isNotEmpty())
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-white text-xs uppercase tracking-[0.12em] text-gray-400">
+                                        <tr>
+                                            <th class="px-5 py-3 font-semibold">Campaign</th>
+                                            <th class="px-5 py-3 font-semibold">Source Page</th>
+                                            <th class="px-5 py-3 font-semibold">Guest</th>
+                                            <th class="px-5 py-3 font-semibold">Student</th>
+                                            <th class="px-5 py-3 font-semibold">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100 bg-white">
+                                        @foreach($campaignSignups as $campaignRow)
+                                            <tr>
+                                                <td class="px-5 py-4 font-semibold text-gray-800">{{ $campaignRow->campaign_label }}</td>
+                                                <td class="px-5 py-4 text-gray-500">{{ $campaignRow->source_page }}</td>
+                                                <td class="px-5 py-4 text-gray-600">{{ $campaignRow->guest_signups }}</td>
+                                                <td class="px-5 py-4 text-gray-600">{{ $campaignRow->student_signups }}</td>
+                                                <td class="px-5 py-4 font-bold text-gray-900">{{ $campaignRow->total_signups }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="px-5 py-10 text-sm text-gray-400">Belum ada signup dengan attribution campaign yang tersimpan.</div>
+                        @endif
+                    </div>
+
+                    <div class="rounded-2xl border border-gray-100 bg-gray-50 p-5">
+                        <h3 class="text-sm font-bold text-gray-800">WHV CTA copy variants</h3>
+                        <div class="mt-4 space-y-3">
+                            @forelse(($whvVariantBreakdown ?? collect()) as $variantRow)
+                                <div class="flex items-center justify-between rounded-xl bg-white px-4 py-3 border border-gray-100">
+                                    <div>
+                                        <div class="text-xs font-bold uppercase tracking-[0.12em] text-gray-400">Variant</div>
+                                        <div class="mt-1 font-semibold text-gray-900">{{ $variantRow->variant_label }}</div>
+                                    </div>
+                                    <div class="text-2xl font-black text-gray-900">{{ $variantRow->total }}</div>
+                                </div>
+                            @empty
+                                <div class="rounded-xl bg-white px-4 py-6 text-sm text-gray-400 border border-gray-100">Belum ada signup WHV yang membawa label variant.</div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
+                @include('admin.partials.lead-campaign-conversion-panel')
+
+                @include('admin.partials.export-activity-panel')
+            </div>
+
             <!-- Realtime Monitoring -->
             <div class="mb-8" x-data="{
                 search: '',
+                quickTask: '2',
+                quickMeetingId: '',
                 students: [
                     @foreach($activeStudents ?? [] as $student)
                     {
@@ -164,6 +319,33 @@
                     const diffInSeconds = now - timestamp;
                     // Consider idle if no activity in the last 15 minutes (900 seconds)
                     return diffInSeconds > 900;
+                },
+                hasQuickWritingTarget() {
+                    const meeting = parseInt(this.quickMeetingId, 10);
+                    const task = parseInt(this.quickTask, 10);
+                    return Number.isInteger(meeting) && meeting > 0 && (task === 1 || task === 2);
+                },
+                buildRemoteViewUrl(studentId, autoRequest = false) {
+                    if (!this.hasQuickWritingTarget()) {
+                        return `/admin/remote-view/${studentId}`;
+                    }
+
+                    const query = new URLSearchParams({
+                        task: String(this.quickTask),
+                        meeting: String(parseInt(this.quickMeetingId, 10)),
+                    });
+
+                    if (autoRequest) {
+                        query.set('auto_request', '1');
+                    }
+
+                    return `/admin/remote-view/${studentId}?${query.toString()}`;
+                },
+                buildLiveDraftUrl(studentId) {
+                    if (!this.hasQuickWritingTarget()) return null;
+                    const task = parseInt(this.quickTask, 10);
+                    const meeting = parseInt(this.quickMeetingId, 10);
+                    return `/admin/live-draft/ielts-writing/${studentId}/${task}/meeting/${meeting}`;
                 }
             }">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -176,6 +358,11 @@
                             </span>
                         </div>
                         <div class="flex gap-3">
+                            <select x-model="quickTask" class="form-control rounded-xl text-sm border-gray-200">
+                                <option value="1">Task 1</option>
+                                <option value="2">Task 2</option>
+                            </select>
+                            <input type="number" x-model="quickMeetingId" min="1" placeholder="Meeting ID" class="form-control rounded-xl text-sm border-gray-200 w-28">
                             <input type="text" x-model="search" placeholder="Search student..." class="form-control rounded-xl text-sm border-gray-200">
                         </div>
                     </div>
@@ -232,12 +419,12 @@
                                             <template x-if="student.role === 'guest'">
                                                 <a :href="`/admin/users/${student.id}`" class="px-3 py-1.5 text-xs font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-lg transition shadow-sm inline-block">Manage Guest</a>
                                             </template>
-                                            <a :href="`/admin/remote-view/${student.id}`" target="_blank" class="px-3 py-1.5 text-xs font-medium text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition shadow-sm inline-block">
-                                                <div class="flex items-center gap-1.5">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                                    View Screen
-                                                </div>
-                                            </a>
+                                            <template x-if="hasQuickWritingTarget()">
+                                                <a :href="buildLiveDraftUrl(student.id)" target="_blank" class="px-3 py-1.5 text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-lg transition shadow-sm inline-flex items-center gap-1.5">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                                    Live Draft
+                                                </a>
+                                            </template>
                                         </td>
                                     </tr>
                                 </template>
@@ -282,6 +469,12 @@
                             </div>
                             <span class="font-medium text-gray-700">Add Scholarship</span>
                         </a>
+                        <a href="{{ route('admin.whv-applications.create') }}" class="w-full flex items-center gap-3 p-3 bg-amber-50 hover:bg-amber-100 rounded-xl transition text-left">
+                            <div class="p-2 bg-amber-100 text-amber-600 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8.97 5.7a1 1 0 01-1.06 0L4 7m16 0a2 2 0 00-2-2H6a2 2 0 00-2 2m16 0v10a2 2 0 01-2 2H6a2 2 0 01-2-2V7m9 10.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z"></path></svg>
+                            </div>
+                            <span class="font-medium text-gray-700">Add WHV Program</span>
+                        </a>
                     </div>
                 </div>
 
@@ -306,6 +499,15 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             </div>
                             <span class="font-medium text-gray-700">Attendance Summary</span>
+                        </a>
+                        <a href="{{ route('admin.whv-applications.index') }}" class="w-full flex items-center gap-3 p-3 bg-amber-50 hover:bg-amber-100 rounded-xl transition text-left">
+                            <div class="p-2 bg-amber-100 text-amber-600 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7V6a3 3 0 013-3h0a3 3 0 013 3v1m4 0H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2z"></path></svg>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-700">WHV Programs</div>
+                                <div class="text-xs text-gray-500">Kelola landing page program WHV Australia</div>
+                            </div>
                         </a>
                     </div>
                 </div>
@@ -389,10 +591,106 @@
         </main>
     </div>
 
+    <div id="copy-link-toast" class="pointer-events-none fixed bottom-6 right-6 z-[100] hidden translate-y-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white opacity-0 shadow-lg transition-all duration-200 ease-out">
+        <span class="inline-flex items-center gap-2">
+            <svg id="copy-link-toast-icon-success" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <svg id="copy-link-toast-icon-error" class="hidden h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <span id="copy-link-toast-text">Link copied</span>
+        </span>
+    </div>
+
     </div>
 
     <script>
-        // Alpine data component for monitoring tab is now handled entirely within the x-data attribute
+        let copyLinkToastTimeout = null;
+
+        function copyReplayLink(url) {
+            if (!url) {
+                return;
+            }
+
+            const showToast = (message, type = 'success') => {
+                const toast = document.getElementById('copy-link-toast');
+                const toastText = document.getElementById('copy-link-toast-text');
+                const successIcon = document.getElementById('copy-link-toast-icon-success');
+                const errorIcon = document.getElementById('copy-link-toast-icon-error');
+                if (!toast) {
+                    return;
+                }
+
+                if (toastText) {
+                    toastText.textContent = message;
+                }
+                toast.classList.remove('bg-emerald-600', 'bg-rose-600');
+                toast.classList.add(type === 'error' ? 'bg-rose-600' : 'bg-emerald-600');
+
+                if (successIcon && errorIcon) {
+                    if (type === 'error') {
+                        successIcon.classList.add('hidden');
+                        errorIcon.classList.remove('hidden');
+                    } else {
+                        errorIcon.classList.add('hidden');
+                        successIcon.classList.remove('hidden');
+                    }
+                }
+
+                toast.classList.remove('hidden');
+                toast.classList.remove('opacity-0', 'translate-y-2');
+                toast.classList.add('opacity-100', 'translate-y-0');
+
+                if (copyLinkToastTimeout) {
+                    clearTimeout(copyLinkToastTimeout);
+                }
+
+                copyLinkToastTimeout = setTimeout(() => {
+                    toast.classList.remove('opacity-100', 'translate-y-0');
+                    toast.classList.add('opacity-0', 'translate-y-2');
+                    setTimeout(() => {
+                        toast.classList.add('hidden');
+                    }, 200);
+                }, 1400);
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url)
+                    .then(() => showToast('Link copied', 'success'))
+                    .catch(() => showToast('Copy failed', 'error'));
+                return;
+            }
+
+            const input = document.createElement('input');
+            input.value = url;
+            document.body.appendChild(input);
+            input.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                showToast(successful ? 'Link copied' : 'Copy failed', successful ? 'success' : 'error');
+            } catch (error) {
+                showToast('Copy failed', 'error');
+            }
+
+            document.body.removeChild(input);
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (!(event.metaKey || event.ctrlKey) || String(event.key).toLowerCase() !== 'c') {
+                return;
+            }
+
+            const activeElement = document.activeElement;
+            if (!activeElement) {
+                return;
+            }
+
+            const replayUrl = activeElement.getAttribute('data-replay-url');
+            if (!replayUrl) {
+                return;
+            }
+
+            event.preventDefault();
+            copyReplayLink(replayUrl);
+        });
     </script>
 </body>
 </html>

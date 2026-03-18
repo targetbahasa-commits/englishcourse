@@ -27,6 +27,11 @@
 
 @section('content')
 <div class="p-8 max-w-7xl mx-auto space-y-8">
+    @if(session('success'))
+        <div class="mb-2 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
+            {{ session('success') }}
+        </div>
+    @endif
     
     <!-- Top Identity Card -->
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden relative">

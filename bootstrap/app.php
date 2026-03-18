@@ -15,10 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->authenticateSessions();
         $middleware->redirectGuestsTo(function ($request) {
             if ($request->is('teacher') || $request->is('teacher/*')) {
-                return route('teacher.login');
+                return secure_url('/teacher/login');
             }
 
-            return route('student.login');
+            return secure_url('/student/login');
         });
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,

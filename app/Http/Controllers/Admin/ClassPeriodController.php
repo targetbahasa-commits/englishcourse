@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ClassPeriod;
 use App\Models\Meeting;
-use App\Models\Program;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -36,17 +35,23 @@ class ClassPeriodController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
+        $data = $request->validate([
+            'name' => 'nullable|string|max:255',
             'program_id' => 'required|exists:programs,id',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
             'status' => 'required|in:active,upcoming,closed',
             'learning_mode' => 'required|in:online,offline',
             'batch_type' => 'required|in:regular,private',
         ]);
 
-        $classPeriod = ClassPeriod::create($request->all());
+        if (empty($data['name'])) {
+            $start = \Carbon\Carbon::parse($data['start_date'])->translatedFormat('d M Y');
+            $end = \Carbon\Carbon::parse($data['end_date'])->translatedFormat('d M Y');
+            $data['name'] = "Batch {$start} - {$end}";
+        }
+
+        $classPeriod = ClassPeriod::create($data);
 
         return back()->with('success', 'Class Period created successfully. You can now manage meetings and students.');
     }
@@ -87,17 +92,23 @@ class ClassPeriodController extends Controller
      */
     public function update(Request $request, ClassPeriod $classPeriod)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
+        $data = $request->validate([
+            'name' => 'nullable|string|max:255',
             'program_id' => 'required|exists:programs,id',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
             'status' => 'required|in:active,upcoming,closed',
             'learning_mode' => 'required|in:online,offline',
             'batch_type' => 'required|in:regular,private',
         ]);
 
-        $classPeriod->update($request->all());
+        if (empty($data['name'])) {
+            $start = \Carbon\Carbon::parse($data['start_date'])->translatedFormat('d M Y');
+            $end = \Carbon\Carbon::parse($data['end_date'])->translatedFormat('d M Y');
+            $data['name'] = "Batch {$start} - {$end}";
+        }
+
+        $classPeriod->update($data);
 
         return back()->with('success', 'Class Period updated successfully.');
     }

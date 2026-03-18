@@ -1,7 +1,5 @@
 @component('layouts.dashboard')
-    @slot('pageTitle')
-        Free Lessons
-    @endslot
+    @slot('header')@endslot
 
     <div class="px-4 py-8 w-full max-w-7xl mx-auto">
         <!-- Page Header -->

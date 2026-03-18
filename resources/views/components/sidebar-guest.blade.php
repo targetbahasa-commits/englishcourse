@@ -42,6 +42,12 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                         Overseas Jobs
                     </a>
+
+                    {{-- Working Holiday Visa Australia --}}
+                    <a href="{{ route('whv-applications.index') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('whv-applications.*') ? 'bg-amber-50 text-amber-600 border-l-4 border-amber-600' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8.97 5.7a1 1 0 01-1.06 0L4 7m16 0a2 2 0 00-2-2H6a2 2 0 00-2 2m16 0v10a2 2 0 01-2 2H6a2 2 0 01-2-2V7m9 10.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z"></path></svg>
+                        WHV Australia
+                    </a>
                 </nav>
             </div>
 

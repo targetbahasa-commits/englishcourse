@@ -3,14 +3,18 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Schema;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+
+    protected static ?bool $announcementReadsTableExists = null;
 
     /**
      * The attributes that are mass assignable.
@@ -29,6 +33,16 @@ class User extends Authenticatable
         'referral_code',
         'referral_points',
         'referred_by_id',
+        'utm_source',
+        'utm_medium',
+        'utm_campaign',
+        'utm_content',
+        'utm_term',
+        'acquisition_referrer',
+        'acquisition_landing_path',
+        'acquisition_source_page',
+        'acquisition_variant',
+        'acquisition_last_cta',
 
         'class_period_id',
         'teacher_id',
@@ -154,19 +168,73 @@ class User extends Authenticatable
         return $this->belongsTo(User::class, 'referred_by_id');
     }
 
-    public function hasUnreadInbox(): bool
+    public function announcementReads()
     {
-        $hasUnreadNotifications = $this->unreadNotifications()->exists();
+        return $this->belongsToMany(Announcement::class, 'announcement_user_reads')
+            ->withPivot('read_at')
+            ->withTimestamps();
+    }
+
+    public function unreadAnnouncements(): Builder
+    {
+        if (!$this->hasAnnouncementReadsTable()) {
+            return Announcement::query()
+                ->active()
+                ->visibleTo($this)
+                ->select('announcements.*');
+        }
+
+        return Announcement::query()
+            ->active()
+            ->visibleTo($this)
+            ->leftJoin('announcement_user_reads as announcement_reads', function ($join) {
+                $join->on('announcements.id', '=', 'announcement_reads.announcement_id')
+                    ->where('announcement_reads.user_id', '=', $this->id);
+            })
+            ->where(function ($query) {
+                $query->whereNull('announcement_reads.read_at')
+                    ->orWhereColumn('announcement_reads.read_at', '<', 'announcements.updated_at');
+            })
+            ->select('announcements.*');
+    }
+
+    public function hasUnreadChat(): bool
+    {
         $hasUnreadDirect = \App\Models\DirectMessage::where('receiver_id', $this->id)
             ->whereNull('read_at')->exists();
-        
+
         if ($this->role === 'admin') {
             $hasUnreadAdmin = \App\Models\DirectMessage::whereNull('receiver_id')
                 ->whereNull('read_at')->exists();
-            return $hasUnreadNotifications || $hasUnreadDirect || $hasUnreadAdmin;
+
+            return $hasUnreadDirect || $hasUnreadAdmin;
         }
 
-        return $hasUnreadNotifications || $hasUnreadDirect;
+        return $hasUnreadDirect;
+    }
+
+    public function hasUnreadNotificationBadge(): bool
+    {
+        return $this->unreadNotifications()->exists();
+    }
+
+    public function hasUnreadAnnouncements(): bool
+    {
+        if ($this->isAdmin()) {
+            return false;
+        }
+
+        return $this->unreadAnnouncements()->exists();
+    }
+
+    protected function hasAnnouncementReadsTable(): bool
+    {
+        return self::$announcementReadsTableExists ??= Schema::hasTable('announcement_user_reads');
+    }
+
+    public function hasUnreadInbox(): bool
+    {
+        return $this->hasUnreadNotificationBadge() || $this->hasUnreadChat();
     }
 
     /**
@@ -199,6 +267,22 @@ class User extends Authenticatable
     public function freeTestResults()
     {
         return $this->hasMany(FreeTestResult::class);
+    }
+
+    /**
+     * Payments owned by this user.
+     */
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * Payments created/recorded by this user (typically admin/staff).
+     */
+    public function createdPayments()
+    {
+        return $this->hasMany(Payment::class, 'created_by');
     }
 
     /**

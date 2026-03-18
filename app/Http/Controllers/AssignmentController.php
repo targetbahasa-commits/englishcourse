@@ -8,6 +8,20 @@ use Illuminate\Support\Facades\Auth;
 
 class AssignmentController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $user = Auth::user();
+
+            if ($user && $user->isGuest()) {
+                return redirect()->route('guest.free-tests')
+                    ->with('error', 'Guest account does not have access to assignments.');
+            }
+
+            return $next($request);
+        });
+    }
+
     public function index()
     {
         // Exclude internal/helper programs from the main dashboard
@@ -40,6 +54,8 @@ class AssignmentController extends Controller
     public function ieltsListeningIndex()
     {
         $program = \App\Models\Program::where('slug', 'ielts-academic-listening')->with('meetings')->first();
+        $batchProgram = $this->resolveBatchProgramForIelts(Auth::user());
+        $selectedClassPeriod = $this->resolveSelectedClassPeriodForProgram($batchProgram);
 
         if (!$program) {
              $program = \App\Models\Program::firstOrCreate(
@@ -55,7 +71,7 @@ class AssignmentController extends Controller
         $meetings = $program->meetings()->orderBy('meeting_number')->get();
         // Debugging: Verify we are in the correct method
         // dd('Hit listeningIndex method - Route is correct');
-        return view('assignments.ielts.listening.index', compact('meetings', 'program'));
+        return view('assignments.ielts.listening.index', compact('meetings', 'program', 'batchProgram', 'selectedClassPeriod'));
     }
 
     public function listeningPracticeIndexPart($set)
@@ -309,9 +325,11 @@ class AssignmentController extends Controller
         // Program is internal and excluded from the main assignments listing.
         // We pass a plain object so the view does not need a DB record.
         $program = \App\Models\Program::where('slug', 'ielts-academic-reading')->with('meetings')->first();
+        $batchProgram = $this->resolveBatchProgramForIelts(Auth::user());
+        $selectedClassPeriod = $this->resolveSelectedClassPeriodForProgram($batchProgram);
 
         $meetings = $program ? $program->meetings()->orderBy('meeting_number')->get() : collect();
-        return view('assignments.ielts.reading.index', compact('meetings', 'program'));
+        return view('assignments.ielts.reading.index', compact('meetings', 'program', 'batchProgram', 'selectedClassPeriod'));
     }
 
     public function ieltsReadingPracticeIndex()
@@ -2206,6 +2224,8 @@ class AssignmentController extends Controller
     public function ieltsWritingIndex(Request $request)
     {
         $task = $request->input('task');
+        $batchProgram = $this->resolveBatchProgramForIelts(Auth::user());
+        $selectedClassPeriod = $this->resolveSelectedClassPeriodForProgram($batchProgram);
         
         if ($task) {
             $allMeetings = \App\Models\IeltsWritingMeeting::where('task_type', $task)
@@ -2214,11 +2234,11 @@ class AssignmentController extends Controller
             
             $lessons = $allMeetings->where('category', 'lesson');
             
-            return view('assignments.ielts.writing.task_list', compact('task', 'lessons'));
+            return view('assignments.ielts.writing.task_list', compact('task', 'lessons', 'batchProgram', 'selectedClassPeriod'));
         }
 
         $meetings = collect([]); 
-        return view('assignments.ielts.writing.index', compact('meetings'));
+        return view('assignments.ielts.writing.index', compact('meetings', 'batchProgram', 'selectedClassPeriod'));
     }
 
     public function storeIeltsWritingMeeting(Request $request)
@@ -2307,10 +2327,18 @@ class AssignmentController extends Controller
     {
         // Now using real ID from DB
         $meeting = \App\Models\IeltsWritingMeeting::findOrFail($id);
+        $this->hydrateWritingSupportData($meeting);
         
         // Determine Back URL
         // include ?type=... for practice_item meetings to return to filtered list
         $backUrl = route('assignments.ielts-academic.writing.practice.index');
+        if ($meeting->category === 'practice' && (int) $meeting->task_type === 2) {
+            $backUrl = route('assignments.ielts-academic.writing.practice.index', [
+                'task' => 2,
+                'type' => $meeting->view_type,
+            ]);
+        }
+
         if ($meeting->category === 'practice_item') {
             // determine type by meeting_number range
             $num = $meeting->meeting_number;
@@ -2444,6 +2472,81 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
     }
 
     return view('assignments.ielts.writing.meeting', compact('task', 'meeting', 'backUrl'));
+    }
+
+    private function hydrateWritingSupportData(\App\Models\IeltsWritingMeeting $meeting): void
+    {
+        $topicSlug = $this->inferWritingTopicSlug($meeting);
+
+        if (empty($meeting->collocations)) {
+            $meeting->collocations = $this->normalizeSupportItems(
+                $this->getCollocationsForTopic($topicSlug)
+            );
+        }
+
+        if (empty($meeting->idioms)) {
+            $meeting->idioms = $this->normalizeSupportItems(
+                $this->getIdiomsForTopic($topicSlug)
+            );
+        }
+    }
+
+    private function inferWritingTopicSlug(\App\Models\IeltsWritingMeeting $meeting): string
+    {
+        $raw = strtolower(trim(($meeting->title ?? '') . ' ' . ($meeting->prompt ?? '')));
+        $slug = preg_replace('/[^a-z0-9]+/', '-', $raw);
+        $slug = trim($slug ?? '', '-');
+
+        $aliases = [
+            'working-from-home' => 'work',
+            'tourism' => 'travel-holidays',
+            'social-media' => 'technology',
+            'online-education' => 'study',
+            'electric-vehicles' => 'transportation',
+            'nuclear-energy' => 'technology',
+            'artificial-intelligence' => 'artificial-intelligence',
+            'globalization' => 'work',
+            'globalisation' => 'work',
+            'urbanisation' => 'hometown',
+            'urbanization' => 'hometown',
+            'fast-food' => 'food-cooking',
+            'keeping-animals-in-zoos' => 'animals',
+            'zoos' => 'animals',
+            'space-exploration' => 'space-exploration',
+            'gap-year' => 'study',
+            'online-shopping' => 'shopping',
+            'living-abroad' => 'travel-holidays',
+        ];
+
+        foreach ($aliases as $needle => $mappedSlug) {
+            if (str_contains($slug, $needle)) {
+                return $mappedSlug;
+            }
+        }
+
+        return $slug;
+    }
+
+    private function normalizeSupportItems($items): array
+    {
+        if (!is_array($items)) {
+            return [];
+        }
+
+        $normalized = [];
+
+        foreach ($items as $item) {
+            if (is_array($item) && array_key_exists('phrase', $item)) {
+                $normalized[] = $item;
+                continue;
+            }
+
+            if (is_array($item)) {
+                $normalized = array_merge($normalized, $this->normalizeSupportItems($item));
+            }
+        }
+
+        return $normalized;
     }
 
     private function queryAI($prompt, $jsonMode = false, $timeout = 300, $maxTokens = 4096)
@@ -3420,21 +3523,22 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
     public function ieltsWritingPracticeIndex(Request $request)
     {
         $ranges = [
-            // restore original intended ranges (20 items per type)
-            'line' => [1010, 1029],
-            'bar' => [1030, 1049],
-            'pie' => [1050, 1069],
-            'table' => [1070, 1089],
-            'mixed' => [1090, 1109],
+            'line'      => [1010, 1029],
+            'bar'       => [1030, 1049],
+            'pie'       => [1050, 1069],
+            'table'     => [1070, 1089],
+            'mixed'     => [1090, 1109],
             'flowchart' => [1110, 1129],
-            'mapping' => [1130, 1149],
+            'mapping'   => [1130, 1149],
         ];
 
+        $task = $request->get('task');
         $type = $request->get('type');
         $items = collect();
+        $task2Meetings = collect();
 
-        // Fetch practice items based on selected type
-        if ($type && isset($ranges[$type])) {
+        // Task 1: fetch chart practice items when a type is selected
+        if ($task == 1 && $type && isset($ranges[$type])) {
             [$min, $max] = $ranges[$type];
             $items = \App\Models\IeltsWritingMeeting::whereBetween('meeting_number', [$min, $max])
                 ->where('category', 'practice_item')
@@ -3443,7 +3547,19 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
                 ->get();
         }
 
-        return view('assignments.ielts.writing.practice-index', compact('items'));
+        // Task 2: show type selector, or fetch items for a specific type
+        $task2Types = ['advantages_disadvantages', 'opinion', 'agree_disagree', 'problem_solution', 'discussion'];
+        if ($task == 2 && $type && in_array($type, $task2Types, true)) {
+            $task2Meetings = \App\Models\IeltsWritingMeeting::where('task_type', 2)
+                ->where('category', 'practice')
+                ->where('view_type', $type)
+                ->orderBy('meeting_number')
+                ->get();
+        } elseif ($task == 2) {
+            $task2Meetings = collect(); // will show type selector
+        }
+
+        return view('assignments.ielts.writing.practice-index', compact('items', 'task', 'type', 'task2Meetings'));
     }
 
     public function ieltsSpeakingIndex(Request $request)
@@ -3471,7 +3587,10 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
         // Placeholder until other speaking parts are implemented
         $meetings = collect([]);
-        return view('assignments.ielts.speaking.index', compact('meetings', 'lessons'));
+        $batchProgram = $this->resolveBatchProgramForIelts(Auth::user());
+        $selectedClassPeriod = $this->resolveSelectedClassPeriodForProgram($batchProgram);
+
+        return view('assignments.ielts.speaking.index', compact('meetings', 'lessons', 'batchProgram', 'selectedClassPeriod'));
     }
 
     public function ieltsSpeakingPractice(Request $request)
@@ -3891,6 +4010,14 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
                 ['phrase' => 'Surfing the web', 'meaning' => 'Menjelajah internet', 'example' => 'I spend hours surfing the web.'],
                 ['phrase' => 'Glue to the screen', 'meaning' => 'Terpaku pada layar', 'example' => 'Kids are often glued to the screen.'],
                 ['phrase' => 'Social networking', 'meaning' => 'Jejaring sosial', 'example' => 'I use social networking sites daily.']
+            ],
+            'space-exploration' => [
+                ['phrase' => 'Space exploration', 'meaning' => 'Eksplorasi ruang angkasa', 'example' => 'Space exploration requires substantial public funding.'],
+                ['phrase' => 'Scientific breakthrough', 'meaning' => 'Terobosan ilmiah', 'example' => 'Many scientific breakthroughs result from research in this field.'],
+                ['phrase' => 'Technological innovation', 'meaning' => 'Inovasi teknologi', 'example' => 'The programme encourages technological innovation in several industries.'],
+                ['phrase' => 'Long-term investment', 'meaning' => 'Investasi jangka panjang', 'example' => 'Supporters regard it as a long-term investment for humanity.'],
+                ['phrase' => 'Public expenditure', 'meaning' => 'Pengeluaran publik', 'example' => 'Critics argue that public expenditure should focus on urgent social needs.'],
+                ['phrase' => 'Practical application', 'meaning' => 'Penerapan praktis', 'example' => 'Satellite technology has many practical applications in daily life.'],
             ],
             'transportation' => [
                 ['phrase' => 'Traffic jam', 'meaning' => 'Macet', 'example' => 'I was stuck in a traffic jam for an hour.'],
@@ -5080,6 +5207,13 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
                 ['phrase' => 'Well-oiled machine', 'meaning' => 'Berjalan lancar/Efisien', 'example' => 'Our team works like a well-oiled machine.'],
                 ['phrase' => 'Cog in the machine', 'meaning' => 'Bagian kecil dari sistem besar', 'example' => 'I feel like just a cog in the machine.']
             ],
+            'space-exploration' => [
+                ['phrase' => 'Reach for the stars', 'meaning' => 'Berani punya cita-cita tinggi', 'example' => 'Young scientists should be encouraged to reach for the stars.'],
+                ['phrase' => 'Shoot for the moon', 'meaning' => 'Menargetkan sesuatu yang sangat tinggi', 'example' => 'Governments shoot for the moon when they invest in ambitious programmes.'],
+                ['phrase' => 'A giant leap forward', 'meaning' => 'Kemajuan besar', 'example' => 'The new mission could be a giant leap forward for science.'],
+                ['phrase' => 'Open up new horizons', 'meaning' => 'Membuka cakrawala baru', 'example' => 'Space research opens up new horizons for future generations.'],
+                ['phrase' => 'On another level', 'meaning' => 'Di level yang berbeda', 'example' => 'Satellite technology has taken global communication to another level.'],
+            ],
             'transportation' => [
                 ['phrase' => 'In the same boat', 'meaning' => 'Senasib', 'example' => 'We are all in the same boat regarding the delay.'],
                 ['phrase' => 'Drive someone up the wall', 'meaning' => 'Membuat kesal', 'example' => 'The traffic noise drives me up the wall.'],
@@ -6106,7 +6240,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             ],
         ];
 
-        return collect($topicTitles)->values()->map(function ($title, $index) use ($colors, $icon, $lexicalBanks) {
+        $topics = collect($topicTitles)->values()->map(function ($title, $index) use ($colors, $icon, $lexicalBanks) {
             $normalized = strtolower($title);
 
             if (str_contains($normalized, 'work') || str_contains($normalized, 'study') || str_contains($normalized, 'school') || str_contains($normalized, 'university') || str_contains($normalized, 'job') || str_contains($normalized, 'leadership') || str_contains($normalized, 'teamwork') || str_contains($normalized, 'communication')) {
@@ -9173,6 +9307,14 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
     {
         $user = Auth::user();
         $meetings = [];
+        $batchProgram = $this->resolveBatchProgramForToefl($user);
+        $selectedClassPeriod = $this->resolveToeflSelectedClassPeriod($user);
+        $batchLockMap = collect();
+        if ($selectedClassPeriod) {
+            $batchLockMap = \App\Models\ClassPeriodToeflMeeting::where('class_period_id', $selectedClassPeriod->id)
+                ->where('module', 'listening')
+                ->pluck('is_open', 'meeting_number');
+        }
         
         // Get all meetings from database
         $dbMeetings = \App\Models\ToeflListeningMeeting::orderBy('meeting_number')->get();
@@ -9191,7 +9333,12 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
                 
                 $meetings[] = [
                     'number' => $i,
-                    'is_locked' => $meeting ? $meeting->is_locked : false,
+                    'is_locked' => $this->resolveToeflLockedState(
+                        $batchLockMap,
+                        $i,
+                        $meeting ? (bool) $meeting->is_locked : false,
+                        (bool) $selectedClassPeriod
+                    ),
                     'transcript_enabled' => $meeting ? $meeting->transcript_enabled : false,
                     'completed' => $score !== null,
                     'score' => $score ? $score->score : null,
@@ -9205,7 +9352,12 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
                 
                 $meetings[] = [
                     'number' => $dbMeeting->meeting_number,
-                    'is_locked' => $dbMeeting->is_locked,
+                    'is_locked' => $this->resolveToeflLockedState(
+                        $batchLockMap,
+                        (int) $dbMeeting->meeting_number,
+                        (bool) $dbMeeting->is_locked,
+                        (bool) $selectedClassPeriod
+                    ),
                     'transcript_enabled' => $dbMeeting->transcript_enabled,
                     'completed' => $score !== null,
                     'score' => $score ? $score->score : null,
@@ -9213,19 +9365,151 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             }
         }
         
-        return view('assignments.toefl-itp.listening.index', compact('meetings'));
+        return view('assignments.toefl-itp.listening.index', compact('meetings', 'batchProgram', 'selectedClassPeriod'));
     }
 
     public function structureIndex()
     {
         $topics = \App\Models\ToeflStructureMeeting::where('meeting_number', '<', 50)->orderBy('meeting_number')->get();
-        return view('assignments.toefl-itp.structure.index', compact('topics'));
+        $user = Auth::user();
+        $batchProgram = $this->resolveBatchProgramForToefl($user);
+        $selectedClassPeriod = $this->resolveToeflSelectedClassPeriod($user);
+        $batchLockMap = collect();
+        if ($selectedClassPeriod) {
+            $batchLockMap = \App\Models\ClassPeriodToeflMeeting::where('class_period_id', $selectedClassPeriod->id)
+                ->where('module', 'structure')
+                ->pluck('is_open', 'meeting_number');
+            $topics->transform(function ($topic) use ($batchLockMap) {
+                $topic->is_locked = $this->resolveToeflLockedState(
+                    $batchLockMap,
+                    (int) $topic->meeting_number,
+                    (bool) $topic->is_locked,
+                    (bool) $selectedClassPeriod
+                );
+
+                return $topic;
+            });
+        }
+
+        return view('assignments.toefl-itp.structure.index', compact('topics', 'batchProgram', 'selectedClassPeriod'));
     }
 
     public function readingIndex()
     {
         $meetings = \App\Models\ToeflReadingMeeting::orderBy('meeting_number')->get();
-        return view('assignments.toefl-itp.reading.index', compact('meetings'));
+        $user = Auth::user();
+        $batchProgram = $this->resolveBatchProgramForToefl($user);
+        $selectedClassPeriod = $this->resolveToeflSelectedClassPeriod($user);
+        $batchLockMap = collect();
+        if ($selectedClassPeriod) {
+            $batchLockMap = \App\Models\ClassPeriodToeflMeeting::where('class_period_id', $selectedClassPeriod->id)
+                ->where('module', 'reading')
+                ->pluck('is_open', 'meeting_number');
+            $meetings->transform(function ($meeting) use ($batchLockMap) {
+                $meeting->is_locked = $this->resolveToeflLockedState(
+                    $batchLockMap,
+                    (int) $meeting->meeting_number,
+                    (bool) $meeting->is_locked,
+                    (bool) $selectedClassPeriod
+                );
+
+                return $meeting;
+            });
+        }
+
+        return view('assignments.toefl-itp.reading.index', compact('meetings', 'batchProgram', 'selectedClassPeriod'));
+    }
+
+    private function resolveBatchProgramForToefl($user)
+    {
+        $program = null;
+
+        if ($user && $user->program_id) {
+            $program = \App\Models\Program::with('classPeriods')->find($user->program_id);
+        }
+
+        if (!$program) {
+            $program = \App\Models\Program::with('classPeriods')->where('slug', 'toefl-itp')->first();
+        }
+
+        return $program;
+    }
+
+    private function resolveBatchProgramForIelts($user)
+    {
+        $program = null;
+
+        if ($user && $user->program_id) {
+            $candidate = \App\Models\Program::with('classPeriods')->find($user->program_id);
+            if ($candidate && str_starts_with((string) $candidate->slug, 'ielts-academic')) {
+                $program = $candidate;
+            }
+        }
+
+        if (!$program) {
+            $program = \App\Models\Program::with('classPeriods')
+                ->whereIn('slug', ['ielts-academic', 'ielts-academic-listening', 'ielts-academic-reading'])
+                ->orderByRaw("CASE slug
+                    WHEN 'ielts-academic' THEN 1
+                    WHEN 'ielts-academic-listening' THEN 2
+                    WHEN 'ielts-academic-reading' THEN 3
+                    ELSE 4
+                END")
+                ->first();
+        }
+
+        return $program;
+    }
+
+    private function resolveSelectedClassPeriodForProgram($program)
+    {
+        if (!$program || empty($program->period)) {
+            return null;
+        }
+
+        return $program->classPeriods->firstWhere('name', $program->period);
+    }
+
+    private function resolveToeflSelectedClassPeriod($user)
+    {
+        $batchProgram = $this->resolveBatchProgramForToefl($user);
+        return $this->resolveSelectedClassPeriodForProgram($batchProgram);
+    }
+
+    private function resolveToeflLockedState($batchLockMap, int $meetingNumber, bool $globalLocked, bool $useBatchRules = false): bool
+    {
+        if ($batchLockMap && $batchLockMap->has($meetingNumber)) {
+            return !((bool) $batchLockMap->get($meetingNumber));
+        }
+
+        if ($useBatchRules) {
+            return true;
+        }
+
+        return $globalLocked;
+    }
+
+    public function updateBatchPeriod(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user || (!$user->isAdmin() && !$user->isTeacher())) {
+            abort(403);
+        }
+
+        $request->validate([
+            'program_id' => 'required|integer|exists:programs,id',
+            'period' => 'required|string|max:255',
+        ]);
+
+        $program = \App\Models\Program::with('classPeriods')->findOrFail($request->integer('program_id'));
+
+        if ($program->classPeriods->isNotEmpty() && !$program->classPeriods->pluck('name')->contains($request->period)) {
+            return back()->with('error', 'Selected batch is invalid for this program.');
+        }
+
+        $program->update(['period' => $request->period]);
+
+        return back()->with('success', 'Active batch set to ' . $request->period . '.');
     }
 
     public function reorderReadingMeetings(Request $request)
@@ -9244,6 +9528,36 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function toggleReadingLock(\App\Models\ToeflReadingMeeting $meeting)
     {
+        $user = Auth::user();
+        if (!$user || (!$user->isAdmin() && !$user->isTeacher())) {
+            abort(403);
+        }
+
+        $classPeriodId = request()->integer('class_period_id');
+        if ($classPeriodId) {
+            $batchRule = \App\Models\ClassPeriodToeflMeeting::where('class_period_id', $classPeriodId)
+                ->where('module', 'reading')
+                ->where('meeting_number', $meeting->meeting_number)
+                ->first();
+
+            if ($batchRule) {
+                $batchRule->update(['is_open' => !$batchRule->is_open]);
+                $isOpenNow = (bool) $batchRule->fresh()->is_open;
+            } else {
+                \App\Models\ClassPeriodToeflMeeting::create([
+                    'class_period_id' => $classPeriodId,
+                    'module' => 'reading',
+                    'meeting_number' => $meeting->meeting_number,
+                    'is_open' => true,
+                ]);
+                $isOpenNow = true;
+            }
+
+            $classPeriod = \App\Models\ClassPeriod::find($classPeriodId);
+            $label = $isOpenNow ? 'OPEN' : 'LOCKED';
+            return back()->with('success', "Meeting is now {$label} for batch {$classPeriod->name}.");
+        }
+
         $meeting->update(['is_locked' => !$meeting->is_locked]);
         return back()->with('success', 'Meeting lock status updated.');
     }
@@ -9354,7 +9668,15 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         $meeting = \App\Models\ToeflReadingMeeting::where('meeting_number', $number)->firstOrFail();
 
         // Check Lock
-        if ($meeting->is_locked && !Auth::user()->isAdmin() && !Auth::user()->isTeacher()) {
+        $batchLockMap = collect();
+        $selectedClassPeriod = $this->resolveToeflSelectedClassPeriod(Auth::user());
+        if ($selectedClassPeriod) {
+            $batchLockMap = \App\Models\ClassPeriodToeflMeeting::where('class_period_id', $selectedClassPeriod->id)
+                ->where('module', 'reading')
+                ->pluck('is_open', 'meeting_number');
+        }
+        $isLocked = $this->resolveToeflLockedState($batchLockMap, (int) $meeting->meeting_number, (bool) $meeting->is_locked, (bool) $selectedClassPeriod);
+        if ($isLocked) {
             return redirect()->route('assignments.toefl-itp.reading')->with('error', 'Class is locked.');
         }
 
@@ -9386,7 +9708,15 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         $meeting = \App\Models\ToeflStructureMeeting::where('meeting_number', $number)->firstOrFail();
 
         // Check Lock
-        if ($meeting->is_locked && !Auth::user()->isAdmin() && !Auth::user()->isTeacher()) {
+        $batchLockMap = collect();
+        $selectedClassPeriod = $this->resolveToeflSelectedClassPeriod(Auth::user());
+        if ($selectedClassPeriod) {
+            $batchLockMap = \App\Models\ClassPeriodToeflMeeting::where('class_period_id', $selectedClassPeriod->id)
+                ->where('module', 'structure')
+                ->pluck('is_open', 'meeting_number');
+        }
+        $isLocked = $this->resolveToeflLockedState($batchLockMap, (int) $meeting->meeting_number, (bool) $meeting->is_locked, (bool) $selectedClassPeriod);
+        if ($isLocked) {
             return redirect()->route('assignments.toefl-itp.structure')->with('error', 'Class is locked.');
         }
 
@@ -9495,6 +9825,36 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function toggleStructureLock(\App\Models\ToeflStructureMeeting $meeting)
     {
+        $user = Auth::user();
+        if (!$user || (!$user->isAdmin() && !$user->isTeacher())) {
+            abort(403);
+        }
+
+        $classPeriodId = request()->integer('class_period_id');
+        if ($classPeriodId) {
+            $batchRule = \App\Models\ClassPeriodToeflMeeting::where('class_period_id', $classPeriodId)
+                ->where('module', 'structure')
+                ->where('meeting_number', $meeting->meeting_number)
+                ->first();
+
+            if ($batchRule) {
+                $batchRule->update(['is_open' => !$batchRule->is_open]);
+                $isOpenNow = (bool) $batchRule->fresh()->is_open;
+            } else {
+                \App\Models\ClassPeriodToeflMeeting::create([
+                    'class_period_id' => $classPeriodId,
+                    'module' => 'structure',
+                    'meeting_number' => $meeting->meeting_number,
+                    'is_open' => true,
+                ]);
+                $isOpenNow = true;
+            }
+
+            $classPeriod = \App\Models\ClassPeriod::find($classPeriodId);
+            $label = $isOpenNow ? 'OPEN' : 'LOCKED';
+            return back()->with('success', "Meeting is now {$label} for batch {$classPeriod->name}.");
+        }
+
         $meeting->update(['is_locked' => !$meeting->is_locked]);
         return back()->with('success', 'Meeting lock status updated.');
     }
@@ -9734,7 +10094,15 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         
         // Check lock status
         $meeting = \App\Models\ToeflListeningMeeting::where('meeting_number', $number)->first();
-        if ($meeting && $meeting->is_locked && !$user->isAdmin() && !$user->isTeacher()) {
+        $batchLockMap = collect();
+        $selectedClassPeriod = $this->resolveToeflSelectedClassPeriod($user);
+        if ($selectedClassPeriod) {
+            $batchLockMap = \App\Models\ClassPeriodToeflMeeting::where('class_period_id', $selectedClassPeriod->id)
+                ->where('module', 'listening')
+                ->pluck('is_open', 'meeting_number');
+        }
+        $isLocked = $meeting ? $this->resolveToeflLockedState($batchLockMap, (int) $meeting->meeting_number, (bool) $meeting->is_locked, (bool) $selectedClassPeriod) : false;
+        if ($isLocked) {
             return redirect()->route('assignments.toefl-itp.listening')
                 ->with('error', 'This meeting is currently locked.');
         }
@@ -9827,7 +10195,15 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         
         // Check lock status
         $meeting = \App\Models\ToeflListeningMeeting::where('meeting_number', $number)->first();
-        if ($meeting && $meeting->is_locked && !$user->isAdmin() && !$user->isTeacher()) {
+        $batchLockMap = collect();
+        $selectedClassPeriod = $this->resolveToeflSelectedClassPeriod($user);
+        if ($selectedClassPeriod) {
+            $batchLockMap = \App\Models\ClassPeriodToeflMeeting::where('class_period_id', $selectedClassPeriod->id)
+                ->where('module', 'listening')
+                ->pluck('is_open', 'meeting_number');
+        }
+        $isLocked = $meeting ? $this->resolveToeflLockedState($batchLockMap, (int) $meeting->meeting_number, (bool) $meeting->is_locked, (bool) $selectedClassPeriod) : false;
+        if ($isLocked) {
             return redirect()->route('assignments.toefl-itp.listening')
                 ->with('error', 'This meeting is currently locked.');
         }
@@ -10040,7 +10416,36 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function toggleListeningLock($number)
     {
+        if (!Auth::check() || !(Auth::user()->isAdmin() || Auth::user()->isTeacher())) {
+            abort(403);
+        }
+
         $meeting = \App\Models\ToeflListeningMeeting::where('meeting_number', $number)->firstOrFail();
+        $classPeriodId = request()->integer('class_period_id');
+        if ($classPeriodId) {
+            $batchRule = \App\Models\ClassPeriodToeflMeeting::where('class_period_id', $classPeriodId)
+                ->where('module', 'listening')
+                ->where('meeting_number', $meeting->meeting_number)
+                ->first();
+
+            if ($batchRule) {
+                $batchRule->update(['is_open' => !$batchRule->is_open]);
+                $isOpenNow = (bool) $batchRule->fresh()->is_open;
+            } else {
+                \App\Models\ClassPeriodToeflMeeting::create([
+                    'class_period_id' => $classPeriodId,
+                    'module' => 'listening',
+                    'meeting_number' => $meeting->meeting_number,
+                    'is_open' => true,
+                ]);
+                $isOpenNow = true;
+            }
+
+            $classPeriod = \App\Models\ClassPeriod::find($classPeriodId);
+            $label = $isOpenNow ? 'OPEN' : 'LOCKED';
+            return back()->with('success', "Meeting is now {$label} for batch {$classPeriod->name}.");
+        }
+
         $meeting->is_locked = !$meeting->is_locked;
         $meeting->save();
         
@@ -10049,6 +10454,10 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function toggleTranscriptLock($number)
     {
+        if (!Auth::check() || !(Auth::user()->isAdmin() || Auth::user()->isTeacher())) {
+            abort(403);
+        }
+
         $meeting = \App\Models\ToeflListeningMeeting::where('meeting_number', $number)->firstOrFail();
         $meeting->transcript_enabled = !$meeting->transcript_enabled;
         $meeting->save();
@@ -10312,13 +10721,32 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function grammarWriting()
     {
-        $program = \App\Models\Program::where('slug', 'grammar-for-writing')->with('meetings')->firstOrFail();
+        $program = \App\Models\Program::where('slug', 'grammar-for-writing')
+            ->with(['meetings', 'classPeriods'])
+            ->firstOrFail();
         
         $user = Auth::user();
 
+        $selectedClassPeriod = null;
+        if (!empty($program->period)) {
+            $selectedClassPeriod = $program->classPeriods
+                ->firstWhere('name', $program->period);
+        }
+
+        $periodMeetingStatus = collect();
+        if ($selectedClassPeriod) {
+            $periodMeetingStatus = $selectedClassPeriod->meetings()
+                ->pluck('class_period_meetings.is_open', 'meetings.id');
+        }
+
         // Map meetings to include dynamic lock status
-        $program->meetings->transform(function ($meeting) use ($user) {
-            $meeting->is_locked = $meeting->isLockedFor($user);
+        $program->meetings->transform(function ($meeting) use ($user, $selectedClassPeriod, $periodMeetingStatus) {
+            if ($selectedClassPeriod) {
+                $meeting->is_locked = !((bool)($periodMeetingStatus[$meeting->id] ?? false));
+            } else {
+                $meeting->is_locked = $meeting->isLockedFor($user);
+            }
+
             return $meeting;
         });
 
@@ -10351,11 +10779,16 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             20 => 'Writing Structure 3',
         ];
         
-        return view('assignments.grammar-writing', compact('program', 'scores', 'meetingTopics'));
+        return view('assignments.grammar-writing', compact('program', 'scores', 'meetingTopics', 'selectedClassPeriod'));
     }
 
     public function updatePeriod(Request $request)
     {
+        $user = Auth::user();
+        if (!$user || (!$user->isAdmin() && !$user->isTeacher())) {
+            abort(403);
+        }
+
         $request->validate([
             'period' => 'required|string|max:255',
         ]);
@@ -10363,13 +10796,53 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         $program = \App\Models\Program::where('slug', 'grammar-for-writing')->firstOrFail();
         $program->update(['period' => $request->period]);
 
-        return back()->with('success', 'Class period updated successfully.');
+        return back()
+            ->with('success', 'Active batch set to ' . $request->period . '.')
+            ->with('success_state', 'batch');
     }
 
     public function toggleLock(\App\Models\Meeting $meeting)
     {
+        $user = Auth::user();
+        if (!$user || (!$user->isAdmin() && !$user->isTeacher())) {
+            abort(403);
+        }
+
+        $classPeriodId = request()->integer('class_period_id');
+
+        if ($classPeriodId) {
+            $classPeriod = \App\Models\ClassPeriod::where('id', $classPeriodId)
+                ->where('program_id', $meeting->program_id)
+                ->first();
+
+            if ($classPeriod) {
+                $existing = $classPeriod->meetings()->where('meeting_id', $meeting->id)->first();
+                $isOpenNow = false;
+
+                if ($existing) {
+                    $isOpenNow = !$existing->pivot->is_open;
+                    $classPeriod->meetings()->updateExistingPivot($meeting->id, [
+                        'is_open' => $isOpenNow,
+                    ]);
+                } else {
+                    // Default without pivot is locked, so first toggle should open it.
+                    $classPeriod->meetings()->attach($meeting->id, ['is_open' => true]);
+                    $isOpenNow = true;
+                }
+
+                $newLabel = $isOpenNow ? 'OPEN' : 'LOCKED';
+                return back()
+                    ->with('success', $meeting->title . ' is now ' . $newLabel . ' for batch ' . $classPeriod->name . '.')
+                    ->with('success_state', $isOpenNow ? 'open' : 'locked');
+            }
+        }
+
+        // Fallback to global lock when no valid class period is selected.
         $meeting->update(['is_locked' => !$meeting->is_locked]);
-        return back()->with('success', 'Meeting lock status updated.');
+        $newLabel = $meeting->is_locked ? 'LOCKED' : 'OPEN';
+        return back()
+            ->with('success', $meeting->title . ' is now ' . $newLabel . '.')
+            ->with('success_state', $meeting->is_locked ? 'locked' : 'open');
     }
 
     /*
@@ -10377,10 +10850,24 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
      */
     public function meeting1()
     {
-        // Fetch questions from DB, ordered by question_number
-        $questions = \App\Models\GrammarQuestion::where('meeting_number', 1)
-            ->orderBy('question_number')
+        $hasSectionColumn = $this->grammarQuestionsHasSectionColumn();
+
+        // Fetch sentence questions from DB, ordered by question_number
+        $questionsQuery = \App\Models\GrammarQuestion::where('meeting_number', 1)
+            ->orderBy('question_number');
+
+        if ($hasSectionColumn) {
+            $questionsQuery->where(function ($q) {
+                $q->whereNull('section')
+                    ->orWhere('section', '!=', 'paragraph');
+            });
+        }
+
+        $questions = $questionsQuery
             ->get()
+            ->filter(function ($q) use ($hasSectionColumn) {
+                return $hasSectionColumn || (int) $q->question_number !== 999;
+            })
             ->keyBy('question_number') // Key by number to match view expectations
             ->map(function ($q) {
                 return [
@@ -10396,6 +10883,21 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             })
             ->toArray();
 
+        $paragraphQuery = \App\Models\GrammarQuestion::where('meeting_number', 1);
+        if ($hasSectionColumn) {
+            $paragraphQuery->where('section', 'paragraph');
+        } else {
+            $paragraphQuery->where('question_number', 999);
+        }
+        $dbParagraph = $paragraphQuery->first();
+        $paragraphData = $dbParagraph
+            ? ['id' => $dbParagraph->question_text, 'en' => $dbParagraph->correct_answer]
+            : $this->meeting1Paragraph;
+
+        if (empty($questions)) {
+            $questions = $this->meeting1FallbackQuestions;
+        }
+
         // Fetch vocab from DB
         $vocabList = \App\Models\GrammarVocabulary::where('meeting_number', 1)
             ->where('section', 'global')
@@ -10409,9 +10911,13 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             })
             ->toArray();
 
+        if (empty($vocabList)) {
+            $vocabList = $this->meeting1FallbackVocab;
+        }
+
         return view('assignments.grammar-writing.meeting1', [
             'questions' => $questions,
-            'paragraphData' => $this->meeting1Paragraph,
+            'paragraphData' => $paragraphData,
             'vocabList' => $vocabList,
             'submitted' => false
         ]);
@@ -10422,16 +10928,114 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         'en' => 'My mother is a chef. She cooks food for various events, like birthday parties and weddings. Her cooking is very delicious, so many people like it. She works with passion and always maintains the quality of her food. Every day, many customers order food from her.'
     ];
 
+    private $meeting1FallbackQuestions = [
+        1 => [
+            'id' => 'Saya menyukainya.',
+            'en' => 'I like her',
+            'example' => ['id' => 'Saya mengenalnya dengan baik.', 'en' => 'I know her well'],
+            'vocab' => [
+                'like' => ['id' => 'menyukai', 'pos' => '(v)'],
+                'her' => ['id' => 'dia (objek perempuan)', 'pos' => '(pron)'],
+            ],
+            'db_id' => null,
+        ],
+        2 => [
+            'id' => 'Dia memberiku sebuah buku.',
+            'en' => 'He gives me a book',
+            'example' => ['id' => 'Dia mengirimiku pesan setiap hari.', 'en' => 'He sends me a message every day'],
+            'vocab' => [
+                'gives' => ['id' => 'memberi', 'pos' => '(v)'],
+                'me' => ['id' => 'saya (objek)', 'pos' => '(pron)'],
+                'book' => ['id' => 'buku', 'pos' => '(n)'],
+            ],
+            'db_id' => null,
+        ],
+        3 => [
+            'id' => 'Mereka menolong kami.',
+            'en' => 'They help us',
+            'example' => ['id' => 'Mereka selalu mendukung kami.', 'en' => 'They always support us'],
+            'vocab' => [
+                'they' => ['id' => 'mereka', 'pos' => '(pron)'],
+                'help' => ['id' => 'menolong', 'pos' => '(v)'],
+                'us' => ['id' => 'kami (objek)', 'pos' => '(pron)'],
+            ],
+            'db_id' => null,
+        ],
+        4 => [
+            'id' => 'Kami melihat mereka di pasar.',
+            'en' => 'We see them at the market',
+            'example' => ['id' => 'Kami bertemu mereka kemarin.', 'en' => 'We met them yesterday'],
+            'vocab' => [
+                'we' => ['id' => 'kami', 'pos' => '(pron)'],
+                'them' => ['id' => 'mereka (objek)', 'pos' => '(pron)'],
+                'market' => ['id' => 'pasar', 'pos' => '(n)'],
+            ],
+            'db_id' => null,
+        ],
+        5 => [
+            'id' => 'Apakah kamu mengenalnya?',
+            'en' => 'Do you know him',
+            'example' => ['id' => 'Apakah kamu melihatnya?', 'en' => 'Do you see him'],
+            'vocab' => [
+                'do' => ['id' => 'apakah (aux)', 'pos' => '(aux)'],
+                'know' => ['id' => 'mengenal', 'pos' => '(v)'],
+                'him' => ['id' => 'dia (objek laki-laki)', 'pos' => '(pron)'],
+            ],
+            'db_id' => null,
+        ],
+    ];
+
+    private $meeting1FallbackVocab = [
+        'mother' => ['id' => 'ibu', 'pos' => '(n)', 'db_id' => null],
+        'chef' => ['id' => 'koki', 'pos' => '(n)', 'db_id' => null],
+        'cook' => ['id' => 'memasak', 'pos' => '(v)', 'db_id' => null],
+        'event' => ['id' => 'acara', 'pos' => '(n)', 'db_id' => null],
+        'birthday party' => ['id' => 'pesta ulang tahun', 'pos' => '(n)', 'db_id' => null],
+        'wedding' => ['id' => 'pernikahan', 'pos' => '(n)', 'db_id' => null],
+        'delicious' => ['id' => 'enak', 'pos' => '(adj)', 'db_id' => null],
+        'passion' => ['id' => 'semangat', 'pos' => '(n)', 'db_id' => null],
+        'quality' => ['id' => 'kualitas', 'pos' => '(n)', 'db_id' => null],
+        'customer' => ['id' => 'pelanggan', 'pos' => '(n)', 'db_id' => null],
+        'order' => ['id' => 'memesan', 'pos' => '(v)', 'db_id' => null],
+    ];
+
     public function meeting1Submit(Request $request)
     {
         $score = 0;
         $results = [];
         $paragraphResult = [];
 
+        $hasSectionColumn = $this->grammarQuestionsHasSectionColumn();
+
         // Fetch questions from DB
-        $questions = \App\Models\GrammarQuestion::where('meeting_number', 1)
-            ->orderBy('question_number')
-            ->get();
+        $questionsQuery = \App\Models\GrammarQuestion::where('meeting_number', 1)
+            ->orderBy('question_number');
+
+        if ($hasSectionColumn) {
+            $questionsQuery->where(function ($q) {
+                $q->whereNull('section')
+                    ->orWhere('section', '!=', 'paragraph');
+            });
+        }
+
+        $questions = $questionsQuery->get()->filter(function ($q) use ($hasSectionColumn) {
+            return $hasSectionColumn || (int) $q->question_number !== 999;
+        })->values();
+
+        if ($questions->isEmpty()) {
+            $questions = collect($this->meeting1FallbackQuestions)->map(function ($q, $number) {
+                return (object) [
+                    'id' => null,
+                    'meeting_number' => 1,
+                    'question_number' => (int) $number,
+                    'question_text' => $q['id'],
+                    'correct_answer' => $q['en'],
+                    'example_id' => $q['example']['id'] ?? null,
+                    'example_en' => $q['example']['en'] ?? null,
+                    'vocab' => $q['vocab'] ?? [],
+                ];
+            })->values();
+        }
 
         // Process Sentence Questions
         foreach ($questions as $q) {
@@ -10472,10 +11076,21 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             ];
         }
 
+        $paragraphQuery = \App\Models\GrammarQuestion::where('meeting_number', 1);
+        if ($hasSectionColumn) {
+            $paragraphQuery->where('section', 'paragraph');
+        } else {
+            $paragraphQuery->where('question_number', 999);
+        }
+        $dbParagraph = $paragraphQuery->first();
+        $paragraphReference = $dbParagraph
+            ? ['id' => $dbParagraph->question_text, 'en' => $dbParagraph->correct_answer]
+            : $this->meeting1Paragraph;
+
         // Process Paragraph Question
         $userParagraph = trim($request->input('paragraph_ans', ''));
         $cleanUserPara = strtolower(rtrim($userParagraph, '.!'));
-        $cleanCorrectPara = strtolower(rtrim($this->meeting1Paragraph['en'], '.!'));
+        $cleanCorrectPara = strtolower(rtrim($paragraphReference['en'], '.!'));
         
         $paraPercent = 0;
         similar_text($cleanUserPara, $cleanCorrectPara, $paraPercent);
@@ -10483,14 +11098,14 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         $score += $paraScore;
         
         $userParaWords = explode(' ', $userParagraph);
-        $correctParaWords = explode(' ', $this->meeting1Paragraph['en']);
+        $correctParaWords = explode(' ', $paragraphReference['en']);
         $formattedParaAnswer = $this->getDiffFeedback($userParaWords, $correctParaWords);
         
         $paragraphResult = [
             'user_answer' => $userParagraph,
             'formatted_answer' => $formattedParaAnswer,
             'score' => $paraScore,
-            'correct_answer' => $this->meeting1Paragraph['en']
+            'correct_answer' => $paragraphReference['en']
         ];
 
         $maxRawScore = ($questions->count() * 10) + 50;
@@ -10511,6 +11126,10 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
                 ]];
             })
             ->toArray();
+
+        if (empty($vocabList)) {
+            $vocabList = $this->meeting1FallbackVocab;
+        }
         
         // Prepare questions array for view (same format as meeting1)
         $questionsView = $questions->keyBy('question_number')->map(function ($q) {
@@ -10528,7 +11147,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
         return view('assignments.grammar-writing.meeting1', [
             'questions' => $questionsView,
-            'paragraphData' => $this->meeting1Paragraph,
+            'paragraphData' => $paragraphReference,
             'vocabList' => $vocabList,
             'submitted' => true,
             'score' => $finalScore,
@@ -11333,6 +11952,58 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         return redirect()->route('assignments.grammar-writing.meeting2');
     }
 
+    private function grammarQuestionsHasSectionColumn(): bool
+    {
+        static $hasSectionColumn = null;
+
+        if ($hasSectionColumn === null) {
+            $hasSectionColumn = \Illuminate\Support\Facades\Schema::hasColumn('grammar_questions', 'section');
+        }
+
+        return $hasSectionColumn;
+    }
+
+    private $meeting3FallbackQuestions = [
+        1 => ['id' => 'Tempat penyimpanan air telah dibangun di desa ini.', 'en' => 'Water storage has been built in this village', 'tense' => 'Present Perfect Passive', 'vocab' => ['Water' => ['id' => 'Air', 'pos' => '(n)'], 'Storage' => ['id' => 'Penyimpanan', 'pos' => '(n)'], 'Village' => ['id' => 'Desa', 'pos' => '(n)']]],
+        2 => ['id' => 'Kemerdekaan Indonesia ada pada tanggal 17 agustus 1945.', 'en' => 'Indonesia\'s independence was on August 17, 1945', 'tense' => 'Simple Past Nominal', 'vocab' => ['Independence' => ['id' => 'Kemerdekaan', 'pos' => '(n)'], 'August' => ['id' => 'Agustus', 'pos' => '(n)']]],
+        3 => ['id' => 'Pembangunan daerah membantu perekonomian lokal.', 'en' => 'Regional development helps the local economy', 'tense' => 'Simple Present Verbal', 'vocab' => ['Regional' => ['id' => 'Daerah', 'pos' => '(adj)'], 'Development' => ['id' => 'Pembangunan', 'pos' => '(n)'], 'Help' => ['id' => 'Membantu', 'pos' => '(v)'], 'Local' => ['id' => 'Lokal', 'pos' => '(adj)'], 'Economy' => ['id' => 'Perekonomian', 'pos' => '(n)']]],
+        4 => ['id' => 'Pemanasan global sedang dibicarakan oleh seluruh orang di dunia.', 'en' => 'Global warming is being discussed by everyone in the world', 'tense' => 'Present Continuous Passive', 'vocab' => ['Global warming' => ['id' => 'Pemanasan global', 'pos' => '(n)'], 'Discuss' => ['id' => 'Membicarakan', 'pos' => '(v)'], 'Everyone' => ['id' => 'Seluruh orang', 'pos' => '(pron)'], 'World' => ['id' => 'Dunia', 'pos' => '(n)']]],
+        5 => ['id' => 'Laut adalah tempat dari banyak mineral di Bumi.', 'en' => 'The ocean is the place of many minerals on Earth', 'tense' => 'Simple Present Nominal', 'vocab' => ['Ocean' => ['id' => 'Laut', 'pos' => '(n)'], 'Place' => ['id' => 'Tempat', 'pos' => '(n)'], 'Many' => ['id' => 'Banyak', 'pos' => '(adj)'], 'Mineral' => ['id' => 'Mineral', 'pos' => '(n)'], 'Earth' => ['id' => 'Bumi', 'pos' => '(n)']]],
+        6 => ['id' => 'Banyak kebijakan telah diterapkan untuk melindungi satwa liar.', 'en' => 'Many policies have been implemented to protect wildlife', 'tense' => 'Present Perfect Passive', 'vocab' => ['Many' => ['id' => 'Banyak', 'pos' => '(adj)'], 'Policy' => ['id' => 'Kebijakan', 'pos' => '(n)'], 'Implement' => ['id' => 'Menerapkan', 'pos' => '(v)'], 'Protect' => ['id' => 'Melindungi', 'pos' => '(v)'], 'Wildlife' => ['id' => 'Satwa liar', 'pos' => '(n)']]],
+        7 => ['id' => 'Pendidikan adalah kunci untuk masa depan yang lebih baik.', 'en' => 'Education is the key to a better future', 'tense' => 'Simple Present Nominal', 'vocab' => ['Education' => ['id' => 'Pendidikan', 'pos' => '(n)'], 'Key' => ['id' => 'Kunci', 'pos' => '(n)'], 'Future' => ['id' => 'Masa depan', 'pos' => '(n)'], 'Better' => ['id' => 'Lebih baik', 'pos' => '(adj)']]],
+        8 => ['id' => 'Mereka sedang mendiskusikan rencana proyek baru.', 'en' => 'They are discussing the new project plan', 'tense' => 'Present Continuous Verbal', 'vocab' => ['Discuss' => ['id' => 'Mendiskusikan', 'pos' => '(v)'], 'Plan' => ['id' => 'Rencana', 'pos' => '(n)'], 'Project' => ['id' => 'Proyek', 'pos' => '(n)'], 'New' => ['id' => 'Baru', 'pos' => '(adj)']]],
+        9 => ['id' => 'Teknologi telah mengubah cara kita berkomunikasi.', 'en' => 'Technology has changed the way we communicate', 'tense' => 'Present Perfect Verbal', 'vocab' => ['Technology' => ['id' => 'Teknologi', 'pos' => '(n)'], 'Change' => ['id' => 'Mengubah', 'pos' => '(v)'], 'Way' => ['id' => 'Cara', 'pos' => '(n)'], 'Communicate' => ['id' => 'Berkomunikasi', 'pos' => '(v)']]],
+        10 => ['id' => 'Gunung krakatau akan menjadi lebih tinggi.', 'en' => 'Mount Krakatoa will become higher', 'tense' => 'Simple Future Verbal', 'vocab' => ['Mount' => ['id' => 'Gunung', 'pos' => '(n)'], 'Become' => ['id' => 'Menjadi', 'pos' => '(v)'], 'Higher' => ['id' => 'Lebih tinggi', 'pos' => '(adj)']]],
+        11 => ['id' => 'Apollo 11 mendarat di bulan 50 tahun lalu.', 'en' => 'Apollo 11 landed on the moon 50 years ago', 'tense' => 'Simple Past Verbal', 'vocab' => ['Land' => ['id' => 'Mendarat', 'pos' => '(v)'], 'Moon' => ['id' => 'Bulan', 'pos' => '(n)'], 'Ago' => ['id' => 'Lalu/Yang lalu', 'pos' => '(adv)']]],
+        12 => ['id' => 'Pertanian telah berkembang di Asia sebelum di America.', 'en' => 'Agriculture had developed in Asia before in America', 'tense' => 'Past Perfect Verbal', 'vocab' => ['Agriculture' => ['id' => 'Pertanian', 'pos' => '(n)'], 'Develop' => ['id' => 'Berkembang', 'pos' => '(v)'], 'Before' => ['id' => 'Sebelum', 'pos' => '(prep)']]],
+        13 => ['id' => 'Pembangunan negara telah sedang diwujudkan saat ini.', 'en' => 'National development has been being realized at this moment', 'tense' => 'Present Perfect Continuous Passive', 'vocab' => ['National' => ['id' => 'Negara', 'pos' => '(adj)'], 'Development' => ['id' => 'Pembangunan', 'pos' => '(n)'], 'Realize' => ['id' => 'Mewujudkan', 'pos' => '(v)'], 'Moment' => ['id' => 'Saat', 'pos' => '(n)']]],
+        14 => ['id' => 'Kami akan mengimplementasikan kebijakan baru bulan depan.', 'en' => 'We will implement the new policy next month', 'tense' => 'Simple Future Verbal', 'vocab' => ['Implement' => ['id' => 'Mengimplementasikan', 'pos' => '(v)'], 'Policy' => ['id' => 'Kebijakan', 'pos' => '(n)'], 'Next month' => ['id' => 'Bulan depan', 'pos' => '(adv)']]],
+        15 => ['id' => 'Anak-anak itu bermain di taman setiap sore.', 'en' => 'Those children play in the park every afternoon', 'tense' => 'Simple Present Verbal', 'vocab' => ['Children' => ['id' => 'Anak-anak', 'pos' => '(n)'], 'Play' => ['id' => 'Bermain', 'pos' => '(v)'], 'Park' => ['id' => 'Taman', 'pos' => '(n)'], 'Every afternoon' => ['id' => 'Setiap sore', 'pos' => '(adv)']]],
+        16 => ['id' => 'Peraturan harus diikuti secara ketat.', 'en' => 'Regulations must be followed strictly', 'tense' => 'Modal Passive', 'vocab' => ['Regulation' => ['id' => 'Peraturan', 'pos' => '(n)'], 'Must' => ['id' => 'Harus', 'pos' => '(modal)'], 'Follow' => ['id' => 'Mengikuti', 'pos' => '(v)'], 'Strictly' => ['id' => 'Secara ketat', 'pos' => '(adv)']]],
+        17 => ['id' => 'Pemerintah sedang ceroboh dalam kebijakan ini.', 'en' => 'The government is being careless in this policy', 'tense' => 'Present Continuous Nominal', 'vocab' => ['Government' => ['id' => 'Pemerintah', 'pos' => '(n)'], 'Careless' => ['id' => 'Ceroboh', 'pos' => '(adj)'], 'Policy' => ['id' => 'Kebijakan', 'pos' => '(n)']]],
+        18 => ['id' => 'Kerusakan ekosistem bisa menyebabkan kerusakan ekonomi.', 'en' => 'Ecosystem damage can cause economic damage', 'tense' => 'Modal Present', 'vocab' => ['Ecosystem' => ['id' => 'Ekosistem', 'pos' => '(n)'], 'Damage' => ['id' => 'Kerusakan', 'pos' => '(n)'], 'Can' => ['id' => 'Bisa', 'pos' => '(modal)'], 'Cause' => ['id' => 'Menyebabkan', 'pos' => '(v)'], 'Economic' => ['id' => 'Ekonomi', 'pos' => '(adj)']]],
+        19 => ['id' => 'Iklim global telah dipengaruhi oleh aktivitas manusia selama 1 abad ini.', 'en' => 'Global climate has been influenced by human activity for this century', 'tense' => 'Present Perfect Passive', 'vocab' => ['Global' => ['id' => 'Global', 'pos' => '(adj)'], 'Climate' => ['id' => 'Iklim', 'pos' => '(n)'], 'Influence' => ['id' => 'Mempengaruhi', 'pos' => '(v)'], 'Human' => ['id' => 'Manusia', 'pos' => '(n)'], 'Activity' => ['id' => 'Aktivitas', 'pos' => '(n)'], 'Century' => ['id' => 'Abad', 'pos' => '(n)']]],
+        20 => ['id' => 'Populasi Asia telah berada nomor 1 di dunia selama berabad - abad.', 'en' => 'Asia\'s population has been number 1 in the world for centuries', 'tense' => 'Present Perfect Nominal', 'vocab' => ['Population' => ['id' => 'Populasi', 'pos' => '(n)'], 'Number' => ['id' => 'Nomor', 'pos' => '(n)'], 'World' => ['id' => 'Dunia', 'pos' => '(n)'], 'Centuries' => ['id' => 'Berabad-abad', 'pos' => '(n)']]],
+    ];
+
+    private $meeting3FallbackParagraph = [
+        'id' => 'Polusi plastik merusak lingkungan setiap hari. Sampah plastik sedang mencemari lautan di seluruh dunia. Para ilmuwan telah menemukan mikroplastik dalam tubuh hewan laut. Banyak komunitas telah lama memperingatkan bahaya plastik sekali pakai. Larangan penggunaan kantong plastik dapat mengurangi jumlah sampah di tempat umum. Botol plastik bekas didaur ulang oleh beberapa perusahaan ramah lingkungan. Pada masa lalu, masyarakat kurang menyadari dampak jangka panjang limbah plastik. Anak-anak sekolah sedang diajari tentang pentingnya pengelolaan sampah. Masalah polusi plastik adalah ancaman serius bagi keberlanjutan bumi. Tahun depan, pemerintah akan memberlakukan regulasi baru tentang penggunaan plastik. Program pengurangan plastik akan sedang dilaksanakan di berbagai kota besar. Para aktivis lingkungan akan telah mengorganisir kampanye global dalam beberapa bulan mendatang. Upaya global harus difokuskan pada solusi jangka panjang. Negara-negara berkembang bisa mengalami kesulitan dalam menerapkan kebijakan ramah lingkungan. Organisasi internasional telah lama berusaha menyatukan negara-negara untuk mengatasi krisis ini. Edukasi sejak dini merupakan kunci dalam mengubah kebiasaan konsumen. Pada masa lalu, penggunaan plastik adalah simbol kemajuan dan kemudahan. Jika tidak dikendalikan, polusi plastik akan menjadi bencana lingkungan yang lebih besar.',
+        'en' => 'Plastic pollution damages the environment every day. Plastic waste is polluting oceans all over the world. Scientists have found microplastics in the bodies of marine animals. Many communities have long warned about the dangers of single-use plastic. The ban on plastic bags can reduce the amount of waste in public places. Used plastic bottles are recycled by several eco-friendly companies. In the past, society was less aware of the long-term impact of plastic waste. School children are being taught about the importance of waste management. The problem of plastic pollution is a serious threat to the earth\'s sustainability. Next year, the government will enforce new regulations on plastic use. Plastic reduction programs will be being implemented in various major cities. Environmental activists will have organized global campaigns in the coming months. Global efforts must be focused on long-term solutions. Developing countries could experience difficulties in implementing eco-friendly policies. International organizations have long been trying to unite countries to overcome this crisis. Early education is the key to changing consumer habits. In the past, plastic use was a symbol of progress and convenience. If not controlled, plastic pollution will become a greater environmental disaster.',
+        'vocab' => [
+            'Plastic' => ['id' => 'Plastik', 'pos' => '(n)'],
+            'Pollution' => ['id' => 'Polusi', 'pos' => '(n)'],
+            'Environment' => ['id' => 'Lingkungan', 'pos' => '(n)'],
+            'Waste' => ['id' => 'Sampah/Limbah', 'pos' => '(n)'],
+            'Ocean' => ['id' => 'Lautan', 'pos' => '(n)'],
+            'Scientist' => ['id' => 'Ilmuwan', 'pos' => '(n)'],
+            'Microplastic' => ['id' => 'Mikroplastik', 'pos' => '(n)'],
+            'Single-use' => ['id' => 'Sekali pakai', 'pos' => '(adj)'],
+            'Regulation' => ['id' => 'Regulasi', 'pos' => '(n)'],
+            'Sustainability' => ['id' => 'Keberlanjutan', 'pos' => '(n)'],
+            'Disaster' => ['id' => 'Bencana', 'pos' => '(n)']
+        ]
+    ];
+
     public function meeting3(Request $request)
     {
         $submitted = session('meeting3_submitted', false);
@@ -11342,11 +12013,21 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         $userAnswers = session('meeting3_user_answers', []);
         $userParagraphAnswer = session('meeting3_user_paragraph_answer', '');
 
+        $hasSectionColumn = $this->grammarQuestionsHasSectionColumn();
+
         // Fetch Questions
-        $questions = \App\Models\GrammarQuestion::where('meeting_number', 3)
-            ->where('section', 'sentences')
-            ->orderBy('question_number')
-            ->get()
+        $questionsQuery = \App\Models\GrammarQuestion::where('meeting_number', 3)
+            ->orderBy('question_number');
+
+        if ($hasSectionColumn) {
+            $questionsQuery->where('section', 'sentences');
+        }
+
+        $questions = $questionsQuery->get()
+            ->filter(function ($q) use ($hasSectionColumn) {
+                // Legacy schema stores only sentence rows unless a dedicated paragraph marker (q_num 999) exists.
+                return $hasSectionColumn || (int) $q->question_number !== 999;
+            })
             ->map(function ($q) {
                 return [
                     'id' => $q->question_text,
@@ -11358,16 +12039,39 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
                 ];
             });
 
-        // Fetch Paragraph
-        $paragraph = \App\Models\GrammarQuestion::where('meeting_number', 3)
-            ->where('section', 'paragraph')
-            ->first();
+        if ($questions->isEmpty()) {
+            $questions = collect($this->meeting3FallbackQuestions)->map(function ($q, $number) {
+                return [
+                    'id' => $q['id'],
+                    'en' => $q['en'],
+                    'tense' => $q['tense'],
+                    'vocab' => $q['vocab'] ?? [],
+                    'original_id' => 0,
+                    'q_num' => (int) $number,
+                ];
+            });
+        }
 
-        $paragraphData = $paragraph ? [
-            'id' => $paragraph->question_text,
-            'en' => $paragraph->correct_answer,
-            'vocab' => $paragraph->vocab
-        ] : ['id' => '', 'en' => '', 'vocab' => []];
+        // Fetch Paragraph
+        $paragraphQuery = \App\Models\GrammarQuestion::where('meeting_number', 3);
+        if ($hasSectionColumn) {
+            $paragraphQuery->where('section', 'paragraph');
+        } else {
+            $paragraphQuery->where('question_number', 999);
+        }
+        $paragraph = $paragraphQuery->first();
+
+        $paragraphData = $paragraph
+            ? [
+                'id' => $paragraph->question_text,
+                'en' => $paragraph->correct_answer,
+                'vocab' => $paragraph->vocab
+            ]
+            : [
+                'id' => $this->meeting3FallbackParagraph['id'],
+                'en' => $this->meeting3FallbackParagraph['en'],
+                'vocab' => $this->meeting3FallbackParagraph['vocab']
+            ];
 
         return view('assignments.grammar-writing.meeting3', [
             'questions' => $questions,
@@ -11389,16 +12093,44 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         $userAnswers = $request->input('userAnswers', []);
         $userParagraphAnswer = $request->input('userParagraphAnswer', '');
         
+        $hasSectionColumn = $this->grammarQuestionsHasSectionColumn();
+
         // Fetch Questions
-        $questions = \App\Models\GrammarQuestion::where('meeting_number', 3)
-            ->where('section', 'sentences')
-            ->orderBy('question_number')
-            ->get();
+        $questionsQuery = \App\Models\GrammarQuestion::where('meeting_number', 3)
+            ->orderBy('question_number');
+
+        if ($hasSectionColumn) {
+            $questionsQuery->where('section', 'sentences');
+        }
+
+        $questions = $questionsQuery->get()->filter(function ($q) use ($hasSectionColumn) {
+            return $hasSectionColumn || (int) $q->question_number !== 999;
+        })->values();
+
+        if ($questions->isEmpty()) {
+            $questions = collect($this->meeting3FallbackQuestions)->map(function ($q, $number) {
+                return (object) [
+                    'question_number' => (int) $number,
+                    'correct_answer' => $q['en'],
+                    'tense' => $q['tense'],
+                ];
+            })->values();
+        }
             
         // Fetch Paragraph
-        $paragraphData = \App\Models\GrammarQuestion::where('meeting_number', 3)
-            ->where('section', 'paragraph')
-            ->first();
+        $paragraphQuery = \App\Models\GrammarQuestion::where('meeting_number', 3);
+        if ($hasSectionColumn) {
+            $paragraphQuery->where('section', 'paragraph');
+        } else {
+            $paragraphQuery->where('question_number', 999);
+        }
+        $paragraphData = $paragraphQuery->first();
+
+        if (!$paragraphData) {
+            $paragraphData = (object) [
+                'correct_answer' => $this->meeting3FallbackParagraph['en'],
+            ];
+        }
 
         $results = [];
         $totalScore = 0;
@@ -13818,7 +14550,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         $userParagraphAnswer = session('meeting11_user_paragraph_answer', '');
 
         // Fetch questions from DB
-        $questions = \App\Models\GrammarQuestion::where('meeting_number', 11)
+                $questions = \App\Models\GrammarQuestion::where('meeting_number', 11)
             ->where(function($q) {
                 $q->whereNull('section')
                   ->orWhere('section', '!=', 'paragraph');
@@ -13835,15 +14567,27 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
                 ];
             });
 
+        if ($questions->isEmpty()) {
+            $questions = collect($this->meeting11Questions)->map(function ($q) {
+                return [
+                    'id' => $q['id'],
+                    'en' => $q['en'],
+                    'vocab' => $q['vocab'] ?? [],
+                    'example' => $q['example'] ?? '',
+                    'db_id' => null,
+                ];
+            })->values();
+        }
+
         // Fetch Paragraph from DB
         $dbParagraph = \App\Models\GrammarQuestion::where('meeting_number', 11)
             ->where('section', 'paragraph')
             ->first();
 
         // Fallback or use DB data
-        $paragraphId = $dbParagraph ? $dbParagraph->question_text : '';
-        $paragraphEn = $dbParagraph ? $dbParagraph->correct_answer : '';
-        $paragraphVocab = $dbParagraph ? ($dbParagraph->vocab ?? []) : [];
+        $paragraphId = $dbParagraph ? $dbParagraph->question_text : $this->meeting11Paragraph['id'];
+        $paragraphEn = $dbParagraph ? $dbParagraph->correct_answer : $this->meeting11Paragraph['en'];
+        $paragraphVocab = $dbParagraph ? ($dbParagraph->vocab ?? []) : ($this->meeting11Paragraph['vocab'] ?? []);
         $paragraphDbId = $dbParagraph ? $dbParagraph->id : null;
 
         return view('assignments.grammar-writing.meeting11', [
@@ -13867,7 +14611,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         $userParagraphAnswer = $request->input('userParagraphAnswer', '');
         
         // Fetch questions from DB for scoring
-        $dbQuestions = \App\Models\GrammarQuestion::where('meeting_number', 11)
+                $dbQuestions = \App\Models\GrammarQuestion::where('meeting_number', 11)
             ->where(function($q) {
                 $q->whereNull('section')
                   ->orWhere('section', '!=', 'paragraph');
@@ -13881,6 +14625,16 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
                     'db_id' => $q->id
                  ];
             });
+
+        if ($dbQuestions->isEmpty()) {
+            $dbQuestions = collect($this->meeting11Questions)->values()->map(function ($q) {
+                return [
+                    'id' => $q['id'],
+                    'en' => $q['en'],
+                    'db_id' => null,
+                ];
+            });
+        }
 
         $results = [];
         $totalScore = 0;
@@ -13924,7 +14678,8 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             ->where('section', 'paragraph')
             ->first();
 
-        $paraCorrectWords = preg_split('/\s+/', $dbParagraph ? $dbParagraph->correct_answer : '', -1, PREG_SPLIT_NO_EMPTY);
+        $paragraphCorrectAnswer = $dbParagraph ? $dbParagraph->correct_answer : $this->meeting11Paragraph['en'];
+        $paraCorrectWords = preg_split('/\s+/', $paragraphCorrectAnswer, -1, PREG_SPLIT_NO_EMPTY);
         $paraUserWords = preg_split('/\s+/', $userParagraphAnswer, -1, PREG_SPLIT_NO_EMPTY);
         
         $paraMatchCount = 0;
@@ -13946,7 +14701,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         $paraFormatted = $this->getDiffFeedback($paraUserWords, $paraCorrectWords);
         $totalScore += $paraScore;
         
-        $finalScore = round(($totalScore / $maxScore) * 100);
+        $finalScore = $maxScore > 0 ? round(($totalScore / $maxScore) * 100) : 0;
 
         session([
             'meeting11_submitted' => true,
@@ -14226,7 +14981,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         $userParagraphAnswer = session('meeting12_user_paragraph_answer', '');
 
         // Fetch questions from DB
-        $questions = \App\Models\GrammarQuestion::where('meeting_number', 12)
+                $questions = \App\Models\GrammarQuestion::where('meeting_number', 12)
             ->where(function($q) {
                 $q->whereNull('section')
                   ->orWhere('section', '!=', 'paragraph');
@@ -14245,14 +15000,28 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
                 ];
             });
 
+        if ($questions->isEmpty()) {
+            $questions = collect($this->meeting12Questions)->values()->map(function ($q) {
+                return [
+                    'id' => $q['id'],
+                    'en' => $q['en'],
+                    'type' => $q['type'] ?? '',
+                    'conjunction' => $q['conjunction'] ?? '',
+                    'example' => $q['example'] ?? ['id' => '', 'en' => ''],
+                    'vocab' => $q['vocab'] ?? [],
+                    'db_id' => null,
+                ];
+            });
+        }
+
         // Fetch Paragraph from DB
         $dbParagraph = \App\Models\GrammarQuestion::where('meeting_number', 12)
             ->where('section', 'paragraph')
             ->first();
 
-        $paragraphId = $dbParagraph ? $dbParagraph->question_text : '';
-        $paragraphEn = $dbParagraph ? $dbParagraph->correct_answer : '';
-        $paragraphVocab = $dbParagraph ? ($dbParagraph->vocab ?? []) : [];
+        $paragraphId = $dbParagraph ? $dbParagraph->question_text : $this->meeting12Paragraph['id'];
+        $paragraphEn = $dbParagraph ? $dbParagraph->correct_answer : $this->meeting12Paragraph['en'];
+        $paragraphVocab = $dbParagraph ? ($dbParagraph->vocab ?? []) : ($this->meeting12Paragraph['vocab'] ?? []);
         $paragraphDbId = $dbParagraph ? $dbParagraph->id : null;
 
         return view('assignments.grammar-writing.meeting12', [
@@ -14276,7 +15045,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         $userParagraphAnswer = $request->input('userParagraphAnswer', '');
         
         // Fetch questions from DB for scoring
-        $dbQuestions = \App\Models\GrammarQuestion::where('meeting_number', 12)
+                $dbQuestions = \App\Models\GrammarQuestion::where('meeting_number', 12)
             ->where(function($q) {
                 $q->whereNull('section')
                   ->orWhere('section', '!=', 'paragraph');
@@ -14290,6 +15059,16 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
                     'db_id' => $q->id
                  ];
             });
+
+        if ($dbQuestions->isEmpty()) {
+            $dbQuestions = collect($this->meeting12Questions)->values()->map(function ($q) {
+                return [
+                    'id' => $q['id'],
+                    'en' => $q['en'],
+                    'db_id' => null,
+                ];
+            });
+        }
 
         $results = [];
         $totalScore = 0;
@@ -14333,7 +15112,8 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             ->where('section', 'paragraph')
             ->first();
 
-        $paraCorrectWords = preg_split('/\s+/', $dbParagraph ? $dbParagraph->correct_answer : '', -1, PREG_SPLIT_NO_EMPTY);
+        $paragraphCorrectAnswer = $dbParagraph ? $dbParagraph->correct_answer : $this->meeting12Paragraph['en'];
+        $paraCorrectWords = preg_split('/\s+/', $paragraphCorrectAnswer, -1, PREG_SPLIT_NO_EMPTY);
         $paraUserWords = preg_split('/\s+/', $userParagraphAnswer, -1, PREG_SPLIT_NO_EMPTY);
         
         $paraMatchCount = 0;
@@ -14355,7 +15135,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         $paraFormatted = $this->getDiffFeedback($paraUserWords, $paraCorrectWords);
         $totalScore += $paraScore;
         
-        $finalScore = round(($totalScore / $maxScore) * 100);
+        $finalScore = $maxScore > 0 ? round(($totalScore / $maxScore) * 100) : 0;
 
         session([
             'meeting12_submitted' => true,
@@ -17059,12 +17839,54 @@ $paraFormatted = $this->getDiffFeedback($paraUserWords, $paraCorrectWords);
         $userAnswers = session('meeting4_user_answers', []);
         $userParagraphAnswer = session('meeting4_user_paragraph_answer', '');
 
+        $hasSectionColumn = $this->grammarQuestionsHasSectionColumn();
+
+        $questionsQuery = \App\Models\GrammarQuestion::where('meeting_number', 4)
+            ->orderBy('question_number');
+        if ($hasSectionColumn) {
+            $questionsQuery->where(function ($q) {
+                $q->whereNull('section')
+                    ->orWhere('section', '!=', 'paragraph');
+            });
+        }
+
+        $dbQuestions = $questionsQuery->get()->filter(function ($q) use ($hasSectionColumn) {
+            return $hasSectionColumn || (int) $q->question_number !== 999;
+        })->values();
+
+        $questions = $dbQuestions->isNotEmpty()
+            ? $dbQuestions->mapWithKeys(function ($q) {
+                return [$q->question_number => [
+                    'id' => $q->question_text,
+                    'en' => $q->correct_answer,
+                    'vocab' => is_array($q->vocab) ? $q->vocab : [],
+                    'db_id' => $q->id,
+                ]];
+            })->toArray()
+            : $this->meeting4Questions;
+
+        $paragraphQuery = \App\Models\GrammarQuestion::where('meeting_number', 4);
+        if ($hasSectionColumn) {
+            $paragraphQuery->where('section', 'paragraph');
+        } else {
+            $paragraphQuery->where('question_number', 999);
+        }
+        $dbParagraph = $paragraphQuery->first();
+        $paragraphData = $dbParagraph
+            ? [
+                'id' => $dbParagraph->question_text,
+                'en' => $dbParagraph->correct_answer,
+                'sentences' => [],
+                'vocab' => is_array($dbParagraph->vocab) ? $dbParagraph->vocab : [],
+            ]
+            : $this->meeting4Paragraph;
+
         return view('assignments.grammar-writing.meeting4', [
-            'questions' => $this->meeting4Questions,
-            'fullParagraphId' => $this->meeting4Paragraph['id'],
-            'fullParagraphEn' => $this->meeting4Paragraph['en'],
-            'paragraphSentences' => $this->meeting4Paragraph['sentences'],
-            'paragraphVocab' => $this->meeting4Paragraph['vocab'] ?? [],
+            'questions' => $questions,
+            'fullParagraphId' => $paragraphData['id'],
+            'fullParagraphEn' => $paragraphData['en'],
+            'paragraphSentences' => $paragraphData['sentences'],
+            'paragraphVocab' => $paragraphData['vocab'] ?? [],
             'submitted' => $submitted,
             'results' => $results,
             'paragraphResult' => $paragraphResult,
@@ -17078,13 +17900,49 @@ $paraFormatted = $this->getDiffFeedback($paraUserWords, $paraCorrectWords);
     {
         $userAnswers = $request->input('userAnswers', []);
         $userParagraphAnswer = $request->input('userParagraphAnswer', '');
+
+        $hasSectionColumn = $this->grammarQuestionsHasSectionColumn();
+
+        $questionsQuery = \App\Models\GrammarQuestion::where('meeting_number', 4)
+            ->orderBy('question_number');
+        if ($hasSectionColumn) {
+            $questionsQuery->where(function ($q) {
+                $q->whereNull('section')
+                    ->orWhere('section', '!=', 'paragraph');
+            });
+        }
+
+        $dbQuestions = $questionsQuery->get()->filter(function ($q) use ($hasSectionColumn) {
+            return $hasSectionColumn || (int) $q->question_number !== 999;
+        })->values();
+
+        $questions = $dbQuestions->isNotEmpty()
+            ? $dbQuestions->mapWithKeys(function ($q) {
+                return [$q->question_number => [
+                    'id' => $q->question_text,
+                    'en' => $q->correct_answer,
+                    'vocab' => is_array($q->vocab) ? $q->vocab : [],
+                ]];
+            })->toArray()
+            : $this->meeting4Questions;
+
+        $paragraphQuery = \App\Models\GrammarQuestion::where('meeting_number', 4);
+        if ($hasSectionColumn) {
+            $paragraphQuery->where('section', 'paragraph');
+        } else {
+            $paragraphQuery->where('question_number', 999);
+        }
+        $dbParagraph = $paragraphQuery->first();
+        $paragraphReference = $dbParagraph
+            ? ['en' => $dbParagraph->correct_answer]
+            : $this->meeting4Paragraph;
         
         $results = [];
         $totalScore = 0;
-        $maxScore = (count($this->meeting4Questions) * 10) + 20; // 10 points per question + 20 for paragraph
+        $maxScore = (count($questions) * 10) + 20; // 10 points per question + 20 for paragraph
 
         // Check Questions
-        foreach ($this->meeting4Questions as $idx => $data) {
+        foreach ($questions as $idx => $data) {
             $uTrans = trim($userAnswers[$idx]['trans'] ?? '');
             
             // Score Translation (10 points per question)
@@ -17120,7 +17978,7 @@ $paraFormatted = $this->getDiffFeedback($paraUserWords, $paraCorrectWords);
         }
 
         // Check Paragraph
-        $paraCorrectWords = preg_split('/\s+/', $this->meeting4Paragraph['en'], -1, PREG_SPLIT_NO_EMPTY);
+        $paraCorrectWords = preg_split('/\s+/', $paragraphReference['en'], -1, PREG_SPLIT_NO_EMPTY);
         $paraUserWords = preg_split('/\s+/', $userParagraphAnswer, -1, PREG_SPLIT_NO_EMPTY);
         
         $paraMatchCount = 0;

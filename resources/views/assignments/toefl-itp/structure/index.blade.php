@@ -104,6 +104,11 @@
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">TOEFL ITP Structure</h2>
                     <p class="text-gray-500 text-sm">Master your grammar structure and written expression.</p>
+                    <p class="text-xs mt-2">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-100">
+                            Active Batch: {{ $selectedClassPeriod->name ?? ($batchProgram->period ?? 'Not selected') }}
+                        </span>
+                    </p>
                 </div>
                 <div class="flex items-center gap-3">
                     @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
@@ -117,6 +122,39 @@
                         Back
                     </a>
                 </div>
+            </div>
+
+            <div class="mb-6">
+                @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                    <form action="{{ route('assignments.batch-period') }}" method="POST" class="inline-flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
+                        @csrf
+                        <input type="hidden" name="program_id" value="{{ $batchProgram?->id }}">
+                        <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
+                        <select name="period" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
+                            @if(!$batchProgram)
+                                <option value="" selected>No program found</option>
+                            @elseif($batchProgram->classPeriods->isEmpty())
+                                <option value="{{ $batchProgram->period }}" selected>{{ $batchProgram->period ?: 'No batch available' }}</option>
+                            @else
+                                @foreach($batchProgram->classPeriods->sortByDesc('start_date') as $classPeriod)
+                                    <option value="{{ $classPeriod->name }}" {{ $batchProgram->period === $classPeriod->name ? 'selected' : '' }}>
+                                        {{ $classPeriod->name }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <button type="submit" class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed" title="Apply batch" {{ !$batchProgram ? 'disabled' : '' }}>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </button>
+                    </form>
+                @else
+                    <div class="inline-flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
+                        <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
+                        <span class="text-sm text-gray-800 px-2 py-1 bg-gray-50 rounded-lg">
+                            {{ $selectedClassPeriod->name ?? ($batchProgram->period ?? 'Not selected') }}
+                        </span>
+                    </div>
+                @endif
             </div>
 
             <!-- Meetings Grid -->
@@ -140,7 +178,14 @@
                             <!-- Lock Toggle -->
                             <form action="{{ route('assignments.toefl-itp.structure.toggle-lock', $topic) }}" method="POST">
                                 @csrf
-                                <button type="submit" class="text-gray-400 hover:text-gray-600 transition" title="{{ $topic->is_locked ? 'Unlock' : 'Lock' }}">
+                                @if($selectedClassPeriod)
+                                    <input type="hidden" name="class_period_id" value="{{ $selectedClassPeriod->id }}">
+                                @endif
+                                <button
+                                    type="submit"
+                                    class="inline-flex items-center justify-center p-1.5 rounded-lg border transition {{ $topic->is_locked ? 'bg-gray-100 text-gray-500 border-gray-300 hover:bg-gray-200 hover:text-gray-600' : 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-700' }}"
+                                    title="{{ $topic->is_locked ? 'Unlock' : 'Lock' }}"
+                                >
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         @if($topic->is_locked)
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
@@ -177,7 +222,7 @@
                     <p class="text-gray-500 text-sm mb-4">Structure Exercise</p>
                     
                     @if(!$topic->is_locked || Auth::user()->isAdmin() || Auth::user()->isTeacher())
-                        <a href="{{ route('assignments.toefl-itp.structure.meeting', $topic->meeting_number) }}" class="block w-full py-2 bg-green-600 text-white text-center rounded-xl font-bold hover:bg-green-700 transition">Start</a>
+                        <a href="{{ route('assignments.toefl-itp.structure.meeting', $topic->meeting_number) }}" class="block w-full py-2 text-center rounded-xl font-bold transition {{ $topic->is_locked ? 'bg-gray-300 text-gray-700 hover:bg-gray-400' : 'bg-green-600 text-white hover:bg-green-700' }}">Start</a>
                     @else
                         <button disabled class="block w-full py-2 bg-gray-100 text-gray-400 text-center rounded-xl font-bold cursor-not-allowed">Locked</button>
                     @endif

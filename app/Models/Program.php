@@ -28,5 +28,10 @@ class Program extends Model
     {
         return $this->hasMany(ProgramDiscount::class);
     }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
 }
 

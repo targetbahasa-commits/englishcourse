@@ -36,6 +36,7 @@
             <form method="POST" action="{{ route('register') }}" class="space-y-5">
                 @csrf
                 <input type="hidden" name="role" value="student">
+                <x-marketing-attribution />
 
                 <input type="hidden" name="referral_code" value="{{ request()->query('ref') }}">
 
