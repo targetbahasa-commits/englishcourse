@@ -240,7 +240,9 @@
                         </div>
 
                         <h3 class="text-lg md:text-xl font-bold text-gray-900 line-clamp-2 mb-1 group-hover:text-blue-700 transition">{{ $scholarship->title }}</h3>
+                        @if(strtolower($scholarship->provider) !== 'luarkampus.id')
                         <p class="text-sm font-medium text-gray-500 mb-4">{{ $scholarship->provider }}</p>
+                        @endif
 
                         <div class="space-y-2 mt-auto">
                             <!-- Degree & Funding Level -->

@@ -157,6 +157,7 @@
 
         <div id="ielts-meetings-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             @php
+                $meetingsMap = $meetings->keyBy('meeting_number');
                 $materials = [
                     1 => 'Multiple Choice',
                     2 => 'Matching',
@@ -173,25 +174,49 @@
             @endphp
 
             @foreach($materials as $number => $title)
+                @php
+                    $dbMeeting = $meetingsMap->get($number);
+                    $isLocked = $dbMeeting ? (bool) $dbMeeting->is_locked : false;
+                @endphp
                 <div class="bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition group relative flex flex-col h-full border border-gray-100">
                     <div class="flex justify-between items-start mb-6">
-                        <span class="px-4 py-1.5 bg-green-100 text-green-600 rounded-full text-sm font-bold uppercase tracking-wide">
-                            OPEN
+                        <span class="px-4 py-1.5 {{ $isLocked ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600' }} rounded-full text-sm font-bold uppercase tracking-wide">
+                            {{ $isLocked ? 'LOCKED' : 'OPEN' }}
                         </span>
+                        @if((Auth::user()->isAdmin() || Auth::user()->isTeacher()) && $dbMeeting)
+                            <form action="{{ route('assignments.ielts.listening.meeting.toggle-lock', $dbMeeting->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="text-gray-400 hover:text-gray-600 transition" title="Toggle Lock">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        @if($isLocked)
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                        @else
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+                                        @endif
+                                    </svg>
+                                </button>
+                            </form>
+                        @endif
                     </div>
                     
                     <div class="flex-1 mb-6">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 {{ $isLocked ? 'bg-gray-100 text-gray-400' : 'bg-blue-50 text-blue-600' }} rounded-2xl flex items-center justify-center flex-shrink-0">
                                 <span class="font-bold text-xl">{{ $number }}</span>
                             </div>
                             <h3 class="font-bold text-lg text-gray-800 leading-tight">{{ $title }}</h3>
                         </div>
                     </div>
                     
-                    <a href="{{ route('assignments.ielts-academic.listening.material', $number) }}" class="block w-full py-3 bg-blue-600 text-white text-center rounded-xl font-bold hover:bg-blue-700 transition shadow-sm hover:shadow active:scale-95">
-                        Start Practice
-                    </a>
+                    @if(!$isLocked)
+                        <a href="{{ route('assignments.ielts-academic.listening.material', $number) }}" class="block w-full py-3 bg-blue-600 text-white text-center rounded-xl font-bold hover:bg-blue-700 transition shadow-sm hover:shadow active:scale-95">
+                            Start Practice
+                        </a>
+                    @else
+                        <button disabled class="block w-full py-3 bg-gray-100 text-gray-400 text-center rounded-xl font-bold cursor-not-allowed">
+                            Locked
+                        </button>
+                    @endif
                 </div>
             @endforeach
         </div>

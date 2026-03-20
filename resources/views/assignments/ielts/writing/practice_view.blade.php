@@ -196,7 +196,9 @@
                         @endphp
 
                         @if($imageUrl)
-                            <img src="{{ $imageUrl }}" alt="{{ $meeting->title }} Map" class="max-w-full h-auto rounded-lg shadow-sm border border-gray-200">
+                            <div class="flex justify-center">
+                                <img src="{{ $imageUrl }}" alt="{{ $meeting->title }} Map" class="w-4/5 max-h-[600px] object-contain rounded-lg shadow-sm border border-gray-200">
+                            </div>
                         @else
                             <div class="text-center p-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
                                 <p class="text-gray-500">Map Diagram not available for this meeting.</p>

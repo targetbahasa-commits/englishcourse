@@ -24,131 +24,109 @@
         </div>
     </div>
 
-    <div class="mb-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <div class="rounded-2xl border border-amber-100 bg-[linear-gradient(135deg,rgba(255,251,235,1),rgba(255,237,213,0.92))] p-5 shadow-sm">
-            <p class="text-xs font-bold uppercase tracking-[0.2em] text-amber-700/70">Public Framing</p>
-            <h2 class="mt-2 text-xl font-bold text-gray-900">WHV tidak lagi tampil sebagai listing kartu</h2>
-            <p class="mt-3 text-sm leading-7 text-gray-600">Area publik sekarang memposisikan WHV Australia sebagai satu landing page program. Karena itu, kualitas judul, deskripsi, syarat, biaya, FAQ, dan alur pendaftaran akan langsung memengaruhi persepsi pengguna.</p>
-        </div>
-        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">Current Count</p>
-            <div class="mt-2 text-3xl font-black text-gray-900">{{ $applications->total() }}</div>
-            <p class="mt-2 text-sm leading-7 text-gray-500">Program tersimpan di database. Idealnya hanya program yang benar-benar siap tayang yang diberi status open dan published.</p>
-        </div>
-    </div>
 
-    @if(session('success'))
-        <div x-data="{ show: true }" x-show="show" class="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 text-green-700 flex justify-between items-center" x-init="setTimeout(() => show = false, 5000)">
-            <div class="flex items-center gap-3">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <span>{{ session('success') }}</span>
+
+            <!-- Campaign Pulse -->
+            <div class="mt-8 mb-8 rounded-3xl border border-amber-100 bg-white p-6 shadow-sm">
+                @include('admin.partials.campaign-pulse-header')
+
+                <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div class="rounded-2xl border border-blue-100 bg-blue-50 p-5">
+                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-blue-600/70">Tracked Signups</div>
+                        <div class="mt-2 text-3xl font-black text-blue-900">{{ $trackedSignupsLast30Days ?? 0 }}</div>
+                        <p class="mt-2 text-sm text-blue-800/80">User guest + student dengan UTM atau source page tersimpan pada window aktif.</p>
+                    </div>
+                    <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-5">
+                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-emerald-600/70">Tracked 7 Days</div>
+                        <div class="mt-2 text-3xl font-black text-emerald-900">{{ $trackedSignupsLast7Days ?? 0 }}</div>
+                        <p class="mt-2 text-sm text-emerald-800/80">Momentum recent acquisition untuk lihat campaign yang masih jalan.</p>
+                    </div>
+                    <div class="rounded-2xl border border-amber-100 bg-amber-50 p-5">
+                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-amber-700/70">WHV Attributed</div>
+                        <div class="mt-2 text-3xl font-black text-amber-900">{{ $whvAttributedUsers ?? 0 }}</div>
+                        <p class="mt-2 text-sm text-amber-900/75">Signup yang membawa source page `whv_applications`.</p>
+                    </div>
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div class="rounded-2xl border border-slate-100 bg-slate-50 p-5">
+                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-slate-700/70">Tracked Leads</div>
+                        <div class="mt-2 text-3xl font-black text-slate-900">{{ $trackedLeadsTotal ?? 0 }}</div>
+                        <p class="mt-2 text-sm text-slate-700/80">Jumlah lead attribution pada window aktif.</p>
+                    </div>
+                    <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-5">
+                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700/70">Converted Leads</div>
+                        <div class="mt-2 text-3xl font-black text-emerald-900">{{ $trackedLeadsConverted ?? 0 }}</div>
+                        <p class="mt-2 text-sm text-emerald-800/80">Lead attribution dengan status converted.</p>
+                    </div>
+                    <div class="rounded-2xl border border-blue-100 bg-blue-50 p-5">
+                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-blue-700/70">Lead CVR</div>
+                        <div class="mt-2 text-3xl font-black text-blue-900">
+                            {{ ($trackedLeadsTotal ?? 0) > 0 ? number_format((($trackedLeadsConverted ?? 0) / $trackedLeadsTotal) * 100, 1) : '0.0' }}%
+                        </div>
+                        <p class="mt-2 text-sm text-blue-800/80">Conversion rate lead attribution ke status converted.</p>
+                    </div>
+                </div>
+
+
+
+                <div class="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+                    <div class="overflow-hidden rounded-2xl border border-gray-100">
+                        <div class="border-b border-gray-100 bg-gray-50 px-5 py-4">
+                            <h3 class="text-sm font-bold text-gray-800">Top campaign sources</h3>
+                        </div>
+                        @if(isset($campaignSignups) && $campaignSignups->isNotEmpty())
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-white text-xs uppercase tracking-[0.12em] text-gray-400">
+                                        <tr>
+                                            <th class="px-5 py-3 font-semibold">Campaign</th>
+                                            <th class="px-5 py-3 font-semibold">Source Page</th>
+                                            <th class="px-5 py-3 font-semibold">Guest</th>
+                                            <th class="px-5 py-3 font-semibold">Student</th>
+                                            <th class="px-5 py-3 font-semibold">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100 bg-white">
+                                        @foreach($campaignSignups as $campaignRow)
+                                            <tr>
+                                                <td class="px-5 py-4 font-semibold text-gray-800">{{ $campaignRow->campaign_label }}</td>
+                                                <td class="px-5 py-4 text-gray-500">{{ $campaignRow->source_page }}</td>
+                                                <td class="px-5 py-4 text-gray-600">{{ $campaignRow->guest_signups }}</td>
+                                                <td class="px-5 py-4 text-gray-600">{{ $campaignRow->student_signups }}</td>
+                                                <td class="px-5 py-4 font-bold text-gray-900">{{ $campaignRow->total_signups }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="px-5 py-10 text-sm text-gray-400">Belum ada signup dengan attribution campaign yang tersimpan.</div>
+                        @endif
+                    </div>
+
+                    <div class="rounded-2xl border border-gray-100 bg-gray-50 p-5">
+                        <h3 class="text-sm font-bold text-gray-800">WHV CTA copy variants</h3>
+                        <div class="mt-4 space-y-3">
+                            @forelse(($whvVariantBreakdown ?? collect()) as $variantRow)
+                                <div class="flex items-center justify-between rounded-xl bg-white px-4 py-3 border border-gray-100">
+                                    <div>
+                                        <div class="text-xs font-bold uppercase tracking-[0.12em] text-gray-400">Variant</div>
+                                        <div class="mt-1 font-semibold text-gray-900">{{ $variantRow->variant_label }}</div>
+                                    </div>
+                                    <div class="text-2xl font-black text-gray-900">{{ $variantRow->total }}</div>
+                                </div>
+                            @empty
+                                <div class="rounded-xl bg-white px-4 py-6 text-sm text-gray-400 border border-gray-100">Belum ada signup WHV yang membawa label variant.</div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
+                @include('admin.partials.lead-campaign-conversion-panel')
+
+                @include('admin.partials.export-activity-panel')
             </div>
-            <button @click="show = false" class="text-green-500 hover:text-green-600 shrink-0">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-        </div>
-    @endif
-
-    <div class="bg-white shadow-lg rounded-xl border border-gray-100 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left text-gray-500">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-100">
-                    <tr>
-                        <th class="px-6 py-4 font-semibold">Program Title</th>
-                        <th class="px-6 py-4 font-semibold">Visa Type & Country</th>
-                        <th class="px-6 py-4 font-semibold">Requirements</th>
-                        <th class="px-6 py-4 font-semibold">Timeline</th>
-                        <th class="px-6 py-4 font-semibold">Status</th>
-                        <th class="px-6 py-4 text-right font-semibold">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @forelse($applications as $item)
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-4">
-                                <div class="font-semibold text-gray-800">{{ $item->title }}</div>
-                                @if($item->url)
-                                    <a href="{{ $item->url }}" target="_blank" class="text-xs text-blue-500 hover:underline truncate block max-w-xs">{{ $item->url }}</a>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="font-medium text-gray-700">{{ $item->visa_type }}</div>
-                                <div class="text-xs text-gray-500">{{ $item->country }}</div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="space-y-1 text-xs text-gray-600">
-                                    @if($item->english_requirement && $item->english_requirement !== 'none')
-                                        <div>
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 uppercase">
-                                                {{ str_replace('_', ' ', $item->english_requirement) }}
-                                                @if($item->min_score) : {{ $item->min_score }} @endif
-                                            </span>
-                                        </div>
-                                    @endif
-                                    @if($item->age_requirement)
-                                        <div>Age: {{ $item->age_requirement }}</div>
-                                    @endif
-                                    @if($item->education_requirement)
-                                        <div>Education: {{ $item->education_requirement }}</div>
-                                    @endif
-                                    @if($item->financial_requirement)
-                                        <div>Funds: {{ $item->financial_requirement }}</div>
-                                    @endif
-                                    @if(!$item->english_requirement && !$item->age_requirement && !$item->education_requirement && !$item->financial_requirement)
-                                        <span class="text-xs text-gray-500">No structured requirements yet</span>
-                                    @endif
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-600">
-                                <div>Open: {{ $item->opening_date?->format('d M Y') ?? 'TBA' }}</div>
-                                <div>Deadline: {{ $item->application_deadline?->format('d M Y') ?? 'TBA' }}</div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex flex-col gap-2 items-start">
-                                    @if($item->status === 'open')
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Open</span>
-                                    @elseif($item->status === 'closed')
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Closed</span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">Draft</span>
-                                    @endif
-
-                                    @if($item->is_active)
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">Published</span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Hidden</span>
-                                    @endif
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 text-right whitespace-nowrap">
-                                <a href="{{ route('admin.whv-applications.edit', $item) }}" class="text-amber-600 hover:text-amber-900 mx-1 transition font-medium">Edit</a>
-                                <form action="{{ route('admin.whv-applications.destroy', $item) }}" method="POST" class="inline-block" onsubmit="return confirm('Delete this WHV program?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700 transition font-medium">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="px-6 py-12 text-center text-gray-400">
-                                <div class="flex flex-col items-center">
-                                    <svg class="w-10 h-10 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2.5 2.5 0 00-2.5-2.5H15"></path></svg>
-                                    No WHV programs found. Add the first program and build the public WHV landing page from there.
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    @if($applications->hasPages())
-        <div class="mt-6">
-            {{ $applications->links() }}
-        </div>
-    @endif
 
 </div>
 @endsection

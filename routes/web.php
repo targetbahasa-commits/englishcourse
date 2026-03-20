@@ -164,15 +164,42 @@ Route::middleware([
                 ->get();
         }
 
-        // 6. Chart Data (Standardized for M1-M20)
-        $scores = \App\Models\MeetingScore::where('user_id', $user->id)
+        // 6. Chart Data Per Class/Program
+        // MeetingScore only stores user_id + meeting_number (no program_id),
+        // so we fetch all scores for the user and map them to M1-M20.
+        $allMeetingScores = \App\Models\MeetingScore::where('user_id', $user->id)
             ->pluck('score', 'meeting_number')
             ->toArray();
 
-        $chartData = [];
+        $singleChartData = [];
         for ($i = 1; $i <= 20; $i++) {
-            $chartData[] = $scores[$i] ?? 0;
+            $singleChartData[] = $allMeetingScores[$i] ?? null;
         }
+
+        // Try to get the active enrolled program name
+        $enrollments = \App\Models\Enrollment::where('user_id', $user->id)
+            ->whereIn('status', ['active', 'completed'])
+            ->with('program')
+            ->get();
+
+        $classScores = [];
+        $classNames = [];
+        if ($enrollments->isNotEmpty()) {
+            foreach ($enrollments as $enrollment) {
+                $program = $enrollment->program;
+                if (!$program) continue;
+                $classScores[$program->id] = $singleChartData;
+                $classNames[$program->id] = $program->name;
+            }
+        }
+
+        if (empty($classScores)) {
+            $classScores[0] = $singleChartData;
+            $classNames[0] = 'All Meetings';
+        }
+
+        // Default chartData (for backward compatibility)
+        $chartData = count($classScores) ? reset($classScores) : [];
 
         // 7. Sprint 3: Progress Prediction Model
         // Calculate predicted score based on average MeetingScore
@@ -217,7 +244,9 @@ Route::middleware([
             'needs_review' => 0, // < 70
         ];
         
-        foreach ($scores as $scoreVal) {
+        $allScores = \App\Models\MeetingScore::where('user_id', $user->id)->pluck('score');
+        
+        foreach ($allScores as $scoreVal) {
             if ($scoreVal >= 90) {
                 $diagnosticStats['excellent']++;
             } elseif ($scoreVal >= 70) {
@@ -246,6 +275,8 @@ Route::middleware([
             'targetScore'        => $targetScore,
             'upcomingClasses'    => $upcomingClasses,
             'chartData'          => $chartData,
+            'classScores'        => $classScores,
+            'classNames'         => $classNames,
             'predictedScore'     => $predictedScore,
             'lowestScores'       => $lowestScores,
             'enrolledProgram'    => $enrolledProgram,
@@ -384,6 +415,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/assignments/ielts-academic/writing', [App\Http\Controllers\AssignmentController::class, 'storeIeltsWritingMeeting'])->name('assignments.ielts.writing.store');
     Route::put('/assignments/ielts-academic/writing/{id}', [App\Http\Controllers\AssignmentController::class, 'updateIeltsWritingMeeting'])->name('assignments.ielts.writing.update');
     Route::delete('/assignments/ielts-academic/writing/{id}', [App\Http\Controllers\AssignmentController::class, 'deleteIeltsWritingMeeting'])->name('assignments.ielts.writing.destroy');
+    Route::post('/assignments/ielts-academic/writing/{id}/toggle-lock', [App\Http\Controllers\AssignmentController::class, 'toggleIeltsWritingLock'])->name('assignments.ielts.writing.toggle-lock');
     Route::get('/assignments/ielts-academic/mockup/writing', [App\Http\Controllers\AssignmentController::class, 'ieltsWritingMockUp'])->name('assignments.ielts-academic.mockup.writing');
     Route::get('/assignments/ielts-academic/mockup/writing/{id}', function($id) {
         return redirect()->route('assignments.ielts-academic.mockup.writing');
@@ -406,6 +438,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/ielts-speaking/topics', [App\Http\Controllers\AssignmentController::class, 'storeSpeakingTopic'])->name('admin.ielts.speaking.topics.store');
     Route::put('/admin/ielts-speaking/topics/{id}', [App\Http\Controllers\AssignmentController::class, 'updateSpeakingTopic'])->name('admin.ielts.speaking.topics.update');
     Route::delete('/admin/ielts-speaking/topics/{id}', [App\Http\Controllers\AssignmentController::class, 'destroySpeakingTopic'])->name('admin.ielts.speaking.topics.delete');
+    Route::post('/admin/ielts-speaking/topics/{id}/toggle-lock', [App\Http\Controllers\AssignmentController::class, 'toggleIeltsSpeakingLock'])->name('admin.ielts.speaking.topics.toggle-lock');
     Route::post('/assignments/ielts-academic/speaking/practice/check-grammar', [App\Http\Controllers\AssignmentController::class, 'checkSpeakingGrammar'])->name('assignments.ielts-academic.speaking.check-grammar');
     Route::post('/assignments/ielts-academic/speaking/practice/upgrade-grammar', [App\Http\Controllers\AssignmentController::class, 'upgradeSpeakingGrammar'])->name('assignments.ielts-academic.speaking.upgrade-grammar');
     Route::post('/assignments/ielts-academic/speaking/practice/model-answer', [App\Http\Controllers\AssignmentController::class, 'generateBand9SpeakingAnswer'])->name('assignments.ielts-academic.speaking.model-answer');
@@ -602,7 +635,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('admin/students', App\Http\Controllers\Admin\StudentController::class)->names('students')->middleware('role:admin');
 
     Route::get('/admin', [App\Http\Controllers\AdminController::class, 'index'])->name('admin.dashboard')->middleware('role:admin');
-    Route::get('/admin/campaign-signups/export', [App\Http\Controllers\AdminController::class, 'exportCampaignSignups'])->name('admin.campaign-signups.export')->middleware('role:admin');
+    Route::get('/admin/campaign-signups/export', [App\Http\Controllers\Admin\WHVApplicationController::class, 'exportCampaignSignups'])->name('admin.campaign-signups.export')->middleware('role:admin');
     
     // Admin Class Periods Management
     Route::post('/admin/class-periods/{classPeriod}/status', [App\Http\Controllers\Admin\ClassPeriodController::class, 'updateStatus'])->name('class-periods.status');
@@ -642,6 +675,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Admin Programs Management
     Route::resource('admin/programs', App\Http\Controllers\Admin\ProgramController::class)->names('programs')->middleware('role:admin');
+    Route::post('admin/programs/{program}/deactivate', [App\Http\Controllers\Admin\ProgramController::class, 'deactivate'])->name('programs.deactivate')->middleware('role:admin');
     
     // Admin Programs Syllabus Management
     Route::get('admin/programs/{program}/syllabus', [App\Http\Controllers\Admin\ProgramController::class, 'syllabus'])->name('programs.syllabus')->middleware('role:admin');

@@ -124,162 +124,64 @@
                 </div>
             </div>
 
-            <div class="mb-8 rounded-3xl border border-amber-100 bg-white p-6 shadow-sm">
-                @include('admin.partials.campaign-pulse-header')
-
-                <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <div class="rounded-2xl border border-blue-100 bg-blue-50 p-5">
-                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-blue-600/70">Tracked Signups</div>
-                        <div class="mt-2 text-3xl font-black text-blue-900">{{ $trackedSignupsLast30Days ?? 0 }}</div>
-                        <p class="mt-2 text-sm text-blue-800/80">User guest + student dengan UTM atau source page tersimpan pada window aktif.</p>
+            <!-- Overview Grids -->
+            <div class="mb-8 grid gap-6 lg:grid-cols-2">
+                <!-- Program Performance -->
+                <div class="overflow-hidden rounded-2xl border border-gray-100">
+                    <div class="border-b border-gray-100 bg-white px-5 py-4">
+                        <h3 class="text-sm font-bold text-gray-800">Program Performance</h3>
                     </div>
-                    <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-5">
-                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-emerald-600/70">Tracked 7 Days</div>
-                        <div class="mt-2 text-3xl font-black text-emerald-900">{{ $trackedSignupsLast7Days ?? 0 }}</div>
-                        <p class="mt-2 text-sm text-emerald-800/80">Momentum recent acquisition untuk lihat campaign yang masih jalan.</p>
-                    </div>
-                    <div class="rounded-2xl border border-amber-100 bg-amber-50 p-5">
-                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-amber-700/70">WHV Attributed</div>
-                        <div class="mt-2 text-3xl font-black text-amber-900">{{ $whvAttributedUsers ?? 0 }}</div>
-                        <p class="mt-2 text-sm text-amber-900/75">Signup yang membawa source page `whv_applications`.</p>
-                    </div>
-                </div>
-
-                <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <div class="rounded-2xl border border-slate-100 bg-slate-50 p-5">
-                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-slate-700/70">Tracked Leads</div>
-                        <div class="mt-2 text-3xl font-black text-slate-900">{{ $trackedLeadsTotal ?? 0 }}</div>
-                        <p class="mt-2 text-sm text-slate-700/80">Jumlah lead attribution pada window aktif.</p>
-                    </div>
-                    <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-5">
-                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700/70">Converted Leads</div>
-                        <div class="mt-2 text-3xl font-black text-emerald-900">{{ $trackedLeadsConverted ?? 0 }}</div>
-                        <p class="mt-2 text-sm text-emerald-800/80">Lead attribution dengan status converted.</p>
-                    </div>
-                    <div class="rounded-2xl border border-blue-100 bg-blue-50 p-5">
-                        <div class="text-xs font-bold uppercase tracking-[0.16em] text-blue-700/70">Lead CVR</div>
-                        <div class="mt-2 text-3xl font-black text-blue-900">
-                            {{ ($trackedLeadsTotal ?? 0) > 0 ? number_format((($trackedLeadsConverted ?? 0) / $trackedLeadsTotal) * 100, 1) : '0.0' }}%
-                        </div>
-                        <p class="mt-2 text-sm text-blue-800/80">Conversion rate lead attribution ke status converted.</p>
-                    </div>
-                </div>
-
-                <div class="mt-6 grid gap-6 lg:grid-cols-2">
-                    <!-- Program Performance -->
-                    <div class="overflow-hidden rounded-2xl border border-gray-100">
-                        <div class="border-b border-gray-100 bg-gray-50 px-5 py-4">
-                            <h3 class="text-sm font-bold text-gray-800">Program Performance</h3>
-                        </div>
-                        @if(isset($programPerformance) && $programPerformance->isNotEmpty())
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-sm">
-                                    <thead class="bg-white text-xs uppercase tracking-[0.12em] text-gray-400">
-                                        <tr>
-                                            <th class="px-5 py-3 font-semibold">Program</th>
-                                            <th class="px-5 py-3 font-semibold text-right">Students</th>
-                                            <th class="px-5 py-3 font-semibold text-right">Active</th>
+                    @if(isset($programPerformance) && $programPerformance->isNotEmpty())
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-gray-50 text-xs uppercase tracking-[0.12em] text-gray-400">
+                                    <tr>
+                                        <th class="px-5 py-3 font-semibold">Program</th>
+                                        <th class="px-5 py-3 font-semibold text-right">Students</th>
+                                        <th class="px-5 py-3 font-semibold text-right">Active</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 bg-white">
+                                    @foreach($programPerformance as $prog)
+                                        <tr class="hover:bg-gray-50 transition">
+                                            <td class="px-5 py-4 font-semibold text-gray-800">{{ $prog->name }}</td>
+                                            <td class="px-5 py-4 text-right text-gray-600">{{ $prog->students_count ?? 0 }}</td>
+                                            <td class="px-5 py-4 text-right">
+                                                <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
+                                                    {{ $prog->active_students_count ?? 0 }}
+                                                </span>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-100 bg-white">
-                                        @foreach($programPerformance as $prog)
-                                            <tr class="hover:bg-gray-50 transition">
-                                                <td class="px-5 py-4 font-semibold text-gray-800">{{ $prog->name }}</td>
-                                                <td class="px-5 py-4 text-right text-gray-600">{{ $prog->students_count ?? 0 }}</td>
-                                                <td class="px-5 py-4 text-right">
-                                                    <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
-                                                        {{ $prog->active_students_count ?? 0 }}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        @else
-                            <div class="px-5 py-10 text-sm text-gray-400">No program data available.</div>
-                        @endif
-                    </div>
-
-                    <!-- Teacher Activity -->
-                    <div class="overflow-hidden rounded-2xl border border-gray-100">
-                        <div class="border-b border-gray-100 bg-gray-50 px-5 py-4">
-                            <h3 class="text-sm font-bold text-gray-800">Top Teachers</h3>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
-                        @if(isset($teacherActivitySummary) && $teacherActivitySummary->isNotEmpty())
-                            <div class="space-y-2 p-5">
-                                @foreach($teacherActivitySummary as $teacher)
-                                    <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition">
-                                        <div>
-                                            <div class="text-sm font-semibold text-gray-800">{{ $teacher->name }}</div>
-                                            <div class="text-xs text-gray-500">{{ $teacher->program_count ?? 0 }} program{{ $teacher->program_count !== 1 ? 's' : '' }}</div>
-                                        </div>
-                                        <div class="text-2xl font-black text-blue-600">{{ $teacher->program_count ?? 0 }}</div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <div class="px-5 py-10 text-sm text-gray-400">No teacher data available.</div>
-                        @endif
-                    </div>
+                    @else
+                        <div class="px-5 py-10 text-sm text-gray-400 bg-white">No program data available.</div>
+                    @endif
                 </div>
 
-                <div class="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-                    <div class="overflow-hidden rounded-2xl border border-gray-100">
-                        <div class="border-b border-gray-100 bg-gray-50 px-5 py-4">
-                            <h3 class="text-sm font-bold text-gray-800">Top campaign sources</h3>
-                        </div>
-                        @if(isset($campaignSignups) && $campaignSignups->isNotEmpty())
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-sm">
-                                    <thead class="bg-white text-xs uppercase tracking-[0.12em] text-gray-400">
-                                        <tr>
-                                            <th class="px-5 py-3 font-semibold">Campaign</th>
-                                            <th class="px-5 py-3 font-semibold">Source Page</th>
-                                            <th class="px-5 py-3 font-semibold">Guest</th>
-                                            <th class="px-5 py-3 font-semibold">Student</th>
-                                            <th class="px-5 py-3 font-semibold">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-100 bg-white">
-                                        @foreach($campaignSignups as $campaignRow)
-                                            <tr>
-                                                <td class="px-5 py-4 font-semibold text-gray-800">{{ $campaignRow->campaign_label }}</td>
-                                                <td class="px-5 py-4 text-gray-500">{{ $campaignRow->source_page }}</td>
-                                                <td class="px-5 py-4 text-gray-600">{{ $campaignRow->guest_signups }}</td>
-                                                <td class="px-5 py-4 text-gray-600">{{ $campaignRow->student_signups }}</td>
-                                                <td class="px-5 py-4 font-bold text-gray-900">{{ $campaignRow->total_signups }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        @else
-                            <div class="px-5 py-10 text-sm text-gray-400">Belum ada signup dengan attribution campaign yang tersimpan.</div>
-                        @endif
+                <!-- Teacher Activity -->
+                <div class="overflow-hidden rounded-2xl border border-gray-100">
+                    <div class="border-b border-gray-100 bg-white px-5 py-4">
+                        <h3 class="text-sm font-bold text-gray-800">Top Teachers</h3>
                     </div>
-
-                    <div class="rounded-2xl border border-gray-100 bg-gray-50 p-5">
-                        <h3 class="text-sm font-bold text-gray-800">WHV CTA copy variants</h3>
-                        <div class="mt-4 space-y-3">
-                            @forelse(($whvVariantBreakdown ?? collect()) as $variantRow)
-                                <div class="flex items-center justify-between rounded-xl bg-white px-4 py-3 border border-gray-100">
+                    @if(isset($teacherActivitySummary) && $teacherActivitySummary->isNotEmpty())
+                        <div class="space-y-2 p-5 bg-white h-full">
+                            @foreach($teacherActivitySummary as $teacher)
+                                <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition">
                                     <div>
-                                        <div class="text-xs font-bold uppercase tracking-[0.12em] text-gray-400">Variant</div>
-                                        <div class="mt-1 font-semibold text-gray-900">{{ $variantRow->variant_label }}</div>
+                                        <div class="text-sm font-semibold text-gray-800">{{ $teacher->name }}</div>
+                                        <div class="text-xs text-gray-500">{{ $teacher->program_count ?? 0 }} program{{ $teacher->program_count !== 1 ? 's' : '' }}</div>
                                     </div>
-                                    <div class="text-2xl font-black text-gray-900">{{ $variantRow->total }}</div>
+                                    <div class="text-2xl font-black text-blue-600">{{ $teacher->program_count ?? 0 }}</div>
                                 </div>
-                            @empty
-                                <div class="rounded-xl bg-white px-4 py-6 text-sm text-gray-400 border border-gray-100">Belum ada signup WHV yang membawa label variant.</div>
-                            @endforelse
+                            @endforeach
                         </div>
-                    </div>
+                    @else
+                        <div class="px-5 py-10 text-sm text-gray-400 bg-white">No teacher data available.</div>
+                    @endif
                 </div>
-
-                @include('admin.partials.lead-campaign-conversion-panel')
-
-                @include('admin.partials.export-activity-panel')
             </div>
 
             <!-- Realtime Monitoring -->

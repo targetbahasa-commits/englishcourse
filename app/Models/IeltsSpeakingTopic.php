@@ -17,11 +17,15 @@ class IeltsSpeakingTopic extends Model
         'questions',
         'subtopics',
         'order',
+        'is_locked',
     ];
+
 
     protected $casts = [
         'questions' => 'array',
         'subtopics' => 'array',
         'order' => 'integer',
+        'is_locked' => 'boolean',
     ];
+
 }

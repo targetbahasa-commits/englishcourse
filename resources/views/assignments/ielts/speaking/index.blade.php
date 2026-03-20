@@ -158,12 +158,30 @@
                             @php
                                 $lessonNum = ucfirst(str_replace('-', ' ', $topic['slug']));
                                 $pillColor = $topic['color'] ?? 'orange'; 
+                                $isLocked = $topic['is_locked'] ?? false;
                             @endphp
-                            <span class="px-3 py-1 bg-{{ $pillColor }}-100 text-{{ $pillColor }}-600 rounded-full text-xs font-semibold">{{ $lessonNum }}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="px-3 py-1 bg-{{ $pillColor }}-100 text-{{ $pillColor }}-600 rounded-full text-xs font-semibold">{{ $lessonNum }}</span>
+                                <span class="px-3 py-1 {{ $isLocked ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600' }} rounded-full text-xs font-bold uppercase tracking-wide">
+                                    {{ $isLocked ? 'LOCKED' : 'OPEN' }}
+                                </span>
+                            </div>
                             
                             <!-- Icons -->
                             @if(isset($topic['id']))
-                            <div class="absolute top-2 right-2 z-50 flex gap-2">
+                            <div class="absolute top-2 right-2 z-50 flex gap-2 items-center bg-white/80 backdrop-blur-sm rounded-lg p-1 shadow-sm border border-gray-100">
+                                <form action="{{ route('admin.ielts.speaking.topics.toggle-lock', $topic['id']) }}" method="POST" class="inline-block">
+                                    @csrf
+                                    <button type="submit" @click.stop class="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer p-1 rounded-md hover:bg-gray-100" title="Toggle Lock">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            @if($isLocked)
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                            @else
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+                                            @endif
+                                        </svg>
+                                    </button>
+                                </form>
                                 <button type="button" 
                                     @click.stop="edit({{ $topic['id'] }})"
                                     class="text-gray-400 hover:text-blue-600 transition-colors cursor-pointer p-1 rounded-md hover:bg-blue-50">
@@ -188,10 +206,19 @@
                             Topic: {{ $topic['title'] }} (Speaking Practice Part 1)
                         </p>
                         
-                        <a href="{{ route('assignments.ielts-academic.speaking.practice', ['topic' => $topic['slug']]) }}" class="flex items-center text-{{ $pillColor }}-600 text-base font-semibold mt-auto hover:underline">
-                            <span>Start Lesson</span>
-                            <svg class="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                        </a>
+                        @if(!$isLocked)
+                            <a href="{{ route('assignments.ielts-academic.speaking.practice', ['topic' => $topic['slug']]) }}" class="flex items-center text-{{ $pillColor }}-600 text-base font-semibold mt-auto hover:underline w-fit">
+                                <span>Start Lesson</span>
+                                <svg class="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </a>
+                        @else
+                            <button disabled class="flex items-center text-gray-400 text-base font-semibold mt-auto cursor-not-allowed w-fit">
+                                <span>Locked</span>
+                                <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                            </button>
+                        @endif
                     </div>
                 </div>
                 @endforeach

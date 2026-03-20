@@ -3,10 +3,10 @@
         {{ $scholarship->title }}
     @endslot
 
-<div class="px-4 py-8 w-full max-w-6xl mx-auto">
+<!-- ...existing code... -->
     
     <!-- Top Bar: Back Button & Academic Calendar -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2 sm:gap-4">
         <a href="{{ route('scholarships.search.index') }}" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             Back to Search
@@ -19,15 +19,15 @@
     </div>
 
     <!-- Header Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8 relative">
-        <div class="h-48 bg-gradient-to-r from-blue-600 to-indigo-800 relative flex items-center p-8 lg:p-10">
+    <section class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden mb-8 relative">
+        <div class="h-40 sm:h-48 bg-gradient-to-r from-blue-600 to-indigo-800 relative flex items-center p-4 sm:p-8 lg:p-10">
             <!-- Decorative elements -->
             <div class="absolute right-0 top-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
             <div class="absolute inset-0 opacity-20" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
             
-            <div class="flex flex-col md:flex-row items-start md:items-center gap-6 relative z-10 w-full mb-[-4rem]">
+            <div class="flex flex-col md:flex-row items-start md:items-center gap-4 sm:gap-6 relative z-10 w-full mb-[-3rem]">
                 <!-- Scholarship Image/Logo -->
-                <div class="w-24 h-24 lg:w-32 lg:h-32 shrink-0 bg-white rounded-2xl shadow-lg border-4 border-white flex items-center justify-center p-2 overflow-hidden mt-8 md:mt-16">
+                <div class="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 shrink-0 bg-white rounded-2xl shadow-lg border-4 border-white flex items-center justify-center p-2 overflow-hidden mt-6 md:mt-12">
                     @if($scholarship->image_path)
                         <img src="{{ asset('storage/' . $scholarship->image_path) }}" alt="{{ $scholarship->title }} Logo" class="w-full h-full object-contain">
                     @else
@@ -36,7 +36,7 @@
                 </div>
 
                 <!-- Title & Provider (White text on gradient) -->
-                <div class="md:mt-4 text-white">
+                <div class="md:mt-2 text-white">
                     <div class="flex flex-wrap gap-2 mb-2">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-white/20 backdrop-blur-sm text-white border border-white/30 uppercase tracking-widest">
                             {{ $scholarship->country ?? 'Global' }}
@@ -47,10 +47,12 @@
                             </span>
                         @endif
                     </div>
-                    <h1 class="text-2xl lg:text-3xl font-bold mb-1 shadow-sm">{{ $scholarship->title }}</h1>
+                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 shadow-sm">{{ $scholarship->title }}</h1>
+                    @if(strtolower($scholarship->provider) !== 'luarkampus.id')
                     <p class="text-lg text-blue-100 font-medium flex items-center">
                         {{ $scholarship->provider }}
                     </p>
+                    @endif
                 </div>
             </div>
             
@@ -64,35 +66,34 @@
             @endauth
         </div>
 
-        <div class="px-8 lg:px-10 pt-16 pb-6 bg-white flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between border-t border-gray-50">
-            <div class="flex lg:items-center gap-x-8 gap-y-6 flex-wrap w-full lg:w-auto">
-                <div class="flex items-center text-sm text-gray-700 bg-gray-50 px-4 py-2.5 rounded-xl border border-gray-100 w-full lg:w-auto">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3 shrink-0">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+        <div class="px-6 pt-8 pb-6 bg-white flex flex-col gap-6 border-t border-gray-100">
+            <div class="flex flex-col gap-4 w-full md:w-auto">
+                <div class="flex flex-col gap-4">
+                    <div class="flex items-center text-sm text-gray-700 bg-gray-50 px-4 py-2.5 rounded-xl border border-gray-100 w-full">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3 shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+                        </div>
+                        <div>
+                            <span class="block text-xs text-gray-400 font-bold uppercase tracking-wider">Level</span>
+                            <span class="font-bold text-gray-800">{{ $scholarship->level_of_study }}</span>
+                        </div>
                     </div>
-                    <div>
-                        <span class="block text-xs text-gray-400 font-bold uppercase tracking-wider">Level</span>
-                        <span class="font-bold text-gray-800">{{ $scholarship->level_of_study }}</span>
+                    <div class="flex items-center text-sm bg-gray-50 px-4 py-2.5 rounded-xl border border-gray-100 w-full">
+                        <div class="w-10 h-10 rounded-full {{ $scholarship->deadline && $scholarship->deadline->isPast() ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600' }} flex items-center justify-center mr-3 shrink-0" x-data="countdown('{{ $scholarship->deadline ? $scholarship->deadline->format('Y-m-d H:i:s') : '' }}')">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                            <span class="block text-xs {{ $scholarship->deadline && $scholarship->deadline->isPast() ? 'text-red-400' : 'text-gray-400' }} font-bold uppercase tracking-wider">Deadline</span>
+                            @if($scholarship->deadline)
+                                <span class="font-bold {{ $scholarship->deadline->isPast() ? 'text-red-600' : 'text-gray-800' }}">{{ $scholarship->deadline->format('d M Y') }}</span>
+                            @else
+                                <span class="font-bold text-gray-800">Always Open</span>
+                            @endif
+                        </div>
                     </div>
                 </div>
-                
-                <div class="flex items-center text-sm bg-gray-50 px-4 py-2.5 rounded-xl border border-gray-100 w-full lg:w-auto">
-                    <div class="w-10 h-10 rounded-full {{ $scholarship->deadline && $scholarship->deadline->isPast() ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600' }} flex items-center justify-center mr-3 shrink-0" x-data="countdown('{{ $scholarship->deadline ? $scholarship->deadline->format('Y-m-d H:i:s') : '' }}')">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <div>
-                        <span class="block text-xs {{ $scholarship->deadline && $scholarship->deadline->isPast() ? 'text-red-400' : 'text-gray-400' }} font-bold uppercase tracking-wider">Deadline</span>
-                        @if($scholarship->deadline)
-                            <span class="font-bold {{ $scholarship->deadline->isPast() ? 'text-red-600' : 'text-gray-800' }}">{{ $scholarship->deadline->format('d M Y') }}</span>
-                        @else
-                            <span class="font-bold text-gray-800">Always Open</span>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 w-full lg:w-auto shrink-0 mt-4 lg:mt-0">
+                <!-- Action Buttons -->
+                <div class="flex flex-row gap-4 items-center mt-4">
                 <!-- WhatsApp Share / Consult -->
                 @php
                     // Create a WhatsApp share link
@@ -147,13 +148,13 @@
     </div>
 
     <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         
         <!-- Left Column: Requirements & Details -->
-        <div class="lg:col-span-2 space-y-6">
+        <div class="flex flex-col gap-6 w-full md:col-span-2">
             
             <!-- Eligibility Checklist -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <section class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-6">
                 <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
                     <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mr-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4C10.5 7.5 14.5 7.5 16 9c1.5 1.5 1.5 5.5 0 7-1.5 1.5-5.5 1.5-7 0-1.5-1.5-1.5-5.5 0-7z"></path></svg>
@@ -161,7 +162,7 @@
                     Key Requirements
                 </h2>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
                     <div class="flex items-start gap-3 p-4 rounded-xl border {{ $scholarship->min_ielts ? 'border-purple-100 bg-purple-50' : 'border-gray-100 bg-gray-50' }}">
                         <svg class="w-6 h-6 shrink-0 {{ $scholarship->min_ielts ? 'text-purple-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path></svg>
                         <div>
@@ -214,7 +215,7 @@
             </div>
 
             <!-- Description -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <section class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-6">
                 <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
                     <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -228,7 +229,7 @@
 
             <!-- Full Requirements Rules -->
             @if($scholarship->requirements)
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <section class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-6">
                 <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
                     <div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-600 flex items-center justify-center mr-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -244,10 +245,10 @@
         </div>
 
         <!-- Right Column: Sidebar Data -->
-        <div class="space-y-6">
+        <div class="flex flex-col gap-6 w-full md:col-span-1">
 
             <!-- Benefits JSON parser -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <section class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-6">
                 <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center pb-4 border-b border-gray-100">
                     <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mr-3 shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -280,7 +281,7 @@
                 @endif
                 
                 @if($scholarship->has_work_contract)
-                    <div class="mt-6 p-4 bg-orange-50 border border-orange-100 rounded-xl flex items-start">
+                    <div class="mt-4 p-3 sm:p-4 bg-orange-50 border border-orange-100 rounded-xl flex items-start">
                         <svg class="w-5 h-5 text-orange-500 mr-3 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                         <p class="text-sm font-medium text-orange-800">Note: This scholarship involves a work contract or post-study obligation.</p>
                     </div>
@@ -289,16 +290,16 @@
             
             <!-- Target Bahasa CTA widget -->
             @guest
-                <div class="bg-gradient-to-br from-blue-700 to-indigo-800 rounded-2xl shadow-md border border-blue-600 p-8 text-white text-center relative overflow-hidden group">
+                <div class="bg-gradient-to-br from-blue-700 to-indigo-800 rounded-2xl shadow-md border border-blue-600 p-4 sm:p-6 md:p-8 text-white text-center relative overflow-hidden group w-full max-w-md mx-auto mb-4 md:mb-0 break-words">
                     <div class="absolute -right-16 -top-16 w-32 h-32 rounded-full bg-white opacity-10 blur-xl group-hover:scale-110 transition-transform duration-700"></div>
-                    <div class="w-16 h-16 mx-auto bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-3 sm:mb-4">
                         <span class="text-3xl">🎯</span>
                     </div>
                     <h3 class="text-xl font-bold mb-3 relative z-10">Do you qualify?</h3>
                     <p class="text-blue-100 mb-6 text-[15px] leading-relaxed relative z-10">
                         Take our free diagnostic test to predict your score and see if you meet the requirements for this scholarship!
                     </p>
-                    <a href="{{ route('free-test.register.show', ['type' => 'ielts']) }}" class="inline-block w-full py-3 bg-white text-blue-700 font-bold rounded-xl transition-all shadow-[0_4px_14px_0_rgba(255,255,255,0.2)] hover:shadow-[0_6px_20px_rgba(255,255,255,0.3)] hover:-translate-y-0.5 relative z-10">
+                    <a href="{{ route('free-test.register.show', ['type' => 'ielts']) }}" class="inline-block w-full py-2.5 sm:py-3 bg-white text-blue-700 font-bold rounded-xl transition-all shadow-[0_4px_14px_0_rgba(255,255,255,0.2)] hover:shadow-[0_6px_20px_rgba(255,255,255,0.3)] hover:-translate-y-0.5 relative z-10">
                         Take Free Test
                     </a>
                 </div>
@@ -306,7 +307,7 @@
 
             @auth
                 <!-- Language Prep CTA Widget for active students -->
-                <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl shadow-sm border border-indigo-100 p-6 relative overflow-hidden">
+                <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl shadow border border-indigo-100 p-4 sm:p-6 relative overflow-hidden w-full max-w-md mx-auto mb-4 md:mb-0 break-words">
                     <div class="absolute right-0 bottom-0 opacity-10">
                          <svg class="w-32 h-32 text-indigo-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z"></path></svg>
                     </div>
@@ -315,7 +316,7 @@
                         {{ $scholarship->min_ielts || $scholarship->min_toefl ? 'Ensure you hit the minimum requirements.' : 'A high score makes you stand out.' }} 
                         Join our intensive preparation programs.
                     </p>
-                    <a href="#" class="inline-block w-full text-center py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors shadow-sm relative z-10">
+                    <a href="#" class="inline-block w-full text-center py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors shadow-sm relative z-10">
                         View Study Programs
                     </a>
                 </div>

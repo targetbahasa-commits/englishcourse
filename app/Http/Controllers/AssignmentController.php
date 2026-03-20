@@ -25,7 +25,9 @@ class AssignmentController extends Controller
     public function index()
     {
         // Exclude internal/helper programs from the main dashboard
-        $programs = \App\Models\Program::whereNotIn('slug', ['ielts-academic-listening', 'ielts-academic-reading'])->get();
+        $programs = \App\Models\Program::whereNotIn('slug', ['ielts-academic-listening', 'ielts-academic-reading'])
+            ->where('is_active', true)
+            ->get();
         // dd('Hit index method');
         return view('assignments.index', compact('programs'));
     }
@@ -368,6 +370,12 @@ class AssignmentController extends Controller
 
         $title = $materials[$id];
         $content = null;
+
+        // Check if the lesson is locked
+        $meeting = \App\Models\Meeting::where('program_id', 8)->where('meeting_number', $id)->first();
+        if ($meeting && $meeting->is_locked && !\Illuminate\Support\Facades\Auth::user()->isAdmin() && !\Illuminate\Support\Facades\Auth::user()->isTeacher()) {
+            return redirect()->route('assignments.ielts-academic.reading.index')->with('error', 'This practice test is currently locked.');
+        }
 
         // Check DB first
         $dbPassages = \App\Models\IeltsReadingPassage::where('material_id', $id)
@@ -1627,7 +1635,7 @@ class AssignmentController extends Controller
             'order' => 'nullable|integer'
         ]);
 
-        $passage = \DB::table('ielts_reading_passages')->insert([
+        $passage = \Illuminate\Support\Facades\DB::table('ielts_reading_passages')->insert([
             'material_id' => $validated['material_id'],
             'title' => $validated['title'],
             'content' => $validated['content'],
@@ -1647,7 +1655,7 @@ class AssignmentController extends Controller
             'order' => 'nullable|integer'
         ]);
 
-        \DB::table('ielts_reading_passages')
+        \Illuminate\Support\Facades\DB::table('ielts_reading_passages')
             ->where('id', $id)
             ->update([
                 'title' => $validated['title'],
@@ -1661,7 +1669,7 @@ class AssignmentController extends Controller
 
     public function deletePassage($id)
     {
-        \DB::table('ielts_reading_passages')->where('id', $id)->delete();
+        \Illuminate\Support\Facades\DB::table('ielts_reading_passages')->where('id', $id)->delete();
         return response()->json(['success' => true, 'message' => 'Passage deleted successfully']);
     }
 
@@ -1902,6 +1910,10 @@ class AssignmentController extends Controller
     public function ieltsListeningPart1Practice($meetingId, $set, $partNumber = null)
     {
         $meeting = \App\Models\Meeting::findOrFail($meetingId);
+
+        if ($meeting->is_locked && !\Illuminate\Support\Facades\Auth::user()->isAdmin() && !\Illuminate\Support\Facades\Auth::user()->isTeacher()) {
+             return redirect()->route('assignments.ielts-academic.listening.index')->with('error', 'This practice test is currently locked.');
+        }
         
         // Auto-seed sections if missing (standard 4 parts)
         if ($meeting->ieltsSections->isEmpty()) {
@@ -1912,7 +1924,7 @@ class AssignmentController extends Controller
                 4 => 'Monologue (Academic Subject)',
             ];
             foreach ($parts as $num => $title) {
-                \DB::table('ielts_sections')->insert([
+                \Illuminate\Support\Facades\DB::table('ielts_sections')->insert([
                     'meeting_id' => $meeting->id,
                     'section_number' => $num,
                     'title' => $title,
@@ -1931,6 +1943,10 @@ class AssignmentController extends Controller
     public function ieltsListeningPracticeTest($meetingId, $set, $testId, $partNumber = null)
     {
         $meeting = \App\Models\Meeting::findOrFail($meetingId);
+
+        if ($meeting->is_locked && !\Illuminate\Support\Facades\Auth::user()->isAdmin() && !\Illuminate\Support\Facades\Auth::user()->isTeacher()) {
+             return redirect()->route('assignments.ielts-academic.listening.index')->with('error', 'This practice test is currently locked.');
+        }
         
         // Use the outer part number if provided (for practice-index routes)
         $set = $partNumber ?? $set;
@@ -2288,6 +2304,26 @@ class AssignmentController extends Controller
         return back()->with('success', 'Lesson deleted successfully.');
     }
 
+    public function toggleIeltsWritingLock($id)
+    {
+        $meeting = \App\Models\IeltsWritingMeeting::findOrFail($id);
+        $meeting->update(['is_locked' => !$meeting->is_locked]);
+        $newLabel = $meeting->is_locked ? 'LOCKED' : 'OPEN';
+        return back()
+            ->with('success', 'Writing lesson is now ' . $newLabel . '.')
+            ->with('success_state', $meeting->is_locked ? 'locked' : 'open');
+    }
+
+    public function toggleIeltsSpeakingLock($id)
+    {
+        $topic = \App\Models\IeltsSpeakingTopic::findOrFail($id);
+        $topic->update(['is_locked' => !$topic->is_locked]);
+        $newLabel = $topic->is_locked ? 'LOCKED' : 'OPEN';
+        return back()
+            ->with('success', 'Speaking topic is now ' . $newLabel . '.')
+            ->with('success_state', $topic->is_locked ? 'locked' : 'open');
+    }
+
     public function storeIeltsWritingQuestion(Request $request)
     {
         $request->validate([
@@ -2327,6 +2363,11 @@ class AssignmentController extends Controller
     {
         // Now using real ID from DB
         $meeting = \App\Models\IeltsWritingMeeting::findOrFail($id);
+
+        if ($meeting->is_locked && !\Illuminate\Support\Facades\Auth::user()->isAdmin() && !\Illuminate\Support\Facades\Auth::user()->isTeacher()) {
+             return redirect()->route('assignments.ielts-academic.writing.index', ['task' => $task])->with('error', 'This practice test is currently locked.');
+        }
+
         $this->hydrateWritingSupportData($meeting);
         
         // Determine Back URL
@@ -3579,10 +3620,9 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             }
         }
 
-        // Get lessons from Part 1 topics
-        $topics = $this->getSpeakingPart1Topics();
-        $lessons = collect($topics)->filter(function($t) { 
-            return str_contains(strtolower($t['slug']), 'lesson'); 
+        // Fetch speaking lessons (topics) from the database
+        $lessons = \App\Models\IeltsSpeakingTopic::orderBy('order')->get()->map(function($topic) {
+            return $topic->toArray();
         });
 
         // Placeholder until other speaking parts are implemented
@@ -3601,30 +3641,45 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         // Explicit Override for Lesson 6 (Complex Sentences + Mixed Topics)
         if (false) { // Override removed
         } else {
-            $topicsPart1 = collect($this->getSpeakingPart1Topics());
-            $topicsPart2 = collect($this->getSpeakingPart2Topics());
-            
-            $topic = $topicsPart1->firstWhere('slug', $slug);
-            if (!$topic) {
-                $topic = $topicsPart2->firstWhere('slug', $slug);
-                if ($topic) {
-                    // Check if explicit Part 3 request
-                    if ($request->query('part') == 3) {
-                        $topic['part'] = 3;
-                        if (isset($topic['part3_questions'])) {
-                            $topic['questions'] = $topic['part3_questions'];
+            // Check if it's a lesson from the database
+            if (str_contains(strtolower($slug), 'lesson')) {
+                $dbTopic = \App\Models\IeltsSpeakingTopic::where('slug', $slug)->first();
+                if ($dbTopic) {
+                    $topic = $dbTopic->toArray();
+                    if ($topic['is_locked'] && !Auth::user()->isAdmin() && !Auth::user()->isTeacher()) {
+                        return redirect()->route('assignments.ielts-academic.speaking.index')->with('error', 'This topic is currently locked.');
+                    }
+                } else {
+                    $topic = null;
+                }
+            } else {
+                $topicsPart1 = collect($this->getSpeakingPart1Topics());
+                $topicsPart2 = collect($this->getSpeakingPart2Topics());
+                
+                /** @var array|null $topic */
+                $topic = $topicsPart1->firstWhere('slug', $slug);
+                if (!$topic) {
+                    /** @var array|null $topic */
+                    $topic = $topicsPart2->firstWhere('slug', $slug);
+                    if ($topic) {
+                        // Check if explicit Part 3 request
+                        if ($request->query('part') == 3) {
+                            $topic['part'] = 3;
+                            if (isset($topic['part3_questions'])) {
+                                $topic['questions'] = $topic['part3_questions'];
+                            }
+                            if (isset($topic['part3_idioms'])) {
+                                $topic['idioms'] = $topic['part3_idioms'];
+                            }
+                            if (isset($topic['part3_collocations'])) {
+                                $topic['collocations'] = $topic['part3_collocations'];
+                            }
+                        } else {
+                            $topic['part'] = 2;
                         }
-                        if (isset($topic['part3_idioms'])) {
-                            $topic['idioms'] = $topic['part3_idioms'];
-                        }
-                        if (isset($topic['part3_collocations'])) {
-                            $topic['collocations'] = $topic['part3_collocations'];
-                        }
-                    } else {
-                        $topic['part'] = 2;
                     }
                 }
-            }
+        }
         }
         
         if (!$topic) {
@@ -9379,7 +9434,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             $batchLockMap = \App\Models\ClassPeriodToeflMeeting::where('class_period_id', $selectedClassPeriod->id)
                 ->where('module', 'structure')
                 ->pluck('is_open', 'meeting_number');
-            $topics->transform(function ($topic) use ($batchLockMap) {
+            $topics->transform(function ($topic) use ($batchLockMap, $selectedClassPeriod) {
                 $topic->is_locked = $this->resolveToeflLockedState(
                     $batchLockMap,
                     (int) $topic->meeting_number,
@@ -9405,7 +9460,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             $batchLockMap = \App\Models\ClassPeriodToeflMeeting::where('class_period_id', $selectedClassPeriod->id)
                 ->where('module', 'reading')
                 ->pluck('is_open', 'meeting_number');
-            $meetings->transform(function ($meeting) use ($batchLockMap) {
+            $meetings->transform(function ($meeting) use ($batchLockMap, $selectedClassPeriod) {
                 $meeting->is_locked = $this->resolveToeflLockedState(
                     $batchLockMap,
                     (int) $meeting->meeting_number,

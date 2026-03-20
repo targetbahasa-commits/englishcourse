@@ -19,12 +19,16 @@ class IeltsWritingMeeting extends Model
         'category',
         'idioms',
         'collocations',
+        'is_locked',
     ];
+
 
     protected $casts = [
         'idioms' => 'array',
         'collocations' => 'array',
+        'is_locked' => 'boolean',
     ];
+
     public function questions()
     {
         return $this->hasMany(IeltsWritingQuestion::class)->orderBy('order');

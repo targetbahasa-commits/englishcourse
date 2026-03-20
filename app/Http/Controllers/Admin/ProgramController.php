@@ -37,7 +37,6 @@ class ProgramController extends Controller
             'name'           => 'required|string|max:255',
             'period'         => 'required|string|max:255',
             'description'    => 'required|string',
-            'is_active'      => 'boolean',
             'price'          => 'nullable|numeric|min:0',
             'brochure_image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
             'brochure_pdf'   => 'nullable|mimes:pdf|max:20480',
@@ -67,7 +66,6 @@ class ProgramController extends Controller
             'name'           => 'required|string|max:255',
             'period'         => 'required|string|max:255',
             'description'    => 'required|string',
-            'is_active'      => 'boolean',
             'price'          => 'nullable|numeric|min:0',
             'brochure_image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
             'brochure_pdf'   => 'nullable|mimes:pdf|max:20480',
@@ -148,22 +146,37 @@ class ProgramController extends Controller
     }
 
     /**
-     * Remove or Archive the program.
+     * Deactivate a program (first step before permanent deletion).
+     */
+    public function deactivate(Program $program)
+    {
+        $program->update(['is_active' => false]);
+
+        return back()->with('success', 'Program "' . $program->name . '" has been deactivated. You can now delete it permanently.');
+    }
+
+    /**
+     * Permanently delete the program (only allowed if already inactive).
      */
     public function destroy(Program $program)
     {
-        // Avoid deleting programs if they have active users.
-        // For phase 1, we will just delete, but ideally this would soft delete or mark as archived.
-        $activeUsers = $program->users()->where('role', 'student')->where('status', 'active')->count();
+        // Guard: must be deactivated first
+        if ($program->is_active) {
+            return back()->with('error', 'Program must be deactivated before it can be permanently deleted. Click "Deactivate" first.');
+        }
 
+        // Guard: cannot delete if there are active students enrolled
+        $activeUsers = $program->users()->where('role', 'student')->where('status', 'active')->count();
         if ($activeUsers > 0) {
             return back()->with('error', "Cannot delete program. There are $activeUsers active students currently enrolled.");
         }
 
+        $programName = $program->name;
         $program->delete();
-        
-        return back()->with('success', 'Program deleted successfully.');
+
+        return back()->with('success', "Program \"$programName\" has been permanently deleted.");
     }
+
 
     /**
      * Display the syllabus builder for a program.

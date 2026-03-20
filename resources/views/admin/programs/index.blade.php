@@ -184,17 +184,32 @@
                                     
                                     <div x-show="open" 
                                          x-transition.opacity
-                                         class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 z-10 py-1"
+                                         class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 z-10 py-1"
                                          style="display: none;">
                                         
-                                        <form method="POST" action="{{ route('programs.destroy', $program->id) }}" onsubmit="return confirm('Archive/Delete this program forever?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                Archive & Delete
-                                            </button>
-                                        </form>
+                                        @if($program->is_active)
+                                            {{-- Step 1: Deactivate (for active programs) --}}
+                                            <form method="POST" action="{{ route('programs.deactivate', $program->id) }}" onsubmit="return confirm('Deactivate program \'{{ addslashes($program->name) }}\'? It will be hidden from students. You can delete it permanently after deactivating.');">
+                                                @csrf
+                                                <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                                                    Deactivate Program
+                                                </button>
+                                            </form>
+                                        @else
+                                            {{-- Step 2: Delete Permanently (only for inactive programs) --}}
+                                            <div class="px-4 py-2 border-b border-gray-100">
+                                                <p class="text-xs text-gray-400 font-medium">Program is inactive</p>
+                                            </div>
+                                            <form method="POST" action="{{ route('programs.destroy', $program->id) }}" onsubmit="return confirm('PERMANENTLY DELETE \'{{ addslashes($program->name) }}\'? This cannot be undone!');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                    Delete Permanently
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -299,13 +314,12 @@
                     </div>
                 </div>
 
+
                 <!-- Form -->
-                <form :action="isEdit ? '/admin/programs/' + form.id : '{{ route('programs.store') }}'" method="POST" class="px-6 py-5 space-y-6">
+                <form x-ref="programForm" :action="isEdit ? '/admin/programs/' + form.id : '{{ route('programs.store') }}'" method="POST" class="px-6 py-5 space-y-6">
                     @csrf
                     <!-- Dynamic Method Injection for PUT requests -->
-                    <template x-if="isEdit">
-                        <input type="hidden" name="_method" value="PUT">
-                    </template>
+                    <input type="hidden" name="_method" :value="isEdit ? 'PUT' : 'POST'">
 
                     <div>
                         <label for="name" class="block text-sm font-semibold text-gray-700 mb-1">Program Name <span class="text-red-500">*</span></label>
