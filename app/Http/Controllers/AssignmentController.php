@@ -397,7 +397,14 @@ class AssignmentController extends Controller
                             'db_id' => $q->id, // Add Question DB ID for CRUD
                             'type' => $q->type,
                             'text' => $q->question_text,
-                            'options' => $q->options,
+                            'options' => (function($opts) {
+                                if (!is_array($opts) || empty($opts)) return $opts;
+                                // If numerically indexed (e.g. ["A","B","C"]), convert to assoc (e.g. ["A"=>"A","B"=>"B"])
+                                if (array_keys($opts) === range(0, count($opts) - 1)) {
+                                    return array_combine($opts, $opts);
+                                }
+                                return $opts;
+                            })($q->options),
                             'correct_answer' => $q->correct_answer,
                             'explanation' => $q->explanation,
                             'data' => $q->data, // Keep the raw data object for the editor

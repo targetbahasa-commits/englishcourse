@@ -8,7 +8,6 @@
 </head>
 <body class="font-sans antialiased bg-gray-50">
     @include('components.impersonation-banner')
-    @include('components.program-sidebar')
     <div class="flex min-h-screen">
         {{-- Sidebar --}}
         @if(Auth::user()->isAdmin())

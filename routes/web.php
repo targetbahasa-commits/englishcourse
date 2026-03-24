@@ -6,6 +6,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/debug-reading-test', function() {
+    return view('assignments.ielts.mockup.c20-reading-test-4', ['testId' => 4, 'edition' => 20]);
+});
+
 // Cleanup Route (Temporary - Public) - Removed
 // Route::get('/cleanup-ielts-reading', [App\Http\Controllers\AssignmentController::class, 'cleanupIeltsReading']);
 
