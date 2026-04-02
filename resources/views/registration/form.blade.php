@@ -417,9 +417,9 @@ function regForm() {
     return {
         step: 1,
         form: {
-            full_name:            '{{ old('full_name') }}',
-            whatsapp:             '{{ old('whatsapp') }}',
-            email:                '{{ old('email') }}',
+            full_name:            '{{ old('full_name', auth()->user()?->name ?? '') }}',
+            whatsapp:             '{{ old('whatsapp', auth()->user()?->phone_number ?? '') }}',
+            email:                '{{ old('email', auth()->user()?->email ?? '') }}',
             city:                 '{{ old('city') }}',
             age:                  '{{ old('age') }}',
             profession:           '{{ old('profession', 'other') }}',

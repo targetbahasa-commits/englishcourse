@@ -28,3 +28,8 @@ yarn-error.log
 *.blade.php.bak2
 /migrate_meeting*.php
 vosk-browser.zip
+
+# Playwright
+/playwright-report
+/test-results
+playwright/.cache

@@ -4,6 +4,7 @@
 @section('content')
 
     <div class="px-4 py-8 w-full max-w-7xl mx-auto">
+
         @include('guest.components.free-tests-content')
 
         {{-- Footer CTA --}}

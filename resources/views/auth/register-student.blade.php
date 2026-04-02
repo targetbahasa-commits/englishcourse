@@ -25,10 +25,15 @@
             <div class="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/30 transform hover:scale-105 transition-transform duration-500">
                 <span class="text-2xl font-black text-white">TB</span>
             </div>
-            <h1 class="text-3xl sm:text-4xl font-extrabold mb-3 tracking-tight text-gray-900">Create Account</h1>
+            <h1 class="text-3xl sm:text-4xl font-extrabold mb-3 tracking-tight text-gray-900">Buat Akun Student</h1>
             <p class="text-gray-600 text-sm sm:text-base mx-auto font-medium leading-relaxed max-w-md">
-                Start your language mastery journey today. Please fill in your details to register as a student.
+                Daftarkan dirimu untuk mengakses kelas dan memulai perjalanan belajar bahasa Inggris.
             </p>
+            @if(request('program'))
+            <div class="mt-4 mx-auto max-w-md px-4 py-2 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-700 font-medium">
+                🎯 Program yang kamu pilih: <strong>{{ request('program') }}</strong>
+            </div>
+            @endif
         </div>
 
         <!-- Registration Form -->
@@ -39,6 +44,8 @@
                 <x-marketing-attribution />
 
                 <input type="hidden" name="referral_code" value="{{ request()->query('ref') }}">
+                <input type="hidden" name="program" value="{{ request('program') }}">
+                <input type="hidden" name="city" value="{{ request('city') }}">
 
                 <!-- Name -->
                 <div class="group relative">
@@ -47,7 +54,7 @@
                         <div class="absolute left-4 text-gray-400 group-focus-within:text-blue-600 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                         </div>
-                        <input id="name" type="text" name="name" value="{{ old('name') }}" required autocomplete="name" 
+                        <input id="name" type="text" name="name" value="{{ old('name', request('name')) }}" required autocomplete="name" 
                             class="w-full pl-11 pr-4 py-3 bg-white/90 backdrop-blur border border-gray-200 text-gray-900 rounded-xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 transition-all duration-300 outline-none placeholder-gray-400 shadow-sm" 
                             placeholder="Ahmad Wijaya">
                     </div>
@@ -77,7 +84,7 @@
                                 <!-- Phone Icon -->
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                             </div>
-                            <input id="phone_number" type="tel" name="phone_number" value="{{ old('phone_number') }}" required autocomplete="tel" 
+                            <input id="phone_number" type="tel" name="phone_number" value="{{ old('phone_number', request('phone_number')) }}" required autocomplete="tel" 
                                 class="w-full pl-11 pr-4 py-3 bg-white/90 backdrop-blur border border-gray-200 text-gray-900 rounded-xl focus:ring-4 focus:ring-green-600/10 focus:border-green-600 transition-all duration-300 outline-none placeholder-gray-400 shadow-sm" 
                                 placeholder="081234567890" oninput="resetOtpState()">
                         </div>

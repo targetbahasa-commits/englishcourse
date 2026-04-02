@@ -786,6 +786,9 @@ Route::get('/daftar', [App\Http\Controllers\RegistrationController::class, 'show
 Route::post('/daftar', [App\Http\Controllers\RegistrationController::class, 'store'])->name('registration.store');
 Route::get('/daftar/success', [App\Http\Controllers\RegistrationController::class, 'success'])->name('registration.success');
 
+// Landing Page Class Registration Lead (saves to RegistrationLead + redirects to student register)
+Route::post('/daftar-kelas', [App\Http\Controllers\PublicRegistrationLeadController::class, 'store'])->name('class-lead.store');
+
 // 2-Way Messaging & Inbox
 Route::middleware(['auth'])->group(function () {
     Route::get('/announcements', [App\Http\Controllers\AnnouncementController::class, 'index'])->name('announcements.index');

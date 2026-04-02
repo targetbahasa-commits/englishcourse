@@ -155,7 +155,7 @@ $freeLessons = [
 
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         <!-- IELTS Academic -->
-        <div class="group bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 hover:border-blue-200 hover:shadow-[0_8px_30px_rgb(37,99,235,0.1)] transition-all duration-300 p-8 flex flex-col h-full overflow-hidden relative">
+        <div class="group bg-gradient-to-br from-blue-100 via-blue-50 to-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-blue-200 hover:border-blue-400 hover:shadow-[0_8px_30px_rgb(37,99,235,0.15)] transition-all duration-300 p-8 flex flex-col h-full overflow-hidden relative">
             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-transparent rounded-bl-[100px] z-0 opacity-50 group-hover:opacity-100 transition-opacity"></div>
             
             <div class="relative z-10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-sm bg-gradient-to-br from-blue-500 to-blue-600 transform group-hover:-translate-y-1 transition-transform">
@@ -191,7 +191,7 @@ $freeLessons = [
         </div>
 
         <!-- IELTS General -->
-        <div class="group bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 hover:border-emerald-200 hover:shadow-[0_8px_30px_rgb(16,185,129,0.1)] transition-all duration-300 p-8 flex flex-col h-full overflow-hidden relative">
+        <div class="group bg-gradient-to-br from-emerald-100 via-emerald-50 to-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-emerald-200 hover:border-emerald-400 hover:shadow-[0_8px_30px_rgb(16,185,129,0.15)] transition-all duration-300 p-8 flex flex-col h-full overflow-hidden relative">
             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-50 to-transparent rounded-bl-[100px] z-0 opacity-50 group-hover:opacity-100 transition-opacity"></div>
             
             <div class="relative z-10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-sm bg-gradient-to-br from-emerald-500 to-emerald-600 transform group-hover:-translate-y-1 transition-transform">
@@ -227,7 +227,7 @@ $freeLessons = [
         </div>
 
         <!-- TOEFL ITP -->
-        <div class="group bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 hover:border-purple-200 hover:shadow-[0_8px_30px_rgb(147,51,234,0.1)] transition-all duration-300 p-8 flex flex-col h-full overflow-hidden relative">
+        <div class="group bg-gradient-to-br from-purple-100 via-purple-50 to-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-purple-200 hover:border-purple-400 hover:shadow-[0_8px_30px_rgb(147,51,234,0.15)] transition-all duration-300 p-8 flex flex-col h-full overflow-hidden relative">
             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-50 to-transparent rounded-bl-[100px] z-0 opacity-50 group-hover:opacity-100 transition-opacity"></div>
             
             <div class="relative z-10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-sm bg-gradient-to-br from-purple-500 to-purple-600 transform group-hover:-translate-y-1 transition-transform">
@@ -263,7 +263,7 @@ $freeLessons = [
         </div>
 
         <!-- PTE Academic -->
-        <div class="group bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 hover:border-orange-200 hover:shadow-[0_8px_30px_rgb(234,88,12,0.1)] transition-all duration-300 p-8 flex flex-col h-full overflow-hidden relative">
+        <div class="group bg-gradient-to-br from-orange-100 via-orange-50 to-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-orange-200 hover:border-orange-400 hover:shadow-[0_8px_30px_rgb(234,88,12,0.15)] transition-all duration-300 p-8 flex flex-col h-full overflow-hidden relative">
             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-50 to-transparent rounded-bl-[100px] z-0 opacity-50 group-hover:opacity-100 transition-opacity"></div>
             
             <div class="relative z-10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-sm bg-gradient-to-br from-orange-500 to-orange-600 transform group-hover:-translate-y-1 transition-transform">

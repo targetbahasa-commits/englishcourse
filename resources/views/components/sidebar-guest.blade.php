@@ -66,6 +66,12 @@
 
         {{-- Footer Auth Links --}}
         <div class="mt-auto px-6 py-6 border-t border-gray-100 bg-white flex-shrink-0">
+            <nav class="space-y-1 mb-4">
+                <a href="{{ url('/') }}" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-xl font-medium transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Kembali ke Beranda
+                </a>
+            </nav>
             <p class="text-xs font-semibold text-gray-400 mb-4 uppercase tracking-wider">Akun</p>
             <nav class="space-y-1">
                 @auth
