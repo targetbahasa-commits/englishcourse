@@ -18,6 +18,7 @@ class ToeflStructureQuestion extends Model
         'option_c',
         'option_d',
         'correct_answer',
+        'explanation',
     ];
 
     public function meeting()

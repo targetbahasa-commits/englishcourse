@@ -57,3 +57,7 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Project Notes
+
+- Manual workflow untuk set audio dan transcript TOEFL Listening ada di [TOEFL_LISTENING_CLI.md](TOEFL_LISTENING_CLI.md).

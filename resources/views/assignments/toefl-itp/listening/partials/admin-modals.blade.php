@@ -1,5 +1,5 @@
 
-{{-- Edit Transcript Modal --}}
+{{-- Edit/Upload Audio Modals --}}
 @if(Auth::user()->isAdmin())
     <div id="editTranscriptModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
@@ -25,8 +25,8 @@
         </div>
     </div>
 
-    {{-- Upload SRT Modal (Admin Only) --}}
-    <div id="uploadSrtModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center"
+    {{-- Upload SRT Modal --}}
+    <div id="uploadSrtModal" class="hidden fixed inset-0  items-center justify-center"
             onclick="if(event.target === this) this.classList.add('hidden')">
         <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 relative transform transition-all">
             <div class="flex items-center justify-between mb-6">
@@ -111,8 +111,8 @@ Start translating here..."></textarea>
         </div>
     </div>
 
-    {{-- Upload Audio Modal (Admin Only) --}}
-    <div id="uploadAudioModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center"
+    {{-- Upload Audio Modal --}}
+    <div id="uploadAudioModal" class="hidden fixed inset-0  items-center justify-center"
             onclick="if(event.target === this) this.classList.add('hidden')">
         <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
             <div class="flex items-center justify-between mb-6">
@@ -159,4 +159,198 @@ Start translating here..."></textarea>
             </form>
         </div>
     </div>
+
+    {{-- Choose Audio From Folder Modal (File Manager) --}}
+    <div id="chooseAudioModal" class="hidden fixed inset-0  items-center justify-center"
+         onclick="if(event.target === this) this.classList.add('hidden')">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full mx-4 my-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-900">Choose Audio File</h3>
+                    <p class="text-sm text-gray-500 mt-1">Navigate and select from available audio files</p>
+                </div>
+                <button type="button" onclick="document.getElementById('chooseAudioModal').classList.add('hidden')"
+                        class="text-gray-400 hover:text-gray-600 flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form action="{{ route('assignments.toefl-itp.listening.meeting.upload-audio', ['number' => $number ?? 0, 'set' => $set ?? 0]) }}" method="POST" class="space-y-4">
+                @csrf
+
+                {{-- Breadcrumb Navigation --}}
+                <div class="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="flex items-center gap-2 text-sm font-medium flex-wrap">
+                        <button type="button" class="text-blue-600 hover:text-blue-800 flex-shrink-0" onclick="audioFileManager.goToRoot(event)">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2.83-2.83a1 1 0 011.41 0L12 12m0 0l5.76-5.76a1 1 0 011.41 0L21 12"></path></svg>
+                        </button>
+                        <span id="audioBreadcrumb" class="text-gray-700">Root</span>
+                    </div>
+                </div>
+
+                {{-- File Manager List --}}
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Available Files & Folders</label>
+                    <div id="audioFileList" class="w-full border-2 border-gray-300 rounded-lg max-h-80 overflow-y-auto bg-white">
+                        <div class="p-4 text-center text-gray-500 text-sm">Loading files...</div>
+                    </div>
+                </div>
+
+                {{-- Selected File Display --}}
+                <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                    <p class="text-sm font-medium text-emerald-800">Selected:</p>
+                    <p id="audioSelectedFile" class="text-sm text-emerald-700 mt-1 break-words">
+                        <span class="italic text-gray-500">None selected</span>
+                    </p>
+                </div>
+
+                {{-- Hidden input for selected file path --}}
+                <input type="hidden" name="existing_audio_path" id="selectedAudioPath" value="">
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="document.getElementById('chooseAudioModal').classList.add('hidden')"
+                            class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" id="useSelectedAudioBtn"
+                            class="flex-1 px-4 py-2 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled>
+                        Use Selected
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    const audioFileManager = {
+        allFiles: @json($sourceAudioOptions ?? []),
+        currentPath: '',
+        selectedFile: null,
+
+        init() {
+            this.render();
+        },
+
+        goToRoot(e) {
+            if (e) e.preventDefault();
+            this.currentPath = '';
+            this.render();
+        },
+
+        selectFile(filePath) {
+            this.selectedFile = filePath;
+            document.getElementById('selectedAudioPath').value = filePath;
+            
+            const fileName = filePath.split('/').pop();
+            document.getElementById('audioSelectedFile').innerHTML = `<span class="text-green-700 font-medium">${fileName}</span>`;
+            document.getElementById('useSelectedAudioBtn').disabled = false;
+            
+            this.render();
+        },
+
+        goToFolder(folderPath) {
+            this.currentPath = folderPath;
+            this.render();
+        },
+
+        render() {
+            const listContainer = document.getElementById('audioFileList');
+            const breadcrumb = document.getElementById('audioBreadcrumb');
+            
+            if (!this.allFiles.length) {
+                listContainer.innerHTML = '<div class="p-4 text-center text-gray-500">No files available</div>';
+                return;
+            }
+
+            // Build folder structure
+            const items = {};
+            this.allFiles.forEach(audio => {
+                const path = audio.label || audio.value;
+                const parts = path.split('/');
+                let current = items;
+                
+                for (let i = 0; i < parts.length; i++) {
+                    const part = parts[i];
+                    const fullPath = parts.slice(0, i + 1).join('/');
+                    
+                    if (!current[part]) {
+                        current[part] = { _path: fullPath, _isFile: i === parts.length - 1 };
+                    }
+                    current = current[part];
+                }
+            });
+
+            // Get current folder contents
+            let current = items;
+            if (this.currentPath) {
+                const pathParts = this.currentPath.split('/');
+                breadcrumb.innerHTML = pathParts.map((p, i) => {
+                    const p2 = pathParts.slice(0, i + 1).join('/');
+                    return `<button class="text-blue-600 hover:text-blue-800" onclick="audioFileManager.goToFolder('${p2}'); event.preventDefault()">${p}</button>`;
+                }).join(' <span class="text-gray-400">/</span> ');
+
+                pathParts.forEach(part => {
+                    current = current[part];
+                });
+            } else {
+                breadcrumb.innerHTML = 'Root';
+            }
+
+            // Render folder contents
+            const contents = Object.keys(current).filter(k => !k.startsWith('_')).sort();
+            
+            if (!contents.length) {
+                listContainer.innerHTML = '<div class="p-4 text-center text-gray-500 text-sm">Folder is empty</div>';
+                return;
+            }
+
+            let html = '';
+            contents.forEach(name => {
+                const item = current[name];
+                const isFile = item._isFile;
+                const fullPath = item._path;
+                const isSelected = isFile && this.selectedFile === fullPath;
+                
+                if (isFile) {
+                    html += `
+                        <div class="flex items-center p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 ${isSelected ? 'bg-blue-100' : ''}"
+                             onclick="audioFileManager.selectFile('${fullPath}')">
+                            <svg class="w-5 h-5 text-red-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                            </svg>
+                            <span class="text-sm text-gray-800 flex-1 break-words">${name}</span>
+                            ${isSelected ? '<svg class="w-5 h-5 text-green-600 ml-2 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>' : ''}
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="flex items-center p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100"
+                             onclick="audioFileManager.goToFolder('${fullPath}')">
+                            <svg class="w-5 h-5 text-yellow-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"></path>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-800 flex-1">${name}</span>
+                            <svg class="w-4 h-4 text-gray-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    `;
+                }
+            });
+            
+            listContainer.innerHTML = html;
+        }
+    };
+
+    // Initialize when modal is opened
+    const originalChooseAudioClick = document.addEventListener('click', function initAudioModal(e) {
+        const chooseBtn = e.target.closest('[onclick*="chooseAudioModal"]');
+        if (chooseBtn && chooseBtn.getAttribute('onclick').includes("remove('hidden')")) {
+            setTimeout(() => audioFileManager.init(), 100);
+        }
+    });
+    </script>
 @endif

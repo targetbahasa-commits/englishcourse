@@ -3,16 +3,20 @@
         <div class="flex-none flex items-center justify-end gap-2 w-8">
             <span class="font-bold text-gray-500 text-xl">{{ $question->question_number }}.</span>
         </div>
-        @if(auth()->check() && auth()->user()->isAdmin())
-            <button type="button" 
-                    onclick="openEditQuestionModal({{ $question }})" 
-                    class="absolute top-3 right-10 w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
-                    title="Edit Question">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-            </button>
-        @endif
+        @php
+            $currentUser = auth()->user();
+            $baseRole = strtolower(trim((string) ($currentUser->role ?? '')));
+            $hasAdminBaseRole = $baseRole === 'admin' || str_contains($baseRole, 'admin');
+            $isAdminImpersonating = $currentUser && $baseRole === 'admin' && request()->hasSession() && session()->has('view_as_role');
+            $hasPrivilegedAccess = $currentUser && (
+                (method_exists($currentUser, 'isAdmin') && $currentUser->isAdmin())
+                || $hasAdminBaseRole
+                || $isAdminImpersonating
+            );
+            $canEditQuestion = $currentUser && (
+                $hasPrivilegedAccess
+            );
+        @endphp
         @if(isset($transcript_enabled) && $transcript_enabled)
             <button type="button" 
                     onclick="jumpToTime({{ $questionTimestamps[$question->id] ?? 'null' }})" 
@@ -21,11 +25,35 @@
                 ?
             </button>
         @endif
+        @php
+            $rawQuestionText = trim((string) ($question->question_text ?? ''));
+            $displayQuestionText = $rawQuestionText;
+
+            if (isset($instructionQuestionId) && (int) $instructionQuestionId === (int) $question->id) {
+                $normalizedQuestionText = str_replace('\\n', "\n", $rawQuestionText);
+                if (stripos($normalizedQuestionText, 'Focus:') === 0 && stripos($normalizedQuestionText, 'Directions:') !== false) {
+                    $displayQuestionText = '';
+                }
+            }
+        @endphp
         <div class="flex flex-col gap-2 flex-1">
+            @if(auth()->check() && $canEditQuestion)
+                <div class="flex justify-end mb-1">
+                    <button type="button"
+                            onclick="openEditQuestionById({{ $question->id }})"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-100 text-amber-700 hover:bg-amber-200 text-xs font-semibold transition-colors"
+                            title="Edit Text Soal">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                        Edit Text Soal
+                    </button>
+                </div>
+            @endif
             {{-- Display Question Text if available and valid (not just 'Question N') --}}
-            @if($question->question_text && !Str::startsWith($question->question_text, 'Question '))
+            @if($displayQuestionText && !Str::startsWith($displayQuestionText, 'Question '))
                 <div class="mb-2 text-lg text-gray-800 font-medium">
-                    {{ $question->question_text }}
+                    {{ $displayQuestionText }}
                 </div>
             @endif
 

@@ -1,0 +1,4 @@
+# meeting	set	audio_source	transcript_en_source	transcript_id_source
+# Paths can be absolute or relative to this project root.
+# Leave a field empty if not needed.
+3	2	public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/21. mini test 1.mp3	public/audio/toefl/listening/Source/transcript EN/2-1 tanpa musik.srt	public/audio/toefl/listening/Source/transcript IDN/2-1 idn.srt.txt

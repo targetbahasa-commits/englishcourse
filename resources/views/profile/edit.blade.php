@@ -15,12 +15,16 @@
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
 
+        @php
+            $profileRole = strtolower($user->role ?? 'student');
+        @endphp
+
         {{-- Sidebar --}}
-        @if(Auth::user()->isAdmin())
+        @if($profileRole === 'admin')
             @include('components.sidebar-admin')
-        @elseif(Auth::user()->isTeacher())
+        @elseif($profileRole === 'teacher')
             @include('components.sidebar-teacher')
-        @elseif(Auth::user()->isGuest())
+        @elseif($profileRole === 'guest')
             @include('components.sidebar-guest')
         @else
             @include('components.sidebar-student')

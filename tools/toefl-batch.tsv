@@ -1,0 +1,35 @@
+# meeting	set	audio_source	transcript_en_source	transcript_id_source
+# Rules:
+# - Use paths relative to project root (recommended) or absolute paths.
+# - Leave a column empty if you do not want to update that asset.
+# - Run dry-run first: ./tools/toefl-batch-apply tools/toefl-batch.tsv --dry-run
+# - Apply after review: ./tools/toefl-batch-apply tools/toefl-batch.tsv --apply
+
+# Reliable mapping from filename pattern "2-1"
+2	1		public/audio/toefl/listening/Source/transcript EN/2-1 tanpa musik.srt	public/audio/toefl/listening/Source/transcript IDN/2-1 idn.srt.txt
+
+# Candidate audio files from Source/AUDIO UNTUK TOEFL ONLINE (assign manually):
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/1. Mini-Test 2.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/1. Practice Test 2.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/1. Practice Test 3.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/3. Part C, Mini-Talks Exercise 15.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/4. Part B Extended Conversations Exercise 12.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/4. Part B Extended Conversations Exercise 13-1.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/4. Part B Extended Conversations Exercise 13-2.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/4. Practice Test 1.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/6. Part C, Mini-Talks Exercise 16-1.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/10. Part C, Mini-Talks Exercise 3.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/10. Part C, Mini-Talks Exercise 16-2.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/10. Part C, Mini-Talks Exercise 16-2 benar.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/10. Part C, Mini-Talks Exercise 16-2 baru.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/21. mini test 1.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/21. Part A Dialogs Exercise 4.3 (1-20).mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/21. Part A Dialogs Exercise 5 (1-20).mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/21. Part A Dialogs Exercise 7.1.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/21. Part A Dialogs Exercise 7.2.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/21. Part A Dialogs Exercise 8.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/21. Part A Dialogs Exercise 9.mp3
+# public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/21. Part A Dialogs Exercise 10.mp3
+
+# Example row format (uncomment and edit):
+# 3	1	public/audio/toefl/listening/Source/AUDIO UNTUK TOEFL ONLINE/21. mini test 1.mp3		

@@ -1,0 +1,31 @@
+<?php
+
+use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
+
+define('LARAVEL_START', microtime(true));
+
+// ============================================================
+// CATATAN UNTUK SHARED HOSTING:
+// File ini ada di: public_html/index.php
+// Laravel app ada di: laravel_app/ (satu folder di atas public_html)
+// Struktur di server:
+//   /home/username/laravel_app/   ← semua file Laravel (kecuali public/)
+//   /home/username/public_html/   ← isi dari public/ folder
+// ============================================================
+
+define('APP_ROOT', __DIR__ . '/../laravel_app');
+
+// Determine if the application is in maintenance mode...
+if (file_exists($maintenance = APP_ROOT . '/storage/framework/maintenance.php')) {
+    require $maintenance;
+}
+
+// Register the Composer autoloader...
+require APP_ROOT . '/vendor/autoload.php';
+
+// Bootstrap Laravel and handle the request...
+/** @var Application $app */
+$app = require_once APP_ROOT . '/bootstrap/app.php';
+
+$app->handleRequest(Request::capture());

@@ -72,7 +72,7 @@
                     Kembali ke Beranda
                 </a>
             </nav>
-            <p class="text-xs font-semibold text-gray-400 mb-4 uppercase tracking-wider">Akun</p>
+            <p class="text-xs font-semibold text-gray-400 mb-4 uppercase tracking-wider">AKUN - GUEST</p>
             <nav class="space-y-1">
                 @auth
                     <form method="POST" action="{{ route('logout') }}" class="m-0">

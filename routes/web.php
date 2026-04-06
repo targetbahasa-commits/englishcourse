@@ -456,13 +456,15 @@ Route::middleware(['auth'])->group(function () {
     // TOEFL ITP Mock Up Test Route
     Route::get('/assignments/toefl-itp', [App\Http\Controllers\AssignmentController::class, 'toeflItp'])->name('assignments.toefl-itp');
     Route::get('/assignments/toefl-itp/listening', [App\Http\Controllers\AssignmentController::class, 'listeningIndex'])->name('assignments.toefl-itp.listening');
+    Route::get('/assignments/toefl-itp/listening-lesson', [App\Http\Controllers\AssignmentController::class, 'listeningIndex'])->name('assignments.toefl-itp.listening.lesson');
+    Route::get('/assignments/toefl-itp/listening-practice', [App\Http\Controllers\AssignmentController::class, 'toeflListeningPracticeIndex'])->name('assignments.toefl-itp.listening.practice');
     Route::get('/assignments/toefl-itp/listening/{number}', [App\Http\Controllers\AssignmentController::class, 'listeningMeeting'])->name('assignments.toefl-itp.listening.meeting');
     Route::post('/assignments/toefl-itp/listening/{number}/add-set', [App\Http\Controllers\AssignmentController::class, 'addListeningSet'])->name('assignments.toefl-itp.listening.meeting.add-set');
     Route::post('/assignments/toefl-itp/listening/{number}/remove-set', [App\Http\Controllers\AssignmentController::class, 'removeListeningSet'])->name('assignments.toefl-itp.listening.meeting.remove-set');
     Route::get('/assignments/toefl-itp/listening/{number}/practice/{set}', [App\Http\Controllers\AssignmentController::class, 'listeningMeetingPractice'])->name('assignments.toefl-itp.listening.meeting.practice');
-    Route::post('/assignments/toefl-itp/listening/{number}/upload-srt', [App\Http\Controllers\AssignmentController::class, 'uploadListeningSrt'])->name('assignments.toefl-itp.listening.meeting.upload-srt');
+    Route::post('/assignments/toefl-itp/listening/{number}/practice/{set}/upload-srt', [App\Http\Controllers\AssignmentController::class, 'uploadSrt'])->name('assignments.toefl-itp.listening.meeting.upload-srt');
     Route::post('/assignments/toefl-itp/listening/{number}/practice/{set}/upload-audio', [App\Http\Controllers\AssignmentController::class, 'uploadListeningAudio'])->name('assignments.toefl-itp.listening.meeting.upload-audio');
-    Route::post('/assignments/toefl-itp/listening/{number}/practice/{set}/update-transcript', [App\Http\Controllers\AssignmentController::class, 'updateListeningTranscript'])->name('assignments.toefl-itp.listening.meeting.update-transcript');
+    Route::post('/assignments/toefl-itp/listening/{number}/practice/{set}/update-transcript', [App\Http\Controllers\AssignmentController::class, 'updateTranscript'])->name('assignments.toefl-itp.listening.meeting.update-transcript');
     
     Route::post('/assignments/toefl-itp/listening/question', [App\Http\Controllers\AssignmentController::class, 'storeListeningQuestion'])->name('assignments.toefl-itp.listening.question.store');
     Route::put('/assignments/toefl-itp/listening/question/{id}', [App\Http\Controllers\AssignmentController::class, 'updateListeningQuestion'])->name('assignments.toefl-itp.listening.question.update');
@@ -473,6 +475,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/assignments/toefl-itp/listening/{number}/toggle-transcript', [App\Http\Controllers\AssignmentController::class, 'toggleTranscriptLock'])->name('assignments.toefl-itp.listening.toggle-transcript');
     
     Route::get('/assignments/toefl-itp/structure', [App\Http\Controllers\AssignmentController::class, 'structureIndex'])->name('assignments.toefl-itp.structure');
+    Route::get('/assignments/toefl-itp/structure-lesson', [App\Http\Controllers\AssignmentController::class, 'structureIndex'])->name('assignments.toefl-itp.structure.lesson');
+    Route::get('/assignments/toefl-itp/structure-practice', [App\Http\Controllers\AssignmentController::class, 'toeflStructurePracticeIndex'])->name('assignments.toefl-itp.structure.practice');
     
     // Existing store route kept for backward compatibility if needed, but adding specific add-set route
     // Note: addStructureSet expects {number} parameter based on my earlier read
@@ -481,6 +485,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/assignments/toefl-itp/structure/{number}/add-set', [App\Http\Controllers\AssignmentController::class, 'addStructureSet'])->name('assignments.toefl-itp.structure.meeting.add-set');
     Route::post('/assignments/toefl-itp/structure/{number}/remove-set', [App\Http\Controllers\AssignmentController::class, 'removeStructureSet'])->name('assignments.toefl-itp.structure.meeting.remove-set');
     Route::post('/assignments/toefl-itp/structure/{number}/submit', [App\Http\Controllers\AssignmentController::class, 'submitStructureMeeting'])->name('assignments.toefl-itp.structure.meeting.submit');
+    Route::post('/assignments/toefl-itp/structure/{number}/save-explanation', [App\Http\Controllers\AssignmentController::class, 'saveStructureExplanation'])->name('assignments.toefl-itp.structure.meeting.save-explanation');
+    Route::get('/assignments/toefl-itp/structure/{number}/download-explanation', [App\Http\Controllers\AssignmentController::class, 'downloadStructureExplanation'])->name('assignments.toefl-itp.structure.meeting.download-explanation');
     
     Route::post('/assignments/toefl-itp/structure/reorder', [App\Http\Controllers\AssignmentController::class, 'reorderStructureMeetings'])->name('assignments.toefl-itp.structure.reorder');
     
@@ -488,6 +494,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/assignments/toefl-itp/structure/question', [App\Http\Controllers\AssignmentController::class, 'storeStructureQuestion'])->name('assignments.toefl-itp.structure.question.store');
     Route::put('/assignments/toefl-itp/structure/question/{id}', [App\Http\Controllers\AssignmentController::class, 'updateStructureQuestion'])->name('assignments.toefl-itp.structure.question.update');
     Route::delete('/assignments/toefl-itp/structure/question/{id}', [App\Http\Controllers\AssignmentController::class, 'deleteStructureQuestion'])->name('assignments.toefl-itp.structure.question.destroy');
+    Route::post('/assignments/toefl-itp/structure/question/{id}/update-answer', [App\Http\Controllers\AssignmentController::class, 'updateStructureQuestionAnswer'])->name('assignments.toefl-itp.structure.question.update-answer');
     
     Route::get('/assignments/toefl-itp/structure/{number}', [App\Http\Controllers\AssignmentController::class, 'structureMeeting'])->name('assignments.toefl-itp.structure.meeting');
     Route::post('/assignments/toefl-itp/structure/{meeting}/toggle-lock', [App\Http\Controllers\AssignmentController::class, 'toggleStructureLock'])->name('assignments.toefl-itp.structure.toggle-lock');
@@ -495,6 +502,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/assignments/toefl-itp/structure/{meeting}/destroy', [App\Http\Controllers\AssignmentController::class, 'removeStructureSet'])->name('assignments.toefl-itp.structure.destroy');
     
     Route::get('/assignments/toefl-itp/reading', [App\Http\Controllers\AssignmentController::class, 'readingIndex'])->name('assignments.toefl-itp.reading');
+    Route::get('/assignments/toefl-itp/reading-lesson', [App\Http\Controllers\AssignmentController::class, 'readingIndex'])->name('assignments.toefl-itp.reading.lesson');
+    Route::get('/assignments/toefl-itp/reading-practice', [App\Http\Controllers\AssignmentController::class, 'toeflReadingPracticeIndex'])->name('assignments.toefl-itp.reading.practice');
     Route::post('/assignments/toefl-itp/reading', [App\Http\Controllers\AssignmentController::class, 'storeReadingMeeting'])->name('assignments.toefl-itp.reading.store');
     Route::post('/assignments/toefl-itp/reading/reorder', [App\Http\Controllers\AssignmentController::class, 'reorderReadingMeetings'])->name('assignments.toefl-itp.reading.reorder');
     Route::get('/assignments/toefl-itp/reading/{number}', [App\Http\Controllers\AssignmentController::class, 'readingMeeting'])->name('assignments.toefl-itp.reading.meeting');

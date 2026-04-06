@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.dashboard')
 
 @section('content')
 <div class="container mx-auto px-4 py-8 relative">
@@ -32,7 +32,7 @@
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-gray-900">Pilih Latihan</h2>
             
-            @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+            @if(Auth::user()->isAdmin())
             <div class="flex items-center gap-2">
                 <!-- Add Button -->
                 <form action="{{ route('assignments.toefl-itp.structure.meeting.add-set', $main->meeting_number) }}" method="POST">

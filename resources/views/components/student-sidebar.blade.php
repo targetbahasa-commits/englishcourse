@@ -51,7 +51,7 @@
 </div>
 
 <div class="mt-auto px-6 py-6 border-t border-gray-100 bg-white flex-shrink-0">
-    <p class="text-xs font-semibold text-gray-400 mb-4">AKUN</p>
+    <p class="text-xs font-semibold text-gray-400 mb-4">AKUN - STUDENT</p>
     <nav class="space-y-1">
          <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('profile.edit') ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>

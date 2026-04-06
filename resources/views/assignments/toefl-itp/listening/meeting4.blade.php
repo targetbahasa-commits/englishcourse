@@ -75,16 +75,16 @@
     }
 </style>
 
-<div class="container mx-auto px-4 py-8 relative bg-white min-h-screen">
+<div class="container mx-auto px-4 pb-8 relative bg-white min-h-screen {{ isset($set) ? 'pt-40 md:pt-36' : 'pt-8' }}">
     
     {{-- Main Paper Card --}}
-    <div class="bg-white max-w-7xl mx-auto rounded-xl shadow-lg border border-gray-100 p-8 md:p-12 relative overflow-hidden">
+    <div class="bg-white max-w-7xl mx-auto rounded-xl shadow-lg border border-gray-100 p-8 md:p-12 relative overflow-hidden" style="{{ isset($set) ? 'padding-top: 9rem;' : '' }}">
         
         {{-- Top Decoration --}}
         <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
 
         {{-- Header Section --}}
-        <div class="mb-10 border-b border-gray-100 pb-8">
+        <div class="mb-10 border-b border-gray-100 pb-8 {{ isset($set) ? 'mt-24 md:mt-20' : '' }}">
             <div class="flex items-center justify-between mb-6">
                 <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Latihan Soal</h1>
                 <div class="flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-semibold">
@@ -175,7 +175,7 @@
                                     @csrf
                                     <input type="hidden" name="set_number" value="{{ $s }}">
                                     <button type="submit" class="p-1.5 bg-white/20 hover:bg-red-500 hover:text-white text-white rounded-full transition-colors backdrop-blur-sm" title="Hapus Latihan {{ $s }}">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
                                 </form>
                             @endif
@@ -226,33 +226,33 @@
             </div>
 
             {{-- Audio Player Section - Fixed/Floating --}}
-            <div class="fixed top-0 left-0 right-0 z-50 bg-white shadow-lg">
+            <div class="fixed top-0 left-0 right-0 md:left-64 z-40 bg-white shadow-lg">
                 <div class="max-w-7xl mx-auto">
-                    <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-b-2 border-indigo-200">
+                    <div class="flex flex-wrap lg:flex-nowrap items-center gap-2 md:gap-4 p-2 md:p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-b-2 border-indigo-200">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-md">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 012.828 2.828"></path></svg>
+                            <div class="w-9 h-9 md:w-10 md:h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-md">
+                                <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 012.828 2.828"></path></svg>
                             </div>
-                            <span class="text-lg font-bold text-indigo-900">Audio Session - Latihan {{ $set }}</span>
+                            <span class="text-sm md:text-lg font-bold text-indigo-900 whitespace-nowrap">Audio Session - Latihan {{ $set }}</span>
                         </div>
                         
                         {{-- Custom Audio Player with Skip Controls --}}
-                        <div class="flex-1 flex items-center gap-3 max-w-3xl">
+                        <div class="flex-1 min-w-[220px] flex items-center gap-1.5 md:gap-3 max-w-3xl">
                             {{-- Backward 10s Button --}}
                             <button type="button" onclick="skipAudio(-10)" 
-                                    class="p-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Mundur 10 detik">
-                                <svg class="w-5 h-5 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="p-1.5 md:p-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Mundur 10 detik">
+                                <svg class="w-4 h-4 md:w-5 md:h-5 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path>
                                 </svg>
                             </button>
 
                             {{-- Play/Pause Button --}}
                             <button type="button" id="playPauseBtn" onclick="togglePlayPause()" 
-                                    class="p-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex-shrink-0">
-                                <svg id="playIcon" class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    class="p-1.5 md:p-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex-shrink-0">
+                                <svg id="playIcon" class="w-5 h-5 md:w-6 md:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M8 5v14l11-7z"/>
                                 </svg>
-                                <svg id="pauseIcon" class="w-6 h-6 text-white hidden" fill="currentColor" viewBox="0 0 24 24">
+                                <svg id="pauseIcon" class="w-5 h-5 md:w-6 md:h-6 text-white hidden" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
                                 </svg>
                             </button>
@@ -274,22 +274,20 @@
 
                             {{-- Forward 10s Button --}}
                             <button type="button" onclick="skipAudio(10)" 
-                                    class="p-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Maju 10 detik">
-                                <svg class="w-5 h-5 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="p-1.5 md:p-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Maju 10 detik">
+                                <svg class="w-4 h-4 md:w-5 md:h-5 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"></path>
                                 </svg>
                             </button>
 
                             {{-- Transcript Toggle Button --}}
-                            @if(isset($transcript_enabled) && $transcript_enabled)
                                 <button type="button" onclick="toggleTranscriptDrawer()" 
-                                        class="p-2 bg-yellow-400 border-2 border-yellow-500 hover:bg-yellow-500 rounded-lg transition-colors flex-shrink-0 flex items-center gap-2 group shadow-sm" title="Lihat/Tutup Transkrip">
-                                    <svg class="w-5 h-5 text-black group-hover:text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        class="p-1.5 md:p-2 bg-yellow-400 border-2 border-yellow-500 hover:bg-yellow-500 rounded-lg transition-colors flex-shrink-0 flex items-center gap-1.5 md:gap-2 group shadow-sm" title="Lihat/Tutup Transkrip">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-black group-hover:text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
                                     <span class="text-xs font-bold text-black hidden sm:inline">Terjemah</span>
                                 </button>
-                            @endif
 
                             {{-- Hidden Audio Element --}}
                             <audio id="mainAudio" class="hidden" preload="auto">
@@ -297,32 +295,39 @@
                             </audio>
                         </div>
 
-                        {{-- Admin Upload Audio Button --}}
                         @if(Auth::user()->isAdmin())
-                            <div class="flex gap-2">
+                            <div class="w-full lg:w-auto flex flex-wrap justify-end gap-2">
                                 <button type="button" 
-                                        onclick="document.getElementById('uploadSrtModal').classList.remove('hidden')" 
-                                        class="px-3 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        onclick="document.getElementById('uploadSrtModal').classList.remove('hidden'); document.getElementById('uploadSrtModal').classList.add('flex')" 
+                                        class="px-2 py-1.5 md:px-3 md:py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-1.5 md:gap-2 shadow-md relative z-10 text-xs md:text-sm">
+                                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
                                     Upload SRT
                                 </button>
                                 
                                 <button type="button" 
-                                        onclick="console.log('Upload button clicked'); document.getElementById('uploadAudioModal').classList.remove('hidden');" 
-                                        class="px-3 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        onclick="console.log('Upload button clicked'); document.getElementById('uploadAudioModal').classList.remove('hidden'); document.getElementById('uploadAudioModal').classList.add('flex');" 
+                                        class="px-2 py-1.5 md:px-3 md:py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-1.5 md:gap-2 shadow-md relative z-10 text-xs md:text-sm">
+                                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                                     </svg>
                                     Upload Audio
+                                </button>
+
+                                <button type="button"
+                                        onclick="document.getElementById('chooseAudioModal').classList.remove('hidden'); document.getElementById('chooseAudioModal').classList.add('flex');"
+                                        class="px-2 py-1.5 md:px-3 md:py-2 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-1.5 md:gap-2 shadow-md relative z-10 text-xs md:text-sm">
+                                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path>
+                                    </svg>
+                                    Choose Audio
                                 </button>
                             </div>
                         @endif
                     </div>
                     {{-- Transcript Drawer (Collapsible) --}}
-                    @if(isset($transcript_enabled) && $transcript_enabled)
-                        <div id="transcriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex flex-col transition-all duration-300 ease-in-out shadow-md">
+                        <div id="transcriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
                             <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                                 {{-- English Column --}}
                                 <div class="flex flex-col h-full bg-slate-50">
@@ -651,13 +656,12 @@
                                 });
                             });
                         </script>
-                    @endif
                 </div>
             </div>
             </div>
 
             {{-- Spacer to prevent content from being hidden under fixed player --}}
-            <div class="h-20 mb-8"></div>
+            <div class="h-24 md:h-20 mb-8"></div>
 
 
 
@@ -1033,14 +1037,12 @@
                                     </svg>
                                 </button>
                             @endif
-                            @if(isset($transcript_enabled) && $transcript_enabled)
                                 <button type="button" 
                                         onclick="jumpToTime({{ $questionTimestamps[$question->id] ?? 'null' }})" 
                                         class="absolute top-3 right-2 w-6 h-6 rounded-full bg-purple-100 text-purple-600 hover:bg-purple-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
                                         title="Lihat Transkrip & Dengar Audio">
                                     ?
                                 </button>
-                            @endif
                             <div class="flex flex-col gap-2 flex-1">
                                 @foreach(['A' => $question->option_a, 'B' => $question->option_b, 'C' => $question->option_c, 'D' => $question->option_d] as $option => $text)
                                     @if($text !== 'N/A' && $text !== '')
@@ -1110,14 +1112,12 @@
                                     </svg>
                                 </button>
                             @endif
-                            @if(isset($transcript_enabled) && $transcript_enabled)
                                 <button type="button" 
                                         onclick="jumpToTime({{ $questionTimestamps[$question->id] ?? 'null' }})" 
                                         class="absolute top-3 right-2 w-6 h-6 rounded-full bg-purple-100 text-purple-600 hover:bg-purple-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
                                         title="Lihat Transkrip & Dengar Audio">
                                     ?
                                 </button>
-                            @endif
                             <div class="flex flex-col gap-2 flex-1">
                                 @foreach(['A' => $question->option_a, 'B' => $question->option_b, 'C' => $question->option_c, 'D' => $question->option_d] as $option => $text)
                                     @if($text !== 'N/A' && $text !== '')
@@ -1336,9 +1336,8 @@
 @endsection
 
 @section('modals')
-    {{-- Upload SRT Modal (Admin Only) --}}
     @if(Auth::user()->isAdmin())
-        <div id="uploadSrtModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center"
+        <div id="uploadSrtModal" class="hidden fixed inset-0  items-center justify-center"
              onclick="if(event.target === this) this.classList.add('hidden')">
             <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 relative transform transition-all">
                 <div class="flex items-center justify-between mb-6">
@@ -1424,9 +1423,8 @@ Start translating here..."></textarea>
         </div>
     @endif
 
-    {{-- Upload Audio Modal (Admin Only) --}}
     @if(Auth::user()->isAdmin())
-        <div id="uploadAudioModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center"
+        <div id="uploadAudioModal" class="hidden fixed inset-0  items-center justify-center"
              onclick="if(event.target === this) this.classList.add('hidden')">
             <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
                 <div class="flex items-center justify-between mb-6">
@@ -1474,9 +1472,204 @@ Start translating here..."></textarea>
             </div>
         </div>
     @endif
+
+        {{-- Choose Audio From Folder Modal (File Manager) --}}
+    <div id="chooseAudioModal" class="hidden fixed inset-0  items-center justify-center"
+         onclick="if(event.target === this) this.classList.add('hidden')">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full mx-4 my-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-900">Choose Audio File</h3>
+                    <p class="text-sm text-gray-500 mt-1">Navigate and select from available audio files</p>
+                </div>
+                <button type="button" onclick="document.getElementById('chooseAudioModal').classList.add('hidden')"
+                        class="text-gray-400 hover:text-gray-600 flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form action="{{ route('assignments.toefl-itp.listening.meeting.upload-audio', ['number' => $number ?? 0, 'set' => $set ?? 0]) }}" method="POST" class="space-y-4">
+                @csrf
+
+                {{-- Breadcrumb Navigation --}}
+                <div class="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="flex items-center gap-2 text-sm font-medium flex-wrap">
+                        <button type="button" class="text-blue-600 hover:text-blue-800 flex-shrink-0" onclick="audioFileManager.goToRoot(event)">
+                            <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2.83-2.83a1 1 0 011.41 0L12 12m0 0l5.76-5.76a1 1 0 011.41 0L21 12"></path></svg>
+                        </button>
+                        <span id="audioBreadcrumb" class="text-gray-700">Root</span>
+                    </div>
+                </div>
+
+                {{-- File Manager List --}}
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Available Files & Folders</label>
+                    <div id="audioFileList" class="w-full border-2 border-gray-300 rounded-lg max-h-80 overflow-y-auto bg-white">
+                        <div class="p-4 text-center text-gray-500 text-sm">Loading files...</div>
+                    </div>
+                </div>
+
+                {{-- Selected File Display --}}
+                <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                    <p class="text-sm font-medium text-emerald-800">Selected:</p>
+                    <p id="audioSelectedFile" class="text-sm text-emerald-700 mt-1 break-words">
+                        <span class="italic text-gray-500">None selected</span>
+                    </p>
+                </div>
+
+                {{-- Hidden input for selected file path --}}
+                <input type="hidden" name="existing_audio_path" id="selectedAudioPath" value="">
+
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="document.getElementById('chooseAudioModal').classList.add('hidden')"
+                            class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" id="useSelectedAudioBtn"
+                            class="flex-1 px-4 py-2 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled>
+                        Use Selected
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    const audioFileManager = {
+        allFiles: @json($sourceAudioOptions ?? []),
+        currentPath: '',
+        selectedFile: null,
+
+        init() {
+            this.render();
+        },
+
+        goToRoot(e) {
+            if (e) e.preventDefault();
+            this.currentPath = '';
+            this.render();
+        },
+
+        selectFile(filePath) {
+            this.selectedFile = filePath;
+            document.getElementById('selectedAudioPath').value = filePath;
+            
+            const fileName = filePath.split('/').pop();
+            document.getElementById('audioSelectedFile').innerHTML = `<span class="text-green-700 font-medium">${fileName}</span>`;
+            document.getElementById('useSelectedAudioBtn').disabled = false;
+            
+            this.render();
+        },
+
+        goToFolder(folderPath) {
+            this.currentPath = folderPath;
+            this.render();
+        },
+
+        render() {
+            const listContainer = document.getElementById('audioFileList');
+            const breadcrumb = document.getElementById('audioBreadcrumb');
+            
+            if (!this.allFiles.length) {
+                listContainer.innerHTML = '<div class="p-4 text-center text-gray-500">No files available</div>';
+                return;
+            }
+
+            // Build folder structure
+            const items = {};
+            this.allFiles.forEach(audio => {
+                const path = audio.label || audio.value;
+                const parts = path.split('/');
+                let current = items;
+                
+                for (let i = 0; i < parts.length; i++) {
+                    const part = parts[i];
+                    const fullPath = parts.slice(0, i + 1).join('/');
+                    
+                    if (!current[part]) {
+                        current[part] = { _path: fullPath, _isFile: i === parts.length - 1 };
+                    }
+                    current = current[part];
+                }
+            });
+
+            // Get current folder contents
+            let current = items;
+            if (this.currentPath) {
+                const pathParts = this.currentPath.split('/');
+                breadcrumb.innerHTML = pathParts.map((p, i) => {
+                    const p2 = pathParts.slice(0, i + 1).join('/');
+                    return `<button class="text-blue-600 hover:text-blue-800" onclick="audioFileManager.goToFolder('${p2}'); event.preventDefault()">${p}</button>`;
+                }).join(' <span class="text-gray-400">/</span> ');
+
+                pathParts.forEach(part => {
+                    current = current[part];
+                });
+            } else {
+                breadcrumb.innerHTML = 'Root';
+            }
+
+            // Render folder contents
+            const contents = Object.keys(current).filter(k => !k.startsWith('_')).sort();
+            
+            if (!contents.length) {
+                listContainer.innerHTML = '<div class="p-4 text-center text-gray-500 text-sm">Folder is empty</div>';
+                return;
+            }
+
+            let html = '';
+            contents.forEach(name => {
+                const item = current[name];
+                const isFile = item._isFile;
+                const fullPath = item._path;
+                const isSelected = isFile && this.selectedFile === fullPath;
+                
+                if (isFile) {
+                    html += `
+                        <div class="flex items-center p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 ${isSelected ? 'bg-blue-100' : ''}"
+                             onclick="audioFileManager.selectFile('${fullPath}')">
+                            <svg class="w-5 h-5 text-red-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                            </svg>
+                            <span class="text-sm text-gray-800 flex-1 break-words">${name}</span>
+                            ${isSelected ? '<svg class="w-5 h-5 text-green-600 ml-2 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>' : ''}
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="flex items-center p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100"
+                             onclick="audioFileManager.goToFolder('${fullPath}')">
+                            <svg class="w-5 h-5 text-yellow-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"></path>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-800 flex-1">${name}</span>
+                            <svg class="w-4 h-4 text-gray-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    `;
+                }
+            });
+            
+            listContainer.innerHTML = html;
+        }
+    };
+
+    // Initialize when modal is opened
+    const originalChooseAudioClick = document.addEventListener('click', function initAudioModal(e) {
+        const chooseBtn = e.target.closest('[onclick*="chooseAudioModal"]');
+        if (chooseBtn && chooseBtn.getAttribute('onclick').includes("remove('hidden')")) {
+            setTimeout(() => audioFileManager.init(), 100);
+        }
+    });
+    </script>
+
     {{-- Floating Add Question Button (Admin Only) --}}
     @if(Auth::user()->isAdmin())
-        <button onclick="openCreateQuestionModal()" 
+        <button onclick="openCreateQuestionModal()"
                 class="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 hover:scale-110 transition-all duration-200 flex items-center justify-center z-40 group"
                 title="Add New Question">
             <svg class="w-8 h-8 group-hover:rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1688,7 +1881,13 @@ Start translating here..."></textarea>
         function toggleTranscriptDrawer() {
             const drawer = document.getElementById('transcriptDrawer');
             if (drawer) {
-                drawer.classList.toggle('hidden');
+                if (drawer.classList.contains('hidden')) {
+                    drawer.classList.remove('hidden');
+                    drawer.classList.add('flex');
+                } else {
+                    drawer.classList.add('hidden');
+                    drawer.classList.remove('flex');
+                }
             }
         }
         

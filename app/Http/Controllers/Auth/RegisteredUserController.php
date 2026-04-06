@@ -84,18 +84,18 @@ class RegisteredUserController extends Controller
 
         $attributionData = $this->extractAttributionData($request);
 
-        // Require OTP verification only for non-guest roles
-        if ($request->role !== 'guest') {
-            $request->validate(['phone_number' => ['required']]);
-            
-            $otpRecord = \App\Models\Otp::where('phone_number', $request->phone_number)
-                ->where('is_verified', true)
-                ->first();
-
-            if (!$otpRecord) {
-                return back()->withInput()->withErrors(['phone_number' => 'Please verify your WhatsApp number with an OTP first.']);
-            }
-        }
+        // OTP verification temporarily disabled
+        // if ($request->role !== 'guest') {
+        //     $request->validate(['phone_number' => ['required']]);
+        //
+        //     $otpRecord = \App\Models\Otp::where('phone_number', $request->phone_number)
+        //         ->where('is_verified', true)
+        //         ->first();
+        //
+        //     if (!$otpRecord) {
+        //         return back()->withInput()->withErrors(['phone_number' => 'Please verify your WhatsApp number with an OTP first.']);
+        //     }
+        // }
 
         $referredBy = null;
         if ($request->filled('referral_code')) {

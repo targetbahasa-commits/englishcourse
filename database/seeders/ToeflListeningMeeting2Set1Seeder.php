@@ -18,7 +18,7 @@ class ToeflListeningMeeting2Set1Seeder extends Seeder
             [
                 'question_number' => 1,
                 'question_text' => 'Listen to the audio.',
-                'option_a' => 'Get in a different lane.',
+                'option_a' => 'Get a different line.',
                 'option_b' => 'Stand in another line.',
                 'option_c' => 'N/A',
                 'option_d' => 'N/A',

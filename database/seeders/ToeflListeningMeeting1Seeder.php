@@ -16,7 +16,7 @@ class ToeflListeningMeeting1Seeder extends Seeder
             [
                 'question_number' => 1,
                 'question_text' => 'Focus: listening to dialogs that involve agreement and disagreement.\nDirections: listen to the following dialogs. Decide which choice best answers the question.',
-                'option_a' => 'Get in a different lane.',
+                'option_a' => 'Get a different line.',
                 'option_b' => 'Stand in another line.',
                 'option_c' => 'N/A',
                 'option_d' => 'N/A',

@@ -20,7 +20,21 @@
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        @include('components.sidebar-admin')
+        @auth
+            @php($sidebarRole = strtolower(Auth::user()->role ?? 'student'))
+
+            @if($sidebarRole === 'admin')
+                @include('components.sidebar-admin')
+            @elseif($sidebarRole === 'teacher')
+                @include('components.sidebar-teacher')
+            @elseif($sidebarRole === 'guest')
+                @include('components.sidebar-guest')
+            @else
+                @include('components.sidebar-student')
+            @endif
+        @else
+            @include('components.sidebar-guest')
+        @endauth
 
         <!-- Main Content -->
         <main class="flex-1 md:ml-64">

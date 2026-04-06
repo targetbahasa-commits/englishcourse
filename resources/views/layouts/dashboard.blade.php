@@ -21,11 +21,13 @@
     <div class="flex min-h-screen">
         <!-- Sidebar - Automatically selected based on user role -->
         @auth
-            @if(Auth::user()->isAdmin())
+            @php($sidebarRole = strtolower(Auth::user()->role ?? 'student'))
+
+            @if($sidebarRole === 'admin')
                 @include('components.sidebar-admin')
-            @elseif(Auth::user()->isTeacher())
+            @elseif($sidebarRole === 'teacher')
                 @include('components.sidebar-teacher')
-            @elseif(Auth::user()->isGuest())
+            @elseif($sidebarRole === 'guest')
                 @include('components.sidebar-guest')
             @else
                 @include('components.sidebar-student')

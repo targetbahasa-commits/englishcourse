@@ -1,7 +1,7 @@
 <div x-data="{
     open: false,
     searchQuery: '',
-    x: window.innerWidth / 2 + 190,
+    x: window.innerWidth - 260,
     y: window.innerHeight - 85,
     dragging: false,
     offset: { x: 0, y: 0 },

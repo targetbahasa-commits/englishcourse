@@ -1,0 +1,3 @@
+laravel_app has vendor: True
+laravel_app has .env: True
+public_html has vendor: True

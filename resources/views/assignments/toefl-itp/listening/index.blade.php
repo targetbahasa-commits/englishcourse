@@ -1,6 +1,27 @@
-@extends('layouts.admin')
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>TOEFL ITP Listening - {{ config('app.name', 'Target Bahasa') }}</title>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="font-sans antialiased bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    @include('components.impersonation-banner')
+    <div class="flex min-h-screen">
+        @if(Auth::user()->isAdmin())
+            @include('components.sidebar-admin')
+        @elseif(Auth::user()->isTeacher())
+            @include('components.sidebar-teacher')
+        @else
+            @include('components.sidebar-student')
+        @endif
 
-@section('content')
+        <main class="flex-1 md:ml-64 p-8">
 <div class="container mx-auto px-4 py-8">
     <!-- Header -->
     <div class="mb-8">
@@ -196,4 +217,7 @@
         @endforeach
     </div>
 </div>
-@endsection
+        </main>
+    </div>
+</body>
+</html>

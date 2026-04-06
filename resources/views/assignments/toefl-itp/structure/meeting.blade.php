@@ -1,10 +1,81 @@
-@extends('layouts.admin')
+@extends('layouts.dashboard')
 
 @section('content')
-<div x-data="{ showCheatSheet: false }">
-    <!-- Fixed Cheat Sheet Button (Bottom Left) -->
+<div x-data="{
+    showCheatSheet: false,
+    cheatZoom: 1,
+    minCheatZoom: 0.6,
+    maxCheatZoom: 2.5,
+    zoomStep: 0.1,
+    cheatPos: {
+        x: window.innerWidth >= 768 ? 288 : 28,
+        y: Math.max(20, Math.round(window.innerHeight * 0.15))
+    },
+    cheatDrag: {
+        active: false,
+        offsetX: 0,
+        offsetY: 0
+    },
+    zoomIn() {
+        this.cheatZoom = Math.min(this.maxCheatZoom, +(this.cheatZoom + this.zoomStep).toFixed(2));
+    },
+    zoomOut() {
+        this.cheatZoom = Math.max(this.minCheatZoom, +(this.cheatZoom - this.zoomStep).toFixed(2));
+    },
+    resetZoom() {
+        this.cheatZoom = 1;
+    },
+    startCheatDrag(e) {
+        const p = e.touches ? e.touches[0] : e;
+        this.cheatDrag.active = true;
+        this.cheatDrag.offsetX = p.clientX - this.cheatPos.x;
+        this.cheatDrag.offsetY = p.clientY - this.cheatPos.y;
+    },
+    onCheatDrag(e) {
+        if (!this.cheatDrag.active) return;
+        const p = e.touches ? e.touches[0] : e;
+        this.cheatPos.x = p.clientX - this.cheatDrag.offsetX;
+        this.cheatPos.y = p.clientY - this.cheatDrag.offsetY;
+        this.constrainCheatSheet();
+    },
+    stopCheatDrag() {
+        this.cheatDrag.active = false;
+    },
+    cheatSize: { width: 350, height: Math.round(window.innerHeight * 0.8) },
+    cheatResize: { active: false, startX: 0, startY: 0, startW: 0, startH: 0 },
+    startCheatResize(e) {
+        e.stopPropagation();
+        const p = e.touches ? e.touches[0] : e;
+        this.cheatResize.active = true;
+        this.cheatResize.startX = p.clientX;
+        this.cheatResize.startY = p.clientY;
+        this.cheatResize.startW = this.cheatSize.width;
+        this.cheatResize.startH = this.cheatSize.height;
+    },
+    onCheatResize(e) {
+        if (!this.cheatResize.active) return;
+        const p = e.touches ? e.touches[0] : e;
+        const dx = p.clientX - this.cheatResize.startX;
+        const dy = p.clientY - this.cheatResize.startY;
+        this.cheatSize.width = Math.max(280, Math.min(window.innerWidth - this.cheatPos.x - 8, this.cheatResize.startW + dx));
+        this.cheatSize.height = Math.max(200, Math.min(window.innerHeight - this.cheatPos.y - 8, this.cheatResize.startH + dy));
+    },
+    stopCheatResize() {
+        this.cheatResize.active = false;
+    },
+    constrainCheatSheet() {
+        this.cheatPos.x = Math.max(8, Math.min(window.innerWidth - this.cheatSize.width - 8, this.cheatPos.x));
+        this.cheatPos.y = Math.max(8, Math.min(window.innerHeight - this.cheatSize.height - 8, this.cheatPos.y));
+    }
+}"
+@mousemove.window="onCheatDrag($event); onCheatResize($event)"
+@touchmove.window="onCheatDrag($event); onCheatResize($event)"
+@mouseup.window="stopCheatDrag(); stopCheatResize()"
+@touchend.window="stopCheatDrag(); stopCheatResize()"
+@resize.window="constrainCheatSheet()">
+            <!-- Fixed Cheat Sheet Button (Left of Question Area) -->
     <button @click="showCheatSheet = !showCheatSheet"
-            class="fixed bottom-8 left-8 z-[90] px-4 py-2 bg-yellow-400 text-yellow-900 rounded-full shadow-lg font-bold hover:bg-yellow-300 transition flex items-center gap-2 border border-yellow-500 cursor-pointer">
+                        class="fixed bottom-8 left-7 md:left-72 z-[90] px-4 py-2 bg-yellow-400 text-yellow-900 rounded-full shadow-lg font-bold hover:bg-yellow-300 transition flex items-center gap-2 border border-yellow-500 cursor-pointer">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
         Contekan
     </button>
@@ -17,31 +88,55 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100 scale-100"
          x-transition:leave-end="opacity-0 scale-95"
-         class="fixed bottom-24 left-8 z-[150] shadow-2xl rounded-xl overflow-hidden ring-1 ring-black/5 bg-white border border-gray-200 flex flex-col"
-         style="width: 350px; height: 80vh; display: none;">
-        
-        <!-- Force Close Button -->
-        <button type="button" 
-                @click.stop="showCheatSheet = false" 
-                @mousedown.stop="showCheatSheet = false"
-                onclick="this.closest('[x-data]').__x.$data.showCheatSheet = false"
-                class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-lg p-2 shadow-lg border-2 border-red-700 transform transition hover:scale-110 z-[999] flex items-center justify-center w-10 h-10 cursor-pointer" 
-                title="Close">
-            <svg class="w-6 h-6 pointer-events-none font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-        </button>
+            class="fixed z-[150] shadow-2xl rounded-xl ring-1 ring-black/5 bg-white border border-gray-200 flex flex-col"
+            :style="`left: ${cheatPos.x}px; top: ${cheatPos.y}px; width: ${cheatSize.width}px; height: ${cheatSize.height}px;`">
         
         <!-- Header -->
         <div class="bg-yellow-300 border-b flex justify-between items-center select-none overflow-hidden rounded-t-xl">
-            <div class="flex-1 p-4 flex items-center gap-2 text-yellow-900">
-                <h3 class="font-bold text-lg text-gray-800">Cheat Sheet</h3>
+            <div class="flex-1 p-4 flex items-center gap-2 text-yellow-900 cursor-move"
+                 @mousedown.prevent="startCheatDrag($event)"
+                 @touchstart.prevent="startCheatDrag($event)">
+                <h3 class="font-bold text-base text-gray-800 whitespace-nowrap">Cheat Sheet</h3>
+            </div>
+            <div class="pr-3 flex items-center gap-2">
+                <button type="button" @click="zoomOut()" class="w-8 h-8 rounded-lg bg-white/80 hover:bg-white text-gray-700 font-bold border border-yellow-500">-</button>
+                <span class="text-xs font-bold text-gray-700 min-w-[52px] text-center" x-text="Math.round(cheatZoom * 100) + '%'">100%</span>
+                <button type="button" @click="zoomIn()" class="w-8 h-8 rounded-lg bg-white/80 hover:bg-white text-gray-700 font-bold border border-yellow-500">+</button>
+                <button type="button" @click="resetZoom()" class="px-2 py-1 rounded-lg bg-white/80 hover:bg-white text-[11px] font-semibold text-gray-700 border border-yellow-500">Reset</button>
+                <button type="button"
+                        @click.stop="showCheatSheet = false"
+                        @mousedown.stop="showCheatSheet = false"
+                        onclick="this.closest('[x-data]').__x.$data.showCheatSheet = false"
+                        class="bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg border-2 border-red-700 transform transition hover:scale-105 z-[999] flex items-center justify-center w-10 h-10 cursor-pointer"
+                        title="Close">
+                    <svg class="w-6 h-6 pointer-events-none font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
             </div>
         </div>
 
         <!-- Image Content -->
-        <div class="flex-1 bg-white p-0 relative overflow-y-auto">
-            <img src="/images/cheatsheet_contekan.jpg" class="w-full h-auto" alt="TOEFL Cheat Sheet">
+        <div class="flex-1 bg-white p-0 relative overflow-auto rounded-b-xl"
+             @wheel="if ($event.ctrlKey) { $event.preventDefault(); $event.deltaY < 0 ? zoomIn() : zoomOut(); }">
+            <div class="min-h-full flex items-start justify-center p-2">
+                <img src="/images/cheatsheet_contekan.jpg"
+                     class="max-w-none h-auto transition-all duration-150"
+                     :style="`width: ${Math.round(cheatZoom * 100)}%;`"
+                     alt="TOEFL Cheat Sheet">
+            </div>
+        </div>
+
+        <!-- Resize Handle -->
+        <div class="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize z-10 flex items-center justify-center opacity-40 hover:opacity-90 transition-opacity"
+             @mousedown.prevent.stop="startCheatResize($event)"
+             @touchstart.prevent.stop="startCheatResize($event)"
+             title="Resize">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M11 1L1 11" stroke="#374151" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M11 5L5 11" stroke="#374151" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M11 9L9 11" stroke="#374151" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
         </div>
     </div>
 </div>
@@ -138,11 +233,16 @@
     }
 </style>
 <div class="container mx-auto px-4 py-8">
+    @php
+        $backRoute = $number > 50
+            ? route('assignments.toefl-itp.structure.practice')
+            : route('assignments.toefl-itp.structure');
+    @endphp
     <!-- Header -->
     <div class="mb-8 flex justify-between items-end">
         <div>
             <div class="flex items-center gap-3 mb-2">
-                <a href="{{ route('assignments.toefl-itp.structure') }}" class="text-gray-500 hover:text-gray-700 transition">
+                <a href="{{ $backRoute }}" class="text-gray-500 hover:text-gray-700 transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </a>
                 <h2 class="text-2xl font-bold text-gray-800">Structure Meeting {{ $number }}</h2>
@@ -150,28 +250,63 @@
             <p class="text-gray-500 text-sm ml-9">{{ $title }}</p>
         </div>
 
-        @if(Auth::user()->isAdmin())
-            <button onclick="openAddQuestionModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                Add Question
-            </button>
-        @endif
+        <div class="flex gap-2">
+            @if(Auth::user()->isAdmin())
+                <button onclick="openAddQuestionModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Add Question
+                </button>
+            @endif
+
+            @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                <button type="button" onclick="saveExplanationCanvas()" class="px-4 py-2 bg-slate-700 text-white rounded-lg shadow-md hover:bg-slate-800 transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"></path></svg>
+                    Save Explanation
+                </button>
+            @endif
+
+            @if($hasSavedExplanation)
+                <a href="{{ route('assignments.toefl-itp.structure.meeting.download-explanation', $number) }}" class="px-4 py-2 bg-white text-slate-700 rounded-lg shadow-md hover:bg-slate-50 transition flex items-center gap-2 border border-slate-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"></path></svg>
+                    Download Teacher Notes
+                </a>
+            @endif
+
+            @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                <button onclick="document.getElementById('explanation-container').__x?.toggleAnswerKey()" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition flex items-center gap-2" id="toggleAnswerBtn">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    <span>Show Answer Key</span>
+                </button>
+            @endif
+        </div>
     </div>
 
     <!-- Questions Form -->
     <div id="explanation-container" x-data="{ 
-        explanationMode: false, 
+        explanationMode: false,
+        showAnswerKey: false, 
+        questionZoom: 1,
+        questionZoomMin: 0.8,
+        questionZoomMax: 1.5,
+        questionZoomStep: 0.1,
         tool: 'pen', 
         color: '#EF4444', 
         baseColor: '#EF4444',
         opacity: 0.2, 
         lineWidth: 2,
         colors: {
-            pen: ['#EF4444', '#3B82F6', '#10B981', '#000000'],
-            highlight: ['#FFFF00', '#3B82F6', '#10B981', '#EC4899']
+            pen: ['#EF4444', '#3B82F6', '#10B981', '#FACC15', '#F59E0B', '#8B5CF6', '#06B6D4', '#F97316'],
+            highlight: ['#FFFF00', '#93C5FD', '#86EFAC', '#F9A8D4', '#FCD34D', '#C4B5FD', '#A7F3D0', '#FDBA74']
         },
         stamps: ['Subject', 'Verb Asli', 'Verb Palsu', 'Ving', 'V3', 'To infinitive', 'Preposition', 'FANBOYS', 'Main Clause', 'Sub Clause', 'Comparative', 'Superlative'],
         selectedStamp: null,
+        stampPanel: {
+            x: Math.max(8, window.innerWidth - 170),
+            y: Math.max(90, Math.round(window.innerHeight / 2) - 220),
+            dragging: false,
+            offsetX: 0,
+            offsetY: 0
+        },
         laserPointer: { visible: false, x: 0, y: 0, timeout: null },
         toggleMode() {
             this.explanationMode = !this.explanationMode;
@@ -179,6 +314,59 @@
                 setTimeout(() => {
                      if(typeof initCanvases === 'function') initCanvases();
                 }, 50);
+                this.constrainStampPanel();
+            }
+        },
+        zoomQuestionIn() {
+            this.questionZoom = Math.min(this.questionZoomMax, +(this.questionZoom + this.questionZoomStep).toFixed(2));
+            if (this.explanationMode) {
+                setTimeout(() => { if (typeof initCanvases === 'function') initCanvases(); }, 80);
+            }
+        },
+        zoomQuestionOut() {
+            this.questionZoom = Math.max(this.questionZoomMin, +(this.questionZoom - this.questionZoomStep).toFixed(2));
+            if (this.explanationMode) {
+                setTimeout(() => { if (typeof initCanvases === 'function') initCanvases(); }, 80);
+            }
+        },
+        resetQuestionZoom() {
+            this.questionZoom = 1;
+            if (this.explanationMode) {
+                setTimeout(() => { if (typeof initCanvases === 'function') initCanvases(); }, 80);
+            }
+        },
+        startStampDrag(e) {
+            const p = e.touches ? e.touches[0] : e;
+            this.stampPanel.dragging = true;
+            this.stampPanel.offsetX = p.clientX - this.stampPanel.x;
+            this.stampPanel.offsetY = p.clientY - this.stampPanel.y;
+        },
+        onStampDrag(e) {
+            if (!this.stampPanel.dragging) return;
+            const p = e.touches ? e.touches[0] : e;
+            this.stampPanel.x = p.clientX - this.stampPanel.offsetX;
+            this.stampPanel.y = p.clientY - this.stampPanel.offsetY;
+            this.constrainStampPanel();
+        },
+        stopStampDrag() {
+            this.stampPanel.dragging = false;
+        },
+        constrainStampPanel() {
+            const panelWidth = 180;
+            const panelHeight = Math.min(window.innerHeight * 0.8, 560);
+            this.stampPanel.x = Math.max(8, Math.min(window.innerWidth - panelWidth - 8, this.stampPanel.x));
+            this.stampPanel.y = Math.max(70, Math.min(window.innerHeight - panelHeight - 8, this.stampPanel.y));
+        },
+        toggleAnswerKey() {
+            this.showAnswerKey = !this.showAnswerKey;
+            const btn = document.getElementById('toggleAnswerBtn');
+            const span = btn.querySelector('span');
+            if (this.showAnswerKey) {
+                btn.classList.add('ring-2', 'ring-yellow-400');
+                span.textContent = 'Hide Answer Key';
+            } else {
+                btn.classList.remove('ring-2', 'ring-yellow-400');
+                span.textContent = 'Show Answer Key';
             }
         },
         hexToRgba(hex, alpha) {
@@ -252,8 +440,20 @@
                 this.laserPointer.timeout = null;
             }
         }
-    }">
+    }"
+    @mousemove.window="onStampDrag($event)"
+    @touchmove.window="onStampDrag($event)"
+    @mouseup.window="stopStampDrag()"
+    @touchend.window="stopStampDrag()"
+    @resize.window="constrainStampPanel()">
         
+        <!-- Auto-save Indicator -->
+        <div id="autosave-indicator"
+             class="fixed bottom-4 right-4 z-[200] flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white text-xs font-semibold rounded-full shadow-lg transition-opacity duration-500 opacity-0 pointer-events-none">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+            Tersimpan otomatis
+        </div>
+
         <!-- Global Laser Pointer Overlay -->
         <div x-show="explanationMode && laserPointer.visible"
              x-transition:enter="transition ease-out duration-100"
@@ -270,6 +470,12 @@
         </div>        
         <!-- Explanation Mode Toggle (Header) -->
         <div class="mb-4 flex justify-end gap-2">
+            <div class="px-3 py-2 rounded-lg bg-white/80 border border-gray-200 shadow-sm flex items-center gap-2">
+                <button type="button" @click="zoomQuestionOut()" class="w-7 h-7 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold">-</button>
+                <span class="text-xs font-bold text-gray-600 min-w-[48px] text-center" x-text="Math.round(questionZoom * 100) + '%'">100%</span>
+                <button type="button" @click="zoomQuestionIn()" class="w-7 h-7 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold">+</button>
+                <button type="button" @click="resetQuestionZoom()" class="px-2 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-[11px] font-semibold text-gray-700">Reset</button>
+            </div>
             <button @click="toggleMode()" 
                 :class="explanationMode ? 'bg-yellow-500 text-white' : 'bg-gray-200 text-gray-700'"
                 class="px-4 py-2 rounded-lg font-bold shadow transition flex items-center gap-2">
@@ -355,9 +561,20 @@
         </div>
 
         <!-- Vertical Stamp Sidebar -->
-        <div x-show="explanationMode" x-transition 
-             class="fixed top-1/2 right-4 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm shadow-xl border border-gray-200 rounded-2xl p-2 z-50 flex flex-col gap-2 max-h-[80vh] overflow-y-auto">
-             <div class="text-center text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">Stamps</div>
+        <div x-show="explanationMode" x-transition
+             class="fixed bg-white/90 backdrop-blur-sm shadow-xl border border-gray-200 rounded-2xl p-2 z-50 flex flex-col gap-2 max-h-[80vh] overflow-y-auto"
+             :style="`left: ${stampPanel.x}px; top: ${stampPanel.y}px; width: 170px;`">
+               <div class="flex items-center justify-between px-1 mb-1 cursor-move select-none"
+                   @mousedown.prevent="startStampDrag($event)"
+                   @touchstart.prevent="startStampDrag($event)">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">Stamps</div>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9h8M8 15h8"></path></svg>
+               </div>
+             <button @click.stop="explanationMode = false" @mousedown.stop
+                 class="w-full flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold bg-red-50 text-red-500 hover:bg-red-100 border border-red-200 transition mb-1">
+                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                 Keluar Mode
+             </button>
              <template x-for="stamp in stamps" :key="stamp">
                 <button @click="setStamp(stamp)"
                     class="px-3 py-2 rounded-lg text-xs font-bold transition shadow-sm border"
@@ -367,30 +584,33 @@
              </template>
         </div>
 
-        <form action="{{ route('assignments.toefl-itp.structure.meeting.submit', $number) }}" method="POST" class="max-w-4xl mx-auto">
+        <form action="{{ route('assignments.toefl-itp.structure.meeting.submit', $number) }}" method="POST" class="relative max-w-4xl mx-auto transition-transform duration-150" :style="`transform: scale(${questionZoom}); transform-origin: top center; width: ${100 / questionZoom}%;`">
             @csrf
+            <div x-show="explanationMode"
+                 class="absolute inset-0 z-40 pointer-events-none"
+                 :class="{
+                     'cursor-text': tool === 'text',
+                     'cursor-crosshair': tool === 'line',
+                     'cursor-tool-pen': tool === 'pen',
+                     'cursor-tool-highlight': tool === 'highlight',
+                     'cursor-tool-eraser': tool === 'eraser',
+                     'cursor-laser': tool === 'laser'
+                 }"
+                 style="touch-action: none; display: none;">
+                <canvas id="global-explanation-canvas" class="w-full h-full pointer-events-auto"></canvas>
+            </div>
+
             <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-6">
                 <div class="space-y-8">
                     @forelse($questions as $question)
                     <div class="question-item relative group/item" x-data="{ selected: '{{ $userAnswer ?? '' }}' }">
-                        
-                         <!-- CANVAS LAYER -->
-                         <div x-show="explanationMode" 
-                              class="absolute inset-0 z-40 pointer-events-auto select-none"
-                              :class="{
-                                  'cursor-text': tool === 'text',
-                                  'cursor-crosshair': tool === 'line',
-                                  'cursor-tool-pen': tool === 'pen',
-                                  'cursor-tool-highlight': tool === 'highlight',
-                                  'cursor-tool-eraser': tool === 'eraser',
-                                  'cursor-laser': tool === 'laser'
-                              }"
-                              style="touch-action: none;">
-                            <canvas id="canvas-{{ $question->id }}" class="w-full h-full"></canvas>
-                         </div>
 
-                        @if(Auth::user()->isAdmin())
+                        @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
                             <div class="absolute top-0 right-0 flex gap-2 transition z-50">
+                                @if(Auth::user()->isAdmin())
+                                <button type="button" onclick="openEditAnswerModal({{ $question->id }}, '{{ $question->correct_answer }}')" class="p-1 bg-yellow-100 text-yellow-600 rounded hover:bg-yellow-200" title="Edit Answer Key">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                                </button>
                                 <button type="button" onclick="openEditQuestionModal({{ $question }})" class="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200" title="Edit">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 </button>
@@ -401,6 +621,7 @@
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
                                 </form>
+                                @endif
                             </div>
                         @endif
 
@@ -480,7 +701,7 @@
                                             @if(session('score_data'))
                                                 class="{{ $staticClass }}"
                                             @else
-                                                :class="selected == '{{ $optionUpper }}' ? 'border-gray-300 bg-white' : 'border-gray-200 hover:bg-gray-50'"
+                                                :class="showAnswerKey && '{{ $optionUpper }}' === '{{ $question->correct_answer }}' ? 'border-green-500 bg-green-50 ring-1 ring-green-500' : (selected == '{{ $optionUpper }}' ? 'border-gray-300 bg-white' : 'border-gray-200 hover:bg-gray-50')"
                                             @endif
                                         >
                                             <input type="radio" name="answers[{{ $question->id }}]" value="{{ $optionUpper }}" class="peer sr-only" x-model="selected" {{ session('score_data') ? 'disabled' : '' }}>
@@ -492,7 +713,7 @@
                                                     @if(session('score_data'))
                                                         class="{{ $checked ? ($isCorrect ? 'bg-green-600 text-white border-green-600' : 'bg-red-600 text-white border-red-600') : 'bg-gray-50 text-gray-500 border-gray-200' }}"
                                                     @else
-                                                        :class="selected == '{{ $optionUpper }}' ? 'bg-red-600 text-white border-red-600' : 'bg-gray-50 text-gray-500 border-gray-200 group-hover:bg-gray-100'"
+                                                        :class="showAnswerKey && '{{ $optionUpper }}' === '{{ $question->correct_answer }}' ? 'bg-green-600 text-white border-green-600' : (selected == '{{ $optionUpper }}' ? 'bg-red-600 text-white border-red-600' : 'bg-gray-50 text-gray-500 border-gray-200 group-hover:bg-gray-100')"
                                                     @endif
                                                 >
                                                     {{ $optionUpper }}
@@ -503,7 +724,7 @@
                                                     @if(session('score_data'))
                                                         class="{{ $checked ? ($isCorrect ? 'text-green-700' : 'text-red-700') : 'text-gray-600' }}"
                                                     @else
-                                                        :class="selected == '{{ $optionUpper }}' ? 'text-red-600' : 'text-gray-600 group-hover:text-gray-900'"
+                                                        :class="showAnswerKey && '{{ $optionUpper }}' === '{{ $question->correct_answer }}' ? 'text-green-700' : (selected == '{{ $optionUpper }}' ? 'text-red-600' : 'text-gray-600 group-hover:text-gray-900')"
                                                     @endif
                                                 >
                                                     {{ $question->{'option_'.$option} }}
@@ -520,9 +741,42 @@
                                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                                     </span>
                                                 @endif
+                                            @else
+                                                <span x-show="showAnswerKey && '{{ $optionUpper }}' === '{{ $question->correct_answer }}'" class="absolute right-3 text-green-500">
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                </span>
                                             @endif
                                         </label>
                                         @endforeach
+                                    </div>
+                                @endif
+
+                                @if(session('score_data'))
+                                    @php
+                                        $answerStatus = is_null($userAnswer) ? 'Belum Dijawab' : ($isCorrect ? 'Benar' : 'Salah');
+                                        $answerStatusClass = is_null($userAnswer)
+                                            ? 'bg-gray-100 text-gray-700 border-gray-300'
+                                            : ($isCorrect ? 'bg-green-100 text-green-700 border-green-300' : 'bg-red-100 text-red-700 border-red-300');
+                                    @endphp
+                                    <div class="mt-4 p-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 space-y-3">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span class="text-xs font-bold px-2 py-1 rounded-md bg-white border border-slate-300">
+                                                Kunci: {{ $correctAnswer ?? '-' }}
+                                            </span>
+                                            <span class="text-xs font-bold px-2 py-1 rounded-md bg-white border border-slate-300">
+                                                Jawaban Anda: {{ $userAnswer ?? '-' }}
+                                            </span>
+                                            <span class="text-xs font-bold px-2 py-1 rounded-md border {{ $answerStatusClass }}">
+                                                {{ $answerStatus }}
+                                            </span>
+                                        </div>
+
+                                        <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-900">
+                                            <p class="text-sm font-bold mb-1">Penjelasan Jawaban</p>
+                                            <p class="text-sm leading-relaxed">
+                                                {{ $question->explanation ?: 'Penjelasan belum tersedia untuk soal ini.' }}
+                                            </p>
+                                        </div>
                                     </div>
                                 @endif
                             </div>
@@ -561,7 +815,7 @@
                         <a href="{{ route('assignments.toefl-itp.structure.meeting', $number) }}" class="px-6 py-2 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition">
                             Try Again
                         </a>
-                        <a href="{{ route('assignments.toefl-itp.structure') }}" class="px-6 py-2 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition">
+                        <a href="{{ $backRoute }}" class="px-6 py-2 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition">
                             Finish Lesson
                         </a>
                     </div>
@@ -569,7 +823,7 @@
             </div>
             @elseif($questions->count() > 0)
             <!-- Submit Button -->
-            <div class="flex justify-end sticky bottom-6 z-20">
+            <div class="flex justify-end mt-2">
                 <button type="submit" class="px-8 py-3 bg-green-600 text-white rounded-xl shadow-lg hover:bg-green-700 font-bold transition transform hover:-translate-y-1">
                     Submit Answers
                 </button>
@@ -593,6 +847,38 @@
 
         let canvases = {}; // Store canvas contexts and states
         let undoStack = []; // History stack for undo functionality
+
+        // ===== AUTO-SAVE =====
+        const AUTOSAVE_KEY = 'expl_canvas_{{ $number }}';
+        let autoSaveTimer = null;
+
+        function autoSaveCanvas() {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => {
+                const canvas = document.getElementById('global-explanation-canvas');
+                if (!canvas || canvas.width === 0 || canvas.height === 0) return;
+                try {
+                    localStorage.setItem(AUTOSAVE_KEY, canvas.toDataURL('image/png'));
+                    const el = document.getElementById('autosave-indicator');
+                    if (el) {
+                        el.style.opacity = '1';
+                        clearTimeout(el._t);
+                        el._t = setTimeout(() => { el.style.opacity = '0'; }, 2000);
+                    }
+                } catch(e) {}
+            }, 1500);
+        }
+
+        function restoreCanvasFromStorage() {
+            const saved = localStorage.getItem(AUTOSAVE_KEY);
+            if (!saved) return;
+            const canvas = document.getElementById('global-explanation-canvas');
+            if (!canvas || canvas.width === 0 || canvas.height === 0) return;
+            const img = new Image();
+            img.onload = () => canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            img.src = saved;
+        }
+        // ===== END AUTO-SAVE =====
 
         function preventDrag(e) { e.preventDefault(); }
 
@@ -658,89 +944,99 @@
         }
 
         function initCanvases() {
-            document.querySelectorAll('canvas').forEach(canvas => {
-                const parent = canvas.parentElement.parentElement; 
-                const id = canvas.id;
+            const canvas = document.getElementById('global-explanation-canvas');
+            if (!canvas) return;
 
-                // Initialize State Object if needed
-                if (!canvases[id]) {
-                    canvases[id] = {
-                        canvas: canvas,
-                        ctx: canvas.getContext('2d'),
-                        isDrawing: false,       
-                        lineState: null,        
-                        lastX: 0,
-                        lastY: 0,
-                        observer: null
-                    };
-                } else {
-                    canvases[id].canvas = canvas;
-                    canvases[id].ctx = canvas.getContext('2d');
-                }
-                
-                // Context setup
-                const ctx = canvases[id].ctx;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
+            const parent = canvas.parentElement;
+            const id = canvas.id;
 
-                // Resize Observer for robust dimensions
-                if (!canvases[id].observer) {
-                     const observer = new ResizeObserver(() => {
-                        const rect = parent.getBoundingClientRect();
-                        // Only resize if dimensions changed significantly
-                        if (canvas.width !== rect.width || canvas.height !== rect.height) {
-                            // Check if valid dimensions (prevent 0x0)
-                            if(rect.width > 0 && rect.height > 0) {
-                                // Try to preserve content
-                                let snapshot = null;
+            // Initialize State Object if needed
+            if (!canvases[id]) {
+                canvases[id] = {
+                    canvas: canvas,
+                    ctx: canvas.getContext('2d'),
+                    isDrawing: false,
+                    lineState: null,
+                    lastX: 0,
+                    lastY: 0,
+                    observer: null
+                };
+            } else {
+                canvases[id].canvas = canvas;
+                canvases[id].ctx = canvas.getContext('2d');
+            }
+            
+            // Context setup
+            const ctx = canvases[id].ctx;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Resize Observer for robust dimensions
+            if (!canvases[id].observer) {
+                let _firstResize = true;
+                 const observer = new ResizeObserver(() => {
+                    const rect = parent.getBoundingClientRect();
+                    // Only resize if dimensions changed significantly
+                    if (canvas.width !== rect.width || canvas.height !== rect.height) {
+                        // Check if valid dimensions (prevent 0x0)
+                        if(rect.width > 0 && rect.height > 0) {
+                            // Try to preserve content
+                            let snapshot = null;
+                            if (!_firstResize) {
                                 try {
                                     snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
                                 } catch(e) {}
+                            }
 
-                                canvas.width = rect.width;
-                                canvas.height = rect.height;
-                                
-                                // Restore context settings lost on resize
-                                ctx.lineCap = 'round';
-                                ctx.lineJoin = 'round';
+                            canvas.width = rect.width;
+                            canvas.height = rect.height;
+                            
+                            // Restore context settings lost on resize
+                            ctx.lineCap = 'round';
+                            ctx.lineJoin = 'round';
 
-                                if(snapshot) ctx.putImageData(snapshot, 0, 0);
+                            if(snapshot) {
+                                ctx.putImageData(snapshot, 0, 0);
+                            } else if (_firstResize) {
+                                _firstResize = false;
+                                // Restore auto-saved drawing on first real sizing
+                                restoreCanvasFromStorage();
                             }
                         }
-                     });
-                     observer.observe(parent);
-                     canvases[id].observer = observer;
-                }
+                    }
+                 });
+                 observer.observe(parent);
+                 canvases[id].observer = observer;
+            }
 
-                // Remove old listeners
-                canvas.removeEventListener('mousedown', startDrawing);
-                canvas.removeEventListener('mousemove', draw);
-                canvas.removeEventListener('mouseup', stopDrawing);
-                canvas.removeEventListener('mouseout', stopDrawing);
-                
-                canvas.removeEventListener('touchstart', startDrawing);
-                canvas.removeEventListener('touchmove', draw);
-                canvas.removeEventListener('touchend', stopDrawing);
-                canvas.removeEventListener('touchcancel', stopDrawing);
-                
-                canvas.removeEventListener('pointerdown', startDrawing);
-                canvas.removeEventListener('pointermove', draw);
-                canvas.removeEventListener('pointerup', stopDrawing);
-                canvas.removeEventListener('pointerout', stopDrawing);
-                canvas.removeEventListener('pointercancel', stopDrawing);
+            // Remove old listeners
+            canvas.removeEventListener('mousedown', startDrawing);
+            canvas.removeEventListener('mousemove', draw);
+            canvas.removeEventListener('mouseup', stopDrawing);
+            canvas.removeEventListener('mouseout', stopDrawing);
+            
+            canvas.removeEventListener('touchstart', startDrawing);
+            canvas.removeEventListener('touchmove', draw);
+            canvas.removeEventListener('touchend', stopDrawing);
+            canvas.removeEventListener('touchcancel', stopDrawing);
+            
+            canvas.removeEventListener('pointerdown', startDrawing);
+            canvas.removeEventListener('pointermove', draw);
+            canvas.removeEventListener('pointerup', stopDrawing);
+            canvas.removeEventListener('pointerout', stopDrawing);
+            canvas.removeEventListener('pointercancel', stopDrawing);
 
-                canvas.removeEventListener('dragstart', preventDrag);
+            canvas.removeEventListener('dragstart', preventDrag);
 
-                // Add Listeners (Pointer Events - Unified)
-                canvas.addEventListener('pointerdown', startDrawing);
-                canvas.addEventListener('pointermove', draw);
-                canvas.addEventListener('pointerup', stopDrawing);
-                canvas.addEventListener('pointerout', stopDrawing);
-                canvas.addEventListener('pointercancel', stopDrawing);
-                
-                // Prevent standard drag behavior
-                canvas.addEventListener('dragstart', preventDrag); 
-            });
+            // Add Listeners (Pointer Events - Unified)
+            canvas.addEventListener('pointerdown', startDrawing);
+            canvas.addEventListener('pointermove', draw);
+            canvas.addEventListener('pointerup', stopDrawing);
+            canvas.addEventListener('pointerout', stopDrawing);
+            canvas.addEventListener('pointercancel', stopDrawing);
+            
+            // Prevent standard drag behavior
+            canvas.addEventListener('dragstart', preventDrag); 
         }
 
         function getAlpineData() {
@@ -749,9 +1045,11 @@
 
         function getPointerPos(e, canvas, cachedRect = null) {
             const rect = cachedRect || canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
             return {
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
             };
         }
 
@@ -825,6 +1123,7 @@
                 if (undoStack.length > 50) undoStack.shift(); 
                 undoStack.push({ id: canvas.id, imageData: data.ctx.getImageData(0, 0, canvas.width, canvas.height) });
                 drawStamp(data.ctx, app.selectedStamp, x, y);
+                autoSaveCanvas();
                 return;
             }
 
@@ -921,11 +1220,11 @@
         }
 
         function drawStamp(ctx, text, x, y) {
-            ctx.font = "bold 14px sans-serif";
-            const padding = 8;
+            ctx.font = "bold 11px sans-serif";
+            const padding = 7;
             const metrics = ctx.measureText(text);
             const width = metrics.width + (padding * 2);
-            const height = 28;
+            const height = 22;
             const radius = 8;
 
             // Centering logic: Stamps are clicked at x,y. Let's center the pill there.
@@ -977,6 +1276,40 @@
                     // Ignore error if pointer was not captured
                 }
             }
+
+            // Auto-save after each stroke
+            autoSaveCanvas();
+        }
+
+        async function saveExplanationCanvas() {
+            const canvas = document.getElementById('global-explanation-canvas');
+            if (!canvas) {
+                alert('Explanation canvas not found.');
+                return;
+            }
+
+            try {
+                const image = canvas.toDataURL('image/png');
+                const response = await fetch("{{ route('assignments.toefl-itp.structure.meeting.save-explanation', $number) }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ image })
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Failed to save explanation.');
+                }
+
+                alert('Explanation saved successfully.');
+                window.location.reload();
+            } catch (error) {
+                alert(error.message || 'Failed to save explanation.');
+            }
         }
 
         function undoLastAction() {
@@ -992,10 +1325,11 @@
 
         function clearAllCanvases() {
             if(confirm('Clear all drawings?')) {
-                document.querySelectorAll('canvas').forEach(canvas => {
-                    const ctx = canvas.getContext('2d');
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                });
+                const canvas = document.getElementById('global-explanation-canvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                localStorage.removeItem(AUTOSAVE_KEY);
             }
         }
     </script>
@@ -1035,6 +1369,30 @@
                 <div class="flex justify-end gap-2">
                     <button type="button" onclick="document.getElementById('addQuestionModal').classList.add('hidden')" class="px-4 py-2 bg-gray-200 rounded text-gray-800">Cancel</button>
                     <button type="submit" class="px-4 py-2 bg-green-600 rounded text-white">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Answer Modal -->
+    <div id="editAnswerModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-6 border w-11/12 md:w-1/3 shadow-lg rounded-lg bg-white">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Edit Answer Key</h3>
+            <form id="editAnswerForm" method="POST">
+                @csrf
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-3">Select Correct Answer:</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" class="answer-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-bold text-lg hover:bg-blue-50 transition" data-answer="A">A</button>
+                        <button type="button" class="answer-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-bold text-lg hover:bg-blue-50 transition" data-answer="B">B</button>
+                        <button type="button" class="answer-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-bold text-lg hover:bg-blue-50 transition" data-answer="C">C</button>
+                        <button type="button" class="answer-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-bold text-lg hover:bg-blue-50 transition" data-answer="D">D</button>
+                    </div>
+                    <input type="hidden" name="correct_answer" id="selectedAnswer" value="">
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="document.getElementById('editAnswerModal').classList.add('hidden')" class="px-4 py-2 bg-gray-200 rounded text-gray-800">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-green-600 rounded text-white font-bold">Update Answer</button>
                 </div>
             </form>
         </div>
@@ -1097,14 +1455,85 @@
             document.getElementById('editQuestionForm').action = "/assignments/toefl-itp/structure/question/" + question.id;
             document.getElementById('editQuestionModal').classList.remove('hidden');
         }
+
+        let currentQuestionIdForAnswer = null;
+
+        function openEditAnswerModal(questionId, currentAnswer) {
+            currentQuestionIdForAnswer = questionId;
+            document.getElementById('selectedAnswer').value = currentAnswer;
+            
+            // Reset button states
+            document.querySelectorAll('.answer-btn').forEach(btn => {
+                btn.classList.remove('bg-green-100', 'border-green-500');
+                btn.classList.add('border-gray-300');
+            });
+            
+            // Highlight current answer
+            document.querySelectorAll('.answer-btn').forEach(btn => {
+                if (btn.dataset.answer === currentAnswer) {
+                    btn.classList.remove('border-gray-300');
+                    btn.classList.add('bg-green-100', 'border-green-500', 'border-2');
+                }
+            });
+            
+            document.getElementById('editAnswerModal').classList.remove('hidden');
+        }
+
+        // Answer button click handler
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.answer-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const answer = this.dataset.answer;
+                    document.getElementById('selectedAnswer').value = answer;
+                    
+                    // Update UI
+                    document.querySelectorAll('.answer-btn').forEach(b => {
+                        b.classList.remove('bg-green-100', 'border-green-500');
+                        b.classList.add('border-gray-300');
+                    });
+                    this.classList.remove('border-gray-300');
+                    this.classList.add('bg-green-100', 'border-green-500', 'border-2');
+                });
+            });
+
+            // Handle edit answer form submission
+            document.getElementById('editAnswerForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const answer = document.getElementById('selectedAnswer').value;
+                
+                if (!answer) {
+                    alert('Please select an answer');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('_token', '{{ csrf_token() }}');
+                formData.append('correct_answer', answer);
+
+                fetch(`/assignments/toefl-itp/structure/question/${currentQuestionIdForAnswer}/update-answer`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Answer updated successfully!');
+                        document.getElementById('editAnswerModal').classList.add('hidden');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'Failed to update answer'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error updating answer');
+                });
+            });
+        });
     </script>
 @endif
     <!-- Irregular Verbs Button -->
     <x-irregular-verbs-button />
 
-    <!-- PERSISTENT DEBUG STATUS BAR -->
-    <div class="fixed bottom-0 left-0 w-full bg-gray-800 text-white text-xs py-1 px-4 opacity-75 z-50 flex justify-between">
-        <span>Debug: {{ Auth::check() ? Auth::user()->name : 'Guest' }} (ID: {{ Auth::id() }})</span>
-        <span>Role: "{{ Auth::check() ? Auth::user()->role : 'N/A' }}" | IsAdmin: {{ Auth::check() && Auth::user()->isAdmin() ? 'TRUE' : 'FALSE' }}</span>
-    </div>
 @endsection

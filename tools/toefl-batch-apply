@@ -1,0 +1,77 @@
+#!/usr/bin/env zsh
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+MAPPING_FILE="${1:-$SCRIPT_DIR/toefl-batch-template.tsv}"
+MODE="${2:---dry-run}"
+
+if [[ ! -f "$MAPPING_FILE" ]]; then
+  echo "Mapping file not found: $MAPPING_FILE" >&2
+  exit 1
+fi
+
+if [[ "$MODE" != "--dry-run" && "$MODE" != "--apply" ]]; then
+  echo "Mode must be --dry-run or --apply" >&2
+  exit 1
+fi
+
+cd "$ROOT_DIR"
+
+line_no=0
+applied=0
+
+while IFS= read -r line || [[ -n "$line" ]]; do
+  line_no=$((line_no + 1))
+
+  # Skip comments/empty lines
+  if [[ -z "${line:-}" || "${line}" == \#* ]]; then
+    continue
+  fi
+
+  remainder="$line"
+
+  meeting="${remainder%%$'\t'*}"
+  remainder="${remainder#*$'\t'}"
+
+  set="${remainder%%$'\t'*}"
+  remainder="${remainder#*$'\t'}"
+
+  audio="${remainder%%$'\t'*}"
+  remainder="${remainder#*$'\t'}"
+
+  transcript_en="${remainder%%$'\t'*}"
+  transcript_id="${remainder#*$'\t'}"
+
+  args=("$meeting" "$set")
+
+  if [[ -n "${audio:-}" ]]; then
+    args+=(--audio "$audio")
+  fi
+  if [[ -n "${transcript_en:-}" ]]; then
+    args+=(--transcript-en "$transcript_en")
+  fi
+  if [[ -n "${transcript_id:-}" ]]; then
+    args+=(--transcript-id "$transcript_id")
+  fi
+
+  if [[ ${#args[@]} -le 2 ]]; then
+    echo "Skip line $line_no: no asset column provided"
+    continue
+  fi
+
+  echo "Line $line_no -> toefl-set ${args[*]}"
+
+  if [[ "$MODE" == "--apply" ]]; then
+    "$SCRIPT_DIR/toefl-set" "${args[@]}"
+    applied=$((applied + 1))
+  fi
+done < "$MAPPING_FILE"
+
+if [[ "$MODE" == "--dry-run" ]]; then
+  echo "Dry run complete. Re-run with --apply to execute."
+else
+  echo "Apply complete. Commands executed: $applied"
+fi

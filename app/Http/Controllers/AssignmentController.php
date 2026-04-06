@@ -9368,6 +9368,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
     public function listeningIndex()
     {
         $user = Auth::user();
+
         $meetings = [];
         $batchProgram = $this->resolveBatchProgramForToefl($user);
         $selectedClassPeriod = $this->resolveToeflSelectedClassPeriod($user);
@@ -9428,6 +9429,47 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         }
         
         return view('assignments.toefl-itp.listening.index', compact('meetings', 'batchProgram', 'selectedClassPeriod'));
+    }
+
+    public function toeflListeningPracticeIndex()
+    {
+        return view('assignments.toefl-itp.listening.practice-index');
+    }
+
+    public function toeflStructurePracticeIndex()
+    {
+        $activeMeetings = \App\Models\ToeflStructureMeeting::query()
+            ->where('meeting_number', '>', 50)
+            ->orderBy('meeting_number')
+            ->take(2)
+            ->get();
+
+        $practicePackages = collect(range(1, 70))->map(function ($number) use ($activeMeetings) {
+            $activeMeeting = $activeMeetings->get($number - 1);
+
+            if ($activeMeeting) {
+                return [
+                    'package_number' => $number,
+                    'status' => 'available',
+                    'title' => (string) $activeMeeting->title,
+                    'meeting_number' => (int) $activeMeeting->meeting_number,
+                    'question_count' => \App\Models\ToeflStructureQuestion::where('section_id', $activeMeeting->id)->count(),
+                ];
+            }
+
+            return [
+                'package_number' => $number,
+                'title' => 'Coming Soon',
+                'status' => 'coming_soon',
+            ];
+        });
+
+        return view('assignments.toefl-itp.structure.practice-index', compact('practicePackages'));
+    }
+
+    public function toeflReadingPracticeIndex()
+    {
+        return view('assignments.toefl-itp.reading.practice-index');
     }
 
     public function structureIndex()
@@ -9809,12 +9851,71 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
         $title = $meeting->title;
         $questions = \App\Models\ToeflStructureQuestion::where('section_id', $meeting->id)->orderBy('question_number')->get();
+        $explanationPath = $this->getStructureExplanationAbsolutePath($meeting->meeting_number);
+        $hasSavedExplanation = file_exists($explanationPath);
 
-        return view('assignments.toefl-itp.structure.meeting', compact('number', 'title', 'questions'));
+        return view('assignments.toefl-itp.structure.meeting', compact('number', 'title', 'questions', 'hasSavedExplanation'));
+    }
+
+    public function saveStructureExplanation(Request $request, $number)
+    {
+        $user = Auth::user();
+        if (!$user || (!$user->isAdmin() && !$user->isTeacher())) {
+            abort(403);
+        }
+
+        $meeting = \App\Models\ToeflStructureMeeting::where('meeting_number', $number)->firstOrFail();
+
+        $validated = $request->validate([
+            'image' => 'required|string'
+        ]);
+
+        $image = $validated['image'];
+        if (!str_starts_with($image, 'data:image/png;base64,')) {
+            return response()->json(['success' => false, 'message' => 'Invalid image format.'], 422);
+        }
+
+        $binaryData = base64_decode(substr($image, strlen('data:image/png;base64,')));
+        if ($binaryData === false) {
+            return response()->json(['success' => false, 'message' => 'Invalid image payload.'], 422);
+        }
+
+        $directory = public_path('uploads/structure-explanations');
+        if (!file_exists($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        file_put_contents($this->getStructureExplanationAbsolutePath($meeting->meeting_number), $binaryData);
+
+        return response()->json(['success' => true, 'message' => 'Explanation saved successfully.']);
+    }
+
+    public function downloadStructureExplanation($number)
+    {
+        $meeting = \App\Models\ToeflStructureMeeting::where('meeting_number', $number)->firstOrFail();
+        $absolutePath = $this->getStructureExplanationAbsolutePath($meeting->meeting_number);
+
+        if (!file_exists($absolutePath)) {
+            return back()->with('error', 'Explanation file not found.');
+        }
+
+        return response()->download(
+            $absolutePath,
+            'structure-explanation-meeting-' . $meeting->meeting_number . '.png'
+        );
+    }
+
+    private function getStructureExplanationAbsolutePath($meetingNumber)
+    {
+        return public_path('uploads/structure-explanations/meeting-' . $meetingNumber . '.png');
     }
 
     public function addStructureSet(\Illuminate\Http\Request $request, $number)
     {
+        if (!Auth::user()?->isAdmin()) {
+            abort(403);
+        }
+
         // $number is the Main Meeting Number
         $parent = \App\Models\ToeflStructureMeeting::where('meeting_number', $number)->firstOrFail();
 
@@ -9854,6 +9955,10 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function removeStructureSet(\Illuminate\Http\Request $request, $number)
     {
+        if (!Auth::user()?->isAdmin()) {
+            abort(403);
+        }
+
         // $number here is the Parent number (6) but we need to delete the specific child
         // Passed via input 'meeting_id' or 'target_number'
         $targetNumber = $request->input('target_number');
@@ -10005,6 +10110,8 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function storeStructureMeeting(Request $request)
     {
+        if (!Auth::user()?->isAdmin()) abort(403);
+
         $request->validate([
             'meeting_number' => 'required|integer',
             'title' => 'required|string|max:255',
@@ -10024,6 +10131,8 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function updateStructureMeeting(Request $request, \App\Models\ToeflStructureMeeting $meeting)
     {
+        if (!Auth::user()?->isAdmin()) abort(403);
+
         $request->validate([
             'meeting_number' => 'required|integer',
             'title' => 'required|string|max:255',
@@ -10039,6 +10148,8 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function destroyStructureMeeting(\App\Models\ToeflStructureMeeting $meeting)
     {
+        if (!Auth::user()?->isAdmin()) abort(403);
+
         $meeting->delete();
         return back()->with('success', 'Structure meeting deleted successfully.');
     }
@@ -10090,14 +10201,45 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function deleteStructureQuestion($id)
     {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            abort(403, 'Unauthorized');
+        }
+
         $question = \App\Models\ToeflStructureQuestion::findOrFail($id);
         $question->delete();
 
         return back()->with('success', 'Question deleted successfully.');
     }
 
+    public function updateStructureQuestionAnswer(Request $request, $id)
+    {
+        // Check authorization - Only admin can update answers
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $question = \App\Models\ToeflStructureQuestion::findOrFail($id);
+        
+        $validated = $request->validate([
+            'correct_answer' => 'required|in:A,B,C,D',
+        ]);
+
+        $question->update([
+            'correct_answer' => $validated['correct_answer'],
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Answer updated successfully.']);
+    }
+
     public function storeStructureQuestion(Request $request, $number)
     {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            abort(403, 'Unauthorized');
+        }
+
         $meeting = \App\Models\ToeflStructureMeeting::where('meeting_number', $number)->firstOrFail();
 
         $validated = $request->validate([
@@ -10120,6 +10262,11 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function updateStructureQuestion(Request $request, $id)
     {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            abort(403, 'Unauthorized');
+        }
+
         $question = \App\Models\ToeflStructureQuestion::findOrFail($id);
 
         $validated = $request->validate([
@@ -10296,13 +10443,18 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
            $availableSets = [1, 2, 3];
         }
 
+        $sourceAudioOptions = [];
+        if ($user && ($user->isAdmin() || $user->isTeacher())) {
+            $sourceAudioOptions = $this->getToeflListeningSourceAudioOptions();
+        }
+
         // Map meeting numbers to their respective views (meetings 2-16)
         if ($number >= 2 && $number <= 16) {
             $viewName = 'assignments.toefl-itp.listening.meeting' . $number;
-            return view($viewName, compact('questions', 'number', 'existingScore', 'set', 'transcript_enabled', 'availableSets'));
+            return view($viewName, compact('questions', 'number', 'existingScore', 'set', 'transcript_enabled', 'availableSets', 'sourceAudioOptions'));
         }
 
-        return view('assignments.toefl-itp.listening.meeting', compact('questions', 'number', 'existingScore', 'set', 'availableSets', 'transcript_enabled'));
+        return view('assignments.toefl-itp.listening.meeting', compact('questions', 'number', 'existingScore', 'set', 'availableSets', 'transcript_enabled', 'sourceAudioOptions'));
     }
 
     public function addPracticeSet(Request $request, $number)
@@ -10376,105 +10528,130 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
     public function uploadListeningAudio(Request $request, $number, $set)
     {
         $user = Auth::user();
-        
-        // Check if user is admin
-        if (!$user->isAdmin()) {
+
+        // Check if user is admin or teacher
+        if (!$user || (!$user->isAdmin() && !$user->isTeacher())) {
             return redirect()->back()->with('error', 'Unauthorized access.');
         }
 
-        // Validate the request
-    $request->validate([
-        'audio_file' => 'required|file|mimes:mp3,wav,ogg|max:51200', // 50MB max
-    ]);
-        
-        // Handle file upload
-    if ($request->hasFile('audio_file')) {
-        try {
-            $file = $request->file('audio_file');
-            
-            if (!$file->isValid()) {
-                 return redirect()->back()->with('error', 'File is not valid. Error code: ' . $file->getError());
-            }
+        $request->validate([
+            'audio_file' => 'nullable|file|mimes:mp3,wav,ogg,m4a|max:51200', // 50MB max
+            'existing_audio_path' => 'nullable|string|max:500',
+        ]);
 
-            // cleanup old file logic
+        if (!$request->hasFile('audio_file') && !$request->filled('existing_audio_path')) {
+            return redirect()->back()->with('error', 'Please upload a file or choose audio from folder.');
+        }
+
+        try {
             $existingQuestion = \App\Models\ToeflListeningQuestion::where('meeting_number', $number)
                 ->where('set_number', $set)
                 ->first();
 
             if ($existingQuestion && $existingQuestion->audio_file) {
-                 $oldPath = public_path($existingQuestion->audio_file);
-                 if (file_exists($oldPath)) {
-                     @unlink($oldPath);
-                 }
-            }
-
-            // Create directory path
-            $directory = "audio/toefl-listening/meeting-{$number}/set-{$set}";
-            $publicPath = public_path($directory);
-            
-            // Create directory if it doesn't exist
-            if (!file_exists($publicPath)) {
-                if (!mkdir($publicPath, 0777, true)) {
-                    return redirect()->back()->with('error', 'Failed to create directory: ' . $publicPath);
+                $oldPath = public_path($existingQuestion->audio_file);
+                if (file_exists($oldPath)) {
+                    @unlink($oldPath);
                 }
             }
-            
-            // Generate filename
-            $filename = 'audio_' . time() . '.' . $file->getClientOriginalExtension();
-            
-            // Move file to public directory
-            $file->move($publicPath, $filename);
-            
-            // Update all questions in this set with the audio file path
+
+            $directory = $this->getToeflListeningSetDirectory($number, $set);
+            $publicPath = $this->ensurePublicDirectoryExists($directory);
+
+            $filename = null;
+
+            if ($request->hasFile('audio_file')) {
+                $file = $request->file('audio_file');
+                if (!$file || !$file->isValid()) {
+                    return redirect()->back()->with('error', 'Uploaded file is invalid.');
+                }
+
+                $filename = 'audio_' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move($publicPath, $filename);
+            } else {
+                $selectedPath = str_replace('\\', '/', trim((string) $request->input('existing_audio_path')));
+                $selectedPath = ltrim($selectedPath, '/');
+
+                if (str_contains($selectedPath, '..')) {
+                    return redirect()->back()->with('error', 'Invalid audio path selection.');
+                }
+
+                if (!str_starts_with($selectedPath, 'audio/toefl/listening/Source/')) {
+                    return redirect()->back()->with('error', 'Selected audio must come from TOEFL listening source folder.');
+                }
+
+                $sourceAbsolutePath = public_path($selectedPath);
+                if (!file_exists($sourceAbsolutePath) || !is_file($sourceAbsolutePath)) {
+                    return redirect()->back()->with('error', 'Selected source audio file was not found.');
+                }
+
+                $ext = strtolower(pathinfo($sourceAbsolutePath, PATHINFO_EXTENSION));
+                if (!in_array($ext, ['mp3', 'wav', 'ogg', 'm4a'], true)) {
+                    return redirect()->back()->with('error', 'Unsupported source audio format.');
+                }
+
+                $safeBaseName = preg_replace('/[^A-Za-z0-9._-]/', '_', basename($sourceAbsolutePath));
+                $filename = 'audio_' . time() . '_' . $safeBaseName;
+
+                if (!copy($sourceAbsolutePath, $publicPath . '/' . $filename)) {
+                    return redirect()->back()->with('error', 'Failed to copy selected source audio.');
+                }
+            }
+
             $audioPath = $directory . '/' . $filename;
-            
-            // Verify file exists after move
             if (!file_exists($publicPath . '/' . $filename)) {
-                 return redirect()->back()->with('error', 'File move failed. Check permissions.');
+                return redirect()->back()->with('error', 'Audio file was not saved correctly.');
             }
 
             \App\Models\ToeflListeningQuestion::where('meeting_number', $number)
                 ->where('set_number', $set)
                 ->update(['audio_file' => $audioPath]);
-            
-            // Auto-transcribe audio file
-            try {
-                $fullAudioPath = public_path($audioPath);
-                $srtPath = $publicPath . '/transcript.srt';
-                
-                // Use Whisper to transcribe
-                $process = new \Symfony\Component\Process\Process([
-                    'whisper',
-                    $fullAudioPath,
-                    '--model', 'base',
-                    '--language', 'en',
-                    '--output_format', 'srt',
-                    '--output_dir', $publicPath,
-                    '--fp16', 'false',
-                ]);
-                
-                $process->setTimeout(600); // 10 minutes
-                $process->run();
-                
-                if ($process->isSuccessful() && file_exists($srtPath)) {
-                    \App\Models\ToeflListeningQuestion::where('meeting_number', $number)
-                        ->where('set_number', $set)
-                        ->update(['transcript' => file_get_contents($srtPath)]);
-                    
-                    return redirect()->back()->with('success', 'Audio file uploaded and transcribed successfully!');
-                } else {
-                    return redirect()->back()->with('success', 'Audio file uploaded successfully! Transcription failed, but audio is ready.');
+
+            // Auto-transcribe only when file is uploaded directly
+            if ($request->hasFile('audio_file')) {
+                try {
+                    $fullAudioPath = public_path($audioPath);
+                    $generatedSrtPath = $publicPath . '/' . pathinfo($filename, PATHINFO_FILENAME) . '.srt';
+
+                    $process = new \Symfony\Component\Process\Process([
+                        'whisper',
+                        $fullAudioPath,
+                        '--model', 'base',
+                        '--language', 'en',
+                        '--output_format', 'srt',
+                        '--output_dir', $publicPath,
+                        '--fp16', 'false',
+                    ]);
+
+                    $process->setTimeout(600);
+                    $process->run();
+
+                    if ($process->isSuccessful() && file_exists($generatedSrtPath)) {
+                        $srtContent = file_get_contents($generatedSrtPath);
+                        $this->storeToeflListeningTranscriptFile($number, $set, 'en', $srtContent);
+
+                        if ($generatedSrtPath !== $this->getToeflListeningTranscriptPublicPath($number, $set, 'en')) {
+                            @unlink($generatedSrtPath);
+                        }
+
+                        \App\Models\ToeflListeningQuestion::where('meeting_number', $number)
+                            ->where('set_number', $set)
+                            ->update(['transcript_en' => $this->parseSrtContentForStorage($srtContent)]);
+
+                        return redirect()->back()->with('success', 'Audio uploaded and transcribed successfully!');
+                    }
+
+                    return redirect()->back()->with('success', 'Audio uploaded successfully! Transcription failed, but audio is ready.');
+                } catch (\Exception $e) {
+                    return redirect()->back()->with('success', 'Audio uploaded successfully! Transcription error: ' . $e->getMessage());
                 }
-            } catch (\Exception $e) {
-                return redirect()->back()->with('success', 'Audio file uploaded successfully! Transcription error: ' . $e->getMessage());
             }
+
+            return redirect()->back()->with('success', 'Audio selected from folder successfully!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Exception during upload: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Exception during audio processing: ' . $e->getMessage());
         }
     }
-    
-    return redirect()->back()->with('error', 'No file received by server.');
-}
 
     public function toggleListeningLock($number)
     {
@@ -10553,8 +10730,10 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function uploadSrt(Request $request, $number, $set)
     {
-        // Admin validation
-        if (!Auth::user()->isAdmin()) {
+        $user = Auth::user();
+
+        // Admin/Teacher validation
+        if (!$user || (!$user->isAdmin() && !$user->isTeacher())) {
             abort(403);
         }
 
@@ -10567,72 +10746,21 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         $content = '';
         if ($request->hasFile('srt_file')) {
             $file = $request->file('srt_file');
+            if ($file && $file->isValid()) {
             $content = file_get_contents($file->getRealPath());
+            }
         } elseif ($request->filled('srt_content')) {
             $content = $request->input('srt_content');
         }
 
         if (!empty($content)) {
-            // Normalize line endings
-            $content = str_replace("\r\n", "\n", $content);
-
-            // Parsing Logic: Convert SRT to JSON with timestamps
-            // Regex to match SRT blocks:
-            // Group 1: Sequence number
-            // Group 2: Start time (supports HH:MM:SS,ms or H:i:s.ms)
-            // Group 3: End time
-            // Group 4: Text content
-            // Regex to match SRT blocks:
-            // Flexible pattern:
-            // 1. Index (digits)
-            // 2. Separator (newline OR space)
-            // 3. Start Time 
-            // 4. Arrow 
-            // 5. End Time
-            // 6. Text (until next index+timestamp pattern or end of string)
-            $pattern = '/(\d+)\s+(\d{1,2}:\d{2}:\d{2}[,.]\d{1,3})\s*-->\s*(\d{1,2}:\d{2}:\d{2}[,.]\d{1,3})\s+([\s\S]*?)(?=(?:\n\s*\d+\s+\d{1,2}:\d{2}:\d{2})|$)/';
-            
-            $blocks = [];
-            if (preg_match_all($pattern, $content, $matches, PREG_SET_ORDER)) {
-                foreach ($matches as $match) {
-                    $startTime = $this->srtTimeToSeconds($match[2]);
-                    $endTime = $this->srtTimeToSeconds($match[3]);
-                    $text = trim($match[4]);
-                    $text = str_replace("\n", " ", $text); // Optional: flatten newlines within a block
-                    
-                    if (!empty($text)) {
-                        $blocks[] = [
-                            'start' => $startTime,
-                            'end' => $endTime,
-                            'text' => $text
-                        ];
-                    }
-                }
-            }
-
-            // Fallback: if regex fails (empty blocks), might be plain text or weird format
-            if (empty($blocks)) {
-                // If parsing failed entirely, just save as plain text (legacy behavior)
-                 // But we want to encourage JSON, so let's try a simpler split if regex failed
-                 // For now, let's assume valid SRT. If empty, save as empty JSON or raw content.
-                 // Let's stick to storing JSON if possible.
-                 $finalText = json_encode([]);
-                 if (empty($matches)) {
-                     // If really no matches, maybe it's not a valid SRT. 
-                     // Let's just store the content cleaned up as a single block 0-end? 
-                     // Or just legacy text.
-                     // Decision: If regex fails, store as plain text string (legacy).
-                     // Frontend will check if it's JSON or not.
-                     $finalText = $content; 
-                 } else {
-                     $finalText = json_encode($blocks);
-                 }
-            } else {
-                $finalText = json_encode($blocks);
-            }
+            $content = $this->normalizeSrtContent($content);
+            $finalText = $this->parseSrtContentForStorage($content);
 
             // Determine column to update
             $column = ($request->language === 'en') ? 'transcript_en' : 'transcript_id';
+
+            $this->storeToeflListeningTranscriptFile($number, $set, $request->language, $content);
 
             // Update database
             \App\Models\ToeflListeningQuestion::where('meeting_number', $number)
@@ -18750,6 +18878,115 @@ $paraFormatted = $this->getDiffFeedback($paraUserWords, $paraCorrectWords);
         }
         
         return ($h * 3600) + ($m * 60) + $s + (float)$ms;
+    }
+
+    private function getToeflListeningSetDirectory($number, $set)
+    {
+        return "audio/toefl/listening/meeting-{$number}/set-{$set}";
+    }
+
+    private function getToeflListeningSourceAudioOptions()
+    {
+        $baseRelative = 'audio/toefl/listening/Source';
+        $baseAbsolute = public_path($baseRelative);
+
+        if (!is_dir($baseAbsolute)) {
+            return [];
+        }
+
+        $allowedExt = ['mp3', 'wav', 'ogg', 'm4a'];
+        $options = [];
+
+        try {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($baseAbsolute, \FilesystemIterator::SKIP_DOTS)
+            );
+
+            foreach ($iterator as $file) {
+                if (!$file->isFile()) {
+                    continue;
+                }
+
+                $ext = strtolower($file->getExtension());
+                if (!in_array($ext, $allowedExt, true)) {
+                    continue;
+                }
+
+                $absolutePath = $file->getPathname();
+                $relativePath = str_replace('\\', '/', ltrim(substr($absolutePath, strlen(public_path())), '/'));
+
+                $options[] = [
+                    'value' => $relativePath,
+                    'label' => str_replace('audio/toefl/listening/Source/', '', $relativePath),
+                ];
+            }
+        } catch (\Throwable $e) {
+            return [];
+        }
+
+        usort($options, function ($a, $b) {
+            return strcmp($a['label'], $b['label']);
+        });
+
+        return $options;
+    }
+
+    private function ensurePublicDirectoryExists($relativePath)
+    {
+        $publicPath = public_path($relativePath);
+
+        if (!file_exists($publicPath) && !mkdir($publicPath, 0777, true) && !is_dir($publicPath)) {
+            throw new \RuntimeException('Failed to create directory: ' . $publicPath);
+        }
+
+        return $publicPath;
+    }
+
+    private function normalizeSrtContent($content)
+    {
+        return str_replace(["\r\n", "\r"], "\n", $content);
+    }
+
+    private function parseSrtContentForStorage($content)
+    {
+        $content = $this->normalizeSrtContent($content);
+        $pattern = '/(\d+)\s+(\d{1,2}:\d{2}:\d{2}[,.]\d{1,3})\s*-->\s*(\d{1,2}:\d{2}:\d{2}[,.]\d{1,3})\s+([\s\S]*?)(?=(?:\n\s*\d+\s+\d{1,2}:\d{2}:\d{2})|$)/';
+
+        $blocks = [];
+        $matches = [];
+
+        if (preg_match_all($pattern, $content, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $startTime = $this->srtTimeToSeconds($match[2]);
+                $endTime = $this->srtTimeToSeconds($match[3]);
+                $text = trim(str_replace("\n", ' ', $match[4]));
+
+                if (!empty($text)) {
+                    $blocks[] = [
+                        'start' => $startTime,
+                        'end' => $endTime,
+                        'text' => $text,
+                    ];
+                }
+            }
+        }
+
+        if (empty($blocks)) {
+            return empty($matches) ? $content : json_encode($blocks);
+        }
+
+        return json_encode($blocks);
+    }
+
+    private function getToeflListeningTranscriptPublicPath($number, $set, $language)
+    {
+        return public_path($this->getToeflListeningSetDirectory($number, $set) . '/transcript-' . $language . '.srt');
+    }
+
+    private function storeToeflListeningTranscriptFile($number, $set, $language, $content)
+    {
+        $this->ensurePublicDirectoryExists($this->getToeflListeningSetDirectory($number, $set));
+        file_put_contents($this->getToeflListeningTranscriptPublicPath($number, $set, $language), $this->normalizeSrtContent($content));
     }
 
 

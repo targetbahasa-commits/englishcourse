@@ -84,38 +84,20 @@
                                 <!-- Phone Icon -->
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                             </div>
-                            <input id="phone_number" type="tel" name="phone_number" value="{{ old('phone_number', request('phone_number')) }}" required autocomplete="tel" 
+                            <input id="phone_number" type="tel" name="phone_number" value="{{ old('phone_number', request('phone_number')) }}" autocomplete="tel" 
                                 class="w-full pl-11 pr-4 py-3 bg-white/90 backdrop-blur border border-gray-200 text-gray-900 rounded-xl focus:ring-4 focus:ring-green-600/10 focus:border-green-600 transition-all duration-300 outline-none placeholder-gray-400 shadow-sm" 
-                                placeholder="081234567890" oninput="resetOtpState()">
+                                placeholder="081234567890">
                         </div>
-                        <button type="button" id="btn-send-otp" onclick="sendOtp()" class="px-4 py-3 bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 font-semibold rounded-xl transition-all duration-300 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">
-                            Send OTP
-                        </button>
+                        {{-- OTP button hidden temporarily --}}
+                        {{-- <button type="button" id="btn-send-otp" onclick="sendOtp()" ...>Send OTP</button> --}}
                     </div>
                     <p id="otp-message" class="mt-2 text-sm hidden"></p>
                     <x-input-error :messages="$errors->get('phone_number')" class="mt-2 text-sm text-red-500" />
                 </div>
 
-                <!-- OTP Input (Hidden initially) -->
-                <div id="otp-container" class="group relative hidden">
-                    <label for="otp_code" class="block text-sm font-medium text-gray-700 mb-1 transition-colors group-focus-within:text-blue-600">Enter OTP Code <span class="text-red-500">*</span></label>
-                    <div class="flex gap-2">
-                        <div class="relative flex-1 flex items-center">
-                            <div class="absolute left-4 text-gray-400 group-focus-within:text-blue-600 transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                            </div>
-                            <input id="otp_code" type="text" maxlength="6"
-                                class="w-full pl-11 pr-4 py-3 bg-white/90 backdrop-blur border border-gray-200 text-gray-900 rounded-xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 transition-all duration-300 outline-none placeholder-gray-400 shadow-sm tracking-widest text-center" 
-                                placeholder="------">
-                        </div>
-                        <button type="button" id="btn-verify-otp" onclick="verifyOtp()" class="px-6 py-3 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 font-semibold rounded-xl transition-all duration-300 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">
-                            Verify
-                        </button>
-                    </div>
-                    <p id="otp-verify-message" class="mt-2 text-sm hidden"></p>
-                </div>
-                <!-- Hidden input to track verification status for form submission -->
-                <input type="hidden" id="is_phone_verified" value="false">
+                {{-- OTP input hidden temporarily --}}
+                {{-- <div id="otp-container" class="group relative hidden">...</div> --}}
+                <input type="hidden" id="is_phone_verified" value="true">
 
                 <!-- Passwords -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -151,9 +133,9 @@
                 <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2 text-sm text-red-500 text-center" />
 
                 <!-- Submit Button -->
-                <button type="submit" id="btn-submit-register" disabled class="w-full relative py-3.5 mt-2 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 focus:outline-none focus:ring-4 focus:ring-blue-600/20 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                <button type="submit" id="btn-submit-register" class="w-full relative py-3.5 mt-2 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 focus:outline-none focus:ring-4 focus:ring-blue-600/20 active:scale-[0.98] transition-all duration-300">
                     <span class="relative z-10 flex items-center justify-center gap-2">
-                        Create Account (Verify Phone First)
+                        Create Account
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </span>
                 </button>

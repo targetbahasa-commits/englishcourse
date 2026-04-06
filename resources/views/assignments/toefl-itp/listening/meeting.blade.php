@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container mx-auto px-4 py-8 relative" x-data="{ 
+<div class="container mx-auto px-4 {{ isset($set) ? 'pt-24 pb-8' : 'py-8' }} relative" x-data="{ 
     sidebarOpen: false, 
     editingQuestion: null,
     showForm: false,
@@ -58,7 +58,7 @@
         this.showForm = false;
         this.editingQuestion = null;
     }
-}">
+}" x-on:open-edit-question.window="edit($event.detail)" x-on:create-question.window="create()">
     <style>
         body {
             background-color: white !important;
@@ -102,8 +102,12 @@
         color: #991b1b !important; /* red-800 */
     }
 </style>
+    @if(isset($set))
+        @include('assignments.toefl-itp.listening.partials.audio-player')
+    @endif
+
     <!-- Header -->
-    <div class="mb-8 {{ isset($set) ? 'pt-24' : '' }}">
+    <div class="mb-8">
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
                 <div class="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg">
@@ -220,29 +224,125 @@
             </div>
         </div>
     @else
-        @include('assignments.toefl-itp.listening.partials.audio-player')
 
         <form method="POST" action="{{ route('assignments.toefl-itp.listening.meeting.submit', $number) }}" class="space-y-8">
             @csrf
             <input type="hidden" name="set_number" value="{{ $set }}">
+            <script>
+                window.toeflListeningQuestions = @json($questions->keyBy('id'));
+                window.openEditQuestionById = function(questionId) {
+                    const map = window.toeflListeningQuestions || {};
+                    const key = String(questionId);
+                    const question = map[key] || map[questionId];
+
+                    if (!question) {
+                        console.warn('Question data not found for ID:', questionId);
+                        return;
+                    }
+
+                    window.dispatchEvent(new CustomEvent('open-edit-question', { detail: question }));
+                };
+            </script>
             
             @php
+                $instructionPanel = null;
+                $instructionQuestionId = null;
+
+                if ($questions->isNotEmpty()) {
+                    $firstQuestion = $questions->sortBy('question_number')->first();
+                    $rawInstructionText = trim((string) ($firstQuestion->question_text ?? ''));
+                    $normalizedInstructionText = str_replace('\\n', "\n", $rawInstructionText);
+
+                    if (stripos($normalizedInstructionText, 'Focus:') === 0 && stripos($normalizedInstructionText, 'Directions:') !== false) {
+                        $focusText = '';
+                        $directionsText = '';
+
+                        if (preg_match('/^\s*Focus:\s*(.+?)\s*Directions:\s*(.+)\s*$/is', $normalizedInstructionText, $matches)) {
+                            $focusText = trim($matches[1]);
+                            $directionsText = trim($matches[2]);
+                        } else {
+                            $parts = preg_split('/Directions:/i', $normalizedInstructionText, 2);
+                            $focusText = isset($parts[0]) ? trim(preg_replace('/^\s*Focus:\s*/i', '', $parts[0])) : '';
+                            $directionsText = isset($parts[1]) ? trim($parts[1]) : '';
+                        }
+
+                        if ($focusText !== '' || $directionsText !== '') {
+                            $instructionPanel = [
+                                'focus' => $focusText,
+                                'directions' => $directionsText,
+                            ];
+                            $instructionQuestionId = $firstQuestion->id;
+                        }
+                    }
+                }
+
                 $splitIndex = ceil(count($questions) / 2);
             @endphp
+
+            @if($instructionPanel)
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-5">
+                    @if($instructionPanel['focus'] !== '')
+                        <p class="text-amber-900"><span class="font-semibold">Focus:</span> {{ $instructionPanel['focus'] }}</p>
+                    @endif
+                    @if($instructionPanel['directions'] !== '')
+                        <p class="text-amber-900 mt-2"><span class="font-semibold">Directions:</span> {{ $instructionPanel['directions'] }}</p>
+                    @endif
+                </div>
+            @endif
             
             <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                <div class="flex items-center justify-between gap-3 mb-5 pb-4 border-b border-gray-100">
+                    <h3 class="text-lg md:text-xl font-bold text-gray-800">Container Soal</h3>
+                    @php
+                        $currentUser = Auth::user();
+                        $baseRole = strtolower(trim((string) ($currentUser->role ?? '')));
+                        $hasAdminBaseRole = $baseRole === 'admin' || str_contains($baseRole, 'admin');
+                        $isAdminImpersonating = $currentUser && $baseRole === 'admin' && request()->hasSession() && session()->has('view_as_role');
+                        $hasPrivilegedAccess = $currentUser && (
+                            (method_exists($currentUser, 'isAdmin') && $currentUser->isAdmin())
+                            || $hasAdminBaseRole
+                            || $isAdminImpersonating
+                        );
+                        $canSeeEditSoal = $currentUser && (
+                            $hasPrivilegedAccess
+                        );
+                    @endphp
+                    @if($canSeeEditSoal)
+                        @if($questions->isNotEmpty())
+                            <button type="button"
+                                onclick="openEditQuestionById({{ $questions->sortBy('question_number')->first()->id }})"
+                                class="px-3 py-2 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors flex items-center gap-2 shadow-md text-sm"
+                                title="Edit Soal">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L12.828 14H10v-2.828l7.586-7.586z"></path>
+                                </svg>
+                                Edit Soal
+                            </button>
+                        @else
+                            <button type="button"
+                                onclick='window.dispatchEvent(new CustomEvent("create-question"))'
+                                class="px-3 py-2 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors flex items-center gap-2 shadow-md text-sm"
+                                title="Tambah Soal">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Tambah Soal
+                            </button>
+                        @endif
+                    @endif
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 relative">
                     {{-- Column 1 --}}
                     <div class="space-y-0 divide-y divide-gray-100">
                         @foreach($questions->slice(0, $splitIndex) as $index => $question)
-                            @include('assignments.toefl-itp.listening.partials.question-card', ['question' => $question, 'index' => $question->question_number, 'existingScore' => $existingScore])
+                            @include('assignments.toefl-itp.listening.partials.question-card', ['question' => $question, 'index' => $question->question_number, 'existingScore' => $existingScore, 'instructionQuestionId' => $instructionQuestionId])
                         @endforeach
                     </div>
 
                     {{-- Column 2 --}}
                     <div class="space-y-0 divide-y divide-gray-100">
                         @foreach($questions->slice($splitIndex) as $index => $question)
-                            @include('assignments.toefl-itp.listening.partials.question-card', ['question' => $question, 'index' => $question->question_number, 'existingScore' => $existingScore])
+                            @include('assignments.toefl-itp.listening.partials.question-card', ['question' => $question, 'index' => $question->question_number, 'existingScore' => $existingScore, 'instructionQuestionId' => $instructionQuestionId])
                         @endforeach
                     </div>
                 </div>
@@ -333,8 +433,22 @@
         </div>
     </form>
 
-    <!-- Admin Floating Action Button -->
-    @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+    <!-- Question Management Floating Action Button -->
+    @php
+        $currentUser = Auth::user();
+        $baseRole = strtolower(trim((string) ($currentUser->role ?? '')));
+        $hasAdminBaseRole = $baseRole === 'admin' || str_contains($baseRole, 'admin');
+        $isAdminImpersonating = $currentUser && $baseRole === 'admin' && request()->hasSession() && session()->has('view_as_role');
+        $hasPrivilegedAccess = $currentUser && (
+            (method_exists($currentUser, 'isAdmin') && $currentUser->isAdmin())
+            || $hasAdminBaseRole
+            || $isAdminImpersonating
+        );
+        $canManageQuestions = $currentUser && (
+            $hasPrivilegedAccess
+        );
+    @endphp
+    @if($canManageQuestions)
         <button @click="create()" class="fixed bottom-8 right-8 w-16 h-16 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-blue-700 hover:scale-110 transition-all duration-300 z-50">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
         </button>
