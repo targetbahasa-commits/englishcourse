@@ -125,4 +125,66 @@ Alpine.data('countdown', (deadlineStr) => ({
     }
 }));
 
+// ============================================================
+// Alpine.data Component: TOEFL Reading Practice Page
+// Usage: x-data="readingPracticePage(answerKey, totalQuestions)"
+// ============================================================
+Alpine.data('readingPracticePage', (answerKey, totalQuestions) => ({
+    answers: {},
+    submitted: false,
+    answerKey: answerKey,
+    totalQuestions: totalQuestions,
+    answeredCount() {
+        return Object.values(this.answers).filter(Boolean).length;
+    },
+    remainingCount() {
+        return this.totalQuestions - this.answeredCount();
+    },
+    score() {
+        return Object.entries(this.answerKey).reduce((total, [questionNumber, correctAnswer]) => {
+            return total + (this.answers[questionNumber] === correctAnswer ? 1 : 0);
+        }, 0);
+    },
+    setAnswer(questionNumber, optionLetter) {
+        this.answers[questionNumber] = optionLetter;
+    },
+    percentage() {
+        if (this.totalQuestions === 0) {
+            return 0;
+        }
+        return Math.round((this.score() / this.totalQuestions) * 100);
+    },
+    optionClass(questionNumber, optionLetter) {
+        if (!this.submitted) {
+            return '';
+        }
+        if (this.answerKey[questionNumber] === optionLetter) {
+            return 'reading-correct';
+        }
+        if (this.answers[questionNumber] === optionLetter) {
+            return 'reading-wrong';
+        }
+        return 'reading-muted';
+    },
+    submitPractice() {
+        this.submitted = true;
+        const questionPanel = document.getElementById('questions-panel');
+        if (questionPanel) {
+            questionPanel.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    },
+    resetPractice() {
+        this.answers = {};
+        this.submitted = false;
+        const passagePanel = document.getElementById('passages-panel');
+        const questionPanel = document.getElementById('questions-panel');
+        if (passagePanel) {
+            passagePanel.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        if (questionPanel) {
+            questionPanel.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    },
+}));
+
 Alpine.start();

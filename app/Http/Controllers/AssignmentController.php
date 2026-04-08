@@ -9433,7 +9433,377 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function toeflListeningPracticeIndex()
     {
-        return view('assignments.toefl-itp.listening.practice-index');
+        $parts = collect([
+            [
+                'key' => 'A',
+                'title' => 'Part A',
+                'subtitle' => 'Short Dialogues',
+                'status' => 'available',
+                'description' => 'Latihan soal Listening Part A.',
+            ],
+            [
+                'key' => 'B',
+                'title' => 'Part B',
+                'subtitle' => 'Longer Conversations',
+                'status' => 'coming_soon',
+                'description' => 'Latihan Part B akan segera tersedia.',
+            ],
+            [
+                'key' => 'C',
+                'title' => 'Part C',
+                'subtitle' => 'Talks and Lectures',
+                'status' => 'coming_soon',
+                'description' => 'Latihan Part C akan segera tersedia.',
+            ],
+        ]);
+
+        $listeningPackages = collect(range(1, 5))->map(function ($number) {
+            if ($number === 1) {
+                $partA = \App\Models\ToeflMockupQuestion::where('section', 'listening')->where('part', 'A')->count();
+                $partB = \App\Models\ToeflMockupQuestion::where('section', 'listening')->where('part', 'B')->count();
+                $partC = \App\Models\ToeflMockupQuestion::where('section', 'listening')->where('part', 'C')->count();
+
+                return [
+                    'package_number' => $number,
+                    'title' => 'Paket ' . $number,
+                    'subtitle' => 'Diagnostic Pre-Test Listening',
+                    'status' => 'available',
+                    'description' => 'Part A, Part B, Part C (' . ($partA + $partB + $partC) . ' soal).',
+                ];
+            }
+
+            return [
+                'package_number' => $number,
+                'title' => 'Paket ' . $number,
+                'subtitle' => 'Listening Package',
+                'status' => 'coming_soon',
+                'description' => 'Paket soal listening akan segera tersedia.',
+            ];
+        });
+
+        return view('assignments.toefl-itp.listening.practice-index', compact('parts', 'listeningPackages'));
+    }
+
+    public function toeflListeningPracticePackage($package)
+    {
+        $package = (int) $package;
+
+        if ($package !== 1) {
+            return redirect()->route('assignments.toefl-itp.listening.practice')
+                ->with('error', 'Paket ini belum tersedia.');
+        }
+
+        $listeningPartA = \App\Models\ToeflMockupQuestion::where('section', 'listening')
+            ->where('part', 'A')
+            ->orderBy('question_number')
+            ->get();
+
+        $listeningPartB = \App\Models\ToeflMockupQuestion::where('section', 'listening')
+            ->where('part', 'B')
+            ->orderBy('question_number')
+            ->get();
+
+        $listeningPartC = \App\Models\ToeflMockupQuestion::where('section', 'listening')
+            ->where('part', 'C')
+            ->orderBy('question_number')
+            ->get();
+
+        $structureQuestions = collect();
+        $writtenQuestions = collect();
+        $listeningQuestions = $listeningPartA;
+        $packageMode = true;
+        $packageNumber = $package;
+        $audioModalContext = 'package';
+        $uploadAudioRoute = route('assignments.toefl-itp.listening.practice.package.upload-audio', ['package' => $package]);
+        $uploadSrtRoute = route('assignments.toefl-itp.listening.practice.package.upload-srt', ['package' => $package]);
+        $updateTranscriptRoute = route('assignments.toefl-itp.listening.practice.package.update-transcript', ['package' => $package]);
+        $sourceAudioOptions = $this->getToeflListeningSourceAudioOptions();
+        $listeningSubmitRoute = route('assignments.toefl-itp.listening.practice.package.submit', ['package' => $package]);
+
+        return view('assignments.toefl-itp.mockup', compact(
+            'listeningPartA',
+            'listeningPartB',
+            'listeningPartC',
+            'listeningQuestions',
+            'structureQuestions',
+            'writtenQuestions',
+            'packageMode',
+            'packageNumber',
+            'audioModalContext',
+            'uploadAudioRoute',
+            'uploadSrtRoute',
+            'updateTranscriptRoute',
+            'sourceAudioOptions',
+            'listeningSubmitRoute'
+        ));
+    }
+
+    public function uploadListeningPracticePackageAudio(Request $request, $package)
+    {
+        $user = Auth::user();
+
+        if (!$user || (!$user->isAdmin() && !$user->isTeacher())) {
+            return redirect()->back()->with('error', 'Unauthorized access.');
+        }
+
+        $package = (int) $package;
+        if ($package !== 1) {
+            return redirect()->back()->with('error', 'Paket ini belum tersedia.');
+        }
+
+        $request->validate([
+            'audio_file' => 'nullable|file|mimes:mp3,wav,ogg,m4a|max:51200',
+            'existing_audio_path' => 'nullable|string|max:500',
+        ]);
+
+        if (!$request->hasFile('audio_file') && !$request->filled('existing_audio_path')) {
+            return redirect()->back()->with('error', 'Please upload a file or choose audio from folder.');
+        }
+
+        try {
+            $questions = \App\Models\ToeflMockupQuestion::where('section', 'listening')
+                ->whereIn('part', ['A', 'B', 'C'])
+                ->get();
+
+            if ($questions->isEmpty()) {
+                return redirect()->back()->with('error', 'Listening questions for this package are not available yet.');
+            }
+
+            $currentAudioPath = (string) ($questions->first()->audio_file ?? '');
+            if ($currentAudioPath !== '') {
+                $oldPath = public_path($currentAudioPath);
+                $safeDirPrefix = 'audio/toefl/listening/practice/package-' . $package . '/';
+                if (str_starts_with(str_replace('\\', '/', $currentAudioPath), $safeDirPrefix) && file_exists($oldPath)) {
+                    @unlink($oldPath);
+                }
+            }
+
+            $directory = 'audio/toefl/listening/practice/package-' . $package;
+            $publicPath = $this->ensurePublicDirectoryExists($directory);
+
+            if ($request->hasFile('audio_file')) {
+                $file = $request->file('audio_file');
+                if (!$file || !$file->isValid()) {
+                    return redirect()->back()->with('error', 'Uploaded file is invalid.');
+                }
+
+                $filename = 'audio_' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move($publicPath, $filename);
+            } else {
+                $selectedPath = str_replace('\\', '/', trim((string) $request->input('existing_audio_path')));
+                $selectedPath = ltrim($selectedPath, '/');
+
+                if (str_contains($selectedPath, '..')) {
+                    return redirect()->back()->with('error', 'Invalid audio path selection.');
+                }
+
+                if (!str_starts_with($selectedPath, 'audio/toefl/listening/Source/')) {
+                    return redirect()->back()->with('error', 'Selected audio must come from TOEFL listening source folder.');
+                }
+
+                $sourceAbsolutePath = public_path($selectedPath);
+                if (!file_exists($sourceAbsolutePath) || !is_file($sourceAbsolutePath)) {
+                    return redirect()->back()->with('error', 'Selected source audio file was not found.');
+                }
+
+                $ext = strtolower(pathinfo($sourceAbsolutePath, PATHINFO_EXTENSION));
+                if (!in_array($ext, ['mp3', 'wav', 'ogg', 'm4a'], true)) {
+                    return redirect()->back()->with('error', 'Unsupported source audio format.');
+                }
+
+                $safeBaseName = preg_replace('/[^A-Za-z0-9._-]/', '_', basename($sourceAbsolutePath));
+                $filename = 'audio_' . time() . '_' . $safeBaseName;
+
+                if (!copy($sourceAbsolutePath, $publicPath . '/' . $filename)) {
+                    return redirect()->back()->with('error', 'Failed to copy selected source audio.');
+                }
+            }
+
+            $audioPath = $directory . '/' . $filename;
+
+            \App\Models\ToeflMockupQuestion::where('section', 'listening')
+                ->whereIn('part', ['A', 'B', 'C'])
+                ->update(['audio_file' => $audioPath]);
+
+            return redirect()->back()->with('success', 'Audio updated successfully for listening package.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Exception during audio processing: ' . $e->getMessage());
+        }
+    }
+
+    public function updateListeningPracticePackageTranscript(Request $request, $package)
+    {
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            abort(403);
+        }
+
+        $package = (int) $package;
+        if ($package !== 1) {
+            return redirect()->back()->with('error', 'Paket ini belum tersedia.');
+        }
+
+        $request->validate([
+            'transcript_en' => 'nullable|string',
+            'transcript_id' => 'nullable|string',
+        ]);
+
+        \App\Models\ToeflMockupQuestion::where('section', 'listening')
+            ->whereIn('part', ['A', 'B', 'C'])
+            ->update([
+                'transcript_en' => $request->input('transcript_en'),
+                'transcript_id' => $request->input('transcript_id'),
+            ]);
+
+        return back()->with('success', 'Transcript updated successfully.');
+    }
+
+    public function uploadListeningPracticePackageSrt(Request $request, $package)
+    {
+        $user = Auth::user();
+
+        if (!$user || (!$user->isAdmin() && !$user->isTeacher())) {
+            abort(403);
+        }
+
+        $package = (int) $package;
+        if ($package !== 1) {
+            return redirect()->back()->with('error', 'Paket ini belum tersedia.');
+        }
+
+        $request->validate([
+            'srt_file' => 'required_without:srt_content|nullable|file|extensions:srt|max:2048',
+            'srt_content' => 'required_without:srt_file|nullable|string',
+            'language' => 'required|in:en,id',
+        ]);
+
+        $content = '';
+        if ($request->hasFile('srt_file')) {
+            $file = $request->file('srt_file');
+            if ($file && $file->isValid()) {
+                $content = file_get_contents($file->getRealPath());
+            }
+        } elseif ($request->filled('srt_content')) {
+            $content = $request->input('srt_content');
+        }
+
+        if ($content === '') {
+            return back()->with('error', 'Failed to upload SRT file.');
+        }
+
+        $content = $this->normalizeSrtContent($content);
+        $finalText = $this->parseSrtContentForStorage($content);
+        $column = $request->input('language') === 'en' ? 'transcript_en' : 'transcript_id';
+
+        \App\Models\ToeflMockupQuestion::where('section', 'listening')
+            ->whereIn('part', ['A', 'B', 'C'])
+            ->update([$column => $finalText]);
+
+        $directory = 'audio/toefl/listening/practice/package-' . $package;
+        $publicPath = $this->ensurePublicDirectoryExists($directory);
+        $filename = $request->input('language') === 'en' ? 'transcript_en.srt' : 'transcript_id.srt';
+        @file_put_contents($publicPath . '/' . $filename, $content);
+
+        return back()->with('success', 'SRT uploaded and parsed successfully.');
+    }
+
+    public function submitToeflListeningPracticePackage(Request $request, $package)
+    {
+        $package = (int) $package;
+
+        if ($package !== 1) {
+            abort(404);
+        }
+
+        $questions = \App\Models\ToeflMockupQuestion::query()
+            ->where('section', 'listening')
+            ->whereIn('part', ['A', 'B', 'C'])
+            ->orderBy('question_number')
+            ->get();
+
+        if ($questions->isEmpty()) {
+            return redirect()->route('assignments.toefl-itp.listening.practice.package', ['package' => $package])
+                ->with('error', 'Soal paket belum tersedia.');
+        }
+
+        $correctCount = 0;
+        $reviewRows = [];
+        $totalQuestions = $questions->count();
+
+        foreach ($questions as $question) {
+            $userAnswer = strtoupper((string) $request->input('question_' . $question->id, ''));
+            $correctAnswer = strtoupper((string) $question->correct_answer);
+            $isCorrect = $userAnswer !== '' && $userAnswer === $correctAnswer;
+
+            if ($isCorrect) {
+                $correctCount++;
+            }
+
+            $reviewRows[] = [
+                'question_number' => (int) $question->question_number,
+                'part' => (string) $question->part,
+                'user_answer' => $userAnswer !== '' ? $userAnswer : '-',
+                'correct_answer' => $correctAnswer,
+                'is_correct' => $isCorrect,
+                'is_unanswered' => $userAnswer === '',
+            ];
+        }
+
+        $score = (int) round(($correctCount / max(1, $totalQuestions)) * 100);
+
+        return redirect()->route('assignments.toefl-itp.listening.practice.package', ['package' => $package])
+            ->with('success', "Paket {$package} submitted. Score: {$score} ({$correctCount}/{$totalQuestions} correct)")
+            ->with('listeningPackageReview', [
+                'score' => $score,
+                'correct' => $correctCount,
+                'total' => $totalQuestions,
+                'rows' => $reviewRows,
+            ]);
+    }
+
+    public function toeflListeningPracticePartA()
+    {
+        $questionNumbers = \App\Models\ToeflMockupQuestion::query()
+            ->where('section', 'listening')
+            ->where('part', 'A')
+            ->pluck('question_number')
+            ->map(fn ($number) => (int) $number);
+
+        $ranges = collect(range(1, 27))
+            ->map(function ($index) use ($questionNumbers) {
+                $start = (($index - 1) * 10) + 1;
+                $end = $start + 9;
+                $count = $questionNumbers->filter(fn ($number) => $number >= $start && $number <= $end)->count();
+
+                return [
+                    'start' => $start,
+                    'end' => $end,
+                    'label' => $start . '-' . $end,
+                    'question_count' => $count,
+                ];
+            })
+            ->values();
+
+        return view('assignments.toefl-itp.listening.practice-part-a', compact('ranges'));
+    }
+
+    public function toeflListeningPracticePartARange($start, $end)
+    {
+        $start = (int) $start;
+        $end = (int) $end;
+
+        $isValidBoundary = $start >= 1 && $end <= 270 && (($start - 1) % 10 === 0) && ($end === $start + 9);
+        if (!$isValidBoundary) {
+            abort(404);
+        }
+
+        $questions = \App\Models\ToeflMockupQuestion::query()
+            ->where('section', 'listening')
+            ->where('part', 'A')
+            ->whereBetween('question_number', [$start, $end])
+            ->orderBy('question_number')
+            ->get();
+
+        return view('assignments.toefl-itp.listening.practice-part-a-range', compact('questions', 'start', 'end'));
     }
 
     public function toeflStructurePracticeIndex()
@@ -9441,7 +9811,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         $activeMeetings = \App\Models\ToeflStructureMeeting::query()
             ->where('meeting_number', '>', 50)
             ->orderBy('meeting_number')
-            ->take(2)
+            ->take(3)
             ->get();
 
         $practicePackages = collect(range(1, 70))->map(function ($number) use ($activeMeetings) {
@@ -9469,7 +9839,31 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function toeflReadingPracticeIndex()
     {
-        return view('assignments.toefl-itp.reading.practice-index');
+        $readingPackages = collect(\App\Services\ToeflReadingPracticeData::catalog());
+
+        return view('assignments.toefl-itp.reading.practice-index', compact('readingPackages'));
+    }
+
+    public function toeflReadingPracticePackage($package)
+    {
+        $package = (int) $package;
+
+        $packageData = \App\Services\ToeflReadingPracticeData::package($package);
+
+        if ($packageData) {
+            $answerKey = collect($packageData['passages'])
+                ->flatMap(function ($passage) {
+                    return collect($passage['questions'])->mapWithKeys(function ($question) {
+                        return [(string) $question['number'] => $question['answer']];
+                    });
+                })
+                ->all();
+
+            return view('assignments.toefl-itp.reading.practice-package', compact('packageData', 'answerKey'));
+        }
+
+        return redirect()->route('assignments.toefl-itp.reading.practice')
+            ->with('error', 'Paket ' . $package . ' belum tersedia.');
     }
 
     public function structureIndex()
@@ -9618,6 +10012,11 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function reorderReadingMeetings(Request $request)
     {
+        $user = Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            abort(403);
+        }
+
         $request->validate([
             'meetings' => 'required|array',
             'meetings.*' => 'exists:toefl_reading_meetings,id'
@@ -9633,7 +10032,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
     public function toggleReadingLock(\App\Models\ToeflReadingMeeting $meeting)
     {
         $user = Auth::user();
-        if (!$user || (!$user->isAdmin() && !$user->isTeacher())) {
+        if (!$user || !$user->isAdmin()) {
             abort(403);
         }
 
@@ -9730,6 +10129,11 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function storeReadingMeeting(Request $request)
     {
+        $user = Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            abort(403);
+        }
+
         $request->validate([
             'meeting_number' => 'required|integer',
             'title' => 'required|string|max:255',
@@ -9748,6 +10152,11 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function updateReadingMeeting(Request $request, \App\Models\ToeflReadingMeeting $meeting)
     {
+        $user = Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            abort(403);
+        }
+
         $request->validate([
             'meeting_number' => 'required|integer',
             'title' => 'required|string|max:255',
@@ -9763,6 +10172,11 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function destroyReadingMeeting(\App\Models\ToeflReadingMeeting $meeting)
     {
+        $user = Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            abort(403);
+        }
+
         $meeting->delete();
         return back()->with('success', 'Reading meeting deleted successfully.');
     }
@@ -10028,6 +10442,11 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function storeReadingQuestion(Request $request)
     {
+        $user = Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            abort(403);
+        }
+
         $request->validate([
             'passage_id' => 'required|exists:toefl_reading_passages,id',
             'question_number' => 'required|integer',
@@ -10046,6 +10465,11 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function updateReadingQuestion(Request $request, $id)
     {
+        $user = Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            abort(403);
+        }
+
         $question = \App\Models\ToeflReadingQuestion::findOrFail($id);
 
         $request->validate([
@@ -10065,6 +10489,11 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function destroyReadingQuestion($id)
     {
+        $user = Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            abort(403);
+        }
+
         $question = \App\Models\ToeflReadingQuestion::findOrFail($id);
         $question->delete();
 
@@ -10073,6 +10502,11 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function storeReadingPassage(Request $request)
     {
+        $user = Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            abort(403);
+        }
+
         $request->validate([
             'meeting_id' => 'required|exists:toefl_reading_meetings,id',
             'passage_number' => 'required|integer',
@@ -10087,6 +10521,11 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function updateReadingPassage(Request $request, $id)
     {
+        $user = Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            abort(403);
+        }
+
         $passage = \App\Models\ToeflReadingPassage::findOrFail($id);
 
         $request->validate([
@@ -10102,6 +10541,11 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     public function destroyReadingPassage($id)
     {
+        $user = Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            abort(403);
+        }
+
         $passage = \App\Models\ToeflReadingPassage::findOrFail($id);
         $passage->delete();
 

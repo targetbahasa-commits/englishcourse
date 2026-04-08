@@ -337,7 +337,7 @@
 
                                     <div class="flex gap-4 items-start relative group/question">
                                     <!-- Admin Controls -->
-                                    @if(Auth::user() && (Auth::user()->isAdmin() || Auth::user()->isTeacher()))
+                                    @if(Auth::user() && Auth::user()->isAdmin())
                                     <div class="absolute top-2 right-2 z-20">
                                         <button type="button" onclick='openEditQuestionModal(@json($question))' class="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition shadow-sm" title="Edit Question">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
@@ -488,7 +488,8 @@
 
     <!-- REUSE MODALS AND SCRIPTS FROM ORIGINAL VIEW -->
     <!-- Edit Question Modal -->
-    <div id="editQuestionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center overflow-y-auto">
+    <div id="editQuestionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="min-h-full grid place-items-center p-4">
         <div class="bg-white rounded-2xl p-8 w-full max-w-2xl mx-4 my-8 relative">
             <button onclick="document.getElementById('editQuestionModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -544,6 +545,7 @@
                     <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">Update Question</button>
                 </div>
             </form>
+        </div>
         </div>
     </div>
     <!-- Dictionary Popup -->

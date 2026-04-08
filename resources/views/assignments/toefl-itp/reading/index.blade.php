@@ -77,7 +77,7 @@
                     </p>
                 </div>
                 <div class="flex items-center gap-3">
-                    @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                    @if(Auth::user()->isAdmin())
                     <button onclick="document.getElementById('addMeetingModal').classList.remove('hidden')" class="px-4 py-2 bg-blue-600 text-white rounded-xl shadow-sm hover:bg-blue-700 font-medium transition flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         Add Lesson
@@ -91,7 +91,7 @@
             </div>
 
             <div class="mb-6">
-                @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                @if(Auth::user()->isAdmin())
                     <form action="{{ route('assignments.batch-period') }}" method="POST" class="inline-flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
                         @csrf
                         <input type="hidden" name="program_id" value="{{ $batchProgram?->id }}">
@@ -134,13 +134,13 @@
                         
                         <div class="flex items-center gap-2">
                             <!-- Drag Handle -->
-                            @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                            @if(Auth::user()->isAdmin())
                             <div class="cursor-move text-gray-300 hover:text-gray-500 p-1">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
                             </div>
                             @endif
                             
-                            @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                            @if(Auth::user()->isAdmin())
                             <!-- Lock Toggle -->
                             <form action="{{ route('assignments.toefl-itp.reading.toggle-lock', $meeting) }}" method="POST">
                                 @csrf
@@ -199,7 +199,8 @@
     </div>
 
     <!-- Add Meeting Modal -->
-    <div id="addMeetingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div id="addMeetingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="min-h-full grid place-items-center p-4">
         <div class="bg-white rounded-2xl p-8 w-full max-w-md mx-4">
             <h3 class="text-2xl font-bold text-gray-800 mb-6">Add New Lesson</h3>
             <form action="{{ route('assignments.toefl-itp.reading.store') }}" method="POST">
@@ -218,9 +219,11 @@
                 </div>
             </form>
         </div>
+        </div>
     </div>
     <!-- Edit Meeting Modal -->
-    <div id="editMeetingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div id="editMeetingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="min-h-full grid place-items-center p-4">
         <div class="bg-white rounded-2xl p-8 w-full max-w-md mx-4">
             <h3 class="text-2xl font-bold text-gray-800 mb-6">Edit Lesson</h3>
             <form id="editMeetingForm" method="POST">
@@ -239,6 +242,7 @@
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">Update Lesson</button>
                 </div>
             </form>
+        </div>
         </div>
     </div>
 

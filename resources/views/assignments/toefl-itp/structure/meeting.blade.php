@@ -66,6 +66,37 @@
     constrainCheatSheet() {
         this.cheatPos.x = Math.max(8, Math.min(window.innerWidth - this.cheatSize.width - 8, this.cheatPos.x));
         this.cheatPos.y = Math.max(8, Math.min(window.innerHeight - this.cheatSize.height - 8, this.cheatPos.y));
+    },
+    getExplanationData() {
+        const container = document.getElementById('explanation-container');
+        if (!container || typeof Alpine === 'undefined') return null;
+        try {
+            return Alpine.$data(container);
+        } catch (e) {
+            return null;
+        }
+    },
+    isLaserActive() {
+        const explanation = this.getExplanationData();
+        return !!(explanation && explanation.explanationMode && explanation.tool === 'laser');
+    },
+    isExplanationActive() {
+        const explanation = this.getExplanationData();
+        return !!(explanation && explanation.explanationMode);
+    },
+    isToolActive(tool) {
+        const explanation = this.getExplanationData();
+        return !!(explanation && explanation.explanationMode && explanation.tool === tool);
+    },
+    triggerCheatLaser(e) {
+        const explanation = this.getExplanationData();
+        if (!explanation || !explanation.explanationMode || explanation.tool !== 'laser') return;
+        explanation.showLaserPointer(e.clientX, e.clientY, true);
+    },
+    triggerCheatLaserMove(e) {
+        const isMouse = e.pointerType === 'mouse' || !e.pointerType;
+        if (isMouse && e.buttons !== 1) return;
+        this.triggerCheatLaser(e);
     }
 }"
 @mousemove.window="onCheatDrag($event); onCheatResize($event)"
@@ -74,7 +105,7 @@
 @touchend.window="stopCheatDrag(); stopCheatResize()"
 @resize.window="constrainCheatSheet()">
             <!-- Fixed Cheat Sheet Button (Left of Question Area) -->
-    <button @click="showCheatSheet = !showCheatSheet"
+    <button @click="showCheatSheet = !showCheatSheet; if (showCheatSheet) { $nextTick(() => { if (typeof initCanvases === 'function') initCanvases(); }); }"
                         class="fixed bottom-8 left-7 md:left-72 z-[90] px-4 py-2 bg-yellow-400 text-yellow-900 rounded-full shadow-lg font-bold hover:bg-yellow-300 transition flex items-center gap-2 border border-yellow-500 cursor-pointer">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
         Contekan
@@ -92,13 +123,13 @@
             :style="`left: ${cheatPos.x}px; top: ${cheatPos.y}px; width: ${cheatSize.width}px; height: ${cheatSize.height}px;`">
         
         <!-- Header -->
-        <div class="bg-yellow-300 border-b flex justify-between items-center select-none overflow-hidden rounded-t-xl">
-            <div class="flex-1 p-4 flex items-center gap-2 text-yellow-900 cursor-move"
+        <div class="bg-yellow-300 border-b flex justify-between items-center select-none rounded-t-xl">
+            <div class="flex-1 min-w-0 p-4 flex items-center gap-2 text-yellow-900 cursor-move"
                  @mousedown.prevent="startCheatDrag($event)"
                  @touchstart.prevent="startCheatDrag($event)">
                 <h3 class="font-bold text-base text-gray-800 whitespace-nowrap">Cheat Sheet</h3>
             </div>
-            <div class="pr-3 flex items-center gap-2">
+            <div class="pr-2 pl-1 flex items-center gap-1.5 shrink-0">
                 <button type="button" @click="zoomOut()" class="w-8 h-8 rounded-lg bg-white/80 hover:bg-white text-gray-700 font-bold border border-yellow-500">-</button>
                 <span class="text-xs font-bold text-gray-700 min-w-[52px] text-center" x-text="Math.round(cheatZoom * 100) + '%'">100%</span>
                 <button type="button" @click="zoomIn()" class="w-8 h-8 rounded-lg bg-white/80 hover:bg-white text-gray-700 font-bold border border-yellow-500">+</button>
@@ -107,7 +138,7 @@
                         @click.stop="showCheatSheet = false"
                         @mousedown.stop="showCheatSheet = false"
                         onclick="this.closest('[x-data]').__x.$data.showCheatSheet = false"
-                        class="bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg border-2 border-red-700 transform transition hover:scale-105 z-[999] flex items-center justify-center w-10 h-10 cursor-pointer"
+                        class="relative z-20 pointer-events-auto bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg border-2 border-red-700 transform transition hover:scale-105 flex items-center justify-center w-9 h-9 md:w-10 md:h-10 cursor-pointer"
                         title="Close">
                     <svg class="w-6 h-6 pointer-events-none font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12"></path>
@@ -117,13 +148,20 @@
         </div>
 
         <!-- Image Content -->
-        <div class="flex-1 bg-white p-0 relative overflow-auto rounded-b-xl"
+           <div class="flex-1 bg-white p-0 relative overflow-auto rounded-b-xl"
+                         @pointerdown="triggerCheatLaser($event)"
+                         @pointermove="triggerCheatLaserMove($event)"
              @wheel="if ($event.ctrlKey) { $event.preventDefault(); $event.deltaY < 0 ? zoomIn() : zoomOut(); }">
             <div class="min-h-full flex items-start justify-center p-2">
-                <img src="/images/cheatsheet_contekan.jpg"
-                     class="max-w-none h-auto transition-all duration-150"
-                     :style="`width: ${Math.round(cheatZoom * 100)}%;`"
-                     alt="TOEFL Cheat Sheet">
+                <div class="relative inline-block">
+                    <img src="/images/cheatsheet_contekan.jpg"
+                         @load="$nextTick(() => { if (typeof initCanvases === 'function') initCanvases(); })"
+                         class="max-w-none h-auto transition-all duration-150"
+                         :style="`width: ${Math.round(cheatZoom * 100)}%;`"
+                         alt="TOEFL Cheat Sheet">
+                    <canvas id="cheat-explanation-canvas"
+                            class="explanation-draw-canvas absolute inset-0 w-full h-full pointer-events-auto"></canvas>
+                </div>
             </div>
         </div>
 
@@ -199,32 +237,33 @@
     }
     
     /* Laser Pointer Styles */
-    @keyframes laser-pulse {
-        0%, 100% {
-            opacity: 1;
-            transform: scale(1);
-            box-shadow: 0 0 10px #EF4444, 0 0 20px #EF4444, 0 0 30px #EF4444;
+    @keyframes laser-trail-fade {
+        0% {
+            opacity: 0.95;
+            transform: translate(-6px, -6px) scale(1);
         }
-        50% {
-            opacity: 0.7;
-            transform: scale(1.2);
-            box-shadow: 0 0 15px #EF4444, 0 0 30px #EF4444, 0 0 45px #EF4444;
+        100% {
+            opacity: 0;
+            transform: translate(-6px, -6px) scale(0.6);
         }
     }
-    
+
     .laser-dot {
-        width: 12px;
-        height: 12px;
+        width: 4px;
+        height: 4px;
         background: #EF4444;
         border-radius: 50%;
-        animation: laser-pulse 1s ease-in-out infinite;
-        box-shadow: 0 0 10px #EF4444, 0 0 20px #EF4444;
+        box-shadow: 0 0 3px rgba(239, 68, 68, 0.55);
     }
-    
-    .laser-line {
-        height: 2px;
-        background: linear-gradient(to right, #EF4444, rgba(239, 68, 68, 0.3), transparent);
-        box-shadow: 0 0 5px #EF4444;
+
+    .laser-trail-dot {
+        position: fixed;
+        width: 5px;
+        height: 5px;
+        background: rgba(239, 68, 68, 0.92);
+        border-radius: 50%;
+        box-shadow: 0 0 5px rgba(239, 68, 68, 0.55);
+        animation: laser-trail-fade 4s ease-out forwards;
     }
     
     /* Custom Red Dot Cursor for Laser Tool */
@@ -298,23 +337,39 @@
             pen: ['#EF4444', '#3B82F6', '#10B981', '#FACC15', '#F59E0B', '#8B5CF6', '#06B6D4', '#F97316'],
             highlight: ['#FFFF00', '#93C5FD', '#86EFAC', '#F9A8D4', '#FCD34D', '#C4B5FD', '#A7F3D0', '#FDBA74']
         },
-        stamps: ['Subject', 'Verb Asli', 'Verb Palsu', 'Ving', 'V3', 'To infinitive', 'Preposition', 'FANBOYS', 'Main Clause', 'Sub Clause', 'Comparative', 'Superlative'],
+        stamps: ['Subject', 'Verb Asli', 'Verb Palsu', 'Ving', 'V3', 'To infinitive', 'Preposition', 'Conjunction', 'Appositive', 'FANBOYS', 'Main Clause', 'Sub Clause', 'Comparative', 'Superlative'],
         selectedStamp: null,
         stampPanel: {
             x: Math.max(8, window.innerWidth - 170),
-            y: Math.max(90, Math.round(window.innerHeight / 2) - 220),
+            y: Math.max(70, Math.round(window.innerHeight / 2) - 300),
+            maxHeight: Math.max(260, window.innerHeight - 190),
             dragging: false,
             offsetX: 0,
             offsetY: 0
         },
-        laserPointer: { visible: false, x: 0, y: 0, timeout: null },
+        laserPointer: { visible: false, x: 0, y: 0, localX: 0, localY: 0, scope: 'question', timeout: null },
+        laserPressing: false,
+        laserTrail: [],
+        addLaserTrailPoint(x, y, scope = 'question') {
+            const id = Date.now() + Math.random();
+            this.laserTrail.push({ id, x, y, scope });
+            if (this.laserTrail.length > 220) {
+                this.laserTrail.shift();
+            }
+
+            setTimeout(() => {
+                this.laserTrail = this.laserTrail.filter(point => point.id !== id);
+            }, 4000);
+        },
         toggleMode() {
             this.explanationMode = !this.explanationMode;
             if (this.explanationMode) {
                 setTimeout(() => {
                      if(typeof initCanvases === 'function') initCanvases();
                 }, 50);
-                this.constrainStampPanel();
+                this.$nextTick(() => this.constrainStampPanel());
+            } else {
+                this.laserTrail = [];
             }
         },
         zoomQuestionIn() {
@@ -351,11 +406,24 @@
         stopStampDrag() {
             this.stampPanel.dragging = false;
         },
+        getStampPanelHeight() {
+            const panel = document.getElementById('stamp-panel');
+            if (panel && panel.offsetHeight > 0) {
+                return panel.offsetHeight;
+            }
+            return Math.min(window.innerHeight * 0.8, 560);
+        },
         constrainStampPanel() {
             const panelWidth = 180;
-            const panelHeight = Math.min(window.innerHeight * 0.8, 560);
+            const minTop = 70;
+            const safeBottomGap = window.innerWidth < 768 ? 120 : 24;
+            const availableHeight = Math.max(260, window.innerHeight - minTop - safeBottomGap);
+            this.stampPanel.maxHeight = availableHeight;
+
+            const panelHeight = this.getStampPanelHeight();
+            const maxY = Math.max(minTop, window.innerHeight - panelHeight - safeBottomGap);
             this.stampPanel.x = Math.max(8, Math.min(window.innerWidth - panelWidth - 8, this.stampPanel.x));
-            this.stampPanel.y = Math.max(70, Math.min(window.innerHeight - panelHeight - 8, this.stampPanel.y));
+            this.stampPanel.y = Math.max(minTop, Math.min(maxY, this.stampPanel.y));
         },
         toggleAnswerKey() {
             this.showAnswerKey = !this.showAnswerKey;
@@ -412,26 +480,91 @@
         setColor(c) {
             this.color = c;
         },
-        showLaserPointer(arg1, arg2) {
+        extractLaserCoords(arg1, arg2) {
+            if (typeof arg1 === 'number' && typeof arg2 === 'number') {
+                return { x: arg1, y: arg2 };
+            }
+
+            if (arg1 && typeof arg1 === 'object') {
+                if (typeof arg1.clientX === 'number' && typeof arg1.clientY === 'number') {
+                    return { x: arg1.clientX, y: arg1.clientY };
+                }
+
+                const t = arg1.touches && arg1.touches[0] ? arg1.touches[0] : (arg1.changedTouches && arg1.changedTouches[0] ? arg1.changedTouches[0] : null);
+                if (t && typeof t.clientX === 'number' && typeof t.clientY === 'number') {
+                    return { x: t.clientX, y: t.clientY };
+                }
+            }
+
+            return { x: NaN, y: NaN };
+        },
+        getLaserBoundsRect() {
+            const questionViewport = document.getElementById('question-viewport');
+            if (questionViewport) {
+                return questionViewport.getBoundingClientRect();
+            }
+
+            const questionCanvas = document.getElementById('global-explanation-canvas');
+            if (questionCanvas) {
+                return questionCanvas.getBoundingClientRect();
+            }
+
+            return null;
+        },
+        isPointInsideRect(x, y, rect) {
+            if (!rect) return true;
+            return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+        },
+        showLaserPointer(arg1, arg2, allowOutsideQuestion = false) {
             if (this.laserPointer.timeout) {
                 clearTimeout(this.laserPointer.timeout);
             }
-            
-            let x, y;
-            if (arg1 && arg1 instanceof Event) {
-                x = arg1.clientX;
-                y = arg1.clientY;
+
+            const { x, y } = this.extractLaserCoords(arg1, arg2);
+
+            if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+
+            if (!allowOutsideQuestion) {
+                const rect = this.getLaserBoundsRect();
+                if (!this.isPointInsideRect(x, y, rect)) {
+                    this.hideLaserPointer();
+                    return;
+                }
+
+                this.laserPointer.scope = 'question';
+                this.laserPointer.localX = rect ? (x - rect.left) : x;
+                this.laserPointer.localY = rect ? (y - rect.top) : y;
             } else {
-                x = arg1;
-                y = arg2;
+                this.laserPointer.scope = 'global';
+                this.laserPointer.localX = x;
+                this.laserPointer.localY = y;
             }
             
             this.laserPointer.visible = true;
             this.laserPointer.x = x;
             this.laserPointer.y = y;
+            this.addLaserTrailPoint(
+                this.laserPointer.scope === 'question' ? this.laserPointer.localX : x,
+                this.laserPointer.scope === 'question' ? this.laserPointer.localY : y,
+                this.laserPointer.scope
+            );
             this.laserPointer.timeout = setTimeout(() => {
                 this.hideLaserPointer();
-            }, 3000);
+            }, 4000);
+        },
+        handleGlobalLaserDown(e) {
+            if (!this.explanationMode || this.tool !== 'laser') return;
+            this.laserPressing = true;
+            this.showLaserPointer(e);
+        },
+        handleGlobalLaserMove(e) {
+            if (!this.explanationMode || this.tool !== 'laser') return;
+            const isMouse = e.pointerType === 'mouse' || !e.pointerType;
+            if (isMouse && !(this.laserPressing || e.buttons === 1)) return;
+            this.showLaserPointer(e);
+        },
+        handleGlobalLaserUp() {
+            this.laserPressing = false;
         },
         hideLaserPointer() {
             this.laserPointer.visible = false;
@@ -445,6 +578,11 @@
     @touchmove.window="onStampDrag($event)"
     @mouseup.window="stopStampDrag()"
     @touchend.window="stopStampDrag()"
+    @pointerdown.window="handleGlobalLaserDown($event)"
+    @pointermove.window="handleGlobalLaserMove($event)"
+    @pointerup.window="handleGlobalLaserUp()"
+    @pointercancel.window="handleGlobalLaserUp()"
+    @blur.window="handleGlobalLaserUp()"
     @resize.window="constrainStampPanel()">
         
         <!-- Auto-save Indicator -->
@@ -455,19 +593,25 @@
         </div>
 
         <!-- Global Laser Pointer Overlay -->
-        <div x-show="explanationMode && laserPointer.visible"
-             x-transition:enter="transition ease-out duration-100"
-             x-transition:enter-start="opacity-0 scale-50"
-             x-transition:enter-end="opacity-100 scale-100"
-             x-transition:leave="transition ease-in duration-300"
-             x-transition:leave-start="opacity-100 scale-100"
-             x-transition:leave-end="opacity-0 scale-150"
-             class="fixed pointer-events-none z-[100] flex items-center"
-             :style="`left: ${laserPointer.x}px; top: ${laserPointer.y}px; transform: translate(-6px, -6px);`"
-             style="display: none;">
-            <div class="laser-dot"></div>
-            <div class="h-[2px] w-64 bg-gradient-to-r from-red-500/80 to-transparent rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
-        </div>        
+        <div x-show="explanationMode" class="fixed inset-0 pointer-events-none z-[260]" style="display: none;">
+            <template x-for="point in laserTrail.filter(p => p.scope === 'global')" :key="point.id">
+                <div class="laser-trail-dot"
+                     :style="`left: ${point.x}px; top: ${point.y}px; transform: translate(-2.5px, -2.5px);`"></div>
+            </template>
+
+            <div x-show="laserPointer.visible && laserPointer.scope === 'global'"
+                 x-transition:enter="transition ease-out duration-100"
+                 x-transition:enter-start="opacity-0 scale-50"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-300"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-150"
+                 class="fixed"
+                 :style="`left: ${laserPointer.x}px; top: ${laserPointer.y}px; transform: translate(-2.5px, -2.5px);`"
+                 style="display: none;">
+                <div class="laser-dot"></div>
+            </div>
+        </div>
         <!-- Explanation Mode Toggle (Header) -->
         <div class="mb-4 flex justify-end gap-2">
             <div class="px-3 py-2 rounded-lg bg-white/80 border border-gray-200 shadow-sm flex items-center gap-2">
@@ -476,13 +620,17 @@
                 <button type="button" @click="zoomQuestionIn()" class="w-7 h-7 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold">+</button>
                 <button type="button" @click="resetQuestionZoom()" class="px-2 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-[11px] font-semibold text-gray-700">Reset</button>
             </div>
-            <button @click="toggleMode()" 
-                :class="explanationMode ? 'bg-yellow-500 text-white' : 'bg-gray-200 text-gray-700'"
-                class="px-4 py-2 rounded-lg font-bold shadow transition flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                <span x-text="explanationMode ? 'Exit Mode' : 'Mode Penjelasan'"></span>
-            </button>
         </div>
+
+        <!-- Floating Explanation Mode Button -->
+        <button @click="toggleMode()"
+            :class="explanationMode ? 'bg-yellow-500 text-gray-900 ring-2 ring-yellow-200' : 'bg-gray-900 text-white'"
+            class="fixed bottom-24 right-4 md:right-6 z-[120] h-14 w-14 sm:w-auto sm:min-w-[220px] sm:px-5 rounded-full font-bold shadow-xl transition hover:scale-105 active:scale-95 flex items-center justify-center gap-2 backdrop-blur-sm"
+            :aria-label="explanationMode ? 'Keluar Mode Penjelasan' : 'Mode Penjelasan'"
+            :title="explanationMode ? 'Keluar Mode Penjelasan' : 'Mode Penjelasan'">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+            <span class="hidden sm:inline" x-text="explanationMode ? 'Keluar Mode' : 'Mode Penjelasan'"></span>
+        </button>
 
         <!-- Float Toolbar (Bottom Tools) -->
         <div x-show="explanationMode" x-transition 
@@ -562,8 +710,9 @@
 
         <!-- Vertical Stamp Sidebar -->
         <div x-show="explanationMode" x-transition
-             class="fixed bg-white/90 backdrop-blur-sm shadow-xl border border-gray-200 rounded-2xl p-2 z-50 flex flex-col gap-2 max-h-[80vh] overflow-y-auto"
-             :style="`left: ${stampPanel.x}px; top: ${stampPanel.y}px; width: 170px;`">
+               id="stamp-panel"
+                         class="fixed bg-white/90 backdrop-blur-sm shadow-xl border border-gray-200 rounded-2xl p-2 z-[320] flex flex-col gap-2 overflow-y-auto"
+                         :style="`left: ${stampPanel.x}px; top: ${stampPanel.y}px; width: 170px; max-height: ${stampPanel.maxHeight}px;`">
                <div class="flex items-center justify-between px-1 mb-1 cursor-move select-none"
                    @mousedown.prevent="startStampDrag($event)"
                    @touchstart.prevent="startStampDrag($event)">
@@ -584,7 +733,7 @@
              </template>
         </div>
 
-        <form action="{{ route('assignments.toefl-itp.structure.meeting.submit', $number) }}" method="POST" class="relative max-w-4xl mx-auto transition-transform duration-150" :style="`transform: scale(${questionZoom}); transform-origin: top center; width: ${100 / questionZoom}%;`">
+        <form id="question-form-container" action="{{ route('assignments.toefl-itp.structure.meeting.submit', $number) }}" method="POST" class="relative max-w-4xl mx-auto transition-transform duration-150" :style="`transform: scale(${questionZoom}); transform-origin: top center; width: ${100 / questionZoom}%;`">
             @csrf
             <div x-show="explanationMode"
                  class="absolute inset-0 z-40 pointer-events-none"
@@ -597,10 +746,29 @@
                      'cursor-laser': tool === 'laser'
                  }"
                  style="touch-action: none; display: none;">
-                <canvas id="global-explanation-canvas" class="w-full h-full pointer-events-auto"></canvas>
+                <canvas id="global-explanation-canvas" class="explanation-draw-canvas w-full h-full pointer-events-auto"></canvas>
             </div>
 
-            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-6">
+            <div id="question-viewport" class="relative overflow-hidden bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-6">
+                <div x-show="explanationMode" class="absolute inset-0 pointer-events-none z-[255]" style="display: none;">
+                    <template x-for="point in laserTrail.filter(p => p.scope === 'question')" :key="point.id">
+                        <div class="laser-trail-dot"
+                             :style="`left: ${point.x}px; top: ${point.y}px; transform: translate(-2.5px, -2.5px);`"></div>
+                    </template>
+
+                    <div x-show="laserPointer.visible && laserPointer.scope === 'question'"
+                         x-transition:enter="transition ease-out duration-100"
+                         x-transition:enter-start="opacity-0 scale-50"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-300"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-150"
+                         class="absolute"
+                           :style="`left: ${laserPointer.localX}px; top: ${laserPointer.localY}px; transform: translate(-2.5px, -2.5px);`"
+                         style="display: none;">
+                        <div class="laser-dot"></div>
+                    </div>
+                </div>
                 <div class="space-y-8">
                     @forelse($questions as $question)
                     <div class="question-item relative group/item" x-data="{ selected: '{{ $userAnswer ?? '' }}' }">
@@ -944,99 +1112,99 @@
         }
 
         function initCanvases() {
-            const canvas = document.getElementById('global-explanation-canvas');
-            if (!canvas) return;
+            const canvasList = document.querySelectorAll('.explanation-draw-canvas');
+            if (!canvasList.length) return;
 
-            const parent = canvas.parentElement;
-            const id = canvas.id;
+            canvasList.forEach((canvas) => {
+                const parent = canvas.parentElement;
+                const id = canvas.id;
+                if (!parent || !id) return;
 
-            // Initialize State Object if needed
-            if (!canvases[id]) {
-                canvases[id] = {
-                    canvas: canvas,
-                    ctx: canvas.getContext('2d'),
-                    isDrawing: false,
-                    lineState: null,
-                    lastX: 0,
-                    lastY: 0,
-                    observer: null
-                };
-            } else {
-                canvases[id].canvas = canvas;
-                canvases[id].ctx = canvas.getContext('2d');
-            }
-            
-            // Context setup
-            const ctx = canvases[id].ctx;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
+                // Initialize State Object if needed
+                if (!canvases[id]) {
+                    canvases[id] = {
+                        canvas: canvas,
+                        ctx: canvas.getContext('2d'),
+                        isDrawing: false,
+                        lineState: null,
+                        lastX: 0,
+                        lastY: 0,
+                        observer: null
+                    };
+                } else {
+                    canvases[id].canvas = canvas;
+                    canvases[id].ctx = canvas.getContext('2d');
+                }
 
-            // Resize Observer for robust dimensions
-            if (!canvases[id].observer) {
-                let _firstResize = true;
-                 const observer = new ResizeObserver(() => {
-                    const rect = parent.getBoundingClientRect();
-                    // Only resize if dimensions changed significantly
-                    if (canvas.width !== rect.width || canvas.height !== rect.height) {
-                        // Check if valid dimensions (prevent 0x0)
-                        if(rect.width > 0 && rect.height > 0) {
-                            // Try to preserve content
-                            let snapshot = null;
-                            if (!_firstResize) {
-                                try {
-                                    snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                                } catch(e) {}
-                            }
+                // Context setup
+                const data = canvases[id];
+                const ctx = data.ctx;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
 
-                            canvas.width = rect.width;
-                            canvas.height = rect.height;
-                            
-                            // Restore context settings lost on resize
-                            ctx.lineCap = 'round';
-                            ctx.lineJoin = 'round';
+                // Resize Observer for robust dimensions
+                if (!data.observer) {
+                    let _firstResize = true;
+                    const observer = new ResizeObserver(() => {
+                        const rect = parent.getBoundingClientRect();
+                        if (canvas.width !== rect.width || canvas.height !== rect.height) {
+                            if (rect.width > 0 && rect.height > 0) {
+                                let snapshot = null;
+                                if (!_firstResize) {
+                                    try {
+                                        snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                    } catch (e) {}
+                                }
 
-                            if(snapshot) {
-                                ctx.putImageData(snapshot, 0, 0);
-                            } else if (_firstResize) {
-                                _firstResize = false;
-                                // Restore auto-saved drawing on first real sizing
-                                restoreCanvasFromStorage();
+                                canvas.width = rect.width;
+                                canvas.height = rect.height;
+
+                                ctx.lineCap = 'round';
+                                ctx.lineJoin = 'round';
+
+                                if (snapshot) {
+                                    ctx.putImageData(snapshot, 0, 0);
+                                } else if (_firstResize && id === 'global-explanation-canvas') {
+                                    _firstResize = false;
+                                    // Restore auto-saved drawing only for question canvas
+                                    restoreCanvasFromStorage();
+                                }
                             }
                         }
-                    }
-                 });
-                 observer.observe(parent);
-                 canvases[id].observer = observer;
-            }
+                    });
+                    observer.observe(parent);
+                    data.observer = observer;
+                }
 
-            // Remove old listeners
-            canvas.removeEventListener('mousedown', startDrawing);
-            canvas.removeEventListener('mousemove', draw);
-            canvas.removeEventListener('mouseup', stopDrawing);
-            canvas.removeEventListener('mouseout', stopDrawing);
-            
-            canvas.removeEventListener('touchstart', startDrawing);
-            canvas.removeEventListener('touchmove', draw);
-            canvas.removeEventListener('touchend', stopDrawing);
-            canvas.removeEventListener('touchcancel', stopDrawing);
-            
-            canvas.removeEventListener('pointerdown', startDrawing);
-            canvas.removeEventListener('pointermove', draw);
-            canvas.removeEventListener('pointerup', stopDrawing);
-            canvas.removeEventListener('pointerout', stopDrawing);
-            canvas.removeEventListener('pointercancel', stopDrawing);
+                // Remove old listeners
+                canvas.removeEventListener('mousedown', startDrawing);
+                canvas.removeEventListener('mousemove', draw);
+                canvas.removeEventListener('mouseup', stopDrawing);
+                canvas.removeEventListener('mouseout', stopDrawing);
 
-            canvas.removeEventListener('dragstart', preventDrag);
+                canvas.removeEventListener('touchstart', startDrawing);
+                canvas.removeEventListener('touchmove', draw);
+                canvas.removeEventListener('touchend', stopDrawing);
+                canvas.removeEventListener('touchcancel', stopDrawing);
 
-            // Add Listeners (Pointer Events - Unified)
-            canvas.addEventListener('pointerdown', startDrawing);
-            canvas.addEventListener('pointermove', draw);
-            canvas.addEventListener('pointerup', stopDrawing);
-            canvas.addEventListener('pointerout', stopDrawing);
-            canvas.addEventListener('pointercancel', stopDrawing);
-            
-            // Prevent standard drag behavior
-            canvas.addEventListener('dragstart', preventDrag); 
+                canvas.removeEventListener('pointerdown', startDrawing);
+                canvas.removeEventListener('pointermove', draw);
+                canvas.removeEventListener('pointerup', stopDrawing);
+                canvas.removeEventListener('pointerout', stopDrawing);
+                canvas.removeEventListener('pointercancel', stopDrawing);
+
+                canvas.removeEventListener('dragstart', preventDrag);
+
+                // Add Listeners (Pointer Events - Unified)
+                canvas.addEventListener('pointerdown', startDrawing);
+                canvas.addEventListener('pointermove', draw);
+                canvas.addEventListener('pointerup', stopDrawing);
+                canvas.addEventListener('pointerout', stopDrawing);
+                canvas.addEventListener('pointercancel', stopDrawing);
+
+                // Prevent standard drag behavior
+                canvas.addEventListener('dragstart', preventDrag);
+            });
         }
 
         function getAlpineData() {
@@ -1053,6 +1221,31 @@
             };
         }
 
+        function ensureCanvasReady(canvas, data) {
+            const rect = canvas.getBoundingClientRect();
+            if (rect.width <= 0 || rect.height <= 0) return rect;
+
+            if (canvas.width !== Math.round(rect.width) || canvas.height !== Math.round(rect.height)) {
+                let snapshot = null;
+                try {
+                    if (canvas.width > 0 && canvas.height > 0) {
+                        snapshot = data.ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    }
+                } catch (e) {}
+
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                data.ctx = canvas.getContext('2d');
+                data.ctx.lineCap = 'round';
+                data.ctx.lineJoin = 'round';
+
+                if (snapshot) {
+                    data.ctx.putImageData(snapshot, 0, 0);
+                }
+            }
+            return rect;
+        }
+
         // ... helpers ...
 
         function startDrawing(e) {
@@ -1061,9 +1254,11 @@
 
             const canvas = e.target;
             const data = canvases[canvas.id];
+            if (!data) return;
 
             // Cache rect for performance during this stroke
-            data.rect = canvas.getBoundingClientRect(); 
+            data.rect = ensureCanvasReady(canvas, data);
+            if (data.rect.width <= 0 || data.rect.height <= 0) return;
 
             // === LASER TOOL LOGIC ===
             if (app.tool === 'laser') {
@@ -1166,8 +1361,17 @@
             const app = getAlpineData();
 
             if (!app || !app.explanationMode) return;
+            if (!data) return;
+
+            if (app.tool === 'laser') {
+                const isMouse = e.pointerType === 'mouse' || !e.pointerType;
+                if (isMouse && !(app.laserPressing || e.buttons === 1)) return;
+                app.showLaserPointer(e);
+                return;
+            }
             
-            const rect = data.rect || canvas.getBoundingClientRect(); // Use cached rect
+            const rect = data.rect || ensureCanvasReady(canvas, data); // Use cached rect
+            if (rect.width <= 0 || rect.height <= 0) return;
             const {x, y} = getPointerPos(e, canvas, rect);
             const ctx = data.ctx;
 
@@ -1325,10 +1529,10 @@
 
         function clearAllCanvases() {
             if(confirm('Clear all drawings?')) {
-                const canvas = document.getElementById('global-explanation-canvas');
-                if (!canvas) return;
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                document.querySelectorAll('.explanation-draw-canvas').forEach((canvas) => {
+                    const ctx = canvas.getContext('2d');
+                    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+                });
                 localStorage.removeItem(AUTOSAVE_KEY);
             }
         }

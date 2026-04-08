@@ -14,10 +14,249 @@
             color: #0f766e;
             font-weight: 700;
         }
+        .listening-answer-sheet .divide-y > .group {
+            padding-top: 0.125rem;
+            padding-bottom: 0.125rem;
+        }
+        .listening-answer-sheet .group .mb-2.text-sm {
+            font-size: 1.05rem;
+            line-height: 1.35;
+            margin-bottom: 0.2rem;
+        }
+        .listening-answer-sheet .group .space-y-2 > :not([hidden]) ~ :not([hidden]) {
+            margin-top: 0.2rem;
+        }
+        .listening-answer-sheet .group .space-y-2 .p-2 {
+            padding: 0.4rem 0.62rem;
+        }
+        .listening-answer-sheet .group .space-y-2 span.text-sm {
+            font-size: 1.08rem;
+            line-height: 1.32;
+        }
+        .listening-answer-sheet .bg-white.rounded-lg.border.border-gray-200.shadow-sm.p-4 {
+            padding: 0.7rem;
+        }
+        .listening-answer-sheet .grid.grid-cols-1.md\:grid-cols-2.gap-4.md\:gap-6 {
+            gap: 0.5rem;
+        }
+        .listening-answer-sheet .listening-option-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+            min-height: 3.35rem;
+            transition: border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease, transform 0.12s ease;
+        }
+        .listening-answer-sheet input[type="radio"]:checked + .listening-option-card {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 12px rgba(220, 38, 38, 0.16);
+        }
+        .listening-answer-sheet .listening-option-card::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 2.1rem;
+            width: 6px;
+            height: 6px;
+            border-radius: 9999px;
+            background: rgba(220, 38, 38, 0.22);
+            transform: translate(-50%, -50%) scale(0);
+            pointer-events: none;
+            opacity: 0;
+        }
+        .listening-answer-sheet input[type="radio"]:checked + .listening-option-card::after {
+            animation: listeningOptionRipple 0.34s ease-out;
+        }
+        .listening-answer-sheet input[type="radio"]:checked + .listening-option-card span.text-sm {
+            color: #b91c1c;
+        }
+        .listening-answer-sheet .listening-option-badge {
+            width: 2.32rem;
+            height: 2.32rem;
+            transform-origin: center;
+            will-change: transform, box-shadow;
+        }
+        .listening-answer-sheet input[type="radio"]:checked + .listening-option-card .listening-option-badge {
+            border-color: #dc2626;
+            background-color: #dc2626;
+            color: #ffffff;
+            animation: listeningBadgePop 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .listening-answer-sheet input[type="radio"]:checked + .listening-option-card .listening-option-badge span {
+            color: #ffffff;
+        }
+        .listening-answer-sheet input[type="radio"]:checked + .listening-option-card {
+            border-color: #e02424;
+            background-color: #fff7f7;
+            box-shadow: 0 0 0 1px rgba(224, 36, 36, 0.36), 0 3px 12px rgba(224, 36, 36, 0.14);
+        }
+        .listening-answer-sheet input[type="radio"]:checked + .listening-option-card span.text-sm {
+            font-weight: 700;
+            letter-spacing: 0.005em;
+        }
+        .listening-answer-sheet .listening-option-card .mr-3 {
+            margin-right: 0.78rem;
+        }
+        .listening-answer-sheet .listening-option-card span.text-sm {
+            padding-left: 0.1rem;
+        }
+        @keyframes listeningBadgePop {
+            0% {
+                transform: scale(0.82);
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.45);
+            }
+            65% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 8px rgba(220, 38, 38, 0.12);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+            }
+        }
+        @keyframes listeningOptionRipple {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(42);
+                opacity: 0;
+            }
+        }
+        @media (max-width: 768px) {
+            .listening-answer-sheet .group .space-y-2 .p-2 {
+                padding: 0.32rem 0.5rem;
+            }
+            .listening-answer-sheet .group .space-y-2 span.text-sm {
+                font-size: 1rem;
+                line-height: 1.28;
+            }
+            .listening-answer-sheet .listening-option-card {
+                min-height: 3rem;
+            }
+            .listening-answer-sheet .listening-option-badge {
+                width: 2.05rem;
+                height: 2.05rem;
+            }
+            .listening-answer-sheet .listening-option-card .mr-3 {
+                margin-right: 0.58rem;
+            }
+            .listening-answer-sheet input[type="radio"]:checked + .listening-option-card .listening-option-badge {
+                animation-duration: 0.14s;
+            }
+            .listening-answer-sheet input[type="radio"]:checked + .listening-option-card::after {
+                animation-duration: 0.24s;
+            }
+            .listening-answer-sheet .listening-option-card {
+                transition-duration: 0.11s;
+            }
+        }
+        @media (min-width: 769px) and (max-width: 1199px) {
+            .listening-answer-sheet .group .space-y-2 .p-2 {
+                padding: 0.36rem 0.58rem;
+            }
+            .listening-answer-sheet .group .space-y-2 span.text-sm {
+                font-size: 1.04rem;
+                line-height: 1.3;
+            }
+            .listening-answer-sheet .listening-option-card {
+                min-height: 3.22rem;
+            }
+            .listening-answer-sheet .listening-option-badge {
+                width: 2.2rem;
+                height: 2.2rem;
+            }
+            .listening-answer-sheet .listening-option-card .mr-3 {
+                margin-right: 0.68rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .listening-answer-sheet .group .space-y-2 span.text-sm {
+                font-size: 1.12rem;
+            }
+            .listening-answer-sheet .listening-option-card {
+                min-height: 3.45rem;
+            }
+            .listening-answer-sheet .listening-option-badge {
+                width: 2.38rem;
+                height: 2.38rem;
+            }
+        }
     </style>
 
     <!-- Audio Player -->
     @include('assignments.toefl-itp.listening.partials.audio-player')
+
+    {{-- Dynamic spacer: height set by JS to match actual audio player height --}}
+    <div id="audioPlayerSpacer" style="flex-shrink:0;"></div>
+    <script>
+        (function() {
+            function setAudioSpacer() {
+                var player = document.querySelector('.fixed.top-0.left-0.right-0');
+                var spacer = document.getElementById('audioPlayerSpacer');
+                if (player && spacer) {
+                    spacer.style.height = player.offsetHeight + 'px';
+                }
+            }
+            setAudioSpacer();
+            window.addEventListener('resize', setAudioSpacer);
+            // Re-measure after fonts/images load
+            window.addEventListener('load', setAudioSpacer);
+        })();
+    </script>
+
+    @if(session('success'))
+        <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-800">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if(($packageMode ?? false) && session('listeningPackageReview'))
+        @php
+            $review = session('listeningPackageReview');
+        @endphp
+        <div class="mb-6 rounded-2xl border border-blue-200 bg-white shadow-sm overflow-hidden" x-data="{ reviewFilter: 'all' }">
+            <div class="px-5 py-4 bg-blue-50 border-b border-blue-100">
+                <h3 class="text-lg font-bold text-blue-900">Review Jawaban Paket {{ $packageNumber ?? 1 }}</h3>
+                <p class="text-sm text-blue-800 mt-1">Skor {{ $review['score'] }} - Benar {{ $review['correct'] }}/{{ $review['total'] }}</p>
+                <div class="mt-3 flex flex-wrap gap-2">
+                    <button type="button" @click="reviewFilter = 'all'" :class="reviewFilter === 'all' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-700 border-blue-200'" class="px-3 py-1.5 text-xs font-semibold rounded-lg border transition">
+                        Semua
+                    </button>
+                    <button type="button" @click="reviewFilter = 'wrong'" :class="reviewFilter === 'wrong' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-red-700 border-red-200'" class="px-3 py-1.5 text-xs font-semibold rounded-lg border transition">
+                        Salah
+                    </button>
+                    <button type="button" @click="reviewFilter = 'unanswered'" :class="reviewFilter === 'unanswered' ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-amber-700 border-amber-200'" class="px-3 py-1.5 text-xs font-semibold rounded-lg border transition">
+                        Kosong
+                    </button>
+                </div>
+            </div>
+            <div class="p-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+                    @foreach(($review['rows'] ?? []) as $row)
+                        @php
+                            $statusClass = $row['is_correct']
+                                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                                : ($row['is_unanswered'] ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-red-50 border-red-200 text-red-800');
+                            $statusText = $row['is_correct'] ? 'Benar' : ($row['is_unanswered'] ? 'Kosong' : 'Salah');
+                        @endphp
+                        <div x-show="reviewFilter === 'all' || (reviewFilter === 'wrong' && {{ $row['is_correct'] ? 'false' : ($row['is_unanswered'] ? 'false' : 'true') }}) || (reviewFilter === 'unanswered' && {{ $row['is_unanswered'] ? 'true' : 'false' }})" class="rounded-lg border px-3 py-2 text-sm {{ $statusClass }}">
+                            <div class="font-bold">{{ $row['question_number'] }} ({{ $row['part'] }})</div>
+                            <div>Jawaban: {{ $row['user_answer'] }}</div>
+                            <div>Kunci: {{ $row['correct_answer'] }}</div>
+                            <div class="font-semibold mt-1">{{ $statusText }}</div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
 
     <!-- Header -->
     <div class="mb-8">
@@ -27,14 +266,14 @@
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                 </div>
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-800">TOEFL ITP Mock Up Test</h1>
+                    <h1 class="text-3xl font-bold text-gray-800">{{ ($packageMode ?? false) ? ('Listening Practice - Paket ' . $packageNumber) : 'TOEFL ITP Mock Up Test' }}</h1>
                     <p class="text-gray-600 mt-1">Section 1: Listening Comprehension</p>
                 </div>
             </div>
             
-            <a href="{{ route('assignments.toefl-itp') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
+            <a href="{{ ($packageMode ?? false) ? route('assignments.toefl-itp.listening.practice') : route('assignments.toefl-itp') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Back to TOEFL ITP
+                {{ ($packageMode ?? false) ? 'Back to Listening Practice' : 'Back to TOEFL ITP' }}
             </a>
         </div>
     </div>
@@ -120,7 +359,7 @@
     </div>
 
     <!-- Questions Section (Part A) -->
-    <div x-show="currentSection === 'questions'" class="bg-white rounded-2xl shadow-lg p-8">
+    <div x-show="currentSection === 'questions'" class="listening-answer-sheet bg-white rounded-2xl shadow-lg p-5 md:p-6">
         <div class="mb-6">
             <template x-if="currentListeningPart === 'A'">
                 <div>
@@ -142,7 +381,7 @@
             </template>
         </div>
 
-        <form method="POST" action="#" class="space-y-8">
+        <form method="POST" action="{{ $listeningSubmitRoute ?? '#' }}" class="space-y-8">
             @csrf
             
             
@@ -153,22 +392,22 @@
                         $splitIndex = ceil($listeningPartA->count() / 2);
                     @endphp
                     
-                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 relative">
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 relative">
                             {{-- Column 1 --}}
                             <div class="space-y-0 divide-y divide-gray-100">
                                 @foreach($listeningPartA->slice(0, $splitIndex) as $question)
-                                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2">
+                                    <div class="py-1 group transition-colors hover:bg-gray-50/50 rounded-md px-1 -mx-1">
                                         <div class="flex items-baseline gap-3">
                                             <div class="flex-none flex items-center justify-end gap-2 w-8">
-                                                <span class="font-bold text-gray-500 text-xl">{{ $question->question_number }}.</span>
+                                                <span class="font-bold text-gray-500 text-base">{{ $question->question_number }}.</span>
                                             </div>
-                                            <div class="flex flex-col gap-3 flex-1">
-                                                <div class="mb-3 text-lg text-gray-800 font-medium pl-1">
+                                            <div class="flex flex-col gap-2 flex-1">
+                                                <div class="mb-2 text-sm text-gray-800 font-medium pl-1">
                                                     {{ $question->question_text }}
                                                 </div>
 
-                                                <div class="space-y-3">
+                                                <div class="space-y-2">
                                                     @foreach(['A' => $question->option_a, 'B' => $question->option_b, 'C' => $question->option_c, 'D' => $question->option_d] as $option => $text)
                                                         <label class="group/option block w-full cursor-pointer">
                                                             <input type="radio" 
@@ -177,14 +416,14 @@
                                                                    class="peer sr-only"
                                                                    required>
                                                             
-                                                            <div class="flex items-center p-3 rounded-xl border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all duration-200 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:shadow-sm">
-                                                                <div class="flex items-center justify-center mr-4 flex-none">
-                                                                    <div class="w-10 h-10 aspect-square rounded-full border-2 border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center shrink-0">
-                                                                        <span class="text-sm font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">{{ $option }}</span>
+                                                            <div class="listening-option-card flex items-center p-2 rounded-md border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all duration-200 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:shadow-sm">
+                                                                <div class="flex items-center justify-center mr-3 flex-none">
+                                                                    <div class="listening-option-badge w-8 h-8 aspect-square rounded-full border-2 border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center shrink-0">
+                                                                        <span class="text-xs font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">{{ $option }}</span>
                                                                     </div>
                                                                 </div>
                                                                 
-                                                                <span class="text-lg text-gray-700 font-medium peer-checked:text-red-700 peer-checked:font-semibold group-hover/option:text-red-700 transition-colors">{{ $text }}</span>
+                                                                <span class="text-sm text-gray-700 font-medium peer-checked:text-red-700 peer-checked:font-semibold group-hover/option:text-red-700 transition-colors">{{ $text }}</span>
                                                             </div>
                                                         </label>
                                                     @endforeach
@@ -198,17 +437,17 @@
                             {{-- Column 2 --}}
                             <div class="space-y-0 divide-y divide-gray-100">
                                 @foreach($listeningPartA->slice($splitIndex) as $question)
-                                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2">
+                                    <div class="py-1 group transition-colors hover:bg-gray-50/50 rounded-md px-1 -mx-1">
                                         <div class="flex items-baseline gap-3">
                                             <div class="flex-none flex items-center justify-end gap-2 w-8">
-                                                <span class="font-bold text-gray-500 text-xl">{{ $question->question_number }}.</span>
+                                                <span class="font-bold text-gray-500 text-base">{{ $question->question_number }}.</span>
                                             </div>
-                                            <div class="flex flex-col gap-3 flex-1">
-                                                <div class="mb-3 text-lg text-gray-800 font-medium pl-1">
+                                            <div class="flex flex-col gap-2 flex-1">
+                                                <div class="mb-2 text-sm text-gray-800 font-medium pl-1">
                                                     {{ $question->question_text }}
                                                 </div>
 
-                                                <div class="space-y-3">
+                                                <div class="space-y-2">
                                                     @foreach(['A' => $question->option_a, 'B' => $question->option_b, 'C' => $question->option_c, 'D' => $question->option_d] as $option => $text)
                                                         <label class="group/option block w-full cursor-pointer">
                                                             <input type="radio" 
@@ -217,14 +456,14 @@
                                                                    class="peer sr-only"
                                                                    required>
                                                             
-                                                            <div class="flex items-center p-3 rounded-xl border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all duration-200 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:shadow-sm">
-                                                                <div class="flex items-center justify-center mr-4 flex-none">
-                                                                    <div class="w-10 h-10 aspect-square rounded-full border-2 border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center shrink-0">
-                                                                        <span class="text-sm font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">{{ $option }}</span>
+                                                            <div class="listening-option-card flex items-center p-2 rounded-md border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all duration-200 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:shadow-sm">
+                                                                <div class="flex items-center justify-center mr-3 flex-none">
+                                                                    <div class="listening-option-badge w-8 h-8 aspect-square rounded-full border-2 border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center shrink-0">
+                                                                        <span class="text-xs font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">{{ $option }}</span>
                                                                     </div>
                                                                 </div>
                                                                 
-                                                                <span class="text-lg text-gray-700 font-medium peer-checked:text-red-700 peer-checked:font-semibold group-hover/option:text-red-700 transition-colors">{{ $text }}</span>
+                                                                <span class="text-sm text-gray-700 font-medium peer-checked:text-red-700 peer-checked:font-semibold group-hover/option:text-red-700 transition-colors">{{ $text }}</span>
                                                             </div>
                                                         </label>
                                                     @endforeach
@@ -265,7 +504,7 @@
             <!-- Part B Content -->
             <div x-show="currentListeningPart === 'B'">
                 @if($listeningPartB->count() > 0)
-                    <div class="mt-12 pt-8 border-t-4 border-purple-200">
+                    <div class="mt-8 pt-5 border-t-4 border-purple-200">
                         <!-- Part B Directions -->
                         <div class="mb-6 p-6 bg-purple-50 border-l-4 border-purple-600 rounded-r-lg">
                             <h3 class="text-2xl font-bold text-purple-700 mb-4">Part B</h3>
@@ -278,22 +517,22 @@
                         <h3 class="text-2xl font-bold text-purple-700 mb-4">Questions 31-37</h3>
                         <p class="text-gray-600 mb-6">Longer Conversations</p>
                         
-                        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 relative">
+                        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 relative">
                                 {{-- Column 1 --}}
                                 <div class="space-y-0 divide-y divide-gray-100">
                                     @foreach($listeningPartB->take(4) as $question)
-                                        <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2">
+                                        <div class="py-1 group transition-colors hover:bg-gray-50/50 rounded-md px-1 -mx-1">
                                             <div class="flex items-baseline gap-3">
                                                 <div class="flex-none flex items-center justify-end gap-2 w-8">
-                                                    <span class="font-bold text-gray-500 text-xl">{{ $question->question_number }}.</span>
+                                                    <span class="font-bold text-gray-500 text-base">{{ $question->question_number }}.</span>
                                                 </div>
-                                                <div class="flex flex-col gap-3 flex-1">
-                                                    <div class="mb-3 text-lg text-gray-800 font-medium pl-1">
+                                                <div class="flex flex-col gap-2 flex-1">
+                                                    <div class="mb-2 text-sm text-gray-800 font-medium pl-1">
                                                         {!! nl2br(e($question->question_text)) !!}
                                                     </div>
 
-                                                    <div class="space-y-3">
+                                                    <div class="space-y-2">
                                                         @foreach(['A' => $question->option_a, 'B' => $question->option_b, 'C' => $question->option_c, 'D' => $question->option_d] as $option => $text)
                                                             <label class="group/option block w-full cursor-pointer">
                                                                 <input type="radio" 
@@ -302,14 +541,14 @@
                                                                        class="peer sr-only"
                                                                        required>
                                                                 
-                                                                <div class="flex items-center p-3 rounded-xl border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all duration-200 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:shadow-sm">
-                                                                    <div class="flex items-center justify-center mr-4 flex-none">
-                                                                        <div class="w-10 h-10 aspect-square rounded-full border-2 border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center shrink-0">
-                                                                            <span class="text-sm font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">{{ $option }}</span>
+                                                                <div class="listening-option-card flex items-center p-2 rounded-md border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all duration-200 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:shadow-sm">
+                                                                    <div class="flex items-center justify-center mr-3 flex-none">
+                                                                        <div class="listening-option-badge w-8 h-8 aspect-square rounded-full border-2 border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center shrink-0">
+                                                                            <span class="text-xs font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">{{ $option }}</span>
                                                                         </div>
                                                                     </div>
                                                                     
-                                                                    <span class="text-lg text-gray-700 font-medium peer-checked:text-red-700 peer-checked:font-semibold group-hover/option:text-red-700 transition-colors">{{ $text }}</span>
+                                                                    <span class="text-sm text-gray-700 font-medium peer-checked:text-red-700 peer-checked:font-semibold group-hover/option:text-red-700 transition-colors">{{ $text }}</span>
                                                                 </div>
                                                             </label>
                                                         @endforeach
@@ -326,17 +565,17 @@
                                 {{-- Column 2 --}}
                                 <div class="space-y-0 divide-y divide-gray-100">
                                     @foreach($listeningPartB->skip(4) as $question)
-                                        <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2">
+                                        <div class="py-1 group transition-colors hover:bg-gray-50/50 rounded-md px-1 -mx-1">
                                             <div class="flex items-baseline gap-3">
                                                 <div class="flex-none flex items-center justify-end gap-2 w-8">
-                                                    <span class="font-bold text-gray-500 text-xl">{{ $question->question_number }}.</span>
+                                                    <span class="font-bold text-gray-500 text-base">{{ $question->question_number }}.</span>
                                                 </div>
-                                                <div class="flex flex-col gap-3 flex-1">
-                                                    <div class="mb-3 text-lg text-gray-800 font-medium pl-1">
+                                                <div class="flex flex-col gap-2 flex-1">
+                                                    <div class="mb-2 text-sm text-gray-800 font-medium pl-1">
                                                         {!! nl2br(e($question->question_text)) !!}
                                                     </div>
 
-                                                    <div class="space-y-3">
+                                                    <div class="space-y-2">
                                                         @foreach(['A' => $question->option_a, 'B' => $question->option_b, 'C' => $question->option_c, 'D' => $question->option_d] as $option => $text)
                                                             <label class="group/option block w-full cursor-pointer">
                                                                 <input type="radio" 
@@ -345,14 +584,14 @@
                                                                        class="peer sr-only"
                                                                        required>
                                                                 
-                                                                <div class="flex items-center p-3 rounded-xl border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all duration-200 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:shadow-sm">
-                                                                    <div class="flex items-center justify-center mr-4 flex-none">
-                                                                        <div class="w-10 h-10 aspect-square rounded-full border-2 border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center shrink-0">
-                                                                            <span class="text-sm font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">{{ $option }}</span>
+                                                                <div class="listening-option-card flex items-center p-2 rounded-md border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all duration-200 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:shadow-sm">
+                                                                    <div class="flex items-center justify-center mr-3 flex-none">
+                                                                        <div class="listening-option-badge w-8 h-8 aspect-square rounded-full border-2 border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center shrink-0">
+                                                                            <span class="text-xs font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">{{ $option }}</span>
                                                                         </div>
                                                                     </div>
                                                                     
-                                                                    <span class="text-lg text-gray-700 font-medium peer-checked:text-red-700 peer-checked:font-semibold group-hover/option:text-red-700 transition-colors">{{ $text }}</span>
+                                                                    <span class="text-sm text-gray-700 font-medium peer-checked:text-red-700 peer-checked:font-semibold group-hover/option:text-red-700 transition-colors">{{ $text }}</span>
                                                                 </div>
                                                             </label>
                                                         @endforeach
@@ -387,7 +626,7 @@
             <!-- Part C Content -->
             <div x-show="currentListeningPart === 'C'">
                 @if($listeningPartC->count() > 0)
-                    <div class="mt-12 pt-8 border-t-4 border-indigo-200">
+                    <div class="mt-8 pt-5 border-t-4 border-indigo-200">
                         <!-- Part C Directions -->
                         <div class="mb-6 p-6 bg-indigo-50 border-l-4 border-indigo-600 rounded-r-lg">
                             <h3 class="text-2xl font-bold text-indigo-700 mb-4">Part C</h3>
@@ -400,25 +639,25 @@
                         <h3 class="text-2xl font-bold text-indigo-700 mb-4">Questions 38-50</h3>
                         <p class="text-gray-600 mb-6">Talks and Lectures</p>
                         
-                        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 relative">
+                        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 relative">
                                 {{-- Column 1 --}}
                                 <div class="space-y-0 divide-y divide-gray-100">
                                     @php
                                         $splitIndex = ceil($listeningPartC->count() / 2);
                                     @endphp
                                     @foreach($listeningPartC->slice(0, $splitIndex) as $question)
-                                        <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2">
+                                        <div class="py-1 group transition-colors hover:bg-gray-50/50 rounded-md px-1 -mx-1">
                                             <div class="flex items-baseline gap-3">
                                                 <div class="flex-none flex items-center justify-end gap-2 w-8">
-                                                    <span class="font-bold text-gray-500 text-xl">{{ $question->question_number }}.</span>
+                                                    <span class="font-bold text-gray-500 text-base">{{ $question->question_number }}.</span>
                                                 </div>
-                                                <div class="flex flex-col gap-3 flex-1">
-                                                    <div class="mb-3 text-lg text-gray-800 font-medium pl-1">
+                                                <div class="flex flex-col gap-2 flex-1">
+                                                    <div class="mb-2 text-sm text-gray-800 font-medium pl-1">
                                                         {!! nl2br(e($question->question_text)) !!}
                                                     </div>
 
-                                                    <div class="space-y-3">
+                                                    <div class="space-y-2">
                                                         @foreach(['A' => $question->option_a, 'B' => $question->option_b, 'C' => $question->option_c, 'D' => $question->option_d] as $option => $text)
                                                             <label class="group/option block w-full cursor-pointer">
                                                                 <input type="radio" 
@@ -427,14 +666,14 @@
                                                                        class="peer sr-only"
                                                                        required>
                                                                 
-                                                                <div class="flex items-center p-3 rounded-xl border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all duration-200 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:shadow-sm">
-                                                                    <div class="flex items-center justify-center mr-4 flex-none">
-                                                                        <div class="w-10 h-10 aspect-square rounded-full border-2 border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center shrink-0">
-                                                                            <span class="text-sm font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">{{ $option }}</span>
+                                                                <div class="listening-option-card flex items-center p-2 rounded-md border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all duration-200 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:shadow-sm">
+                                                                    <div class="flex items-center justify-center mr-3 flex-none">
+                                                                        <div class="listening-option-badge w-8 h-8 aspect-square rounded-full border-2 border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center shrink-0">
+                                                                            <span class="text-xs font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">{{ $option }}</span>
                                                                         </div>
                                                                     </div>
                                                                     
-                                                                    <span class="text-lg text-gray-700 font-medium peer-checked:text-red-700 peer-checked:font-semibold group-hover/option:text-red-700 transition-colors">{{ $text }}</span>
+                                                                    <span class="text-sm text-gray-700 font-medium peer-checked:text-red-700 peer-checked:font-semibold group-hover/option:text-red-700 transition-colors">{{ $text }}</span>
                                                                 </div>
                                                             </label>
                                                         @endforeach
@@ -451,17 +690,17 @@
                                 {{-- Column 2 --}}
                                 <div class="space-y-0 divide-y divide-gray-100">
                                     @foreach($listeningPartC->slice($splitIndex) as $question)
-                                        <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2">
+                                        <div class="py-1 group transition-colors hover:bg-gray-50/50 rounded-md px-1 -mx-1">
                                             <div class="flex items-baseline gap-3">
                                                 <div class="flex-none flex items-center justify-end gap-2 w-8">
-                                                    <span class="font-bold text-gray-500 text-xl">{{ $question->question_number }}.</span>
+                                                    <span class="font-bold text-gray-500 text-base">{{ $question->question_number }}.</span>
                                                 </div>
-                                                <div class="flex flex-col gap-3 flex-1">
-                                                    <div class="mb-3 text-lg text-gray-800 font-medium pl-1">
+                                                <div class="flex flex-col gap-2 flex-1">
+                                                    <div class="mb-2 text-sm text-gray-800 font-medium pl-1">
                                                         {!! nl2br(e($question->question_text)) !!}
                                                     </div>
 
-                                                    <div class="space-y-3">
+                                                    <div class="space-y-2">
                                                         @foreach(['A' => $question->option_a, 'B' => $question->option_b, 'C' => $question->option_c, 'D' => $question->option_d] as $option => $text)
                                                             <label class="group/option block w-full cursor-pointer">
                                                                 <input type="radio" 
@@ -470,14 +709,14 @@
                                                                        class="peer sr-only"
                                                                        required>
                                                                 
-                                                                <div class="flex items-center p-3 rounded-xl border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all duration-200 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:shadow-sm">
-                                                                    <div class="flex items-center justify-center mr-4 flex-none">
-                                                                        <div class="w-10 h-10 aspect-square rounded-full border-2 border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center shrink-0">
-                                                                            <span class="text-sm font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">{{ $option }}</span>
+                                                                <div class="listening-option-card flex items-center p-2 rounded-md border border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all duration-200 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:shadow-sm">
+                                                                    <div class="flex items-center justify-center mr-3 flex-none">
+                                                                        <div class="listening-option-badge w-8 h-8 aspect-square rounded-full border-2 border-gray-300 peer-checked:border-red-600 peer-checked:bg-red-600 group-hover/option:border-red-400 transition-all duration-200 flex items-center justify-center shrink-0">
+                                                                            <span class="text-xs font-bold text-gray-500 peer-checked:text-white transition-colors duration-200">{{ $option }}</span>
                                                                         </div>
                                                                     </div>
                                                                     
-                                                                    <span class="text-lg text-gray-700 font-medium peer-checked:text-red-700 peer-checked:font-semibold group-hover/option:text-red-700 transition-colors">{{ $text }}</span>
+                                                                    <span class="text-sm text-gray-700 font-medium peer-checked:text-red-700 peer-checked:font-semibold group-hover/option:text-red-700 transition-colors">{{ $text }}</span>
                                                                 </div>
                                                             </label>
                                                         @endforeach
@@ -513,6 +752,7 @@
     <!-- ============================================ -->
 
     <!-- Section 2 Instructions -->
+    @if(!($packageMode ?? false))
     <div x-show="currentView === 'section2' && currentSection === 'instructions'" class="bg-white rounded-2xl shadow-lg overflow-hidden">
         <!-- Section Header -->
         <div class="instruction-box text-white p-6">
@@ -705,7 +945,9 @@
             Section 2: Structure
         </button>
     </div>
+    @endif
 </div>
 
+@include('assignments.toefl-itp.listening.partials.admin-modals')
 @include('assignments.toefl-itp.listening.partials.audio-player-scripts')
 @endsection

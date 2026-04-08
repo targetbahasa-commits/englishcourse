@@ -42,7 +42,101 @@
                 </div>
             </div>
 
-            {{-- Content goes here --}}
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Pilih Bagian Listening</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    @foreach(($parts ?? collect()) as $part)
+                        @php
+                            $isAvailable = ($part['status'] ?? 'coming_soon') === 'available';
+                        @endphp
+                        <div class="bg-white rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col hover:-translate-y-1 transform">
+                            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 relative">
+                                <span class="absolute top-4 right-4 px-3 py-1 backdrop-blur-sm rounded-full text-xs font-bold uppercase tracking-wide border border-blue-100/40 text-white {{ $isAvailable ? 'bg-blue-100/25' : 'bg-slate-200/25' }}">
+                                    {{ $isAvailable ? 'AVAILABLE' : 'COMING SOON' }}
+                                </span>
+
+                                <div class="w-16 h-16 rounded-2xl flex items-center justify-center shadow-md mb-4 bg-white/20 text-white">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-2v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"></path>
+                                    </svg>
+                                </div>
+
+                                <h3 class="text-white text-2xl font-bold">{{ $part['title'] }}</h3>
+                                <p class="text-white/90 text-sm mt-1">{{ $part['subtitle'] }}</p>
+                                <p class="mt-3 text-white/85 text-sm">{{ $part['description'] }}</p>
+                            </div>
+
+                            <div class="p-6 flex flex-col flex-1 bg-blue-50/40 justify-end">
+                                @if($isAvailable && ($part['key'] ?? '') === 'A')
+                                    <a href="{{ route('assignments.toefl-itp.listening.practice.part-a') }}"
+                                       class="block w-full py-3 text-center rounded-xl font-bold shadow bg-red-500 text-white hover:bg-red-600 transition">
+                                        Buka Part A ->
+                                    </a>
+                                @else
+                                    <button type="button"
+                                            disabled
+                                            class="block w-full py-3 text-center rounded-xl font-bold shadow cursor-not-allowed bg-sky-400 text-white">
+                                        Coming Soon
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Paket Soal Listening</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-6">
+                    @foreach(($listeningPackages ?? collect()) as $package)
+                        @php
+                            $isPackageAvailable = ($package['status'] ?? 'coming_soon') === 'available';
+                        @endphp
+                        <div class="bg-white rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col hover:-translate-y-1 transform">
+                            <div class="bg-gradient-to-r from-sky-600 to-blue-700 px-6 py-4 relative">
+                                <span class="absolute top-4 right-4 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border border-sky-100/50 text-white bg-white/15">
+                                    {{ strtoupper(str_replace('_', ' ', $package['status'])) }}
+                                </span>
+
+                                <p class="text-white text-sm font-semibold tracking-wide">Listening Package</p>
+                            </div>
+
+                            <div class="p-6 flex flex-col flex-1 bg-white justify-between">
+                                <div>
+                                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm mb-4 bg-sky-100 text-sky-700 border border-sky-200">
+                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h8m-8 4h6M5 5h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"></path>
+                                        </svg>
+                                    </div>
+
+                                    <h3 class="text-slate-900 text-2xl font-bold">{{ $package['title'] }}</h3>
+                                    <p class="text-sky-700 text-sm mt-1 font-medium">{{ $package['subtitle'] }}</p>
+                                    <p class="mt-3 text-slate-600 text-sm leading-6">{{ $package['description'] }}</p>
+                                </div>
+
+                                <button type="button"
+                                        disabled
+                                        class="block w-full py-3 text-center rounded-xl font-bold shadow cursor-not-allowed bg-sky-400 text-white {{ $isPackageAvailable ? 'hidden' : '' }}">
+                                    Coming Soon
+                                </button>
+
+                                @if($isPackageAvailable)
+                                    <a href="{{ route('assignments.toefl-itp.listening.practice.package', ['package' => $package['package_number']]) }}"
+                                       class="block w-full py-3 text-center rounded-xl font-bold shadow bg-red-500 text-white hover:bg-red-600 transition">
+                                        Buka Paket {{ $package['package_number'] }} ->
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
 
         </main>
     </div>

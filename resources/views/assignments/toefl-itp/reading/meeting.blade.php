@@ -57,7 +57,7 @@
                                 <span class="absolute top-0 right-0 bg-blue-100 text-blue-600 text-xs font-bold px-2 py-1 rounded-bl-lg rounded-tr-lg">Passage {{ $passage->passage_number }}</span>
                                 
                                 <!-- Admin Controls -->
-                                @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                                @if(Auth::user()->isAdmin())
                                 <div class="absolute top-8 right-2 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity p-2 z-10">
                                     <button onclick='openEditPassageModal(@json($passage))' class="w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded-xl hover:bg-blue-200 transition-colors">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
@@ -92,7 +92,7 @@
                                 <div class="relative pl-4 border-l-2 border-gray-200 group" x-data="{ selected: null }">
                                     
                                     <!-- Admin Controls -->
-                                    @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                                    @if(Auth::user()->isAdmin())
                                     <div class="absolute top-0 right-0 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity p-2">
                                         <button onclick='openEditQuestionModal(@json($question))' class="w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded-xl hover:bg-blue-200 transition-colors">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
@@ -176,7 +176,8 @@
         </main>
     </div>
     <!-- Edit Question Modal -->
-    <div id="editQuestionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center overflow-y-auto">
+    <div id="editQuestionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="min-h-full grid place-items-center p-4">
         <div class="bg-white rounded-2xl p-8 w-full max-w-2xl mx-4 my-8">
             <h3 class="text-2xl font-bold text-gray-800 mb-6">Edit Question</h3>
             <form id="editQuestionForm" method="POST">
@@ -231,10 +232,12 @@
                 </div>
             </form>
         </div>
+        </div>
     </div>
 
     <!-- Edit Passage Modal -->
-    <div id="editPassageModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center overflow-y-auto">
+    <div id="editPassageModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="min-h-full grid place-items-center p-4">
         <div class="bg-white rounded-2xl p-8 w-full max-w-2xl mx-4 my-8">
             <h3 class="text-2xl font-bold text-gray-800 mb-6">Edit Passage</h3>
             <form id="editPassageForm" method="POST">
@@ -259,10 +262,12 @@
                 </div>
             </form>
         </div>
+        </div>
     </div>
 
     <!-- Add Question Modal -->
-    <div id="addQuestionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center overflow-y-auto">
+    <div id="addQuestionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="min-h-full grid place-items-center p-4">
         <div class="bg-white rounded-2xl p-8 w-full max-w-2xl mx-4 my-8">
             <h3 class="text-2xl font-bold text-gray-800 mb-6">Add New Question</h3>
             <form id="addQuestionForm" action="{{ route('assignments.toefl-itp.reading.question.store') }}" method="POST">
@@ -316,6 +321,7 @@
                     <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition">Add Question</button>
                 </div>
             </form>
+        </div>
         </div>
     </div>
 

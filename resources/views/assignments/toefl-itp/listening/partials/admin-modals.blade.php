@@ -1,20 +1,26 @@
 
 {{-- Edit/Upload Audio Modals --}}
 @if(Auth::user()->isAdmin())
+    @php
+        $resolvedUpdateTranscriptRoute = $updateTranscriptRoute ?? route('assignments.toefl-itp.listening.meeting.update-transcript', ['number' => $number ?? 0, 'set' => $set ?? 0]);
+        $resolvedUploadSrtRoute = $uploadSrtRoute ?? route('assignments.toefl-itp.listening.meeting.upload-srt', ['number' => $number ?? 0, 'set' => $set ?? 0]);
+        $resolvedUploadAudioRoute = $uploadAudioRoute ?? route('assignments.toefl-itp.listening.meeting.upload-audio', ['number' => $number ?? 0, 'set' => $set ?? 0]);
+        $transcriptSourceQuestions = $questions ?? $listeningQuestions ?? collect();
+    @endphp
     <div id="editTranscriptModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
             <div class="mt-3">
                 <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Edit Transcript (Set {{ $set ?? '' }})</h3>
-                <form action="{{ route('assignments.toefl-itp.listening.meeting.update-transcript', ['number' => $number, 'set' => $set ?? 0]) }}" method="POST">
+                <form action="{{ $resolvedUpdateTranscriptRoute }}" method="POST">
                     @csrf
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2">English Script</label>
-                        <textarea name="transcript_en" rows="6" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">{{ $questions->first() ? $questions->first()->transcript_en : '' }}</textarea>
+                        <textarea name="transcript_en" rows="6" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">{{ $transcriptSourceQuestions->first() ? $transcriptSourceQuestions->first()->transcript_en : '' }}</textarea>
                         <p class="text-gray-500 text-xs mt-1">Use newline for paragraphs.</p>
                     </div>
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2">Indonesian Translation</label>
-                        <textarea name="transcript_id" rows="6" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">{{ $questions->first() ? $questions->first()->transcript_id : '' }}</textarea>
+                        <textarea name="transcript_id" rows="6" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">{{ $transcriptSourceQuestions->first() ? $transcriptSourceQuestions->first()->transcript_id : '' }}</textarea>
                     </div>
                     <div class="flex justify-end gap-2">
                         <button type="button" onclick="document.getElementById('editTranscriptModal').classList.add('hidden')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Cancel</button>
@@ -39,7 +45,7 @@
                 </button>
             </div>
 
-            <form action="{{ route('assignments.toefl-itp.listening.meeting.upload-srt', ['number' => $number ?? 0, 'set' => $set ?? 0]) }}" 
+            <form action="{{ $resolvedUploadSrtRoute }}" 
                     method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 
@@ -125,7 +131,7 @@ Start translating here..."></textarea>
                 </button>
             </div>
 
-            <form action="{{ route('assignments.toefl-itp.listening.meeting.upload-audio', ['number' => $number ?? 0, 'set' => $set ?? 0]) }}" 
+            <form action="{{ $resolvedUploadAudioRoute }}" 
                     method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 
@@ -137,11 +143,11 @@ Start translating here..."></textarea>
                         class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none">
                 </div>
 
-                @if(isset($questions) && $questions->first() && $questions->first()->audio_file)
+                @if($transcriptSourceQuestions->first() && $transcriptSourceQuestions->first()->audio_file)
                     <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
                         <p class="text-sm text-blue-800">
                             <span class="font-semibold">Current file:</span> 
-                            {{ basename($questions->first()->audio_file) }}
+                            {{ basename($transcriptSourceQuestions->first()->audio_file) }}
                         </p>
                     </div>
                 @endif
@@ -177,7 +183,7 @@ Start translating here..."></textarea>
                 </button>
             </div>
 
-            <form action="{{ route('assignments.toefl-itp.listening.meeting.upload-audio', ['number' => $number ?? 0, 'set' => $set ?? 0]) }}" method="POST" class="space-y-4">
+            <form action="{{ $resolvedUploadAudioRoute }}" method="POST" class="space-y-4">
                 @csrf
 
                 {{-- Breadcrumb Navigation --}}

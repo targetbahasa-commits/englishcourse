@@ -42,7 +42,78 @@
                 </div>
             </div>
 
-            {{-- Content goes here --}}
+            {{-- 10 Reading Packages --}}
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Paket Soal Reading</h2>
+                    <span class="text-sm text-gray-500">{{ collect($readingPackages ?? [])->where('status', 'available')->count() }} paket tersedia</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
+                    @foreach(($readingPackages ?? collect()) as $package)
+                        @php
+                            $isAvailable = ($package['status'] ?? 'coming_soon') === 'available';
+                                $palettes = [
+                                    1  => ['bg' => 'linear-gradient(135deg,#4338ca,#7c3aed)', 'btn' => '#4338ca', 'btnHover' => '#3730a3'],
+                                    2  => ['bg' => 'linear-gradient(135deg,#6d28d9,#7e22ce)', 'btn' => '#6d28d9', 'btnHover' => '#5b21b6'],
+                                    3  => ['bg' => 'linear-gradient(135deg,#7c3aed,#a21caf)', 'btn' => '#7c3aed', 'btnHover' => '#6d28d9'],
+                                    4  => ['bg' => 'linear-gradient(135deg,#1d4ed8,#4338ca)', 'btn' => '#1d4ed8', 'btnHover' => '#1e40af'],
+                                    5  => ['bg' => 'linear-gradient(135deg,#0f766e,#047857)', 'btn' => '#0f766e', 'btnHover' => '#0d6460'],
+                                    6  => ['bg' => 'linear-gradient(135deg,#065f46,#166534)', 'btn' => '#065f46', 'btnHover' => '#064e3b'],
+                                    7  => ['bg' => 'linear-gradient(135deg,#334155,#1e293b)', 'btn' => '#334155', 'btnHover' => '#1e293b'],
+                                    8  => ['bg' => 'linear-gradient(135deg,#1e40af,#1e3a5f)', 'btn' => '#1e40af', 'btnHover' => '#1e3a8a'],
+                                    9  => ['bg' => 'linear-gradient(135deg,#be123c,#9f1239)', 'btn' => '#be123c', 'btnHover' => '#9f1239'],
+                                    10 => ['bg' => 'linear-gradient(135deg,#c2410c,#b91c1c)', 'btn' => '#c2410c', 'btnHover' => '#9a3412'],
+                                ];
+                                $p = $palettes[$package['package_number']] ?? $palettes[1];
+                        @endphp
+                        <div class="group bg-white rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col hover:-translate-y-1 transform">
+                            {{-- Card Header --}}
+                                     <div class="p-5 relative overflow-hidden" style="background: {{ $p['bg'] }}">
+                                <div class="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-white/10"></div>
+                                <div class="absolute -bottom-4 -left-4 w-16 h-16 rounded-full bg-white/10"></div>
+
+                                <div class="relative">
+                                    <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide border {{ $isAvailable ? 'bg-white/20 border-white/30 text-white' : 'bg-white/10 border-white/20 text-white/70' }} mb-3">
+                                        {{ $isAvailable ? 'TERSEDIA' : 'SEGERA HADIR' }}
+                                    </span>
+
+                                    <div class="flex items-center gap-3 mb-1">
+                                        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shadow-inner">
+                                            <span class="text-white font-extrabold text-lg leading-none">{{ $package['package_number'] }}</span>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-white font-bold text-lg leading-tight">{{ $package['title'] }}</h3>
+                                            <p class="text-white/80 text-xs">{{ $package['subtitle'] }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Card Body --}}
+                            <div class="p-4 flex flex-col flex-1 justify-between bg-gray-50/60">
+                                <p class="text-gray-500 text-sm mb-4 leading-relaxed">{{ $package['description'] }}</p>
+
+                                @if($isAvailable)
+                                    <a href="{{ route('assignments.toefl-itp.reading.practice.package', ['package' => $package['package_number']]) }}"
+                                           class="block w-full py-2.5 text-center rounded-xl font-bold shadow text-white transition-colors duration-200"
+                                           style="background-color: {{ $p['btn'] }}"
+                                           onmouseover="this.style.backgroundColor='{{ $p['btnHover'] }}'"
+                                           onmouseout="this.style.backgroundColor='{{ $p['btn'] }}'">
+                                        Mulai →
+                                    </a>
+                                @else
+                                    <button type="button" disabled
+                                            class="block w-full py-2.5 text-center rounded-xl font-bold cursor-not-allowed text-white shadow-sm"
+                                            style="background: {{ $p['bg'] }}; opacity: 0.72;">
+                                        Coming Soon
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
 
         </main>
     </div>
