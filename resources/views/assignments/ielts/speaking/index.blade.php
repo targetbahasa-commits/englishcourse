@@ -159,6 +159,7 @@
                                 $lessonNum = ucfirst(str_replace('-', ' ', $topic['slug']));
                                 $pillColor = $topic['color'] ?? 'orange'; 
                                 $isLocked = $topic['is_locked'] ?? false;
+                                $canAccess = !$isLocked || Auth::user()->isAdmin() || Auth::user()->isTeacher();
                             @endphp
                             <div class="flex items-center gap-2">
                                 <span class="px-3 py-1 bg-{{ $pillColor }}-100 text-{{ $pillColor }}-600 rounded-full text-xs font-semibold">{{ $lessonNum }}</span>
@@ -206,7 +207,7 @@
                             Topic: {{ $topic['title'] }} (Speaking Practice Part 1)
                         </p>
                         
-                        @if(!$isLocked)
+                        @if($canAccess)
                             <a href="{{ route('assignments.ielts-academic.speaking.practice', ['topic' => $topic['slug']]) }}" class="flex items-center text-{{ $pillColor }}-600 text-base font-semibold mt-auto hover:underline w-fit">
                                 <span>Start Lesson</span>
                                 <svg class="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>

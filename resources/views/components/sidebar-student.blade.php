@@ -1,12 +1,108 @@
 <!-- Student Sidebar Component -->
 <style>
+    .student-sidebar-shell {
+        width: 16rem;
+    }
+
+    @media (min-width: 768px) {
+        body.has-student-sidebar main {
+            margin-left: var(--student-sidebar-offset, 16rem) !important;
+            transition: margin-left .2s ease;
+        }
+
+        .student-sidebar-shell {
+            width: var(--student-sidebar-width, 16rem);
+        }
+
+        body.sidebar-collapsed main {
+            margin-left: 4rem !important;
+        }
+    }
+
+    .sidebar-collapsed .sidebar-title,
+    .sidebar-collapsed .sidebar-menu p {
+        display: none;
+    }
+
+    .sidebar-collapsed .sidebar-header {
+        padding: 0.75rem 0.25rem;
+        justify-content: center;
+        position: relative;
+    }
+
+    .sidebar-collapsed .sidebar-brand {
+        width: 100%;
+        justify-content: center;
+        gap: 0;
+    }
+
+    .sidebar-collapsed .sidebar-logo {
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 0.75rem;
+    }
+
+    .sidebar-collapsed .sidebar-desktop-toggle {
+        position: absolute;
+        right: 0.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1.75rem;
+        height: 1.75rem;
+        border: 1px solid #dbeafe;
+        border-radius: 9999px;
+        background: #eff6ff;
+        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+        color: #2563eb;
+        z-index: 20;
+    }
+
+    .sidebar-collapsed .sidebar-menu {
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+    }
+
+    .sidebar-collapsed .sidebar-menu nav a,
+    .sidebar-collapsed .sidebar-menu nav button {
+        justify-content: center;
+        padding-left: 0.625rem;
+        padding-right: 0.625rem;
+        font-size: 0;
+    }
+
+    .sidebar-collapsed .sidebar-menu nav a svg,
+    .sidebar-collapsed .sidebar-menu nav button svg {
+        margin-right: 0;
+        flex-shrink: 0;
+    }
+
+    .sidebar-desktop-toggle {
+        display: inline-flex;
+    }
+
+    @media (max-width: 767px) {
+        .sidebar-desktop-toggle {
+            display: none !important;
+        }
+    }
+
     @media (max-width: 767px) {
         .mobile-sidebar-safe {
             padding-left: 3.5rem;
         }
     }
 </style>
-<div x-data="{ mobileSidebarOpen: false }">
+<div x-data="{
+    mobileSidebarOpen: false,
+    sidebarCollapsed: JSON.parse(localStorage.getItem('studentSidebarCollapsed') || 'false')
+}"
+     x-effect="
+        localStorage.setItem('studentSidebarCollapsed', JSON.stringify(sidebarCollapsed));
+        document.body.classList.toggle('sidebar-collapsed', sidebarCollapsed);
+        document.body.classList.add('has-student-sidebar');
+        document.documentElement.style.setProperty('--student-sidebar-width', sidebarCollapsed ? '4rem' : '16rem');
+        document.documentElement.style.setProperty('--student-sidebar-offset', sidebarCollapsed ? '4rem' : '16rem');
+     ">
 <button
     type="button"
     @click="mobileSidebarOpen = true"
@@ -17,21 +113,27 @@
 
 <div x-show="mobileSidebarOpen" x-transition.opacity class="md:hidden fixed inset-0 bg-black/40 z-40" @click="mobileSidebarOpen = false"></div>
 
-<aside class="w-64 bg-white shadow-md fixed h-full z-50 md:z-10 transform transition-transform duration-200 md:translate-x-0"
-       :class="mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'">
+<aside class="student-sidebar-shell bg-white shadow-md fixed h-full z-50 md:z-10 transform transition-all duration-200 md:translate-x-0"
+    :class="(mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0')">
     <div class="flex flex-col h-full">
         <div class="flex-1 overflow-y-auto pb-4">
-        <div class="p-6 flex items-center gap-3 justify-between">
-            <div class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">TB</div>
-            <span class="text-xl font-bold text-gray-800">Target Bahasa</span>
+        <div class="sidebar-header p-6 flex items-center gap-3 justify-between">
+            <div class="sidebar-brand flex items-center gap-3">
+            <div class="sidebar-logo w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">TB</div>
+            <span class="sidebar-title text-xl font-bold text-gray-800" x-show="!sidebarCollapsed" x-transition.opacity>Target Bahasa</span>
             </div>
+
+            <button type="button" @click="sidebarCollapsed = !sidebarCollapsed" class="sidebar-desktop-toggle items-center justify-center w-8 h-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" :aria-label="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'" :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+                <svg x-show="!sidebarCollapsed" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                <svg x-show="sidebarCollapsed" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+
             <button type="button" @click="mobileSidebarOpen = false" class="md:hidden text-gray-500 hover:text-gray-700" aria-label="Close menu">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
-    
-    <div class="px-6 py-4">
+
+    <div class="sidebar-menu px-6 py-4">
         <p class="text-xs font-semibold text-gray-400 mb-4">MENU UTAMA</p>
         <nav class="space-y-1">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('dashboard') || request()->routeIs('student.dashboard') ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
@@ -49,6 +151,10 @@
             <a href="{{ route('student.progress') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('student.progress') ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                 My Progress
+            </a>
+            <a href="{{ route('student.payments.index') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('student.payments.*') ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a5 5 0 00-10 0v2M5 9h14l1 10a2 2 0 01-2 2H6a2 2 0 01-2-2L5 9z"></path></svg>
+                Payments
             </a>
             <a href="{{ route('free-lesson') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('free-lesson') ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
@@ -83,7 +189,7 @@
         </nav>
     </div>
     
-    <div class="mt-auto px-6 py-6 border-t border-gray-100 bg-white flex-shrink-0">
+    <div class="sidebar-menu mt-auto px-6 py-6 border-t border-gray-100 bg-white flex-shrink-0">
         <p class="text-xs font-semibold text-gray-400 mb-4">AKUN - STUDENT</p>
         <nav class="space-y-1">
             <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-xl font-medium transition">

@@ -1,3 +1,5 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* cache bust Sat Apr 11 08:24:23 WIB 2026 */
+.dummy-cache-bust-1775870677 { color: red; }

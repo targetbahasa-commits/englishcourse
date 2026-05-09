@@ -147,6 +147,12 @@
                         <!-- Glossy effect -->
                         <div class="absolute top-0 -inset-full h-full w-1/2 z-0 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 group-hover:animate-shine"></div>
                     </button>
+
+                    <!-- SKIP NOW Button -->
+                    <a href="{{ url('/guest/quick-access/ielts_academic') }}" class="w-full block mt-4 py-3.5 px-4 text-center bg-white border border-blue-200 text-blue-600 font-semibold rounded-xl shadow hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100 active:scale-[0.98] transition-all duration-300">
+                        SKIP NOW
+                    </a>
+                    <span class="block text-xs text-gray-400 mt-1 mb-2 text-center">Langsung masuk sebagai guest tanpa login. Akan diminta login saat mengambil tes.</span>
                     
                     <!-- Register Link -->
                     <p class="text-center text-sm text-gray-600 mt-8">

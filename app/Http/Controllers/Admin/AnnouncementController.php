@@ -2,18 +2,23 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Application\Announcement\ManageAnnouncements;
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 use Illuminate\Http\Request;
 
 class AnnouncementController extends Controller
 {
+    public function __construct(
+        private readonly ManageAnnouncements $useCase
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $announcements = Announcement::latest()->paginate(15);
+        $announcements = $this->useCase->listAll(15);
         return view('admin.announcements.index', compact('announcements'));
     }
 
@@ -31,15 +36,15 @@ class AnnouncementController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
+            'title'       => 'required|string|max:255',
+            'content'     => 'required|string',
             'target_role' => 'required|in:all,student,teacher',
-            'is_active' => 'boolean'
+            'is_active'   => 'boolean',
         ]);
 
         $validated['is_active'] = $request->has('is_active');
 
-        Announcement::create($validated);
+        $this->useCase->create($validated);
 
         return redirect()->route('admin.announcements.index')
             ->with('success', 'Announcement broadcasted successfully.');
@@ -59,15 +64,15 @@ class AnnouncementController extends Controller
     public function update(Request $request, Announcement $announcement)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
+            'title'       => 'required|string|max:255',
+            'content'     => 'required|string',
             'target_role' => 'required|in:all,student,teacher',
-            'is_active' => 'boolean'
+            'is_active'   => 'boolean',
         ]);
 
         $validated['is_active'] = $request->has('is_active');
 
-        $announcement->update($validated);
+        $this->useCase->update($announcement, $validated);
 
         return redirect()->route('admin.announcements.index')
             ->with('success', 'Announcement updated successfully.');
@@ -78,7 +83,7 @@ class AnnouncementController extends Controller
      */
     public function destroy(Announcement $announcement)
     {
-        $announcement->delete();
+        $this->useCase->delete($announcement);
 
         return redirect()->route('admin.announcements.index')
             ->with('success', 'Announcement deleted successfully.');

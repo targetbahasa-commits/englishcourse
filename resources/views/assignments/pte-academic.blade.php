@@ -41,47 +41,34 @@
                 </div>
             </div>
 
-            <!-- Coming Soon Banner -->
-            <div class="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-6 mb-8 text-white shadow-lg">
-                <div class="flex items-center gap-4">
-                    <div class="p-3 bg-white/20 rounded-xl">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-xl font-bold">Coming Soon! 🚀</h2>
-                        <p class="text-orange-100 text-sm mt-1">PTE Academic materials are being prepared. Check back soon for a full suite of practice tests.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sections Grid (Preview) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            <!-- Sections Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 @php
                     $sections = [
-                        ['title' => 'Speaking & Writing', 'desc' => 'Practice read aloud, repeat sentence, describe image, re-tell lecture, and essay tasks.', 'color' => 'orange', 'gradient' => 'from-orange-400 to-orange-600', 'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'],
-                        ['title' => 'Reading', 'desc' => 'Fill in the blanks, multiple choice, reorder paragraphs, and reading comprehension tasks.', 'color' => 'blue', 'gradient' => 'from-blue-400 to-blue-600', 'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'],
-                        ['title' => 'Listening', 'desc' => 'Summarize spoken text, multiple choice, fill blanks, highlight correct summary.', 'color' => 'purple', 'gradient' => 'from-purple-400 to-purple-600', 'icon' => 'M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 012.828 2.828'],
-                        ['title' => 'Full Mock Test', 'desc' => 'Simulate a full computer-based PTE Academic exam with timed sections.', 'color' => 'red', 'gradient' => 'from-red-400 to-red-600', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'],
+                        ['title' => 'Speaking & Writing', 'desc' => 'Practice read aloud, repeat sentence, describe image, re-tell lecture, and essay tasks.', 'color' => 'orange', 'gradient' => 'from-orange-400 to-orange-600', 'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4', 'route' => route('assignments.pte-academic.speaking-writing.index')],
+                        ['title' => 'Reading', 'desc' => 'Fill in the blanks, multiple choice, reorder paragraphs, and reading comprehension tasks.', 'color' => 'blue', 'gradient' => 'from-blue-400 to-blue-600', 'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253', 'route' => route('assignments.pte-academic.reading.index')],
+                        ['title' => 'Listening', 'desc' => 'Summarize spoken text, multiple choice, fill blanks, highlight correct summary.', 'color' => 'purple', 'gradient' => 'from-purple-400 to-purple-600', 'icon' => 'M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 012.828 2.828', 'route' => route('assignments.pte-academic.listening.index')],
                     ];
                 @endphp
                 @foreach($sections as $section)
-                <div class="group relative bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 opacity-70">
+                <a href="{{ $section['route'] }}" class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
                     <div class="h-32 bg-gradient-to-br {{ $section['gradient'] }} relative overflow-hidden">
+                        <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                         <div class="absolute bottom-4 left-6">
-                            <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center">
+                            <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300">
                                 <svg class="w-8 h-8 text-{{ $section['color'] }}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $section['icon'] }}"></path></svg>
                             </div>
                         </div>
-                        <div class="absolute top-3 right-3 bg-white/80 backdrop-blur-sm text-gray-600 text-xs font-bold px-3 py-1 rounded-full">Coming Soon</div>
                     </div>
                     <div class="p-6 pt-8">
                         <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $section['title'] }}</h3>
                         <p class="text-gray-600 text-sm mb-4 leading-relaxed">{{ $section['desc'] }}</p>
-                        <button disabled class="block w-full text-center bg-gray-200 text-gray-400 font-bold py-3 px-6 rounded-xl cursor-not-allowed">
-                            Coming Soon
-                        </button>
+                        <div class="block w-full text-center bg-{{ $section['color'] }}-500 hover:bg-{{ $section['color'] }}-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+                            Start Learning
+                            <svg class="w-4 h-4 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                        </div>
                     </div>
-                </div>
+                </a>
                 @endforeach
             </div>
         </main>

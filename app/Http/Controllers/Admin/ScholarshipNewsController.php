@@ -2,15 +2,20 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Application\Scholarship\ManageScholarshipNews;
 use App\Http\Controllers\Controller;
 use App\Models\ScholarshipNews;
 use Illuminate\Http\Request;
 
 class ScholarshipNewsController extends Controller
 {
+    public function __construct(
+        private readonly ManageScholarshipNews $useCase
+    ) {}
+
     public function index()
     {
-        $news = ScholarshipNews::latest('published_at')->paginate(15);
+        $news = $this->useCase->listAll(15);
         return view('admin.scholarship-news.index', compact('news'));
     }
 
@@ -29,7 +34,7 @@ class ScholarshipNewsController extends Controller
             'is_active'    => 'boolean',
         ]);
 
-        ScholarshipNews::create([
+        $this->useCase->create([
             'title'        => $request->title,
             'summary'      => $request->summary,
             'url'          => $request->url,
@@ -56,7 +61,7 @@ class ScholarshipNewsController extends Controller
             'is_active'    => 'boolean',
         ]);
 
-        $scholarshipNews->update([
+        $this->useCase->update($scholarshipNews, [
             'title'        => $request->title,
             'summary'      => $request->summary,
             'url'          => $request->url,
@@ -70,7 +75,7 @@ class ScholarshipNewsController extends Controller
 
     public function destroy(ScholarshipNews $scholarshipNews)
     {
-        $scholarshipNews->delete();
+        $this->useCase->delete($scholarshipNews);
         return redirect()->route('admin.scholarship-news.index')
             ->with('success', 'News article deleted.');
     }

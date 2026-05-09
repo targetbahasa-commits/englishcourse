@@ -31,7 +31,7 @@
 @endphp
 
 <div class="container mx-auto px-4 py-8" 
-     x-data="speakingPractice({{ json_encode($topic['questions'] ?? []) }}, {{ json_encode($idioms ?? []) }}, {{ json_encode($collocations ?? []) }}, '{{ request('topic') }}', '{{ request('subtopic') }}', {{ json_encode($advanced_verbs ?? []) }}, {{ json_encode($advanced_adverbs ?? []) }}, {{ json_encode($advanced_adjectives ?? []) }})"
+     x-data="speakingPractice({{ json_encode($topic['questions'] ?? []) }}, {{ json_encode($topic['audio_urls'] ?? []) }}, {{ json_encode($idioms ?? []) }}, {{ json_encode($collocations ?? []) }}, '{{ request('topic') }}', '{{ request('subtopic') }}', {{ json_encode($advanced_verbs ?? []) }}, {{ json_encode($advanced_adverbs ?? []) }}, {{ json_encode($advanced_adjectives ?? []) }})"
      x-cloak>
     
     <!-- Header with Back Button -->
@@ -975,11 +975,13 @@
 </div>
 <script>
     // Use a global function for ensuring registration order doesn't matter as long as it's defined before Alpine runs or init
-    function speakingPractice(initialQuestions, initialIdioms = [], initialCollocations = [], topicSlug = '', subtopicSlug = '', initialAdvancedVerbs = [], initialAdvancedAdverbs = [], initialAdvancedAdjectives = []) {
+    function speakingPractice(initialQuestions, audioUrls = [], initialIdioms = [], initialCollocations = [], topicSlug = '', subtopicSlug = '', initialAdvancedVerbs = [], initialAdvancedAdverbs = [], initialAdvancedAdjectives = []) {
         return {
             topic: topicSlug,
             subtopic: subtopicSlug,
             questions: initialQuestions,
+            audioUrls: audioUrls,
+            currentAudioUtterance: null,
             allIdioms: initialIdioms,
             allCollocations: initialCollocations,
             allAdvancedVerbs: initialAdvancedVerbs,
@@ -1706,25 +1708,26 @@
             },
             
             speakQuestion() {
-                if ('speechSynthesis' in window) {
-                    this.canRecord = false;
-                    window.speechSynthesis.cancel();
-                    
-                    const utterance = new SpeechSynthesisUtterance(this.currentQuestion);
-                    utterance.lang = 'en-US';
-                    
-                    utterance.onend = () => {
+                this.canRecord = false;
+                if (this.currentAudioUtterance) {
+                    this.currentAudioUtterance.pause();
+                    this.currentAudioUtterance.currentTime = 0;
+                }
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                
+                const url = this.audioUrls[this.currentIndex];
+                if (url) {
+                    this.currentAudioUtterance = new Audio(url);
+                    this.currentAudioUtterance.onended = () => {
                         this.canRecord = true;
                     };
-                    
-                    utterance.onerror = () => {
-                        console.error('TTS Error');
-                        this.canRecord = true; // Fallback
+                    this.currentAudioUtterance.onerror = () => {
+                        console.error('Audio playback error');
+                        this.canRecord = true;
                     };
-                    
-                    window.speechSynthesis.speak(utterance);
+                    this.currentAudioUtterance.play();
                 } else {
-                    this.canRecord = true; // No TTS support
+                    this.canRecord = true; // Fallback if no audio found
                 }
             },
             
@@ -1739,6 +1742,7 @@
                      if (this.timerInterval) clearInterval(this.timerInterval);
                      if (this.countdownTimer) clearInterval(this.countdownTimer);
                      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                     if (this.currentAudioUtterance) this.currentAudioUtterance.pause();
                      
                      this.ttsCountdown = 0;
                      this.canRecord = true;
@@ -1751,6 +1755,10 @@
                 
                 // Stop any playing audio/speech
                 if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                if (this.currentAudioUtterance) {
+                    this.currentAudioUtterance.pause();
+                    this.currentAudioUtterance.currentTime = 0;
+                }
 
                 // Only show countdown for the first question
                 if (this.currentIndex > 0) {
@@ -1776,6 +1784,10 @@
             async next() {
                 await this.saveAnswer();
                 if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                if (this.currentAudioUtterance) {
+                    this.currentAudioUtterance.pause();
+                    this.currentAudioUtterance.currentTime = 0;
+                }
                 
                 if (this.currentIndex < this.questions.length - 1) {
                     this.currentIndex++;
@@ -1792,6 +1804,10 @@
             async prev() {
                  await this.saveAnswer();
                  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                 if (this.currentAudioUtterance) {
+                     this.currentAudioUtterance.pause();
+                     this.currentAudioUtterance.currentTime = 0;
+                 }
                  
                  if (this.currentIndex > 0) {
                     this.currentIndex--;

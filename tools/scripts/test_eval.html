@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>Loading...</h1>
+<script>
+fetch('http://localhost:8003/auto-login')
+  .then(res => res.text())
+  .then(html => {
+      document.body.innerHTML = html;
+      setTimeout(() => {
+          const page2 = document.querySelector("[x-show='Number(listeningPage) === 2']");
+          if (page2) {
+             const questionDisplay = page2.querySelector("[x-show='Number(currentPartAIndex) === 0']");
+             if (questionDisplay) {
+                 console.log("Card HTML:", questionDisplay.outerHTML);
+                 console.log("Computed Display:", window.getComputedStyle(questionDisplay).display);
+             } else {
+                 console.log("No card found for index 0");
+             }
+          }
+      }, 3000);
+  });
+</script>
+</body>
+</html>

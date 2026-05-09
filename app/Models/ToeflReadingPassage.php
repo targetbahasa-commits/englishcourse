@@ -8,6 +8,7 @@ class ToeflReadingPassage extends Model
 {
     protected $fillable = [
         'meeting_id',
+        'package_number',
         'passage_number',
         'content',
         'indonesian_translation',

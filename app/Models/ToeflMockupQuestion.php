@@ -9,6 +9,7 @@ class ToeflMockupQuestion extends Model
     protected $fillable = [
         'section',
         'part',
+        'package_number',
         'question_number',
         'question_text',
         'option_a',
@@ -17,5 +18,7 @@ class ToeflMockupQuestion extends Model
         'option_d',
         'correct_answer',
         'audio_file',
+        'transcript_en',
+        'transcript_id',
     ];
 }

@@ -69,10 +69,18 @@
 
     <!-- Lessons Section -->
     <div class="mb-12">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-            <span class="w-2 h-8 bg-{{ $task == 1 ? 'teal' : 'orange' }}-500 rounded-full mr-3"></span>
-            Lessons
-        </h2>
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                <span class="w-2 h-8 bg-{{ $task == 1 ? 'teal' : 'orange' }}-500 rounded-full mr-3"></span>
+                Lessons
+            </h2>
+            @if(Auth::user()->isAdmin())
+            <button onclick="openReorderModal()" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                Atur Urutan
+            </button>
+            @endif
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Add New Lesson Card (Admin Only) -->
             @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
@@ -122,6 +130,40 @@
         </form>
     </div>
 </div>
+
+<!-- Reorder Modal -->
+@if(Auth::user()->isAdmin())
+<div id="reorderModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[90vh]">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <h3 class="text-xl font-bold text-gray-800">Atur Urutan Lesson</h3>
+            <button onclick="hideModal('reorderModal')" class="text-gray-400 hover:text-gray-600 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <p class="text-sm text-gray-500 px-6 pt-3">Seret item untuk mengubah urutan, lalu klik Simpan.</p>
+        <ul id="sortableList" class="overflow-y-auto px-6 py-4 space-y-2 flex-1">
+            @foreach($lessons as $lesson)
+            <li class="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 cursor-grab active:cursor-grabbing select-none"
+                draggable="true"
+                data-id="{{ $lesson->id }}"
+                ondragstart="reorderDragStart(event)"
+                ondragover="reorderDragOver(event)"
+                ondrop="reorderDrop(event)"
+                ondragend="reorderDragEnd(event)">
+                <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <span class="order-badge inline-flex items-center justify-center w-7 h-7 rounded-full bg-{{ $task == 1 ? 'teal' : 'orange' }}-100 text-{{ $task == 1 ? 'teal' : 'orange' }}-700 text-xs font-bold flex-shrink-0">{{ $lesson->meeting_number }}</span>
+                <span class="text-sm font-medium text-gray-700 truncate">{{ $lesson->title }}</span>
+            </li>
+            @endforeach
+        </ul>
+        <div class="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+            <button onclick="hideModal('reorderModal')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-medium transition">Batal</button>
+            <button onclick="saveReorder()" id="saveReorderBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition shadow-sm">Simpan Urutan</button>
+        </div>
+    </div>
+</div>
+@endif
 
 <!-- Edit Modal -->
 <div id="editMeetingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
@@ -175,6 +217,94 @@
         form.action = "/assignments/ielts-academic/writing/" + meeting.id;
         
         showModal('editMeetingModal');
+    }
+
+    // --- Reorder (drag-and-drop) ---
+    let reorderDragSrc = null;
+
+    function openReorderModal() {
+        // Reset badge numbers to current DOM order
+        updateOrderBadges();
+        showModal('reorderModal');
+    }
+
+    function reorderDragStart(e) {
+        reorderDragSrc = e.currentTarget;
+        e.dataTransfer.effectAllowed = 'move';
+        e.currentTarget.classList.add('opacity-50', 'scale-95');
+    }
+
+    function reorderDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const target = e.currentTarget;
+        if (target !== reorderDragSrc) {
+            target.classList.add('border-indigo-400', 'bg-indigo-50');
+        }
+    }
+
+    function reorderDrop(e) {
+        e.preventDefault();
+        const target = e.currentTarget;
+        target.classList.remove('border-indigo-400', 'bg-indigo-50');
+        if (reorderDragSrc && target !== reorderDragSrc) {
+            const list = document.getElementById('sortableList');
+            const children = [...list.children];
+            const srcIdx = children.indexOf(reorderDragSrc);
+            const tgtIdx = children.indexOf(target);
+            if (srcIdx < tgtIdx) {
+                target.after(reorderDragSrc);
+            } else {
+                target.before(reorderDragSrc);
+            }
+            updateOrderBadges();
+        }
+    }
+
+    function reorderDragEnd(e) {
+        e.currentTarget.classList.remove('opacity-50', 'scale-95');
+        document.querySelectorAll('#sortableList li').forEach(li => {
+            li.classList.remove('border-indigo-400', 'bg-indigo-50');
+        });
+    }
+
+    function updateOrderBadges() {
+        document.querySelectorAll('#sortableList li').forEach((li, idx) => {
+            const badge = li.querySelector('.order-badge');
+            if (badge) badge.textContent = idx + 1;
+        });
+    }
+
+    async function saveReorder() {
+        const btn = document.getElementById('saveReorderBtn');
+        btn.disabled = true;
+        btn.textContent = 'Menyimpan...';
+
+        const items = [...document.querySelectorAll('#sortableList li')].map((li, idx) => ({
+            id: parseInt(li.dataset.id),
+            meeting_number: idx + 1,
+        }));
+
+        try {
+            const res = await fetch('{{ route('assignments.ielts.writing.reorder') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                        || '{{ csrf_token() }}',
+                },
+                body: JSON.stringify({ order: items }),
+            });
+
+            if (!res.ok) throw new Error('Server error');
+
+            hideModal('reorderModal');
+            window.location.reload();
+        } catch (err) {
+            alert('Gagal menyimpan urutan. Silakan coba lagi.');
+            btn.disabled = false;
+            btn.textContent = 'Simpan Urutan';
+        }
     }
 </script>
 @endsection

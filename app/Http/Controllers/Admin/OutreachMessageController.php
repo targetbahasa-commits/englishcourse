@@ -2,22 +2,26 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Application\OutreachMessage\ManageOutreachMessages;
 use App\Http\Controllers\Controller;
 use App\Models\OutreachMessage;
-use App\Models\Program;
 use Illuminate\Http\Request;
 
 class OutreachMessageController extends Controller
 {
+    public function __construct(
+        private readonly ManageOutreachMessages $useCase
+    ) {}
+
     public function index()
     {
-        $messages = OutreachMessage::latest()->paginate(15);
+        $messages = $this->useCase->listAll(15);
         return view('admin.outreach-messages.index', compact('messages'));
     }
 
     public function create()
     {
-        $programs = Program::where('is_active', true)->orderBy('name')->get();
+        $programs = $this->useCase->getActiveProgramOptions();
         return view('admin.outreach-messages.create', compact('programs'));
     }
 
@@ -32,7 +36,7 @@ class OutreachMessageController extends Controller
             'message_content' => 'required|string',
         ]);
 
-        OutreachMessage::create($validated);
+        $this->useCase->create($validated);
 
         return redirect()->route('admin.outreach-messages.index')
             ->with('success', 'Outreach message created successfully.');
@@ -40,7 +44,7 @@ class OutreachMessageController extends Controller
 
     public function edit(OutreachMessage $outreachMessage)
     {
-        $programs = Program::where('is_active', true)->orderBy('name')->get();
+        $programs = $this->useCase->getActiveProgramOptions();
         return view('admin.outreach-messages.edit', compact('outreachMessage', 'programs'));
     }
 
@@ -55,7 +59,7 @@ class OutreachMessageController extends Controller
             'message_content' => 'required|string',
         ]);
 
-        $outreachMessage->update($validated);
+        $this->useCase->update($outreachMessage, $validated);
 
         return redirect()->route('admin.outreach-messages.index')
             ->with('success', 'Outreach message updated successfully.');
@@ -63,7 +67,7 @@ class OutreachMessageController extends Controller
 
     public function destroy(OutreachMessage $outreachMessage)
     {
-        $outreachMessage->delete();
+        $this->useCase->delete($outreachMessage);
         return redirect()->route('admin.outreach-messages.index')
             ->with('success', 'Outreach message deleted successfully.');
     }

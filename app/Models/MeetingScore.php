@@ -11,6 +11,7 @@ class MeetingScore extends Model
 
     protected $fillable = [
         'user_id',
+        'program_id',
         'meeting_number',
         'score',
         'submitted_at'
@@ -26,5 +27,13 @@ class MeetingScore extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the program that the meeting score belongs to.
+     */
+    public function program()
+    {
+        return $this->belongsTo(Program::class);
     }
 }

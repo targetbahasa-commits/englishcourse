@@ -5,12 +5,12 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Otp;
-use App\Services\WhatsApp\WhatsAppGatewayInterface;
+use App\Domain\Notification\Contracts\WhatsAppGateway;
 use Illuminate\Support\Facades\Log;
 
 class OtpController extends Controller
 {
-    public function send(Request $request, WhatsAppGatewayInterface $whatsapp)
+    public function send(Request $request, WhatsAppGateway $whatsapp)
     {
         $request->validate([
             'phone_number' => ['required', 'string', 'min:9', 'max:20', 'regex:/^(\+62|62|0)8[1-9][0-9]{6,11}$/'],

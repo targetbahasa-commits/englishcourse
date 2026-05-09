@@ -5,7 +5,11 @@
         $resolvedUpdateTranscriptRoute = $updateTranscriptRoute ?? route('assignments.toefl-itp.listening.meeting.update-transcript', ['number' => $number ?? 0, 'set' => $set ?? 0]);
         $resolvedUploadSrtRoute = $uploadSrtRoute ?? route('assignments.toefl-itp.listening.meeting.upload-srt', ['number' => $number ?? 0, 'set' => $set ?? 0]);
         $resolvedUploadAudioRoute = $uploadAudioRoute ?? route('assignments.toefl-itp.listening.meeting.upload-audio', ['number' => $number ?? 0, 'set' => $set ?? 0]);
-        $transcriptSourceQuestions = $questions ?? $listeningQuestions ?? collect();
+        $transcriptSourceQuestions = collect($questions ?? $listeningQuestions ?? []);
+        $firstTranscriptItem = $transcriptSourceQuestions->first();
+        $firstTranscriptEn = data_get($firstTranscriptItem, 'transcript_en', '');
+        $firstTranscriptId = data_get($firstTranscriptItem, 'transcript_id', '');
+        $firstAudioFile = data_get($firstTranscriptItem, 'audio_file');
     @endphp
     <div id="editTranscriptModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
@@ -15,12 +19,12 @@
                     @csrf
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2">English Script</label>
-                        <textarea name="transcript_en" rows="6" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">{{ $transcriptSourceQuestions->first() ? $transcriptSourceQuestions->first()->transcript_en : '' }}</textarea>
+                        <textarea name="transcript_en" rows="6" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">{{ $firstTranscriptEn }}</textarea>
                         <p class="text-gray-500 text-xs mt-1">Use newline for paragraphs.</p>
                     </div>
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2">Indonesian Translation</label>
-                        <textarea name="transcript_id" rows="6" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">{{ $transcriptSourceQuestions->first() ? $transcriptSourceQuestions->first()->transcript_id : '' }}</textarea>
+                        <textarea name="transcript_id" rows="6" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">{{ $firstTranscriptId }}</textarea>
                     </div>
                     <div class="flex justify-end gap-2">
                         <button type="button" onclick="document.getElementById('editTranscriptModal').classList.add('hidden')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Cancel</button>
@@ -131,9 +135,10 @@ Start translating here..."></textarea>
                 </button>
             </div>
 
-            <form action="{{ $resolvedUploadAudioRoute }}" 
-                    method="POST" enctype="multipart/form-data" class="space-y-4">
+            <form id="uploadAudioForm" action="{{ $resolvedUploadAudioRoute }}" 
+                    method="POST" enctype="multipart/form-data" class="space-y-4" onsubmit="handleAudioUploadSubmit()">
                 @csrf
+                <input type="hidden" name="question_id" id="uploadAudioQuestionId" value="">
                 
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
@@ -143,11 +148,11 @@ Start translating here..."></textarea>
                         class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none">
                 </div>
 
-                @if($transcriptSourceQuestions->first() && $transcriptSourceQuestions->first()->audio_file)
-                    <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                @if($firstAudioFile)
+                    <div class="p-3 bg-blue-50 rounded-lg border border-blue-200 break-words">
                         <p class="text-sm text-blue-800">
                             <span class="font-semibold">Current file:</span> 
-                            {{ basename($transcriptSourceQuestions->first()->audio_file) }}
+                            {{ basename($firstAudioFile) }}
                         </p>
                     </div>
                 @endif
@@ -157,19 +162,55 @@ Start translating here..."></textarea>
                             class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors">
                         Cancel
                     </button>
-                    <button type="submit"
-                            class="flex-1 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
-                        Upload
+                    <button type="submit" id="uploadAudioSubmitBtn"
+                            class="flex-1 flex items-center justify-center px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed">
+                        <span id="uploadAudioBtnText">Upload</span>
+                        <svg id="uploadAudioSpinner" class="hidden animate-spin ml-2 w-5 h-5 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
                     </button>
                 </div>
             </form>
         </div>
     </div>
+    
+    <script>
+    function handleAudioUploadSubmit() {
+        const btn = document.getElementById('uploadAudioSubmitBtn');
+        const text = document.getElementById('uploadAudioBtnText');
+        const spinner = document.getElementById('uploadAudioSpinner');
+        
+        // Prevent double click
+        btn.disabled = true;
+        text.innerText = 'Uploading...';
+        spinner.classList.remove('hidden');
+        
+        return true; 
+    }
+
+    window.openMockupQuestionAudioModal = function(questionId) {
+        const uploadModal = document.getElementById('uploadAudioModal');
+        const uploadModalQuestionInput = document.getElementById('uploadAudioQuestionId');
+        const chooseModalQuestionInput = document.getElementById('chooseAudioQuestionId');
+
+        if (uploadModalQuestionInput) {
+            uploadModalQuestionInput.value = questionId || '';
+        }
+        if (chooseModalQuestionInput) {
+            chooseModalQuestionInput.value = questionId || '';
+        }
+        if (uploadModal) {
+            uploadModal.classList.remove('hidden');
+            uploadModal.classList.add('flex');
+        }
+    }
+    </script>
 
     {{-- Choose Audio From Folder Modal (File Manager) --}}
-    <div id="chooseAudioModal" class="hidden fixed inset-0  items-center justify-center"
+    <div id="chooseAudioModal" class="hidden fixed inset-0 z-50 items-center justify-center"
          onclick="if(event.target === this) this.classList.add('hidden')">
-        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full mx-4 my-8">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full mx-4 my-8 overflow-y-auto max-h-screen">
             <div class="flex items-center justify-between mb-6">
                 <div>
                     <h3 class="text-2xl font-bold text-gray-900">Choose Audio File</h3>
@@ -185,6 +226,7 @@ Start translating here..."></textarea>
 
             <form action="{{ $resolvedUploadAudioRoute }}" method="POST" class="space-y-4">
                 @csrf
+                <input type="hidden" name="question_id" id="chooseAudioQuestionId" value="">
 
                 {{-- Breadcrumb Navigation --}}
                 <div class="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -200,7 +242,7 @@ Start translating here..."></textarea>
                 <div class="mb-4">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Available Files & Folders</label>
                     <div id="audioFileList" class="w-full border-2 border-gray-300 rounded-lg max-h-80 overflow-y-auto bg-white">
-                        <div class="p-4 text-center text-gray-500 text-sm">Loading files...</div>
+                        <div class="p-4 text-center text-gray-400 text-sm italic">Klik "Choose Audio" untuk memuat daftar file...</div>
                     </div>
                 </div>
 
@@ -232,12 +274,50 @@ Start translating here..."></textarea>
 
     <script>
     const audioFileManager = {
-        allFiles: @json($sourceAudioOptions ?? []),
+        allFiles: [],
         currentPath: '',
         selectedFile: null,
+        loaded: false,
+        loading: false,
 
         init() {
-            this.render();
+            if (this.loaded) {
+                this.render();
+                return;
+            }
+            this.fetchFiles();
+        },
+
+        fetchFiles() {
+            if (this.loading) return;
+            this.loading = true;
+            const listContainer = document.getElementById('audioFileList');
+            listContainer.innerHTML = '<div class="p-4 text-center text-gray-500 text-sm"><svg class="animate-spin w-5 h-5 mx-auto mb-2 text-indigo-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Memuat file audio...</div>';
+
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+            fetch('{{ route("api.audio.files") }}', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(function(response) {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
+            .then(function(data) {
+                audioFileManager.allFiles = Array.isArray(data) ? data : [];
+                audioFileManager.loaded = true;
+                audioFileManager.loading = false;
+                audioFileManager.render();
+            })
+            .catch(function(err) {
+                audioFileManager.loading = false;
+                const el = document.getElementById('audioFileList');
+                el.innerHTML = '<div class="p-4 text-center text-red-500 text-sm">Gagal memuat file: ' + err.message + '</div>';
+            });
         },
 
         goToRoot(e) {
@@ -271,19 +351,25 @@ Start translating here..."></textarea>
                 return;
             }
 
-            // Build folder structure
+            // Build folder structure using label for display, keeping value for submission
             const items = {};
             this.allFiles.forEach(audio => {
-                const path = audio.label || audio.value;
-                const parts = path.split('/');
+                const label = audio.label || audio.value;
+                const value = audio.value;
+                const parts = label.split('/');
                 let current = items;
                 
                 for (let i = 0; i < parts.length; i++) {
                     const part = parts[i];
-                    const fullPath = parts.slice(0, i + 1).join('/');
+                    const labelPath = parts.slice(0, i + 1).join('/');
+                    const isFile = i === parts.length - 1;
                     
                     if (!current[part]) {
-                        current[part] = { _path: fullPath, _isFile: i === parts.length - 1 };
+                        current[part] = {
+                            _labelPath: labelPath,
+                            _isFile: isFile,
+                            _value: isFile ? value : null
+                        };
                     }
                     current = current[part];
                 }
@@ -293,14 +379,21 @@ Start translating here..."></textarea>
             let current = items;
             if (this.currentPath) {
                 const pathParts = this.currentPath.split('/');
-                breadcrumb.innerHTML = pathParts.map((p, i) => {
-                    const p2 = pathParts.slice(0, i + 1).join('/');
-                    return `<button class="text-blue-600 hover:text-blue-800" onclick="audioFileManager.goToFolder('${p2}'); event.preventDefault()">${p}</button>`;
-                }).join(' <span class="text-gray-400">/</span> ');
+                breadcrumb.innerHTML = '<button type="button" class="text-blue-600 hover:text-blue-800" data-action="goto-root">Root</button>' +
+                    pathParts.map((p, i) => {
+                        const p2 = pathParts.slice(0, i + 1).join('/');
+                        return ` <span class="text-gray-400">/</span> <button type="button" class="text-blue-600 hover:text-blue-800" data-action="goto-folder" data-path="${p2}">${p}</button>`;
+                    }).join('');
 
-                pathParts.forEach(part => {
+                for (const part of pathParts) {
+                    if (current[part] === undefined) {
+                        // Safety: path no longer valid, go back to root
+                        this.currentPath = '';
+                        this.render();
+                        return;
+                    }
                     current = current[part];
-                });
+                }
             } else {
                 breadcrumb.innerHTML = 'Root';
             }
@@ -317,33 +410,22 @@ Start translating here..."></textarea>
             contents.forEach(name => {
                 const item = current[name];
                 const isFile = item._isFile;
-                const fullPath = item._path;
-                const isSelected = isFile && this.selectedFile === fullPath;
+                const labelPath = item._labelPath;
+                const fileValue = item._value;  // Full path for submission (e.g. audio/toefl/listening/test/file.mp3)
+                const isSelected = isFile && fileValue && this.selectedFile === fileValue;
                 
                 if (isFile) {
-                    html += `
-                        <div class="flex items-center p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 ${isSelected ? 'bg-blue-100' : ''}"
-                             onclick="audioFileManager.selectFile('${fullPath}')">
-                            <svg class="w-5 h-5 text-red-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                            </svg>
-                            <span class="text-sm text-gray-800 flex-1 break-words">${name}</span>
-                            ${isSelected ? '<svg class="w-5 h-5 text-green-600 ml-2 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>' : ''}
-                        </div>
-                    `;
+                    html += `<div class="flex items-center p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 ${isSelected ? 'bg-blue-100' : ''}" data-action="select-file" data-path="${fileValue}">
+                        <svg class="w-5 h-5 text-red-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
+                        <span class="text-sm text-gray-800 flex-1 break-words pointer-events-none">${name}</span>
+                        ${isSelected ? '<svg class="w-5 h-5 text-green-600 ml-2 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>' : ''}
+                    </div>`;
                 } else {
-                    html += `
-                        <div class="flex items-center p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100"
-                             onclick="audioFileManager.goToFolder('${fullPath}')">
-                            <svg class="w-5 h-5 text-yellow-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"></path>
-                            </svg>
-                            <span class="text-sm font-medium text-gray-800 flex-1">${name}</span>
-                            <svg class="w-4 h-4 text-gray-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                            </svg>
-                        </div>
-                    `;
+                    html += `<div class="flex items-center p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100" data-action="goto-folder" data-path="${labelPath}">
+                        <svg class="w-5 h-5 text-yellow-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"></path></svg>
+                        <span class="text-sm font-medium text-gray-800 flex-1 pointer-events-none">${name}</span>
+                        <svg class="w-4 h-4 text-gray-400 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </div>`;
                 }
             });
             
@@ -351,11 +433,32 @@ Start translating here..."></textarea>
         }
     };
 
-    // Initialize when modal is opened
-    const originalChooseAudioClick = document.addEventListener('click', function initAudioModal(e) {
+    // Delegated event listener for file manager - handles folder navigation and file selection
+    // Using data-attributes instead of inline onclick to avoid HTML escaping issues
+    document.addEventListener('click', function(e) {
+        const el = e.target.closest('[data-action]');
+        if (el) {
+            e.preventDefault();
+            e.stopPropagation();
+            const action = el.getAttribute('data-action');
+            const path   = el.getAttribute('data-path');
+            if (action === 'goto-folder') {
+                audioFileManager.goToFolder(path || '');
+            } else if (action === 'select-file') {
+                audioFileManager.selectFile(path);
+            } else if (action === 'goto-root') {
+                audioFileManager.goToRoot(null);
+            }
+            return;
+        }
+
+        // Initialize when modal is opened
         const chooseBtn = e.target.closest('[onclick*="chooseAudioModal"]');
-        if (chooseBtn && chooseBtn.getAttribute('onclick').includes("remove('hidden')")) {
-            setTimeout(() => audioFileManager.init(), 100);
+        if (chooseBtn) {
+            const onclickVal = chooseBtn.getAttribute('onclick') || '';
+            if (onclickVal.includes("remove('hidden')") || onclickVal.includes('classList.remove')) {
+                setTimeout(function() { audioFileManager.init(); }, 150);
+            }
         }
     });
     </script>

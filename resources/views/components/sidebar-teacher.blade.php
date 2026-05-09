@@ -1,12 +1,70 @@
 <!-- Teacher Sidebar Component -->
 <style>
+    .teacher-sidebar-shell {
+        width: 16rem;
+    }
+
+    @media (min-width: 768px) {
+        body.has-teacher-sidebar main {
+            margin-left: var(--teacher-sidebar-offset, 16rem) !important;
+            transition: margin-left .2s ease;
+        }
+
+        .teacher-sidebar-shell {
+            width: var(--teacher-sidebar-width, 16rem);
+        }
+
+        body.sidebar-collapsed main {
+            margin-left: 4rem !important;
+        }
+    }
+
+    .sidebar-collapsed .sidebar-title,
+    .sidebar-collapsed .sidebar-menu p {
+        display: none;
+    }
+
+    .sidebar-collapsed .sidebar-menu nav a,
+    .sidebar-collapsed .sidebar-menu nav button {
+        justify-content: center;
+        padding-left: 0.625rem;
+        padding-right: 0.625rem;
+        font-size: 0;
+    }
+
+    .sidebar-collapsed .sidebar-menu nav a svg,
+    .sidebar-collapsed .sidebar-menu nav button svg {
+        margin-right: 0;
+        flex-shrink: 0;
+    }
+
+    .sidebar-desktop-toggle {
+        display: inline-flex;
+    }
+
+    @media (max-width: 767px) {
+        .sidebar-desktop-toggle {
+            display: none !important;
+        }
+    }
+
     @media (max-width: 767px) {
         .mobile-sidebar-safe {
             padding-left: 3.5rem;
         }
     }
 </style>
-<div x-data="{ mobileSidebarOpen: false }">
+<div x-data="{
+    mobileSidebarOpen: false,
+    sidebarCollapsed: JSON.parse(localStorage.getItem('teacherSidebarCollapsed') || 'false')
+}"
+     x-effect="
+        localStorage.setItem('teacherSidebarCollapsed', JSON.stringify(sidebarCollapsed));
+        document.body.classList.toggle('sidebar-collapsed', sidebarCollapsed);
+        document.body.classList.add('has-teacher-sidebar');
+        document.documentElement.style.setProperty('--teacher-sidebar-width', sidebarCollapsed ? '4rem' : '16rem');
+        document.documentElement.style.setProperty('--teacher-sidebar-offset', sidebarCollapsed ? '4rem' : '16rem');
+     ">
 <button
     type="button"
     @click="mobileSidebarOpen = true"
@@ -17,21 +75,27 @@
 
 <div x-show="mobileSidebarOpen" x-transition.opacity class="md:hidden fixed inset-0 bg-black/40 z-40" @click="mobileSidebarOpen = false"></div>
 
-<aside class="w-64 bg-white shadow-md fixed h-full z-50 md:z-10 transform transition-transform duration-200 md:translate-x-0"
-       :class="mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'">
+<aside class="teacher-sidebar-shell bg-white shadow-md fixed h-full z-50 md:z-10 transform transition-all duration-200 md:translate-x-0"
+    :class="(mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0')">
     <div class="flex flex-col h-full">
         <div class="flex-1 overflow-y-auto pb-4">
         <div class="p-6 flex items-center gap-3 justify-between">
             <div class="flex items-center gap-3">
             <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">TB</div>
-            <span class="text-xl font-bold text-gray-800">Target Bahasa</span>
+            <span class="sidebar-title text-xl font-bold text-gray-800" x-show="!sidebarCollapsed" x-transition.opacity>Target Bahasa</span>
             </div>
+
+            <button type="button" @click="sidebarCollapsed = !sidebarCollapsed" class="sidebar-desktop-toggle items-center justify-center w-8 h-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" :aria-label="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'" :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+                <svg x-show="!sidebarCollapsed" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                <svg x-show="sidebarCollapsed" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+
             <button type="button" @click="mobileSidebarOpen = false" class="md:hidden text-gray-500 hover:text-gray-700" aria-label="Close menu">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
-        
-        <div class="px-6 py-4">
+
+        <div class="sidebar-menu px-6 py-4">
         <p class="text-xs font-semibold text-gray-400 mb-4">MAIN MENU</p>
         <nav class="space-y-1">
             <a href="{{ route('teacher.dashboard') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('teacher.dashboard') ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
@@ -69,7 +133,7 @@
         </nav>
     </div>
     
-    <div class="mt-auto px-6 py-6 border-t border-gray-100 bg-white flex-shrink-0">
+    <div class="sidebar-menu mt-auto px-6 py-6 border-t border-gray-100 bg-white flex-shrink-0">
         <p class="text-xs font-semibold text-gray-400 mb-4">ACCOUNT - TEACHER</p>
         <nav class="space-y-1">
             <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-xl font-medium transition">

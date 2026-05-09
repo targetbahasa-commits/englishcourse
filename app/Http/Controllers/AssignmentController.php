@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Enrollment;
 use App\Models\MeetingScore;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,6 +19,13 @@ class AssignmentController extends Controller
                     ->with('error', 'Guest account does not have access to assignments.');
             }
 
+            $requiredProgramSlug = $this->resolveAssignmentProgramSlugFromRequest($request);
+
+            if ($user && !$this->userCanAccessAssignmentProgram($user, $requiredProgramSlug)) {
+                return redirect()->route('assignments.index')
+                    ->with('error', 'You can only access assignments for your registered program.');
+            }
+
             return $next($request);
         });
     }
@@ -26,31 +34,133 @@ class AssignmentController extends Controller
     {
         // Exclude internal/helper programs from the main dashboard
         $programs = \App\Models\Program::whereNotIn('slug', ['ielts-academic-listening', 'ielts-academic-reading'])
+            ->whereRaw('LOWER(name) NOT LIKE ?', ['%mock test%'])
+            ->whereRaw('LOWER(slug) NOT LIKE ?', ['%mock%'])
+            ->whereRaw('LOWER(slug) NOT LIKE ?', ['%cambridge%'])
             ->where('is_active', true)
             ->get();
+        $allowedAssignmentProgramSlugs = $this->resolveAllowedAssignmentProgramSlugsForUser(Auth::user());
+
         // dd('Hit index method');
-        return view('assignments.index', compact('programs'));
+        return view('assignments.index', compact('programs', 'allowedAssignmentProgramSlugs'));
     }
+
 
     public function toeflItp()
     {
-        // dd('Hit toeflItp method');
+        $user = Auth::user();
+        if (!$this->userCanAccessAssignmentProgram($user, 'toefl-itp')) {
+            return redirect()->route('assignments.index')->with('error', 'You can only access assignments for your registered program.');
+        }
         return view('assignments.toefl-itp');
     }
 
     public function ieltsAcademic()
     {
+        $user = Auth::user();
+        if (!$this->userCanAccessAssignmentProgram($user, 'ielts-academic')) {
+            return redirect()->route('assignments.index')->with('error', 'You can only access assignments for your registered program.');
+        }
         return view('ielts.writing.index');
     }
 
     public function pteAcademic()
     {
+        $user = Auth::user();
+        if (!$this->userCanAccessAssignmentProgram($user, 'pte-academic')) {
+            return redirect()->route('assignments.index')->with('error', 'You can only access assignments for your registered program.');
+        }
         return view('assignments.pte-academic');
     }
 
     public function ieltsGeneral()
     {
+        $user = Auth::user();
+        if (!$this->userCanAccessAssignmentProgram($user, 'ielts-general')) {
+            return redirect()->route('assignments.index')->with('error', 'You can only access assignments for your registered program.');
+        }
         return view('assignments.ielts-general');
+    }
+
+    protected function resolveAssignmentProgramSlugFromRequest(Request $request): ?string
+    {
+        if ($request->routeIs('assignments.toefl-itp*')) {
+            return 'toefl-itp';
+        }
+
+        if ($request->routeIs('assignments.ielts-academic*') || $request->routeIs('assignments.ielts.*')) {
+            return 'ielts-academic';
+        }
+
+        if ($request->routeIs('assignments.pte-academic*')) {
+            return 'pte-academic';
+        }
+
+        if ($request->routeIs('assignments.ielts-general*')) {
+            return 'ielts-general';
+        }
+
+        if ($request->routeIs('assignments.grammar-writing*')) {
+            return 'grammar-for-writing';
+        }
+
+        return null;
+    }
+
+    protected function resolveAllowedAssignmentProgramSlugsForUser($user): array
+    {
+        if (!$user || !$user->isStudent()) {
+            return [];
+        }
+
+        // Only allow the program assigned to the user (from registration)
+        $allowedProgramSlugs = [];
+        if ($user->program && $user->program->slug) {
+            $allowedProgramSlugs[] = $this->normalizeAssignmentProgramSlug($user->program->slug);
+        }
+
+        // If user registered via no-payment, do NOT allow any other program via enrollment
+        // Only allow enrollment-based access if user does NOT have program_id set
+        if (empty($allowedProgramSlugs)) {
+            $enrollmentProgramSlugs = Enrollment::query()
+                ->where('user_id', $user->id)
+                ->whereIn('status', ['active', 'completed'])
+                ->with('program:id,slug')
+                ->get()
+                ->pluck('program.slug')
+                ->filter()
+                ->map(fn ($slug) => $this->normalizeAssignmentProgramSlug($slug))
+                ->all();
+            $allowedProgramSlugs = array_values(array_unique(array_filter($enrollmentProgramSlugs)));
+        }
+
+        $allowedProgramSlugs = array_merge($allowedProgramSlugs, ['ielts-academic', 'ielts-general']);
+
+        return array_values(array_unique(array_filter($allowedProgramSlugs)));
+    }
+
+    protected function normalizeAssignmentProgramSlug(?string $slug): ?string
+    {
+        return match ($slug) {
+            'grammar-writing' => 'grammar-for-writing',
+            'ielts-academic-listening', 'ielts-academic-reading', 'ielts-academic-full-package' => 'ielts-academic',
+            default => $slug,
+        };
+    }
+
+    protected function userCanAccessAssignmentProgram($user, ?string $requiredProgramSlug): bool
+    {
+        if (!$requiredProgramSlug || !$user || !$user->isStudent()) {
+            return true;
+        }
+
+        $allowedProgramSlugs = $this->resolveAllowedAssignmentProgramSlugsForUser($user);
+
+        if ($allowedProgramSlugs === []) {
+            return false;
+        }
+
+        return in_array($requiredProgramSlug, $allowedProgramSlugs, true);
     }
 
     public function ieltsListeningIndex()
@@ -2391,23 +2501,23 @@ class AssignmentController extends Controller
             // determine type by meeting_number range
             $num = $meeting->meeting_number;
             if ($num >= 1010 && $num <= 1029) {
-                $backUrl .= '?type=line';
+                $backUrl .= '?task=1&type=line';
             } elseif ($num >= 1030 && $num <= 1049) {
-                $backUrl .= '?type=bar';
+                $backUrl .= '?task=1&type=bar';
             } elseif ($num >= 1050 && $num <= 1069) {
-                $backUrl .= '?type=pie';
+                $backUrl .= '?task=1&type=pie';
             } elseif ($num >= 1070 && $num <= 1089) {
-                $backUrl .= '?type=table';
+                $backUrl .= '?task=1&type=table';
             } elseif ($num >= 1090 && $num <= 1109) {
-                $backUrl .= '?type=mixed';
+                $backUrl .= '?task=1&type=mixed';
             } elseif ($num >= 1110 && $num <= 1129) {
-                $backUrl .= '?type=flowchart';
+                $backUrl .= '?task=1&type=flowchart';
             } elseif ($num >= 1130 && $num <= 1149) {
-                $backUrl .= '?type=mapping';
+                $backUrl .= '?task=1&type=mapping';
             }
         }
 
-        if ($meeting->category === 'practice_item') {
+        if ($meeting->category === 'practice_item' && $meeting->meeting_number < 1000) {
             $parentNumber = match (true) {
                 $meeting->meeting_number >= 101 && $meeting->meeting_number <= 105 => 100,
                 $meeting->meeting_number >= 106 && $meeting->meeting_number <= 110 => 111,
@@ -3505,6 +3615,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
     private function robustJsonDecode($jsonStr) {
         // 1. Initial attempt
         $json = json_decode($jsonStr, true, 512, JSON_INVALID_UTF8_IGNORE);
+
         if ($json) return $json;
 
         // 2. Try balancing braces
@@ -3641,6 +3752,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
     }
 
     public function ieltsSpeakingPractice(Request $request)
+
     {
         $slug = $request->query('topic');
         $subtopicSlug = $request->query('subtopic');

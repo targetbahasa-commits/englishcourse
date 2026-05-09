@@ -31,7 +31,7 @@
                         </div>
                         <div>
                             <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Part A Soal {{ $start }}-{{ $end }}</h1>
-                            <p class="text-gray-600 mt-1">Total {{ $questions->count() }} soal</p>
+                            <p class="text-gray-600 mt-1">Total {{ count($questions) }} soal</p>
                         </div>
                     </div>
                     <a href="{{ route('assignments.toefl-itp.listening.practice.part-a') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">

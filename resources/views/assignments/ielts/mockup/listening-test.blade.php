@@ -20,6 +20,7 @@
 <body class="font-sans antialiased bg-gray-50">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
+    @include('components.cambridge-guest-signup-modal')
     <div class="flex min-h-screen">
         {{-- Main Content --}}
         <main class="flex-1 w-full max-w-6xl mx-auto p-8">
@@ -255,7 +256,7 @@
                             <h2 class="text-xl font-bold text-center mb-6">Plan of Stevenson's site</h2>
 
                             <div class="mb-8 flex justify-center">
-                                <img src="{{ asset('images/ielts-listening-map.jpg') }}" alt="Plan of Stevenson's site" class="max-w-full h-auto shadow-md rounded-lg">
+                                <img src="{{ asset('images/ielts/listening/ielts-listening-map.jpg') }}" alt="Plan of Stevenson's site" class="max-w-full h-auto shadow-md rounded-lg">
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 max-w-2xl mx-auto">

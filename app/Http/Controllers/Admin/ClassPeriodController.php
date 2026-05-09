@@ -2,30 +2,26 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Application\ClassPeriod\ManageClassPeriods;
 use App\Http\Controllers\Controller;
-use App\Models\ClassPeriod;
+use App\Http\Requests\Admin\ClassPeriodUpsertRequest;
 use App\Models\Meeting;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\ClassPeriod;
 
 class ClassPeriodController extends Controller
 {
+    public function __construct(
+        private readonly ManageClassPeriods $manageClassPeriods
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = ClassPeriod::withCount('users')->latest();
-
-        if ($request->has('program_id') && $request->program_id) {
-            $query->where('program_id', $request->program_id);
-        }
-
-        if ($request->has('status') && $request->status) {
-            $query->where('status', $request->status);
-        }
-
-        $periods = $query->get();
+        $periods = $this->manageClassPeriods->listAll($request->only(['program_id', 'status']));
         
         return view('admin.class-periods.index', compact('periods'));
     }
@@ -33,25 +29,11 @@ class ClassPeriodController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(ClassPeriodUpsertRequest $request)
     {
-        $data = $request->validate([
-            'name' => 'nullable|string|max:255',
-            'program_id' => 'required|exists:programs,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'status' => 'required|in:active,upcoming,closed',
-            'learning_mode' => 'required|in:online,offline',
-            'batch_type' => 'required|in:regular,private',
-        ]);
+        $data = $request->validated();
 
-        if (empty($data['name'])) {
-            $start = \Carbon\Carbon::parse($data['start_date'])->translatedFormat('d M Y');
-            $end = \Carbon\Carbon::parse($data['end_date'])->translatedFormat('d M Y');
-            $data['name'] = "Batch {$start} - {$end}";
-        }
-
-        $classPeriod = ClassPeriod::create($data);
+        $this->manageClassPeriods->create($data);
 
         return back()->with('success', 'Class Period created successfully. You can now manage meetings and students.');
     }
@@ -61,28 +43,7 @@ class ClassPeriodController extends Controller
      */
     public function show(ClassPeriod $classPeriod)
     {
-        $classPeriod->load('users', 'program.meetings');
-        
-        // Get meetings for the program associated with this class period
-        // And also fetch their pivot status for THIS class period
-        
-        $meetings = $classPeriod->program ? $classPeriod->program->meetings : collect();
-        
-        // We need to attach the "is_open" status to each meeting.
-        // We can do this by loading the relationship or querying the pivot table.
-        // Let's get the pivot data
-        $pivotData = $classPeriod->meetings()->pluck('class_period_meetings.is_open', 'class_period_meetings.meeting_id');
-        
-        // Map the status to the meetings collection
-        $meetings->transform(function($meeting) use ($pivotData) {
-            $meeting->is_open_for_period = $pivotData[$meeting->id] ?? false; // Default false (LOCKED)
-            return $meeting;
-        });
-
-        // For the "Add Student" dropdown
-        // Ideally fetch students NOT in any active class or generic pool
-        // For simplicity, fetch all students
-        $allStudents = User::where('role', 'student')->get();
+        ['classPeriod' => $classPeriod, 'meetings' => $meetings, 'allStudents' => $allStudents] = $this->manageClassPeriods->show($classPeriod);
 
         return view('admin.class-periods.show', compact('classPeriod', 'meetings', 'allStudents'));
     }
@@ -90,25 +51,11 @@ class ClassPeriodController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ClassPeriod $classPeriod)
+    public function update(ClassPeriodUpsertRequest $request, ClassPeriod $classPeriod)
     {
-        $data = $request->validate([
-            'name' => 'nullable|string|max:255',
-            'program_id' => 'required|exists:programs,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'status' => 'required|in:active,upcoming,closed',
-            'learning_mode' => 'required|in:online,offline',
-            'batch_type' => 'required|in:regular,private',
-        ]);
+        $data = $request->validated();
 
-        if (empty($data['name'])) {
-            $start = \Carbon\Carbon::parse($data['start_date'])->translatedFormat('d M Y');
-            $end = \Carbon\Carbon::parse($data['end_date'])->translatedFormat('d M Y');
-            $data['name'] = "Batch {$start} - {$end}";
-        }
-
-        $classPeriod->update($data);
+        $this->manageClassPeriods->update($classPeriod, $data);
 
         return back()->with('success', 'Class Period updated successfully.');
     }
@@ -118,30 +65,22 @@ class ClassPeriodController extends Controller
      */
     public function destroy(ClassPeriod $classPeriod)
     {
-        $classPeriod->delete();
-        return redirect()->route('admin.class-periods.index')
-            ->with('success', 'Class Period deleted successfully.');
+        $this->manageClassPeriods->delete($classPeriod);
+        return back()->with('success', 'Class Period deleted successfully.');
+    }
+
+    public function nextBatchNumber(Request $request)
+    {
+        $request->validate(['program_id' => 'required|exists:programs,id']);
+        $next = $this->manageClassPeriods->getNextBatchNumber((int) $request->program_id);
+        return response()->json(['next_batch_number' => $next]);
     }
 
     // --- Custom Methods ---
 
     public function toggleMeeting(Request $request, ClassPeriod $classPeriod, Meeting $meeting)
     {
-        // Toggle the is_open status in the pivot table
-        // First check if exists
-        $pivot = $classPeriod->meetings()->where('meeting_id', $meeting->id)->first();
-        
-        if ($pivot) {
-           // Toggle
-           $newStatus = !$pivot->pivot->is_open;
-           $classPeriod->meetings()->updateExistingPivot($meeting->id, ['is_open' => $newStatus]);
-        } else {
-           // Create (Default is locked, so if we are toggling, we probably want to OPEN it, since default "non-existent" is effectively locked)
-           // Wait, logic in model is: "No rule exists => LOCKED".
-           // So creating an entry with is_open = true unlocks it.
-           // If we toggle, we assume from "LOCKED" (non-existent) to "OPEN".
-           $classPeriod->meetings()->attach($meeting->id, ['is_open' => true]);
-        }
+          $this->manageClassPeriods->toggleMeeting($classPeriod, $meeting);
 
         return back()->with('success', 'Meeting status updated.');
     }
@@ -152,18 +91,7 @@ class ClassPeriodController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        $user = User::findOrFail($request->user_id);
-        
-        // Award referral points if this is the user's first time being assigned to a class
-        if (is_null($user->class_period_id) && $user->referred_by_id) {
-            $referrer = User::find($user->referred_by_id);
-            if ($referrer) {
-                // Award 50 points per successful referral
-                $referrer->increment('referral_points', 50);
-            }
-        }
-
-        $user->update(['class_period_id' => $classPeriod->id]);
+        $this->manageClassPeriods->assignStudent($classPeriod, (int) $request->user_id);
 
         return back()->with('success', 'Student assigned to class period.');
     }
@@ -174,15 +102,14 @@ class ClassPeriodController extends Controller
             'status' => 'required|in:active,upcoming,closed',
         ]);
 
-        $classPeriod->update(['status' => $request->status]);
+        $this->manageClassPeriods->updateStatus($classPeriod, $request->status);
 
         return back()->with('success', "Status updated to " . ucfirst($request->status));
     }
 
     public function removeStudent(ClassPeriod $classPeriod, User $user)
     {
-        if ($user->class_period_id === $classPeriod->id) {
-            $user->update(['class_period_id' => null]);
+        if ($this->manageClassPeriods->removeStudent($classPeriod, $user)) {
             return back()->with('success', 'Student removed from class period.');
         }
         return back()->with('error', 'Student does not belong to this class period.');

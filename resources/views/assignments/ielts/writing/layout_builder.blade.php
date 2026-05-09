@@ -66,17 +66,34 @@
         splitRatio: 50,
         draggingSplit: false,
         
-        handleSplitDrag(e) {
-            if (!this.draggingSplit) return;
-            const container = this.$refs.splitContainer;
-            if (!container) return;
+        startResize(e) {
+            this.draggingSplit = true;
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
             
-            const rect = container.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const percentage = (x / rect.width) * 100;
+            const onMouseMove = (e) => {
+                if (!this.draggingSplit) return;
+                const container = this.$refs.splitContainer;
+                if (!container) return;
+                
+                const rect = container.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const percentage = (x / rect.width) * 100;
+                
+                // Constrain between 20% and 80%
+                this.splitRatio = Math.max(20, Math.min(80, percentage));
+            };
             
-            // Constrain between 20% and 80%
-            this.splitRatio = Math.max(20, Math.min(80, percentage));
+            const onMouseUp = () => {
+                this.draggingSplit = false;
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                window.removeEventListener('mousemove', onMouseMove);
+                window.removeEventListener('mouseup', onMouseUp);
+            };
+            
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
         },
 
         init() {
@@ -503,8 +520,6 @@
     <!-- Main Content -->
     <div x-show="!showResults" 
          x-ref="splitContainer"
-         @mousemove.window="handleSplitDrag($event)"
-         @mouseup.window="draggingSplit = false"
          class="flex flex-col lg:flex-row flex-1 min-h-0 relative bg-gray-50/50"
          x-data>
         <!-- Left Column -->
@@ -692,13 +707,13 @@
 
         <!-- Draggable Divider -->
         <div class="hidden lg:flex w-1 hover:bg-blue-500 cursor-col-resize items-center justify-center transition-colors group z-10 hover:w-2 -ml-1 -mr-1"
-             @mousedown.prevent="draggingSplit = true">
+             @mousedown.prevent="startResize($event)">
             <div class="h-8 w-1 bg-gray-300 rounded-full group-hover:bg-white transition-colors pointer-events-none"></div>
         </div>
 
         <!-- Right Column -->
         <div class="flex flex-col h-auto lg:h-full min-w-0 transition-none lg:overflow-hidden"
-             :style="isLargeScreen ? 'width: ' + (100 - splitRatio) + '%' : ''">
+             :style="isLargeScreen ? 'width: calc(' + (100 - splitRatio) + '% - 2px);' : ''">
              
              <div class="flex-1 overflow-visible lg:overflow-y-auto px-4 pb-32 space-y-8 custom-scrollbar">
             

@@ -21,6 +21,12 @@ class AuthenticatedSessionController extends Controller
 
     public function createTeacher(): View
     {
+        // If currently logged in as a guest, log out first so they can authenticate properly
+        if (auth()->check() && in_array(auth()->user()->role, ['guest', 'guest_quick'])) {
+            auth()->logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+        }
         return view('auth.login-teacher');
     }
 
@@ -31,6 +37,12 @@ class AuthenticatedSessionController extends Controller
 
     public function createStudent(): View
     {
+        // If currently logged in as a guest, log out first so they can authenticate properly
+        if (auth()->check() && in_array(auth()->user()->role, ['guest', 'guest_quick'])) {
+            auth()->logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+        }
         return view('auth.login-student');
     }
 
@@ -42,6 +54,27 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+
+        // Clear any lingering impersonation session so the user gets
+        // the correct dashboard for their actual role.
+        $request->session()->forget('view_as_role');
+
+        $user = $request->user();
+
+        if ($user->isAdmin()) {
+            return redirect()->intended(route('admin.dashboard'));
+        }
+
+        if ($user->isTeacher()) {
+            return redirect()->intended(route('teacher.dashboard'));
+        }
+
+        if ($user->isGuest()) {
+            // Always send guests to their landing page — never let a stored
+            // 'intended' URL (e.g. an IELTS test page) override this.
+            $request->session()->forget('url.intended');
+            return redirect()->route('guest.free-tests');
+        }
 
         return redirect()->intended(route('dashboard', absolute: false));
     }

@@ -2,19 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\FreeTestResult;
-use App\Models\OutreachMessage;
-use App\Models\Program;
-use App\Jobs\SendOutreachFollowUpJob;
+use App\Application\FreeTest\GetTestResult;
+use App\Application\FreeTest\SubmitFreeTest;
+use App\Domain\FreeTest\Repositories\FreeTestRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class FreeTestController extends Controller
 {
+    private const VALID_TYPES = ['ielts_academic', 'ielts_general', 'toefl_itp', 'pte_academic'];
+
+    public function __construct(
+        private readonly SubmitFreeTest $submitFreeTest,
+        private readonly GetTestResult $getTestResult,
+        private readonly FreeTestRepository $repository,
+    ) {
+    }
+
     public function show($type)
     {
-        $validTypes = ['ielts_academic', 'ielts_general', 'toefl_itp', 'pte_academic'];
-        if (!in_array($type, $validTypes)) {
+        if (! in_array($type, self::VALID_TYPES)) {
             abort(404);
         }
 
@@ -23,85 +30,47 @@ class FreeTestController extends Controller
 
     public function submit(Request $request, $type)
     {
-        $validTypes = ['ielts_academic', 'ielts_general', 'toefl_itp', 'pte_academic'];
-        if (!in_array($type, $validTypes)) {
+        if (! in_array($type, self::VALID_TYPES)) {
             abort(404);
         }
 
-        // Mock simulation score generator
-        $score = mt_rand(350, 677); // Default mock for TOEFL ITP
-        
-        if (str_starts_with($type, 'ielts_') || $type === 'pte_academic') {
-            $score = mt_rand(40, 90) / 10; // Mock for IELTS (4.0 - 9.0)
-        }
-
-        // Mock Evaluation Feedback
         $evaluationData = [
-            'strengths' => ['Reading Comprehension', 'Basic Grammar Structures'],
-            'weaknesses' => ['Advanced Vocabulary', 'Listening Speed & Accuracy'],
+            'strengths'   => ['Reading Comprehension', 'Basic Grammar Structures'],
+            'weaknesses'  => ['Advanced Vocabulary', 'Listening Speed & Accuracy'],
         ];
 
-        $result = FreeTestResult::create([
-            'user_id' => Auth::id(),
-            'test_type' => $type,
-            'score' => $score,
-            'evaluation_data' => $evaluationData
-        ]);
-
-        // Sprint 4: Dispatch the automated follow-up email job (delayed by 1 minute for realism)
-        SendOutreachFollowUpJob::dispatch($result)->delay(now()->addMinute());
+        $result = $this->submitFreeTest->execute(Auth::id(), $type, $evaluationData);
 
         return redirect()->route('free-test.result', $result->id);
     }
 
     public function result($id)
     {
-        $result = FreeTestResult::where('user_id', Auth::id())->findOrFail($id);
-        
-        // Find matching outreach message
-        $outreachMessage = OutreachMessage::where('test_type', $result->test_type)
-            ->where('target_role', Auth::user()->role)
-            ->where('min_score', '<=', $result->score)
-            ->where('max_score', '>=', $result->score)
-            ->first();
+        $data = $this->getTestResult->execute((int) $id, Auth::id(), Auth::user()->role);
 
-        // Find a recommended program based on score level
-        $recommendedProgram = null;
-        if ($outreachMessage && $outreachMessage->program_id ?? false) {
-            $recommendedProgram = Program::find($outreachMessage->program_id);
-        }
-        // Fallback: recommend first active program if none found
-        if (!$recommendedProgram) {
-            $recommendedProgram = Program::where('is_active', true)->first();
-        }
-
-        return view('free-tests.result', compact('result', 'outreachMessage', 'recommendedProgram'));
+        return view('free-tests.result', $data);
     }
 
     public function downloadCertificate($id)
     {
-        $result = FreeTestResult::where('user_id', Auth::id())->findOrFail($id);
-        $certificate = \App\Models\FreeTestCertificate::where('test_type', $result->test_type)
-            ->where('is_active', true)
-            ->first();
+        $result = $this->repository->findResultOrFail((int) $id, Auth::id());
+        $certificate = $this->repository->findCertificate($result->test_type);
 
-        if (!$certificate) {
+        if (! $certificate) {
             return back()->with('error', 'Sertifikat tidak tersedia untuk jenis ujian ini.');
         }
 
-        // Define the variables to pass to the view
         $data = [
-            'user' => Auth::user(),
-            'result' => $result,
+            'user'        => Auth::user(),
+            'result'      => $result,
             'certificate' => $certificate,
-            'testName' => ucwords(str_replace('_', ' ', $result->test_type)),
-            'date' => $result->created_at->format('d F Y'),
+            'testName'    => ucwords(str_replace('_', ' ', $result->test_type)),
+            'date'        => $result->created_at->format('d F Y'),
         ];
 
-        // Generate PDF using DOMPDF
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('free-tests.certificate-pdf', $data)
             ->setPaper('a4', 'landscape');
 
-        return $pdf->download('Sertifikat_' . str_replace(' ', '_', $data['testName']) . '_' . Auth::user()->name . '.pdf');
+        return $pdf->download('Sertifikat_'.str_replace(' ', '_', $data['testName']).'_'.Auth::user()->name.'.pdf');
     }
 }

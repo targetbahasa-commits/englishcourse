@@ -11,6 +11,7 @@ class Enrollment extends Model
     protected $fillable = [
         'user_id',
         'program_id',
+        'class_period_id',
         'enrolled_at',
         'status'
     ];
@@ -22,6 +23,11 @@ class Enrollment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function classPeriod(): BelongsTo
+    {
+        return $this->belongsTo(ClassPeriod::class);
     }
 
     public function program(): BelongsTo

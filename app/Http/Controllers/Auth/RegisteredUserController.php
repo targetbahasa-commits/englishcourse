@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Concerns\ExtractsAttributionData;
 use App\Http\Controllers\Controller;
+use App\Models\Program;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -15,21 +17,7 @@ use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
-    private function extractAttributionData(Request $request): array
-    {
-        return $request->only([
-            'utm_source',
-            'utm_medium',
-            'utm_campaign',
-            'utm_content',
-            'utm_term',
-            'acquisition_referrer',
-            'acquisition_landing_path',
-            'acquisition_source_page',
-            'acquisition_variant',
-            'acquisition_last_cta',
-        ]);
-    }
+    use ExtractsAttributionData;
 
     /**
      * Display the registration view.
@@ -50,9 +38,38 @@ class RegisteredUserController extends Controller
 
     public function createStudent(Request $request): View
     {
+        return $this->renderStudentRegistrationView($request, false);
+    }
+
+    public function createStudentNoPayment(Request $request): View
+    {
+        return $this->renderStudentRegistrationView($request, true);
+    }
+
+    private function renderStudentRegistrationView(Request $request, bool $skipPaymentFlow): View
+    {
         $ref = $request->query('ref');
         $classPeriods = \App\Models\ClassPeriod::where('status', '!=', 'closed')->latest()->get();
-        return view('auth.register-student', compact('classPeriods', 'ref'));
+
+        $requestedProgram = strtolower(trim((string) $request->query('program', '')));
+        $programAliases = [
+            'ielts academic' => 'ielts-academic',
+            'ielts general' => 'ielts-general',
+            'toefl itp' => 'toefl-itp',
+            'pte' => 'pte-academic',
+            'pte academic' => 'pte-academic',
+            'grammar for writing' => 'grammar-for-writing',
+            'grammar writing' => 'grammar-for-writing',
+            'ielts-academic' => 'ielts-academic',
+            'ielts-general' => 'ielts-general',
+            'toefl-itp' => 'toefl-itp',
+            'pte-academic' => 'pte-academic',
+            'grammar-for-writing' => 'grammar-for-writing',
+        ];
+
+        $preselectedProgramSlug = $programAliases[$requestedProgram] ?? null;
+
+        return view('auth.register-student', compact('classPeriods', 'ref', 'preselectedProgramSlug', 'skipPaymentFlow'));
     }
 
     /**
@@ -80,9 +97,53 @@ class RegisteredUserController extends Controller
             'acquisition_source_page' => ['nullable', 'string', 'max:100'],
             'acquisition_variant' => ['nullable', 'string', 'max:50'],
             'acquisition_last_cta' => ['nullable', 'string', 'max:100'],
+            'program_choice' => ['nullable', 'string'],
+            'payment_channel_choice' => ['nullable', 'string', 'in:bank_transfer,cash'],
+            'skip_payment_flow' => ['nullable', 'boolean'],
         ]);
 
         $attributionData = $this->extractAttributionData($request);
+
+        $role = $request->role ?? 'student';
+        $selectedProgramId = null;
+        $skipPaymentFlow = $request->boolean('skip_payment_flow');
+
+        if ($role === 'student') {
+            $selectedProgramSlug = (string) $request->input('program_choice', '');
+            $selectedPaymentChannel = (string) $request->input('payment_channel_choice', '');
+
+            if ($selectedProgramSlug === '') {
+                return back()->withInput()->withErrors([
+                    'program_choice' => 'Silakan pilih kelas terlebih dahulu.',
+                ]);
+            }
+
+            if (!$skipPaymentFlow && $selectedPaymentChannel === '') {
+                return back()->withInput()->withErrors([
+                    'payment_channel_choice' => 'Silakan pilih metode pembayaran terlebih dahulu.',
+                ]);
+            }
+
+            $acceptedProgramSlugs = [
+                'ielts-academic' => ['ielts-academic'],
+                'ielts-general' => ['ielts-general'],
+                'toefl-itp' => ['toefl-itp'],
+                'pte-academic' => ['pte-academic', 'pte'],
+                'grammar-for-writing' => ['grammar-for-writing', 'grammar-writing'],
+            ];
+
+            $slugsToFind = $acceptedProgramSlugs[$selectedProgramSlug] ?? [$selectedProgramSlug];
+
+            $program = Program::whereIn('slug', $slugsToFind)->first();
+
+            if (!$program) {
+                return back()->withInput()->withErrors([
+                    'program_choice' => 'Pilihan kelas tidak valid.',
+                ]);
+            }
+
+            $selectedProgramId = $program->id;
+        }
 
         // OTP verification temporarily disabled
         // if ($request->role !== 'guest') {
@@ -116,14 +177,41 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'phone_number' => $request->phone_number,
             'password' => Hash::make($request->password),
-            'role' => $request->role ?? 'student',
+            'role' => $role,
             'referral_code' => $newReferralCode,
             'referred_by_id' => $referredBy,
+            // 'program_id' is intentionally left null until admin approves the EnrollmentRequest
         ] + $attributionData);
 
         event(new Registered($user));
 
         Auth::login($user);
+
+        if ($role === 'student' && $selectedProgramId) {
+            \App\Models\EnrollmentRequest::create([
+                'user_id' => $user->id,
+                'program_id' => $selectedProgramId,
+                'status' => 'pending',
+            ]);
+        }
+
+        if ($role === 'student' && $selectedProgramId && !$skipPaymentFlow) {
+            return redirect()->route('student.payments.index')
+                ->with('success', 'Akun berhasil dibuat. Lanjutkan ke tahap pembayaran untuk membuat invoice pertamamu.')
+                ->with('registration_prefill_program_id', $selectedProgramId)
+                ->with('registration_prefill_payment_channel', (string) $request->input('payment_channel_choice', 'bank_transfer'));
+        }
+
+        // After registration, always redirect students to assignments so locking is visible
+        if ($role === 'student') {
+            return redirect()->route('assignments.index')
+                ->with('success', 'Akun berhasil dibuat. Silakan mulai belajar di program yang kamu pilih.');
+        }
+        // Guest registration: redirect directly to free tests page
+        if ($role === 'guest') {
+            return redirect()->route('guest.free-tests')
+                ->with('success', 'Akun berhasil dibuat. Selamat datang di Target Bahasa!');
+        }
 
         return redirect(route('dashboard', absolute: false));
     }

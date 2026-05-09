@@ -45,29 +45,38 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            @forelse($progressData as $index => $data)
+            <div class="mb-4">
+                <h2 class="text-xl font-black text-gray-800">{{ $data['program']->name ?? 'Program' }}</h2>
+                <p class="text-sm text-gray-500 mb-6">Progress assignment dan nilai Anda untuk program ini.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
                 <!-- Skill Breakdown (Radar Chart) -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">Skill Breakdown</h3>
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Skill / Module Breakdown</h3>
                     <div class="relative h-64 w-full flex justify-center">
-                        <canvas id="skillRadarChart"></canvas>
+                        <canvas id="skillRadarChart_{{ $index }}" data-skills="{{ json_encode($data['skillScores']) }}"></canvas>
                     </div>
                     <div class="mt-4 text-center">
-                        <p class="text-xs text-gray-500">*Berdasarkan rata-rata nilai assignment per kategori skill.</p>
+                        <p class="text-xs text-gray-500">*Berdasarkan rata-rata nilai assignment per modul.</p>
                     </div>
                 </div>
 
                 <!-- Assignment Scores Table -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2 flex flex-col">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-bold text-gray-800">Riwayat Nilai Tugas (Assignments)</h3>
-                        <span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-xs font-bold">{{ $totalAssignments }} Tugas Selesai</span>
+                        <h3 class="text-lg font-bold text-gray-800">Riwayat Nilai Tugas</h3>
+                        <div class="flex gap-2">
+                            <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold">Avg: {{ round($data['averageScore'], 1) }}</span>
+                            <span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-xs font-bold">{{ $data['totalAssignments'] }} Selesai</span>
+                        </div>
                     </div>
                     
                     <div class="flex-1 overflow-auto rounded-lg border border-gray-100">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider sticky top-0">
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider sticky top-0 shadow-sm">
                                     <th class="p-3 font-semibold border-b border-gray-100">Meeting</th>
                                     <th class="p-3 font-semibold border-b border-gray-100">Tanggal</th>
                                     <th class="p-3 font-semibold border-b border-gray-100 text-right">Skor</th>
@@ -75,7 +84,7 @@
                                 </tr>
                             </thead>
                             <tbody class="text-sm divide-y divide-gray-50">
-                                @forelse($meetingScores as $ms)
+                                @forelse($data['meetingScores'] as $ms)
                                     <tr class="hover:bg-gray-50 transition">
                                         <td class="p-3 font-medium text-gray-800">Meeting {{ $ms->meeting_number }}</td>
                                         <td class="p-3 text-gray-500">{{ \Carbon\Carbon::parse($ms->submitted_at)->format('d M Y') }}</td>
@@ -104,6 +113,18 @@
                     </div>
                 </div>
             </div>
+            @empty
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center max-w-2xl mx-auto mt-12 mb-12">
+                <div class="w-24 h-24 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-3">Belum Ada Riwayat Progress</h2>
+                <p class="text-gray-500 mb-8">Anda belum memiliki nilai tugas dari program yang Anda daftarkan.</p>
+                <a href="{{ route('assignments.index') }}" class="inline-block px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-sm hover:shadow">
+                    Mulai Belajar Sekarang
+                </a>
+            </div>
+            @endforelse
 
             <!-- Free Tests History -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -156,57 +177,61 @@
     <!-- Chart Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const ctxRadar = document.getElementById('skillRadarChart').getContext('2d');
-            const skillData = @json($skillScores);
+            const canvases = document.querySelectorAll('canvas[id^="skillRadarChart_"]');
             
-            new Chart(ctxRadar, {
-                type: 'radar',
-                data: {
-                    labels: Object.keys(skillData),
-                    datasets: [{
-                        label: 'Rata-rata Skor',
-                        data: Object.values(skillData),
-                        backgroundColor: 'rgba(79, 70, 229, 0.2)', // Indigo 500 transparent
-                        borderColor: 'rgba(79, 70, 229, 1)',
-                        pointBackgroundColor: 'rgba(79, 70, 229, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(79, 70, 229, 1)',
-                        borderWidth: 2,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            angleLines: { color: 'rgba(0, 0, 0, 0.05)' },
-                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
-                            pointLabels: {
-                                font: { size: 12, family: "'Figtree', sans-serif", weight: '600' },
-                                color: '#4B5563'
-                            },
-                            ticks: {
-                                min: 0,
-                                max: 100,
-                                stepSize: 20,
-                                display: false
-                            }
-                        }
+            canvases.forEach(canvas => {
+                const ctxRadar = canvas.getContext('2d');
+                const skillData = JSON.parse(canvas.getAttribute('data-skills'));
+                
+                new Chart(ctxRadar, {
+                    type: 'radar',
+                    data: {
+                        labels: Object.keys(skillData),
+                        datasets: [{
+                            label: 'Rata-rata Skor',
+                            data: Object.values(skillData),
+                            backgroundColor: 'rgba(79, 70, 229, 0.2)', // Indigo 500 transparent
+                            borderColor: 'rgba(79, 70, 229, 1)',
+                            pointBackgroundColor: 'rgba(79, 70, 229, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(79, 70, 229, 1)',
+                            borderWidth: 2,
+                        }]
                     },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(31, 41, 55, 0.9)',
-                            padding: 10,
-                            callbacks: {
-                                label: function(context) {
-                                    return ' Skor: ' + Math.round(context.raw);
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                angleLines: { color: 'rgba(0, 0, 0, 0.05)' },
+                                grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                                pointLabels: {
+                                    font: { size: 12, family: "'Figtree', sans-serif", weight: '600' },
+                                    color: '#4B5563'
+                                },
+                                ticks: {
+                                    min: 0,
+                                    max: 100,
+                                    stepSize: 20,
+                                    display: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(31, 41, 55, 0.9)',
+                                padding: 10,
+                                callbacks: {
+                                    label: function(context) {
+                                        return ' Skor: ' + Math.round(context.raw);
+                                    }
                                 }
                             }
                         }
                     }
-                }
+                });
             });
         });
     </script>

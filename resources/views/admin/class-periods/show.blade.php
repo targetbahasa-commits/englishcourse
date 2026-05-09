@@ -87,11 +87,34 @@
                         </div>
                     </div>
                     <div class="mt-8">
-                            <h3 class="text-lg font-medium text-gray-900 mb-4">Duration</h3>
-                            <p class="text-gray-600">
-                                <strong>Start Date:</strong> {{ $classPeriod->start_date ? $classPeriod->start_date->format('F d, Y') : 'Not Set' }}<br>
-                                <strong>End Date:</strong> {{ $classPeriod->end_date ? $classPeriod->end_date->format('F d, Y') : 'Not Set' }}
-                            </p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-4">Duration</h3>
+                                <p class="text-gray-600">
+                                    <strong>Start Date:</strong> {{ $classPeriod->start_date ? $classPeriod->start_date->format('F d, Y') : 'Not Set' }}<br>
+                                    <strong>End Date:</strong> {{ $classPeriod->end_date ? $classPeriod->end_date->format('F d, Y') : 'Not Set' }}
+                                </p>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-4">Teacher</h3>
+                                @if($classPeriod->teacher)
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-base shrink-0">
+                                            {{ strtoupper(substr($classPeriod->teacher->name, 0, 1)) }}
+                                        </div>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">{{ $classPeriod->teacher->name }}</div>
+                                            <div class="text-xs text-gray-500">{{ $classPeriod->teacher->email }}</div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <p class="text-sm text-orange-600 flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        Belum ada teacher yang diassign. Edit class period untuk menambahkan.
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -118,7 +141,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $student->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $student->email }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <form action="{{ route('class-periods.students.destroy', [$classPeriod, $student]) }}" method="POST" class="inline">
+                                            <form action="{{ route('class-periods.remove-student', [$classPeriod, $student]) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Remove this student from the class period?')">Remove</button>
@@ -245,6 +268,20 @@
                     </select>
                 </div>
 
+                <div class="mb-4">
+                    <x-input-label for="edit_teacher_id" value="Teacher (Optional)" />
+                    <select name="teacher_id" id="edit_teacher_id"
+                            class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full">
+                        <option value="">— Unassigned —</option>
+                        @foreach (\App\Models\User::where('role', 'teacher')->orderBy('name')->get() as $t)
+                            <option value="{{ $t->id }}" {{ $classPeriod->teacher_id == $t->id ? 'selected' : '' }}>
+                                {{ $t->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Pengajar yang mengampu batch ini.</p>
+                </div>
+
                 <div class="mt-6 flex justify-end">
                     <x-secondary-button x-on:click="$dispatch('close')">
                         Cancel
@@ -262,7 +299,7 @@
     <x-modal name="add-student" focusable>
         <div class="p-6">
             <h2 class="text-lg font-medium text-gray-900">Add Student to {{ $classPeriod->name }}</h2>
-            <form method="POST" action="{{ route('class-periods.students.store', $classPeriod) }}" class="mt-6">
+            <form method="POST" action="{{ route('class-periods.assign-student', $classPeriod) }}" class="mt-6">
                 @csrf
                 <div class="mb-4">
                     <x-input-label for="user_id" value="Select Student" />

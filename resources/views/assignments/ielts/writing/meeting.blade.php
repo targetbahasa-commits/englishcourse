@@ -348,7 +348,7 @@
     });
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4" 
+<div class="h-[calc(100vh-2rem)] flex flex-col overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 pb-24 lg:pb-28" 
      x-data="ieltsWritingTask({{ json_encode($meeting->idioms ?? []) }}, {{ json_encode($meeting->collocations ?? []) }})"
      @toggle-collocations.window="isCollocationsOpen = !isCollocationsOpen; if(isCollocationsOpen) isIdiomsOpen = false"
      @toggle-idioms.window="isIdiomsOpen = !isIdiomsOpen; if(isIdiomsOpen) isCollocationsOpen = false"
@@ -392,54 +392,79 @@
 
     <!-- WRITING MODE CONTENT -->
     <div x-show="!showResults" 
-         class="flex flex-col lg:flex-row flex-1 min-h-0" 
-         x-data="{ 
-             leftWidth: 40, 
-             resizing: false,
-             startResize(e) {
-                 this.resizing = true;
-                 document.body.style.cursor = 'col-resize';
-                 document.body.style.userSelect = 'none';
-                 
-                 const onMouseMove = (e) => {
-                     if (!this.resizing) return;
-                     const container = this.$el;
-                     const containerRect = container.getBoundingClientRect();
-                     let newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
-                     
-                     // clamp between 20% and 80%
-                     if (newWidth < 20) newWidth = 20;
-                     if (newWidth > 80) newWidth = 80;
-                     
-                     this.leftWidth = newWidth;
-                 };
-                 
-                 const onMouseUp = () => {
-                     this.resizing = false;
-                     document.body.style.cursor = '';
-                     document.body.style.userSelect = '';
-                     window.removeEventListener('mousemove', onMouseMove);
-                     window.removeEventListener('mouseup', onMouseUp);
-                 };
-                 
-                 window.addEventListener('mousemove', onMouseMove);
-                 window.addEventListener('mouseup', onMouseUp);
+         class="flex flex-col lg:flex-row flex-1 min-h-0 gap-0 lg:gap-0 overflow-hidden" 
+         x-data="{
+             splitLeftWidth: 62,
+             isResizing: false,
+             startX: 0,
+             startWidth: 62,
+             resizeMoveHandler: null,
+             resizeUpHandler: null,
+             splitStorageKey: 'ielts-writing-meeting-split-v2-{{ $meeting->id ?? 0 }}',
+             panelStyle(side) {
+                 if (window.innerWidth < 1024) return '';
+                 const left = this.splitLeftWidth;
+                 return side === 'left' ? `width: ${left}%;` : `width: ${100 - left}%;`;
+             },
+             startResize(event) {
+                 if (window.innerWidth < 1024) return;
+                 this.isResizing = true;
+                 this.startX = event.clientX;
+                 this.startWidth = this.splitLeftWidth;
+                 if (!this.resizeMoveHandler) this.resizeMoveHandler = (e) => this.onResize(e);
+                 if (!this.resizeUpHandler) this.resizeUpHandler = () => this.stopResize();
+                 document.addEventListener('mousemove', this.resizeMoveHandler);
+                 document.addEventListener('mouseup', this.resizeUpHandler);
+             },
+             onResize(event) {
+                 if (!this.isResizing) return;
+                 const containerWidth = this.$el.clientWidth;
+                 if (!containerWidth) return;
+                 const deltaPercent = ((event.clientX - this.startX) / containerWidth) * 100;
+                 this.splitLeftWidth = Math.max(40, Math.min(68, this.startWidth + deltaPercent));
+             },
+             stopResize() {
+                 this.isResizing = false;
+                 if (this.resizeMoveHandler) document.removeEventListener('mousemove', this.resizeMoveHandler);
+                 if (this.resizeUpHandler) document.removeEventListener('mouseup', this.resizeUpHandler);
+                 try { localStorage.setItem(this.splitStorageKey, String(this.splitLeftWidth)); } catch(e) {}
+             },
+             init() {
+                 try {
+                     const stored = parseFloat(localStorage.getItem(this.splitStorageKey) || '');
+                     if (!isNaN(stored)) this.splitLeftWidth = Math.max(40, Math.min(68, stored));
+                 } catch(e) {}
              }
          }">
          <!-- Left Column: Question / Prompt + RESULTS -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col flex-shrink-0" :style="`width: ${leftWidth}%;`">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0 min-w-0 lg:h-full overflow-hidden" :style="panelStyle('left')">
             <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                 <h2 class="font-bold text-gray-700">Question Prompt</h2>
                 <span class="text-xs font-semibold text-gray-400">Read Carefully</span>
             </div>
             
-            <div class="p-6 overflow-y-auto flex-1 prose max-w-none">
+            <div class="p-6 pb-24 lg:pb-28 overflow-y-auto flex-1 prose max-w-none scroll-pb-24 lg:scroll-pb-28">
                 @if($task == 1)
-                    <h3 class="text-lg font-bold mb-4">The chart below shows...</h3>
-                    <div class="w-full h-80 bg-white rounded-xl flex items-center justify-center mb-6 relative" style="min-height: 300px;">
-                        <canvas id="meetingChart" class="w-full h-full"></canvas>
+                    <div class="not-prose space-y-5">
+                        <section class="rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white p-5 shadow-sm">
+                            <div class="flex items-start justify-between gap-3 mb-4">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-[0.2em] text-teal-600 mb-2">Prompt Overview</p>
+                                    <h3 class="text-xl font-bold text-slate-900">The chart below shows...</h3>
+                                </div>
+                                <span class="inline-flex items-center rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">Task 1 Reference</span>
+                            </div>
+
+                            <div class="w-full h-auto min-h-[300px] rounded-2xl border border-slate-200 bg-white flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300">
+                                <canvas id="meetingChart" class="w-full !h-80"></canvas>
+                            </div>
+                        </section>
+
+                        <section class="rounded-2xl border border-indigo-100 bg-indigo-50/65 p-5 shadow-sm">
+                            <p class="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 mb-3">What You Need To Do</p>
+                            <p class="text-base leading-8 text-slate-700">Summarize the information by selecting and reporting the main features, and make comparisons where relevant.</p>
+                        </section>
                     </div>
-                    <p>Summarize the information by selecting and reporting the main features, and make comparisons where relevant.</p>
                 @else
                     <h3 class="text-lg font-bold mb-4 text-gray-700">You should spend about 40 minutes on this task.</h3>
                     
@@ -624,13 +649,14 @@
         </div>
 
         <!-- DIVIDER -->
-        <div class="w-1.5 cursor-col-resize hover:bg-orange-400 bg-gray-200 rounded-full transition-colors flex flex-col justify-center items-center group touch-none mx-1"
-             @mousedown.prevent="startResize($event)">
-            <div class="w-0.5 h-8 bg-gray-400 group-hover:bg-white rounded-full"></div>
+        <div
+            class="hidden lg:flex w-4 items-stretch justify-center cursor-col-resize select-none flex-shrink-0"
+            @mousedown.prevent="startResize($event)">
+            <div class="w-1 rounded-full bg-gray-300 hover:bg-blue-400 transition-colors"></div>
         </div>
 
         <!-- Right Column: Writing Area -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col flex-1" style="min-width: 0;">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0 min-w-0 lg:h-full overflow-hidden" :style="panelStyle('right')">
             <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                 <div>
                     <h2 class="font-bold text-gray-700">Your Response</h2>
@@ -638,7 +664,7 @@
                 </div>
                 <span class="text-xs font-semibold text-gray-400" x-data="{ count: 0 }" x-init="$watch('essay', value => count = value.trim().split(/\s+/).filter(a => a).length)">Word Count: <span x-text="count">0</span></span>
             </div>
-            <textarea x-model="essay" class="flex-1 w-full p-6 resize-none focus:outline-none focus:bg-blue-50/30 transition-colors font-serif leading-relaxed text-gray-800 text-lg" style="min-height: 900px;" placeholder="Start typing your answer here..."></textarea>
+            <textarea x-model="essay" class="flex-1 min-h-0 w-full p-6 resize-none overflow-y-auto focus:outline-none focus:bg-blue-50/30 transition-colors font-serif leading-relaxed text-gray-800 text-lg" placeholder="Start typing your answer here..."></textarea>
             
             <!-- Footer: Refresh/Reset -->
             <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
@@ -934,12 +960,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const showHtmlRender = (html) => {
             const container = canvas.parentElement;
             canvas.style.display = 'none';
+            container.classList.remove('h-80', 'items-center', 'justify-center');
+            container.classList.add('items-stretch', 'justify-start');
             
             let contentDiv = document.getElementById('htmlContentData');
             if (!contentDiv) {
                 contentDiv = document.createElement('div');
                 contentDiv.id = 'htmlContentData';
-                contentDiv.className = 'w-full h-full overflow-auto p-4 flex items-center justify-center';
+                contentDiv.className = 'w-full h-auto flex flex-col';
                 container.appendChild(contentDiv);
             }
             contentDiv.innerHTML = html;
@@ -1010,12 +1038,38 @@ document.addEventListener('DOMContentLoaded', () => {
             `);
         } else if (meetingNum === 6) {
             showHtmlRender(`
-                <div class="text-center h-full flex flex-col justify-center">
-                    <h3 class="font-bold text-lg mb-4 text-gray-700">Map: Town Centre Changes (1990 vs 2020)</h3>
-                    <p class="text-gray-500">[Interactive Map Rendering Not Supported in Demo - Provide Textual Features]</p>
-                    <div class="grid grid-cols-2 gap-4 mt-4 w-full">
-                        <div class="p-4 border-2 border-dashed bg-gray-50"><b>1990:</b> Many old houses, narrow roads, small local shops.</div>
-                        <div class="p-4 border-2 border-dashed bg-blue-50"><b>2020:</b> Old houses replaced by apartments, widened roads, large supermarket added.</div>
+                <div class="p-6 w-full">
+                    <h3 class="font-bold text-lg text-center text-gray-800 mb-5">Writing Task 1 – Quick Reference</h3>
+                    <div class="flex flex-col gap-6">
+                        <div class="rounded-xl overflow-hidden border border-green-300 shadow-sm">
+                            <div class="bg-green-600 text-white font-bold px-5 py-3 text-base">Useful introductory phrases:</div>
+                            <ul class="bg-green-50 px-5 py-4 space-y-2 text-sm text-gray-800">
+                                <li><span class="text-green-600 mr-2">•</span> The table shows changes in ...</li>
+                                <li><span class="text-green-600 mr-2">•</span> The table gives information about ...</li>
+                                <li><span class="text-green-600 mr-2">•</span> The bar chart compares ...</li>
+                                <li><span class="text-green-600 mr-2">•</span> The graph illustrates ...</li>
+                                <li><span class="text-green-600 mr-2">•</span> The chart shows data about ...</li>
+                                <li><span class="text-green-600 mr-2">•</span> The pie charts compare ...</li>
+                                <li><span class="text-green-600 mr-2">•</span> The diagram shows the process of ...</li>
+                                <li><span class="text-green-600 mr-2">•</span> The figure shows how ... is produced</li>
+                                <li><span class="text-green-600 mr-2">•</span> The line graph shows changes in ...</li>
+                                <li><span class="text-green-600 mr-2">•</span> The line graph compares ...</li>
+                            </ul>
+                        </div>
+                        <div class="rounded-xl overflow-hidden border border-purple-300 shadow-sm">
+                            <div class="bg-purple-600 text-white font-bold px-5 py-3 text-base">Simple changes you can make:</div>
+                            <ul class="bg-purple-50 px-5 py-4 space-y-2 text-sm text-gray-800">
+                                <li><span class="text-purple-600 mr-2">•</span> Graph / line graph / chart / bar chart</li>
+                                <li><span class="text-purple-600 mr-2">•</span> Diagram / figure</li>
+                                <li><span class="text-purple-600 mr-2">•</span> Shows / illustrates / compares</li>
+                                <li><span class="text-purple-600 mr-2">•</span> proportion = percentage</li>
+                                <li><span class="text-purple-600 mr-2">•</span> information = data</li>
+                                <li><span class="text-purple-600 mr-2">•</span> the number of / the figure for / the proportion of</li>
+                                <li><span class="text-purple-600 mr-2">•</span> people in the UK / the British</li>
+                                <li><span class="text-purple-600 mr-2">•</span> from 1999 to 2009 / between 1999 and 2009 / over a period of 10 years</li>
+                                <li><span class="text-purple-600 mr-2">•</span> in three countries = in the UK, France and Spain (i.e. name the countries)</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             `);

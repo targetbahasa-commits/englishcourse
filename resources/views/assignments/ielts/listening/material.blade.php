@@ -12,16 +12,14 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="font-sans antialiased bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-8">
+<body class="font-sans antialiased bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
     @include('components.impersonation-banner')
     @include('components.program-sidebar', ['programSidebarAlwaysVisible' => true])
 
 <div x-data="{ sidebarOpen: true }"
     @program-sidebar-change.window="sidebarOpen = !!($event.detail && $event.detail.open)"
-    class="transition-all duration-300"
-    :class="sidebarOpen ? 'lg:ml-72' : 'lg:ml-0'">
-<div class="container mx-auto px-4 py-8 max-w-5xl transition-all duration-300"
-    :class="sidebarOpen ? '' : 'max-w-7xl'">
+    class="transition-all duration-300">
+<div class="w-full max-w-[1600px] px-6 lg:px-10 pt-20 pb-8 transition-all duration-300">
     <!-- Header -->
     <div class="mb-8">
         <div class="flex items-center justify-between mb-4">
@@ -53,7 +51,7 @@
 
     @if($id == 6 && !request()->has('practice'))
     <!-- Practice Selection Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 max-w-6xl mx-auto">
         <!-- Practice 1 Card (Enabled) -->
           <a href="{{ route('assignments.ielts-academic.listening.material', ['id' => 6, 'practice' => 1]) }}"
               class="group block h-full bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-purple-400 transform hover:-translate-y-1">
@@ -799,8 +797,8 @@
             <div class="h-24"></div>
         </div>
         
-        <!-- Fixed Bottom Audio Player -->
-        <div class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-indigo-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] px-4 py-3 transform transition-transform duration-300" x-data="{ playing: false, time: '0:00', duration: '0:00', audio: null, progress: 0 }">
+        <!-- Fixed Top Audio Player -->
+        <div class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-indigo-100 shadow-md px-4 py-3 transform transition-all duration-300" :class="sidebarOpen ? 'md:left-72' : 'left-0'" x-data="{ playing: false, time: '0:00', duration: '0:00', audio: null, progress: 0 }">
             <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-4">
                 <!-- Icon & Title -->
                 <div class="flex items-center gap-4 w-full md:w-auto">
@@ -855,8 +853,24 @@
                     </button>
                     
                     @if(Auth::user()->isAdmin())
+                       @php
+                           $hasAudio = isset($material) && filled($material->audio_file);
+                           $hasTranscript = isset($material) && (filled($material->transcript_en) || filled($material->transcript_id));
+                           $hasAnswerKey = isset($material) && filled($material->answer_key);
+                       @endphp
                        <!-- Upload Buttons (Admin Only) -->
                        <div class="flex items-center gap-2">
+                           <div class="hidden xl:flex items-center gap-1.5 mr-1">
+                               <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasAudio ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
+                                   <span>{{ $hasAudio ? '✓' : '✕' }}</span> Audio
+                               </span>
+                               <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasTranscript ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
+                                   <span>{{ $hasTranscript ? '✓' : '✕' }}</span> Transcript
+                               </span>
+                               <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasAnswerKey ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
+                                   <span>{{ $hasAnswerKey ? '✓' : '✕' }}</span> Kunci
+                               </span>
+                           </div>
                            <button onclick="const modal=document.getElementById('uploadSrtModal'); modal.classList.remove('hidden'); modal.classList.add('flex');" class="px-3 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm" title="Upload SRT">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                 Upload SRT
@@ -1179,8 +1193,8 @@
         <div class="h-24"></div>
     </div>
     
-    <!-- Fixed Bottom Audio Player -->
-    <div class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-indigo-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] px-4 py-3 transform transition-transform duration-300" x-data="{ playing: false, time: '0:00', duration: '0:00', audio: null, progress: 0 }">
+    <!-- Fixed Top Audio Player -->
+    <div class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-indigo-100 shadow-md px-4 py-3 transform transition-all duration-300" :class="sidebarOpen ? 'md:left-72' : 'left-0'" x-data="{ playing: false, time: '0:00', duration: '0:00', audio: null, progress: 0 }">
         <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-4">
             <!-- Icon & Title -->
             <div class="flex items-center gap-4 w-full md:w-auto">
@@ -1545,8 +1559,8 @@
             <div class="h-24"></div>
         </div>
         
-        <!-- Fixed Bottom Audio Player -->
-        <div class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-indigo-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] px-4 py-3 transform transition-transform duration-300" x-data="{ playing: false, time: '0:00', duration: '0:00', audio: null, progress: 0 }">
+        <!-- Fixed Top Audio Player -->
+        <div class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-indigo-100 shadow-md px-4 py-3 transform transition-all duration-300" :class="sidebarOpen ? 'md:left-72' : 'left-0'" x-data="{ playing: false, time: '0:00', duration: '0:00', audio: null, progress: 0 }">
             <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-4">
                 <!-- Icon & Title -->
                 <div class="flex items-center gap-4 w-full md:w-auto">
@@ -1906,7 +1920,7 @@
 
     @elseif($id == 8)
     @if(!request()->has('practice'))
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <a href="?practice=1" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-teal-300 transition-all duration-300 hover:-translate-y-2">
             <div class="p-8 relative">
                 <div class="absolute top-4 right-4">
@@ -2058,63 +2072,63 @@
 
     @elseif($id == 7)
     @if(!request()->has('practice'))
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <a href="?practice=1" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-rose-300 transition-all duration-300 hover:-translate-y-2">
-            <div class="p-8 relative">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 max-w-5xl mx-auto">
+        <a href="?practice=1" class="group block bg-white rounded-2xl shadow-md hover:shadow-xl overflow-hidden border border-rose-200/70 hover:border-rose-300 transition-all duration-300 hover:-translate-y-1">
+            <div class="p-5 lg:p-6 relative">
                 <div class="absolute top-4 right-4">
                     <span class="px-3 py-1 bg-gradient-to-r from-rose-500 to-red-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 1</span>
                 </div>
-                <div class="w-16 h-16 bg-gradient-to-br from-rose-100 to-red-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <svg class="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <div class="w-11 h-11 bg-gradient-to-br from-rose-100 to-red-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-rose-600 transition-colors">Kitesurfing Safety Summary</h3>
-                <p class="text-gray-600 text-sm leading-relaxed mb-6">Complete the summary questions 1-8.</p>
-                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>8 Questions</span><span>~10 mins</span></div>
+                <h3 class="text-lg font-bold text-gray-900 mb-1.5 group-hover:text-rose-600 transition-colors">Kitesurfing Safety Summary</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-4">Complete the summary questions 1-8.</p>
+                <div class="flex items-center gap-3 text-xs font-medium text-gray-500 mb-4"><span>8 Questions</span><span>~10 mins</span></div>
                 <span class="text-rose-600 font-semibold group-hover:text-rose-700 flex items-center gap-2">Start Listening 1 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
             </div>
         </a>
 
-        <a href="?practice=2" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-indigo-300 transition-all duration-300 hover:-translate-y-2">
-            <div class="p-8 relative">
+        <a href="?practice=2" class="group block bg-white rounded-2xl shadow-md hover:shadow-xl overflow-hidden border border-indigo-200/70 hover:border-indigo-300 transition-all duration-300 hover:-translate-y-1">
+            <div class="p-5 lg:p-6 relative">
                 <div class="absolute top-4 right-4">
                     <span class="px-3 py-1 bg-gradient-to-r from-indigo-500 to-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 2</span>
                 </div>
-                <div class="w-16 h-16 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <div class="w-11 h-11 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">Rock Climbing Safety Summary</h3>
-                <p class="text-gray-600 text-sm leading-relaxed mb-6">Complete the summary questions 9-16.</p>
-                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>8 Questions</span><span>~10 mins</span></div>
+                <h3 class="text-lg font-bold text-gray-900 mb-1.5 group-hover:text-indigo-600 transition-colors">Rock Climbing Safety Summary</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-4">Complete the summary questions 9-16.</p>
+                <div class="flex items-center gap-3 text-xs font-medium text-gray-500 mb-4"><span>8 Questions</span><span>~10 mins</span></div>
                 <span class="text-indigo-600 font-semibold group-hover:text-indigo-700 flex items-center gap-2">Start Listening 2 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
             </div>
         </a>
 
-        <a href="?practice=3" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-amber-300 transition-all duration-300 hover:-translate-y-2">
-            <div class="p-8 relative">
+        <a href="?practice=3" class="group block bg-white rounded-2xl shadow-md hover:shadow-xl overflow-hidden border border-amber-200/70 hover:border-amber-300 transition-all duration-300 hover:-translate-y-1">
+            <div class="p-5 lg:p-6 relative">
                 <div class="absolute top-4 right-4">
                     <span class="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 3</span>
                 </div>
-                <div class="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <div class="w-11 h-11 bg-gradient-to-br from-amber-100 to-orange-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors">Assessment Schedule (Listening 1)</h3>
-                <p class="text-gray-600 text-sm leading-relaxed mb-6">Multiple choice (1-3) and table completion (4-10).</p>
-                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>10 Questions</span><span>~12 mins</span></div>
+                <h3 class="text-lg font-bold text-gray-900 mb-1.5 group-hover:text-amber-600 transition-colors">Assessment Schedule (Listening 1)</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-4">Multiple choice (1-3) and table completion (4-10).</p>
+                <div class="flex items-center gap-3 text-xs font-medium text-gray-500 mb-4"><span>10 Questions</span><span>~12 mins</span></div>
                 <span class="text-amber-600 font-semibold group-hover:text-amber-700 flex items-center gap-2">Start Soal 3 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
             </div>
         </a>
 
-        <a href="?practice=4" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-cyan-300 transition-all duration-300 hover:-translate-y-2">
-            <div class="p-8 relative">
+        <a href="?practice=4" class="group block bg-white rounded-2xl shadow-md hover:shadow-xl overflow-hidden border border-cyan-200/70 hover:border-cyan-300 transition-all duration-300 hover:-translate-y-1">
+            <div class="p-5 lg:p-6 relative">
                 <div class="absolute top-4 right-4">
                     <span class="px-3 py-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 4</span>
                 </div>
-                <div class="w-16 h-16 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <svg class="w-8 h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h16"></path></svg>
+                <div class="w-11 h-11 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                    <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h16"></path></svg>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-cyan-600 transition-colors">Assessment Schedule (Listening 2)</h3>
-                <p class="text-gray-600 text-sm leading-relaxed mb-6">Sentence completion (1-4) and value table (5-10).</p>
-                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>10 Questions</span><span>~12 mins</span></div>
+                <h3 class="text-lg font-bold text-gray-900 mb-1.5 group-hover:text-cyan-600 transition-colors">Assessment Schedule (Listening 2)</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-4">Sentence completion (1-4) and value table (5-10).</p>
+                <div class="flex items-center gap-3 text-xs font-medium text-gray-500 mb-4"><span>10 Questions</span><span>~12 mins</span></div>
                 <span class="text-cyan-600 font-semibold group-hover:text-cyan-700 flex items-center gap-2">Start Soal 4 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
             </div>
         </a>
@@ -2743,132 +2757,54 @@
     @elseif($id == 1)
     @if(!request()->has('practice'))
     <!-- Material 1: Practice Selection Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <a href="?practice=1" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-rose-300 transition-all duration-300 hover:-translate-y-2">
-            <div class="p-8 relative">
-                <div class="absolute top-4 right-4">
-                    <span class="px-3 py-1 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 1</span>
-                </div>
-                <div class="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <svg class="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-rose-600 transition-colors">School Tuck Shops</h3>
-                <p class="text-gray-600 text-sm leading-relaxed mb-6">Multiple choice questions 1-7 about healthy food in schools.</p>
-                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
-                    <span>7 Questions</span>
-                    <span>~10 mins</span>
-                </div>
-                <span class="text-rose-600 font-semibold group-hover:text-rose-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
-            </div>
-        </a>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        @php
+            $practiceCards = [
+                1 => ['title' => 'School Tuck Shops', 'desc' => 'Multiple choice questions 1-7 about healthy food in schools.', 'q' => '7 Questions', 't' => '~10 mins', 'color' => 'rose', 'tag' => 'LISTENING 1'],
+                2 => ['title' => 'Healthy Lifestyle Talk', 'desc' => 'Multiple choice questions 8-15 about nutrition and exercise advice.', 'q' => '8 Questions', 't' => '~12 mins', 'color' => 'orange', 'tag' => 'LISTENING 2'],
+                3 => ['title' => 'Relay Race Matching', 'desc' => 'Matching questions 1-24 about teams, colours, positions, and race-day announcements.', 'q' => '24 Questions', 't' => '~20 mins', 'color' => 'emerald', 'tag' => 'LISTENING 3'],
+                4 => ['title' => 'Teacher Matching (1-4)', 'desc' => 'Choose A-F to match teacher information for questions 1-4.', 'q' => '4 Questions', 't' => '~7 mins', 'color' => 'sky', 'tag' => 'SOAL 4'],
+                5 => ['title' => 'Teacher Matching (5-8)', 'desc' => 'Choose A-F to match teacher information for questions 5-8.', 'q' => '4 Questions', 't' => '~7 mins', 'color' => 'violet', 'tag' => 'SOAL 5'],
+                6 => ['title' => 'Olympic Timeline (1-7)', 'desc' => 'Classification questions about the history of the Olympic Games.', 'q' => '7 Questions', 't' => '~9 mins', 'color' => 'amber', 'tag' => 'LISTENING 6'],
+                7 => ['title' => 'Flight History (8-14)', 'desc' => 'Classification questions about key milestones in flight development.', 'q' => '7 Questions', 't' => '~9 mins', 'color' => 'lime', 'tag' => 'LISTENING 7'],
+            ];
+            $cMap = [
+                'rose'    => ['bg' => 'bg-rose-50',    'text' => 'text-rose-600',    'btn' => 'bg-rose-600 hover:bg-rose-700',    'badge' => 'bg-rose-100 text-rose-600'],
+                'orange'  => ['bg' => 'bg-orange-50',  'text' => 'text-orange-600',  'btn' => 'bg-orange-600 hover:bg-orange-700',  'badge' => 'bg-orange-100 text-orange-600'],
+                'emerald' => ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-600', 'btn' => 'bg-emerald-600 hover:bg-emerald-700', 'badge' => 'bg-emerald-100 text-emerald-600'],
+                'sky'     => ['bg' => 'bg-sky-50',     'text' => 'text-sky-600',     'btn' => 'bg-sky-600 hover:bg-sky-700',     'badge' => 'bg-sky-100 text-sky-600'],
+                'violet'  => ['bg' => 'bg-violet-50',  'text' => 'text-violet-600',  'btn' => 'bg-violet-600 hover:bg-violet-700',  'badge' => 'bg-violet-100 text-violet-600'],
+                'amber'   => ['bg' => 'bg-amber-50',   'text' => 'text-amber-600',   'btn' => 'bg-amber-600 hover:bg-amber-700',   'badge' => 'bg-amber-100 text-amber-600'],
+                'lime'    => ['bg' => 'bg-lime-50',    'text' => 'text-lime-600',    'btn' => 'bg-lime-600 hover:bg-lime-700',    'badge' => 'bg-lime-100 text-lime-600'],
+            ];
+        @endphp
 
-        <a href="?practice=2" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-orange-300 transition-all duration-300 hover:-translate-y-2">
-            <div class="p-8 relative">
-                <div class="absolute top-4 right-4">
-                    <span class="px-3 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 2</span>
+        @foreach($practiceCards as $num => $card)
+            @php $c = $cMap[$card['color']]; @endphp
+            <div class="bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition group relative flex flex-col h-full border border-gray-100">
+                <div class="flex justify-between items-start mb-6">
+                    <span class="px-4 py-1.5 {{ $c['badge'] }} rounded-full text-sm font-bold uppercase tracking-wide">
+                        {{ $card['tag'] }}
+                    </span>
                 </div>
-                <div class="w-16 h-16 bg-gradient-to-br from-orange-100 to-amber-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <div class="flex-1 mb-6">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 {{ $c['bg'] }} {{ $c['text'] }} rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <span class="font-bold text-xl">{{ $num }}</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-gray-800 leading-tight">{{ $card['title'] }}</h3>
+                    </div>
+                    <p class="text-sm text-gray-600">{{ $card['desc'] }}</p>
+                    <div class="mt-4 flex gap-4 text-xs font-semibold text-gray-500">
+                        <span>{{ $card['q'] }}</span>
+                        <span>{{ $card['t'] }}</span>
+                    </div>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">Healthy Lifestyle Talk</h3>
-                <p class="text-gray-600 text-sm leading-relaxed mb-6">Multiple choice questions 8-15 about nutrition and exercise advice.</p>
-                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
-                    <span>8 Questions</span>
-                    <span>~12 mins</span>
-                </div>
-                <span class="text-orange-600 font-semibold group-hover:text-orange-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+                <a href="?practice={{ $num }}" class="block w-full py-3 {{ $c['btn'] }} text-white text-center rounded-xl font-bold transition shadow-sm hover:shadow active:scale-95">
+                    Start Practice
+                </a>
             </div>
-        </a>
-
-        <a href="?practice=3" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-emerald-300 transition-all duration-300 hover:-translate-y-2">
-            <div class="p-8 relative">
-                <div class="absolute top-4 right-4">
-                    <span class="px-3 py-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 3</span>
-                </div>
-                <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h10M7 16h6M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">Relay Race Matching</h3>
-                <p class="text-gray-600 text-sm leading-relaxed mb-6">Matching questions 1-24 about teams, colours, positions, and race-day announcements.</p>
-                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
-                    <span>24 Questions</span>
-                    <span>~20 mins</span>
-                </div>
-                <span class="text-emerald-600 font-semibold group-hover:text-emerald-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
-            </div>
-        </a>
-
-        <a href="?practice=4" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-sky-300 transition-all duration-300 hover:-translate-y-2">
-            <div class="p-8 relative">
-                <div class="absolute top-4 right-4">
-                    <span class="px-3 py-1 bg-gradient-to-r from-sky-500 to-cyan-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 4</span>
-                </div>
-                <div class="w-16 h-16 bg-gradient-to-br from-sky-100 to-cyan-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <svg class="w-8 h-8 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h10M7 16h10"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-sky-600 transition-colors">Teacher Matching (1-4)</h3>
-                <p class="text-gray-600 text-sm leading-relaxed mb-6">Choose A-F to match teacher information for questions 1-4.</p>
-                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
-                    <span>4 Questions</span>
-                    <span>~7 mins</span>
-                </div>
-                <span class="text-sky-600 font-semibold group-hover:text-sky-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
-            </div>
-        </a>
-
-        <a href="?practice=5" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-violet-300 transition-all duration-300 hover:-translate-y-2">
-            <div class="p-8 relative">
-                <div class="absolute top-4 right-4">
-                    <span class="px-3 py-1 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Soal 5</span>
-                </div>
-                <div class="w-16 h-16 bg-gradient-to-br from-violet-100 to-fuchsia-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <svg class="w-8 h-8 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-violet-600 transition-colors">Teacher Matching (5-8)</h3>
-                <p class="text-gray-600 text-sm leading-relaxed mb-6">Choose A-F to match teacher information for questions 5-8.</p>
-                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
-                    <span>4 Questions</span>
-                    <span>~7 mins</span>
-                </div>
-                <span class="text-violet-600 font-semibold group-hover:text-violet-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
-            </div>
-        </a>
-
-        <a href="?practice=6" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-amber-300 transition-all duration-300 hover:-translate-y-2">
-            <div class="p-8 relative">
-                <div class="absolute top-4 right-4">
-                    <span class="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 6</span>
-                </div>
-                <div class="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors">Olympic Timeline (1-7)</h3>
-                <p class="text-gray-600 text-sm leading-relaxed mb-6">Classification questions about the history of the Olympic Games.</p>
-                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
-                    <span>7 Questions</span>
-                    <span>~9 mins</span>
-                </div>
-                <span class="text-amber-600 font-semibold group-hover:text-amber-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
-            </div>
-        </a>
-
-        <a href="?practice=7" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-lime-300 transition-all duration-300 hover:-translate-y-2">
-            <div class="p-8 relative">
-                <div class="absolute top-4 right-4">
-                    <span class="px-3 py-1 bg-gradient-to-r from-lime-500 to-emerald-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Listening 7</span>
-                </div>
-                <div class="w-16 h-16 bg-gradient-to-br from-lime-100 to-emerald-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <svg class="w-8 h-8 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-lime-600 transition-colors">Flight History (8-14)</h3>
-                <p class="text-gray-600 text-sm leading-relaxed mb-6">Classification questions about key milestones in flight development.</p>
-                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
-                    <span>7 Questions</span>
-                    <span>~9 mins</span>
-                </div>
-                <span class="text-lime-600 font-semibold group-hover:text-lime-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
-            </div>
-        </a>
+        @endforeach
     </div>
     @elseif(request()->get('practice') == 1 || request()->get('practice') == 2 || request()->get('practice') == 3)
     <div class="space-y-6">
@@ -2908,7 +2844,7 @@
                 <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">15. What should children do if they can't walk or bike to school?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q15" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>take a taxi</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q15" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>play sports with friends</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q15" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>join a chess club</span></label></div></div>
                 @else
                 @if(!request()->has('section'))
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <a href="?practice=3&section=1" class="group block bg-white rounded-2xl shadow-md border border-emerald-100 hover:border-emerald-300 hover:shadow-xl transition-all duration-300 p-6">
                         <div class="flex items-center justify-between mb-4">
                             <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
@@ -3221,11 +3157,161 @@
             </div>
         </div>
     </div>
+
+    @endif
+
+    @if(request()->has('practice'))
+    <!-- Audio Player -->
+    <div class="fixed top-0 left-0 right-0 md:left-64 z-40 bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-wrap lg:flex-nowrap items-center gap-2 md:gap-4 p-2 md:p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-b-2 border-indigo-200">
+                <div class="flex items-center gap-2 md:gap-3">
+                    @if(Auth::user()->isAdmin())
+                        @php
+                            $statusAudio = filled($material->audio_file ?? null);
+                            $statusTranscript = filled($material->transcript_en ?? null) || filled($material->transcript_id ?? null);
+                        @endphp
+                        <div class="flex items-center gap-1 flex-shrink-0">
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusAudio ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                                <span class="font-bold">{{ $statusAudio ? '✓' : '✕' }}</span> Audio
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusTranscript ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                                <span class="font-bold">{{ $statusTranscript ? '✓' : '✕' }}</span> SRT
+                            </span>
+                        </div>
+                    @endif
+                    <div class="w-9 h-9 md:w-10 md:h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-md">
+                        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.5 5.5L7 9H4v6h3l4.5 3.5V5.5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.5 9.5a4 4 0 010 5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 7a7.5 7.5 0 010 10"></path></svg>
+                    </div>
+                    <span class="text-sm md:text-lg font-bold text-indigo-900 whitespace-nowrap">Audio Session - Practice {{ request()->get('practice') }}</span>
+                </div>
+
+                <div class="flex-1 min-w-[220px] flex items-center gap-1.5 md:gap-3 max-w-3xl">
+                    @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher()))
+                        <button type="button" id="toggleKeyBtn" onclick="toggleAnswerKey()"
+                                class="p-2 bg-yellow-100 text-yellow-700 hover:bg-yellow-200 rounded-lg transition-colors flex-shrink-0 flex items-center gap-2 border border-yellow-300 mr-2"
+                                title="Toggle Answer Key">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <span class="text-xs font-bold hidden md:inline">Key</span>
+                        </button>
+                    @endif
+
+                    <button type="button" onclick="skipAudio(-10)"
+                            class="p-1.5 md:p-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Mundur 10 detik">
+                        <svg class="w-4 h-4 md:w-5 md:h-5 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path>
+                        </svg>
+                    </button>
+
+                    <button type="button" id="playPauseBtn" onclick="togglePlayPause()"
+                            class="p-1.5 md:p-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex-shrink-0">
+                        <svg id="playIcon" class="w-5 h-5 md:w-6 md:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        <svg id="pauseIcon" class="w-5 h-5 md:w-6 md:h-6 text-white hidden" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                        </svg>
+                    </button>
+
+                    <div class="flex-1 flex flex-col gap-1">
+                        <div class="flex justify-between text-xs text-indigo-700 font-medium">
+                            <span id="currentTime">0:00</span>
+                            <span id="duration">0:00</span>
+                        </div>
+
+                        <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="progressContainer">
+                            <div id="progressBar" class="absolute h-full bg-indigo-600 rounded-full transition-all" style="width: 0%"></div>
+                            <div id="progressHandle" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="skipAudio(10)"
+                            class="p-1.5 md:p-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Maju 10 detik">
+                        <svg class="w-4 h-4 md:w-5 md:h-5 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"></path>
+                        </svg>
+                    </button>
+
+                    <button type="button" onclick="toggleTranscriptDrawer()"
+                            class="p-1.5 md:p-2 bg-yellow-400 border-2 border-yellow-500 hover:bg-yellow-500 rounded-lg transition-colors flex-shrink-0 flex items-center gap-1.5 md:gap-2 group shadow-sm" title="Lihat/Tutup Transkrip">
+                        <svg class="w-4 h-4 md:w-5 md:h-5 text-black group-hover:text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span class="text-xs font-bold text-black hidden sm:inline">Terjemah</span>
+                    </button>
+
+                    <audio id="mainAudio" class="hidden" preload="auto">
+                        <source src="{{ isset($material) && $material->audio_file ? asset($material->audio_file) : '' }}" type="audio/mpeg">
+                    </audio>
+                </div>
+
+                @if(Auth::user()->isAdmin())
+                    <div class="w-full lg:w-auto flex flex-wrap justify-end gap-2">
+                        <button type="button"
+                                onclick="const modal=document.getElementById('uploadSrtModal'); modal.classList.remove('hidden'); modal.classList.add('flex');"
+                                class="px-2 py-1.5 md:px-3 md:py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-1.5 md:gap-2 shadow-md relative z-10 text-xs md:text-sm">
+                            <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Upload SRT
+                        </button>
+
+                        <button type="button"
+                                onclick="const modal=document.getElementById('uploadAnswerKeyModal'); modal.classList.remove('hidden'); modal.classList.add('flex');"
+                                class="px-2 py-1.5 md:px-3 md:py-2 bg-yellow-400 text-black font-semibold rounded-lg hover:bg-yellow-500 transition-colors flex items-center gap-1.5 md:gap-2 shadow-md relative z-10 text-xs md:text-sm border border-yellow-500">
+                            <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2m-1-2v4m-7 4h14M5 19h14M7 9h10a2 2 0 012 2v6a2 2 0 01-2 2H7a2 2 0 01-2-2v-6a2 2 0 012-2z"></path>
+                            </svg>
+                            Answer Key
+                        </button>
+
+                        <button type="button"
+                                onclick="const modal=document.getElementById('uploadAudioModal'); modal.classList.remove('hidden'); modal.classList.add('flex');"
+                                class="px-2 py-1.5 md:px-3 md:py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-1.5 md:gap-2 shadow-md relative z-10 text-xs md:text-sm">
+                            <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            Upload Audio
+                        </button>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <div id="transcriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mt-20 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
+        <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
+            <div class="flex flex-col h-full bg-slate-50">
+                <div class="flex-none px-4 py-2 bg-slate-100 border-b border-slate-200 font-semibold text-slate-700">English Script</div>
+                <div class="flex-1 overflow-y-auto p-4 text-sm text-slate-600">
+                    @if(isset($material) && $material->transcript_en)
+                        {!! nl2br(e($material->transcript_en)) !!}
+                    @else
+                        <div class="text-center text-slate-400 italic mt-4">No transcript available.</div>
+                    @endif
+                </div>
+            </div>
+            <div class="flex flex-col h-full bg-indigo-50">
+                <div class="flex-none px-4 py-2 bg-indigo-100 border-b border-indigo-200 font-semibold text-indigo-800">Terjemahan Indonesia</div>
+                <div class="flex-1 overflow-y-auto p-4 text-sm text-indigo-900/80">
+                    @if(isset($material) && $material->transcript_id)
+                        {!! nl2br(e($material->transcript_id)) !!}
+                    @else
+                        <div class="text-center text-indigo-300 italic mt-4">Belum ada terjemahan.</div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
     @endif
 
     @elseif($id == 5)
     @if(!request()->has('practice'))
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 items-stretch">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 items-stretch">
         <a href="?practice=1" class="group block h-full bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-indigo-300 transition-all duration-300 hover:-translate-y-2">
             <div class="p-8 relative h-full flex flex-col">
                 <div class="absolute top-4 right-4">
@@ -3627,11 +3713,116 @@
             </div>
         </div>
     </div>
+
+    @if(request()->has('practice'))
+    <!-- Fixed Top Audio Player -->
+    <div class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-indigo-200 shadow-md px-4 py-3 transform transition-all duration-300" :class="sidebarOpen ? 'md:left-72' : 'left-0'">
+        <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-4">
+            <div class="flex items-center gap-4 w-full md:w-auto">
+                <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-md flex-shrink-0">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"></path></svg>
+                </div>
+                <span class="text-sm font-bold text-indigo-900 line-clamp-1 hidden sm:inline">Audio Session - Practice {{ request()->get('practice') }}</span>
+            </div>
+
+            <div class="flex-1 flex items-center gap-3 w-full justify-center md:justify-center">
+                <button type="button" onclick="skipAudio(-10)" class="p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-indigo-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path></svg>
+                </button>
+
+                <button type="button" id="playPauseBtn" onclick="togglePlayPause()" class="w-10 h-10 bg-indigo-600 hover:bg-indigo-700 rounded-xl flex items-center justify-center text-white transition-colors shadow-lg hover:shadow-indigo-200 transform hover:scale-105 active:scale-95">
+                    <svg id="playIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="pauseIcon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+                </button>
+
+                <div class="flex-1 flex flex-col min-w-[200px] max-w-lg">
+                    <div class="flex justify-between text-[10px] text-indigo-600 font-bold mb-1">
+                        <span id="currentTime">0:00</span>
+                        <span id="duration">0:00</span>
+                    </div>
+                    <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="progressContainer">
+                        <div id="progressBar" class="absolute h-full bg-indigo-600 rounded-full" style="width: 0%"></div>
+                        <div id="progressHandle" class="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
+                    </div>
+                </div>
+
+                <button type="button" onclick="skipAudio(10)" class="p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-indigo-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"></path></svg>
+                </button>
+
+                <button type="button" onclick="toggleTranscriptDrawer()" class="p-2 bg-yellow-400 border-2 border-yellow-500 hover:bg-yellow-500 rounded-lg transition-colors flex-shrink-0 flex items-center gap-2 group shadow-sm" title="Lihat/Tutup Transkrip">
+                    <svg class="w-5 h-5 text-black group-hover:text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span class="text-xs font-bold text-black hidden sm:inline">Terjemah</span>
+                </button>
+
+                @if(Auth::user()->isAdmin())
+                    @php
+                        $hasAudio = isset($material) && filled($material->audio_file);
+                        $hasTranscript = isset($material) && (filled($material->transcript_en) || filled($material->transcript_id));
+                        $hasAnswerKey = isset($material) && filled($material->answer_key);
+                    @endphp
+                    <div class="flex items-center gap-2">
+                        <div class="hidden xl:flex items-center gap-1.5 mr-1">
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasAudio ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}"><span>{{ $hasAudio ? '✓' : '✕' }}</span> Audio</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasTranscript ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}"><span>{{ $hasTranscript ? '✓' : '✕' }}</span> Transcript</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasAnswerKey ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}"><span>{{ $hasAnswerKey ? '✓' : '✕' }}</span> Kunci</span>
+                        </div>
+                        <button onclick="const modal=document.getElementById('uploadSrtModal'); modal.classList.remove('hidden'); modal.classList.add('flex');" class="px-3 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm" title="Upload SRT">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            Upload SRT
+                        </button>
+                        <button onclick="const modal=document.getElementById('uploadAudioModal'); modal.classList.remove('hidden'); modal.classList.add('flex');" class="px-3 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm" title="Upload Audio">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            Upload Audio
+                        </button>
+                    </div>
+                @endif
+            </div>
+
+            <audio id="mainAudio" class="hidden">
+                @if(isset($material) && $material->audio_file)
+                    <source src="{{ asset($material->audio_file) }}" type="audio/mpeg">
+                @else
+                    <source src="" type="audio/mpeg">
+                @endif
+            </audio>
+        </div>
+    </div>
+
+    <div id="transcriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mt-20 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
+        <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
+            <div class="flex flex-col h-full bg-slate-50">
+                <div class="flex-none px-4 py-2 bg-slate-100 border-b border-slate-200 font-semibold text-slate-700">English Script</div>
+                <div class="flex-1 overflow-y-auto p-4 text-sm text-slate-600">
+                    @if(isset($material) && $material->transcript_en)
+                        {!! nl2br(e($material->transcript_en)) !!}
+                    @else
+                        <div class="text-center text-slate-400 italic mt-4">No transcript available.</div>
+                    @endif
+                </div>
+            </div>
+            <div class="flex flex-col h-full bg-indigo-50">
+                <div class="flex-none px-4 py-2 bg-indigo-100 border-b border-indigo-200 font-semibold text-indigo-800">Terjemahan Indonesia</div>
+                <div class="flex-1 overflow-y-auto p-4 text-sm text-indigo-900/80">
+                    @if(isset($material) && $material->transcript_id)
+                        {!! nl2br(e($material->transcript_id)) !!}
+                    @else
+                        <div class="text-center text-indigo-300 italic mt-4">Belum ada terjemahan.</div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="h-24"></div>
+    @endif
     @endif
 
     @elseif($id == 10)
     @if(!request()->has('practice'))
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <a href="?practice=1" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-amber-300 transition-all duration-300 hover:-translate-y-2">
             <div class="p-8 relative">
                 <div class="absolute top-4 right-4">
@@ -3857,7 +4048,7 @@
 
     @elseif($id == 11)
     @if(!request()->has('practice'))
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <a href="?practice=1" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-emerald-300 transition-all duration-300 hover:-translate-y-2">
             <div class="p-8 relative">
                 <div class="absolute top-4 right-4">
@@ -4528,6 +4719,486 @@
     </div>
     @endif
 
+    @elseif($id == 4)
+    @php
+        $selectedTest = (int) request()->get('practice', 1);
+        if ($selectedTest < 1 || $selectedTest > 30) {
+            $selectedTest = 1;
+        }
+        $selectedPartial = 'assignments.ielts.listening.questions.part4.test' . $selectedTest;
+    @endphp
+
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 lg:p-8 mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Form Completion</h2>
+                <p class="text-gray-600">Pilih paket soal untuk Section 4 (Questions 31-40).</p>
+            </div>
+            <a href="{{ route('assignments.ielts-academic.listening.material', ['id' => 4]) }}"
+               class="inline-flex items-center justify-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
+                Reset ke Test 1
+            </a>
+        </div>
+
+        <div class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-10 gap-2 mb-8">
+            @foreach(range(1, 30) as $testNumber)
+                <a href="?practice={{ $testNumber }}"
+                   class="h-9 flex items-center justify-center rounded-lg border text-sm font-semibold transition-colors {{ $selectedTest === $testNumber ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-200 text-gray-700 hover:bg-indigo-50 hover:border-indigo-300' }}">
+                    {{ $testNumber }}
+                </a>
+            @endforeach
+        </div>
+
+        <div class="rounded-2xl border border-gray-200 p-4 lg:p-6 bg-white">
+            @includeIf($selectedPartial)
+
+            @unless(View::exists($selectedPartial))
+                <div class="text-center py-10">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Konten tidak ditemukan</h3>
+                    <p class="text-gray-500">File untuk test {{ $selectedTest }} belum tersedia.</p>
+                </div>
+            @endunless
+        </div>
+    </div>
+
+    @elseif($id == 3)
+    @php
+        $selectedTest = (int) request()->get('practice', 1);
+        if ($selectedTest < 1 || $selectedTest > 30) {
+            $selectedTest = 1;
+        }
+        $selectedPartial = 'assignments.ielts.listening.questions.part3.test' . $selectedTest;
+    @endphp
+
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 lg:p-8 mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Note Completion</h2>
+                <p class="text-gray-600">Pilih paket soal untuk Section 3 (Questions 21-30).</p>
+            </div>
+            <a href="{{ route('assignments.ielts-academic.listening.material', ['id' => 3]) }}"
+               class="inline-flex items-center justify-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
+                Reset ke Test 1
+            </a>
+        </div>
+
+        <div class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-10 gap-2 mb-8">
+            @foreach(range(1, 30) as $testNumber)
+                <a href="?practice={{ $testNumber }}"
+                   class="h-9 flex items-center justify-center rounded-lg border text-sm font-semibold transition-colors {{ $selectedTest === $testNumber ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-200 text-gray-700 hover:bg-indigo-50 hover:border-indigo-300' }}">
+                    {{ $testNumber }}
+                </a>
+            @endforeach
+        </div>
+
+        <div class="rounded-2xl border border-gray-200 p-4 lg:p-6 bg-white">
+            @includeIf($selectedPartial)
+
+            @unless(View::exists($selectedPartial))
+                <div class="text-center py-10">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Konten tidak ditemukan</h3>
+                    <p class="text-gray-500">File untuk test {{ $selectedTest }} belum tersedia.</p>
+                </div>
+            @endunless
+        </div>
+    </div>
+
+    @elseif($id == 2)
+    @if(!request()->has('practice'))
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <a href="?practice=1" class="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden border-2 border-transparent hover:border-indigo-300 transition-all duration-300 hover:-translate-y-2">
+            <div class="p-8 relative">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 bg-gradient-to-r from-indigo-500 to-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">Practice 1</span>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">Matching Sections</h3>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">Complete matching questions for dictionary dialogue, hotel services, and more.</p>
+                <div class="flex items-center justify-between mt-auto">
+                    <span class="text-indigo-600 font-semibold group-hover:text-indigo-700 flex items-center gap-2">
+                        Start Practice
+                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                    </span>
+                </div>
+            </div>
+        </a>
+    </div>
+    @elseif(request()->get('practice') == 1)
+    <div class="bg-white rounded-3xl shadow-xl border-t-4 border-indigo-500 overflow-hidden mb-8">
+        <div class="p-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Part 5: Questions 26-30</h2>
+            <p class="text-gray-700 mb-6 font-medium leading-relaxed">
+                Based on the dialogue you hear, choose the letters from the box, <span class="font-bold text-indigo-600">A-K</span>, that represent the information to complete sentences 26-30.
+                <br>
+                <span class="font-bold text-red-600">NO LETTER IS USED MORE THAN ONCE.</span> There are more options than are required. The recording is played once only.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <!-- Options Column -->
+                <div class="lg:sticky lg:top-8">
+                    <div class="bg-indigo-50 rounded-2xl p-6 shadow-inner border border-indigo-100">
+                        <h3 class="text-lg font-bold text-indigo-800 mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            Options (A-K)
+                        </h3>
+                        <ul class="space-y-2 text-sm">
+                            @foreach([
+                                'A' => 'French',
+                                'B' => 'electronic dictionary',
+                                'C' => 'book dictionary',
+                                'D' => '1 month',
+                                'E' => '3 months',
+                                'F' => '3 years',
+                                'G' => '5 years',
+                                'H' => 'more examples visible',
+                                'I' => 'fewer examples visible',
+                                'J' => 'slower',
+                                'K' => 'faster'
+                            ] as $key => $value)
+                            <li class="flex items-start gap-2 bg-white p-2 rounded-lg border border-indigo-100 shadow-sm">
+                                <span class="flex-none flex items-center justify-center w-5 h-5 rounded bg-indigo-100 text-indigo-700 font-bold text-xs">{{ $key }}</span>
+                                <span class="text-gray-800">{{ $value }}</span>
+                            </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Questions Column -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 mb-4">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                        <h3 class="text-lg font-bold text-gray-800">Sentences</h3>
+                    </div>
+                    
+                    <!-- Example -->
+                    <div class="mb-4 p-3 bg-gray-100 rounded-lg border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-gray-600 text-sm">Example: The language of dictionary the customer wants is</span>
+                            <span class="font-bold text-indigo-600 bg-white border border-indigo-200 px-2 py-1 rounded text-sm">A</span>
+                        </div>
+                    </div>
+
+                    @foreach([
+                        26 => 'The daughter has been studying the language for',
+                        27 => 'The shop assistant recommends',
+                        28 => 'The daughter has been on exchanges for a total of',
+                        29 => 'An electronic dictionary has',
+                        30 => 'For advanced learners, an electronic dictionary is'
+                    ] as $qNum => $qText)
+                    <div class="group flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-indigo-400 hover:bg-white hover:shadow-md transition-all duration-200">
+                        <div class="flex items-center gap-4 flex-1">
+                            <span class="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-300 text-gray-600 font-bold text-sm shadow-sm group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:border-indigo-200 transition-colors">{{ $qNum }}.</span>
+                            <span class="font-medium text-gray-800 group-hover:text-indigo-900 transition-colors">{{ $qText }}</span>
+                        </div>
+                        <div class="relative ml-4">
+                            <select name="part5_q{{ $qNum }}" class="appearance-none bg-white block w-20 pl-3 pr-8 py-2 border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-bold text-center cursor-pointer hover:border-gray-400 transition-colors">
+                                <option value="" disabled selected>-</option>
+                                @foreach(range('A', 'K') as $opt)
+                                    <option value="{{ $opt }}">{{ $opt }}</option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            
+             <!-- Audio Player (Part 5) -->
+             @include('assignments.ielts.listening.partials.audio-player', [
+                 'audio_url' => asset('assets/audio/ielts/listening/material_2_part5.mp3'),
+                 'title' => 'Audio - Dictionary Dialogue',
+                 'fixed' => false
+             ])
+        </div>
+    </div>
+
+
+    <!-- Part 6: Dictionary Comparison -->
+    <div class="bg-white rounded-3xl shadow-xl border-t-4 border-rose-500 overflow-hidden mb-8">
+        <div class="p-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Part 6: Questions 31-38</h2>
+            <p class="text-gray-700 mb-6 font-medium leading-relaxed">
+                Based on the dialogue you hear, choose letters from the box, <span class="font-bold text-rose-600">A-J</span>, that represent the descriptions of the two dictionaries below. 
+                <br>
+                <span class="font-bold text-red-600">NO LETTER IS USED MORE THAN ONCE.</span> There are more options than are required. The recording is played once only.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <!-- Options Column -->
+                <div class="lg:sticky lg:top-8">
+                    <div class="bg-rose-50 rounded-2xl p-6 shadow-inner border border-rose-100">
+                        <h3 class="text-lg font-bold text-rose-800 mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            Descriptions (A-J)
+                        </h3>
+                        <ul class="space-y-2 text-sm">
+                            @foreach([
+                                'A' => 'black and green',
+                                'B' => 'red and blue',
+                                'C' => 'a CD with a pronunciation guide',
+                                'D' => 'clearer definitions',
+                                'E' => 'clearer type - easier to read',
+                                'F' => 'free annual updates',
+                                'G' => 'more academic examples',
+                                'H' => 'more academic tone',
+                                'I' => 'more up-to-date examples',
+                                'J' => 'a wider range of word forms given'
+                            ] as $key => $value)
+                            <li class="flex items-start gap-2 bg-white p-2 rounded-lg border border-rose-100 shadow-sm">
+                                <span class="flex-none flex items-center justify-center w-5 h-5 rounded bg-rose-100 text-rose-700 font-bold text-xs">{{ $key }}</span>
+                                <span class="text-gray-800">{{ $value }}</span>
+                            </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Questions Column -->
+                <div class="space-y-6">
+                    <!-- Webster's Dictionary -->
+                    <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <div class="flex items-center gap-3 mb-4 border-b border-gray-200 pb-2">
+                            <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-rose-600 shadow-sm border border-gray-100">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800">Webster's Dictionary</h3>
+                        </div>
+                        
+                        <div class="space-y-3">
+                        @foreach(range(31, 34) as $qNum)
+                        <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 hover:border-rose-300 transition-colors">
+                            <span class="font-bold text-gray-500 w-8">{{ $qNum }}.</span>
+                            <div class="relative">
+                                <select name="part6_q{{ $qNum }}" class="appearance-none bg-gray-50 block w-20 pl-3 pr-8 py-2 border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 font-bold text-center cursor-pointer hover:bg-white transition-colors">
+                                    <option value="" disabled selected>-</option>
+                                    @foreach(range('A', 'J') as $opt)
+                                        <option value="{{ $opt }}">{{ $opt }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                        </div>
+                    </div>
+
+                    <!-- Branston's Dictionary -->
+                    <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <div class="flex items-center gap-3 mb-4 border-b border-gray-200 pb-2">
+                            <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-indigo-600 shadow-sm border border-gray-100">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800">Branston's Dictionary</h3>
+                        </div>
+                        
+                        <div class="space-y-3">
+                        @foreach(range(35, 38) as $qNum)
+                        <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 hover:border-indigo-300 transition-colors">
+                            <span class="font-bold text-gray-500 w-8">{{ $qNum }}.</span>
+                            <div class="relative">
+                                <select name="part6_q{{ $qNum }}" class="appearance-none bg-gray-50 block w-20 pl-3 pr-8 py-2 border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-bold text-center cursor-pointer hover:bg-white transition-colors">
+                                    <option value="" disabled selected>-</option>
+                                    @foreach(range('A', 'J') as $opt)
+                                        <option value="{{ $opt }}">{{ $opt }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+             <!-- Audio Player (Part 6) -->
+             @include('assignments.ielts.listening.partials.audio-player', [
+                 'audio_url' => asset('assets/audio/ielts/listening/material_2_part6.mp3'),
+                 'title' => 'Audio - Dictionary Comparison',
+                 'fixed' => false
+             ])
+        </div>
+    </div>
+
+    <!-- Part 7: Food Descriptions -->
+    <div class="bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 overflow-hidden mb-8">
+        <div class="p-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Part 7: Questions 39-45</h2>
+            <p class="text-gray-700 mb-6 font-medium leading-relaxed">
+                Based on the dialogue you hear, match the descriptions from the box, <span class="font-bold text-amber-600">A-I</span>, with the foods, 39-45.
+                <br>
+                <span class="font-bold text-red-600">NO LETTER IS USED MORE THAN ONCE.</span> There are more options than are required. The recording is played once only.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <!-- Options Column -->
+                <div class="lg:sticky lg:top-8 order-2 lg:order-1">
+                    <div class="bg-amber-50 rounded-2xl p-6 shadow-inner border border-amber-100">
+                        <h3 class="text-lg font-bold text-amber-800 mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            Descriptions (A-I)
+                        </h3>
+                        <ul class="space-y-2 text-sm">
+                            @foreach([
+                                'A' => 'long and thick',
+                                'B' => 'mild with coconut',
+                                'C' => 'unusual with potatoes',
+                                'D' => 'round and flat',
+                                'E' => 'slice with pineapple',
+                                'F' => 'slightly spicy',
+                                'G' => 'lamb curry',
+                                'H' => 'thin and crispy',
+                                'I' => 'vegetables in flour, fried'
+                            ] as $key => $value)
+                            <li class="flex items-start gap-2 bg-white p-2 rounded-lg border border-amber-100 shadow-sm">
+                                <span class="flex-none flex items-center justify-center w-5 h-5 rounded bg-amber-100 text-amber-700 font-bold text-xs">{{ $key }}</span>
+                                <span class="text-gray-800">{{ $value }}</span>
+                            </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Questions Column -->
+                <div class="space-y-4 order-1 lg:order-2">
+                    <div class="flex items-center gap-2 mb-4">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        <h3 class="text-lg font-bold text-gray-800">Foods</h3>
+                    </div>
+
+                    @foreach([
+                        39 => 'Chapatti',
+                        40 => 'Naan bread',
+                        41 => 'Poppadom',
+                        42 => 'Chicken korma',
+                        43 => 'Rogan josh',
+                        44 => 'Thai seafood curry',
+                        45 => 'Bhaji'
+                    ] as $qNum => $foodName)
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-amber-400 hover:bg-white hover:shadow-md transition-all duration-200">
+                        <div class="flex items-center gap-4 flex-1">
+                            <span class="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-300 text-gray-600 font-bold text-sm shadow-sm">{{ $qNum }}.</span>
+                            <span class="font-medium text-gray-800">{{ $foodName }}</span>
+                        </div>
+                        <div class="relative ml-4">
+                            <select name="part7_q{{ $qNum }}" class="appearance-none bg-white block w-20 pl-3 pr-8 py-2 border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-bold text-center cursor-pointer hover:border-gray-400 transition-colors">
+                                <option value="" disabled selected>-</option>
+                                @foreach(range('A', 'I') as $opt)
+                                    <option value="{{ $opt }}">{{ $opt }}</option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            
+             <!-- Audio Player (Part 7) -->
+             @include('assignments.ielts.listening.partials.audio-player', [
+                 'audio_url' => asset('assets/audio/ielts/listening/material_2_part7.mp3'),
+                 'title' => 'Audio - Food Descriptions',
+                 'fixed' => false
+             ])
+        </div>
+    </div>
+
+    <!-- Part 8: Hotel Services -->
+    <div class="bg-white rounded-3xl shadow-xl border-t-4 border-emerald-500 overflow-hidden mb-8">
+        <div class="p-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Part 8: Questions 46-51</h2>
+            <p class="text-gray-700 mb-6 font-medium leading-relaxed">
+                You will hear a talk about hotels. Based on the information you hear, match the hotels from the box, <span class="font-bold text-emerald-600">A-C</span>, with the descriptions, 46-51.
+                <br>
+                You may use some of the letters more than once. The recording is played once only.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <!-- Options Column -->
+                <div class="lg:sticky lg:top-8 order-2 lg:order-1">
+                    <div class="bg-emerald-50 rounded-2xl p-6 shadow-inner border border-emerald-100">
+                        <h3 class="text-lg font-bold text-emerald-800 mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                            Hotels (A-C)
+                        </h3>
+                        <ul class="space-y-3">
+                            @foreach([
+                                'A' => 'Swan Hotel',
+                                'B' => 'Sunrise Hotel',
+                                'C' => 'Backpacker Hotel'
+                            ] as $key => $value)
+                            <li class="flex items-center gap-3 bg-white p-3 rounded-lg border border-emerald-100 shadow-sm">
+                                <span class="flex-none flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold text-lg">{{ $key }}</span>
+                                <span class="text-gray-800 font-semibold text-lg">{{ $value }}</span>
+                            </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Questions Column -->
+                <div class="space-y-4 order-1 lg:order-2">
+                    <div class="flex items-center gap-2 mb-4">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                        <h3 class="text-lg font-bold text-gray-800">Descriptions</h3>
+                    </div>
+
+                    @foreach([
+                        46 => 'Close to airport',
+                        47 => 'Close to city centre',
+                        48 => 'En suite bathroom',
+                        49 => 'Satellite TV',
+                        50 => 'Internet in room',
+                        51 => 'Credit cards accepted'
+                    ] as $qNum => $qText)
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-emerald-400 hover:bg-white hover:shadow-md transition-all duration-200">
+                        <div class="flex items-center gap-4 flex-1">
+                            <span class="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-300 text-gray-600 font-bold text-sm shadow-sm">{{ $qNum }}.</span>
+                            <span class="font-medium text-gray-800">{{ $qText }}</span>
+                        </div>
+                        <div class="relative ml-4">
+                            <select name="part8_q{{ $qNum }}" class="appearance-none bg-white block w-20 pl-3 pr-8 py-2 border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-bold text-center cursor-pointer hover:border-gray-400 transition-colors">
+                                <option value="" disabled selected>-</option>
+                                @foreach(range('A', 'C') as $opt)
+                                    <option value="{{ $opt }}">{{ $opt }}</option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            
+             <!-- Audio Player (Part 8) -->
+             @include('assignments.ielts.listening.partials.audio-player', [
+                 'audio_url' => asset('assets/audio/ielts/listening/material_2_part8.mp3'),
+                 'title' => 'Audio - Hotel Services',
+                 'fixed' => false
+             ])
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Spacer for Audio Player -->
+<div class="h-24"></div>
+
+    @endif
+
     @else
     <!-- Content Placeholder for other materials -->
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 min-h-[400px] flex flex-col items-center justify-center text-center">
@@ -4661,6 +5332,46 @@ Start translating here..."></textarea>
                         <button type="submit"
                                 class="flex-1 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
                             Upload
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {{-- Upload Answer Key Modal (Admin Only) --}}
+        <div id="uploadAnswerKeyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] items-center justify-center"
+             onclick="if(event.target === this) { this.classList.add('hidden'); this.classList.remove('flex'); }">
+            <div class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full mx-4">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900">Update Answer Key</h3>
+                    <button type="button" onclick="const modal=document.getElementById('uploadAnswerKeyModal'); modal.classList.add('hidden'); modal.classList.remove('flex');"
+                            class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <form action="{{ route('assignments.ielts-academic.listening.material.upload-answer-key', ['id' => $id]) }}"
+                      method="POST" class="space-y-4">
+                    @csrf
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Answer Key</label>
+                        <textarea name="answer_key" rows="10"
+                                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:outline-none placeholder-gray-400 text-sm font-mono"
+                                  placeholder="1. A&#10;2. B&#10;3. C">{{ old('answer_key', isset($material) ? $material->answer_key : '') }}</textarea>
+                        <p class="mt-2 text-xs text-gray-500">Masukkan kunci jawaban dalam format bebas, misalnya satu nomor per baris.</p>
+                    </div>
+
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="const modal=document.getElementById('uploadAnswerKeyModal'); modal.classList.add('hidden'); modal.classList.remove('flex');"
+                                class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="flex-1 px-4 py-2 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors">
+                            Save Answer Key
                         </button>
                     </div>
                 </form>
@@ -4812,6 +5523,17 @@ Start translating here..."></textarea>
                     transcriptDrawer.classList.add('hidden');
                     transcriptDrawer.classList.remove('flex');
                 }
+            }
+        };
+
+        window.toggleAnswerKey = function() {
+            document.body.classList.toggle('reveal-key');
+            const btn = document.getElementById('toggleKeyBtn');
+            if (btn) {
+                const active = document.body.classList.contains('reveal-key');
+                btn.classList.toggle('bg-yellow-300', active);
+                btn.classList.toggle('border-yellow-400', active);
+                btn.classList.toggle('text-yellow-900', active);
             }
         };
     });

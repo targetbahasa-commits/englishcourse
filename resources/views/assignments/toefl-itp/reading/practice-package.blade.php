@@ -12,6 +12,9 @@
 <body class="font-sans antialiased bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 h-screen overflow-hidden">
     <style>
         .toefl-passage-shell {
+            --toefl-passage-font-size: 15px;
+            --toefl-passage-leading: 1.65;
+            --toefl-line-step: calc(var(--toefl-passage-font-size) * var(--toefl-passage-leading));
             background: #ffffff;
             border: 1px solid #e5e7eb;
             box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
@@ -25,8 +28,8 @@
 
         .toefl-passage-text {
             color: #111827;
-            font-size: 15px;
-            line-height: 1.65;
+            font-size: var(--toefl-passage-font-size);
+            line-height: var(--toefl-passage-leading);
         }
 
         .custom-scrollbar::-webkit-scrollbar {
@@ -58,7 +61,7 @@
 
         .toefl-passage-gutter {
             position: relative;
-            --toefl-line-step: 1.65em;
+            padding-top: 0.25rem;
         }
 
         .toefl-gutter-marker {
@@ -68,13 +71,18 @@
             font-style: italic;
             font-weight: 500;
             color: #111827;
+            font-size: 13px;
             line-height: 1;
             white-space: nowrap;
-            transform: translateY(-0.08em);
+            transform: translateY(-50%);
         }
 
         .toefl-passage-paragraph {
-            margin: 0 0 0.85rem;
+            margin: 0;
+        }
+
+        .toefl-passage-paragraph + .toefl-passage-paragraph {
+            text-indent: 1.25em;
         }
 
         .toefl-line-segment {
@@ -357,16 +365,12 @@
                 column-gap: 0.3rem;
             }
 
-            .toefl-passage-gutter {
-                --toefl-line-step: 1.58em;
-            }
-
             .toefl-gutter-marker {
-                font-size: 13px;
+                font-size: 12px;
             }
 
-            .toefl-passage-paragraph {
-                margin-bottom: 0.75rem;
+            .toefl-passage-paragraph + .toefl-passage-paragraph {
+                text-indent: 1.1em;
             }
 
             .toefl-line-segment {
@@ -486,8 +490,9 @@
                                                         $defaultLine = $loop->index === 0 ? 1 : $loop->index * 5;
                                                         $markerLabel = is_array($marker) ? ($marker['label'] ?? '') : $marker;
                                                         $lineNumber = is_array($marker) ? (int) ($marker['line'] ?? $defaultLine) : $defaultLine;
+                                                        $lineCenter = $lineNumber - 0.5;
                                                     @endphp
-                                                    <div class="toefl-gutter-marker" style="top: calc({{ max(0, $lineNumber - 1) }} * var(--toefl-line-step));">{{ $markerLabel }}</div>
+                                                    <div class="toefl-gutter-marker" style="top: calc({{ $lineCenter }} * var(--toefl-line-step));">{{ $markerLabel }}</div>
                                                 @endforeach
                                             @endif
                                         </div>

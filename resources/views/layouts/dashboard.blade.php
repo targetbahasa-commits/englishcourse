@@ -21,13 +21,13 @@
     <div class="flex min-h-screen">
         <!-- Sidebar - Automatically selected based on user role -->
         @auth
-            @php($sidebarRole = strtolower(Auth::user()->role ?? 'student'))
+            @php($sidebarRole = strtolower(Auth::user()->active_role ?? 'student'))
 
             @if($sidebarRole === 'admin')
                 @include('components.sidebar-admin')
             @elseif($sidebarRole === 'teacher')
                 @include('components.sidebar-teacher')
-            @elseif($sidebarRole === 'guest')
+            @elseif(in_array($sidebarRole, ['guest', 'guest_quick']))
                 @include('components.sidebar-guest')
             @else
                 @include('components.sidebar-student')
@@ -51,7 +51,10 @@
                 
                 <div class="flex items-center gap-4 md:gap-6">
                     @auth
-                        @include('components.topbar-action-icons')
+                        @php($activeRole = strtolower(Auth::user()->active_role ?? 'student'))
+                        @if(!in_array($activeRole, ['guest', 'guest_quick'], true))
+                            @include('components.topbar-action-icons')
+                        @endif
                     @endauth
                     
                     <!-- User Profile / Auth Actions -->
@@ -59,7 +62,7 @@
                         @auth
                             <div class="text-right hidden md:block">
                                 <p class="text-sm font-bold text-gray-800">{{ Auth::user()->name }}</p>
-                                <p class="text-xs text-gray-500">{{ ucfirst(Auth::user()->role) }}</p>
+                                <p class="text-xs text-gray-500">{{ in_array(Auth::user()->active_role, ['guest', 'guest_quick']) ? 'Guest' : ucfirst(Auth::user()->active_role) }}</p>
                             </div>
                             <div class="w-10 h-10 bg-blue-100 rounded-full overflow-hidden flex items-center justify-center text-blue-600 font-bold shrink-0">
                                 {{ substr(Auth::user()->name, 0, 1) }}
@@ -107,5 +110,7 @@
     <!-- Additional Scripts -->
     @stack('scripts')
     @include('components.student-broadcaster')
+    <!-- Alpine.js for interactivity -->
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </body>
 </html>

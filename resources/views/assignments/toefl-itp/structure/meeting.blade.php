@@ -276,6 +276,12 @@
         $backRoute = $number > 50
             ? route('assignments.toefl-itp.structure.practice')
             : route('assignments.toefl-itp.structure');
+
+        $totalQuestionCount = collect($questions)->count();
+        $answerKeyFilledCount = collect($questions)->filter(function ($question) {
+            return filled(trim((string) ($question->correct_answer ?? '')));
+        })->count();
+        $isAnswerKeyComplete = $totalQuestionCount > 0 && $answerKeyFilledCount === $totalQuestionCount;
     @endphp
     <!-- Header -->
     <div class="mb-8 flex justify-between items-end">
@@ -289,7 +295,25 @@
             <p class="text-gray-500 text-sm ml-9">{{ $title }}</p>
         </div>
 
-        <div class="flex gap-2">
+        <div class="flex items-center gap-2 flex-wrap justify-end">
+            @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                <button type="button" onclick="openAnswerKeyStatusModal()" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold {{ $isAnswerKeyComplete ? 'bg-emerald-100 text-emerald-700 border border-emerald-200 hover:bg-emerald-200' : 'bg-amber-100 text-amber-700 border border-amber-200 hover:bg-amber-200' }} transition" title="Lihat daftar answer key">
+                    <span class="w-2 h-2 rounded-full {{ $isAnswerKeyComplete ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
+                    {{ $isAnswerKeyComplete ? 'Answer Key Ditambahkan' : 'Answer Key Belum Lengkap' }}
+                </button>
+                <button type="button" onclick="openAnswerKeyStatusModal()" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition" title="Lihat daftar answer key">
+                    {{ $answerKeyFilledCount }}/{{ $totalQuestionCount }} Soal
+                </button>
+            @else
+                <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold {{ $isAnswerKeyComplete ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-amber-100 text-amber-700 border border-amber-200' }}">
+                    <span class="w-2 h-2 rounded-full {{ $isAnswerKeyComplete ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
+                    {{ $isAnswerKeyComplete ? 'Answer Key Ditambahkan' : 'Answer Key Belum Lengkap' }}
+                </span>
+                <span class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                    {{ $answerKeyFilledCount }}/{{ $totalQuestionCount }} Soal
+                </span>
+            @endif
+
             @if(Auth::user()->isAdmin())
                 <button onclick="openAddQuestionModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -989,7 +1013,7 @@
                     </div>
                 </div>
             </div>
-            @elseif($questions->count() > 0)
+            @elseif(count($questions) > 0)
             <!-- Submit Button -->
             <div class="flex justify-end mt-2">
                 <button type="submit" class="px-8 py-3 bg-green-600 text-white rounded-xl shadow-lg hover:bg-green-700 font-bold transition transform hover:-translate-y-1">
@@ -1539,6 +1563,72 @@
     </script>
 </div>
 @if(true)
+    @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+    <!-- Answer Key Status Modal -->
+    <div id="answerKeyStatusModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-16 mx-auto p-5 border w-11/12 md:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-900">Daftar Answer Key</h3>
+                <button type="button" onclick="closeAnswerKeyStatusModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="mb-4 text-sm text-gray-600">
+                <span class="font-semibold">Terisi:</span> {{ $answerKeyFilledCount }}/{{ $totalQuestionCount }} soal
+            </div>
+
+            <div class="max-h-96 overflow-y-auto border border-gray-100 rounded-lg">
+                <table class="w-full text-sm">
+                    <thead class="sticky top-0 bg-gray-50 border-b border-gray-100">
+                        <tr>
+                            <th class="text-left px-4 py-2 font-semibold text-gray-600">Nomor</th>
+                            <th class="text-left px-4 py-2 font-semibold text-gray-600">Answer Key</th>
+                            <th class="text-left px-4 py-2 font-semibold text-gray-600">Status</th>
+                            <th class="text-left px-4 py-2 font-semibold text-gray-600">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($questions as $question)
+                            @php
+                                $answerKeyValue = trim((string) ($question->correct_answer ?? ''));
+                                $isFilled = $answerKeyValue !== '';
+                            @endphp
+                            <tr class="border-b border-gray-50">
+                                <td class="px-4 py-2 text-gray-700">{{ $question->question_number }}</td>
+                                <td class="px-4 py-2">
+                                    <select id="answer-key-select-{{ $question->id }}" class="border border-gray-300 rounded-md px-2 py-1 text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="" {{ $answerKeyValue === '' ? 'selected' : '' }}>-</option>
+                                        <option value="A" {{ strtoupper($answerKeyValue) === 'A' ? 'selected' : '' }}>A</option>
+                                        <option value="B" {{ strtoupper($answerKeyValue) === 'B' ? 'selected' : '' }}>B</option>
+                                        <option value="C" {{ strtoupper($answerKeyValue) === 'C' ? 'selected' : '' }}>C</option>
+                                        <option value="D" {{ strtoupper($answerKeyValue) === 'D' ? 'selected' : '' }}>D</option>
+                                    </select>
+                                </td>
+                                <td class="px-4 py-2">
+                                    <span id="answer-key-status-{{ $question->id }}" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold {{ $isFilled ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
+                                        <span class="w-1.5 h-1.5 rounded-full {{ $isFilled ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
+                                        {{ $isFilled ? 'Terisi' : 'Kosong' }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-2">
+                                    <button type="button" onclick="saveAnswerKeyFromStatusModal({{ $question->id }})" class="px-3 py-1.5 bg-blue-600 text-white rounded-md text-xs font-semibold hover:bg-blue-700 transition">
+                                        Simpan
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-5 flex justify-end">
+                <button type="button" onclick="closeAnswerKeyStatusModal()" class="px-4 py-2 bg-gray-200 rounded text-gray-800 hover:bg-gray-300 transition">Tutup</button>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Add Question Modal -->
     <div id="addQuestionModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 shadow-lg rounded-md bg-white">
@@ -1548,7 +1638,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-gray-700 text-sm font-bold mb-2">Number</label>
-                        <input type="number" name="question_number" value="{{ $questions->count() + 1 }}" class="shadow border rounded w-full py-2 px-3 text-gray-700">
+                        <input type="number" name="question_number" value="{{ count($questions) + 1 }}" class="shadow border rounded w-full py-2 px-3 text-gray-700">
                     </div>
                     <div>
                          <label class="block text-gray-700 text-sm font-bold mb-2">Correct Answer</label>
@@ -1643,6 +1733,58 @@
     </div>
 
     <script>
+        function openAnswerKeyStatusModal() {
+            const modal = document.getElementById('answerKeyStatusModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeAnswerKeyStatusModal() {
+            const modal = document.getElementById('answerKeyStatusModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function saveAnswerKeyFromStatusModal(questionId) {
+            const selectEl = document.getElementById(`answer-key-select-${questionId}`);
+            const statusEl = document.getElementById(`answer-key-status-${questionId}`);
+            if (!selectEl) return;
+
+            const answer = (selectEl.value || '').toUpperCase().trim();
+            if (!answer) {
+                alert('Pilih answer key terlebih dahulu.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+            formData.append('correct_answer', answer);
+
+            fetch(`/assignments/toefl-itp/structure/question/${questionId}/update-answer`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    throw new Error(data.message || 'Gagal menyimpan answer key.');
+                }
+
+                if (statusEl) {
+                    statusEl.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700';
+                    statusEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Terisi';
+                }
+
+                alert('Answer key berhasil diperbarui.');
+                window.location.reload();
+            })
+            .catch(error => {
+                alert(error.message || 'Terjadi kesalahan saat menyimpan answer key.');
+            });
+        }
+
         function openAddQuestionModal() {
             document.getElementById('addQuestionModal').classList.remove('hidden');
         }

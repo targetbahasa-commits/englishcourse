@@ -1,6 +1,9 @@
 @extends('layouts.admin')
 
 @section('content')
+@php
+    $questions = collect($questions ?? []);
+@endphp
 <style>
     /* Custom Scrollbar - Forced Visibility */
     div.custom-scrollbar::-webkit-scrollbar {
@@ -57,30 +60,68 @@
     .answer-label.is-wrong span {
         color: #991b1b !important; /* red-800 */
     }
-</style>
 
-<div class="container mx-auto px-4 pb-8 relative bg-white min-h-screen {{ isset($set) ? 'pt-40 md:pt-36' : 'pt-8' }}">
+/* Highlight for active transcript/translation segment */
+.active-segment { background: #fef08a; transition: background 0.2s; }
+</style>
+<script src="/js/transcript-sync.js"></script>
+
+<div class="container mx-auto px-4 pb-8 relative bg-white min-h-screen {{ isset($set) ? 'pt-32 md:pt-28' : 'pt-8' }}">
     
     {{-- Main Paper Card --}}
-    <div class="bg-white max-w-7xl mx-auto rounded-xl shadow-lg border border-gray-100 p-8 md:p-12 relative overflow-hidden" style="{{ isset($set) ? 'padding-top: 9rem;' : '' }}">
+    <div class="bg-white max-w-7xl mx-auto rounded-xl shadow-lg border border-gray-100 p-8 md:p-12 relative overflow-hidden" style="{{ isset($set) ? 'padding-top: 5.5rem;' : '' }}">
         
         {{-- Top Decoration --}}
         <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
 
         {{-- Header Section --}}
-        <div class="mb-10 border-b border-gray-100 pb-8 {{ isset($set) ? 'mt-24 md:mt-20' : '' }}">
+        <div class="mb-10 border-b border-gray-100 pb-8 {{ isset($set) ? 'mt-10 md:mt-8' : '' }}">
             <div class="flex items-center justify-between mb-6">
-                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Latihan Soal</h1>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Latihan Soal</h1>
+                    @if(Auth::user()->isAdmin())
+                        @php
+                            // Tentukan status kunci jawaban
+                            $statusAnswerKey = false;
+                            if ($questions && count($questions) > 0) {
+                                $firstQuestion = $questions->first();
+                                if ($firstQuestion) {
+                                    $statusAnswerKey = filled($firstQuestion->answer_key ?? null) || filled($firstQuestion->explanation ?? null);
+                                }
+                            }
+                        @endphp
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $statusAnswerKey ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                            <span class="font-bold">{{ $statusAnswerKey ? '✓' : '✕' }}</span> Kunci
+                        </span>
+                    @endif
+                </div>
                 <div class="flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-semibold">
                     <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                     TOEFL Listening
                 </div>
             </div>
             
-            <div class="bg-gray-50 rounded-lg p-6 border border-gray-100">
-                <p class="mb-3 text-gray-700 leading-relaxed"><strong class="text-gray-900">Focus:</strong> listening to dialogs that involve agreement and disagreement, and answering questions about them.</p>
-                <p class="mb-0 text-gray-700 leading-relaxed"><strong class="text-gray-900">Directions:</strong> listen to the following dialogs. Decide which choice <span class="bg-white px-2 py-0.5 rounded border border-gray-200 text-sm font-mono">(A)</span>, <span class="bg-white px-2 py-0.5 rounded border border-gray-200 text-sm font-mono">(B)</span>, or <span class="bg-white px-2 py-0.5 rounded border border-gray-200 text-sm font-mono">(C)</span> best answers the question and mark the appropriate answer. The first one is done as an example.</p>
-            </div>
+            @if(isset($set))
+                <div class="bg-gray-50 rounded-lg p-6 border border-gray-100">
+                    <p class="mb-3 text-gray-700 leading-relaxed"><strong class="text-gray-900">Focus:</strong> understanding extended talks and lectures, and answering questions about their content.</p>
+                    <div class="mb-0 text-gray-700 leading-relaxed">
+                        <strong class="text-gray-900">Directions:</strong> In this part of the test, you will hear several talks. Each talk will be followed by a number of questions. The talks and the questions will not be repeated.
+                        <br><br>
+                        Listen carefully to each talk and the questions that follow it. Then, choose the best answer to each question from the four choices given and mark the corresponding letter on your answer sheet.
+                        <br><br>
+                        <span class="block font-semibold text-gray-800 mt-2">Example:</span>
+                        <div class="border border-gray-200 rounded p-3 mt-2 bg-white">
+                            <em>(You will hear:)</em><br>
+                            <span class="italic">You will hear a short talk about a university event. After the talk, you will hear:</span><br>
+                            <span class="italic">"What is the main purpose of the talk?"</span>
+                            <br><br>
+                            <em>(You will read:)</em><br>
+                            <span class="block">A. To announce a change in the university schedule<br>B. To describe a campus event<br>C. To explain a new university policy<br>D. To introduce a guest speaker</span>
+                        </div>
+                        <span class="block mt-2">The best answer to the question is <span class="font-bold">B</span>. Therefore, you should mark <span class="font-bold">B</span> on your answer sheet.</span>
+                    </div>
+                </div>
+            @endif
         </div>
 
         @if(session('success'))
@@ -213,9 +254,23 @@
             <div class="fixed top-0 left-0 right-0 md:left-64 z-40 bg-white shadow-lg">
                 <div class="max-w-7xl mx-auto">
                     <div class="flex flex-wrap lg:flex-nowrap items-center gap-2 md:gap-4 p-2 md:p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-b-2 border-indigo-200">
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2 md:gap-3">
+                            @if(Auth::user()->isAdmin())
+                                @php
+                                    $statusAudio = filled($questions->first()->audio_file ?? null);
+                                    $statusTranscript = filled($questions->first()->transcript_en ?? null) || filled($questions->first()->transcript_id ?? null);
+                                @endphp
+                                <div class="flex items-center gap-1 flex-shrink-0">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusAudio ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                                        <span class="font-bold">{{ $statusAudio ? '✓' : '✕' }}</span> Audio
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusTranscript ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                                        <span class="font-bold">{{ $statusTranscript ? '✓' : '✕' }}</span> SRT
+                                    </span>
+                                </div>
+                            @endif
                             <div class="w-9 h-9 md:w-10 md:h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-md">
-                                <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 012.828 2.828"></path></svg>
+                                <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.5 5.5L7 9H4v6h3l4.5 3.5V5.5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.5 9.5a4 4 0 010 5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 7a7.5 7.5 0 010 10"></path></svg>
                             </div>
                             <span class="text-sm md:text-lg font-bold text-indigo-900 whitespace-nowrap">Audio Session - Latihan {{ $set }}</span>
                         </div>
@@ -418,27 +473,12 @@
                                                 @if($isJsonId)
                                                     <div class="space-y-2">
                                                         @foreach($jsonId as $block)
-                                                            @php
-                                                                $words = explode(' ', $block['text']);
-                                                                $startTime = $block['start'];
-                                                                $totalDuration = $block['end'] - $startTime;
-                                                                $wordCount = count($words);
-                                                                $durationPerWord = $wordCount > 0 ? $totalDuration / $wordCount : 0;
-                                                            @endphp
-                                                            <div class="mb-2">
-                                                                @foreach($words as $index => $word)
-                                                                    @php
-                                                                        $wordStart = $startTime + ($index * $durationPerWord);
-                                                                        $wordEnd = $startTime + (($index + 1) * $durationPerWord);
-                                                                    @endphp
-                                                                    <span class="transcript-word-id cursor-pointer hover:bg-yellow-100 transition-colors duration-200 rounded px-0.5 inline-block"
-                                                                          data-start="{{ $wordStart }}"
-                                                                          data-end="{{ $wordEnd }}"
-                                                                          onclick="seekAudio({{ $wordStart }})">
-                                                                        {{ $word }}
-                                                                    </span>
-                                                                @endforeach
-                                                            </div>
+                                                            <span class="transcript-segment cursor-pointer hover:bg-yellow-100 transition-colors duration-200 rounded px-0.5 inline-block"
+                                                                  data-start="{{ $block['start'] }}"
+                                                                  data-end="{{ $block['end'] }}"
+                                                                  onclick="seekAudio({{ $block['start'] }})">
+                                                                {{ $block['text'] }}
+                                                            </span>
                                                         @endforeach
                                                     </div>
                                                 @else
@@ -861,14 +901,14 @@
             <input type="hidden" name="set_number" value="{{ $set }}">
             
             {{-- Instruction Header --}}
-            <p class="mb-4 text-gray-700 font-medium h7-instruction">Putar audio, ulangi jika perlu hingga semua alike-sound jawaban bergaris bawah.</p>
+            <p class="mb-5 text-gray-700 font-medium h7-instruction max-w-5xl mx-auto">Putar audio, ulangi jika perlu hingga semua alike-sound jawaban bergaris bawah.</p>
 
             {{-- Two Column Layout --}}
-            <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 md:p-6 max-w-5xl mx-auto">
             @php
-                $splitIndex = ceil($questions->count() / 2);
+                $splitIndex = ceil(count($questions) / 2);
             @endphp
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0">
+            <div class="grid grid-cols-1 md:grid-cols-2 md:gap-x-0 gap-y-0">
                 
             {{-- Parse Transcript timestamps map --}}
             @php
@@ -928,9 +968,9 @@
             </script>
 
             {{-- Column 1: Questions 1-{{ $splitIndex }} --}}
-            <div class="space-y-0 divide-y divide-gray-100">
+            <div class="space-y-0 divide-y divide-gray-100 md:pr-1">
                 @foreach($questions->take($splitIndex) as $question)
-                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-1 md:px-2 -mx-1 md:-mx-2 relative">
                         <div class="flex items-baseline gap-3">
                             <div class="flex-none flex items-center justify-end gap-2 w-8">
                                 <span class="font-bold text-gray-500 text-xl">{{ $question->question_number }}.</span>
@@ -1010,9 +1050,9 @@
             </div>
 
             {{-- Column 2: Questions {{ $splitIndex + 1 }}-End --}}
-            <div class="space-y-0 divide-y divide-gray-100">
+            <div class="space-y-0 divide-y divide-gray-100 md:pl-1">
                 @foreach($questions->skip($splitIndex) as $question)
-                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-1 md:px-2 -mx-1 md:-mx-2 relative">
                         <div class="flex items-baseline gap-3">
                             <div class="flex-none flex items-center justify-end gap-2 w-8">
                                 <span class="font-bold text-gray-500 text-xl">{{ $question->question_number }}.</span>

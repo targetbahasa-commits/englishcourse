@@ -2,15 +2,20 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Application\JobVacancy\ManageJobVacancies;
 use App\Http\Controllers\Controller;
 use App\Models\JobVacancy;
 use Illuminate\Http\Request;
 
 class JobVacancyController extends Controller
 {
+    public function __construct(
+        private readonly ManageJobVacancies $useCase
+    ) {}
+
     public function index()
     {
-        $vacancies = JobVacancy::latest()->paginate(15);
+        $vacancies = $this->useCase->listAll(15);
         return view('admin.job-vacancies.index', compact('vacancies'));
     }
 
@@ -38,10 +43,10 @@ class JobVacancyController extends Controller
             'url'                 => 'nullable|url|max:500',
             'is_active'           => 'boolean',
         ]);
-        
+
         $validated['is_active'] = $request->boolean('is_active');
 
-        JobVacancy::create($validated);
+        $this->useCase->create($validated);
 
         return redirect()->route('admin.job-vacancies.index')
             ->with('success', 'Job vacancy created successfully.');
@@ -74,7 +79,7 @@ class JobVacancyController extends Controller
 
         $validated['is_active'] = $request->boolean('is_active');
 
-        $jobVacancy->update($validated);
+        $this->useCase->update($jobVacancy, $validated);
 
         return redirect()->route('admin.job-vacancies.index')
             ->with('success', 'Job vacancy updated successfully.');
@@ -82,7 +87,7 @@ class JobVacancyController extends Controller
 
     public function destroy(JobVacancy $jobVacancy)
     {
-        $jobVacancy->delete();
+        $this->useCase->delete($jobVacancy);
         return redirect()->route('admin.job-vacancies.index')
             ->with('success', 'Job vacancy deleted successfully.');
     }

@@ -34,7 +34,8 @@ class GuestMagicLinkController extends Controller
         // DEV MODE: Bypass magic link for now and just log them in
         Auth::login($user);
         $request->session()->regenerate();
-        return redirect()->intended(route('dashboard', absolute: false));
+        $request->session()->forget('url.intended');
+        return redirect()->route('guest.free-tests');
 
         /*
         // Generate signed route valid for 15 minutes
@@ -68,7 +69,8 @@ class GuestMagicLinkController extends Controller
         Auth::login($user);
 
         $request->session()->regenerate();
+        $request->session()->forget('url.intended');
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->route('guest.free-tests');
     }
 }

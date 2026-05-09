@@ -27,6 +27,26 @@
         @endif
 
         <!-- Main Content -->
+                @if(session('require_access_key'))
+                    @php
+                        $slug = session('require_access_key');
+                        $program = $programs->firstWhere('slug', $slug);
+                    @endphp
+                    @if($program && $program->access_key)
+                    <div class="max-w-lg mx-auto mb-8 bg-white border border-blue-200 rounded-2xl shadow-lg p-8">
+                        <h2 class="text-2xl font-bold mb-2 text-blue-700">Access Key Required</h2>
+                        <p class="mb-4 text-gray-600">Enter the access key to unlock <b>{{ $program->name }}</b>.</p>
+                        @if(session('error'))
+                            <div class="bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded mb-4">{{ session('error') }}</div>
+                        @endif
+                        <form method="POST" action="{{ route('assignments.program-access.submit', $program->id) }}" class="flex flex-col gap-4">
+                            @csrf
+                            <input type="text" name="access_key" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter access key..." required autofocus>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition">Submit</button>
+                        </form>
+                    </div>
+                    @endif
+                @endif
         <main class="flex-1 md:ml-64 p-8">
             <!-- Header -->
             <div class="mb-8">
@@ -88,65 +108,104 @@
                         'text-yellow-600', 'light' => 'bg-yellow-50', 'gradient' => 'from-yellow-400 to-yellow-600']
                         ];
                         $colors = $colorClasses[$program->color] ?? $colorClasses['blue'];
+                        $programSlug = match ($program->slug) {
+                        'grammar-writing' => 'grammar-for-writing',
+                        'speaking' => 'speaking',
+                        'grammar-for-speaking' => 'speaking',
+                        'ielts-academic-listening', 'ielts-academic-reading', 'ielts-academic-full-package' => 'ielts-academic',
+                        default => $program->slug,
+                        };
 
-                        // Determine route based on program name
+                        // Determine route based on program slug
                         $routeName = '#';
-                        if ($program->name === 'Grammar for Writing') {
-                        $routeName = route('assignments.grammar-writing');
-                        } elseif ($program->name === 'TOEFL ITP') {
+                        if ($programSlug === 'grammar-for-writing') {
+                        $routeName = route('assignments.grammar-writing.classes');
+                        } elseif ($programSlug === 'speaking') {
+                        $routeName = route('assignments.speaking.classes');
+                        } elseif ($programSlug === 'toefl-itp') {
                         $routeName = route('assignments.toefl-itp');
-                        } elseif ($program->name === 'IELTS Academic') {
+                        } elseif ($programSlug === 'ielts-academic') {
                         $routeName = route('assignments.ielts-academic');
-                        } elseif ($program->name === 'PTE Academic') {
+                        } elseif ($programSlug === 'pte-academic') {
                         $routeName = route('assignments.pte-academic');
-                        } elseif ($program->name === 'IELTS General') {
+                        } elseif ($programSlug === 'ielts-general') {
                         $routeName = route('assignments.ielts-general');
                         }
+
+                        $isLocked = $isStudent
+                            && (empty($allowedAssignmentProgramSlugs) || !in_array($programSlug, $allowedAssignmentProgramSlugs, true));
                         @endphp
 
-                        <a href="{{ $routeName }}"
-                            class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
+                        @php
+                            $cardRoute = $routeName;
+                            if ($cardRoute === '#') {
+                                $cardRoute = route('student.payments.index');
+                            }
+                            $cardClasses = "group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1";
+                            $lockedCardClasses = "group relative bg-white/95 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-2 border-gray-200";
+                        @endphp
+
+                        {{-- Locked cards use <div> to avoid nested <a> tags (invalid HTML) --}}
+                        @if($isLocked)
+                        <div class="{{ $lockedCardClasses }}">
+                        @else
+                        <a href="{{ $cardRoute }}" class="{{ $cardClasses }}">
+                        @endif
                             <!-- Gradient Header -->
                             <div class="h-32 bg-gradient-to-br {{ $colors['gradient'] }} relative overflow-hidden">
-                                <div
-                                    class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300">
-                                </div>
+                                <div class="absolute inset-0 bg-black {{ $isLocked ? 'opacity-20' : 'opacity-0 group-hover:opacity-10' }} transition-opacity duration-300"></div>
+                                @if($isLocked)
+                                    <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-gray-700 shadow-sm">
+                                        🔒 Locked
+                                    </div>
+                                @endif
                                 <div class="absolute bottom-4 left-6">
-                                    <div
-                                        class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300">
-                                        <svg class="w-8 h-8 {{ $colors['text'] }}" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            {!! $program->icon ?? '<path stroke-linecap="round" stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-                                            </path>' !!}
+                                    <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center {{ $isLocked ? '' : 'transform group-hover:rotate-6 transition-transform duration-300' }}">
+                                        <svg class="w-8 h-8 {{ $colors['text'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            {!! $program->icon ?? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>' !!}
                                         </svg>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Card Content -->
-                            <div class="p-6 pt-8">
-                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $program->name }}</h3>
+                            <div class="px-6 pt-4 pb-3 flex flex-col">
+                                <h3 class="text-lg font-bold text-gray-800 mb-1">{{ $program->name }}</h3>
                                 <p class="text-gray-600 text-sm mb-4 leading-relaxed">{{ $program->description }}</p>
 
-                                <!-- CTA Button -->
-                                <div
-                                    class="block w-full text-center {{ $colors['bg'] }} {{ $colors['hover'] }} text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
-                                    Start Learning
-                                    <svg class="w-4 h-4 inline-block ml-2" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                                    </svg>
-                                </div>
+                                @if($isLocked)
+                                    <!-- Pricing Buttons -->
+                                    @php
+                                        $priceDisplay = (int) $program->price > 0
+                                            ? 'IDR ' . number_format((int) $program->price, 0, ',', '.')
+                                            : '';
+                                    @endphp
+                                    <a href="{{ route('student.payments.index') }}" class="flex items-center justify-center gap-2 w-full text-center bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg transition-all duration-300 text-sm mb-1">
+                                        Buy Full Edition {{ $priceDisplay ? "({$priceDisplay})" : '' }}
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                    </a>
+                                    <a href="{{ route('student.payments.index') }}" class="flex items-center justify-center gap-2 w-full text-center bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-2.5 rounded-lg transition-all duration-300 text-sm">
+                                        Buy Per Test (IDR 50.000)
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                    </a>
+                                @else
+                                    <!-- Start Learning Button -->
+                                    <div class="w-full text-center {{ $colors['bg'] . ' ' . $colors['hover'] }} text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+                                        Start Learning
+                                        <svg class="w-4 h-4 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                        </svg>
+                                    </div>
+                                @endif
                             </div>
 
                             <!-- Decorative Element -->
-                            <div
-                                class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br {{ $colors['gradient'] }} opacity-5 rounded-full -mr-16 -mt-16 group-hover:opacity-10 transition-opacity duration-300">
-                            </div>
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br {{ $colors['gradient'] }} opacity-5 rounded-full -mr-16 -mt-16 group-hover:opacity-10 transition-opacity duration-300"></div>
+                        @if($isLocked)
+                        </div>
+                        @else
                         </a>
+                        @endif
                         @endforeach
 
 

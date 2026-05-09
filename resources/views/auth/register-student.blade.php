@@ -27,8 +27,15 @@
             </div>
             <h1 class="text-3xl sm:text-4xl font-extrabold mb-3 tracking-tight text-gray-900">Buat Akun Student</h1>
             <p class="text-gray-600 text-sm sm:text-base mx-auto font-medium leading-relaxed max-w-md">
-                Daftarkan dirimu untuk mengakses kelas dan memulai perjalanan belajar bahasa Inggris.
+                {{ !empty($skipPaymentFlow) ? 'Daftarkan dirimu untuk mengakses kelas tanpa melalui tahap pembayaran.' : 'Daftarkan dirimu untuk mengakses kelas dan memulai perjalanan belajar bahasa Inggris.' }}
             </p>
+            <div class="mt-5 flex items-center justify-center gap-3 text-xs font-semibold tracking-wide uppercase">
+                <span id="step-indicator-1" class="px-3 py-1 rounded-full bg-blue-600 text-white font-medium">Tahap 1: Data Akun</span>
+                <span id="step-indicator-2" class="px-3 py-1 rounded-full bg-gray-100 text-gray-500 border border-gray-200">{{ !empty($skipPaymentFlow) ? 'Tahap 2: Selesai' : 'Tahap 2: Pilih Kelas' }}</span>
+                @if(empty($skipPaymentFlow))
+                <span id="step-indicator-3" class="px-3 py-1 rounded-full bg-gray-100 text-gray-500 border border-gray-200">Tahap 3: Pembayaran</span>
+                @endif
+            </div>
             @if(request('program'))
             <div class="mt-4 mx-auto max-w-md px-4 py-2 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-700 font-medium">
                 🎯 Program yang kamu pilih: <strong>{{ request('program') }}</strong>
@@ -38,15 +45,28 @@
 
         <!-- Registration Form -->
         <div class="p-8 sm:p-10 text-left">
-            <form method="POST" action="{{ route('register') }}" class="space-y-5">
+            <form method="POST" action="{{ !empty($skipPaymentFlow) ? route('student.register.no-payment') : route('register') }}" class="space-y-5" novalidate>
                 @csrf
                 <input type="hidden" name="role" value="student">
                 <x-marketing-attribution />
 
+                @if($errors->any())
+                <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <ul class="list-disc ml-5 space-y-1">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
                 <input type="hidden" name="referral_code" value="{{ request()->query('ref') }}">
-                <input type="hidden" name="program" value="{{ request('program') }}">
+                <input type="hidden" id="program_choice" name="program_choice" value="{{ old('program_choice', $preselectedProgramSlug ?? '') }}">
+                <input type="hidden" id="payment_channel_choice" name="payment_channel_choice" value="{{ old('payment_channel_choice', 'bank_transfer') }}">
+                <input type="hidden" name="skip_payment_flow" value="{{ !empty($skipPaymentFlow) ? '1' : '0' }}">
                 <input type="hidden" name="city" value="{{ request('city') }}">
 
+                <div id="student-step-1" class="space-y-5">
                 <!-- Name -->
                 <div class="group relative">
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-1 transition-colors group-focus-within:text-blue-600">Full Name <span class="text-red-500">*</span></label>
@@ -131,14 +151,88 @@
 
                 <x-turnstile />
                 <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2 text-sm text-red-500 text-center" />
+                </div>
+
+                <div id="student-step-2" class="hidden space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-xl font-bold text-gray-900">{{ !empty($skipPaymentFlow) ? 'Pilih Kelas & Selesaikan' : 'Pilih Kelas' }}</h3>
+                        <p class="text-sm text-gray-500 mt-1">{{ !empty($skipPaymentFlow) ? 'Pilih program utama yang ingin kamu ikuti, lalu langsung buat akun.' : 'Pilih program utama yang ingin kamu ikuti.' }}</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3">
+                        <button type="button" data-program="ielts-academic" class="program-choice-btn text-left rounded-xl border border-gray-200 bg-white px-4 py-3 hover:border-blue-400 hover:bg-blue-50 transition">
+                            <p class="font-semibold text-gray-900">IELTS Academic</p>
+                            <p class="text-sm text-gray-500">Fokus untuk kebutuhan studi dan akademik.</p>
+                        </button>
+
+                        <button type="button" data-program="ielts-general" class="program-choice-btn text-left rounded-xl border border-gray-200 bg-white px-4 py-3 hover:border-blue-400 hover:bg-blue-50 transition">
+                            <p class="font-semibold text-gray-900">IELTS General</p>
+                            <p class="text-sm text-gray-500">Fokus untuk kebutuhan kerja dan migrasi.</p>
+                        </button>
+
+                        <button type="button" data-program="toefl-itp" class="program-choice-btn text-left rounded-xl border border-gray-200 bg-white px-4 py-3 hover:border-blue-400 hover:bg-blue-50 transition">
+                            <p class="font-semibold text-gray-900">TOEFL ITP</p>
+                            <p class="text-sm text-gray-500">Persiapan tes TOEFL ITP untuk kebutuhan institusional.</p>
+                        </button>
+
+                        <button type="button" data-program="pte-academic" class="program-choice-btn text-left rounded-xl border border-gray-200 bg-white px-4 py-3 hover:border-blue-400 hover:bg-blue-50 transition">
+                            <p class="font-semibold text-gray-900">PTE Academic</p>
+                            <p class="text-sm text-gray-500">Persiapan tes PTE berbasis komputer.</p>
+                        </button>
+
+                        <button type="button" data-program="grammar-for-writing" class="program-choice-btn text-left rounded-xl border border-gray-200 bg-white px-4 py-3 hover:border-blue-400 hover:bg-blue-50 transition">
+                            <p class="font-semibold text-gray-900">Grammar for Writing</p>
+                            <p class="text-sm text-gray-500">Fokus memperkuat grammar untuk writing akademik dan profesional.</p>
+                        </button>
+                    </div>
+
+                    <x-input-error :messages="$errors->get('program_choice')" class="mt-2 text-sm text-red-500 text-center" />
+                </div>
+
+                @if(empty($skipPaymentFlow))
+                <div id="student-step-3" class="hidden space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-xl font-bold text-gray-900">Tahap Pembayaran</h3>
+                        <p class="text-sm text-gray-500 mt-1">Pilih metode pembayaran yang akan kamu gunakan.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3">
+                        <button type="button" data-payment-channel="bank_transfer" class="payment-choice-btn text-left rounded-xl border border-gray-200 bg-white px-4 py-3 hover:border-blue-400 hover:bg-blue-50 transition">
+                            <p class="font-semibold text-gray-900">Transfer Bank</p>
+                            <p class="text-sm text-gray-500">Upload bukti transfer lalu tunggu verifikasi admin.</p>
+                        </button>
+
+                        <button type="button" data-payment-channel="cash" class="payment-choice-btn text-left rounded-xl border border-gray-200 bg-white px-4 py-3 hover:border-blue-400 hover:bg-blue-50 transition">
+                            <p class="font-semibold text-gray-900">Cash (Bayar di kantor)</p>
+                            <p class="text-sm text-gray-500">Buat invoice lalu lakukan pembayaran langsung di kantor.</p>
+                        </button>
+                    </div>
+
+                    <div class="rounded-xl bg-blue-50 border border-blue-200 p-3 text-sm text-blue-700">
+                        Setelah akun dibuat, kamu akan langsung diarahkan ke halaman pembayaran untuk membuat invoice.
+                    </div>
+
+                    <x-input-error :messages="$errors->get('payment_channel_choice')" class="mt-2 text-sm text-red-500 text-center" />
+                </div>
+                @endif
+
+                <div class="flex items-center justify-between gap-3">
+                    <button type="button" id="btn-step-back" class="hidden w-full py-3 px-4 border border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition">
+                        ← Kembali
+                    </button>
+
+                    <button type="button" id="btn-step-next" class="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 focus:outline-none focus:ring-4 focus:ring-blue-600/20 active:scale-[0.98] transition-all duration-300">
+                        {{ !empty($skipPaymentFlow) ? 'Lanjut Pilih Kelas →' : 'Lanjut Pilih Kelas →' }}
+                    </button>
 
                 <!-- Submit Button -->
-                <button type="submit" id="btn-submit-register" class="w-full relative py-3.5 mt-2 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 focus:outline-none focus:ring-4 focus:ring-blue-600/20 active:scale-[0.98] transition-all duration-300">
+                <button type="submit" id="btn-submit-register" class="hidden w-full relative py-3.5 mt-2 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 focus:outline-none focus:ring-4 focus:ring-blue-600/20 active:scale-[0.98] transition-all duration-300">
                     <span class="relative z-10 flex items-center justify-center gap-2">
-                        Create Account
+                        {{ !empty($skipPaymentFlow) ? 'Create Account' : 'Create Account & Lanjut Pembayaran' }}
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </span>
                 </button>
+                </div>
                 
                 <!-- Login Link -->
                 <p class="text-center text-sm text-gray-600 mt-6 pb-2">
@@ -152,6 +246,199 @@
     </div>
 
     <!-- OTP Logic Script -->
+    <script>
+        (function () {
+            const step1 = document.getElementById('student-step-1');
+            const step2 = document.getElementById('student-step-2');
+            const step3 = document.getElementById('student-step-3');
+            const skipPaymentFlow = @json(!empty($skipPaymentFlow));
+            const nextBtn = document.getElementById('btn-step-next');
+            const backBtn = document.getElementById('btn-step-back');
+            const submitBtn = document.getElementById('btn-submit-register');
+            const programInput = document.getElementById('program_choice');
+            const paymentChannelInput = document.getElementById('payment_channel_choice');
+            const indicator1 = document.getElementById('step-indicator-1');
+            const indicator2 = document.getElementById('step-indicator-2');
+            const indicator3 = document.getElementById('step-indicator-3');
+            const choiceButtons = document.querySelectorAll('.program-choice-btn');
+            const paymentChoiceButtons = document.querySelectorAll('.payment-choice-btn');
+            const form = step1.closest('form');
+            const step1RequiredFieldIds = ['name', 'email', 'phone_number', 'password', 'password_confirmation'];
+
+            if (!step1 || !step2 || !nextBtn || !backBtn || !submitBtn || !programInput || !paymentChannelInput) {
+                return;
+            }
+
+            function markSelectedProgram() {
+                choiceButtons.forEach((btn) => {
+                    const isSelected = btn.getAttribute('data-program') === programInput.value;
+                    btn.classList.toggle('border-blue-500', isSelected);
+                    btn.classList.toggle('bg-blue-50', isSelected);
+                    btn.classList.toggle('ring-2', isSelected);
+                    btn.classList.toggle('ring-blue-200', isSelected);
+                });
+            }
+
+            function markSelectedPaymentChannel() {
+                if (skipPaymentFlow) {
+                    return;
+                }
+
+                paymentChoiceButtons.forEach((btn) => {
+                    const isSelected = btn.getAttribute('data-payment-channel') === paymentChannelInput.value;
+                    btn.classList.toggle('border-blue-500', isSelected);
+                    btn.classList.toggle('bg-blue-50', isSelected);
+                    btn.classList.toggle('ring-2', isSelected);
+                    btn.classList.toggle('ring-blue-200', isSelected);
+                });
+            }
+
+            function validateStep1Fields() {
+                for (const fieldId of step1RequiredFieldIds) {
+                    const field = document.getElementById(fieldId);
+                    if (!field) {
+                        continue;
+                    }
+
+                    const value = (field.value || '').trim();
+                    if (value === '') {
+                        showStep(1);
+                        field.focus();
+                        alert('Lengkapi data akun pada Tahap 1 terlebih dahulu.');
+                        return false;
+                    }
+                }
+
+                const passwordField = document.getElementById('password');
+                const passwordConfirmationField = document.getElementById('password_confirmation');
+                if (passwordField && passwordConfirmationField && passwordField.value !== passwordConfirmationField.value) {
+                    showStep(1);
+                    passwordConfirmationField.focus();
+                    alert('Konfirmasi password belum sama.');
+                    return false;
+                }
+
+                return true;
+            }
+
+            function showStep(stepNumber) {
+                const onStep2 = stepNumber === 2;
+                const onStep3 = stepNumber === 3;
+                const finalStep = skipPaymentFlow ? 2 : 3;
+
+                step1.classList.toggle('hidden', stepNumber !== 1);
+                step2.classList.toggle('hidden', !onStep2);
+                if (step3) {
+                    step3.classList.toggle('hidden', !onStep3);
+                }
+                nextBtn.classList.toggle('hidden', stepNumber === finalStep);
+                backBtn.classList.toggle('hidden', stepNumber === 1);
+                submitBtn.classList.toggle('hidden', stepNumber !== finalStep);
+
+                if (stepNumber === 1) {
+                    nextBtn.textContent = 'Lanjut Pilih Kelas →';
+                } else {
+                    nextBtn.textContent = skipPaymentFlow ? 'Selesaikan Pendaftaran →' : 'Lanjut Pembayaran →';
+                }
+
+                indicator1.className = stepNumber === 1
+                    ? 'px-3 py-1 rounded-full bg-blue-600 text-white'
+                    : 'px-3 py-1 rounded-full bg-gray-100 text-gray-500 border border-gray-200';
+                indicator2.className = stepNumber === 2
+                    ? 'px-3 py-1 rounded-full bg-blue-600 text-white'
+                    : 'px-3 py-1 rounded-full bg-gray-100 text-gray-500 border border-gray-200';
+                if (indicator3) {
+                    indicator3.className = stepNumber === 3
+                        ? 'px-3 py-1 rounded-full bg-blue-600 text-white'
+                        : 'px-3 py-1 rounded-full bg-gray-100 text-gray-500 border border-gray-200';
+                }
+
+                if (onStep2) {
+                    markSelectedProgram();
+                }
+
+                if (onStep3) {
+                    markSelectedPaymentChannel();
+                }
+            }
+
+            choiceButtons.forEach((btn) => {
+                btn.addEventListener('click', function () {
+                    programInput.value = this.getAttribute('data-program') || '';
+                    markSelectedProgram();
+                });
+            });
+
+            paymentChoiceButtons.forEach((btn) => {
+                btn.addEventListener('click', function () {
+                    paymentChannelInput.value = this.getAttribute('data-payment-channel') || 'bank_transfer';
+                    markSelectedPaymentChannel();
+                });
+            });
+
+            nextBtn.addEventListener('click', function () {
+                if (!step1.classList.contains('hidden')) {
+                    if (!validateStep1Fields()) {
+                        return;
+                    }
+
+                    showStep(2);
+                    return;
+                }
+
+                if (!programInput.value) {
+                    alert('Silakan pilih kelas terlebih dahulu sebelum lanjut ke pembayaran.');
+                    return;
+                }
+
+                if (skipPaymentFlow) {
+                    submitBtn.focus();
+                    return;
+                }
+
+                showStep(3);
+            });
+
+            backBtn.addEventListener('click', function () {
+                if (!skipPaymentFlow && step3 && !step3.classList.contains('hidden')) {
+                    showStep(2);
+                    return;
+                }
+
+                showStep(1);
+            });
+
+            const hasStep1Errors = {{ ($errors->has('name') || $errors->has('email') || $errors->has('phone_number') || $errors->has('password') || $errors->has('password_confirmation') || $errors->has('cf-turnstile-response')) ? 'true' : 'false' }};
+            const hasStep2Errors = {{ $errors->has('program_choice') ? 'true' : 'false' }};
+            const hasStep3Errors = {{ $errors->has('payment_channel_choice') ? 'true' : 'false' }};
+
+            const openStep = hasStep1Errors ? 1 : (hasStep2Errors ? 2 : ((!skipPaymentFlow && hasStep3Errors) ? 3 : 1));
+            showStep(openStep);
+
+            if (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!validateStep1Fields()) {
+                        event.preventDefault();
+                        return;
+                    }
+
+                    if (!programInput.value) {
+                        event.preventDefault();
+                        showStep(2);
+                        alert('Silakan pilih kelas pada Tahap 2.');
+                        return;
+                    }
+
+                    if (!skipPaymentFlow && !paymentChannelInput.value) {
+                        event.preventDefault();
+                        showStep(3);
+                        alert('Silakan pilih metode pembayaran pada Tahap 3.');
+                    }
+                });
+            }
+        })();
+    </script>
+
     <script>
         let countdownInterval;
 

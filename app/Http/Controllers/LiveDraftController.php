@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\IeltsWritingMeeting;
+use App\Application\IeltsWriting\ShowIeltsWritingMeeting;
 use App\Models\User;
 use Illuminate\Http\Request;
 
 class LiveDraftController extends Controller
 {
+    public function __construct(
+        private readonly ShowIeltsWritingMeeting $showIeltsWritingMeeting,
+    ) {
+    }
     public function adminIeltsWriting(User $user, int $task, int $meetingId)
     {
         $actor = auth()->user();
@@ -38,7 +42,7 @@ class LiveDraftController extends Controller
             abort(404);
         }
 
-        $meeting = IeltsWritingMeeting::query()->findOrFail($meetingId);
+        $meeting = $this->showIeltsWritingMeeting->handle($meetingId);
 
         $roomId = sprintf(
             'ielts-writing:%d:task:%d:user:%d',

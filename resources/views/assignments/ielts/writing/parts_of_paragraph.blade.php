@@ -21,8 +21,10 @@
     </div>
 
     <!-- Content Wrapper -->
-    <div class="flex-1 overflow-y-auto pb-8" x-data="partsApp({{ $meeting->id }})">
-        <div class="max-w-4xl mx-auto w-full space-y-8">
+    <div class="flex-1 overflow-hidden" x-data="partsApp({{ $meeting->id }})">
+        <div x-ref="splitContainer" class="w-full h-full flex flex-col lg:flex-row lg:items-stretch gap-6 lg:gap-0">
+            <div class="overflow-y-auto pb-8 lg:pr-3" :style="panelStyle('left')">
+                <div class="max-w-4xl w-full space-y-8">
             
             <!-- Card 1: Explanation -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
@@ -187,7 +189,231 @@
                 </button>
             </div>
             @endif
+                </div>
+            </div>
+
+            <div
+                class="hidden lg:flex w-4 items-stretch justify-center cursor-col-resize select-none"
+                @mousedown.prevent="startResize($event)">
+                <div class="w-1 rounded-full bg-gray-300 hover:bg-blue-400 transition-colors"></div>
+            </div>
+
+            <aside class="overflow-y-auto pb-8 lg:pl-3" :style="panelStyle('right')">
+                <div class="bg-gradient-to-b from-white via-sky-50/40 to-indigo-50/50 rounded-2xl shadow-sm border border-gray-100 p-6 lg:sticky lg:top-0">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Soal Translate</h2>
+                    <p class="text-sm text-gray-600 mb-5">Terjemahkan setiap bagian ke dalam bahasa Inggris sebelum mengisi jawaban di sisi kiri.</p>
+
+                    @php
+                        $translateExercises = [
+                            [
+                                'id' => 1,
+                                'title' => 'Online Learning',
+                                'topic' => 'Salah satu keuntungan utama pembelajaran online adalah fleksibilitasnya.',
+                                'explanation' => 'Siswa dapat mengatur waktu belajar sesuai dengan jadwal mereka sendiri.',
+                                'example' => 'Misalnya, seorang karyawan dapat belajar setelah pulang kerja.',
+                                'result' => 'Akibatnya, lebih banyak orang dapat melanjutkan pendidikan mereka.',
+                            ],
+                            [
+                                'id' => 2,
+                                'title' => 'Healthy Lifestyle',
+                                'topic' => 'Menjalani gaya hidup sehat sangat penting untuk menjaga kualitas hidup.',
+                                'explanation' => 'Pola makan yang seimbang dan olahraga teratur dapat meningkatkan daya tahan tubuh.',
+                                'example' => 'Sebagai contoh, makan sayur dan buah setiap hari dapat membantu mencegah penyakit.',
+                                'result' => 'Oleh karena itu, orang yang hidup sehat cenderung memiliki hidup yang lebih panjang.',
+                            ],
+                            [
+                                'id' => 3,
+                                'title' => 'Technology',
+                                'topic' => 'Teknologi telah mengubah cara orang berkomunikasi.',
+                                'explanation' => 'Dengan adanya internet, informasi dapat dibagikan dengan cepat.',
+                                'example' => 'Contohnya, orang dapat melakukan panggilan video dengan keluarga di luar negeri.',
+                                'result' => 'Akibatnya, komunikasi menjadi lebih mudah dan efisien.',
+                            ],
+                            [
+                                'id' => 4,
+                                'title' => 'Environmental Protection',
+                                'topic' => 'Melindungi lingkungan adalah tanggung jawab semua orang.',
+                                'explanation' => 'Polusi yang berlebihan dapat merusak ekosistem dan kesehatan manusia.',
+                                'example' => 'Misalnya, sampah plastik di laut dapat membahayakan hewan laut.',
+                                'result' => 'Oleh karena itu, kita harus mengurangi penggunaan plastik sekali pakai.',
+                            ],
+                            [
+                                'id' => 5,
+                                'title' => 'Reading Habit',
+                                'topic' => 'Membaca buku secara rutin dapat meningkatkan kemampuan berpikir kritis.',
+                                'explanation' => 'Membaca membantu seseorang memahami berbagai sudut pandang.',
+                                'example' => 'Sebagai contoh, membaca novel sejarah dapat memperluas wawasan tentang masa lalu.',
+                                'result' => 'Akibatnya, seseorang dapat membuat keputusan yang lebih bijaksana.',
+                            ],
+                            [
+                                'id' => 6,
+                                'title' => 'Social Media',
+                                'topic' => 'Media sosial memiliki dampak besar terhadap kehidupan remaja.',
+                                'explanation' => 'Remaja sering menghabiskan banyak waktu untuk mengakses platform tersebut.',
+                                'example' => 'Misalnya, mereka bisa menghabiskan berjam-jam menonton video pendek.',
+                                'result' => 'Akibatnya, waktu belajar mereka bisa berkurang.',
+                            ],
+                            [
+                                'id' => 7,
+                                'title' => 'Public Transportation',
+                                'topic' => 'Transportasi umum dapat membantu mengurangi kemacetan lalu lintas.',
+                                'explanation' => 'Jika lebih banyak orang menggunakan transportasi umum, jumlah kendaraan pribadi akan berkurang.',
+                                'example' => 'Sebagai contoh, penggunaan kereta api dapat mengurangi jumlah mobil di jalan raya.',
+                                'result' => 'Oleh karena itu, kota menjadi lebih tertib dan ramah lingkungan.',
+                            ],
+                            [
+                                'id' => 8,
+                                'title' => 'Learning English',
+                                'topic' => 'Belajar bahasa Inggris membuka banyak peluang karier.',
+                                'explanation' => 'Banyak perusahaan internasional menggunakan bahasa Inggris sebagai bahasa utama.',
+                                'example' => 'Misalnya, seseorang dengan kemampuan bahasa Inggris yang baik dapat bekerja di perusahaan multinasional.',
+                                'result' => 'Akibatnya, peluang mendapatkan pekerjaan yang lebih baik semakin besar.',
+                            ],
+                            [
+                                'id' => 9,
+                                'title' => 'Teamwork',
+                                'topic' => 'Kerja sama tim sangat penting dalam dunia kerja.',
+                                'explanation' => 'Setiap anggota tim memiliki peran dan tanggung jawab yang berbeda.',
+                                'example' => 'Sebagai contoh, dalam sebuah proyek, satu orang bertugas merancang sementara yang lain mengelola anggaran.',
+                                'result' => 'Oleh karena itu, tujuan proyek dapat tercapai dengan lebih efektif.',
+                            ],
+                            [
+                                'id' => 10,
+                                'title' => 'Time Management',
+                                'topic' => 'Manajemen waktu yang baik membantu meningkatkan produktivitas.',
+                                'explanation' => 'Dengan mengatur jadwal secara teratur, seseorang dapat menyelesaikan tugas tepat waktu.',
+                                'example' => 'Misalnya, membuat daftar tugas harian dapat membantu menghindari penundaan.',
+                                'result' => 'Akibatnya, pekerjaan dapat diselesaikan dengan lebih efisien.',
+                            ],
+                        ];
+                    @endphp
+
+                    @php
+                        $translateThemes = [
+                            ['wrap' => 'border-blue-200 bg-blue-50/80', 'title' => 'text-blue-900', 'label' => 'text-blue-700', 'textarea' => 'border-blue-200 focus:border-blue-400 focus:ring-blue-100'],
+                            ['wrap' => 'border-emerald-200 bg-emerald-50/80', 'title' => 'text-emerald-900', 'label' => 'text-emerald-700', 'textarea' => 'border-emerald-200 focus:border-emerald-400 focus:ring-emerald-100'],
+                            ['wrap' => 'border-violet-200 bg-violet-50/80', 'title' => 'text-violet-900', 'label' => 'text-violet-700', 'textarea' => 'border-violet-200 focus:border-violet-400 focus:ring-violet-100'],
+                            ['wrap' => 'border-amber-200 bg-amber-50/80', 'title' => 'text-amber-900', 'label' => 'text-amber-700', 'textarea' => 'border-amber-200 focus:border-amber-400 focus:ring-amber-100'],
+                            ['wrap' => 'border-rose-200 bg-rose-50/80', 'title' => 'text-rose-900', 'label' => 'text-rose-700', 'textarea' => 'border-rose-200 focus:border-rose-400 focus:ring-rose-100'],
+                        ];
+                    @endphp
+
+                    <div class="space-y-4">
+                        @foreach($translateExercises as $exercise)
+                            @php
+                                $theme = $translateThemes[($exercise['id'] - 1) % count($translateThemes)];
+                            @endphp
+                            <div class="rounded-xl border p-4 {{ $theme['wrap'] }}">
+                                <h3 class="font-bold mb-3 {{ $theme['title'] }}">Latihan {{ $exercise['id'] }} - {{ $exercise['title'] }}</h3>
+                                <p class="text-sm"><span class="font-semibold">Topic Sentence:</span> {{ $exercise['topic'] }}</p>
+                                <p class="text-sm mt-2"><span class="font-semibold">Explanation:</span> {{ $exercise['explanation'] }}</p>
+                                <p class="text-sm mt-2"><span class="font-semibold">Example:</span> {{ $exercise['example'] }}</p>
+                                <p class="text-sm mt-2"><span class="font-semibold">Result:</span> {{ $exercise['result'] }}</p>
+
+                                <div class="mt-3">
+                                    <label class="block text-xs font-semibold uppercase tracking-wide mb-1 {{ $theme['label'] }}">Jawaban Translate</label>
+                                    <textarea
+                                        name="translate_{{ $exercise['id'] }}"
+                                        @input="autoResize($event.target)"
+                                        x-init="$nextTick(() => autoResize($el))"
+                                        class="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:ring-2 focus:outline-none {{ $theme['textarea'] }}"
+                                        rows="4"
+                                        placeholder="Tulis hasil terjemahan bahasa Inggris untuk Latihan {{ $exercise['id'] }} di sini..."></textarea>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    @php
+                        $buildParagraphTopics = [
+                            1 => 'The Importance of Exercise',
+                            2 => 'The Impact of Social Media on Teenagers',
+                            3 => 'Why Learning English Is Important',
+                            4 => 'The Benefits of Reading Books',
+                            5 => 'The Problems of Traffic Congestion',
+                            6 => 'The Advantages of Online Shopping',
+                            7 => 'The Importance of Time Management',
+                            8 => 'The Effects of Pollution',
+                            9 => 'The Benefits of Teamwork',
+                            10 => 'The Role of Technology in Education',
+                        ];
+                    @endphp
+
+                    @php
+                        $part2Themes = [
+                            ['wrap' => 'border-fuchsia-200 bg-fuchsia-50/70', 'title' => 'text-fuchsia-900', 'label' => 'text-fuchsia-700', 'textarea' => 'border-fuchsia-200 focus:border-fuchsia-400 focus:ring-fuchsia-100'],
+                            ['wrap' => 'border-cyan-200 bg-cyan-50/70', 'title' => 'text-cyan-900', 'label' => 'text-cyan-700', 'textarea' => 'border-cyan-200 focus:border-cyan-400 focus:ring-cyan-100'],
+                            ['wrap' => 'border-lime-200 bg-lime-50/70', 'title' => 'text-lime-900', 'label' => 'text-lime-700', 'textarea' => 'border-lime-200 focus:border-lime-400 focus:ring-lime-100'],
+                            ['wrap' => 'border-orange-200 bg-orange-50/70', 'title' => 'text-orange-900', 'label' => 'text-orange-700', 'textarea' => 'border-orange-200 focus:border-orange-400 focus:ring-orange-100'],
+                        ];
+                    @endphp
+
+                    <div class="mt-8 pt-6 border-t border-indigo-200">
+                        <h2 class="text-2xl font-bold text-indigo-900 mb-2">PART 2 - Build Your Own Paragraph</h2>
+                        <p class="text-sm text-gray-600 mb-1">Instruksi: Untuk setiap topik di bawah ini, tulis 4 kalimat dengan struktur berikut:</p>
+                        <p class="text-sm text-gray-600">1) Topic Sentence 2) Explanation / Reason 3) Example 4) Result. Gunakan Bahasa Inggris yang jelas dan logis.</p>
+
+                        <div class="space-y-4 mt-5">
+                            @foreach($buildParagraphTopics as $topicNumber => $topicTitle)
+                                @php
+                                    $part2Theme = $part2Themes[($topicNumber - 1) % count($part2Themes)];
+                                @endphp
+                                <div class="rounded-xl border p-4 {{ $part2Theme['wrap'] }}">
+                                    <h3 class="font-bold mb-3 {{ $part2Theme['title'] }}">Topic {{ $topicNumber }}: {{ $topicTitle }}</h3>
+
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label class="block text-xs font-semibold uppercase tracking-wide mb-1 {{ $part2Theme['label'] }}">Topic Sentence</label>
+                                            <textarea
+                                                name="part2_{{ $topicNumber }}_topic"
+                                                @input="autoResize($event.target)"
+                                                x-init="$nextTick(() => autoResize($el))"
+                                                class="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:ring-2 focus:outline-none {{ $part2Theme['textarea'] }}"
+                                                rows="2"
+                                                placeholder="Write your topic sentence for Topic {{ $topicNumber }}..."></textarea>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-semibold uppercase tracking-wide mb-1 {{ $part2Theme['label'] }}">Explanation / Reason</label>
+                                            <textarea
+                                                name="part2_{{ $topicNumber }}_explanation"
+                                                @input="autoResize($event.target)"
+                                                x-init="$nextTick(() => autoResize($el))"
+                                                class="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:ring-2 focus:outline-none {{ $part2Theme['textarea'] }}"
+                                                rows="2"
+                                                placeholder="Write your explanation for Topic {{ $topicNumber }}..."></textarea>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-semibold uppercase tracking-wide mb-1 {{ $part2Theme['label'] }}">Example</label>
+                                            <textarea
+                                                name="part2_{{ $topicNumber }}_example"
+                                                @input="autoResize($event.target)"
+                                                x-init="$nextTick(() => autoResize($el))"
+                                                class="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:ring-2 focus:outline-none {{ $part2Theme['textarea'] }}"
+                                                rows="2"
+                                                placeholder="Write your example for Topic {{ $topicNumber }}..."></textarea>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-semibold uppercase tracking-wide mb-1 {{ $part2Theme['label'] }}">Result</label>
+                                            <textarea
+                                                name="part2_{{ $topicNumber }}_result"
+                                                @input="autoResize($event.target)"
+                                                x-init="$nextTick(() => autoResize($el))"
+                                                class="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:ring-2 focus:outline-none {{ $part2Theme['textarea'] }}"
+                                                rows="2"
+                                                placeholder="Write the result for Topic {{ $topicNumber }}..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </aside>
         </div>
+
     </div>
 
     <!-- Modals -->
@@ -265,7 +491,93 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('partsApp', (meetingId) => ({
             answers: {},
+            splitLeftWidth: 56,
+            isResizing: false,
+            startX: 0,
+            startWidth: 62,
+            resizeMoveHandler: null,
+            resizeUpHandler: null,
+            splitStorageKey: `ielts-writing-split-${meetingId}`,
+            autoResize(el) {
+                if (!el) return;
+                el.style.height = 'auto';
+                el.style.height = `${el.scrollHeight}px`;
+            },
+            panelStyle(side) {
+                if (window.innerWidth < 1024) {
+                    return '';
+                }
+
+                const left = this.splitLeftWidth;
+                const right = 100 - left;
+
+                if (side === 'left') {
+                    return `width: ${left}%;`;
+                }
+
+                return `width: ${right}%;`;
+            },
+            startResize(event) {
+                if (window.innerWidth < 1024) {
+                    return;
+                }
+
+                this.isResizing = true;
+                this.startX = event.clientX;
+                this.startWidth = this.splitLeftWidth;
+
+                if (!this.resizeMoveHandler) {
+                    this.resizeMoveHandler = (moveEvent) => this.onResize(moveEvent);
+                }
+                if (!this.resizeUpHandler) {
+                    this.resizeUpHandler = () => this.stopResize();
+                }
+
+                document.addEventListener('mousemove', this.resizeMoveHandler);
+                document.addEventListener('mouseup', this.resizeUpHandler);
+            },
+            onResize(event) {
+                if (!this.isResizing || !this.$refs.splitContainer) {
+                    return;
+                }
+
+                const containerWidth = this.$refs.splitContainer.clientWidth;
+                if (!containerWidth) {
+                    return;
+                }
+
+                const deltaX = event.clientX - this.startX;
+                const deltaPercent = (deltaX / containerWidth) * 100;
+                const nextWidth = this.startWidth + deltaPercent;
+
+                this.splitLeftWidth = Math.max(35, Math.min(75, nextWidth));
+            },
+            stopResize() {
+                this.isResizing = false;
+
+                if (this.resizeMoveHandler) {
+                    document.removeEventListener('mousemove', this.resizeMoveHandler);
+                }
+                if (this.resizeUpHandler) {
+                    document.removeEventListener('mouseup', this.resizeUpHandler);
+                }
+
+                try {
+                    localStorage.setItem(this.splitStorageKey, String(this.splitLeftWidth));
+                } catch (e) {
+                    // Ignore storage errors (private mode or blocked storage)
+                }
+            },
             init() {
+                try {
+                    const storedWidth = parseFloat(localStorage.getItem(this.splitStorageKey) || '');
+                    if (!Number.isNaN(storedWidth)) {
+                        this.splitLeftWidth = Math.max(35, Math.min(75, storedWidth));
+                    }
+                } catch (e) {
+                    // Ignore storage errors and keep default proportion.
+                }
+
                 if (window.AutoSave) {
                     window.AutoSave.init(meetingId, '{{ Auth::id() }}');
                 }
@@ -283,6 +595,9 @@
                     // removing local storage sync to avoid conflict? Or keep it?
                     // AutoSave handles storage.
                 });
+            },
+            destroy() {
+                this.stopResize();
             }
         }));
     });

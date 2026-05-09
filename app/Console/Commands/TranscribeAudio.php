@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Services\WhisperService;
+use App\Infrastructure\Transcription\WhisperCliTranscriber;
 
 class TranscribeAudio extends Command
 {
@@ -45,7 +45,7 @@ class TranscribeAudio extends Command
         try {
             $this->info("Transcribing {$audioPath} ({$language})...");
             
-            $result = WhisperService::transcribe($audioPath, $language, $format);
+            $result = WhisperCliTranscriber::transcribe($audioPath, $language, $format);
 
             if ($outputFile) {
                 file_put_contents($outputFile, $result);

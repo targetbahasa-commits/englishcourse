@@ -95,6 +95,17 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        \App\Models\Program::firstOrCreate(
+            ['slug' => 'speaking'],
+            [
+                'name' => 'Speaking',
+                'period' => 'All Time',
+                'description' => 'Develop your English speaking skills with interactive lessons and pronunciation practice.',
+                'color' => 'yellow',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2v4c0 1.105 1.343 2 3 2s3-.895 3-2V10c0-1.105-1.343-2-3-2z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 18h6a2 2 0 002-2v-3l4 3V5l-4 3V5a2 2 0 00-2-2H9a2 2 0 00-2 2v11a2 2 0 002 2z"></path>'
+            ]
+        );
+
         for ($i = 1; $i <= 20; $i++) {
             \App\Models\Meeting::firstOrCreate(
                 ['program_id' => $program->id, 'meeting_number' => $i],

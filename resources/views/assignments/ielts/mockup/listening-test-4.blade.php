@@ -282,7 +282,7 @@
                                      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                                         <!-- Map Image -->
                                         <div class="lg:col-span-2 relative rounded-xl overflow-hidden border border-gray-200">
-                                            <img src="{{ asset('assets/img/ielts/listening/128/recreation-ground-map.png') }}" alt="Recreation ground map" class="w-full h-auto">
+                                            <img src="{{ asset('images/ielts/listening/recreation-ground-map.png') }}" alt="Recreation ground map" class="w-full h-auto">
                                         </div>
 
                                         <!-- Questions -->

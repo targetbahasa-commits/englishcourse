@@ -1,12 +1,16 @@
 <?php
-
 namespace App\Models;
+
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Program extends Model
 {
+    public function programAccesses()
+    {
+        return $this->hasMany(ProgramAccess::class);
+    }
     protected $fillable = ['name', 'slug', 'period', 'description', 'color', 'icon', 'price', 'is_active', 'brochure_image', 'brochure_pdf'];
 
     public function meetings(): HasMany

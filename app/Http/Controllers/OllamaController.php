@@ -211,4 +211,60 @@ Output:";
             return null;
         }
     }
+
+    public function chat(Request $request)
+    {
+        $message = $request->input('message');
+        $history = $request->input('history', []);
+        
+        if (!$message) {
+            return response()->json(['error' => 'Message is required'], 400);
+        }
+
+        // Build messages array from history + new message
+        $messages = [];
+        foreach ($history as $msg) {
+            $messages[] = [
+                'role' => $msg['role'],
+                'content' => $msg['content']
+            ];
+        }
+        $messages[] = ['role' => 'user', 'content' => $message];
+
+        // Try LMStudio first (port 1234), then Ollama (port 11434)
+        $ports = [1234, 11434];
+        
+        foreach ($ports as $port) {
+            try {
+                $url = "http://127.0.0.1:{$port}/v1/chat/completions";
+                $modelName = ($port === 1234) ? 'local-model' : 'llama3';
+                
+                $payload = [
+                    'model' => $modelName,
+                    'messages' => $messages,
+                    'temperature' => 0.7,
+                    'stream' => false
+                ];
+
+                $response = Http::timeout(60)->post($url, $payload);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    if (isset($data['choices'][0]['message']['content'])) {
+                        return response()->json([
+                            'response' => $data['choices'][0]['message']['content'],
+                            'source' => ($port === 1234 ? 'LM Studio' : 'Ollama'),
+                            'model' => $modelName
+                        ]);
+                    }
+                }
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        return response()->json([
+            'error' => 'LMStudio/Ollama tidak terdeteksi. Pastikan LMStudio berjalan di port 1234 atau Ollama di port 11434.'
+        ], 503);
+    }
 }

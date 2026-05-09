@@ -298,6 +298,61 @@
                 @endif
             </div>
 
+            <!-- Enrolled Programs & Scores -->
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+                <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                    Program Scores
+                </h3>
+
+                @php
+                    $enrolledProgramIds = \App\Models\Enrollment::where('user_id', $student->id)->pluck('program_id')->toArray();
+                    if ($student->program_id) {
+                        $enrolledProgramIds[] = $student->program_id;
+                    }
+                    
+                    // Distinct programs
+                    $programIds = array_unique($enrolledProgramIds);
+                    $programs = \App\Models\Program::whereIn('id', $programIds)->get();
+                    
+                    $programScores = \App\Models\MeetingScore::where('user_id', $student->id)
+                        ->whereNotNull('program_id')
+                        ->selectRaw('program_id, count(*) as count, avg(score) as avg_score')
+                        ->groupBy('program_id')
+                        ->get()
+                        ->keyBy('program_id');
+                @endphp
+
+                @if($programs->count() > 0)
+                <div class="space-y-4">
+                    @foreach($programs as $prog)
+                    @php
+                        $scoreData = $programScores->get($prog->id);
+                        $avgScore = $scoreData ? $scoreData->avg_score : null;
+                        $count = $scoreData ? $scoreData->count : 0;
+                    @endphp
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <h4 class="font-bold text-gray-900 text-sm">{{ $prog->name }}</h4>
+                            <p class="text-xs text-gray-500 mt-1">{{ $count }} meetings submitted</p>
+                        </div>
+                        <div class="text-right">
+                            @if($avgScore !== null)
+                                <span class="text-lg font-black {{ $avgScore >= 80 ? 'text-green-600' : ($avgScore >= 60 ? 'text-amber-500' : 'text-red-500') }}">
+                                    {{ round($avgScore, 1) }}
+                                </span>
+                            @else
+                                <span class="text-[10px] font-bold text-gray-400 bg-gray-200 px-2 py-1 rounded-md uppercase tracking-wide">No Score</span>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                @else
+                <p class="text-sm text-gray-500 italic">No programs found.</p>
+                @endif
+            </div>
+
             <!-- Notes or Bio -->
             <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
                 <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">

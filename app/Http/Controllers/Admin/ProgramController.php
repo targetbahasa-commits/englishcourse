@@ -2,57 +2,49 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Application\Program\ManagePrograms;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Program;
+use App\Http\Requests\Admin\ProgramBrochureUpdateRequest;
+use App\Http\Requests\Admin\ProgramSyllabusReorderRequest;
+use App\Http\Requests\Admin\ProgramSyllabusStoreRequest;
+use App\Http\Requests\Admin\ProgramUpsertRequest;
 use App\Models\Meeting;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
+use App\Models\Program;
 
 class ProgramController extends Controller
 {
+    public function __construct(
+        private readonly ManagePrograms $managePrograms
+    ) {}
+
     /**
      * Display a listing of the programs.
      */
     public function index()
     {
-        // Load programs with counts for analytics
-        $programs = Program::with('classPeriods')->withCount([
-            'meetings',
-            // active_enrollees: count of students assigned to this program whose status is active
-            'users as active_enrollees_count' => function ($query) {
-                $query->where('role', 'student')->where('status', 'active');
-            }
-        ])->orderBy('created_at', 'desc')->get();
+        $programs = $this->managePrograms->listAll();
 
         return view('admin.programs.index', compact('programs'));
     }
 
     /**
+     * Display a listing of purely mock test programs.
+     */
+    public function mockTestsIndex()
+    {
+        ['programs' => $programs, 'isMockTestView' => $isMockTestView] = $this->managePrograms->listMockTests();
+
+        return view('admin.programs.index', compact('programs', 'isMockTestView'));
+    }
+
+    /**
      * Store a newly created program in storage.
      */
-    public function store(Request $request)
+    public function store(ProgramUpsertRequest $request)
     {
-        $validated = $request->validate([
-            'name'           => 'required|string|max:255',
-            'period'         => 'required|string|max:255',
-            'description'    => 'required|string',
-            'price'          => 'nullable|numeric|min:0',
-            'brochure_image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
-            'brochure_pdf'   => 'nullable|mimes:pdf|max:20480',
-        ]);
+        $validated = $request->validated();
 
-        $validated['slug']      = Str::slug($validated['name']);
-        $validated['is_active'] = $request->has('is_active');
-
-        if ($request->hasFile('brochure_image')) {
-            $validated['brochure_image'] = $request->file('brochure_image')->store('brochures', 'public');
-        }
-        if ($request->hasFile('brochure_pdf')) {
-            $validated['brochure_pdf'] = $request->file('brochure_pdf')->store('brochures', 'public');
-        }
-
-        Program::create($validated);
+        $this->managePrograms->store($validated, $request);
 
         return back()->with('success', 'Program created successfully.');
     }
@@ -60,43 +52,11 @@ class ProgramController extends Controller
     /**
      * Update the specified program in storage.
      */
-    public function update(Request $request, Program $program)
+    public function update(ProgramUpsertRequest $request, Program $program)
     {
-        $validated = $request->validate([
-            'name'           => 'required|string|max:255',
-            'period'         => 'required|string|max:255',
-            'description'    => 'required|string',
-            'price'          => 'nullable|numeric|min:0',
-            'brochure_image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
-            'brochure_pdf'   => 'nullable|mimes:pdf|max:20480',
-        ]);
+        $validated = $request->validated();
 
-        if ($validated['name'] !== $program->name) {
-            $validated['slug'] = Str::slug($validated['name']);
-        }
-
-        $validated['is_active'] = $request->has('is_active');
-
-        if ($request->hasFile('brochure_image')) {
-            if ($program->brochure_image) Storage::disk('public')->delete($program->brochure_image);
-            $validated['brochure_image'] = $request->file('brochure_image')->store('brochures', 'public');
-        }
-        if ($request->hasFile('brochure_pdf')) {
-            if ($program->brochure_pdf) Storage::disk('public')->delete($program->brochure_pdf);
-            $validated['brochure_pdf'] = $request->file('brochure_pdf')->store('brochures', 'public');
-        }
-
-        // Delete brochure if checkbox checked
-        if ($request->has('remove_brochure_image') && $program->brochure_image) {
-            Storage::disk('public')->delete($program->brochure_image);
-            $validated['brochure_image'] = null;
-        }
-        if ($request->has('remove_brochure_pdf') && $program->brochure_pdf) {
-            Storage::disk('public')->delete($program->brochure_pdf);
-            $validated['brochure_pdf'] = null;
-        }
-
-        $program->update($validated);
+        $this->managePrograms->update($program, $validated, $request);
 
         return back()->with('success', 'Program updated successfully.');
     }
@@ -112,35 +72,9 @@ class ProgramController extends Controller
     /**
      * Update brochure files (image and/or pdf) for a program.
      */
-    public function updateBrochure(Request $request, Program $program)
+    public function updateBrochure(ProgramBrochureUpdateRequest $request, Program $program)
     {
-        $request->validate([
-            'brochure_image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
-            'brochure_pdf'   => 'nullable|mimes:pdf|max:20480',
-        ]);
-
-        $data = [];
-
-        if ($request->hasFile('brochure_image')) {
-            if ($program->brochure_image) Storage::disk('public')->delete($program->brochure_image);
-            $data['brochure_image'] = $request->file('brochure_image')->store('brochures', 'public');
-        }
-        if ($request->hasFile('brochure_pdf')) {
-            if ($program->brochure_pdf) Storage::disk('public')->delete($program->brochure_pdf);
-            $data['brochure_pdf'] = $request->file('brochure_pdf')->store('brochures', 'public');
-        }
-        if ($request->has('remove_brochure_image') && $program->brochure_image) {
-            Storage::disk('public')->delete($program->brochure_image);
-            $data['brochure_image'] = null;
-        }
-        if ($request->has('remove_brochure_pdf') && $program->brochure_pdf) {
-            Storage::disk('public')->delete($program->brochure_pdf);
-            $data['brochure_pdf'] = null;
-        }
-
-        if (!empty($data)) {
-            $program->update($data);
-        }
+        $this->managePrograms->updateBrochure($program, $request);
 
         return back()->with('success', 'Brosur berhasil diperbarui!');
     }
@@ -150,7 +84,7 @@ class ProgramController extends Controller
      */
     public function deactivate(Program $program)
     {
-        $program->update(['is_active' => false]);
+        $this->managePrograms->deactivate($program);
 
         return back()->with('success', 'Program "' . $program->name . '" has been deactivated. You can now delete it permanently.');
     }
@@ -172,7 +106,7 @@ class ProgramController extends Controller
         }
 
         $programName = $program->name;
-        $program->delete();
+        $programName = $this->managePrograms->delete($program);
 
         return back()->with('success', "Program \"$programName\" has been permanently deleted.");
     }
@@ -183,25 +117,19 @@ class ProgramController extends Controller
      */
     public function syllabus(Program $program)
     {
-        $meetings = $program->meetings()->orderBy('meeting_number')->get();
+        ['program' => $program, 'meetings' => $meetings] = $this->managePrograms->getSyllabus($program);
         return view('admin.programs.syllabus', compact('program', 'meetings'));
     }
 
     /**
      * Store a new meeting in the syllabus.
      */
-    public function storeSyllabus(Request $request, Program $program)
+    public function storeSyllabus(ProgramSyllabusStoreRequest $request, Program $program)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'is_locked' => 'boolean',
-        ]);
+        $validated = $request->validated();
 
-        $maxMeetingNumber = $program->meetings()->max('meeting_number') ?? 0;
-
-        $program->meetings()->create([
+        $this->managePrograms->addMeeting($program, [
             'title' => $validated['title'],
-            'meeting_number' => $maxMeetingNumber + 1,
             'is_locked' => $request->has('is_locked') ? $request->is_locked : false,
         ]);
 
@@ -211,18 +139,15 @@ class ProgramController extends Controller
     /**
      * Update an existing meeting in the syllabus.
      */
-    public function updateSyllabus(Request $request, Program $program, Meeting $meeting)
+    public function updateSyllabus(ProgramSyllabusStoreRequest $request, Program $program, Meeting $meeting)
     {
         if ($meeting->program_id !== $program->id) {
             abort(404);
         }
 
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'is_locked' => 'boolean',
-        ]);
+        $validated = $request->validated();
 
-        $meeting->update([
+        $this->managePrograms->updateMeeting($program, $meeting, [
             'title' => $validated['title'],
             'is_locked' => $request->has('is_locked') ? $request->is_locked : false,
         ]);
@@ -239,7 +164,7 @@ class ProgramController extends Controller
             abort(404);
         }
 
-        $meeting->delete();
+        $this->managePrograms->deleteMeeting($meeting);
 
         return back()->with('success', 'Meeting deleted successfully.');
     }
@@ -247,18 +172,11 @@ class ProgramController extends Controller
     /**
      * Reorder syllabus meetings by drag-and-drop.
      */
-    public function reorderSyllabus(Request $request, Program $program)
+    public function reorderSyllabus(ProgramSyllabusReorderRequest $request, Program $program)
     {
-        $validated = $request->validate([
-            'order' => 'required|array',
-            'order.*' => 'exists:meetings,id',
-        ]);
+        $validated = $request->validated();
 
-        foreach ($validated['order'] as $index => $meetingId) {
-            Meeting::where('id', $meetingId)
-                ->where('program_id', $program->id)
-                ->update(['meeting_number' => $index + 1]);
-        }
+        $this->managePrograms->reorderMeetings($program, $validated['order']);
 
         return response()->json(['success' => true]);
     }

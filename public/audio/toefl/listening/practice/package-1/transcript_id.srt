@@ -1,0 +1,453 @@
+1
+00:00:00,000 --> 00:00:06,000
+UJIAN PRA-DIAGNOSTIK PENDENGARAN (Tertulis).
+
+2
+00:00:06,100 --> 00:00:13,000
+Dalam bagian tes ini, Anda akan memiliki kesempatan untuk menunjukkan kemampuan Anda dalam
+
+3
+00:00:13,100 --> 00:00:19,000
+memahami percakapan dan pembicaraan dalam Bahasa Inggris. Ada tiga bagian dalam seksi ini.
+
+4
+00:00:19,100 --> 00:00:25,000
+Jawablah semua pertanyaan berdasarkan apa yang dinyatakan atau tersirat oleh para pembicara yang Anda dengar.
+
+5
+00:00:25,100 --> 00:00:33,000
+Dilarang membuat catatan atau menulis di buku tes Anda kapan pun. Jangan buka halaman berikutnya sampai Anda diperintahkan.
+
+6
+00:00:34,000 --> 00:00:44,000
+BAGIAN A. Petunjuk: Di Bagian A, Anda akan mendengar percakapan pendek antara dua orang.
+
+7
+00:00:44,100 --> 00:00:54,000
+Setelah setiap percakapan, Anda akan mendengar pertanyaan mengenai percakapan tersebut. Percakapan dan pertanyaan tidak akan diulang.
+
+8
+00:00:54,100 --> 00:01:03,000
+Setelah mendengar pertanyaan, bacalah empat kemungkinan jawaban di buku tes Anda dan pilihlah jawaban yang terbaik.
+
+9
+00:01:03,100 --> 00:01:10,000
+Kemudian, pada lembar jawaban, cari nomor pertanyaan dan isi ruang yang sesuai dengan huruf jawaban yang telah Anda pilih.
+
+10
+00:01:11,000 --> 00:01:16,000
+Dengarkan contoh pada rekaman. Anda mendengar:
+(pria): Ujian itu benar-benar mengerikan.
+
+11
+00:01:16,100 --> 00:01:21,000
+(wanita): Oh, itu bisa saja lebih buruk.
+(narator): APA MAKSUD DARI SI WANITA?
+
+12
+00:01:21,100 --> 00:01:31,000
+Di buku tes, Anda membaca: (A) Ujiannya benar-benar mengerikan. (B) Itu adalah ujian terburuk yang pernah ia lihat.
+
+13
+00:01:31,100 --> 00:01:45,000
+(C) Tidak mungkin ada yang lebih sulit lagi. (D) Ujiannya tidak sesulit itu.
+
+14
+00:01:45,100 --> 00:02:05,000
+Anda belajar dari percakapan bahwa si pria menganggap ujiannya sangat sulit dan si wanita tidak setuju. Jawaban terbaik adalah (D).
+
+15
+00:02:06,000 --> 00:02:15,000
+Nomor 1. (pria): Bagaimana konser tadi malam?
+(wanita): Sangat luar biasa.
+(narator): APA MAKSUD DARI SI WANITA?
+
+16
+00:02:26,000 --> 00:02:35,000
+Nomor 2. (wanita): Berapa biaya untuk mengirim paket ini ke New York?
+(pria): Dua dolar.
+(narator): DI MANA KEMUNGKINAN BESAR PERCAKAPAN INI BERLANGSUNG?
+
+17
+00:02:49,000 --> 00:03:02,000
+Nomor 3. (pria): Berapa umur anak perempuanmu sekarang?
+(wanita): Dia baru berumur satu setengah tahun.
+(narator): APA MAKSUD DARI SI PRIA?
+
+18
+00:03:10,000 --> 00:03:25,000
+Nomor 4. (pria): Apakah Paul masuk tim bola basket?
+(wanita): Tapi dia tidak cukup tinggi.
+(narator): APA YANG DISIRATKAN SI WANITA TENTANG PAUL?
+
+19
+00:03:30,000 --> 00:03:44,000
+Nomor 5. (pria): Aku rasa seminar ini akan sangat bagus.
+(wanita): Aku juga.
+(narator): APA MAKSUD DARI SI WANITA?
+
+20
+00:03:53,000 --> 00:04:12,000
+Nomor 6. (wanita): Apakah kamu akan datang ke rapat siang ini?
+(pria): Di mana tempatnya?
+(narator): APA YANG INGIN DIKETAHUI SI PRIA?
+
+21
+00:04:12,100 --> 00:04:26,000
+Nomor 7. (pria): Aku sedang tidak ingin memasak.
+(wanita): Kalau begitu ayo kita makan malam di luar saja.
+(narator): APA SARAN DARI SI WANITA?
+
+22
+00:04:34,000 --> 00:04:45,000
+Nomor 8. (pria): Apakah kamu akan menelpon Joe?
+(wanita): Aku sudah menelponnya tadi.
+(narator): APA MAKSUD DARI SI WANITA?
+
+23
+00:04:55,000 --> 00:05:08,000
+Nomor 9. (wanita): Bagaimana kamu bisa menang dalam permainan itu?
+(pria): Sebenarnya, aku hanya sangat beruntung.
+(narator): APA MAKSUD DARI SI PRIA?
+
+24
+00:05:16,000 --> 00:05:30,000
+Nomor 10. (wanita): Mengapa kita tidak memakai mobilmu saja ke bioskop daripada mobilku?
+(pria): Tapi mobilku tidak terlalu bersih.
+(narator): APA YANG DIKATAKAN SI PRIA TENTANG MOBILNYA?
+
+25
+00:05:36,000 --> 00:05:50,000
+Nomor 11. (pria): Kapan pesawatnya akan mendarat?
+(wanita): Pesawat akan mendarat dalam beberapa menit lagi, jadi Anda perlu mengencangkan sabuk pengaman.
+(narator): SIAPA KEMUNGKINAN BESAR SI WANITA TERSEBUT?
+
+26
+00:06:04,000 --> 00:06:18,000
+Nomor 12. (wanita): Di mana posisi mejamu?
+(pria): Tepat di tengah-tengah kantor.
+(narator): APA MAKSUD DARI SI PRIA?
+
+27
+00:06:26,000 --> 00:06:40,000
+Nomor 13. (pria): Aku tidak tahu cara bermain golf, tapi aku sangat ingin belajar.
+(wanita): Mengapa tidak mengambil beberapa les saja?
+(narator): APA SARAN SI WANITA KEPADA SI PRIA?
+
+28
+00:06:50,000 --> 00:07:00,000
+Nomor 14. (wanita): Apakah sudah waktunya berangkat?
+(pria): Belum sebentar lagi.
+(narator): APA MAKSUD DARI SI PRIA?
+
+29
+00:07:10,000 --> 00:07:28,000
+Nomor 15. (pria): Bolehkah aku mengumpulkan tugasnya minggu depan?
+(wanita): Tidak, batas waktunya besok.
+(narator): APA MAKSUD DARI SI WANITA?
+
+30
+00:07:32,000 --> 00:07:45,000
+Nomor 16. (wanita): Pohon-pohonnya sangat indah pada waktu seperti ini tahun ini.
+(pria): Setuju sekali!
+(narator): APA MAKSUD DARI SI PRIA?
+
+31
+00:07:54,000 --> 00:08:10,000
+Nomor 17. (pria): Bisakah Anda menunjukkan di mana saya bisa mencoba pakaian ini?
+(wanita): Kamar pas ada di bagian belakang toko.
+(narator): DI MANA KEMUNGKINAN BESAR SI WANITA BEKERJA?
+
+32
+00:08:17,000 --> 00:08:39,000
+Nomor 18. (pria): Apakah kamu mau keluar sekarang?
+(wanita): Aku perlu membeli beberapa bahan makanan.
+(narator): APA YANG DISIRATKAN SI WANITA?
+
+33
+00:08:39,100 --> 00:08:55,000
+Nomor 19. (pria): Stan mendapat nilai tertinggi dalam ujian.
+(wanita): Tentu saja. Dia tidak benar-benar bodoh.
+(narator): APA YANG DIKATAKAN SI WANITA TENTANG STAN?
+
+34
+00:09:03,000 --> 00:09:15,000
+Nomor 20. (wanita): Aku sudah belajar selama lima jam berturut-turut.
+(pria): Mengapa tidak istirahat sebentar?
+(narator): APA SARAN DARI SI PRIA?
+
+35
+00:09:25,000 --> 00:09:47,000
+Nomor 21. (wanita): Apakah Sharon sudah siap berangkat?
+(pria): Dia sedang sibuk mengemasi kopernya.
+(narator): APA YANG DIKATAKAN SI PRIA TENTANG SHARON?
+
+36
+00:09:47,100 --> 00:10:02,000
+Nomor 22. (pria): Sayang sekali tim kita kalah dalam pertandingan.
+(wanita): Kamu benar sekali!
+(narator): APA MAKSUD DARI SI WANITA?
+
+37
+00:10:09,000 --> 00:10:25,000
+Nomor 23. (pria): Bagaimana perasaan Bob setelah kecelakaan itu?
+(wanita): Dia agak mendingan, tapi dia masih belum terlalu kuat.
+(narator): APA YANG DIKATAKAN SI WANITA TENTANG BOB?
+
+38
+00:10:33,000 --> 00:10:45,000
+Nomor 24. (wanita): Apakah ada yang salah dengan mobilnya?
+(pria): Suara mesinnya tidak bagus.
+(narator): APA MAKSUD DARI SI PRIA?
+
+39
+00:10:56,000 --> 00:11:15,000
+Nomor 25. (pria): Berapa banyak waktu yang kita miliki di museum seni ini?
+(wanita): Kita akan berhenti di sini selama dua jam, dan kalian harus kembali ke bus jam tiga tepat.
+(narator): SIAPA KEMUNGKINAN BESAR SI WANITA TERSEBUT?
+
+40
+00:11:22,000 --> 00:11:40,000
+Nomor 26. (wanita): Apartemen ini berantakan sekali!
+(pria): Mari kita bersihkan dengan cepat.
+(narator): APA SARAN DARI SI PRIA?
+
+41
+00:11:44,000 --> 00:11:54,000
+Nomor 27. (pria): Mengapa Alec sangat senang?
+(wanita): Dia baru saja mendapat cek bonus yang besar.
+(narator): APA YANG DIKATAKAN SI WANITA TENTANG ALEC?
+
+42
+00:12:06,000 --> 00:12:22,000
+Nomor 28. (pria): Ayo pergi belanja hari ini.
+(wanita): Oke, tapi aku tidak mau pergi ke toko yang jauh.
+(narator): APA MAKSUD DARI SI WANITA?
+
+43
+00:12:29,000 --> 00:12:45,000
+Nomor 29. (wanita): Bagaimana kamu bisa tahu Alice marah saat dia pergi?
+(pria): Dia membanting pintu.
+(narator): APA MAKSUD DARI SI PRIA?
+
+44
+00:12:50,000 --> 00:13:08,000
+Nomor 30. (pria): Apakah kamu punya rencana untuk hari Sabtu?
+(wanita): Kami akan pergi mendaki di hutan. Kamu mau ikut?
+(narator): APA YANG DIRENCANAKAN SI WANITA?
+
+45
+00:13:08,100 --> 00:13:18,000
+BAGIAN B. Petunjuk: Di bagian tes ini, Anda akan mendengar percakapan yang lebih panjang.
+
+46
+00:13:18,100 --> 00:13:28,000
+Setelah setiap percakapan, Anda akan mendengar beberapa pertanyaan. Percakapan dan pertanyaan tidak akan diulang.
+
+47
+00:13:28,100 --> 00:13:43,000
+Setelah mendengar pertanyaan, bacalah empat kemungkinan jawaban di buku tes Anda dan pilihlah jawaban terbaik. Ingat, Anda tidak diperbolehkan mencatat.
+
+48
+00:13:43,100 --> 00:13:55,000
+Pertanyaan 31 sampai 34. Dengarkan dua mahasiswa mendiskusikan cara pergi ke kampus.
+
+49
+00:13:55,100 --> 00:14:03,000
+(wanita): Apakah kamu tahu di mana aku bisa mendapatkan sepeda? Tidak harus sepeda baru, tapi harus yang agak murah.
+(pria): Mengapa kamu butuh sepeda?
+
+50
+00:14:03,100 --> 00:14:17,000
+(wanita): Aku baru saja menemukan apartemen yang bagus, tapi agak jauh dari kampus. Aku sangat ingin mengambil apartemen ini tapi aku harus mencari transportasi.
+
+51
+00:14:17,100 --> 00:14:25,000
+(pria): Seberapa jauh apartemennya dari kampus?
+(wanita): Sedikit lebih dari dua mil. Aku bisa saja jalan kaki kalau terpaksa, tapi akan sangat menghemat waktu dengan sepeda.
+
+52
+00:14:31,000 --> 00:14:45,000
+(pria): Wah, kamu sedang beruntung hari ini. Aku punya teman yang mau menjual sepeda lamanya karena dia baru beli yang baru. Aku rasa kamu bisa mendapatkannya dengan murah.
+
+53
+00:14:45,100 --> 00:14:57,000
+(wanita): Terima kasih, kedengarannya bagus. Ayo kita ke sana sekarang.
+
+54
+00:14:57,100 --> 00:15:10,000
+Nomor 31. APA YANG INGIN DIDAPATKAN SI WANITA?
+Nomor 32. KURANG LEBIH SEBERAPA JAUH APARTEMEN SI WANITA DARI KAMPUS?
+
+55
+00:15:24,000 --> 00:15:48,000
+Nomor 33. MENGAPA TEMAN SI PRIA MENJUAL SEPEDA LAMANYA?
+Nomor 34. APA YANG KEMUNGKINAN AKAN DILAKUKAN SI PRIA DAN SI WANITA SELANJUTNYA?
+
+56
+00:16:05,000 --> 00:16:15,000
+Pertanyaan 35 sampai 38. Dengarkan percakapan tentang perjalanan berkemah.
+
+57
+00:16:15,100 --> 00:16:24,000
+(wanita): Apa itu?
+(pria): Ini adalah beberapa foto perjalanan berkemah yang aku lakukan bersama beberapa teman akhir pekan lalu. Kamu mau lihat?
+
+58
+00:16:24,100 --> 00:16:32,000
+(wanita): Terima kasih, aku mau. Foto-foto ini menunjukkan tenda tempat kami menginap. Berapa orang yang tidur di tenda itu? Kelihatannya sangat kecil.
+
+59
+00:16:32,100 --> 00:16:41,000
+(pria): Kami berempat.
+(wanita): Berempat di tenda kecil itu? Bukankah itu sangat sesak?
+
+60
+00:16:41,100 --> 00:16:49,000
+(pria): Agak sesak memang, tapi menyenangkan.
+(wanita): Dan apa yang sedang kalian lakukan di foto ini? Kelihatannya kalian hanya berdiri di sungai dengan sepatu bot besar.
+
+61
+00:16:49,100 --> 00:16:57,000
+(pria): Ya, kami sedang mencoba memancing ikan.
+(wanita): Apakah kalian menangkap banyak ikan?
+(pria): Tidak, tidak banyak.
+
+62
+00:16:57,100 --> 00:17:12,000
+(wanita): Yah, apakah kalian menangkap beberapa ikan?
+(pria): Tidak juga. Sebenarnya, kami tidak menangkap satu pun, tapi itu tetap cara yang bagus untuk menghabiskan hari.
+
+63
+00:17:12,100 --> 00:17:28,000
+Nomor 35. APA YANG SEDANG DILAKUKAN SI PRIA DAN SI WANITA?
+Nomor 36. APA YANG DIKATAKAN SI WANITA TENTANG TENDANYA?
+
+64
+00:17:45,000 --> 00:18:12,000
+Nomor 37. APA YANG DILAKUKAN SI PRIA SAAT DIA MEMAKAI SEPATU BOT TERSEBUT?
+Nomor 38. BERAPA BANYAK IKAN YANG DITANGKAP SI PRIA?
+
+65
+00:18:20,000 --> 00:18:29,000
+BAGIAN C. Petunjuk: Di bagian tes ini, Anda akan mendengar beberapa ceramah/ucapan.
+
+66
+00:18:29,100 --> 00:18:39,000
+Setelah setiap ceramah, Anda akan mendengar beberapa pertanyaan. Ceramah dan pertanyaan tidak akan diulang.
+
+67
+00:18:39,100 --> 00:18:54,000
+Setelah mendengar pertanyaan, bacalah empat kemungkinan jawaban di buku tes Anda dan pilihlah jawaban terbaik. Dengarkan contoh pada rekaman.
+
+68
+00:18:54,100 --> 00:19:03,000
+Anda mendengar: Dengarkan seorang instruktur berbicara kepada kelasnya tentang lukisan.
+(pria): Seniman Grant Wood adalah kekuatan pemandu dalam aliran lukisan yang dikenal sebagai Regionalis Amerika.
+
+69
+00:20:12,000 --> 00:20:21,000
+[Contoh Pertanyaan] ALIRAN LUKISAN APA YANG DIKENAL SEBAGAI REGIONALIS AMERIKA?
+Jawaban terbaik adalah (D) Seni dari bagian pedesaan Amerika.
+
+70
+00:21:13,000 --> 00:21:24,000
+Pertanyaan 39 sampai 42. Dengarkan saat seorang profesor kimia memulai kuliah.
+
+71
+00:21:24,100 --> 00:21:32,000
+(pria): Sebelum aku memulai kuliah hari ini, aku ingin memastikan kalian tahu segala hal yang perlu diketahui tentang ujian yang akan diadakan pada hari Jumat.
+
+72
+00:21:32,100 --> 00:21:41,000
+Ujian ini akan mencakup tiga bab pertama dalam buku teks kimia ditambah informasi tambahan apa pun dari kuliah di kelas.
+
+73
+00:21:41,100 --> 00:21:50,000
+Ujiannya sebagian besar berupa pilihan ganda. Kalian akan mengerjakan 50 pertanyaan pilihan ganda dan dua jawaban esai tertulis singkat.
+
+74
+00:21:50,100 --> 00:22:19,000
+Kalian akan punya waktu satu setengah jam untuk ujian ini. Ada pertanyaan tentang ujiannya? Oke kalau begitu, mari kita lanjut ke kuliahnya.
+
+75
+00:22:19,100 --> 00:22:36,000
+Nomor 39. INFORMASI APA YANG DICAKUP DALAM UJIAN?
+Nomor 40. APA JENIS PERTANYAAN YANG ADA DALAM UJIAN TERSEBUT?
+
+76
+00:22:52,000 --> 00:23:20,000
+Nomor 41. BERAPA BANYAK WAKTU YANG DIMILIKI MAHASISWA UNTUK UJIAN?
+Nomor 42. APA YANG KEMUNGKINAN AKAN DILAKUKAN MAHASISWA SELANJUTNYA?
+
+77
+00:23:25,000 --> 00:23:38,000
+Pertanyaan 43 sampai 46. Dengarkan saat seorang pemandu wisata mendeskripsikan Alcatraz.
+
+78
+00:23:38,100 --> 00:23:46,000
+(wanita): Sembari kapal terus melaju menuju Pulau Alcatraz, izinkan saya memberi tahu sedikit tentang apa yang akan kita lihat.
+
+79
+00:23:46,100 --> 00:23:56,000
+Alcatraz adalah pulau berbatu di tengah Teluk San Francisco. Nama Alcatraz berasal dari kata Spanyol yang berarti Pelikan.
+
+80
+00:23:56,100 --> 00:24:07,000
+Ketika penjelajah Spanyol menemukan pulau ini pada 1775, ada banyak sekali pelikan yang tinggal di sana dan tidak ada orang.
+
+81
+00:24:07,100 --> 00:24:19,000
+Penjara pertama dibangun di Alcatraz pada 1848 dan Alcatraz tetap digunakan sebagai penjara sampai 1963.
+
+82
+00:24:19,100 --> 00:24:31,000
+Selama waktu itu, 39 pria mencoba melarikan diri dari pulau dengan berenang menyeberangi teluk. 24 ditangkap kembali, 10 tewas, dan lima tidak pernah terdengar kabarnya lagi.
+
+83
+00:24:43,000 --> 00:25:07,000
+Sejak 1972, Alcatraz telah dibuka untuk umum untuk wisata. Sebentar lagi, Anda akan bisa berjalan melalui blok sel penjara yang kosong.
+
+84
+00:25:07,100 --> 00:25:23,000
+Nomor 43. DI MANA PEMBICARAAN INI BERLANGSUNG?
+Nomor 44. APA ITU PELIKAN?
+
+85
+00:25:38,000 --> 00:26:08,000
+Nomor 45. BERAPA BANYAK PRIA YANG MENCOBA KABUR DARI ALCATRAZ?
+Nomor 46. APA YANG BENAR TENTANG ALCATRAZ SAAT INI?
+
+86
+00:26:12,000 --> 00:26:23,000
+Pertanyaan 47 sampai 50. Dengarkan pembicaraan tentang jenis tanaman baru.
+
+87
+00:26:23,100 --> 00:26:33,000
+(wanita): Hari ini saya ingin mendiskusikan sesuatu yang baru yang mungkin akan dibawa oleh para ahli botani di masa depan: tanaman yang menghasilkan plastik.
+
+88
+00:26:33,100 --> 00:26:44,000
+Saya tidak berbicara tentang tanaman buatan yang terbuat dari plastik; saya berbicara tentang tanaman hidup dan tumbuh yang menghasilkan zat mirip plastik.
+
+89
+00:26:44,100 --> 00:26:55,000
+Plastik alami dari tanaman ini memiliki satu keuntungan utama: ia terurai secara alami (biodegradable) dengan cepat, yang jauh lebih baik untuk lingkungan.
+
+90
+00:26:55,100 --> 00:27:16,000
+Plastik buatan saat ini terurai sangat lambat. Saat dibuang, plastik itu tetap utuh selama bertahun-tahun, menutupi bumi dan menyebabkan masalah.
+
+91
+00:27:16,100 --> 00:27:28,000
+Mungkin plastik alami baru dari tanaman dapat membantu menyelesaikan masalah tersebut.
+
+92
+00:27:28,100 --> 00:27:45,000
+Nomor 47. JENIS TANAMAN APA YANG SEDANG DIBAHAS SI WANITA?
+Nomor 48. APA KEUNTUNGAN UTAMA DARI PLASTIK ALAMI YANG BARU?
+
+93
+00:28:00,000 --> 00:28:28,000
+Nomor 49. APA MASALAH DENGAN PLASTIK BUATAN SAAT INI?
+Nomor 50. KULIAH INI MUNGKIN DIBERIKAN DALAM MATA KULIAH APA?

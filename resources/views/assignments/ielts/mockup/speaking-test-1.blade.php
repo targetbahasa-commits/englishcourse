@@ -29,6 +29,7 @@
 </head>
 <body class="font-sans antialiased bg-gray-50" x-data="speakingMockup()" x-cloak>
     @include('components.impersonation-banner')
+    @include('components.cambridge-guest-signup-modal')
     @include('components.program-sidebar')
 
 <div class="fixed inset-0 z-0 flex flex-col">

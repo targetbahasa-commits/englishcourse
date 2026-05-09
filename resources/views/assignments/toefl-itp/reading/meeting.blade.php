@@ -12,6 +12,22 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased bg-[#F3FFFF]">
+    @php
+        // Calculate answer key statistics
+        $totalQuestionCount = 0;
+        $answerKeyFilledCount = 0;
+        
+        foreach($passages as $passage) {
+            foreach($passage->questions as $question) {
+                $totalQuestionCount++;
+                if(!empty($question->correct_answer) && strtoupper($question->correct_answer) !== '') {
+                    $answerKeyFilledCount++;
+                }
+            }
+        }
+        
+        $isAnswerKeyComplete = $totalQuestionCount > 0 && $answerKeyFilledCount === $totalQuestionCount;
+    @endphp
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         @if(Auth::user()->isAdmin())
@@ -36,6 +52,32 @@
                                 <p class="text-blue-600 font-medium">Reading Lesson {{ $meeting->meeting_number }}</p>
                             </div>
                         </div>
+                        
+                        <!-- Answer Key Status Chips (Admin/Teacher Only) -->
+                        @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                        <div class="flex flex-wrap gap-3 items-center justify-end">
+                            <!-- Status Chip -->
+                            <button 
+                                onclick="openAnswerKeyStatusModal()"
+                                class="px-4 py-2 rounded-full font-semibold text-sm transition-all cursor-pointer hover:scale-105 shadow-md"
+                                :class="$isAnswerKeyComplete ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-amber-100 text-amber-700 border border-amber-300'"
+                            >
+                                @if($isAnswerKeyComplete)
+                                    ✓ Answer Key Ditambahkan
+                                @else
+                                    ⚠ Answer Key Belum Lengkap
+                                @endif
+                            </button>
+                            
+                            <!-- Count Chip -->
+                            <button 
+                                onclick="openAnswerKeyStatusModal()"
+                                class="px-4 py-2 rounded-full font-semibold text-sm bg-blue-100 text-blue-700 border border-blue-300 transition-all cursor-pointer hover:scale-105 shadow-md"
+                            >
+                                {{ $answerKeyFilledCount }}/{{ $totalQuestionCount }} Soal
+                            </button>
+                        </div>
+                        @endif
                     </div>
                 </div>
 
@@ -519,7 +561,119 @@
                 document.getElementById('def_translation').innerText = 'Error';
             }
         }
-    </script>        <div>
+
+        // Answer Key Management Functions
+        function openAnswerKeyStatusModal() {
+            document.getElementById('answerKeyStatusModal').classList.remove('hidden');
+        }
+
+        function closeAnswerKeyStatusModal() {
+            document.getElementById('answerKeyStatusModal').classList.add('hidden');
+        }
+
+        function saveAnswerKeyFromStatusModal(questionId) {
+            const selectEl = document.getElementById(`answer-key-select-${questionId}`);
+            const answer = (selectEl.value || '').toUpperCase().trim();
+            
+            if (!answer) {
+                alert('Pilih answer key terlebih dahulu.');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+            formData.append('correct_answer', answer);
+            
+            fetch(`/assignments/toefl-itp/reading/question/${questionId}/update-answer`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    throw new Error(data.message || 'Gagal menyimpan answer key.');
+                }
+                // Update status badge
+                const statusBadge = document.getElementById(`status-badge-${questionId}`);
+                if (statusBadge) {
+                    statusBadge.className = 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700';
+                    statusBadge.innerHTML = '✓ Terisi';
+                }
+                // Reload page to sync header chips
+                setTimeout(() => window.location.reload(), 500);
+            })
+            .catch(error => {
+                alert(error.message || 'Terjadi kesalahan saat menyimpan answer key.');
+            });
+        }
+    </script>
+    
+    <!-- Answer Key Status Modal -->
+    <div id="answerKeyStatusModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="min-h-full grid place-items-center p-4">
+            <div class="bg-white rounded-2xl p-8 w-full max-w-4xl mx-4 my-8 max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-800">Daftar Answer Key</h3>
+                    <button onclick="closeAnswerKeyStatusModal()" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 border-b-2 border-gray-300">
+                                <th class="px-4 py-3 text-left font-bold text-gray-700">No</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-700">Pertanyaan</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-700">Answer Key</th>
+                                <th class="px-4 py-3 text-center font-bold text-gray-700">Status</th>
+                                <th class="px-4 py-3 text-center font-bold text-gray-700">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $questionNumber = 1;
+                            @endphp
+                            @foreach($passages as $passage)
+                                @foreach($passage->questions as $question)
+                                    @php
+                                        $answerKeyValue = $question->correct_answer ?? '';
+                                        $isAnswerKeyFilled = !empty($answerKeyValue) && strtoupper($answerKeyValue) !== '';
+                                    @endphp
+                                    <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                                        <td class="px-4 py-3 font-semibold text-gray-800 whitespace-nowrap">{{ $questionNumber }}</td>
+                                        <td class="px-4 py-3 text-gray-800 text-sm max-w-xs overflow-hidden text-ellipsis">
+                                            {{ $question->question_text }}
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <select id="answer-key-select-{{ $question->id }}" class="border border-gray-300 rounded-md px-2 py-1 text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="" {{ $answerKeyValue === '' ? 'selected' : '' }}>-</option>
+                                                <option value="A" {{ strtoupper($answerKeyValue) === 'A' ? 'selected' : '' }}>A</option>
+                                                <option value="B" {{ strtoupper($answerKeyValue) === 'B' ? 'selected' : '' }}>B</option>
+                                                <option value="C" {{ strtoupper($answerKeyValue) === 'C' ? 'selected' : '' }}>C</option>
+                                                <option value="D" {{ strtoupper($answerKeyValue) === 'D' ? 'selected' : '' }}>D</option>
+                                            </select>
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <span id="status-badge-{{ $question->id }}" class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold {{ $isAnswerKeyFilled ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
+                                                {{ $isAnswerKeyFilled ? '✓ Terisi' : '○ Kosong' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <button type="button" onclick="saveAnswerKeyFromStatusModal({{ $question->id }})" class="px-3 py-1.5 bg-blue-600 text-white rounded-md text-xs font-semibold hover:bg-blue-700 transition">
+                                                Simpan
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    @php
+                                        $questionNumber++;
+                                    @endphp
+                                @endforeach
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
             <h3 id="def_word" class="text-lg font-bold text-gray-800 mb-1 capitalize">Word</h3>
             <div class="bg-blue-50 text-blue-700 text-sm font-semibold px-3 py-1 rounded-lg inline-block mb-3" id="def_translation">
                 Translation

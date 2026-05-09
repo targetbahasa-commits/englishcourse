@@ -5,6 +5,27 @@
     $isSingle = isset($content['passage_title']);
     $sections = $isSingle ? [$content] : $content;
     $globalQIndex = 0;
+    $hasAnswerKey = false;
+
+    foreach ($sections as $section) {
+        foreach (($section['questions'] ?? []) as $question) {
+            $correctAnswer = $question['correct_answer'] ?? ($question['data']['correct_answer'] ?? null);
+            $hasCorrectAnswer = false;
+
+            if (is_array($correctAnswer)) {
+                $hasCorrectAnswer = count(array_filter($correctAnswer, static fn ($value) => filled($value))) > 0;
+            } else {
+                $hasCorrectAnswer = filled($correctAnswer);
+            }
+
+            $hasExplanation = filled($question['explanation'] ?? null);
+
+            if ($hasCorrectAnswer || $hasExplanation) {
+                $hasAnswerKey = true;
+                break 2;
+            }
+        }
+    }
 @endphp
 
 <!-- Full-screen reading layout — fixed to viewport, bypasses admin layout chain -->
@@ -24,10 +45,19 @@
                     </div>
                 </div>
                 
-                <a href="{{ route('assignments.ielts-academic.reading.index') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    <span class="hidden md:inline">Back</span>
-                </a>
+                <div class="flex items-center gap-3">
+                    @if(auth()->check() && auth()->user()->isAdmin())
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border {{ $hasAnswerKey ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200' }}">
+                            <span>{{ $hasAnswerKey ? '✓' : '✕' }}</span>
+                            <span>{{ $hasAnswerKey ? 'Answer Key Ditambahkan' : 'Answer Key Belum Ada' }}</span>
+                        </span>
+                    @endif
+
+                    <a href="{{ route('assignments.ielts-academic.reading.practice-index') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        <span class="hidden md:inline">Back</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -233,14 +263,10 @@
                                                         $count = count($question['placeholders']);
                                                     }
                                                     
-                                                    if (isset($question['start_number'])) {
-                                                        $currentBadgeNum = $question['start_number'] + 1;
-                                                        $globalQIndex = $currentBadgeNum + $count - 1;
-                                                    } else {
-                                                        $currentBadgeNum = $globalQIndex + 1;
-                                                        $globalQIndex = $globalQIndex + $count;
-                                                        $question['start_number'] = $currentBadgeNum - 1;
-                                                    }
+                                                    // Always track globally so question numbers are sequential (1-40) across all passages
+                                                    $currentBadgeNum = $globalQIndex + 1;
+                                                    $globalQIndex = $globalQIndex + $count;
+                                                    $question['start_number'] = $currentBadgeNum - 1;
                                                 @endphp
                                                 
                                                 @if(!$isGroup)
@@ -251,11 +277,13 @@
                                                 </div>
                                                 @endif
                                                 <div class="flex-1 group">
-                                                    <div class="question-text-content text-base font-semibold text-gray-800 leading-relaxed cursor-text hover:cursor-pointer transition-colors" title="Click any word to find it in the passage">
+                                                    <div class="question-text-content text-base md:text-lg font-semibold text-gray-800 leading-relaxed cursor-text hover:cursor-pointer transition-colors" title="Click any word to find it in the passage">
                                                         @php
-                                                            $isTfNg = in_array($question['type'] ?? '', ['true_false', 'true_false_not_given']);
-                                                            $isYnNg = in_array($question['type'] ?? '', ['yes_no_not_given']);
-                                                            $formattedText = $question['text'];
+                                                            $isTfNg = in_array($question['type'] ?? '', ['true_false', 'true_false_not_given'])
+                                                                || (($question['type'] ?? '') === 'matching_features' && isset($question['options']['TRUE']));
+                                                            $isYnNg = in_array($question['type'] ?? '', ['yes_no_not_given'])
+                                                                || (($question['type'] ?? '') === 'matching_features' && isset($question['options']['YES']));
+                                                            $formattedText = $question['text'] ?? '';
                                                             
                                                             if ($isTfNg || $isYnNg) {
                                                                 // Strip existing instruction blocks
@@ -274,24 +302,24 @@
                                                     </div>
                                                     @if($isTfNg || $isYnNg)
                                                         <div class="mt-6 mb-4">
-                                                                <p class="text-[15px] text-gray-800 italic mb-4">
+                                                                <p class="text-base md:text-lg text-gray-800 italic mb-3">
                                                                     @if($currentBadgeNum === $globalQIndex)
                                                                         In box <span class="font-bold">{{ $currentBadgeNum }}</span> on your answer sheet, write
                                                                     @else
                                                                         In boxes <span class="font-bold">{{ $currentBadgeNum }}-{{ $globalQIndex }}</span> on your answer sheet, write
                                                                     @endif
                                                                 </p>
-                                                                <div class="text-[15px] text-gray-800 ml-8 md:ml-16 flex flex-col gap-1.5">
+                                                                <div class="text-base md:text-lg text-gray-800 ml-4 md:ml-8 flex flex-col gap-1.5">
                                                                     <div class="flex gap-4 md:gap-6 items-start">
-                                                                        <div class="font-bold tracking-wide w-24 flex-shrink-0">{{ $isTfNg ? 'TRUE' : 'YES' }}</div>
+                                                                        <div class="font-bold tracking-wide w-28 flex-shrink-0">{{ $isTfNg ? 'TRUE' : 'YES' }}</div>
                                                                         <div class="italic whitespace-nowrap">if the statement agrees with the {{ $isTfNg ? 'information' : 'claims of the writer' }}</div>
                                                                     </div>
                                                                     <div class="flex gap-4 md:gap-6 items-start">
-                                                                        <div class="font-bold tracking-wide w-24 flex-shrink-0">{{ $isTfNg ? 'FALSE' : 'NO' }}</div>
+                                                                        <div class="font-bold tracking-wide w-28 flex-shrink-0">{{ $isTfNg ? 'FALSE' : 'NO' }}</div>
                                                                         <div class="italic whitespace-nowrap">if the statement contradicts the {{ $isTfNg ? 'information' : 'claims of the writer' }}</div>
                                                                     </div>
                                                                     <div class="flex gap-4 md:gap-6 items-start">
-                                                                        <div class="font-bold tracking-wide w-24 flex-shrink-0">NOT GIVEN</div>
+                                                                        <div class="font-bold tracking-wide w-28 flex-shrink-0">NOT GIVEN</div>
                                                                         <div class="italic whitespace-nowrap">if {{ $isTfNg ? 'there is no information on this' : 'it is impossible to say what the writer thinks about this' }}</div>
                                                                     </div>
                                                                 </div>
@@ -312,9 +340,12 @@
 
                                         <div class="pl-0 md:pl-2">
                                             @if(isset($question['type']) && (in_array($question['type'], ['matching_headings', 'matching_features', 'matching_sentence_endings', 'true_false', 'true_false_not_given', 'yes_no_not_given', 'matching_paragraph_information'])))
+                                                @php
+                                                    $usesMatchingOptionsLayout = in_array($question['type'], ['matching_headings', 'matching_features', 'matching_sentence_endings']);
+                                                @endphp
                                                 
                                                 <!-- List of Headings/Features Box (Top) -->
-                                                @if(!empty($question['box_title']) && in_array($question['type'], ['matching_headings', 'matching_features']))
+                                                @if($usesMatchingOptionsLayout && !empty($question['options']) && !empty($question['box_title']) && in_array($question['type'], ['matching_headings', 'matching_features']))
                                                 <div class="mb-8 border-2 border-gray-300 p-4 rounded-none bg-white">
                                                     <h4 class="text-center font-bold text-gray-800 mb-4 text-lg">{{ $question['box_title'] ?? 'List of Headings' }}</h4>
                                                     <ul class="space-y-2">
@@ -328,14 +359,14 @@
                                                 </div>
                                                 @endif
 
-                                                @if(!empty($question['box_title']))
+                                                @if($usesMatchingOptionsLayout)
                                                 <!-- Questions List with Dropdowns (Existing Layout) -->
                                                 <div class="space-y-4 max-w-2xl mx-auto">
                                                     @foreach($question['sub_questions'] as $subIndex => $subQuestion)
                                                         <div class="flex items-center justify-between gap-4 py-2 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors px-2 rounded-lg">
                                                             <div class="flex items-start gap-3 w-3/4 pt-1">
                                                                 <span class="text-gray-500 font-bold text-base md:text-lg mt-0.5">{{ $subIndex + 1 + ($question['start_number'] ?? 0) }}</span>
-                                                                <span class="font-normal text-gray-900 text-lg md:text-xl leading-relaxed block">{{ $subQuestion['label'] }}</span>
+                                                                <span class="font-normal text-gray-900 text-base md:text-lg leading-relaxed block">{{ $subQuestion['label'] }}</span>
                                                             </div>
                                                             
                                                             <div class="relative w-1/4 max-w-[140px]">
@@ -372,7 +403,7 @@
                                                                     <td class="py-2 px-4 font-bold text-blue-600 text-center">
                                                                         {{ $subIndex + 1 + ($question['start_number'] ?? 0) }}
                                                                     </td>
-                                                                    <td class="py-2 px-4 text-gray-800 font-medium leading-relaxed cursor-text transition-colors relative" title="Click any word to find it in the passage">
+                                                                    <td class="py-2 px-4 text-sm text-gray-800 font-medium leading-relaxed cursor-text transition-colors relative" title="Click any word to find it in the passage">
                                                                         <span class="block">{{ $subQuestion['label'] }}</span>
                                                                     </td>
                                                                     <td class="py-2 px-4 text-center">
@@ -400,7 +431,7 @@
                                                 @endif
 
                                                 <!-- List of Endings Box (Bottom) -->
-                                                @if(!empty($question['box_title']) && $question['type'] === 'matching_sentence_endings')
+                                                @if($usesMatchingOptionsLayout && !empty($question['options']) && $question['type'] === 'matching_sentence_endings')
                                                 <div class="mt-8 border-2 border-gray-300 p-4 rounded-none bg-white">
                                                     <h4 class="text-center font-bold text-gray-800 mb-4 text-lg">{{ $question['box_title'] ?? 'List of Endings' }}</h4>
                                                     <ul class="space-y-2">
@@ -570,7 +601,7 @@
                                                                 <span class="flex-none w-8 h-8 rounded-full bg-white border-2 border-blue-100 text-sm font-bold text-gray-600 flex items-center justify-center shadow-sm relative top-0.5">
                                                                     {{ $subIndex + 1 + ($question['start_number'] ?? 0) }}
                                                                 </span>
-                                                                <p class="font-medium text-gray-900 text-lg md:text-xl leading-relaxed mt-0 mb-0">{{ $subQuestion['label'] }}</p>
+                                                                <p class="font-medium text-gray-900 text-base md:text-lg leading-relaxed mt-0 mb-0">{{ $subQuestion['label'] }}</p>
                                                             </div>
                                                             <div class="space-y-3">
                                                                 @foreach($question['options'] ?? [] as $optKey => $optText)

@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden py-8 font-sans">
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden pt-28 pb-8 font-sans">
     {{-- Background Decoration --}}
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
         <div class="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-indigo-200/40 blur-3xl"></div>
@@ -92,11 +92,8 @@
         </div>
     </div>
     
-    {{-- Spacer for Fixed Audio Player --}}
-    <div class="h-24"></div>
-
-    {{-- Fixed Audio Player --}}
-    @include('assignments.ielts.listening.partials.audio-player', ['set' => 1, 'fixed' => true])
+    {{-- Fixed Audio Player (TOEFL style) --}}
+    @include('assignments.ielts.listening.partials.audio-player-toefl-style', ['set' => 1, 'fixed' => true])
 
 </div>
 
@@ -110,6 +107,7 @@
         animation: slide-down 0.3s ease-out forwards;
     }
 </style>
+@include('assignments.ielts.listening.partials.audio-player-scripts')
 @endpush
 
 @endsection

@@ -16,7 +16,7 @@
     <div class="flex min-h-screen">
 
         @php
-            $profileRole = strtolower($user->role ?? 'student');
+            $profileRole = strtolower($user->active_role ?? 'student');
         @endphp
 
         {{-- Sidebar --}}
@@ -24,7 +24,7 @@
             @include('components.sidebar-admin')
         @elseif($profileRole === 'teacher')
             @include('components.sidebar-teacher')
-        @elseif($profileRole === 'guest')
+        @elseif(in_array($profileRole, ['guest', 'guest_quick']))
             @include('components.sidebar-guest')
         @else
             @include('components.sidebar-student')
@@ -60,16 +60,17 @@
 
                         <div class="mt-4">
                             @php
+                                $displayRole = in_array($user->active_role, ['guest', 'guest_quick']) ? 'guest' : $user->active_role;
                                 $roleColors = [
                                     'admin'   => 'bg-purple-100 text-purple-700',
                                     'teacher' => 'bg-blue-100 text-blue-700',
                                     'student' => 'bg-green-100 text-green-700',
                                     'guest'   => 'bg-gray-100 text-gray-700',
                                 ];
-                                $roleColor = $roleColors[$user->role] ?? 'bg-gray-100 text-gray-700';
+                                $roleColor = $roleColors[$displayRole] ?? 'bg-gray-100 text-gray-700';
                             @endphp
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $roleColor }}">
-                                {{ ucfirst($user->role) }}
+                                {{ ucfirst($displayRole) }}
                             </span>
                         </div>
 
@@ -104,6 +105,33 @@
 
                 {{-- Right: Forms --}}
                 <div class="lg:col-span-2 space-y-6">
+
+                    {{-- Program Access History --}}
+                    <div class="bg-white rounded-2xl shadow-sm border border-blue-100 p-6">
+                        <h3 class="text-lg font-semibold text-blue-800 mb-1">Program Access History</h3>
+                        <p class="text-gray-500 text-sm mb-4">List of programs you have unlocked with an access key.</p>
+                        <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead>
+                                <tr class="text-left text-xs text-gray-500 uppercase border-b">
+                                    <th class="py-2 pr-4">Program</th>
+                                    <th class="py-2 pr-4">Granted At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($user->programAccesses()->with('program')->orderByDesc('granted_at')->get() as $access)
+                                    <tr class="border-b last:border-0">
+                                        <td class="py-2 pr-4 font-medium text-gray-800">{{ $access->program->name ?? '-' }}</td>
+                                        <td class="py-2 pr-4 text-gray-600">{{ $access->granted_at ? \Carbon\Carbon::parse($access->granted_at)->format('d M Y H:i') : '-' }}</td>
+                                    </tr>
+                                @endforeach
+                                @if($user->programAccesses()->count() === 0)
+                                    <tr><td colspan="2" class="py-2 text-gray-400">No program access history yet.</td></tr>
+                                @endif
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
 
                     {{-- Success alerts --}}
                     @if(session('status') === 'profile-updated')

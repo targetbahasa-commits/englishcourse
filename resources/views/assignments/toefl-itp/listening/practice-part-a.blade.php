@@ -75,48 +75,134 @@
                 ];
             @endphp
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-6">
+            <style>
+            .lp-folder-card {
+                transition: box-shadow 0.22s cubic-bezier(.4,2,.3,1), transform 0.16s cubic-bezier(.4,2,.3,1);
+                background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+                border-radius: 1.25rem;
+                box-shadow: 0 4px 16px 0 rgba(30,64,175,0.12);
+                border: 1.5px solid rgba(255,255,255,0.15);
+                position: relative;
+                overflow: hidden;
+            }
+            .lp-folder-card::before {
+                content: '';
+                position: absolute;
+                top: -40%;
+                right: -20%;
+                width: 180px;
+                height: 180px;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.06);
+                pointer-events: none;
+            }
+            .lp-folder-card:hover {
+                box-shadow: 0 12px 36px 0 rgba(30,64,175,0.22), 0 2px 8px 0 rgba(30,64,175,0.12);
+                transform: translateY(-5px) scale(1.02);
+            }
+            .lp-folder-music {
+                background: rgba(255,255,255,0.18);
+                color: #fff;
+                border-radius: 0.9rem;
+                width: 2.6rem;
+                height: 2.6rem;
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(4px);
+            }
+            .lp-badge {
+                font-size: 0.68rem;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                border-radius: 0.5rem;
+                padding: 0.2rem 0.55rem;
+                background: rgba(255,255,255,0.22);
+                color: #fff;
+                white-space: nowrap;
+                flex-shrink: 0;
+                border: 1px solid rgba(255,255,255,0.3);
+            }
+            .lp-badge-soon {
+                background: rgba(148,163,184,0.25);
+                color: rgba(255,255,255,0.7);
+                border-color: rgba(255,255,255,0.15);
+            }
+            .lp-folder-title {
+                color: #fff;
+                font-size: 1.25rem;
+                font-weight: 800;
+                line-height: 1.2;
+                letter-spacing: -0.01em;
+                text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            }
+            .lp-folder-desc {
+                color: rgba(219,234,254,0.85);
+                font-size: 0.82rem;
+                font-weight: 500;
+                margin-top: 0.2rem;
+            }
+            .lp-folder-btn {
+                display: block;
+                width: 100%;
+                font-size: 0.92rem;
+                font-weight: 700;
+                border-radius: 0.75rem;
+                padding: 0.65rem 1rem;
+                background: linear-gradient(90deg, #ef4444 0%, #f97316 100%);
+                color: #fff;
+                text-align: center;
+                box-shadow: 0 2px 8px 0 rgba(239,68,68,0.25);
+                transition: background 0.18s, box-shadow 0.18s, transform 0.13s;
+                letter-spacing: 0.01em;
+            }
+            .lp-folder-btn:hover {
+                background: linear-gradient(90deg, #dc2626 0%, #ea580c 100%);
+                box-shadow: 0 4px 16px 0 rgba(239,68,68,0.35);
+                transform: scale(1.02);
+            }
+            .lp-folder-btn-soon {
+                background: rgba(148,163,184,0.25);
+                color: rgba(255,255,255,0.6);
+                box-shadow: none;
+                cursor: not-allowed;
+                border: 1px solid rgba(255,255,255,0.15);
+            }
+            </style>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5 px-2 py-2">
                 @foreach(($ranges ?? collect()) as $index => $range)
                     @php
                         $hasQuestions = (int) ($range['question_count'] ?? 0) > 0;
-                        $palette = $palettes[$index % count($palettes)];
                     @endphp
-                    <a href="{{ route('assignments.toefl-itp.listening.practice.part-a.range', ['start' => $range['start'], 'end' => $range['end']]) }}"
-                       class="group w-full text-left rounded-3xl border border-white/70 ring-1 {{ $palette['ring'] }} bg-gradient-to-br {{ $palette['surface'] }} px-5 py-5 transition duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1 block relative overflow-hidden {{ $hasQuestions ? '' : 'opacity-85' }}">
-                        <div class="absolute -top-10 -right-10 w-24 h-24 rounded-full bg-white/40 blur-xl"></div>
-                        <div class="relative">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="w-11 h-11 rounded-2xl {{ $palette['icon'] }} flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-300">
-                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M10 4l2 2h8a2 2 0 012 2v9a3 3 0 01-3 3H5a3 3 0 01-3-3V6a2 2 0 012-2h6z"></path>
-                                    </svg>
-                                </div>
-                                <span class="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full {{ $hasQuestions ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600' }}">
-                                    <span class="w-1.5 h-1.5 rounded-full {{ $hasQuestions ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
-                                    {{ $hasQuestions ? 'Ready' : 'Empty' }}
-                                </span>
+                    <div class="lp-folder-card {{ $hasQuestions ? '' : 'opacity-70' }} p-5 flex flex-col gap-4">
+                        {{-- Top row: icon + title + badge --}}
+                        <div class="flex items-start gap-3">
+                            <div class="lp-folder-music mt-0.5">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-2v13"></path>
+                                    <circle cx="6" cy="18" r="3" fill="currentColor"/>
+                                    <circle cx="18" cy="16" r="3" fill="currentColor"/>
+                                </svg>
                             </div>
-
-                            <div class="text-3xl font-bold text-slate-800 leading-none">{{ $range['label'] }}</div>
-
-                            <div class="mt-3 flex items-center justify-between">
-                                <div class="text-xs font-semibold {{ $hasQuestions ? $palette['accent'] : 'text-slate-500' }}">
-                                    {{ $hasQuestions ? (($range['question_count'] ?? 0) . ' soal tersedia') : 'Belum ada soal' }}
-                                </div>
-                                <div class="text-slate-500 group-hover:text-slate-700 transition-colors duration-300">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
-                                </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="lp-folder-title">Soal {{ $range['label'] }}</div>
+                                <div class="lp-folder-desc">{{ $hasQuestions ? ($range['question_count'] . ' soal tersedia') : 'Belum ada soal' }}</div>
                             </div>
-
-                            <div class="mt-2 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
-                                <span class="w-1.5 h-1.5 rounded-full {{ $palette['dot'] }}"></span>
-                                Klik untuk buka folder
-                            </div>
+                            <span class="lp-badge {{ $hasQuestions ? '' : 'lp-badge-soon' }}">
+                                {{ $hasQuestions ? 'AVAILABLE' : 'COMING SOON' }}
+                            </span>
                         </div>
-                        <div class="absolute inset-0 rounded-3xl ring-1 ring-transparent group-hover:ring-white/60 pointer-events-none"></div>
-                    </a>
+                        {{-- Button --}}
+                        <div class="mt-auto">
+                            @if($hasQuestions)
+                                <a href="{{ route('assignments.toefl-itp.listening.practice.part-a.range', ['start' => $range['start'], 'end' => $range['end']]) }}" class="lp-folder-btn">Buka Soal {{ $range['label'] }} &rarr;</a>
+                            @else
+                                <span class="lp-folder-btn lp-folder-btn-soon">Coming Soon</span>
+                            @endif
+                        </div>
+                    </div>
                 @endforeach
             </div>
 

@@ -194,12 +194,12 @@
             <!-- Snapshot Cepat -->
             <article class="xl:col-span-2 rounded-[2rem] bg-cover bg-center p-8 shadow-sm ring-1 ring-cyan-100 relative overflow-hidden" style="background-image: linear-gradient(110deg, rgba(247,249,252,0.38), rgba(247,249,252,0.22)), url('{{ asset('images/whv/sydney-opera-house-day.jpg') }}');">
                 <div class="absolute inset-0 bg-gradient-to-br from-white/30 via-cyan-100/15 to-transparent"></div>
-                <div class="relative grid gap-6 md:grid-cols-[0.95fr_1.05fr] md:gap-8 h-full">
+                <div class="relative grid items-start gap-6 md:grid-cols-[0.92fr_1.08fr] md:gap-6">
                     @php
                         $daysToOpening = $featuredApplication->opening_date ? now()->startOfDay()->diffInDays($featuredApplication->opening_date->copy()->startOfDay(), false) : null;
                     @endphp
 
-                    <div class="rounded-2xl bg-white/80 p-6 ring-1 ring-white/90 backdrop-blur-sm">
+                    <div class="self-start rounded-2xl bg-white/82 p-6 ring-1 ring-white/90 backdrop-blur-sm">
                         <p class="text-xs font-bold uppercase tracking-[0.2em] text-teal-700/90">Key Highlights</p>
                         <h2 class="mt-3 text-3xl font-black text-[#0B1F3A]">Snapshot Program 2026</h2>
                         <p class="mt-4 text-sm leading-8 text-[#334155]">Program ini bukan sekadar visa. Ini adalah peluang kerja internasional, pendapatan dalam mata uang AUD, dan pengalaman hidup global dalam satu langkah strategis.</p>
@@ -218,6 +218,24 @@
                             @else
                                 Pantau jadwal resmi pembukaan kuota
                             @endif
+                        </div>
+
+                        <div class="mt-5 grid gap-3 sm:grid-cols-3 md:grid-cols-1 xl:grid-cols-3">
+                            <div class="rounded-xl border border-cyan-100 bg-cyan-50/80 p-4">
+                                <div class="text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-700">Focus</div>
+                                <div class="mt-1 text-sm font-black text-slate-900">Kerja sambil travel</div>
+                                <p class="mt-1 text-xs leading-5 text-slate-600">Visa ini cocok untuk bangun pengalaman kerja internasional.</p>
+                            </div>
+                            <div class="rounded-xl border border-emerald-100 bg-emerald-50/80 p-4">
+                                <div class="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">Ideal For</div>
+                                <div class="mt-1 text-sm font-black text-slate-900">Usia produktif</div>
+                                <p class="mt-1 text-xs leading-5 text-slate-600">Paling relevan untuk kandidat yang siap berangkat dalam 6-12 bulan.</p>
+                            </div>
+                            <div class="rounded-xl border border-amber-100 bg-amber-50/80 p-4">
+                                <div class="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700">Priority</div>
+                                <div class="mt-1 text-sm font-black text-slate-900">Dokumen & timing</div>
+                                <p class="mt-1 text-xs leading-5 text-slate-600">Kuota cepat habis, jadi kesiapan dokumen lebih penting dari sekadar minat.</p>
+                            </div>
                         </div>
                     </div>
 

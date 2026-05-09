@@ -13,6 +13,24 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const probe = document.createElement('div');
+            probe.className = 'hidden';
+            probe.style.position = 'absolute';
+            probe.style.left = '-9999px';
+            document.body.appendChild(probe);
+
+            const isTailwindApplied = window.getComputedStyle(probe).display === 'none';
+            probe.remove();
+
+            if (!isTailwindApplied) {
+                const fallback = document.createElement('script');
+                fallback.src = 'https://cdn.tailwindcss.com';
+                document.head.appendChild(fallback);
+            }
+        });
+    </script>
 
     <!-- Add custom styles for the animations -->
     <style>

@@ -26,7 +26,7 @@
 
     {{-- Step Indicator --}}
     <div class="flex items-center justify-center gap-2 mb-8">
-        @foreach(['Data Diri', 'Program & Mode', 'Jadwal & Tujuan', 'Konfirmasi'] as $i => $label)
+        @foreach(['Data Diri', 'Program & Mode', 'Jadwal & Tujuan', 'Buat Akun', 'Konfirmasi'] as $i => $label)
             <div class="flex items-center gap-2">
                 <div class="flex items-center gap-1.5">
                     <div :class="step > {{ $i + 1 }} ? 'bg-green-500 text-white' : (step === {{ $i + 1 }} ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-400')"
@@ -37,7 +37,7 @@
                     <span :class="step === {{ $i + 1 }} ? 'text-blue-600 font-semibold' : 'text-gray-400'"
                           class="text-xs hidden sm:inline transition-all">{{ $label }}</span>
                 </div>
-                @if($i < 3)
+                @if($i < 4)
                     <div :class="step > {{ $i + 1 }} ? 'bg-green-300' : 'bg-gray-200'" class="w-8 h-0.5 rounded transition-all"></div>
                 @endif
             </div>
@@ -147,22 +147,19 @@
 
             {{-- Program --}}
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Program yang diminati <span class="text-gray-400 font-normal">(opsional)</span></label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Program yang diminati <span class="text-red-500">*</span></label>
                 <div class="grid grid-cols-1 gap-2">
                     @foreach($programs as $prog)
                         <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-blue-300 transition has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
-                            <input type="radio" name="program_id" value="{{ $prog->id }}" x-model="form.program_id" @change="onProgramOrModeChanged()" class="accent-blue-600">
+                            <input type="radio" name="program_id" value="{{ $prog->id }}" x-model="form.program_id" @change="onProgramOrModeChanged(); programError = false" class="accent-blue-600">
                             <span class="text-sm font-medium">{{ $prog->name }}</span>
                         </label>
                     @endforeach
-                    <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-gray-300 transition has-[:checked]:border-gray-400 has-[:checked]:bg-gray-50">
-                        <input type="radio" name="program_id" value="" x-model="form.program_id" @change="onProgramOrModeChanged()" class="accent-gray-600">
-                        <span class="text-sm text-gray-500">Belum yakin / minta rekomendasi</span>
-                    </label>
                 </div>
-                <div x-show="!form.program_id" x-transition class="mt-2">
-                    <input type="text" name="program_interest" x-model="form.program_interest" placeholder="Ada program tertentu yang diminati?"
-                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition">
+                {{-- Inline error --}}
+                <div x-show="programError" x-transition class="mt-2 flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                    <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                    <p class="text-sm text-red-600 font-medium">Silakan pilih program terlebih dahulu.</p>
                 </div>
             </div>
 
@@ -211,8 +208,18 @@
 
                 {{-- Kondisional Online --}}
                 <div x-show="form.mode === 'online' || form.mode === 'flexible'" x-transition class="mt-3 p-3 bg-purple-50 rounded-xl border border-purple-100">
-                    <p class="text-xs font-semibold text-purple-700 mb-2">Info untuk kelas online:</p>
-                    <p class="text-xs text-purple-600">Kelas dilaksanakan via Zoom/Google Meet. Pastikan kamu memiliki koneksi internet yang stabil. Tim akan mengirimkan link kelas via WhatsApp.</p>
+                    <template x-if="form.mode === 'online'">
+                        <div>
+                            <p class="text-xs font-semibold text-purple-700 mb-2">Info untuk kelas online:</p>
+                            <p class="text-xs text-purple-600">Kelas dilaksanakan via Zoom/Google Meet. Pastikan kamu memiliki koneksi internet yang stabil. Tim akan mengirimkan link kelas via WhatsApp.</p>
+                        </div>
+                    </template>
+                    <template x-if="form.mode === 'flexible'">
+                        <div>
+                            <p class="text-xs font-semibold text-teal-700 mb-2">Info untuk kelas fleksibel:</p>
+                            <p class="text-xs text-teal-600">Kelas fleksibel (online & offline) hanya tersedia dengan konfirmasi admin. Silakan hubungi admin terlebih dahulu sebelum memilih mode ini.</p>
+                        </div>
+                    </template>
                 </div>
 
                 {{-- Kondisional Offline --}}
@@ -324,15 +331,45 @@
                     ← Kembali
                 </button>
                 <button type="button" @click="nextStep()" class="flex-2 flex-grow bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition text-sm">
+                    Lanjut Buat Akun →
+                </button>
+            </div>
+        </div>
+
+        {{-- ============ STEP 4: BUAT AKUN ============ --}}
+        <div x-show="step === 4" x-transition class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
+            <h2 class="text-lg font-bold text-gray-800 border-b border-gray-100 pb-3">
+                <span class="text-blue-600 mr-2">④</span> Buat Akun Student
+            </h2>
+            <p class="text-sm text-gray-500 mb-4">Buat password untuk login ke sistem kami setelah pendaftaran kamu dikonfirmasi oleh tim Target Bahasa.</p>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Password <span class="text-red-500">*</span></label>
+                <input type="password" name="password" x-model="form.password" placeholder="Minimal 8 karakter"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                <div x-show="passwordError" x-transition class="mt-1 text-xs text-red-500" x-text="passwordErrorMsg"></div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Konfirmasi Password <span class="text-red-500">*</span></label>
+                <input type="password" name="password_confirmation" x-model="form.password_confirmation" placeholder="Ulangi password di atas"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="button" @click="step--" class="flex-1 border border-gray-200 text-gray-600 font-semibold py-3 rounded-xl transition text-sm hover:bg-gray-50">
+                    ← Kembali
+                </button>
+                <button type="button" @click="nextStep()" class="flex-2 flex-grow bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition text-sm">
                     Lihat Ringkasan →
                 </button>
             </div>
         </div>
 
-        {{-- ============ STEP 4: KONFIRMASI ============ --}}
-        <div x-show="step === 4" x-transition class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+        {{-- ============ STEP 5: KONFIRMASI ============ --}}
+        <div x-show="step === 5" x-transition class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
             <h2 class="text-lg font-bold text-gray-800 border-b border-gray-100 pb-3">
-                <span class="text-blue-600 mr-2">④</span> Konfirmasi Data
+                <span class="text-blue-600 mr-2">⑤</span> Konfirmasi Data
             </h2>
 
             <div class="bg-gray-50 rounded-xl p-4 space-y-2.5 text-sm">
@@ -400,7 +437,7 @@
 </div>
 
 @php
-    $batchOptions = $classPeriods->map(function ($period) {
+    $batchOptions = collect($classPeriods)->map(function ($period) {
         return [
             'id' => (string) $period->id,
             'label' => trim(($period->program?->name ?? 'Program') . ' - ' . $period->name . ($period->start_date ? ' (Mulai ' . $period->start_date->format('d M Y') . ')' : '') . ' - ' . ucfirst($period->learning_mode)),
@@ -416,6 +453,9 @@ function regForm() {
 
     return {
         step: 1,
+        programError: false,
+        passwordError: false,
+        passwordErrorMsg: '',
         form: {
             full_name:            '{{ old('full_name', auth()->user()?->name ?? '') }}',
             whatsapp:             '{{ old('whatsapp', auth()->user()?->phone_number ?? '') }}',
@@ -439,6 +479,8 @@ function regForm() {
             budget_range:         '{{ old('budget_range') }}',
             best_contact_time:    '{{ old('best_contact_time') }}',
             notes:                '{{ old('notes') }}',
+            password:             '',
+            password_confirmation:'',
         },
         isBatchVisible(programId, learningMode) {
             const matchProgram = !this.form.program_id || String(this.form.program_id) === String(programId);
@@ -479,6 +521,32 @@ function regForm() {
             }
         },
         nextStep() {
+            // Validate program selection on step 2
+            if (this.step === 2) {
+                if (!this.form.program_id) {
+                    this.programError = true;
+                    document.querySelector('[x-show="programError"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                }
+                this.programError = false;
+            }
+            
+            // Validate password on step 4
+            if (this.step === 4) {
+                if (!this.form.password || this.form.password.length < 8) {
+                    this.passwordError = true;
+                    this.passwordErrorMsg = 'Password minimal 8 karakter.';
+                    return;
+                }
+                if (this.form.password !== this.form.password_confirmation) {
+                    this.passwordError = true;
+                    this.passwordErrorMsg = 'Konfirmasi password tidak cocok.';
+                    return;
+                }
+                this.passwordError = false;
+                this.passwordErrorMsg = '';
+            }
+
             this.step++;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }

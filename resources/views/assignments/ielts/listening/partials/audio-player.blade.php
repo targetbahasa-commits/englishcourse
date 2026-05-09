@@ -4,6 +4,34 @@
     <div class="{{ $fixed ? 'max-w-7xl mx-auto' : '' }}">
         <div class="flex items-center gap-4 p-4 bg-white {{ $fixed ? 'border-b-2 border-gray-200' : '' }}">
             <div class="flex items-center gap-3">
+                @if(auth()->check() && strtolower(auth()->user()->role) === 'admin')
+                    @php
+                        $leftStatusAudio = false;
+                        $leftStatusTranscript = false;
+                        $leftStatusAnswerKey = false;
+
+                        if (isset($material)) {
+                            $leftStatusAudio = filled($material->audio_file);
+                            $leftStatusTranscript = filled($material->transcript_en) || filled($material->transcript_id);
+                            $leftStatusAnswerKey = filled($material->answer_key);
+                        } elseif (isset($section) && $section) {
+                            $leftStatusAudio = filled($section->audio_file ?? null);
+                            $leftStatusTranscript = filled($section->transcript_en ?? null) || filled($section->transcript_id ?? null);
+                            $leftStatusAnswerKey = filled($section->answer_key ?? null);
+                        }
+                    @endphp
+                    <div class="flex items-center gap-1 flex-shrink-0">
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $leftStatusAudio ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                            <span class="font-bold">{{ $leftStatusAudio ? '✓' : '✕' }}</span> Audio
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $leftStatusTranscript ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                            <span class="font-bold">{{ $leftStatusTranscript ? '✓' : '✕' }}</span> SRT
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $leftStatusAnswerKey ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                            <span class="font-bold">{{ $leftStatusAnswerKey ? '✓' : '✕' }}</span> Kunci
+                        </span>
+                    </div>
+                @endif
                 <div class="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white shadow-md">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
                 </div>
@@ -69,7 +97,33 @@
 
             {{-- Admin Upload Audio Button --}}
             @if(auth()->check() && strtolower(auth()->user()->role) === 'admin')
+                @php
+                    $statusAudio = false;
+                    $statusTranscript = false;
+                    $statusAnswerKey = false;
+
+                    if (isset($material)) {
+                        $statusAudio = filled($material->audio_file);
+                        $statusTranscript = filled($material->transcript_en) || filled($material->transcript_id);
+                        $statusAnswerKey = filled($material->answer_key);
+                    } elseif (isset($section) && $section) {
+                        $statusAudio = filled($section->audio_file ?? null);
+                        $statusTranscript = filled($section->transcript_en ?? null) || filled($section->transcript_id ?? null);
+                        $statusAnswerKey = filled($section->answer_key ?? null);
+                    }
+                @endphp
                 <div class="flex gap-2">
+                    <div class="hidden items-center gap-1.5 mr-1">
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $statusAudio ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
+                            <span>{{ $statusAudio ? '✓' : '✕' }}</span> Audio
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $statusTranscript ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
+                            <span>{{ $statusTranscript ? '✓' : '✕' }}</span> Transcript
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $statusAnswerKey ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
+                            <span>{{ $statusAnswerKey ? '✓' : '✕' }}</span> Kunci
+                        </span>
+                    </div>
                     <button type="button" 
                             onclick="document.getElementById('uploadSrtModal').classList.remove('hidden')" 
                             class="px-3 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm">

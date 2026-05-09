@@ -1,15 +1,22 @@
 @extends('layouts.admin')
 
-@section('title', 'Manage Programs')
+@section('title', !empty($isMockTestView) ? 'Manage Mock Tests' : 'Manage Programs')
 
 @section('content')
+@php
+    $isMockProgram = static function ($program) {
+        return \Illuminate\Support\Str::startsWith($program->slug, 'cambridge-')
+            || \Illuminate\Support\Str::startsWith($program->slug, 'toefl-itp-mock-package-');
+    };
+@endphp
 <div class="p-6 md:p-8 space-y-8 pb-32">
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            <h1 class="text-3xl font-bold font-serif text-gray-900">Manage Programs</h1>
-            <p class="text-gray-500 mt-1">Design course products, build syllabuses, and track active enrollments.</p>
+            <h1 class="text-3xl font-bold font-serif text-gray-900">{{ !empty($isMockTestView) ? 'Manage Mock Tests' : 'Manage Programs' }}</h1>
+            <p class="text-gray-500 mt-1">{{ !empty($isMockTestView) ? 'Manage pricing and settings for independent test packages.' : 'Design course products, build syllabuses, and track active enrollments.' }}</p>
         </div>
+        @if(empty($isMockTestView))
         <button 
             x-data
             @click="$dispatch('open-program-modal')"
@@ -18,6 +25,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Create Program
         </button>
+        @endif
     </div>
 
     @if(session('success'))
@@ -79,6 +87,42 @@
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @forelse($programs as $program)
+                                        <tr>
+                                            <td colspan="5" class="bg-blue-50/30 p-0 border-t-0">
+                                                <div class="px-8 pb-4 pt-2">
+                                                    <div class="text-xs font-semibold text-blue-700 mb-1">Access Audit Log</div>
+                                                    <div class="overflow-x-auto">
+                                                        <table class="min-w-full text-xs mb-2">
+                                                            <thead>
+                                                                <tr class="text-left text-[11px] text-gray-500 uppercase border-b">
+                                                                    <th class="py-1 pr-4">User</th>
+                                                                    <th class="py-1 pr-4">Email</th>
+                                                                    <th class="py-1 pr-4">Status</th>
+                                                                    <th class="py-1 pr-4">IP</th>
+                                                                    <th class="py-1 pr-4">Time</th>
+                                                                    <th class="py-1 pr-4">Note</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach(\App\Models\ProgramAccessLog::where('program_id', $program->id)->orderByDesc('created_at')->limit(5)->get() as $log)
+                                                                    <tr class="border-b last:border-0">
+                                                                        <td class="py-1 pr-4 font-medium text-gray-800">{{ $log->user->name ?? '-' }}</td>
+                                                                        <td class="py-1 pr-4 text-gray-600">{{ $log->user->email ?? '-' }}</td>
+                                                                        <td class="py-1 pr-4 text-{{ $log->status === 'success' ? 'green' : 'red' }}-600">{{ ucfirst($log->status) }}</td>
+                                                                        <td class="py-1 pr-4 text-gray-500">{{ $log->ip_address }}</td>
+                                                                        <td class="py-1 pr-4 text-gray-500">{{ $log->created_at->format('d M Y H:i') }}</td>
+                                                                        <td class="py-1 pr-4 text-gray-400">{{ $log->note }}</td>
+                                                                    </tr>
+                                                                @endforeach
+                                                                @if(\App\Models\ProgramAccessLog::where('program_id', $program->id)->count() === 0)
+                                                                    <tr><td colspan="6" class="py-1 text-gray-400">No access log yet.</td></tr>
+                                                                @endif
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
                     <tr class="hover:bg-gray-50/50 transition-colors group" x-show="!searchQuery || '{{ strtolower(addslashes($program->name . ' ' . $program->description)) }}'.includes(searchQuery.toLowerCase())">
                         <td class="p-5">
                             <div class="flex items-start gap-4">
@@ -97,6 +141,11 @@
                                                 IDR {{ number_format($program->price, 0, ',', '.') }}
                                             </span>
                                         @endif
+                                        @if($isMockProgram($program))
+                                            <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-pink-50 text-pink-700 border border-pink-200">
+                                                🎯 Mock Test
+                                            </span>
+                                        @endif
                                         @php $activeDiscountCount = $program->discounts()->where('is_active', true)->count(); @endphp
                                         @if($activeDiscountCount > 0)
                                             <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
@@ -113,12 +162,60 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="p-5">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <span class="text-sm font-medium text-gray-700">{{ $program->period ?? 'Flexible / Self-Paced' }}</span>
-                            </div>
-                            <div class="text-xs text-gray-400 mt-1 ml-6">{{ $program->meetings_count }} total meetings</div>
+                        <td class="p-5 align-top">
+                            @php
+                                $activeBatches = collect($program->classPeriods)->whereIn('status', ['active', 'upcoming']);
+                                $allBatches    = collect($program->classPeriods);
+                            @endphp
+
+                            @if($activeBatches->isEmpty())
+                                <p class="text-xs text-gray-400 italic">Belum ada batch aktif</p>
+                                <p class="text-xs text-gray-400 mt-0.5">{{ $program->meetings_count }} total meetings</p>
+                            @else
+                                <div class="space-y-1.5">
+                                    @foreach($activeBatches as $batch)
+                                    <div class="flex items-center gap-2"
+                                         x-data="{ hovered: false }"
+                                         @mouseenter="hovered = true"
+                                         @mouseleave="hovered = false">
+                                        <span class="mt-0.5 w-2 h-2 rounded-full flex-shrink-0 {{ $batch->status === 'active' ? 'bg-emerald-400' : 'bg-blue-400' }}"></span>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-1 flex-wrap">
+                                                @if($batch->batch_number)
+                                                    <span class="text-[10px] font-bold bg-gray-100 text-gray-600 px-1 py-0.5 rounded">B{{ $batch->batch_number }}</span>
+                                                @endif
+                                                <span class="text-xs font-semibold text-gray-800">{{ $batch->name }}</span>
+                                                @if($batch->learning_mode)
+                                                <span class="text-[10px] px-1.5 py-0.5 rounded font-medium {{ $batch->learning_mode === 'online' ? 'bg-purple-50 text-purple-700' : 'bg-orange-50 text-orange-700' }}">
+                                                    {{ $batch->learning_mode === 'online' ? 'Online' : 'Offline' }}
+                                                </span>
+                                                @endif
+                                            </div>
+                                            @if($batch->start_date && $batch->end_date)
+                                            <p class="text-[10px] text-gray-400 mt-0.5">
+                                                {{ \Carbon\Carbon::parse($batch->start_date)->format('d M') }} – {{ \Carbon\Carbon::parse($batch->end_date)->format('d M Y') }}
+                                                · {{ $batch->users_count ?? 0 }} siswa
+                                            </p>
+                                            @endif
+                                        </div>
+                                        <button type="button"
+                                            x-show="hovered"
+                                            x-transition.opacity.duration.150ms
+                                            @click="$dispatch('open-edit-batch-modal', { batch: {{ Js::from($batch) }} })"
+                                            class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                            title="Edit Batch">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                                <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    @endforeach
+
+                                    @if($allBatches->count() > $activeBatches->count())
+                                        <p class="text-[10px] text-gray-400 pl-4">+{{ $allBatches->count() - $activeBatches->count() }} closed</p>
+                                    @endif
+                                </div>
+                            @endif
                         </td>
                         <td class="p-5">
                             <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-semibold border border-blue-100">
@@ -139,21 +236,23 @@
                         </td>
                         <td class="p-5">
                             <div class="flex justify-end items-center gap-2">
-                                {{-- Manage Batches Button --}}
-                                <button 
-                                    type="button" 
-                                    x-data 
-                                    @click="$dispatch('open-batch-modal', { program: {{ Js::from($program) }} })"
-                                    class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors border border-transparent hover:border-emerald-100" 
-                                    title="Manage Class Batches"
-                                >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                </button>
-                                
-                                {{-- Build Syllabus --}}
-                                <a href="{{ route('programs.syllabus', $program->id) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-transparent hover:border-indigo-100" title="Build Syllabus">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-                                </a>
+                                @if(!$isMockProgram($program))
+                                    {{-- Manage Batches Button --}}
+                                    <button 
+                                        type="button" 
+                                        x-data 
+                                        @click="$dispatch('open-batch-modal', { program: {{ Js::from($program) }} })"
+                                        class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors border border-transparent hover:border-emerald-100" 
+                                        title="Manage Class Batches"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    </button>
+                                    
+                                    {{-- Build Syllabus --}}
+                                    <a href="{{ route('programs.syllabus', $program->id) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-transparent hover:border-indigo-100" title="Build Syllabus">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                                    </a>
+                                @endif
 
                                 {{-- Discount Settings --}}
                                 <a href="{{ route('programs.discounts.index', $program->id) }}" class="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors border border-transparent hover:border-orange-100" title="Pengaturan Diskon">
@@ -171,7 +270,7 @@
                                     x-data 
                                     @click="$dispatch('open-program-modal', { program: {{ Js::from($program) }} })"
                                     class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100" 
-                                    title="Edit Program Settings"
+                                    title="Edit Program Settings / Price"
                                 >
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 </button>
@@ -338,6 +437,12 @@
                     </div>
 
                     <div>
+                        <label for="access_key" class="block text-sm font-semibold text-gray-700 mb-1">Access Key <span class="text-gray-400 font-normal">(Optional, can be changed anytime)</span></label>
+                        <input type="text" x-model="form.access_key" name="access_key" id="access_key" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., secret2026">
+                        <span class="text-xs text-gray-400">Leave blank if you don't want to require a key for this program.</span>
+                    </div>
+
+                    <div>
                         <label for="description" class="block text-sm font-semibold text-gray-700 mb-1">Description <span class="text-red-500">*</span></label>
                         <textarea x-model="form.description" name="description" id="description" rows="3" required class="block w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 resize-none h-24 placeholder:text-gray-400" placeholder="Enter a brief summary of what this program covers and who it is for..."></textarea>
                     </div>
@@ -381,31 +486,13 @@
             batch_type: 'regular'
         },
         initCalendar() {
-            flatpickr(this.$refs.dateRange, {
-                mode: 'range',
-                dateFormat: 'Y-m-d',
-                minDate: 'today',
-                onChange: (selectedDates, dateStr, instance) => {
-                    if (selectedDates.length === 2) {
-                        this.form.start_date = instance.formatDate(selectedDates[0], 'Y-m-d');
-                        this.form.end_date = instance.formatDate(selectedDates[1], 'Y-m-d');
-                    } else {
-                        this.form.start_date = '';
-                        this.form.end_date = '';
-                    }
-                }
-            });
+            // No-op: using native date inputs
         }
     }"
     @open-batch-modal.window="
         isOpen = true;
         program = $event.detail.program;
-        form = { name: '', start_date: '', end_date: '', status: 'active', batch_type: 'regular' };
-        if($refs.dateRange && $refs.dateRange._flatpickr) {
-            $refs.dateRange._flatpickr.clear();
-        } else {
-            $nextTick(() => { initCalendar(); });
-        }
+        form = { name: '', start_date: '', end_date: '', status: 'active', batch_type: 'regular', learning_mode: 'online' };
     "
     x-show="isOpen" 
     class="fixed inset-0 z-50 overflow-y-auto" 
@@ -450,6 +537,7 @@
                                 <div class="flex justify-between items-center p-3 bg-white border border-gray-200 rounded-xl hover:shadow-sm transition-shadow">
                                     <div>
                                         <div class="font-bold text-gray-900 text-sm flex items-center gap-2">
+                                            <span class="inline-flex items-center justify-center bg-gray-100 text-gray-800 rounded px-1.5 py-0.5 text-[10px] font-bold mr-1" x-show="batch.batch_number" x-text="'Batch ' + batch.batch_number"></span>
                                             <span x-text="batch.name"></span>
                                             <span class="px-2 py-0.5 text-[10px] uppercase font-bold rounded bg-purple-100 text-purple-700 border border-purple-200" x-show="batch.batch_type === 'private'">Private</span>
                                             <span class="px-2 py-0.5 text-[10px] uppercase font-bold rounded bg-gray-100 text-gray-700 border border-gray-200" x-show="batch.batch_type === 'regular'">Regular</span>
@@ -482,22 +570,38 @@
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Batch Name <span class="text-red-500">*</span></label>
-                            <input type="text" name="name" required class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900" placeholder="e.g., September Intensive 2024">
+                            <input type="text" name="name" required class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900" placeholder="e.g., Intensive Sept 2024">
                         </div>
 
-                        <div>
-                             <label class="block text-sm font-semibold text-gray-700 mb-1">Batch Type</label>
-                             <select name="batch_type" x-model="form.batch_type" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-700">
-                                 <option value="regular">Regular (Group Class)</option>
-                                 <option value="private">Private Class</option>
-                             </select>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Batch Type</label>
+                                 <select name="batch_type" x-model="form.batch_type" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-700">
+                                     <option value="regular">Regular (Group Class)</option>
+                                     <option value="private">Private Class</option>
+                                 </select>
+                            </div>
+                            <div>
+                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Learning Mode <span class="text-red-500">*</span></label>
+                                 <select name="learning_mode" x-model="form.learning_mode" required class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-700">
+                                     <option value="online">Online (Zoom/Meet)</option>
+                                     <option value="offline">Offline (Tatap Muka)</option>
+                                 </select>
+                            </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Duration (Start & End) <span class="text-red-500">*</span></label>
-                            <input x-ref="dateRange" type="text" required class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 cursor-pointer bg-white" placeholder="Select dates on Interactive Calendar" readonly>
-                            <input type="hidden" name="start_date" x-model="form.start_date">
-                            <input type="hidden" name="end_date" x-model="form.end_date">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Start Date <span class="text-red-500">*</span></label>
+                                <input type="date" name="start_date" x-model="form.start_date" required
+                                       class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">End Date <span class="text-red-500">*</span></label>
+                                <input type="date" name="end_date" x-model="form.end_date" required
+                                       :min="form.start_date"
+                                       class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900">
+                            </div>
                         </div>
 
                         <div>
@@ -521,6 +625,108 @@
                     </form>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+{{-- Edit Batch Modal --}}
+<div
+    x-data="{
+        isOpen: false,
+        batch: null,
+        init() {
+            window.addEventListener('open-edit-batch-modal', (e) => {
+                this.batch = e.detail.batch;
+                this.isOpen = true;
+            });
+        }
+    }"
+    x-show="isOpen"
+    class="fixed inset-0 z-50 overflow-y-auto"
+    style="display:none;"
+    role="dialog" aria-modal="true"
+>
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div x-show="isOpen" x-transition.opacity class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="isOpen = false"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+        <div x-show="isOpen" x-transition.duration.300ms.scale.95
+             class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+            <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Edit Batch</h3>
+                    <p class="text-sm text-gray-500 mt-0.5" x-text="batch?.name"></p>
+                </div>
+                <button @click="isOpen = false" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <template x-if="batch">
+                <form :action="'/admin/class-periods/' + batch.id" method="POST" class="px-6 py-5 space-y-4">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="program_id" :value="batch.program_id">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Batch</label>
+                        <input type="text" name="name" :value="batch.name" required
+                               class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Batch Type</label>
+                            <select name="batch_type" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+                                <option value="regular" :selected="batch.batch_type === 'regular'">Regular (Group)</option>
+                                <option value="private" :selected="batch.batch_type === 'private'">Private Class</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Learning Mode</label>
+                            <select name="learning_mode" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+                                <option value="online" :selected="batch.learning_mode === 'online'">Online (Zoom/Meet)</option>
+                                <option value="offline" :selected="batch.learning_mode === 'offline'">Offline (Tatap Muka)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Start Date</label>
+                            <input type="date" name="start_date" :value="batch.start_date ? batch.start_date.substring(0,10) : ''" required
+                                   class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">End Date</label>
+                            <input type="date" name="end_date" :value="batch.end_date ? batch.end_date.substring(0,10) : ''" required
+                                   class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+                        <select name="status" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+                            <option value="upcoming" :selected="batch.status === 'upcoming'">Upcoming (Pre-enrollment)</option>
+                            <option value="active" :selected="batch.status === 'active'">Active (Ongoing)</option>
+                            <option value="closed" :selected="batch.status === 'closed'">Closed</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                        <div>
+                            <button type="button" @click="if(confirm('Apakah Anda yakin ingin menghapus batch ini secara permanen? Data presensi dan pertemuan kelas juga akan terhapus jika ada.')) { $refs.deleteForm.submit() }"
+                                    class="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-xl font-medium transition-colors">
+                                Hapus Batch
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button type="button" @click="isOpen = false"
+                                    class="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium">Batal</button>
+                            <button type="submit"
+                                    class="px-5 py-2 text-sm bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold shadow-sm">Simpan Perubahan</button>
+                        </div>
+                    </div>
+                </form>
+                
+                <form x-ref="deleteForm" :action="'/admin/class-periods/' + batch.id" method="POST" class="hidden">
+                    @csrf
+                    @method('DELETE')
+                </form>
+            </template>
         </div>
     </div>
 </div>

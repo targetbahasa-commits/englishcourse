@@ -2,23 +2,26 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Application\Registration\ManageRegistrationLeads;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\RegistrationLeadUpdateRequest;
+use App\Http\Requests\Admin\RegistrationLeadUpdateStatusRequest;
 use App\Models\ClassPeriod;
-use App\Models\Enrollment;
 use App\Models\Program;
 use App\Models\RegistrationLead;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
-use Illuminate\Validation\Rule;
 
 class RegistrationLeadController extends Controller
 {
+    public function __construct(
+        private readonly ManageRegistrationLeads $manageRegistrationLeads
+    ) {}
+
     private function resolveLeadWindowDays(Request $request): ?int
     {
         $allowed = [7, 14, 30, 90];
@@ -35,82 +38,14 @@ class RegistrationLeadController extends Controller
 
     public function index(Request $request)
     {
-        $query = RegistrationLead::with(['program', 'classPeriod', 'convertedUser']);
-        $this->applyIndexFilters($query, $request);
-
-        $leads    = $query->paginate(20)->withQueryString();
-        $programs = Program::where('is_active', true)->get(['id', 'name']);
-        $classPeriods = ClassPeriod::with('program:id,name')
-            ->whereIn('status', ['active', 'upcoming'])
-            ->orderBy('start_date')
-            ->get(['id', 'name', 'program_id', 'start_date', 'learning_mode']);
-
-        $insightQuery = RegistrationLead::query();
-        $this->applyIndexFilters($insightQuery, $request);
-
-        $attributionInsights = [
-            'filtered_total'   => (clone $insightQuery)->count(),
-            'top_source_page'  => (clone $insightQuery)
-                ->whereNotNull('acquisition_source_page')
-                ->where('acquisition_source_page', '!=', '')
-                ->selectRaw('acquisition_source_page, COUNT(*) as total')
-                ->groupBy('acquisition_source_page')
-                ->orderByDesc('total')
-                ->first(),
-            'top_campaign'     => (clone $insightQuery)
-                ->whereNotNull('utm_campaign')
-                ->where('utm_campaign', '!=', '')
-                ->selectRaw('utm_campaign, COUNT(*) as total')
-                ->groupBy('utm_campaign')
-                ->orderByDesc('total')
-                ->first(),
-            'top_last_cta'     => (clone $insightQuery)
-                ->whereNotNull('acquisition_last_cta')
-                ->where('acquisition_last_cta', '!=', '')
-                ->selectRaw('acquisition_last_cta, COUNT(*) as total')
-                ->groupBy('acquisition_last_cta')
-                ->orderByDesc('total')
-                ->first(),
-            'converted_total'  => (clone $insightQuery)->where('status', 'converted')->count(),
-        ];
-
-        $quickAttributionFilters = [
-            'source_pages' => RegistrationLead::query()
-                ->whereNotNull('acquisition_source_page')
-                ->where('acquisition_source_page', '!=', '')
-                ->selectRaw('acquisition_source_page, COUNT(*) as total')
-                ->groupBy('acquisition_source_page')
-                ->orderByDesc('total')
-                ->limit(6)
-                ->get(),
-            'campaigns' => RegistrationLead::query()
-                ->whereNotNull('utm_campaign')
-                ->where('utm_campaign', '!=', '')
-                ->selectRaw('utm_campaign, COUNT(*) as total')
-                ->groupBy('utm_campaign')
-                ->orderByDesc('total')
-                ->limit(6)
-                ->get(),
-            'last_ctas' => RegistrationLead::query()
-                ->whereNotNull('acquisition_last_cta')
-                ->where('acquisition_last_cta', '!=', '')
-                ->selectRaw('acquisition_last_cta, COUNT(*) as total')
-                ->groupBy('acquisition_last_cta')
-                ->orderByDesc('total')
-                ->limit(6)
-                ->get(),
-        ];
-
-        $metrics = [
-            'total'           => RegistrationLead::count(),
-            'new'             => RegistrationLead::where('status', 'new')->count(),
-            'contacted'       => RegistrationLead::where('status', 'contacted')->count(),
-            'converted'       => RegistrationLead::where('status', 'converted')->count(),
-            'converted_today' => RegistrationLead::whereDate('converted_at', today())->count(),
-            'hot'             => RegistrationLead::where('status', 'new')->where('created_at', '>=', now()->subDay())->count(),
-            'online'          => RegistrationLead::where('mode', 'online')->count(),
-            'offline'         => RegistrationLead::where('mode', 'offline')->count(),
-        ];
+        [
+            'leads' => $leads,
+            'programs' => $programs,
+            'classPeriods' => $classPeriods,
+            'attributionInsights' => $attributionInsights,
+            'quickAttributionFilters' => $quickAttributionFilters,
+            'metrics' => $metrics,
+        ] = $this->manageRegistrationLeads->index($request->query());
 
         $activeDateWindow = $this->resolveLeadWindowDays($request);
 
@@ -198,26 +133,35 @@ class RegistrationLeadController extends Controller
             ->orderBy('start_date')
             ->get(['id', 'name', 'program_id', 'start_date', 'learning_mode']);
 
+        $lead = $registrationLead->load(['program', 'classPeriod.program', 'convertedUser']);
+
+        // Load related payment & enrollment when this lead has been converted
+        $relatedPayment = null;
+        $relatedEnrollment = null;
+        if ($lead->converted_user_id && $lead->program_id) {
+            $relatedPayment = \App\Models\Payment::where('user_id', $lead->converted_user_id)
+                ->where('program_id', $lead->program_id)
+                ->with('program')
+                ->latest()
+                ->first();
+            $relatedEnrollment = \App\Models\Enrollment::where('user_id', $lead->converted_user_id)
+                ->where('program_id', $lead->program_id)
+                ->with('classPeriod')
+                ->first();
+        }
+
         return view('admin.registration-leads.show', [
-            'lead' => $registrationLead->load(['program', 'classPeriod.program', 'convertedUser']),
-            'programs' => $programs,
-            'classPeriods' => $classPeriods,
+            'lead'              => $lead,
+            'programs'          => $programs,
+            'classPeriods'      => $classPeriods,
+            'relatedPayment'    => $relatedPayment,
+            'relatedEnrollment' => $relatedEnrollment,
         ]);
     }
 
-    public function update(Request $request, RegistrationLead $registrationLead)
+    public function update(RegistrationLeadUpdateRequest $request, RegistrationLead $registrationLead)
     {
-        $validated = $request->validate([
-            'full_name'        => 'required|string|max:150',
-            'whatsapp'         => 'required|string|max:20',
-            'email'            => ['nullable', 'email', 'max:150', Rule::unique('users', 'email')->ignore($registrationLead->converted_user_id)],
-            'city'             => 'required|string|max:100',
-            'profession'       => 'required|in:student_sma,mahasiswa,karyawan,other',
-            'profession_other' => 'nullable|string|max:100',
-            'program_id'       => 'nullable|exists:programs,id',
-            'class_period_id'  => 'nullable|exists:class_periods,id',
-            'mode'             => 'required|in:online,offline,flexible',
-        ]);
+        $validated = $request->validated();
 
         if (!empty($validated['class_period_id'])) {
             $selectedPeriod = ClassPeriod::find($validated['class_period_id']);
@@ -235,60 +179,21 @@ class RegistrationLeadController extends Controller
             }
         }
 
-        $registrationLead->update($validated);
-
-        if ($registrationLead->convertedUser) {
-            $phoneNumber = preg_replace('/[^0-9]/', '', (string) $validated['whatsapp']);
-            if ($phoneNumber && str_starts_with($phoneNumber, '0')) {
-                $phoneNumber = '62' . substr($phoneNumber, 1);
-            }
-
-            $registrationLead->convertedUser->update([
-                'name'            => $validated['full_name'],
-                'email'           => $validated['email'] ?: $registrationLead->convertedUser->email,
-                'phone_number'    => $phoneNumber,
-                'program_id'      => $validated['program_id'] ?? null,
-                'class_period_id' => $validated['class_period_id'] ?? null,
-                'learning_mode'   => $validated['mode'] === 'flexible' ? 'both' : $validated['mode'],
-            ]);
-
-            if (!empty($validated['program_id'])) {
-                Enrollment::updateOrCreate(
-                    ['user_id' => $registrationLead->convertedUser->id, 'program_id' => $validated['program_id']],
-                    ['status' => 'active', 'enrolled_at' => now()]
-                );
-            }
-        }
+        $this->manageRegistrationLeads->update($registrationLead, $validated);
 
         return back()->with('success', 'Data lead berhasil diperbarui.');
     }
 
-    public function updateStatus(Request $request, RegistrationLead $registrationLead)
+    public function updateStatus(RegistrationLeadUpdateStatusRequest $request, RegistrationLead $registrationLead)
     {
-        $request->validate([
-            'status'      => 'required|in:new,contacted,converted,cancelled',
-            'admin_notes' => 'nullable|string|max:2000',
-        ]);
-
-        $data = ['status' => $request->status, 'admin_notes' => $request->admin_notes];
-        if ($request->status === 'contacted' && ! $registrationLead->contacted_at) {
-            $data['contacted_at'] = now();
-        }
-        if ($request->status === 'converted' && ! $registrationLead->converted_at) {
-            $data['converted_at'] = now();
-        }
-        if ($request->status !== 'converted') {
-            $data['converted_at'] = null;
-        }
-
-        $registrationLead->update($data);
+        $this->manageRegistrationLeads->updateStatus($registrationLead, $request->status, $request->admin_notes);
 
         return back()->with('success', 'Status lead berhasil diperbarui.');
     }
 
     public function destroy(RegistrationLead $registrationLead)
     {
-        $registrationLead->delete();
+        $this->manageRegistrationLeads->delete($registrationLead);
         return redirect()->route('admin.registration-leads.index')
                          ->with('success', 'Lead berhasil dihapus.');
     }
@@ -300,56 +205,63 @@ class RegistrationLeadController extends Controller
         }
 
         $email = trim((string) $registrationLead->email);
-        if ($email === '') {
-            $email = 'lead-' . now()->format('YmdHis') . '-' . $registrationLead->id . '@targetbahasa.local';
-        }
-
-        if (User::where('email', $email)->exists()) {
+        if ($email !== '' && User::where('email', $email)->exists()) {
             return back()->with('error', 'Email sudah dipakai user lain. Silakan ubah email lead terlebih dahulu.');
         }
+        
+        ['user' => $user, 'email' => $email, 'tempPassword' => $tempPassword, 'payment' => $payment] = $this->manageRegistrationLeads->convertToStudent($registrationLead);
 
-        $rawPhone = preg_replace('/[^0-9]/', '', (string) $registrationLead->whatsapp);
-        if ($rawPhone && str_starts_with($rawPhone, '0')) {
-            $rawPhone = '62' . substr($rawPhone, 1);
+        // Generate PDF Invoice if payment exists
+        $pdfPath = null;
+        if ($payment) {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('emails.invoice-pdf', ['payment' => $payment, 'user' => $user]);
+            $pdfFileName = 'invoice-' . $payment->invoice_number . '.pdf';
+            $pdfPath = storage_path('app/public/invoices/' . $pdfFileName);
+            
+            // Ensure directory exists
+            if (!file_exists(storage_path('app/public/invoices'))) {
+                mkdir(storage_path('app/public/invoices'), 0755, true);
+            }
+            
+            $pdf->save($pdfPath);
         }
 
-        $referralCode = 'TB-' . strtoupper(Str::random(6));
-        while (User::where('referral_code', $referralCode)->exists()) {
-            $referralCode = 'TB-' . strtoupper(Str::random(6));
-        }
-
-        $tempPassword = Str::upper(Str::random(10));
-
-        $user = User::create([
-            'name'            => $registrationLead->full_name,
-            'email'           => $email,
-            'phone_number'    => $rawPhone,
-            'password'        => Hash::make($tempPassword),
-            'role'            => 'student',
-            'status'          => 'active',
-            'program_id'      => $registrationLead->program_id,
-            'class_period_id' => $registrationLead->class_period_id,
-            'learning_mode'   => $registrationLead->mode === 'flexible' ? 'both' : $registrationLead->mode,
-            'referral_code'   => $referralCode,
-        ]);
-
-        if ($registrationLead->program_id) {
-            Enrollment::firstOrCreate(
-                ['user_id' => $user->id, 'program_id' => $registrationLead->program_id],
-                ['status' => 'active', 'enrolled_at' => now()]
+        // Send Email
+        try {
+            \Illuminate\Support\Facades\Mail::to($email)->send(
+                new \App\Mail\StudentConvertedMail($user, $payment, $tempPassword, $pdfPath)
             );
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send conversion email: ' . $e->getMessage());
         }
 
-        $registrationLead->update([
-            'status'            => 'converted',
-            'converted_user_id' => $user->id,
-            'contacted_at'      => $registrationLead->contacted_at ?? now(),
-            'converted_at'      => now(),
-            'admin_notes'       => trim(($registrationLead->admin_notes ? $registrationLead->admin_notes . "\n" : '') . 'Auto converted to student user #' . $user->id),
-        ]);
+        // Send WhatsApp Message manually later, so we just flash the message and invoice path
+        if ($user->phone_number) {
+            $passwordText = $tempPassword ? "Password Sementara: {$tempPassword}\n\nSilakan login ke " . url('/login') . " dan segera ubah password Anda.\n" : "Password: (Sesuai yang Anda buat saat pendaftaran)\n\nSilakan login ke " . url('/login') . "\n";
+            
+            $invoiceText = "";
+            if ($payment) {
+                $formattedAmount = "Rp " . number_format($payment->amount, 0, ',', '.');
+                $invoiceText = "No. Invoice: {$payment->invoice_number}\nTotal Pembayaran: {$formattedAmount}\n\n";
+            }
+            
+            $waMessage = "Halo {$user->name},\n\n" .
+                "Pendaftaran Anda di Target Bahasa telah berhasil dikonfirmasi!\n\n" .
+                "Berikut adalah detail akses akun Anda:\n" .
+                "Email: {$email}\n" .
+                $passwordText . "\n" .
+                $invoiceText .
+                "Invoice dan detail lebih lengkap juga telah kami kirimkan ke email Anda.\n\n" .
+                "Terima kasih!";
+                
+            session()->flash('wa_template', $waMessage);
+            if ($pdfPath && $payment) {
+                session()->flash('invoice_url', asset('storage/invoices/invoice-' . $payment->invoice_number . '.pdf'));
+            }
+        }
 
-        return redirect()->route('students.show', $user)
-            ->with('success', "Student baru berhasil dibuat dari lead. Email login: {$email}, password sementara: {$tempPassword}");
+        return redirect()->back()
+            ->with('success', "Student baru berhasil dibuat dari lead. Email telah dikirimkan. Silakan copy template WhatsApp di bawah ini untuk dikirim secara manual.");
     }
 
     private function applyIndexFilters($query, Request $request): void

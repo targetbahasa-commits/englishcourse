@@ -131,7 +131,7 @@
                     <div class="border-b border-gray-100 bg-white px-5 py-4">
                         <h3 class="text-sm font-bold text-gray-800">Program Performance</h3>
                     </div>
-                    @if(isset($programPerformance) && $programPerformance->isNotEmpty())
+                    @if(isset($programPerformance) && collect($programPerformance)->isNotEmpty())
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm">
                                 <thead class="bg-gray-50 text-xs uppercase tracking-[0.12em] text-gray-400">
@@ -166,7 +166,7 @@
                     <div class="border-b border-gray-100 bg-white px-5 py-4">
                         <h3 class="text-sm font-bold text-gray-800">Top Teachers</h3>
                     </div>
-                    @if(isset($teacherActivitySummary) && $teacherActivitySummary->isNotEmpty())
+                    @if(isset($teacherActivitySummary) && collect($teacherActivitySummary)->isNotEmpty())
                         <div class="space-y-2 p-5 bg-white h-full">
                             @foreach($teacherActivitySummary as $teacher)
                                 <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition">
@@ -187,8 +187,8 @@
             <!-- Realtime Monitoring -->
             <div class="mb-8" x-data="{
                 search: '',
-                quickTask: '2',
-                quickMeetingId: '',
+                selectedProgram: '',
+                programOptions: ['IELTS Academic', 'IELTS General', 'PTE', 'Grammar for Writing'],
                 students: [
                     @foreach($activeStudents ?? [] as $student)
                     {
@@ -200,10 +200,35 @@
                     },
                     @endforeach
                 ],
+                normalizeProgram(program) {
+                    const value = (program || '').toLowerCase();
+
+                    if (value.includes('grammar for writing') || value.includes('grammar-writing')) {
+                        return 'Grammar for Writing';
+                    }
+
+                    if (value.includes('ielts general')) {
+                        return 'IELTS General';
+                    }
+
+                    if (value.includes('ielts')) {
+                        return 'IELTS Academic';
+                    }
+
+                    if (value.includes('pte')) {
+                        return 'PTE';
+                    }
+
+                    return '';
+                },
                 get filteredStudents() {
                     return this.students.filter(s => {
-                        return s.name.toLowerCase().includes(this.search.toLowerCase()) || 
-                               s.program.toLowerCase().includes(this.search.toLowerCase());
+                        const matchesSearch =
+                            s.name.toLowerCase().includes(this.search.toLowerCase()) ||
+                            s.program.toLowerCase().includes(this.search.toLowerCase());
+                        const matchesProgram = !this.selectedProgram || this.normalizeProgram(s.program) === this.selectedProgram;
+
+                        return matchesSearch && matchesProgram;
                     }).sort((a,b) => b.last_activity - a.last_activity);
                 },
                 formatTime(timestamp) {
@@ -221,33 +246,6 @@
                     const diffInSeconds = now - timestamp;
                     // Consider idle if no activity in the last 15 minutes (900 seconds)
                     return diffInSeconds > 900;
-                },
-                hasQuickWritingTarget() {
-                    const meeting = parseInt(this.quickMeetingId, 10);
-                    const task = parseInt(this.quickTask, 10);
-                    return Number.isInteger(meeting) && meeting > 0 && (task === 1 || task === 2);
-                },
-                buildRemoteViewUrl(studentId, autoRequest = false) {
-                    if (!this.hasQuickWritingTarget()) {
-                        return `/admin/remote-view/${studentId}`;
-                    }
-
-                    const query = new URLSearchParams({
-                        task: String(this.quickTask),
-                        meeting: String(parseInt(this.quickMeetingId, 10)),
-                    });
-
-                    if (autoRequest) {
-                        query.set('auto_request', '1');
-                    }
-
-                    return `/admin/remote-view/${studentId}?${query.toString()}`;
-                },
-                buildLiveDraftUrl(studentId) {
-                    if (!this.hasQuickWritingTarget()) return null;
-                    const task = parseInt(this.quickTask, 10);
-                    const meeting = parseInt(this.quickMeetingId, 10);
-                    return `/admin/live-draft/ielts-writing/${studentId}/${task}/meeting/${meeting}`;
                 }
             }">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -260,11 +258,12 @@
                             </span>
                         </div>
                         <div class="flex gap-3">
-                            <select x-model="quickTask" class="form-control rounded-xl text-sm border-gray-200">
-                                <option value="1">Task 1</option>
-                                <option value="2">Task 2</option>
+                            <select x-model="selectedProgram" class="form-control rounded-xl text-sm border-gray-200 min-w-[180px]">
+                                <option value="">Semua Kelas</option>
+                                <template x-for="program in programOptions" :key="program">
+                                    <option :value="program" x-text="program"></option>
+                                </template>
                             </select>
-                            <input type="number" x-model="quickMeetingId" min="1" placeholder="Meeting ID" class="form-control rounded-xl text-sm border-gray-200 w-28">
                             <input type="text" x-model="search" placeholder="Search student..." class="form-control rounded-xl text-sm border-gray-200">
                         </div>
                     </div>
@@ -320,12 +319,6 @@
                                             </template>
                                             <template x-if="student.role === 'guest'">
                                                 <a :href="`/admin/users/${student.id}`" class="px-3 py-1.5 text-xs font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-lg transition shadow-sm inline-block">Manage Guest</a>
-                                            </template>
-                                            <template x-if="hasQuickWritingTarget()">
-                                                <a :href="buildLiveDraftUrl(student.id)" target="_blank" class="px-3 py-1.5 text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-lg transition shadow-sm inline-flex items-center gap-1.5">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                                    Live Draft
-                                                </a>
                                             </template>
                                         </td>
                                     </tr>
@@ -452,7 +445,7 @@
                         <h3 class="text-lg font-bold text-gray-800">Scholarships Closing Soon</h3>
                         <a href="{{ route('admin.scholarships.index') }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">View All →</a>
                     </div>
-                    @if(isset($closingSoonScholarships) && $closingSoonScholarships->isNotEmpty())
+                    @if(isset($closingSoonScholarships) && collect($closingSoonScholarships)->isNotEmpty())
                         <ul class="space-y-3 flex-1">
                             @foreach($closingSoonScholarships as $s)
                             <li class="flex items-start gap-3">

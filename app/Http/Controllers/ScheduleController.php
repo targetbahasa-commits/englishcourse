@@ -12,8 +12,10 @@ class ScheduleController extends Controller
     {
         $user = Auth::user();
 
-        // Ensure user has a ClassPeriod assigned
-        if (!$user->classPeriod) {
+        // Get all enrollments that have a class period assigned
+        $enrollments = $user->enrollments()->with('classPeriod.program')->whereNotNull('class_period_id')->get();
+
+        if ($enrollments->isEmpty()) {
             return view('student.schedule.index', [
                 'hasActivePeriod' => false,
                 'upcomingMeetings' => collect(),
@@ -22,11 +24,11 @@ class ScheduleController extends Controller
         }
 
         $now = now();
+        $classPeriodIds = $enrollments->pluck('class_period_id');
 
-        // Get Upcoming Meetings
-        // Priority: Future date first, then future time if same day.
-        $upcomingMeetings = $user->classPeriod->classMeetings()
-            ->with('meeting') // Assuming this relation exists for topic/details
+        // Get Upcoming Meetings across all enrolled class periods
+        $upcomingMeetings = \App\Models\ClassMeeting::with(['meeting', 'classPeriod.program'])
+            ->whereIn('class_period_id', $classPeriodIds)
             ->where(function($query) use ($now) {
                 $query->where('meeting_date', '>', $now->toDateString())
                       ->orWhere(function($subq) use ($now) {
@@ -39,8 +41,8 @@ class ScheduleController extends Controller
             ->get();
 
         // Get Past Meetings
-        $pastMeetings = $user->classPeriod->classMeetings()
-            ->with('meeting')
+        $pastMeetings = \App\Models\ClassMeeting::with(['meeting', 'classPeriod.program'])
+            ->whereIn('class_period_id', $classPeriodIds)
             ->where(function($query) use ($now) {
                 $query->where('meeting_date', '<', $now->toDateString())
                       ->orWhere(function($subq) use ($now) {

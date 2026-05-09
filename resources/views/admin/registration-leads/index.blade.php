@@ -37,222 +37,129 @@
         </div>
     </div>
 
-    {{-- Metrics --}}
-    <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-4 mb-6">
+    {{-- Top Metrics Row --}}
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-6">
         @foreach([
             ['label'=>'Total Leads',      'value'=>$metrics['total'],           'color'=>'blue'],
-            ['label'=>'Baru',             'value'=>$metrics['new'],             'color'=>'indigo'],
-            ['label'=>'Hot Lead 24 Jam',  'value'=>$metrics['hot'],             'color'=>'red'],
-            ['label'=>'Dihubungi',        'value'=>$metrics['contacted'],       'color'=>'yellow'],
-            ['label'=>'Converted',        'value'=>$metrics['converted'],       'color'=>'green'],
-            ['label'=>'Converted Hari Ini','value'=>$metrics['converted_today'],'color'=>'emerald'],
-            ['label'=>'Online',           'value'=>$metrics['online'],          'color'=>'purple'],
-            ['label'=>'Offline',          'value'=>$metrics['offline'],         'color'=>'orange'],
+            ['label'=>'Leads Baru',       'value'=>$metrics['new'],             'color'=>'indigo'],
+            ['label'=>'Converted',        'value'=>$metrics['converted'],       'color'=>'emerald'],
+            ['label'=>'Hasil Filter',     'value'=>$attributionInsights['filtered_total'] ?? 0,'color'=>'slate'],
         ] as $m)
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-            <p class="text-xs font-medium text-gray-500">{{ $m['label'] }}</p>
-            <p class="text-2xl font-bold text-gray-900 mt-1">{{ $m['value'] }}</p>
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] p-5 flex flex-col justify-between relative overflow-hidden group">
+            <div class="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-{{ $m['color'] }}-50 transition-transform group-hover:scale-110"></div>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest relative z-10">{{ $m['label'] }}</p>
+            <p class="text-3xl font-extrabold text-gray-900 mt-2 relative z-10">{{ $m['value'] }}</p>
         </div>
         @endforeach
     </div>
 
-    <div class="flex flex-wrap gap-2 mb-6">
-        @foreach([7, 14, 30, 90] as $window)
+    {{-- Quick Access Tags --}}
+    <div class="flex flex-wrap gap-2 mb-6 items-center">
+        <span class="text-xs font-bold text-gray-400 uppercase tracking-wide mr-2 flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Quick Filter:
+        </span>
+        <a href="{{ route('admin.registration-leads.index', array_merge(request()->except(['hot','converted_today','page']), ['hot' => 1])) }}"
+           class="px-3 py-1 rounded-full text-xs font-bold tracking-wide transition {{ request()->boolean('hot') ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50' }}">
+            🔥 Hot 24 Jam ({{ $metrics['hot'] }})
+        </a>
+        <a href="{{ route('admin.registration-leads.index', array_merge(request()->except(['hot','converted_today','page']), ['converted_today' => 1])) }}"
+           class="px-3 py-1 rounded-full text-xs font-bold tracking-wide transition {{ request()->boolean('converted_today') ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50' }}">
+            ✅ Converted Hari Ini ({{ $metrics['converted_today'] }})
+        </a>
+        @foreach([7, 14, 30] as $window)
             <a href="{{ route('admin.registration-leads.index', array_merge(request()->except(['date_window','date_from','date_to','page']), ['date_window' => $window])) }}"
-               class="px-3 py-1.5 rounded-full text-xs font-semibold transition {{ (int) ($activeDateWindow ?? 0) === $window ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50' }}">
+               class="px-3 py-1 rounded-full text-xs font-bold tracking-wide transition {{ (int) ($activeDateWindow ?? 0) === $window ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50' }}">
                 {{ $window }} Hari
             </a>
         @endforeach
-        <a href="{{ route('admin.registration-leads.index', array_merge(request()->except(['hot','converted_today','page']), ['hot' => 1])) }}"
-           class="px-3 py-1.5 rounded-full text-xs font-semibold transition {{ request()->boolean('hot') ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50' }}">
-            Hot Lead 24 Jam
-        </a>
-        <a href="{{ route('admin.registration-leads.index', array_merge(request()->except(['hot','converted_today','page']), ['converted_today' => 1])) }}"
-           class="px-3 py-1.5 rounded-full text-xs font-semibold transition {{ request()->boolean('converted_today') ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50' }}">
-            Converted Hari Ini
-        </a>
-        <a href="{{ route('admin.registration-leads.index', array_merge(request()->except(['converted_only','page']), ['converted_only' => 1])) }}"
-           class="px-3 py-1.5 rounded-full text-xs font-semibold transition {{ request()->boolean('converted_only') ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50' }}">
-            Converted Only
-        </a>
-        @if(request()->boolean('hot') || request()->boolean('converted_today') || request()->boolean('converted_only') || request('date_window') || request('date_from') || request('date_to'))
+        @if(request()->hasAny(['hot','converted_today','converted_only','date_window','date_from','date_to']))
             <a href="{{ route('admin.registration-leads.index', request()->except(['hot','converted_today','converted_only','date_window','date_from','date_to','page'])) }}"
-               class="px-3 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 transition">
-                Hapus Quick Filter
+               class="px-2 py-1 rounded-md text-[11px] font-bold bg-gray-100 text-gray-500 hover:bg-gray-200 transition ml-auto">
+                TAMPILKAN SEMUA
             </a>
         @endif
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-            <p class="text-xs font-medium text-gray-500">Total Hasil Filter</p>
-            <p class="text-2xl font-bold text-gray-900 mt-1">{{ $attributionInsights['filtered_total'] ?? 0 }}</p>
-        </div>
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-            <p class="text-xs font-medium text-gray-500">Top Source Page</p>
-            <p class="text-sm font-bold text-gray-900 mt-1 break-all">{{ $attributionInsights['top_source_page']->acquisition_source_page ?? '—' }}</p>
-            <p class="text-xs text-gray-500 mt-1">{{ $attributionInsights['top_source_page']->total ?? 0 }} leads</p>
-        </div>
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-            <p class="text-xs font-medium text-gray-500">Top Campaign</p>
-            <p class="text-sm font-bold text-gray-900 mt-1 break-all">{{ $attributionInsights['top_campaign']->utm_campaign ?? '—' }}</p>
-            <p class="text-xs text-gray-500 mt-1">{{ $attributionInsights['top_campaign']->total ?? 0 }} leads</p>
-        </div>
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-            <p class="text-xs font-medium text-gray-500">Top Last CTA</p>
-            <p class="text-sm font-bold text-gray-900 mt-1 break-all">{{ $attributionInsights['top_last_cta']->acquisition_last_cta ?? '—' }}</p>
-            <p class="text-xs text-gray-500 mt-1">{{ $attributionInsights['top_last_cta']->total ?? 0 }} leads • {{ $attributionInsights['converted_total'] ?? 0 }} converted</p>
-        </div>
+    {{-- Main Filter Box --}}
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] p-5 mb-8" x-data="{ showAdvanced: {{ request()->hasAny(['utm_source','utm_campaign','acquisition_source_page','acquisition_last_cta','date_from','date_to','program_id','class_period_id','mode']) ? 'true' : 'false' }} }">
+        <form method="GET" action="{{ route('admin.registration-leads.index') }}">
+            <div class="flex flex-col md:flex-row gap-4 items-end">
+                <div class="flex-1 w-full">
+                    <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Pencarian</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, WA, email, kota..."
+                               class="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition bg-gray-50 focus:bg-white">
+                    </div>
+                </div>
+                <div class="w-full md:w-48">
+                    <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Status</label>
+                    <select name="status" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 focus:bg-white cursor-pointer appearance-none transition">
+                        <option value="">Semua Status</option>
+                        <option value="new"       {{ request('status')==='new'       ? 'selected' : '' }}>Baru</option>
+                        <option value="contacted" {{ request('status')==='contacted' ? 'selected' : '' }}>Dihubungi</option>
+                        <option value="converted" {{ request('status')==='converted' ? 'selected' : '' }}>Converted</option>
+                        <option value="cancelled" {{ request('status')==='cancelled' ? 'selected' : '' }}>Cancelled</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <button type="submit" class="flex-1 md:flex-none px-6 py-2.5 bg-slate-800 text-white text-sm font-bold rounded-xl hover:bg-slate-900 transition shadow-md shadow-slate-200 whitespace-nowrap">
+                        Cari & Filter
+                    </button>
+                    <button type="button" @click="showAdvanced = !showAdvanced" class="p-2.5 border border-gray-200 text-gray-500 rounded-xl hover:bg-gray-50 transition bg-white" title="Advanced Filters">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                    </button>
+                    @if(request()->hasAny(['search','status','mode','program_id','class_period_id','utm_source','utm_campaign','acquisition_source_page','acquisition_last_cta','date_window','date_from','date_to','sort_by','sort_dir','hot','converted_today','converted_only']))
+                        <a href="{{ route('admin.registration-leads.index') }}" class="p-2.5 border border-red-100 text-red-500 bg-red-50 rounded-xl hover:bg-red-100 hover:text-red-600 transition" title="Reset Filters">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </a>
+                    @endif
+                </div>
+            </div>
+            
+            <div x-show="showAdvanced" x-collapse class="mt-5 pt-5 border-t border-gray-100">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Program</label>
+                        <select name="program_id" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none bg-white">
+                            <option value="">Semua Program</option>
+                            @foreach($programs as $prog)
+                                <option value="{{ $prog->id }}" {{ request('program_id')==$prog->id ? 'selected' : '' }}>{{ $prog->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Batch Kelas</label>
+                        <select name="class_period_id" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none bg-white">
+                            <option value="">Semua Batch</option>
+                            @foreach($classPeriods as $period)
+                                <option value="{{ $period->id }}" {{ request('class_period_id')==$period->id ? 'selected' : '' }}>
+                                    {{ $period->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Mode</label>
+                        <select name="mode" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none bg-white">
+                            <option value="">Semua Mode</option>
+                            <option value="online"   {{ request('mode')==='online'   ? 'selected' : '' }}>Online</option>
+                            <option value="offline"  {{ request('mode')==='offline'  ? 'selected' : '' }}>Offline</option>
+                            <option value="flexible" {{ request('mode')==='flexible' ? 'selected' : '' }}>Fleksibel</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Source Page (Attribution)</label>
+                        <input type="text" name="acquisition_source_page" value="{{ request('acquisition_source_page') }}" placeholder="Ex: whv-application"
+                               class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none bg-white">
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
-
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6 space-y-3">
-        <div>
-            <p class="text-xs font-semibold text-gray-500 mb-2">Quick Filter: Source Page</p>
-            <div class="flex flex-wrap gap-2">
-                @foreach(($quickAttributionFilters['source_pages'] ?? []) as $item)
-                    <a href="{{ route('admin.registration-leads.index', array_merge(request()->except(['acquisition_source_page','page']), ['acquisition_source_page' => $item->acquisition_source_page])) }}"
-                       class="px-3 py-1.5 rounded-full text-xs font-semibold border transition {{ request('acquisition_source_page') === $item->acquisition_source_page ? 'bg-blue-100 text-blue-700 border-blue-200' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100' }}">
-                        {{ $item->acquisition_source_page }} ({{ $item->total }})
-                    </a>
-                @endforeach
-            </div>
-        </div>
-        <div>
-            <p class="text-xs font-semibold text-gray-500 mb-2">Quick Filter: Campaign</p>
-            <div class="flex flex-wrap gap-2">
-                @foreach(($quickAttributionFilters['campaigns'] ?? []) as $item)
-                    <a href="{{ route('admin.registration-leads.index', array_merge(request()->except(['utm_campaign','page']), ['utm_campaign' => $item->utm_campaign])) }}"
-                       class="px-3 py-1.5 rounded-full text-xs font-semibold border transition {{ request('utm_campaign') === $item->utm_campaign ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100' }}">
-                        {{ $item->utm_campaign }} ({{ $item->total }})
-                    </a>
-                @endforeach
-            </div>
-        </div>
-        <div>
-            <p class="text-xs font-semibold text-gray-500 mb-2">Quick Filter: Last CTA</p>
-            <div class="flex flex-wrap gap-2">
-                @foreach(($quickAttributionFilters['last_ctas'] ?? []) as $item)
-                    <a href="{{ route('admin.registration-leads.index', array_merge(request()->except(['acquisition_last_cta','page']), ['acquisition_last_cta' => $item->acquisition_last_cta])) }}"
-                       class="px-3 py-1.5 rounded-full text-xs font-semibold border transition {{ request('acquisition_last_cta') === $item->acquisition_last_cta ? 'bg-slate-200 text-slate-700 border-slate-300' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100' }}">
-                        {{ $item->acquisition_last_cta }} ({{ $item->total }})
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    </div>
-
-    {{-- Filters --}}
-    <form method="GET" action="{{ route('admin.registration-leads.index') }}"
-          class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6 flex flex-wrap gap-3 items-end">
-        <div class="flex-1 min-w-48">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Cari</label>
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Nama, WA, email, kota..."
-                   class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-        </div>
-        <div class="min-w-36">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Status</label>
-            <select name="status" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                <option value="">Semua Status</option>
-                <option value="new"       {{ request('status')==='new'       ? 'selected' : '' }}>Baru</option>
-                <option value="contacted" {{ request('status')==='contacted' ? 'selected' : '' }}>Dihubungi</option>
-                <option value="converted" {{ request('status')==='converted' ? 'selected' : '' }}>Converted</option>
-                <option value="cancelled" {{ request('status')==='cancelled' ? 'selected' : '' }}>Cancelled</option>
-            </select>
-        </div>
-        <div class="min-w-36">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Mode</label>
-            <select name="mode" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                <option value="">Semua Mode</option>
-                <option value="online"   {{ request('mode')==='online'   ? 'selected' : '' }}>Online</option>
-                <option value="offline"  {{ request('mode')==='offline'  ? 'selected' : '' }}>Offline</option>
-                <option value="flexible" {{ request('mode')==='flexible' ? 'selected' : '' }}>Fleksibel</option>
-            </select>
-        </div>
-        <div class="min-w-40">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Program</label>
-            <select name="program_id" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                <option value="">Semua Program</option>
-                @foreach($programs as $prog)
-                    <option value="{{ $prog->id }}" {{ request('program_id')==$prog->id ? 'selected' : '' }}>{{ $prog->name }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="min-w-52">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Batch Kelas</label>
-            <select name="class_period_id" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                <option value="">Semua Batch</option>
-                @foreach($classPeriods as $period)
-                    <option value="{{ $period->id }}" {{ request('class_period_id')==$period->id ? 'selected' : '' }}>
-                        {{ $period->program?->name ?? 'Program' }} - {{ $period->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="min-w-44">
-            <label class="block text-xs font-medium text-gray-500 mb-1">UTM Source</label>
-            <input type="text" name="utm_source" value="{{ request('utm_source') }}" placeholder="google, instagram..."
-                   class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-        </div>
-        <div class="min-w-44">
-            <label class="block text-xs font-medium text-gray-500 mb-1">UTM Campaign</label>
-            <input type="text" name="utm_campaign" value="{{ request('utm_campaign') }}" placeholder="campaign name"
-                   class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-        </div>
-        <div class="min-w-44">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Source Page</label>
-            <input type="text" name="acquisition_source_page" value="{{ request('acquisition_source_page') }}" placeholder="whv-application"
-                   class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-        </div>
-        <div class="min-w-44">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Last CTA</label>
-            <input type="text" name="acquisition_last_cta" value="{{ request('acquisition_last_cta') }}" placeholder="primary-hero-cta"
-                   class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-        </div>
-        <div class="min-w-40">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Window</label>
-            <select name="date_window" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                <option value="">Semua Waktu</option>
-                @foreach([7, 14, 30, 90] as $window)
-                    <option value="{{ $window }}" {{ (string) request('date_window') === (string) $window ? 'selected' : '' }}>{{ $window }} Hari</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="min-w-40">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Dari Tanggal</label>
-            <input type="date" name="date_from" value="{{ request('date_from') }}"
-                   class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-        </div>
-        <div class="min-w-40">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Sampai Tanggal</label>
-            <input type="date" name="date_to" value="{{ request('date_to') }}"
-                   class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-        </div>
-        <div class="min-w-40">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Sort By</label>
-            <select name="sort_by" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                <option value="created_at" {{ request('sort_by', 'created_at') === 'created_at' ? 'selected' : '' }}>Tanggal Daftar</option>
-                <option value="converted_at" {{ request('sort_by') === 'converted_at' ? 'selected' : '' }}>Tanggal Convert</option>
-                <option value="status" {{ request('sort_by') === 'status' ? 'selected' : '' }}>Status</option>
-            </select>
-        </div>
-        <div class="min-w-36">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Arah</label>
-            <select name="sort_dir" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                <option value="desc" {{ request('sort_dir', 'desc') === 'desc' ? 'selected' : '' }}>Terbaru</option>
-                <option value="asc" {{ request('sort_dir') === 'asc' ? 'selected' : '' }}>Terlama</option>
-            </select>
-        </div>
-        <div class="flex gap-2">
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition">
-                Filter
-            </button>
-            @if(request()->hasAny(['search','status','mode','program_id','class_period_id','utm_source','utm_campaign','acquisition_source_page','acquisition_last_cta','date_window','date_from','date_to','sort_by','sort_dir','hot','converted_today','converted_only']))
-                <a href="{{ route('admin.registration-leads.index') }}" class="px-4 py-2 border border-gray-200 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-50 transition">
-                    Reset
-                </a>
-            @endif
-        </div>
-    </form>
 
     {{-- Success flash --}}
     @if(session('success'))

@@ -282,9 +282,11 @@
             $lessons = collect($topics)->filter(function($t) { 
                 return str_contains(strtolower($t['slug']), 'lesson'); 
             });
-            
-            // Current Part 1 content is lesson-based, so render all topics.
-            $practices = collect($topics);
+
+            // Part 1 practice page should only show practice topics, not lesson cards.
+            $practices = collect($topics)->reject(function($t) {
+                return str_contains(strtolower($t['slug'] ?? ''), 'lesson');
+            })->values();
             @endphp
 
 

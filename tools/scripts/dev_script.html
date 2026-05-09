@@ -1,0 +1,9 @@
+<script>
+console.log("Loading dev script");
+setTimeout(() => {
+   const section = document.querySelector("[x-show='currentView === \\'section1\\'']");
+   console.log("Section 1:", section ? section.outerHTML.substring(0, 500) : "Not found");
+   const page2 = document.querySelector("[x-show='Number(listeningPage) === 2']");
+   console.log("Page 2:", page2 ? page2.outerHTML.substring(0, 500) : "Not found");
+}, 2000);
+</script>

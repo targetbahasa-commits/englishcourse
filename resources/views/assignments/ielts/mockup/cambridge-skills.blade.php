@@ -10,16 +10,10 @@
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         {{-- Sidebar --}}
-        @if(Auth::user()->isAdmin())
-            @include('components.sidebar-admin')
-        @elseif(Auth::user()->isTeacher())
-            @include('components.sidebar-teacher')
-        @else
-            @include('components.sidebar-student')
-        @endif
+        @include('components.program-sidebar')
 
         {{-- Main Content --}}
-        <main class="flex-1 md:ml-64 p-8">
+        <main class="flex-1 md:ml-64 p-8 pl-10 md:pl-12">
             {{-- Header --}}
             <div class="mb-8">
                 <div class="flex items-center justify-between mb-4">

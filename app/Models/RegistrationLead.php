@@ -14,7 +14,7 @@ class RegistrationLead extends Model
         'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
         'acquisition_referrer', 'acquisition_landing_path', 'acquisition_source_page', 'acquisition_variant', 'acquisition_last_cta',
         'has_previous_course', 'previous_course_name', 'budget_range', 'best_contact_time',
-        'notes', 'status', 'admin_notes', 'contacted_at', 'converted_at',
+        'notes', 'status', 'admin_notes', 'contacted_at', 'converted_at', 'password',
     ];
 
     protected $casts = [

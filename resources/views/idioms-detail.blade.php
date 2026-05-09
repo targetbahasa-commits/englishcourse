@@ -39,7 +39,7 @@
                 @include('components.sidebar-admin')
             @elseif(Auth::user()->isTeacher())
                 @include('components.sidebar-teacher')
-            @elseif(Auth::user()->role === 'guest')
+            @elseif(in_array(Auth::user()->active_role, ['guest', 'guest_quick']))
                 @include('components.sidebar-guest')
             @else
                 @include('components.sidebar-student')
@@ -162,6 +162,9 @@
                             <p class="text-xs font-bold text-gray-400 mb-2">EXAMPLE:</p>
                             <div class="{{ $color['light'] }} rounded-xl p-4 border {{ $color['border'] }}">
                                 <p class="text-gray-800 font-medium">"{{ $idiom['example'] }}"</p>
+                                @if(!empty($idiom['example_id']))
+                                <p class="text-gray-500 text-sm mt-1 italic">"{{ $idiom['example_id'] }}"</p>
+                                @endif
                             </div>
                         </div>
 

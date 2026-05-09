@@ -21,13 +21,16 @@ class RoleMiddleware
             abort(403, 'Unauthorized access.');
         }
 
-        if ($user->active_role !== $role) {
-            // If the user is actually an admin who is currently impersonating someone else,
-            // and they try to access an admin-only route, automatically stop impersonating.
-            if ($user->role === 'admin' && $role === 'admin') {
-                return redirect()->route('admin.impersonate.stop');
+        // If the requested role is 'admin' and the user's actual role is 'admin',
+        // clear any lingering impersonation session and grant access directly.
+        if ($role === 'admin' && $user->role === 'admin') {
+            if ($request->hasSession() && $request->session()->has('view_as_role')) {
+                $request->session()->forget('view_as_role');
             }
-            
+            return $next($request);
+        }
+
+        if ($user->active_role !== $role) {
             abort(403, 'Unauthorized access.');
         }
 

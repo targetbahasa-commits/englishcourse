@@ -1,6 +1,9 @@
 @extends('layouts.admin')
 
 @section('content')
+@php
+    $questions = collect($questions ?? []);
+@endphp
 <div class="container mx-auto px-4 {{ isset($set) ? 'pt-24 pb-8' : 'py-8' }} relative" x-data="{ 
     sidebarOpen: false, 
     editingQuestion: null,
@@ -111,11 +114,28 @@
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
                 <div class="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 012.828 2.828"></path></svg>
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.5 5.5L7 9H4v6h3l4.5 3.5V5.5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.5 9.5a4 4 0 010 5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 7a7.5 7.5 0 010 10"></path></svg>
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800">Listening - Meeting {{ $number }}</h1>
-                    <p class="text-gray-600 mt-1">Complete listening questions</p>
+                    <div class="flex items-center gap-3 mt-3">
+                        <p class="text-gray-600">Complete listening questions</p>
+                        @if(Auth::user()->isAdmin())
+                            @php
+                                // Tentukan status kunci jawaban
+                                $statusAnswerKey = false;
+                                if (isset($questions) && is_array($questions) && count($questions) > 0) {
+                                    $firstQuestion = is_array($questions) ? reset($questions) : $questions->first();
+                                    if ($firstQuestion) {
+                                        $statusAnswerKey = filled($firstQuestion->answer_key ?? null) || filled($firstQuestion->explanation ?? null);
+                                    }
+                                }
+                            @endphp
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $statusAnswerKey ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                                <span class="font-bold">{{ $statusAnswerKey ? '✓' : '✕' }}</span> Kunci
+                            </span>
+                        @endif
+                    </div>
                 </div>
             </div>
             
@@ -331,16 +351,16 @@
                         @endif
                     @endif
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 relative">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 md:gap-y-0 gap-x-2 md:gap-x-3 relative max-w-4xl mx-auto">
                     {{-- Column 1 --}}
-                    <div class="space-y-0 divide-y divide-gray-100">
+                    <div class="space-y-0 divide-y divide-gray-100 md:pr-1">
                         @foreach($questions->slice(0, $splitIndex) as $index => $question)
                             @include('assignments.toefl-itp.listening.partials.question-card', ['question' => $question, 'index' => $question->question_number, 'existingScore' => $existingScore, 'instructionQuestionId' => $instructionQuestionId])
                         @endforeach
                     </div>
 
                     {{-- Column 2 --}}
-                    <div class="space-y-0 divide-y divide-gray-100">
+                    <div class="space-y-0 divide-y divide-gray-100 md:pl-1">
                         @foreach($questions->slice($splitIndex) as $index => $question)
                             @include('assignments.toefl-itp.listening.partials.question-card', ['question' => $question, 'index' => $question->question_number, 'existingScore' => $existingScore, 'instructionQuestionId' => $instructionQuestionId])
                         @endforeach

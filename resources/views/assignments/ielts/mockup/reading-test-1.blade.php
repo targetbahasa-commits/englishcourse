@@ -16,6 +16,7 @@
 </head>
 <body class="font-sans antialiased bg-gray-50">
     @include('components.impersonation-banner')
+    @include('components.cambridge-guest-signup-modal')
     @include('components.program-sidebar')
 
 {{-- Fixed full-screen layout --}}

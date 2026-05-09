@@ -7,106 +7,137 @@
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/test-selection-modern.css') }}">
 </head>
 
 <body>
 
 
-
-<!-- 1. HERO SECTION -->
-<header class="hero">
-    <!-- Top Navigation Bar for Auth -->
-    <div class="top-bar">
-        <div class="container" style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px;">
-            <a href="/student/login" class="btn-login"><i class="fas fa-user-graduate"></i> Student Login</a>
-            <a href="/teacher/login" class="btn-login"><i class="fas fa-chalkboard-teacher"></i> Teacher Login</a>
-            <a href="/free-tests" class="btn-guest"><i class="fas fa-door-open"></i> Guest Access</a>
+<style>
+    .marquee-container {
+        flex-grow: 1;
+        overflow: hidden;
+        white-space: nowrap;
+        position: relative;
+        margin: 0 30px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 30px;
+        padding: 6px 0;
+        display: flex;
+        align-items: center;
+    }
+    .marquee-content {
+        display: inline-block;
+        padding-left: 100%;
+        animation: marquee 25s linear infinite;
+        color: #fff;
+        font-weight: 500;
+        font-size: 0.95rem;
+        letter-spacing: 0.5px;
+    }
+    .marquee-content:hover {
+        animation-play-state: paused;
+    }
+    @keyframes marquee {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(-100%, 0); }
+    }
+</style>
+<!-- HEADER FIXED -->
+<div style="position: fixed; top: 0; left: 0; width: 100%; display:flex; justify-content:space-between; align-items:center; padding: 5px 30px; z-index: 9999; backdrop-filter: blur(10px); background: rgba(13, 71, 161, 0.95); border-bottom: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    <div class="logo">
+        <img src="/images/logo.png" alt="Target Bahasa" style="height: 110px; width: auto; margin-top: -20px; margin-bottom: -50px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
+    </div>
+    <div class="marquee-container">
+        <div class="marquee-content">
+            {!! setting('header_running_text', '🚀 <strong>PROMO SPESIAL!</strong> Dapatkan Diskon 20% untuk Pendaftaran Kelas IELTS & TOEFL Bulan Ini! | 📝 <strong>IKUTI MOCKUP TEST!</strong> Uji Kemampuan Bahasa Inggrismu dengan Standar Internasional Sekarang Juga! | 🎓 Tingkatkan Karirmu dengan Sertifikat Target Bahasa!') !!}
         </div>
     </div>
 
-    <div class="hero-content">
-        <img src="{{ asset('images/logo.png') }}" class="logo" alt="Target Bahasa Logo">
-        
-        <div class="micro-trusts">
-            <div class="mt-item"><i class="fas fa-star text-yellow"></i> 4.9/5 dari 1000+ peserta</div>
-            <div class="mt-item"><i class="fas fa-user-graduate"></i> Dipakai pelamar WHV & Beasiswa</div>
-            <div class="mt-item"><i class="fas fa-bolt text-yellow"></i> Skor keluar dalam 1x test</div>
-        </div>
-
-        <h1>Cek Skor IELTS, TOEFL, PTE<br>Kamu <span class="text-yellow">Gratis</span></h1>
-        <p class="hero-subtext">Tanpa daftar ribet. Langsung tahu levelmu dalam 10–20 menit dengan <strong>Hasil Instan + Rekomendasi Kelas Otomatis</strong>.</p>
-        
-        <div class="loss-aversion">
-            <i class="fas fa-exclamation-triangle"></i> Tanpa tahu skor asli, kamu berisiko salah pilih kelas dan buang waktu.
-        </div>
-
-        <div class="hero-buttons">
-            <a href="#form-test" class="btn-yellow-huge scale-anim">🎯 Dapatkan Skor Saya Sekarang</a>
-        </div>
+    <div style="display:flex; gap:12px; flex-shrink: 0;">
+        <a href="{{ route('student.login') }}" style="color:#fff; font-weight:600; border-radius:50px; border: 1px solid rgba(255,255,255,0.4); padding:8px 20px; text-decoration:none; display:flex; align-items:center; gap:8px; background: rgba(255,255,255,0.1); transition: all 0.3s;"><i class="fas fa-graduation-cap"></i> Student Login</a>
+        <a href="{{ route('teacher.login') }}" style="color:#fff; font-weight:600; border-radius:50px; border: 1px solid rgba(255,255,255,0.4); padding:8px 20px; text-decoration:none; display:flex; align-items:center; gap:8px; background: rgba(255,255,255,0.1); transition: all 0.3s;"><i class="fas fa-chalkboard-teacher"></i> Teacher Login</a>
+        <a href="{{ route('guest.login') }}" style="background:#FFB800; color:#1e293b; font-weight:800; border-radius:50px; padding:8px 20px; text-decoration:none; display:flex; align-items:center; gap:8px; transition: all 0.3s;"><i class="fas fa-user"></i> Guest Access</a>
     </div>
-</header>
+</div>
 
-<!-- 2. PILIHAN TEST SECTION MASA KINI -->
-<section class="test-selection-modern" id="tests">
-    <div class="container text-center">
-        <h2>Pilih Test Gratis Kamu</h2>
-        <p class="section-subtitle">Dapatkan hasil instan dan ketahui levelmu yang sebenarnya</p>
-        <p class="section-social-proof">🔥 Sudah <strong>1.247</strong> peserta mengikuti test minggu ini</p>
+<!-- HERO SECTION MODERN-->
+<section style="background: #0d47a1; color:#fff; padding:130px 0 100px 0; min-height: 90vh; position: relative;">
+    <div class="container" style="max-width:900px; margin:0 auto; text-align:center; position:relative; z-index:10;">
         
-        <div class="grid-4-modern">
-            <!-- Test 1 -->
-            <div class="test-card-modern">
-                <div class="badge-gratis">GRATIS</div>
-                <div class="test-icon-modern"><i class="fas fa-graduation-cap"></i></div>
-                <h3 class="test-title-modern">TOEFL ITP</h3>
-                <p class="test-desc-modern">Syarat kelulusan kampus, melamar CPNS, atau kerja di perusahaan BUMN / Lokal.</p>
-                <div class="test-duration-modern"><i class="far fa-clock"></i> 15 Menit Simulasi</div>
-                <div class="test-action-modern">
-                    <a href="#form-test" class="btn-primary-gradient w-100">🎯 Mulai Test TOEFL Gratis</a>
-                    <p class="test-urgency-text">Link test dikirim otomatis dalam &lt; 1 menit</p>
-                </div>
+        <div style="display:flex; justify-content:center; gap:16px; flex-wrap:wrap; margin-bottom:24px;">
+            <span style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius:50px; padding:8px 24px; font-size:1rem; font-weight:600; display:flex; align-items:center; gap:8px;"><span style="color:#FFB800;">⭐</span> 4.9/5 dari 1000+ peserta</span>
+            <span style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius:50px; padding:8px 24px; font-size:1rem; font-weight:600; display:flex; align-items:center; gap:8px;"><span style="color:#fff;">🎓</span> Dipakai pelamar WHV & Beasiswa</span>
+            <span style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius:50px; padding:8px 24px; font-size:1rem; font-weight:600; display:flex; align-items:center; gap:8px;"><span style="color:#FFB800;">⚡</span> Skor keluar dalam 1x test</span>
+        </div>
+
+        <h1 style="font-size:3.5rem; font-weight:900; margin-bottom:20px; line-height: 1.2; letter-spacing: -1px; color: #ffffff; text-shadow: 0 4px 10px rgba(0,0,0,0.1);">Cek Skor IELTS, TOEFL, PTE<br>Kamu <span style="color: #FFB800;">Gratis</span></h1>
+        
+        <p style="font-size:1.15rem; margin-bottom:30px; color:#f8fafc; max-width: 700px; margin-left: auto; margin-right: auto; line-height: 1.6;">
+            Tanpa daftar ribet. Langsung tahu levelmu dalam 10–20 menit dengan <strong>Hasil Instan +<br>Rekomendasi Kelas Otomatis.</strong>
+        </p>
+        
+        <div style="margin-bottom:30px; display: flex; justify-content: center;">
+            <span style="display:inline-block; background:transparent; border: 1px dashed rgba(255,255,255,0.5); color:#fff; padding:12px 24px; border-radius:8px; font-weight:600; font-size:1rem;">
+                <i class="fas fa-exclamation-triangle" style="color:#fff; margin-right:6px;"></i> Tanpa tahu skor asli, kamu berisiko salah pilih kelas dan buang waktu.
+            </span>
+        </div>
+        
+        <a href="#form-test" style="display:inline-block; background: #FFB800; color: #1e293b; font-weight:800; border-radius:8px; padding:18px 42px; font-size:1.2rem; text-decoration:none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.3s ease;">🎯 DAPATKAN SKOR SAYA SEKARANG</a>
+    </div>
+</section>
+
+<!-- TEST SELECTION MODERN -->
+<section style="background:#f8fafc; padding:60px 0 40px 0;">
+    <div class="container" style="max-width:1100px; margin:0 auto; text-align:center;">
+        <h2 style="font-size:2.1rem; font-weight:800; margin-bottom:10px; color:#1e293b;">Pilih Test Gratis Kamu</h2>
+        <p class="section-subtitle" style="font-size:1.1rem; color:#64748B; margin-bottom:18px;">Dapatkan hasil instan dan ketahui levelmu yang sebenarnya</p>
+        <div style="margin-bottom:24px;">
+            <span style="display:inline-block; background:#fff3cd; color:#856404; padding:8px 18px; border-radius:8px; font-weight:700; font-size:1rem;">🔥 Sudah 1.247 peserta mengikuti test minggu ini</span>
+        </div>
+        <div style="position:relative; max-width:1100px; margin:0 auto;">
+            <button class="test-carousel-btn left" onclick="document.getElementById('free-test-track').scrollBy({left:-350, behavior:'smooth'})" aria-label="Scroll left">&#8249;</button>
+            <div id="free-test-track" class="test-selection-carousel">
+            <!-- Card 1 -->
+            <div class="hover-lift test-card-item" style="background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(0,0,0,0.07); padding:32px 20px 28px 20px; display:flex; flex-direction:column; align-items:center;">
+                <div style="font-size:2.2rem; color:#2563eb; margin-bottom:10px;"><i class="fas fa-graduation-cap"></i></div>
+                <div style="font-weight:800; font-size:1.15rem; margin-bottom:6px; color:#1e293b;">TOEFL ITP <span style="background:#22c55e; color:#fff; font-size:0.85rem; font-weight:700; border-radius:8px; padding:2px 10px; margin-left:6px;">GRATIS</span></div>
+                <div style="color:#64748B; font-size:0.98rem; margin-bottom:10px;">Syarat kelulusan kampus, melamar CPNS, atau kerja di perusahaan BUMN/Lokal.</div>
+                <div style="color:#64748B; font-size:0.98rem; margin-bottom:10px;"><i class="fas fa-clock"></i> 15 Menit Simulasi</div>
+                <a href="/form-test?type=toefl" class="hover-glow-btn" style="display:inline-block; background:#2563eb; color:#fff; font-weight:700; border-radius:8px; padding:10px 0; width:100%; text-decoration:none; margin-top:10px;">🎯 Mulai Test TOEFL Gratis</a>
             </div>
-            <!-- Test 2 -->
-            <div class="test-card-modern">
-                <div class="badge-gratis">GRATIS</div>
-                <div class="test-icon-modern"><i class="fas fa-book-open"></i></div>
-                <h3 class="test-title-modern">IELTS Academic</h3>
-                <p class="test-desc-modern">Daftar kuliah di luar negeri (Study Abroad) atau memburu beasiswa internasional (AAS, LPDP).</p>
-                <div class="test-duration-modern"><i class="far fa-clock"></i> 20 Menit Simulasi</div>
-                <div class="test-action-modern">
-                    <a href="#form-test" class="btn-primary-gradient w-100">🎯 Cek Skor IELTS Sekarang</a>
-                    <p class="test-urgency-text">Link test dikirim otomatis dalam &lt; 1 menit</p>
-                </div>
+            <!-- Card 2 -->
+            <div class="hover-lift test-card-item" style="background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(0,0,0,0.07); padding:32px 20px 28px 20px; display:flex; flex-direction:column; align-items:center;">
+                <div style="font-size:2.2rem; color:#1d4ed8; margin-bottom:10px;"><i class="fas fa-book"></i></div>
+                <div style="font-weight:800; font-size:1.15rem; margin-bottom:6px; color:#1e293b;">IELTS Academic <span style="background:#22c55e; color:#fff; font-size:0.85rem; font-weight:700; border-radius:8px; padding:2px 10px; margin-left:6px;">GRATIS</span></div>
+                <div style="color:#64748B; font-size:0.98rem; margin-bottom:10px;">Daftar kuliah di luar negeri (Study Abroad) atau beasiswa internasional (AAS, LPDP).</div>
+                <div style="color:#64748B; font-size:0.98rem; margin-bottom:10px;"><i class="fas fa-clock"></i> 20 Menit Simulasi</div>
+                <a href="/form-test?type=ielts-academic" class="hover-glow-btn" style="display:inline-block; background:#2563eb; color:#fff; font-weight:700; border-radius:8px; padding:10px 0; width:100%; text-decoration:none; margin-top:10px;">🎯 Cek Skor IELTS Sekarang</a>
             </div>
-            <!-- Test 3 -->
-            <div class="test-card-modern">
-                <div class="badge-popular">PALING POPULER</div>
-                <div class="test-icon-modern"><i class="fas fa-globe"></i></div>
-                <h3 class="test-title-modern">IELTS General</h3>
-                <p class="test-desc-modern">Persyaratan Visa Kerja (Working Holiday Visa / WHV Australia), migrasi, atau training.</p>
-                <div class="test-duration-modern"><i class="far fa-clock"></i> 20 Menit Simulasi</div>
-                <div class="test-action-modern">
-                    <a href="#form-test" class="btn-primary-gradient w-100">🎯 Cek Skor IELTS Sekarang</a>
-                    <p class="test-urgency-text">Link test dikirim otomatis dalam &lt; 1 menit</p>
-                </div>
+            <!-- Card 3 -->
+            <div class="hover-lift test-card-item" style="background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(0,0,0,0.07); padding:32px 20px 28px 20px; display:flex; flex-direction:column; align-items:center; position:relative;">
+                <div style="position:absolute; top:18px; right:-18px; background:#F97316; color:#fff; font-size:0.85rem; font-weight:800; border-radius:8px; padding:4px 18px; transform:rotate(15deg); box-shadow:0 2px 8px rgba(249,115,22,0.13);">PALING POPULER</div>
+                <div style="font-size:2.2rem; color:#0A58CA; margin-bottom:10px;"><i class="fas fa-globe"></i></div>
+                <div style="font-weight:800; font-size:1.15rem; margin-bottom:6px; color:#1e293b;">IELTS General</div>
+                <div style="color:#64748B; font-size:0.98rem; margin-bottom:10px;">Visa Kerja (WHV Australia), migrasi, atau training.</div>
+                <div style="color:#64748B; font-size:0.98rem; margin-bottom:10px;"><i class="fas fa-clock"></i> 20 Menit Simulasi</div>
+                <a href="/form-test?type=ielts-general" class="hover-glow-btn" style="display:inline-block; background:#2563eb; color:#fff; font-weight:700; border-radius:8px; padding:10px 0; width:100%; text-decoration:none; margin-top:10px;">🎯 Cek Skor IELTS Sekarang</a>
             </div>
-            <!-- Test 4 -->
-            <div class="test-card-modern">
-                <div class="badge-gratis">GRATIS</div>
-                <div class="test-icon-modern"><i class="fas fa-laptop-code"></i></div>
-                <h3 class="test-title-modern">PTE Academic</h3>
-                <p class="test-desc-modern">Alternatif pengganti IELTS untuk WHV Australia atau studi UK/Aus dengan sistem full komputer.</p>
-                <div class="test-duration-modern"><i class="far fa-clock"></i> 15 Menit Simulasi</div>
-                <div class="test-action-modern">
-                    <a href="#form-test" class="btn-primary-gradient w-100">🎯 Mulai Test PTE Gratis</a>
-                    <p class="test-urgency-text">Link test dikirim otomatis dalam &lt; 1 menit</p>
-                </div>
+            <!-- Card 4 -->
+            <div class="hover-lift test-card-item" style="background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(0,0,0,0.07); padding:32px 20px 28px 20px; display:flex; flex-direction:column; align-items:center;">
+                <div style="font-size:2.2rem; color:#0A58CA; margin-bottom:10px;"><i class="fas fa-laptop"></i></div>
+                <div style="font-weight:800; font-size:1.15rem; margin-bottom:6px; color:#1e293b;">PTE Academic <span style="background:#22c55e; color:#fff; font-size:0.85rem; font-weight:700; border-radius:8px; padding:2px 10px; margin-left:6px;">GRATIS</span></div>
+                <div style="color:#64748B; font-size:0.98rem; margin-bottom:10px;">Alternatif IELTS untuk WHV Australia atau studi UK/Aus dengan sistem komputer.</div>
+                <div style="color:#64748B; font-size:0.98rem; margin-bottom:10px;"><i class="fas fa-clock"></i> 15 Menit Simulasi</div>
+                <a href="/form-test?type=pte" class="hover-glow-btn" style="display:inline-block; background:#2563eb; color:#fff; font-weight:700; border-radius:8px; padding:10px 0; width:100%; text-decoration:none; margin-top:10px;">🎯 Mulai Test PTE Gratis</a>
             </div>
+            </div>
+            <button class="test-carousel-btn right" onclick="document.getElementById('free-test-track').scrollBy({left:350, behavior:'smooth'})" aria-label="Scroll right">&#8250;</button>
         </div>
     </div>
 </section>
 
-<!-- 3. PROBLEM SECTION -->
 <section class="problems bg-light">
     <div class="container">
         <div class="problem-content text-center">
@@ -219,7 +250,7 @@
                         </div>
                         <div class="card-bottom">
                             <p class="prog-desc">Membangun pondasi speaking dari nol agar berani bicara.</p>
-                            <a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a>
+                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('speaking_basic')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
                         </div>
                     </div>
                     <div class="program-card card-intermediate pricing-style">
@@ -229,7 +260,7 @@
                         </div>
                         <div class="card-bottom">
                             <p class="prog-desc">Memperlancar percakapan dengan grammar yang tepat.</p>
-                            <a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a>
+                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('speaking_intermediate')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
                         </div>
                     </div>
                     <div class="program-card card-advanced pricing-style">
@@ -239,7 +270,7 @@
                         </div>
                         <div class="card-bottom">
                             <p class="prog-desc">Level mahir untuk presentasi dan diskusi profesional.</p>
-                            <a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a>
+                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('speaking_advanced')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
                         </div>
                     </div>
                     <div class="program-card card-toefl pricing-style">
@@ -249,7 +280,7 @@
                         </div>
                         <div class="card-bottom">
                             <p class="prog-desc">Kelas intensif mengejar target skor 550+ TOEFL ITP.</p>
-                            <a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a>
+                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('toefl_itp')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
                         </div>
                     </div>
                     <div class="program-card card-ielts pricing-style">
@@ -260,7 +291,7 @@
                         </div>
                         <div class="card-bottom">
                             <p class="prog-desc">Kuasai 4 skill spesifik IELTS untuk gapai band 7.0+.</p>
-                            <a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a>
+                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('ielts_prep')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
                         </div>
                     </div>
                     <div class="program-card card-marlins pricing-style">
@@ -270,7 +301,7 @@
                         </div>
                         <div class="card-bottom">
                             <p class="prog-desc">Bimbingan khusus pelaut kapal pesiar menembus skor tinggi.</p>
-                            <a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a>
+                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('marlins')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
                         </div>
                     </div>
                 </div>
@@ -455,7 +486,7 @@
     min-width: 0;
     transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
     transform: scale(0.92);
-    opacity: 0.6;
+    opacity: 0.9;
     user-select: none;
     cursor: grab;
     pointer-events: auto;
@@ -485,8 +516,8 @@
 
 /* Hover Physics & Glow */
 .programs-carousel-track .program-card:hover {
-    opacity: 0.8;
-    transform: scale(0.92) translateY(-6px);
+    opacity: 1;
+    transform: scale(0.95) translateY(-6px);
 }
 .programs-carousel-track .program-card.is-active:hover {
     opacity: 1;
@@ -580,9 +611,130 @@
     background: #F97316;
     box-shadow: 0 0 10px rgba(249, 115, 22, 0.5);
 }
+/* Brochure Modal & Button */
+.btn-info-more {
+    display: block;
+    width: 100%;
+    background: transparent;
+    color: #475569;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 0.8rem 0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+.btn-info-more:hover {
+    background: #f8fafc;
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+.modal-box {
+    background: #ffffff;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 500px;
+    padding: 2.5rem 2rem;
+    position: relative;
+    transform: translateY(30px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+.modal-overlay.active .modal-box {
+    transform: translateY(0) scale(1);
+}
+.modal-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #94a3b8;
+    transition: color 0.2s;
+}
+.modal-close-btn:hover {
+    color: #475569;
+}
 </style>
 
 <script>
+        // === Inline Editing Logic ===
+        var isEditMode = false;
+        var editTextBtn = document.getElementById('edit-text-btn');
+        var editableEls = document.querySelectorAll('[data-editable]');
+        // Load saved edits
+        editableEls.forEach(function(el) {
+            var key = 'editable-' + el.getAttribute('data-editable');
+            var saved = localStorage.getItem(key);
+            if(saved) el.innerHTML = saved;
+        });
+        function enableEditMode() {
+            isEditMode = true;
+            editableEls.forEach(function(el) {
+                el.setAttribute('contenteditable', 'true');
+                el.style.outline = '2px dashed #9333ea';
+                el.style.cursor = 'text';
+                el.title = 'Klik untuk edit';
+            });
+        }
+        function disableEditMode() {
+            isEditMode = false;
+            editableEls.forEach(function(el) {
+                el.removeAttribute('contenteditable');
+                el.style.outline = '';
+                el.style.cursor = '';
+                el.title = '';
+            });
+        }
+        function saveEdits() {
+            editableEls.forEach(function(el) {
+                var key = 'editable-' + el.getAttribute('data-editable');
+                localStorage.setItem(key, el.innerHTML);
+            });
+        }
+        if(editTextBtn) {
+            editTextBtn.onclick = function() {
+                if(!isEditMode) {
+                    enableEditMode();
+                    editTextBtn.textContent = 'Simpan Teks';
+                } else {
+                    saveEdits();
+                    disableEditMode();
+                    editTextBtn.textContent = 'Edit Teks';
+                }
+            };
+        }
+        // Disable edit mode if toolbar closed
+        if(typeof closeBtn !== 'undefined' && closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                if(isEditMode) {
+                    disableEditMode();
+                    if(editTextBtn) editTextBtn.textContent = 'Edit Teks';
+                }
+            });
+        }
 (function () {
     const track   = document.getElementById('prog-track');
     const prev    = document.getElementById('prog-prev');
@@ -660,16 +812,17 @@
         track.style.transform = `translate3d(${offset}px, 0, 0)`;
     }
 
+    let transitionTimeout;
+
     function goToIndex(idx) {
-        if (isTransitioning) return;
-        isTransitioning = true;
-        
         currentIndex = idx;
         setTransform(currentIndex, true);
         updateStates();
         
+        isTransitioning = true;
+        clearTimeout(transitionTimeout);
         // Loop boundary correction visually seamless
-        setTimeout(() => {
+        transitionTimeout = setTimeout(() => {
             if (currentIndex >= totalOrig * 2) {
                 currentIndex -= totalOrig;
                 setTransform(currentIndex, false);
@@ -688,7 +841,7 @@
     // Click to focus card logic
     allCards.forEach((card, i) => {
         card.addEventListener('click', (e) => {
-            if (isTransitioning || wasDragged) return;
+            if (wasDragged) return;
             if (e.target.closest('.btn-pricing') || e.target.closest('button') || e.target.closest('a')) return;
             
             const vCount = getVisibleCount();
@@ -702,6 +855,23 @@
                 startAutoPlay();
             }
         });
+
+        // Hover to center card logic
+        if (window.matchMedia('(hover: hover)').matches) {
+            card.addEventListener('mouseenter', () => {
+                if (wasDragged) return;
+                
+                const vCount = getVisibleCount();
+                let targetActive = currentIndex;
+                if (vCount === 3) targetActive = currentIndex + 1;
+                
+                const jump = i - targetActive;
+                if (jump !== 0) {
+                    stopAutoPlay();
+                    goToIndex(currentIndex + jump);
+                }
+            });
+        }
     });
 
     // Intuitive Swipe & Drag Physics
@@ -798,6 +968,7 @@
 })();
 </script>
 
+
 <!-- 6. WHV OPPORTUNITY TRIGGER -->
 <section class="whv-trigger text-center">
     <div class="container">
@@ -863,20 +1034,31 @@
             <div class="trust-item"><i class="fas fa-paper-plane text-yellow"></i> Link Test dikirim ke WhatsApp dalam <strong>< 1 Menit</strong>.</div>
         </div>
         
-        <form class="lead-form compact-form mt-4" action="/free-tests" method="GET">
-            <label>Nama Anda</label>
-            <input type="text" placeholder="Budi Santoso" required>
-            
-            <label>Alamat Email</label>
-            <input type="email" placeholder="budi@example.com" required>
-            
-            <label>Nomor WhatsApp Aktif</label>
-            <input type="tel" placeholder="08123456789" required>
-            
+        <form class="lead-form compact-form mt-4" action="{{ route('guest.register.submit') }}" method="POST">
+            @csrf
 
+            @if ($errors->any())
+                <div class="text-left mb-4" style="background:rgba(254, 226, 226, 0.96); color:#b91c1c; border:1px solid rgba(248, 113, 113, 0.35); border-radius:14px; padding:14px 16px;">
+                    <div style="font-weight:800; margin-bottom:6px;">Periksa data Anda:</div>
+                    <ul style="margin:0; padding-left:18px; font-size:0.92rem; line-height:1.6;">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <label for="landing-name">Nama Anda</label>
+            <input id="landing-name" type="text" name="name" placeholder="Budi Santoso" value="{{ old('name') }}" required>
+            
+            <label for="landing-email">Alamat Email</label>
+            <input id="landing-email" type="email" name="email" placeholder="budi@example.com" value="{{ old('email') }}" required>
+            
+            <label for="landing-phone">Nomor WhatsApp Aktif</label>
+            <input id="landing-phone" type="tel" name="phone_number" placeholder="08123456789" value="{{ old('phone_number') }}" required>
             
             <button type="submit" class="btn-yellow-huge w-100 scale-anim mt-3">🎯 MULAI TEST SEKARANG</button>
-            <div class="text-center mt-3 text-muted" style="font-size: 0.85rem;">Anda akan langsung menerima PDF soal dan timer di WA.</div>
+            <div class="text-center mt-3 text-muted" style="font-size: 0.85rem;">Setelah submit, akun guest Anda langsung dibuat dan siap dipakai untuk mulai tes.</div>
         </form>
     </div>
 </section>
@@ -897,6 +1079,135 @@
     <a href="/daftar" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#FBBF24;color:#0F172A;padding:12px 24px;font-weight:500;border-radius:50px;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,0.2);border:2px solid #fff;transition:all 0.3s;font-size:0.9rem;white-space:nowrap;">🎓 Mendaftar Kelas</a>
     <a href="#form-test" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#EF4444;color:#fff;padding:12px 24px;font-weight:500;border-radius:50px;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,0.2);border:2px solid #fff;transition:all 0.3s;font-size:0.9rem;white-space:nowrap;">🎯 Mulai Test Gratis Sekarang</a>
 </div>
+
+<!-- Free Test Carousel JS -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const track = document.getElementById('free-test-track');
+    if (!track) return;
+    const cards = track.querySelectorAll('.test-card-item');
+    const supportsHover = window.matchMedia('(hover: hover)').matches;
+
+    function centerCard(card, behavior = 'smooth') {
+        if (!card) return;
+
+        const cardOffsetLeft = card.offsetLeft;
+        const targetLeft = cardOffsetLeft - ((track.clientWidth - card.offsetWidth) / 2);
+        const maxScrollLeft = Math.max(track.scrollWidth - track.clientWidth, 0);
+        const nextScrollLeft = Math.min(Math.max(targetLeft, 0), maxScrollLeft);
+
+        track.scrollTo({
+            left: nextScrollLeft,
+            behavior: behavior,
+        });
+    }
+    
+    function updateCenterCard() {
+        const trackRect = track.getBoundingClientRect();
+        const trackCenter = trackRect.left + trackRect.width / 2;
+        
+        let minDistance = Infinity;
+        let centerCard = null;
+        
+        cards.forEach(card => {
+            const cardRect = card.getBoundingClientRect();
+            const cardCenter = cardRect.left + cardRect.width / 2;
+            const distance = Math.abs(trackCenter - cardCenter);
+            
+            if (distance < minDistance) {
+                minDistance = distance;
+                centerCard = card;
+            }
+            card.classList.remove('is-center');
+        });
+        
+        if (centerCard) {
+            centerCard.classList.add('is-center');
+        }
+    }
+    
+    track.addEventListener('scroll', updateCenterCard, {passive: true});
+    window.addEventListener('resize', updateCenterCard, {passive: true});
+
+    if (supportsHover) {
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                centerCard(card, 'smooth');
+            });
+        });
+    }
+    
+    setTimeout(updateCenterCard, 100);
+});
+</script>
+
+<!-- Brochure Modal -->
+<div id="brochure-modal" class="modal-overlay">
+    <div class="modal-box">
+        <button class="modal-close-btn" onclick="closeBrochure()" aria-label="Tutup">&times;</button>
+        <div style="text-align:center; margin-bottom:1.5rem;">
+            <div style="width:60px; height:60px; background:#e0e7ff; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px auto; color:#4f46e5; font-size:1.8rem;">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <h3 id="brochure-title" style="font-size:1.6rem; font-weight:800; color:#1e293b; margin:0;">Program Title</h3>
+        </div>
+        <div id="brochure-desc" style="color:#475569; font-size:1.05rem; line-height:1.7; margin-bottom:2rem; text-align:center;">
+            Description goes here.
+        </div>
+        <a href="/daftar" class="btn-pricing" style="text-align:center;">Daftar Kelas Sekarang</a>
+    </div>
+</div>
+
+<script>
+    // Brochure Modal Logic
+    const brochureData = {
+        'speaking_basic': {
+            title: 'Speaking Basic',
+            desc: 'Program Speaking Basic didesain khusus untuk pemula (Beginner) yang ingin membangun rasa percaya diri dalam berbicara bahasa Inggris. Anda akan belajar kosakata dasar, pelafalan yang benar, dan percakapan sehari-hari. Cocok untuk Anda yang masih terbata-bata atau takut salah saat berbicara.'
+        },
+        'speaking_intermediate': {
+            title: 'Speaking Intermediate',
+            desc: 'Program Speaking Intermediate ditujukan bagi Anda yang sudah memiliki dasar namun ingin memperlancar percakapan. Fokus pada perbaikan tata bahasa (grammar) saat berbicara secara spontan, memperluas kosakata, dan berlatih diskusi interaktif dalam berbagai konteks sosial maupun profesional.'
+        },
+        'speaking_advanced': {
+            title: 'Speaking Advanced',
+            desc: 'Program Speaking Advanced adalah kelas mahir (Advanced) untuk menyempurnakan kefasihan bahasa Inggris Anda. Sangat cocok bagi profesional atau mahasiswa yang membutuhkan kemampuan presentasi tingkat lanjut, negosiasi, debat, dan public speaking dengan tingkat akurasi tinggi.'
+        },
+        'toefl_itp': {
+            title: 'TOEFL ITP Preparation',
+            desc: 'Kelas intensif yang dirancang untuk mendongkrak skor TOEFL ITP Anda hingga 550+. Kami menyediakan strategi khusus untuk menaklukkan sesi Listening, Structure and Written Expression, serta Reading Comprehension secara efektif dan efisien.'
+        },
+        'ielts_prep': {
+            title: 'IELTS Preparation',
+            desc: 'Program persiapan komprehensif untuk mencapai skor ideal (Band 7.0+). Anda akan dibimbing menguasai keempat skill IELTS: Listening, Reading, Writing, dan Speaking dengan format tes terbaru dan simulasi rutin.'
+        },
+        'marlins': {
+            title: 'Marlins Test Preparation',
+            desc: 'Program bimbingan khusus bagi pelaut dan kru kapal pesiar. Membekali Anda dengan kemampuan bahasa Inggris maritim spesifik untuk lulus tes Marlins dengan skor tinggi, memperbesar peluang kerja di perusahaan pelayaran internasional.'
+        }
+    };
+
+    window.openBrochure = function(id) {
+        const data = brochureData[id];
+        if(data) {
+            document.getElementById('brochure-title').innerText = data.title;
+            document.getElementById('brochure-desc').innerText = data.desc;
+            document.getElementById('brochure-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    };
+    
+    window.closeBrochure = function() {
+        document.getElementById('brochure-modal').classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    // Close on overlay click
+    document.getElementById('brochure-modal').addEventListener('click', function(e) {
+        if(e.target === this) closeBrochure();
+    });
+
+</script>
 
 </body>
 </html>

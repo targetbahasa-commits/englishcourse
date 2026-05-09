@@ -28,21 +28,21 @@
             <!-- Theory Box 1: What are Graphical Sentences? -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="bg-teal-50 px-6 py-4 border-b border-teal-100">
-                    <h2 class="text-lg font-bold text-teal-900">What are Graphical Sentences?</h2>
+                    <h2 class="text-lg font-bold text-teal-900">Apa itu Kalimat Grafis?</h2>
                 </div>
                 <div class="p-6 text-gray-700 space-y-4 text-sm leading-relaxed">
                     <p>
-                        A <strong>graphical sentence</strong> is a single sentence that describes the main trend, pattern, or key feature shown in a graph, chart, diagram or map.
+                        <strong>Kalimat grafis</strong> adalah satu kalimat yang menjelaskan tren utama, pola, atau fitur penting yang ditampilkan pada grafik, bagan, diagram, atau peta.
                     </p>
                     <p>
-                        In IELTS Writing Task 1, you must write:
+                        Dalam IELTS Writing Task 1, kamu perlu menulis:
                     </p>
                     <ul class="list-disc list-inside space-y-2">
-                        <li><strong>Overview sentences</strong> at the start (summarizing overall trends)</li>
-                        <li><strong>Descriptive sentences</strong> in body paragraphs (explaining specific data)</li>
+                        <li><strong>Kalimat overview</strong> di awal (merangkum tren secara umum)</li>
+                        <li><strong>Kalimat deskriptif</strong> pada paragraf isi (menjelaskan data secara lebih spesifik)</li>
                     </ul>
                     <p class="bg-blue-50 p-3 rounded border border-blue-100 text-blue-900 italic">
-                        A good graphical sentence is clear, concise, and uses appropriate vocabulary for describing trends and changes.
+                        Kalimat grafis yang baik harus jelas, ringkas, dan menggunakan kosakata yang tepat untuk menjelaskan tren serta perubahan.
                     </p>
                 </div>
             </div>
@@ -50,58 +50,38 @@
             <!-- Theory Box 2: Basic Structure -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="bg-teal-50 px-6 py-4 border-b border-teal-100">
-                    <h2 class="text-lg font-bold text-teal-900">Basic Sentence Structure</h2>
+                    <h2 class="text-lg font-bold text-teal-900">Struktur Kalimat Dasar</h2>
                 </div>
                 <div class="p-6 text-gray-700 space-y-3 text-sm leading-relaxed">
                     <div class="bg-indigo-50 p-3 rounded border border-indigo-100">
-                        <p class="font-bold text-indigo-900 mb-2">Subject + Verb + Preposition/Object</p>
+                        <p class="font-bold text-indigo-900 mb-2">Subjek + Kata Kerja + Preposisi/Objek</p>
                         <p class="text-indigo-800">The unemployment rate <strong>rose</strong> <strong>from</strong> 5% <strong>to</strong> 10%.</p>
                     </div>
                     
                     <div class="bg-green-50 p-3 rounded border border-green-100">
-                        <p class="font-bold text-green-900 mb-2">Subject + Verb + Object + Prepositional Phrase</p>
+                        <p class="font-bold text-green-900 mb-2">Subjek + Kata Kerja + Objek + Frasa Preposisional</p>
                         <p class="text-green-800">Cell phone usage increased significantly <strong>between 2000 and 2010</strong>.</p>
                     </div>
 
                     <div class="bg-orange-50 p-3 rounded border border-orange-100">
-                        <p class="font-bold text-orange-900 mb-2">There + Verb Structure</p>
+                        <p class="font-bold text-orange-900 mb-2">Struktur There + Kata Kerja</p>
                         <p class="text-orange-800"><strong>There was</strong> a sharp decline in vehicle sales.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Theory Box 3: Key Trends Vocabulary -->
+            <!-- Theory Box 3: Describing Trends Chart -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="bg-teal-50 px-6 py-4 border-b border-teal-100">
-                    <h2 class="text-lg font-bold text-teal-900">Trend Vocabulary</h2>
+                    <h2 class="text-lg font-bold text-teal-900">Describing Trends, Language of Change</h2>
                 </div>
-                <div class="p-6 text-gray-700 space-y-2 text-sm leading-relaxed">
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <p class="font-bold text-red-600 mb-1">🔴 Increasing:</p>
-                            <ul class="text-xs space-y-1 text-gray-600">
-                                <li>• rise, increase, grow</li>
-                                <li>• surge, leap</li>
-                                <li>• upward trend</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <p class="font-bold text-blue-600 mb-1">🔵 Decreasing:</p>
-                            <ul class="text-xs space-y-1 text-gray-600">
-                                <li>• fall, decrease, drop</li>
-                                <li>• decline, plunge</li>
-                                <li>• downward trend</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="pt-2 border-t">
-                        <p class="font-bold text-gray-700 mb-1">🟡 Stable/Stable:</p>
-                        <ul class="text-xs space-y-1 text-gray-600">
-                            <li>• remain stable, flatten</li>
-                            <li>• level off, plateau</li>
-                            <li>• stay constant, stabilize</li>
-                        </ul>
-                    </div>
+                <div class="p-4 bg-gray-50">
+                    <img
+                        src="{{ asset('images/trends_vocabulary.png') }}"
+                        alt="Describing trends and language of change reference chart"
+                        class="w-full h-auto rounded-lg border border-gray-200 bg-white"
+                        loading="lazy"
+                    >
                 </div>
             </div>
         </div>
@@ -109,70 +89,61 @@
         <!-- Right Column: Practice -->
         <div class="lg:col-span-7 space-y-8">
             
-            <!-- Exercise 1: Identifying Key Trends -->
+            <!-- Exercise 3: Multi-Chart Practice -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
-                    <h3 class="text-lg font-bold text-gray-800">Exercise 1: Matching Trends to Descriptions</h3>
-                    <p class="text-sm text-gray-600 mt-1">Match each trend vocabulary word with its correct description.</p>
-                </div>
-                <div class="p-6 space-y-4">
-                    <template x-for="(item, idx) in exercises1" :key="idx">
-                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                            <div class="flex items-start gap-3">
-                                <span class="flex-shrink-0 text-lg font-bold text-teal-600" x-text="idx + 1"></span>
-                                <div class="flex-1">
-                                    <p class="font-medium text-gray-800" x-text="item.word"></p>
-                                    <p class="text-sm text-gray-600 mt-1">
-                                        <span x-text="item.meaning" class="italic text-blue-600"></span>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-
-            <!-- Exercise 2: Correcting Sentences -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
-                    <h3 class="text-lg font-bold text-gray-800">Exercise 2: Identify Correct Graphical Sentences</h3>
-                    <p class="text-sm text-gray-600 mt-1">Read these sentences and identify which ones are correctly written.</p>
-                </div>
-                <div class="p-6 space-y-4">
-                    <template x-for="(item, idx) in exercises2" :key="idx">
-                        <div :class="'p-4 rounded-lg border-2 transition-colors cursor-pointer',
-                             item.correct ? 'bg-green-50 border-green-300 hover:bg-green-100' : 'bg-red-50 border-red-300 hover:bg-red-100'">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <p class="font-medium text-gray-900" x-text="item.sentence"></p>
-                                    <p class="text-sm mt-2" :class="item.correct ? 'text-green-700' : 'text-red-700'" x-text="item.correct ? '✓ Correct' : '✗ Incorrect'"></p>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-
-            <!-- Exercise 3: Write Your Own -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
-                    <h3 class="text-lg font-bold text-gray-800">Exercise 3: Write Graphical Sentences</h3>
-                    <p class="text-sm text-gray-600 mt-1">Write one sentence to describe each trend below.</p>
+                    <h3 class="text-lg font-bold text-gray-800">Exercise 3: Look at the graphs below. Then describe the changes.</h3>
+                    <p class="text-sm text-gray-600 mt-1">Isi dua kolom jawaban untuk setiap graph: Verb dan Noun.</p>
                 </div>
                 <div class="p-6 space-y-6">
-                    <template x-for="(item, idx) in exercises3" :key="idx">
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <label class="block mb-3">
-                                <p class="font-bold text-gray-800" x-text="(idx + 1) + '. ' + item.prompt"></p>
-                                <p class="text-xs text-gray-500 mt-1" x-text="'Hint: ' + item.hint"></p>
-                            </label>
-                            <textarea 
-                                x-model="userAnswers[idx]"
-                                :placeholder="'Write a complete sentence...'"
-                                class="w-full h-20 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all resize-none text-sm">
-                            </textarea>
-                        </div>
-                    </template>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <template x-for="item in exercises3" :key="item.id">
+                            <div class="border border-gray-200 rounded-lg p-4 bg-white">
+                                <div class="relative w-full bg-gray-50 border border-gray-100 rounded-lg overflow-hidden mb-3" style="aspect-ratio: 276/256;">
+                                    <div class="absolute inset-0 bg-no-repeat bg-cover"
+                                        :style="`
+                                            background-image: url('{{ asset('assets/images/ielts/graphs_composite.png') }}');
+                                            background-position: ${item.x * 50}% ${item.y * 33.33}%;
+                                            background-size: 300% 400%;
+                                        `">
+                                    </div>
+                                    <div class="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full text-xs font-bold text-gray-700" x-text="item.id"></div>
+                                </div>
+
+                                <label class="block mb-2">
+                                    <p class="font-semibold text-gray-800 text-sm" x-text="item.prompt"></p>
+                                </label>
+
+                                <div class="space-y-2">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Jawaban 1 (Verb)</label>
+                                        <textarea
+                                            :value="userAnswers[item.id]?.verb || ''"
+                                            @input="setAnswer(item.id, 'verb', $event.target.value); autoResize($event.target)"
+                                            x-init="$nextTick(() => autoResize($el))"
+                                            :placeholder="'Contoh: rose'"
+                                            class="w-full min-h-[2.5rem] p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all text-sm resize-none overflow-hidden leading-relaxed"
+                                        ></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Jawaban 2 (Noun)</label>
+                                        <textarea
+                                            :value="userAnswers[item.id]?.noun || ''"
+                                            @input="setAnswer(item.id, 'noun', $event.target.value); autoResize($event.target)"
+                                            x-init="$nextTick(() => autoResize($el))"
+                                            :placeholder="'Contoh: a rise'"
+                                            class="w-full min-h-[2.5rem] p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all text-sm resize-none overflow-hidden leading-relaxed"
+                                        ></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-900">
+                        <p><strong>Note:</strong> Use a <strong>future tense</strong> to describe changes in items <strong>J, K, and L</strong>.</p>
+                        <p class="mt-1"><strong>Example:</strong> It is predicted that the number of radio listeners will fall to 45,000 people in 2030.</p>
+                    </div>
                     
                     <div class="flex gap-3 pt-4">
                         <button @click="submit()" :disabled="loading" class="flex-1 px-6 py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50">
@@ -195,31 +166,39 @@
         Alpine.data('graphicalSentences', (meetingId) => ({
             userAnswers: {},
             loading: false,
-            exercises1: [
-                { word: 'Rise/Increase/Grow', meaning: 'The value went up or became higher' },
-                { word: 'Fall/Decrease/Drop', meaning: 'The value went down or became lower' },
-                { word: 'Remain stable/Flatten', meaning: 'The value stayed the same with little or no change' },
-                { word: 'Surge/Leap', meaning: 'The value went up suddenly and dramatically' },
-                { word: 'Decline/Plunge', meaning: 'The value went down sharply and significantly' },
-                { word: 'Level off/Plateau', meaning: 'The value stopped changing after a period of growth or decline' },
-            ],
-            exercises2: [
-                { sentence: 'Coffee consumption rose from 20% to 35% between 2000 and 2015.', correct: true },
-                { sentence: 'The unemployment are increased significantly.', correct: false },
-                { sentence: 'There was a sharp decline in vehicle sales.', correct: true },
-                { sentence: 'Internet usage grew rapidly during the 1990s.', correct: true },
-                { sentence: 'Oil prices falling gradually.', correct: false },
-                { sentence: 'Temperatures remained stable throughout the year.', correct: true },
-            ],
             exercises3: [
-                { prompt: 'Describe what happened to fossil fuel consumption from 2005 to 2020', hint: 'It increased significantly' },
-                { prompt: 'Describe what happened to printed book sales from 2010 to 2023', hint: 'It decreased steadily' },
-                { prompt: 'Describe what happened to renewable energy usage over the past decade', hint: 'It grew rapidly' },
+                { id: 'A', prompt: 'Graph A (Car sales in \'000)', x: 0, y: 0 },
+                { id: 'B', prompt: 'Graph B (Car sales)', x: 1, y: 0 },
+                { id: 'C', prompt: 'Graph C (Car sales)', x: 2, y: 0 },
+                { id: 'D', prompt: 'Graph D (Net users in \'000)', x: 0, y: 1 },
+                { id: 'E', prompt: 'Graph E (Net users)', x: 1, y: 1 },
+                { id: 'F', prompt: 'Graph F (Net users)', x: 2, y: 1 },
+                { id: 'G', prompt: 'Graph G (Cases of polio in \'000)', x: 0, y: 2 },
+                { id: 'H', prompt: 'Graph H (Cases of polio)', x: 1, y: 2 },
+                { id: 'I', prompt: 'Graph I (Cases of polio)', x: 2, y: 2 },
+                { id: 'J', prompt: 'Graph J (Radio listeners in \'000)', x: 0, y: 3 },
+                { id: 'K', prompt: 'Graph K (Radio listeners)', x: 1, y: 3 },
+                { id: 'L', prompt: 'Graph L (Radio listeners)', x: 2, y: 3 },
             ],
+            setAnswer(id, type, value) {
+                if (!this.userAnswers[id]) {
+                    this.userAnswers[id] = { verb: '', noun: '' };
+                }
+                this.userAnswers[id][type] = value;
+            },
+            autoResize(el) {
+                if (!el) return;
+                el.style.height = 'auto';
+                el.style.height = `${el.scrollHeight}px`;
+            },
             init() {
                 if (window.AutoSave) {
                     window.AutoSave.init(meetingId, '{{ Auth::id() }}');
                 }
+
+                setTimeout(() => {
+                    document.querySelectorAll('textarea').forEach(el => this.autoResize(el));
+                }, 300);
             },
             submit() {
                 this.loading = true;

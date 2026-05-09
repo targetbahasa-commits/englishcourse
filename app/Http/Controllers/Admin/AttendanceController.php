@@ -2,48 +2,35 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Application\Attendance\ManageAdminAttendance;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\ClassPeriod;
-use App\Models\ClassMeeting;
-use App\Models\Attendance;
 use Illuminate\Support\Facades\Auth;
+use App\Models\ClassMeeting;
+use App\Models\ClassPeriod;
 
 class AttendanceController extends Controller
 {
+    public function __construct(
+        private readonly ManageAdminAttendance $manageAdminAttendance
+    ) {}
+
     public function index()
     {
-        // Fetch class periods that have students enrolled
-        $classPeriods = ClassPeriod::whereHas('users', function ($query) {
-            $query->where('role', 'student');
-        })->get();
+        $classPeriods = $this->manageAdminAttendance->getClassPeriodsWithStudents();
 
         return view('admin.attendance.index', compact('classPeriods'));
     }
 
     public function getMeetings(ClassPeriod $classPeriod)
     {
-        $meetings = $classPeriod->classMeetings()->orderBy('meeting_number')->get();
+        $meetings = $this->manageAdminAttendance->getMeetingsForPeriod($classPeriod->id);
         return response()->json($meetings);
     }
 
     public function getAttendance(ClassMeeting $classMeeting)
     {
-        // Get all students in the class
-        $students = $classMeeting->classPeriod->users()->where('role', 'student')->get();
-        
-        // Get existing attendance records for this meeting
-        $attendances = $classMeeting->attendances()->get()->keyBy('user_id');
-
-        $data = $students->map(function ($student) use ($attendances) {
-            $record = $attendances->get($student->id);
-            return [
-                'id' => $student->id,
-                'name' => $student->name,
-                'status' => $record ? $record->status : '',
-                'notes' => $record ? $record->notes : '',
-            ];
-        });
+        $data = $this->manageAdminAttendance->getAttendanceSummary($classMeeting->id);
 
         return response()->json($data);
     }
@@ -60,19 +47,7 @@ class AttendanceController extends Controller
         $meetingId = $validated['class_meeting_id'];
         $recorderId = Auth::id();
 
-        foreach ($validated['attendance'] as $userId => $data) {
-            Attendance::updateOrCreate(
-                [
-                    'user_id' => $userId,
-                    'class_meeting_id' => $meetingId,
-                ],
-                [
-                    'status' => $data['status'],
-                    'notes' => $data['notes'] ?? null,
-                    'recorded_by' => $recorderId,
-                ]
-            );
-        }
+        $this->manageAdminAttendance->saveAttendance($meetingId, $validated['attendance'], $recorderId);
 
         return response()->json(['success' => true, 'message' => 'Attendance saved successfully']);
     }

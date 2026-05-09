@@ -19,12 +19,8 @@ Route::middleware('guest')->group(function () {
     Route::post('register', [RegisteredUserController::class, 'store'])
         ->middleware('throttle:auth');
 
-    Route::get('guest/register', [AuthenticatedSessionController::class, 'create'])
+    Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
-
-    Route::post('guest/register', [AuthenticatedSessionController::class, 'store']);
-
-    Route::redirect('login', 'guest/register');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
@@ -43,16 +39,16 @@ Route::middleware('guest')->group(function () {
     // Teacher Routes
     Route::get('teacher/register', [RegisteredUserController::class, 'createTeacher'])
         ->name('teacher.register');
-    
-    Route::get('teacher/login', [AuthenticatedSessionController::class, 'createTeacher'])
-        ->name('teacher.login');
 
     // Student Routes
     Route::get('student/register', [RegisteredUserController::class, 'createStudent'])
         ->name('student.register');
 
-    Route::get('student/login', [AuthenticatedSessionController::class, 'createStudent'])
-        ->name('student.login');
+    // POST route for no-payment registration
+    Route::post('student/register-no-payment', [RegisteredUserController::class, 'store'])
+        ->name('student.register.no-payment.post');
+
+
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
@@ -89,3 +85,14 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
+// Student register-no-payment: accessible to both guests and logged-in users (guest_quick)
+Route::get('student/register-no-payment', [RegisteredUserController::class, 'createStudentNoPayment'])
+    ->name('student.register.no-payment');
+
+// Student & Teacher login pages are accessible even when logged in as guest,
+// so they are NOT inside the 'guest' middleware group.
+Route::get('student/login', [AuthenticatedSessionController::class, 'createStudent'])
+    ->name('student.login');
+
+Route::get('teacher/login', [AuthenticatedSessionController::class, 'createTeacher'])
+    ->name('teacher.login');

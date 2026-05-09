@@ -242,14 +242,24 @@
                 @endphp
 
                 @foreach($tests as $num => $test)
+                    @php
+                        $hasAnswerKey = in_array((int) ($test['material_id'] ?? 0), $answerKeyMaterialIds ?? [], true);
+                    @endphp
                     <div class="bg-white rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col {{ !$test['available'] ? 'opacity-60' : 'hover:-translate-y-1' }} transform">
 
                         <!-- Card Top Banner -->
                         <div style="background: {{ $test['gradient'] }}" class="p-6 relative">
                             @if($test['available'])
-                                <span class="absolute top-4 right-4 px-3 py-1 bg-white/25 text-white backdrop-blur-sm rounded-full text-xs font-bold uppercase tracking-wide border border-white/40">
-                                    PRACTICE
-                                </span>
+                                <div class="absolute top-4 right-4 flex flex-col items-end gap-2">
+                                    <span class="px-3 py-1 bg-white/25 text-white backdrop-blur-sm rounded-full text-xs font-bold uppercase tracking-wide border border-white/40 shadow-sm">
+                                        PRACTICE
+                                    </span>
+                                    @if(auth()->check() && auth()->user()->isAdmin())
+                                        <span class="px-3 py-1.5 rounded-full text-xs font-semibold border shadow-sm whitespace-nowrap {{ $hasAnswerKey ? 'bg-emerald-50 text-emerald-900 border-emerald-300' : 'bg-rose-50 text-rose-900 border-rose-300' }}">
+                                            {{ $hasAnswerKey ? '✓ Kunci Ditambahkan' : '✕ Belum Ada Kunci' }}
+                                        </span>
+                                    @endif
+                                </div>
                             @else
                                 <span class="absolute top-4 right-4 px-3 py-1 bg-white/20 text-white rounded-full text-xs font-bold uppercase tracking-wide border border-white/30">
                                     COMING SOON

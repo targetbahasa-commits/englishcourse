@@ -65,11 +65,25 @@
                             <span class="truncate">Academic / Classes</span>
                         </button>
 
-                        <button @click="tab = 'registration'" :class="{ 'bg-blue-50 text-blue-700 hover:text-blue-700 hover:bg-blue-100': tab === 'registration', 'text-gray-900 hover:text-gray-900 hover:bg-gray-100': tab !== 'registration' }" class="flex items-center px-3 py-2 text-sm font-medium rounded-md">
+                        <button @click="tab = 'registration'" :class="{ 'bg-blue-50 text-blue-700 hover:text-blue-700 hover:bg-blue-100': tab === 'registration', 'text-gray-900 hover:text-gray-900 hover:bg-gray-100': tab !== 'registration' }" class="flex items-center px-3 py-2 text-sm font-medium rounded-md mt-1">
                             <svg class="flex-shrink-0 -ml-1 mr-3 h-5 w-5 text-gray-400" :class="{ 'text-blue-500': tab === 'registration' }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                             </svg>
                             <span class="truncate">Registration & Auth</span>
+                        </button>
+
+                        <button @click="tab = 'payment'" :class="{ 'bg-blue-50 text-blue-700 hover:text-blue-700 hover:bg-blue-100': tab === 'payment', 'text-gray-900 hover:text-gray-900 hover:bg-gray-100': tab !== 'payment' }" class="flex items-center px-3 py-2 text-sm font-medium rounded-md mt-1">
+                            <svg class="flex-shrink-0 -ml-1 mr-3 h-5 w-5 text-gray-400" :class="{ 'text-blue-500': tab === 'payment' }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a5 5 0 00-10 0v2M5 9h14l1 10a2 2 0 01-2 2H6a2 2 0 01-2-2L5 9z" />
+                            </svg>
+                            <span class="truncate">Payment Details</span>
+                        </button>
+
+                        <button @click="tab = 'frontpage'" :class="{ 'bg-blue-50 text-blue-700 hover:text-blue-700 hover:bg-blue-100': tab === 'frontpage', 'text-gray-900 hover:text-gray-900 hover:bg-gray-100': tab !== 'frontpage' }" class="flex items-center px-3 py-2 text-sm font-medium rounded-md mt-1">
+                            <svg class="flex-shrink-0 -ml-1 mr-3 h-5 w-5 text-gray-400" :class="{ 'text-blue-500': tab === 'frontpage' }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                            </svg>
+                            <span class="truncate">Landing Page Promos</span>
                         </button>
                     </nav>
                 </div>
@@ -210,6 +224,53 @@
                                     </div>
                                 </div>
 
+                            </div>
+                        </div>
+
+                        <!-- Payment Settings Tab -->
+                        <div x-show="tab === 'payment'" x-cloak>
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Payment & Bank Information</h3>
+                            <p class="text-sm text-gray-500 mb-6">These details will be displayed to students on their invoices for manual bank transfers.</p>
+                            
+                            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                                
+                                <div class="sm:col-span-3">
+                                    <label for="bank_name" class="block text-sm font-medium text-gray-700"> Bank Name </label>
+                                    <div class="mt-1">
+                                        <input type="text" name="bank_name" id="bank_name" value="{{ $settings['bank_name'] ?? 'BCA' }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="e.g. BCA">
+                                    </div>
+                                </div>
+
+                                <div class="sm:col-span-3">
+                                    <label for="bank_account_number" class="block text-sm font-medium text-gray-700"> Account Number </label>
+                                    <div class="mt-1">
+                                        <input type="text" name="bank_account_number" id="bank_account_number" value="{{ $settings['bank_account_number'] ?? '1234567890' }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="e.g. 1234567890">
+                                    </div>
+                                </div>
+
+                                <div class="sm:col-span-6">
+                                    <label for="bank_account_holder" class="block text-sm font-medium text-gray-700"> Account Holder Name </label>
+                                    <div class="mt-1">
+                                        <input type="text" name="bank_account_holder" id="bank_account_holder" value="{{ $settings['bank_account_holder'] ?? 'Target Bahasa Course' }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="e.g. Target Bahasa Course">
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Frontpage Promos Tab -->
+                        <div x-show="tab === 'frontpage'" x-cloak>
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Landing Page Promos</h3>
+                            <p class="text-sm text-gray-500 mb-6">Manage the running text and promotions displayed publicly on the landing page header.</p>
+                            
+                            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                                <div class="sm:col-span-6">
+                                    <label for="header_running_text" class="block text-sm font-medium text-gray-700"> Header Running Text (Marquee) </label>
+                                    <div class="mt-1">
+                                        <textarea name="header_running_text" id="header_running_text" rows="4" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">{{ $settings['header_running_text'] ?? '🚀 <strong>PROMO SPESIAL!</strong> Dapatkan Diskon 20% untuk Pendaftaran Kelas IELTS & TOEFL Bulan Ini! | 📝 <strong>IKUTI MOCKUP TEST!</strong> Uji Kemampuan Bahasa Inggrismu dengan Standar Internasional Sekarang Juga! | 🎓 Tingkatkan Karirmu dengan Sertifikat Target Bahasa!' }}</textarea>
+                                    </div>
+                                    <p class="mt-2 text-sm text-gray-500">Teks ini akan berjalan otomatis di bagian atas website. Gunakan pemisah vertikal ( <code>|</code> ) untuk memisahkan promosi. Mendukung tag <code>&lt;strong&gt;</code> untuk huruf tebal.</p>
+                                </div>
                             </div>
                         </div>
 

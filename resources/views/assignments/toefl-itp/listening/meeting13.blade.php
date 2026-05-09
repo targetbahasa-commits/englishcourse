@@ -1,6 +1,9 @@
 @extends('layouts.admin')
 
 @section('content')
+@php
+    $questions = collect($questions ?? []);
+@endphp
 <style>
     /* Custom Scrollbar - Forced Visibility */
     div.custom-scrollbar::-webkit-scrollbar {
@@ -59,18 +62,35 @@
     }
 </style>
 
-<div class="container mx-auto px-4 pb-8 relative bg-white min-h-screen {{ isset($set) ? 'pt-40 md:pt-36' : 'pt-8' }}">
+<div class="container mx-auto px-4 pb-8 relative bg-white min-h-screen {{ isset($set) ? 'pt-32 md:pt-28' : 'pt-8' }}">
     
     {{-- Main Paper Card --}}
-    <div class="bg-white max-w-7xl mx-auto rounded-xl shadow-lg border border-gray-100 p-8 md:p-12 relative overflow-hidden" style="{{ isset($set) ? 'padding-top: 9rem;' : '' }}">
+    <div class="bg-white max-w-7xl mx-auto rounded-xl shadow-lg border border-gray-100 p-8 md:p-12 relative overflow-hidden" style="{{ isset($set) ? 'padding-top: 5.5rem;' : '' }}">
         
         {{-- Top Decoration --}}
         <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
 
         {{-- Header Section --}}
-        <div class="mb-10 border-b border-gray-100 pb-8 {{ isset($set) ? 'mt-24 md:mt-20' : '' }}">
+        <div class="mb-10 border-b border-gray-100 pb-8 {{ isset($set) ? 'mt-10 md:mt-8' : '' }}">
             <div class="flex items-center justify-between mb-6">
-                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Latihan Soal</h1>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Latihan Soal</h1>
+                    @if(Auth::user()->isAdmin())
+                        @php
+                            // Tentukan status kunci jawaban
+                            $statusAnswerKey = false;
+                            if ($questions && count($questions) > 0) {
+                                $firstQuestion = $questions->first();
+                                if ($firstQuestion) {
+                                    $statusAnswerKey = filled($firstQuestion->answer_key ?? null) || filled($firstQuestion->explanation ?? null);
+                                }
+                            }
+                        @endphp
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $statusAnswerKey ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                            <span class="font-bold">{{ $statusAnswerKey ? '✓' : '✕' }}</span> Kunci
+                        </span>
+                    @endif
+                </div>
                 <div class="flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-semibold">
                     <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                     TOEFL Listening
@@ -213,9 +233,23 @@
             <div class="fixed top-0 left-0 right-0 md:left-64 z-40 bg-white shadow-lg">
                 <div class="max-w-7xl mx-auto">
                     <div class="flex flex-wrap lg:flex-nowrap items-center gap-2 md:gap-4 p-2 md:p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-b-2 border-indigo-200">
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2 md:gap-3">
+                            @if(Auth::user()->isAdmin())
+                                @php
+                                    $statusAudio = filled($questions->first()->audio_file ?? null);
+                                    $statusTranscript = filled($questions->first()->transcript_en ?? null) || filled($questions->first()->transcript_id ?? null);
+                                @endphp
+                                <div class="flex items-center gap-1 flex-shrink-0">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusAudio ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                                        <span class="font-bold">{{ $statusAudio ? '✓' : '✕' }}</span> Audio
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusTranscript ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                                        <span class="font-bold">{{ $statusTranscript ? '✓' : '✕' }}</span> SRT
+                                    </span>
+                                </div>
+                            @endif
                             <div class="w-9 h-9 md:w-10 md:h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-md">
-                                <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 012.828 2.828"></path></svg>
+                                <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.5 5.5L7 9H4v6h3l4.5 3.5V5.5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.5 9.5a4 4 0 010 5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 7a7.5 7.5 0 010 10"></path></svg>
                             </div>
                             <span class="text-sm md:text-lg font-bold text-indigo-900 whitespace-nowrap">Audio Session - Latihan {{ $set }}</span>
                         </div>
@@ -300,7 +334,7 @@
                                 </button>
 
                                 <button type="button"
-                                        onclick="document.getElementById('chooseAudioModal').classList.remove('hidden'); document.getElementById('chooseAudioModal').classList.add('flex');"
+                                        onclick="document.getElementById('chooseAudioModal').classList.remove('hidden'); document.getElementById('chooseAudioModal').classList.add('flex'); setTimeout(function(){ if(typeof audioFileManager !== 'undefined') audioFileManager.init(); }, 100);"
                                         class="px-2 py-1.5 md:px-3 md:py-2 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-1.5 md:gap-2 shadow-md relative z-10 text-xs md:text-sm">
                                     <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path>
@@ -866,7 +900,7 @@
             {{-- Two Column Layout --}}
             <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
             @php
-                $splitIndex = ceil($questions->count() / 2);
+                $splitIndex = ceil(count($questions) / 2);
             @endphp
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0">
                 
@@ -1402,9 +1436,7 @@ Start translating here..."></textarea>
         goToFolder(folderPath) {
             this.currentPath = folderPath;
             this.render();
-        },
-
-        render() {
+        },        render() {
             const listContainer = document.getElementById('audioFileList');
             const breadcrumb = document.getElementById('audioBreadcrumb');
             
@@ -1413,19 +1445,25 @@ Start translating here..."></textarea>
                 return;
             }
 
-            // Build folder structure
+            // Build folder structure using label for display, keeping value for submission
             const items = {};
             this.allFiles.forEach(audio => {
-                const path = audio.label || audio.value;
-                const parts = path.split('/');
+                const label = audio.label || audio.value;
+                const value = audio.value;
+                const parts = label.split('/');
                 let current = items;
                 
                 for (let i = 0; i < parts.length; i++) {
                     const part = parts[i];
-                    const fullPath = parts.slice(0, i + 1).join('/');
+                    const labelPath = parts.slice(0, i + 1).join('/');
+                    const isFile = i === parts.length - 1;
                     
                     if (!current[part]) {
-                        current[part] = { _path: fullPath, _isFile: i === parts.length - 1 };
+                        current[part] = {
+                            _labelPath: labelPath,
+                            _isFile: isFile,
+                            _value: isFile ? value : null
+                        };
                     }
                     current = current[part];
                 }
@@ -1435,14 +1473,20 @@ Start translating here..."></textarea>
             let current = items;
             if (this.currentPath) {
                 const pathParts = this.currentPath.split('/');
-                breadcrumb.innerHTML = pathParts.map((p, i) => {
-                    const p2 = pathParts.slice(0, i + 1).join('/');
-                    return `<button class="text-blue-600 hover:text-blue-800" onclick="audioFileManager.goToFolder('${p2}'); event.preventDefault()">${p}</button>`;
-                }).join(' <span class="text-gray-400">/</span> ');
+                breadcrumb.innerHTML = '<button type="button" class="text-blue-600 hover:text-blue-800" onclick="audioFileManager.goToRoot(event)">Root</button>' +
+                    pathParts.map((p, i) => {
+                        const p2 = pathParts.slice(0, i + 1).join('/');
+                        return ` <span class="text-gray-400">/</span> <button type="button" class="text-blue-600 hover:text-blue-800" onclick="audioFileManager.goToFolder('${p2}'); event.preventDefault()">${p}</button>`;
+                    }).join('');
 
-                pathParts.forEach(part => {
+                for (const part of pathParts) {
+                    if (current[part] === undefined) {
+                        this.currentPath = '';
+                        this.render();
+                        return;
+                    }
                     current = current[part];
-                });
+                }
             } else {
                 breadcrumb.innerHTML = 'Root';
             }
@@ -1459,45 +1503,43 @@ Start translating here..."></textarea>
             contents.forEach(name => {
                 const item = current[name];
                 const isFile = item._isFile;
-                const fullPath = item._path;
-                const isSelected = isFile && this.selectedFile === fullPath;
+                const labelPath = item._labelPath;
+                const fileValue = item._value;
+                const isSelected = isFile && fileValue && this.selectedFile === fileValue;
                 
                 if (isFile) {
-                    html += `
-                        <div class="flex items-center p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 ${isSelected ? 'bg-blue-100' : ''}"
-                             onclick="audioFileManager.selectFile('${fullPath}')">
-                            <svg class="w-5 h-5 text-red-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                            </svg>
-                            <span class="text-sm text-gray-800 flex-1 break-words">${name}</span>
+                    html += `<div class="flex items-center p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 ${isSelected ? 'bg-blue-100' : ''}" data-action="select-file" data-path="${fileValue}">
+                            <svg class="w-5 h-5 text-red-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
+                            <span class="text-sm text-gray-800 flex-1 break-words pointer-events-none">${name}</span>
                             ${isSelected ? '<svg class="w-5 h-5 text-green-600 ml-2 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>' : ''}
-                        </div>
-                    `;
+                        </div>`;
                 } else {
-                    html += `
-                        <div class="flex items-center p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100"
-                             onclick="audioFileManager.goToFolder('${fullPath}')">
-                            <svg class="w-5 h-5 text-yellow-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"></path>
-                            </svg>
-                            <span class="text-sm font-medium text-gray-800 flex-1">${name}</span>
-                            <svg class="w-4 h-4 text-gray-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                            </svg>
-                        </div>
-                    `;
+                    html += `<div class="flex items-center p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100" data-action="goto-folder" data-path="${labelPath}">
+                            <svg class="w-5 h-5 text-yellow-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"></path></svg>
+                            <span class="text-sm font-medium text-gray-800 flex-1 pointer-events-none">${name}</span>
+                            <svg class="w-4 h-4 text-gray-400 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </div>`;
                 }
             });
             
             listContainer.innerHTML = html;
         }
     };
-
-    // Initialize when modal is opened
-    const originalChooseAudioClick = document.addEventListener('click', function initAudioModal(e) {
-        const chooseBtn = e.target.closest('[onclick*="chooseAudioModal"]');
-        if (chooseBtn && chooseBtn.getAttribute('onclick').includes("remove('hidden')")) {
-            setTimeout(() => audioFileManager.init(), 100);
+        // Delegated event listener for file manager
+    document.addEventListener('click', function(e) {
+        const el = e.target.closest('[data-action]');
+        if (el) {
+            e.preventDefault();
+            e.stopPropagation();
+            const action = el.getAttribute('data-action');
+            const path   = el.getAttribute('data-path');
+            if (action === 'goto-folder') {
+                audioFileManager.goToFolder(path || '');
+            } else if (action === 'select-file') {
+                audioFileManager.selectFile(path);
+            } else if (action === 'goto-root') {
+                audioFileManager.goToRoot(null);
+            }
         }
     });
     </script>

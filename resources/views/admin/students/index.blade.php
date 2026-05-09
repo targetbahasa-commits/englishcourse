@@ -105,58 +105,125 @@
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
         <!-- Filters & Search Bar -->
-        <div class="p-6 border-b border-gray-100 bg-gray-50/50">
-            <form action="{{ route('students.index') }}" method="GET" class="flex flex-col md:flex-row gap-3 flex-wrap">
-                <!-- Search -->
-                <div class="flex-1 min-w-[200px]">
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        <!-- Filters & Search Bar -->
+        <div class="p-6 border-b border-gray-100 bg-gray-50/50" x-data="{ showAdvanced: {{ request()->hasAny(['program_id', 'class_period_id', 'month_year']) ? 'true' : 'false' }} }">
+            <form action="{{ route('students.index') }}" method="GET">
+                <div class="flex flex-col md:flex-row gap-3 flex-wrap items-end">
+                    <!-- Search -->
+                    <div class="flex-1 min-w-[200px] w-full">
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Pencarian</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            </div>
+                            <input type="text" name="search" value="{{ request('search') }}" class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow" placeholder="Nama, email, atau no wa...">
                         </div>
-                        <input type="text" name="search" value="{{ request('search') }}" class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow" placeholder="Search name, email, or phone…">
+                    </div>
+
+                    <!-- Status -->
+                    <div class="w-full md:w-40">
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Status</label>
+                        <select name="status" class="block w-full pl-3 pr-8 py-2.5 text-sm border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-xl bg-white cursor-pointer">
+                            <option value="">Semua Status</option>
+                            <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        </select>
+                    </div>
+
+                    <!-- Missing data filter -->
+                    <div class="w-full md:w-52">
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Data Filter</label>
+                        <select name="missing" class="block w-full pl-3 pr-8 py-2.5 text-sm border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-xl bg-white cursor-pointer">
+                            <option value="">Semua Data Lengkap</option>
+                            <option value="whatsapp" {{ request('missing') === 'whatsapp' ? 'selected' : '' }}>⚠️ Missing WhatsApp</option>
+                            <option value="referral" {{ request('missing') === 'referral' ? 'selected' : '' }}>🏷️ Missing Referral Code</option>
+                            <option value="both" {{ request('missing') === 'both' ? 'selected' : '' }}>❌ Missing Both</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-2 w-full md:w-auto">
+                        <button type="submit" class="flex-1 md:flex-none px-6 py-2.5 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition-colors text-sm shadow-md shadow-slate-200 whitespace-nowrap">
+                            Apply Filter
+                        </button>
+                        <button type="button" @click="showAdvanced = !showAdvanced" class="p-2.5 border border-gray-200 text-gray-500 rounded-xl hover:bg-white bg-white transition" title="Advanced Filters">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                        </button>
+                        @if(request()->hasAny(['search', 'status', 'missing', 'program_id', 'class_period_id', 'month_year']))
+                            <a href="{{ route('students.index') }}" class="p-2.5 bg-red-50 border border-red-100 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-600 transition text-center" title="Reset">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </a>
+                        @endif
+                    </div>
+                </div>
+                
+                <!-- Advanced Filters -->
+                <div x-show="showAdvanced" x-collapse class="mt-5 pt-5 border-t border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Program</label>
+                            <select name="program_id" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none bg-white">
+                                <option value="">Semua Program</option>
+                                @php
+                                    $mockPrograms = [];
+                                    $regularPrograms = [];
+                                    foreach($programs as $prog) {
+                                        $name = strtolower($prog->name);
+                                        if (str_contains($name, 'cambridge') || str_contains($name, 'mock')) {
+                                            $mockPrograms[] = $prog;
+                                        } else {
+                                            $regularPrograms[] = $prog;
+                                        }
+                                    }
+                                @endphp
+                                
+                                @if(count($regularPrograms) > 0)
+                                    <optgroup label="Kursus Reguler & Paket">
+                                        @foreach($regularPrograms as $prog)
+                                            <option value="{{ $prog->id }}" {{ request('program_id') == $prog->id ? 'selected' : '' }}>{{ $prog->name }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
+
+                                @if(count($mockPrograms) > 0)
+                                    <optgroup label="Mock Tests & Latihan">
+                                        @foreach($mockPrograms as $prog)
+                                            <option value="{{ $prog->id }}" {{ request('program_id') == $prog->id ? 'selected' : '' }}>{{ $prog->name }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Batch Kelas</label>
+                            <select name="class_period_id" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none bg-white">
+                                <option value="">Semua Batch</option>
+                                @foreach(\App\Models\ClassPeriod::orderBy('start_date', 'desc')->get() as $period)
+                                    <option value="{{ $period->id }}" {{ request('class_period_id') == $period->id ? 'selected' : '' }}>
+                                        {{ $period->name }} ({{ $period->start_date ? $period->start_date->format('M Y') : 'N/A' }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Bulan Daftar</label>
+                            <input type="month" name="month_year" value="{{ request('month_year') }}" 
+                                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none bg-white">
+                        </div>
                     </div>
                 </div>
 
-                <!-- Status -->
-                <div class="w-full md:w-40">
-                    <select name="status" class="block w-full pl-3 pr-8 py-2.5 text-sm border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-xl bg-white cursor-pointer">
-                        <option value="">All Status</option>
-                        <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
-                        <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                    </select>
-                </div>
-
-                <!-- Missing data filter -->
-                <div class="w-full md:w-52">
-                    <select name="missing" class="block w-full pl-3 pr-8 py-2.5 text-sm border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-xl bg-white cursor-pointer">
-                        <option value="">All Students</option>
-                        <option value="whatsapp" {{ request('missing') === 'whatsapp' ? 'selected' : '' }}>⚠️ Missing WhatsApp</option>
-                        <option value="referral" {{ request('missing') === 'referral' ? 'selected' : '' }}>🏷️ Missing Referral Code</option>
-                        <option value="both" {{ request('missing') === 'both' ? 'selected' : '' }}>❌ Missing Both</option>
-                    </select>
-                </div>
-
-                <div class="flex gap-2">
-                    <button type="submit" class="px-5 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors text-sm">
-                        Apply
-                    </button>
-                    @if(request()->hasAny(['search', 'status', 'missing']))
-                        <a href="{{ route('students.index') }}" class="px-5 py-2.5 bg-white border border-gray-200 text-gray-600 font-medium rounded-xl hover:bg-gray-50 transition-colors text-sm text-center">
-                            Clear
-                        </a>
-                    @endif
-                </div>
-
-                <!-- Bulk Actions spacer + button -->
-                <div class="flex-1"></div>
-                <form action="{{ route('admin.students.bulk_generate_referral') }}" method="POST" class="inline">
-                    @csrf
-                    <button type="submit" onclick="return confirm('Auto-generate referral codes for all students without one?')"
-                        class="px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium rounded-xl text-sm flex items-center gap-2 transition">
+                <!-- Bulk Actions -->
+                <div class="mt-5 pt-4 border-t border-gray-100 flex justify-end">
+                    <button type="submit" form="bulkGenerateForm" onclick="return confirm('Auto-generate referral codes for all students without one?')"
+                        class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium rounded-xl text-xs flex items-center gap-2 transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
                         Auto-Generate Referral Codes
                     </button>
-                </form>
+                </div>
+            </form>
+            
+            <form id="bulkGenerateForm" action="{{ route('admin.students.bulk_generate_referral') }}" method="POST" class="hidden">
+                @csrf
             </form>
         </div>
 

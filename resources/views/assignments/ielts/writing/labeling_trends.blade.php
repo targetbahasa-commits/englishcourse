@@ -72,12 +72,15 @@
                                         <span class="text-teal-600 font-bold mr-1" x-text="item.id + '.'"></span>
                                         <span x-text="item.text"></span>
                                     </label>
-                                    <input type="text" 
-                                           :id="'label_' + item.id"
-                                           :name="'label_' + item.id"
-                                           x-model="answers['label_' + item.id]"
-                                           placeholder="e.g. 1960" 
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-shadow text-sm">
+                                    <textarea
+                                        :id="'label_' + item.id"
+                                        :name="'label_' + item.id"
+                                        x-model="answers['label_' + item.id]"
+                                        @input="autoResize($event.target)"
+                                        x-init="$nextTick(() => autoResize($el))"
+                                        placeholder="e.g. 1960"
+                                        class="w-full min-h-[2.75rem] px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-shadow text-sm resize-none overflow-hidden leading-relaxed"
+                                    ></textarea>
                                 </div>
                             </template>
                         </div>
@@ -88,11 +91,13 @@
                         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                             <span>✍️</span> Connecting Trends Description
                         </h3>
-                        <textarea 
-                            class="w-full h-64 p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-teal-100 focus:border-teal-400 focus:outline-none transition-all resize-none text-base leading-relaxed bg-gray-50 from-gray-50 to-white" 
+                        <textarea
+                            class="w-full min-h-[16rem] p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-teal-100 focus:border-teal-400 focus:outline-none transition-all resize-none overflow-hidden text-base leading-relaxed bg-gray-50 from-gray-50 to-white"
                             placeholder="Describe the changes shown in the graph and connect the trends..."
                             x-model="answers.essay"
                             name="essay"
+                            @input="autoResize($event.target)"
+                            x-init="$nextTick(() => autoResize($el))"
                         ></textarea>
                     </div>
                 </div>
@@ -101,6 +106,7 @@
 
         </div>
     </div>
+
 </div>
 
 <!-- Alpine Data -->
@@ -125,6 +131,11 @@
                 { id: 13, text: 'a plateau' },
                 { id: 14, text: 'figures remaining constant' }
             ],
+            autoResize(el) {
+                if (!el) return;
+                el.style.height = 'auto';
+                el.style.height = `${el.scrollHeight}px`;
+            },
 
             init() {
                 if (window.AutoSave) {
@@ -134,8 +145,8 @@
                 // Sync restored values to Alpine data
                 setTimeout(() => {
                     // Sync labels
-                    const inputs = document.querySelectorAll('input[name^="label_"]');
-                    inputs.forEach(el => {
+                    const fields = document.querySelectorAll('textarea[name^="label_"]');
+                    fields.forEach(el => {
                         if(el.value) {
                              const key = el.name; // matches x-model key
                              this.answers[key] = el.value;
@@ -146,6 +157,10 @@
                     if(essay && essay.value) {
                         this.answers.essay = essay.value;
                     }
+
+                    this.$nextTick(() => {
+                        document.querySelectorAll('textarea[name^="label_"], textarea[name="essay"]').forEach(el => this.autoResize(el));
+                    });
                 }, 500);
             },
 

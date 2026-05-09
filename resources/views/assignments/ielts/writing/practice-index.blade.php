@@ -249,50 +249,58 @@
     @if($taskParam == 1 && !$typeParam)
     <div class="mb-12">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Select Practice Type</h2>
+        @php
+            $practiceTypes = [
+                ['slug' => 'line', 'title' => 'Line Chart', 'desc' => 'Analyze trends over time.', 'accent' => 'blue', 'icon' => 'M4 19h16M4 14h4m3 0h9M4 9h7m3 0h6'],
+                ['slug' => 'bar', 'title' => 'Bar Chart', 'desc' => 'Compare categories.', 'accent' => 'emerald', 'icon' => 'M5 20V10m7 10V4m7 16v-7'],
+                ['slug' => 'pie', 'title' => 'Pie Chart', 'desc' => 'Understand proportions.', 'accent' => 'violet', 'icon' => 'M11 3v9h9A9 9 0 1 1 11 3Z'],
+                ['slug' => 'table', 'title' => 'Table', 'desc' => 'Interpret tabular data.', 'accent' => 'amber', 'icon' => 'M4 7h16M4 12h16M4 17h16M9 4v16M15 4v16'],
+                ['slug' => 'mixed', 'title' => 'Mixed Chart', 'desc' => 'Combine chart types.', 'accent' => 'pink', 'icon' => 'M4 18h4v-6H4v6Zm6 0h4V8h-4v10Zm6 0h4V4h-4v14Z'],
+                ['slug' => 'flowchart', 'title' => 'Flowchart', 'desc' => 'Describe processes.', 'accent' => 'indigo', 'icon' => 'M12 3v4m0 0H8m4 0h4m-4 4v4m0 0H8m4 0h4m-4 4v2'],
+                ['slug' => 'mapping', 'title' => 'Mapping', 'desc' => 'Analyze spatial changes.', 'accent' => 'rose', 'icon' => 'M9 20 4 18V6l5 2 6-2 5 2v12l-5-2-6 2Z'],
+            ];
+
+            $accentMap = [
+                'blue'    => ['style' => 'background: linear-gradient(135deg, #38bdf8, #2563eb)'],
+                'emerald' => ['style' => 'background: linear-gradient(135deg, #34d399, #0d9488)'],
+                'violet'  => ['style' => 'background: linear-gradient(135deg, #a78bfa, #9333ea)'],
+                'amber'   => ['style' => 'background: linear-gradient(135deg, #fbbf24, #f97316)'],
+                'pink'    => ['style' => 'background: linear-gradient(135deg, #f472b6, #c026d3)'],
+                'indigo'  => ['style' => 'background: linear-gradient(135deg, #818cf8, #2563eb)'],
+                'rose'    => ['style' => 'background: linear-gradient(135deg, #fb7185, #dc2626)'],
+            ];
+        @endphp
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            @foreach($practiceTypes as $type)
+                @php $accent = $accentMap[$type['accent']]; @endphp
+                <a href="?task=1&type={{ $type['slug'] }}" class="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-0">
+                    <div class="absolute inset-0" style="{{ $accent['style'] }}"></div>
+                    <div class="absolute -bottom-8 -right-8 w-28 h-28 bg-white/10 rounded-full"></div>
+                    <div class="absolute -top-5 -left-5 w-20 h-20 bg-white/10 rounded-full"></div>
 
-            <a href="?task=1&type=line" class="text-left p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition group flex flex-col h-full border border-blue-100 transform hover:scale-105 hover:-translate-y-1 duration-300">
-                <h3 class="font-bold text-lg text-gray-800 mb-2">Line Chart</h3>
-                <p class="text-gray-500 text-sm flex-1">Analyze trends over time.</p>
-                <span class="mt-4 inline-block px-3 py-1 bg-blue-100 text-blue-600 text-xs font-semibold rounded-full">20 Practices</span>
-            </a>
+                    <div class="relative z-10 p-6 flex flex-col h-full">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="w-10 h-10 rounded-xl bg-white/25 backdrop-blur flex items-center justify-center border border-white/30">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $type['icon'] }}"></path>
+                                </svg>
+                            </span>
+                            <span class="px-3 py-1 text-[11px] font-bold rounded-full bg-white/20 text-white/90">20 Practices</span>
+                        </div>
 
-            <a href="?task=1&type=bar" class="text-left p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition group flex flex-col h-full border border-emerald-100 transform hover:scale-105 hover:-translate-y-1 duration-300">
-                <h3 class="font-bold text-lg text-gray-800 mb-2">Bar Chart</h3>
-                <p class="text-gray-500 text-sm flex-1">Compare categories.</p>
-                <span class="mt-4 inline-block px-3 py-1 bg-emerald-100 text-emerald-600 text-xs font-semibold rounded-full">20 Practices</span>
-            </a>
+                        <h3 class="font-bold text-xl text-white mb-1.5">{{ $type['title'] }}</h3>
+                        <p class="text-white/80 text-sm flex-1">{{ $type['desc'] }}</p>
 
-            <a href="?task=1&type=pie" class="text-left p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition group flex flex-col h-full border border-purple-100 transform hover:scale-105 hover:-translate-y-1 duration-300">
-                <h3 class="font-bold text-lg text-gray-800 mb-2">Pie Chart</h3>
-                <p class="text-gray-500 text-sm flex-1">Understand proportions.</p>
-                <span class="mt-4 inline-block px-3 py-1 bg-purple-100 text-purple-600 text-xs font-semibold rounded-full">20 Practices</span>
-            </a>
-
-            <a href="?task=1&type=table" class="text-left p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition group flex flex-col h-full border border-orange-100 transform hover:scale-105 hover:-translate-y-1 duration-300">
-                <h3 class="font-bold text-lg text-gray-800 mb-2">Table</h3>
-                <p class="text-gray-500 text-sm flex-1">Interpret tabular data.</p>
-                <span class="mt-4 inline-block px-3 py-1 bg-orange-100 text-orange-600 text-xs font-semibold rounded-full">20 Practices</span>
-            </a>
-
-            <a href="?task=1&type=mixed" class="text-left p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition group flex flex-col h-full border border-pink-100 transform hover:scale-105 hover:-translate-y-1 duration-300">
-                <h3 class="font-bold text-lg text-gray-800 mb-2">Mixed Chart</h3>
-                <p class="text-gray-500 text-sm flex-1">Combine chart types.</p>
-                <span class="mt-4 inline-block px-3 py-1 bg-pink-100 text-pink-600 text-xs font-semibold rounded-full">20 Practices</span>
-            </a>
-
-            <a href="?task=1&type=flowchart" class="text-left p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition group flex flex-col h-full border border-indigo-100 transform hover:scale-105 hover:-translate-y-1 duration-300">
-                <h3 class="font-bold text-lg text-gray-800 mb-2">Flowchart</h3>
-                <p class="text-gray-500 text-sm flex-1">Describe processes.</p>
-                <span class="mt-4 inline-block px-3 py-1 bg-indigo-100 text-indigo-600 text-xs font-semibold rounded-full">20 Practices</span>
-            </a>
-
-            <a href="?task=1&type=mapping" class="text-left p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition group flex flex-col h-full border border-rose-100 transform hover:scale-105 hover:-translate-y-1 duration-300">
-                <h3 class="font-bold text-lg text-gray-800 mb-2">Mapping</h3>
-                <p class="text-gray-500 text-sm flex-1">Analyze spatial changes.</p>
-                <span class="mt-4 inline-block px-3 py-1 bg-rose-100 text-rose-600 text-xs font-semibold rounded-full">20 Practices</span>
-            </a>
-
+                        <div class="mt-5 inline-flex items-center gap-2 px-4 py-2 bg-white/95 text-gray-800 text-sm font-bold rounded-full w-fit group-hover:bg-white transition-colors">
+                            Mulai
+                            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+            @endforeach
         </div>
     </div>
     @endif

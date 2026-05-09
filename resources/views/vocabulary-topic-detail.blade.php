@@ -42,7 +42,7 @@
                 @include('components.sidebar-admin')
             @elseif(Auth::user()->isTeacher())
                 @include('components.sidebar-teacher')
-            @elseif(Auth::user()->role === 'guest')
+            @elseif(in_array(Auth::user()->active_role, ['guest', 'guest_quick']))
                 @include('components.sidebar-guest')
             @else
                 @include('components.sidebar-student')

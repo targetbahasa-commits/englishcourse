@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -11,6 +10,10 @@ use Illuminate\Support\Facades\Schema;
 
 class User extends Authenticatable
 {
+    public function programAccesses()
+    {
+        return $this->hasMany(\App\Models\ProgramAccess::class);
+    }
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
@@ -51,9 +54,17 @@ class User extends Authenticatable
         'bio',
     ];
 
+    /**
+     * @deprecated Use enrollments() instead to get class periods per program.
+     */
     public function classPeriod(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(ClassPeriod::class);
+    }
+
+    public function enrollments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Enrollment::class);
     }
 
     public function teacher(): \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -101,7 +112,7 @@ class User extends Authenticatable
 
     public function isGuest()
     {
-        return $this->active_role === 'guest';
+        return in_array($this->active_role, ['guest', 'guest_quick']);
     }
 
     public function isActive()

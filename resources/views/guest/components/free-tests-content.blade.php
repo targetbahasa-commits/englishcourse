@@ -1,91 +1,3 @@
-@php
-$freeLessons = [
-    [
-        'id' => 'a1',
-        'title' => 'Vocabulary A1',
-        'description' => 'Essential vocabulary for absolute beginners. 20 topics covering everyday situations.',
-        'color' => 'blue',
-        'route' => route('vocabulary-a1')
-    ],
-    [
-        'id' => 'a2',
-        'title' => 'Vocabulary A2',
-        'description' => 'Elementary vocabulary to expand your daily communication skills.',
-        'color' => 'green',
-        'route' => route('vocabulary-a2')
-    ],
-    [
-        'id' => 'b1',
-        'title' => 'Vocabulary B1',
-        'description' => 'Intermediate vocabulary for more complex conversations.',
-        'color' => 'purple',
-        'route' => route('vocabulary-b1')
-    ],
-    [
-        'id' => 'b2',
-        'title' => 'Vocabulary B2',
-        'description' => 'Upper-intermediate vocabulary for professional fluency.',
-        'color' => 'orange',
-        'route' => route('vocabulary-b2')
-    ],
-    [
-        'id' => 'c1',
-        'title' => 'Vocabulary C1',
-        'description' => 'Advanced vocabulary for near-native proficiency.',
-        'color' => 'red',
-        'route' => route('vocabulary-c1')
-    ],
-    [
-        'id' => 'verbs',
-        'title' => 'Verbs (A1-C1)',
-        'description' => 'Master English verbs across 5 proficiency levels.',
-        'color' => 'teal',
-        'route' => route('vocabulary-verb')
-    ],
-    [
-        'id' => 'adjectives',
-        'title' => 'Adjectives (A1-C1)',
-        'description' => 'Descriptive words to enhance your expression.',
-        'color' => 'yellow',
-        'route' => route('vocabulary-adjective')
-    ],
-    [
-        'id' => 'adverbs',
-        'title' => 'Adverbs (A1-C1)',
-        'description' => 'Add nuance to your verbs and adjectives.',
-        'color' => 'indigo',
-        'route' => route('vocabulary-adverb')
-    ],
-    [
-        'id' => 'expressions',
-        'title' => 'English Expressions',
-        'description' => 'Common expressions for natural conversation.',
-        'color' => 'cyan',
-        'route' => route('english-expression')
-    ],
-     [
-        'id' => 'idioms',
-        'title' => 'English Idioms',
-        'description' => 'Learn idioms to sound like a native speaker.',
-        'color' => 'pink',
-        'route' => route('idioms')
-    ],
-     [
-        'id' => 'phrasal-verbs',
-        'title' => 'Phrasal Verbs',
-        'description' => 'Essential phrasal verbs for fluency.',
-        'color' => 'orange',
-        'route' => route('phrasal-verbs')
-    ],
-     [
-        'id' => 'irregular-verbs',
-        'title' => 'Irregular Verbs',
-        'description' => 'Complete list of irregular verbs.',
-        'color' => 'purple',
-        'route' => route('irregular-verbs')
-    ]
-];
-@endphp
 
 <!-- Hero Section -->
 <div x-data="{
@@ -153,146 +65,191 @@ $freeLessons = [
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
         <!-- IELTS Academic -->
-        <div class="group bg-gradient-to-br from-blue-100 via-blue-50 to-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-blue-200 hover:border-blue-400 hover:shadow-[0_8px_30px_rgb(37,99,235,0.15)] transition-all duration-300 p-8 flex flex-col h-full overflow-hidden relative">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-transparent rounded-bl-[100px] z-0 opacity-50 group-hover:opacity-100 transition-opacity"></div>
-            
-            <div class="relative z-10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-sm bg-gradient-to-br from-blue-500 to-blue-600 transform group-hover:-translate-y-1 transition-transform">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+        <div class="group relative bg-white rounded-[2rem] shadow-lg hover:shadow-2xl transition-all duration-500 ease-out p-8 flex flex-col h-full overflow-hidden border border-gray-100 hover:border-blue-300 hover:-translate-y-2">
+            <!-- Background Icon Watermark -->
+            <svg class="absolute -right-6 -bottom-6 w-32 h-32 text-gray-100 opacity-50 transform rotate-12 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 ease-out pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+
+            <!-- Top Accent Line -->
+            <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-blue-400 to-blue-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
+
+            <!-- Header -->
+            <div class="relative z-10 flex items-start justify-between mb-6">
+                <div class="w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center border border-blue-100 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-inner">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+                    </div>
+                </div>
+                <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wider border border-blue-200">
+                    Academic
+                </span>
             </div>
-            
-            <h3 class="text-xl font-bold text-gray-900 mb-3 relative z-10">IELTS Academic</h3>
+
+            <!-- Content -->
+            <h3 class="text-2xl font-bold text-gray-900 mb-3 relative z-10 group-hover:text-blue-600 transition-colors duration-300 tracking-tight">IELTS Academic</h3>
             
             <div class="flex-1 flex flex-col relative z-10">
-                <div class="mb-6 text-sm text-gray-500 space-y-3">
-                    <p class="font-medium text-gray-600 leading-relaxed">Bagi yang ingin studi ke luar negeri.</p>
-                    <ul class="space-y-2 mt-4">
-                        <li class="flex items-center gap-2.5">
-                            <div class="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                            <span class="font-medium">15 Menit</span>
-                        </li>
-                        <li class="flex items-center gap-2.5">
-                            <div class="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            </div>
-                            <span class="font-medium">Reading & Listening</span>
-                        </li>
-                    </ul>
+                <p class="text-gray-500 text-sm leading-relaxed mb-6 min-h-[40px]">Bagi yang ingin studi ke luar negeri.</p>
+                
+                <div class="space-y-3 mb-8">
+                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-blue-50 group-hover:border-blue-200 transition-colors duration-300">
+                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0 text-blue-600">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">15 Menit</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-blue-50 group-hover:border-blue-200 transition-colors duration-300">
+                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0 text-blue-600">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">Reading & Listening</span>
+                    </div>
                 </div>
-                <div class="mt-auto">
-                    <a href="{{ route('free-test.register.show', 'ielts_academic') }}" class="group/btn block w-full text-center text-blue-600 font-bold py-3 px-4 rounded-xl border-2 border-blue-500 hover:bg-blue-600 hover:text-white transition-all duration-300">
-                        Start Free Test <span class="inline-block transform group-hover/btn:translate-x-1 transition-transform">→</span>
+
+                <!-- Action Button -->
+                <div class="mt-auto relative">
+                    <a href="{{ route('guest.quick-access', 'ielts_academic') }}" class="flex items-center justify-center gap-2 w-full font-bold text-white bg-blue-600 hover:bg-blue-700 py-3.5 px-6 rounded-xl transition-colors duration-300 shadow-md">
+                        <span>Start Free Test</span>
+                        <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                     </a>
                 </div>
             </div>
         </div>
 
         <!-- IELTS General -->
-        <div class="group bg-gradient-to-br from-emerald-100 via-emerald-50 to-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-emerald-200 hover:border-emerald-400 hover:shadow-[0_8px_30px_rgb(16,185,129,0.15)] transition-all duration-300 p-8 flex flex-col h-full overflow-hidden relative">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-50 to-transparent rounded-bl-[100px] z-0 opacity-50 group-hover:opacity-100 transition-opacity"></div>
-            
-            <div class="relative z-10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-sm bg-gradient-to-br from-emerald-500 to-emerald-600 transform group-hover:-translate-y-1 transition-transform">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+        <div class="group relative bg-white rounded-[2rem] shadow-lg hover:shadow-2xl transition-all duration-500 ease-out p-8 flex flex-col h-full overflow-hidden border border-gray-100 hover:border-emerald-300 hover:-translate-y-2">
+            <svg class="absolute -right-6 -bottom-6 w-32 h-32 text-gray-100 opacity-50 transform rotate-12 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 ease-out pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+
+            <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
+
+            <div class="relative z-10 flex items-start justify-between mb-6">
+                <div class="w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center border border-emerald-100 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white shadow-inner">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    </div>
+                </div>
+                <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-bold uppercase tracking-wider border border-emerald-200">
+                    General
+                </span>
             </div>
-            
-            <h3 class="text-xl font-bold text-gray-900 mb-3 relative z-10">IELTS General</h3>
+
+            <h3 class="text-2xl font-bold text-gray-900 mb-3 relative z-10 group-hover:text-emerald-600 transition-colors duration-300 tracking-tight">IELTS General</h3>
             
             <div class="flex-1 flex flex-col relative z-10">
-                <div class="mb-6 text-sm text-gray-500 space-y-3">
-                    <p class="font-medium text-gray-600 leading-relaxed">Untuk bekerja atau imigrasi.</p>
-                    <ul class="space-y-2 mt-4">
-                        <li class="flex items-center gap-2.5">
-                            <div class="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                            <span class="font-medium">15 Menit</span>
-                        </li>
-                        <li class="flex items-center gap-2.5">
-                            <div class="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            </div>
-                            <span class="font-medium">Reading & Listening</span>
-                        </li>
-                    </ul>
+                <p class="text-gray-500 text-sm leading-relaxed mb-6 min-h-[40px]">Untuk bekerja atau imigrasi.</p>
+                
+                <div class="space-y-3 mb-8">
+                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-emerald-50 group-hover:border-emerald-200 transition-colors duration-300">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0 text-emerald-600">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">15 Menit</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-emerald-50 group-hover:border-emerald-200 transition-colors duration-300">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0 text-emerald-600">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">Reading & Listening</span>
+                    </div>
                 </div>
-                <div class="mt-auto">
-                    <a href="{{ route('free-test.register.show', 'ielts_general') }}" class="group/btn block w-full text-center text-emerald-600 font-bold py-3 px-4 rounded-xl border-2 border-emerald-500 hover:bg-emerald-600 hover:text-white transition-all duration-300">
-                        Start Free Test <span class="inline-block transform group-hover/btn:translate-x-1 transition-transform">→</span>
+
+                <div class="mt-auto relative">
+                    <a href="{{ route('guest.quick-access', 'ielts_general') }}" class="flex items-center justify-center gap-2 w-full font-bold text-white bg-emerald-500 hover:bg-emerald-600 py-3.5 px-6 rounded-xl transition-colors duration-300 shadow-md">
+                        <span>Start Free Test</span>
+                        <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                     </a>
                 </div>
             </div>
         </div>
 
         <!-- TOEFL ITP -->
-        <div class="group bg-gradient-to-br from-purple-100 via-purple-50 to-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-purple-200 hover:border-purple-400 hover:shadow-[0_8px_30px_rgb(147,51,234,0.15)] transition-all duration-300 p-8 flex flex-col h-full overflow-hidden relative">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-50 to-transparent rounded-bl-[100px] z-0 opacity-50 group-hover:opacity-100 transition-opacity"></div>
-            
-            <div class="relative z-10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-sm bg-gradient-to-br from-purple-500 to-purple-600 transform group-hover:-translate-y-1 transition-transform">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+        <div class="group relative bg-white rounded-[2rem] shadow-lg hover:shadow-2xl transition-all duration-500 ease-out p-8 flex flex-col h-full overflow-hidden border border-gray-100 hover:border-purple-300 hover:-translate-y-2">
+            <svg class="absolute -right-6 -bottom-6 w-32 h-32 text-gray-100 opacity-50 transform rotate-12 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 ease-out pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+
+            <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-purple-400 to-purple-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
+
+            <div class="relative z-10 flex items-start justify-between mb-6">
+                <div class="w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center border border-purple-100 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white shadow-inner">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    </div>
+                </div>
+                <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-purple-50 text-purple-600 text-xs font-bold uppercase tracking-wider border border-purple-200">
+                    ITP
+                </span>
             </div>
-            
-            <h3 class="text-xl font-bold text-gray-900 mb-3 relative z-10">TOEFL ITP</h3>
+
+            <h3 class="text-2xl font-bold text-gray-900 mb-3 relative z-10 group-hover:text-purple-600 transition-colors duration-300 tracking-tight">TOEFL ITP</h3>
             
             <div class="flex-1 flex flex-col relative z-10">
-                <div class="mb-6 text-sm text-gray-500 space-y-3">
-                    <p class="font-medium text-gray-600 leading-relaxed">Model soal institusi lokal/beasiswa.</p>
-                    <ul class="space-y-2 mt-4">
-                        <li class="flex items-center gap-2.5">
-                            <div class="w-6 h-6 rounded-full bg-purple-50 flex items-center justify-center text-purple-500">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                            <span class="font-medium">20 Menit</span>
-                        </li>
-                        <li class="flex items-center gap-2.5">
-                            <div class="w-6 h-6 rounded-full bg-purple-50 flex items-center justify-center text-purple-500">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            </div>
-                            <span class="font-medium">All Sections</span>
-                        </li>
-                    </ul>
+                <p class="text-gray-500 text-sm leading-relaxed mb-6 min-h-[40px]">Model soal institusi lokal/beasiswa.</p>
+                
+                <div class="space-y-3 mb-8">
+                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-purple-50 group-hover:border-purple-200 transition-colors duration-300">
+                        <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0 text-purple-600">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">20 Menit</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-purple-50 group-hover:border-purple-200 transition-colors duration-300">
+                        <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0 text-purple-600">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">All Sections</span>
+                    </div>
                 </div>
-                <div class="mt-auto">
-                    <a href="{{ route('free-test.register.show', 'toefl_itp') }}" class="group/btn block w-full text-center text-purple-600 font-bold py-3 px-4 rounded-xl border-2 border-purple-500 hover:bg-purple-600 hover:text-white transition-all duration-300">
-                        Start Free Test <span class="inline-block transform group-hover/btn:translate-x-1 transition-transform">→</span>
+
+                <div class="mt-auto relative">
+                    <a href="{{ route('guest.quick-access', 'toefl_itp') }}" class="flex items-center justify-center gap-2 w-full font-bold text-white bg-purple-600 hover:bg-purple-700 py-3.5 px-6 rounded-xl transition-colors duration-300 shadow-md">
+                        <span>Start Free Test</span>
+                        <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                     </a>
                 </div>
             </div>
         </div>
 
         <!-- PTE Academic -->
-        <div class="group bg-gradient-to-br from-orange-100 via-orange-50 to-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-orange-200 hover:border-orange-400 hover:shadow-[0_8px_30px_rgb(234,88,12,0.15)] transition-all duration-300 p-8 flex flex-col h-full overflow-hidden relative">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-50 to-transparent rounded-bl-[100px] z-0 opacity-50 group-hover:opacity-100 transition-opacity"></div>
-            
-            <div class="relative z-10 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-sm bg-gradient-to-br from-orange-500 to-orange-600 transform group-hover:-translate-y-1 transition-transform">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+        <div class="group relative bg-white rounded-[2rem] shadow-lg hover:shadow-2xl transition-all duration-500 ease-out p-8 flex flex-col h-full overflow-hidden border border-gray-100 hover:border-orange-300 hover:-translate-y-2">
+            <svg class="absolute -right-6 -bottom-6 w-32 h-32 text-gray-100 opacity-50 transform rotate-12 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 ease-out pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+
+            <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-orange-400 to-orange-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
+
+            <div class="relative z-10 flex items-start justify-between mb-6">
+                <div class="w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center border border-orange-100 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white shadow-inner">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    </div>
+                </div>
+                <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-bold uppercase tracking-wider border border-orange-200">
+                    Academic
+                </span>
             </div>
-            
-            <h3 class="text-xl font-bold text-gray-900 mb-3 relative z-10">PTE Academic</h3>
+
+            <h3 class="text-2xl font-bold text-gray-900 mb-3 relative z-10 group-hover:text-orange-600 transition-colors duration-300 tracking-tight">PTE Academic</h3>
             
             <div class="flex-1 flex flex-col relative z-10">
-                <div class="mb-6 text-sm text-gray-500 space-y-3">
-                    <p class="font-medium text-gray-600 leading-relaxed">Sistem tes integrated skills.</p>
-                    <ul class="space-y-2 mt-4">
-                        <li class="flex items-center gap-2.5">
-                            <div class="w-6 h-6 rounded-full bg-orange-50 flex items-center justify-center text-orange-500">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                            <span class="font-medium">15 Menit</span>
-                        </li>
-                        <li class="flex items-center gap-2.5">
-                            <div class="w-6 h-6 rounded-full bg-orange-50 flex items-center justify-center text-orange-500">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            </div>
-                            <span class="font-medium">Computer Based</span>
-                        </li>
-                    </ul>
+                <p class="text-gray-500 text-sm leading-relaxed mb-6 min-h-[40px]">Sistem tes integrated skills.</p>
+                
+                <div class="space-y-3 mb-8">
+                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-orange-50 group-hover:border-orange-200 transition-colors duration-300">
+                        <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 text-orange-600">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">15 Menit</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-orange-50 group-hover:border-orange-200 transition-colors duration-300">
+                        <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 text-orange-600">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">Computer Based</span>
+                    </div>
                 </div>
-                <div class="mt-auto">
-                    <a href="{{ route('free-test.register.show', 'pte_academic') }}" class="group/btn block w-full text-center text-orange-600 font-bold py-3 px-4 rounded-xl border-2 border-orange-500 hover:bg-orange-600 hover:text-white transition-all duration-300">
-                        Start Free Test <span class="inline-block transform group-hover/btn:translate-x-1 transition-transform">→</span>
+
+                <div class="mt-auto relative">
+                    <a href="{{ route('guest.quick-access', 'pte_academic') }}" class="flex items-center justify-center gap-2 w-full font-bold text-white bg-orange-500 hover:bg-orange-600 py-3.5 px-6 rounded-xl transition-colors duration-300 shadow-md">
+                        <span>Start Free Test</span>
+                        <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                     </a>
                 </div>
             </div>

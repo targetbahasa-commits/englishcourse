@@ -111,6 +111,7 @@
                         <th scope="col" class="px-6 py-4 font-semibold">Specialization Badge</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-center">Mode</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-center">Workload</th>
+                        <th scope="col" class="px-6 py-4 font-semibold text-center">Batches/Class Periods</th>
                         <th scope="col" class="px-6 py-4 font-semibold text-center">Rating</th>
                         <th scope="col" class="px-6 py-4 font-semibold">Status</th>
                         <th scope="col" class="px-6 py-4 text-right font-semibold">Actions</th>
@@ -194,6 +195,23 @@
                                     <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
                                     Inactive
                                 </span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            @php
+                                $batches = $teacher->classes()->orderByDesc('start_date')->get();
+                            @endphp
+                            @if($batches->count())
+                                <ul class="text-xs text-gray-700 text-left">
+                                    @foreach($batches as $batch)
+                                        <li>
+                                            {{ $batch->batch_number ? '[Batch '.$batch->batch_number.'] ' : '' }}{{ $batch->name }}
+                                            <span class="text-gray-400">({{ $batch->program->name ?? 'No Program' }})</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <span class="text-xs text-gray-400 italic">No Class Period</span>
                             @endif
                         </td>
                         <td class="px-6 py-4 text-right">
@@ -310,7 +328,9 @@
                                         <select name="class_id" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
                                             <option value="">-- Choose Unassigned Class --</option>
                                             @foreach($unassignedClasses as $uClass)
-                                                <option value="{{ $uClass->id }}">{{ $uClass->name }} ({{ $uClass->program->name ?? 'No Program' }})</option>
+                                                <option value="{{ $uClass->id }}">
+                                                        {{ $uClass->batch_number ? '[Batch '.$uClass->batch_number.'] ' : '' }}{{ $uClass->name }} — {{ $uClass->program->name ?? 'No Program' }}
+                                                    </option>
                                             @endforeach
                                         </select>
                                     </div>

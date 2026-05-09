@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Application\Broadcast\DispatchBroadcast;
 use App\Http\Controllers\Controller;
-use App\Models\BroadcastMessage;
-use App\Models\User;
-use App\Notifications\BroadcastInboxNotification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 
 class BroadcastMessageController extends Controller
 {
+    public function __construct(
+        private readonly DispatchBroadcast $dispatchBroadcast
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $messages = BroadcastMessage::latest()->paginate(15);
+        $messages = $this->dispatchBroadcast->listAll(15);
         return view('admin.broadcast-messages.index', compact('messages'));
     }
 
@@ -31,7 +32,7 @@ class BroadcastMessageController extends Controller
     /**
      * Store and dispatch the broadcast message.
      */
-    public function store(Request $request, \App\Services\WhatsApp\WhatsAppGatewayInterface $whatsapp)
+    public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -47,41 +48,14 @@ class BroadcastMessageController extends Controller
             return back()->withInput()->withErrors(['channels' => 'Please select at least one delivery channel.']);
         }
 
-        // Create the record
-        $broadcast = BroadcastMessage::create([
-            'title' => $validated['title'],
-            'content' => $validated['content'],
-            'target_role' => $validated['target_role'],
-            'send_via_email' => $sendViaEmail,
-            'send_via_whatsapp' => $sendViaWhatsapp,
-            'send_via_inbox' => $sendViaInbox,
-            'status' => 'processing',
-        ]);
-
-        // Get recipients
-        $query = User::query();
-        if ($validated['target_role'] !== 'all') {
-            $query->where('role', $validated['target_role']);
-        }
-        $users = $query->get();
-        $broadcast->update(['recipients_count' => $users->count()]);
-
-        // Dispatch
-        foreach ($users as $user) {
-            // 1. Inbox (Database Notification) & Email
-            if ($sendViaInbox || $sendViaEmail) {
-                $user->notify(new BroadcastInboxNotification($broadcast));
-            }
-
-            // 2. WhatsApp
-            if ($sendViaWhatsapp && !empty($user->phone_number)) {
-                $whatsapp->sendMessage($user->phone_number, '*' . $broadcast->title . "*\n\n" . $broadcast->content);
-            }
-        }
-
-        $broadcast->update(['status' => 'completed']);
+        $broadcast = $this->dispatchBroadcast->create(
+            $validated,
+            $sendViaEmail,
+            $sendViaWhatsapp,
+            $sendViaInbox
+        );
 
         return redirect()->route('admin.broadcast-messages.index')
-            ->with('success', 'Broadcast message has been dispatched successfully to ' . $users->count() . ' users.');
+            ->with('success', 'Broadcast message has been dispatched successfully to ' . $broadcast->recipients_count . ' users.');
     }
 }

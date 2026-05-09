@@ -144,6 +144,7 @@
                     $c = $colorMap[$mat['color']]; 
                     $dbMeeting = $meetingsMap->get($id);
                     $isLocked = $dbMeeting ? (bool) $dbMeeting->is_locked : false;
+                    $canAccess = !$isLocked || Auth::user()->isAdmin() || Auth::user()->isTeacher();
                 @endphp
                 <div class="bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition group relative flex flex-col h-full border border-gray-100">
                     <div class="flex justify-between items-start mb-6">
@@ -175,7 +176,7 @@
                         </div>
                     </div>
 
-                    @if(!$isLocked)
+                    @if($canAccess)
                         <a href="{{ route('assignments.ielts-academic.reading.material', $id) }}"
                            class="block w-full py-3 {{ $c['btn'] }} text-white text-center rounded-xl font-bold transition shadow-sm hover:shadow active:scale-95">
                             Start Practice

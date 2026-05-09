@@ -427,16 +427,16 @@
                 @endforelse
             </div>
             
-            @if($latestNews->isNotEmpty())
+            @if(!empty($latestNews))
             <a href="#" class="mt-4 block text-center text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors">
                 View All News →
             </a>
             @endif
-        </div>
-        
-    </div> <!-- Close Right Sidebar Column -->
-</div>
-@endcomponent
+
+        </div> <!-- Close Right Sidebar Column -->
+        </div> <!-- Close Main Content Column -->
+    </div> <!-- Close Main Flex Container -->
+    @endcomponent
 
 @push('scripts')
 <script>

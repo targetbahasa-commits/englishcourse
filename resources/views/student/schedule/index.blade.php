@@ -84,7 +84,8 @@
                                         <span class="text-xl font-black leading-none">{{ \Carbon\Carbon::parse($meeting->meeting_date)->format('d') }}</span>
                                     </div>
                                     <div class="flex-1">
-                                        <div class="flex justify-between items-start mb-1">
+                                        <div class="flex flex-col gap-0.5 mb-1">
+                                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $meeting->classPeriod->program->name ?? 'Program' }}</span>
                                             <span class="text-xs font-bold text-indigo-600 tracking-wider uppercase">Meeting {{ $meeting->meeting_number }}</span>
                                         </div>
                                         <h4 class="text-base font-bold text-gray-800 mb-2 leading-tight">
@@ -140,7 +141,10 @@
                                 <tbody class="text-sm divide-y divide-gray-50">
                                     @forelse($pastMeetings as $meeting)
                                         <tr class="hover:bg-gray-50 transition">
-                                            <td class="p-4 font-bold text-gray-800">Meeting {{ $meeting->meeting_number }}</td>
+                                            <td class="p-4 font-bold text-gray-800">
+                                                <div class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-0.5">{{ $meeting->classPeriod->program->name ?? 'Program' }}</div>
+                                                Meeting {{ $meeting->meeting_number }}
+                                            </td>
                                             <td class="p-4 font-medium text-gray-700">
                                                 <div class="line-clamp-2">
                                                     {{ $meeting->topic ?? ($meeting->meeting ? $meeting->meeting->title : 'Topik belum ditentukan') }}

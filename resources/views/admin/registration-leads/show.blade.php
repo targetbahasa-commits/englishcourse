@@ -23,6 +23,36 @@
     @if(session('success'))
         <div class="mb-6 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">{{ session('success') }}</div>
     @endif
+    
+    @if(session('wa_template'))
+        <div class="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-5 shadow-sm">
+            <h3 class="text-base font-bold text-blue-900 mb-2 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Konversi Berhasil!
+            </h3>
+            <p class="text-sm text-blue-800 mb-4">Email dan Invoice sudah terkirim. Silakan copy template pesan di bawah ini untuk dikirimkan secara manual via WhatsApp.</p>
+            
+            <div class="bg-white border border-blue-100 rounded-lg p-4 text-sm text-gray-800 whitespace-pre-wrap font-mono mb-4">{{ session('wa_template') }}</div>
+            
+            <div class="flex flex-wrap gap-3">
+                <button onclick="navigator.clipboard.writeText(`{{ session('wa_template') }}`); alert('Teks berhasil disalin!');" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                    Copy Text
+                </button>
+                @if(session('invoice_url'))
+                    <a href="{{ session('invoice_url') }}" target="_blank" class="flex items-center gap-2 bg-white border border-blue-200 text-blue-700 hover:bg-blue-100 font-semibold px-4 py-2 rounded-lg text-sm transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Buka & Download Invoice PDF
+                    </a>
+                @endif
+                <a href="https://wa.me/62{{ ltrim(preg_replace('/[^0-9]/', '', $lead->whatsapp), '0') }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded-lg text-sm transition">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.134.558 4.143 1.535 5.886L.057 23.857a.5.5 0 00.614.617l6.077-1.475A11.942 11.942 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.693-.519-5.218-1.422l-.374-.222-3.876.942.96-3.785-.245-.389A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+                    Kirim via WA Web
+                </a>
+            </div>
+        </div>
+    @endif
+
     @if(session('error'))
         <div class="mb-6 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">{{ session('error') }}</div>
     @endif
@@ -44,10 +74,16 @@
 
             {{-- Identity Card --}}
             <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                <h3 class="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    Data Diri
-                </h3>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-bold text-gray-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        Data Diri
+                    </h3>
+                    <button @click="isEditing = !isEditing" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        <span x-text="isEditing ? 'Tutup Edit' : 'Edit Lead'"></span>
+                    </button>
+                </div>
                 <div class="grid grid-cols-2 gap-4 text-sm">
                     @foreach([
                         'Nama Lengkap'   => $lead->full_name,
@@ -81,8 +117,13 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                <h3 class="text-base font-bold text-gray-800 mb-4">Edit Lead</h3>
+            <div x-cloak x-show="isEditing" x-transition class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-bold text-gray-800">Edit Lead</h3>
+                    <button type="button" @click="isEditing = false" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
                 <form action="{{ route('admin.registration-leads.update', $lead) }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     @csrf
                     @method('PUT')
@@ -137,7 +178,7 @@
                             <option value="">Belum dipilih</option>
                             @foreach($classPeriods as $period)
                                 <option value="{{ $period->id }}" :disabled="!isBatchVisible('{{ $period->program_id ?? '' }}', '{{ $period->learning_mode }}')" {{ (string) old('class_period_id', $lead->class_period_id) === (string) $period->id ? 'selected' : '' }}>
-                                    {{ $period->program?->name ?? 'Program' }} - {{ $period->name }}
+                                    {{ $period->program?->name ?? 'Program' }} - {{ $period->name }} ({{ ucfirst($period->learning_mode) }}{{ $period->start_date ? ' | ' . $period->start_date->format('d M Y') : '' }})
                                 </option>
                             @endforeach
                         </select>
@@ -284,6 +325,62 @@
                 </div>
             </div>
 
+            {{-- ─── Data Terkait (Payment & Enrollment) ─── --}}
+            @if($lead->converted_user_id)
+            <div class="bg-white rounded-2xl border border-indigo-100 shadow-sm p-6">
+                <h3 class="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                    </svg>
+                    Data Terkait
+                </h3>
+                <div class="mb-4">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">💳 Invoice Pembayaran</p>
+                    @if($relatedPayment)
+                        <div class="bg-gray-50 rounded-xl border border-gray-100 p-3 text-sm space-y-1">
+                            <p class="font-semibold text-gray-800">{{ $relatedPayment->invoice_number }}</p>
+                            <p class="text-gray-500">Program: {{ $relatedPayment->program->name ?? "—" }}</p>
+                            <p class="text-gray-500">Jumlah: Rp{{ number_format(max(0,(int)$relatedPayment->amount - (int)$relatedPayment->discount_amount), 0, ",", ".") }}</p>
+                            <span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold {{ $relatedPayment->status === "paid" ? "bg-green-100 text-green-700" : ($relatedPayment->status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700") }}">
+                                {{ strtoupper($relatedPayment->status) }}
+                            </span>
+                            @if($relatedPayment->paid_at)
+                                <p class="text-xs text-gray-400">Dibayar: {{ $relatedPayment->paid_at->format("d M Y") }}</p>
+                            @endif
+                        </div>
+                        <a href="{{ route("admin.payments.index", ["q" => $relatedPayment->invoice_number]) }}" class="mt-2 inline-flex items-center gap-1 text-xs text-indigo-600 hover:underline">
+                            Lihat di halaman Payments →
+                        </a>
+                    @else
+                        <p class="text-sm text-gray-400 italic">Belum ada invoice.</p>
+                    @endif
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">🎓 Status Enrollment</p>
+                    @if($relatedEnrollment)
+                        <div class="bg-gray-50 rounded-xl border border-gray-100 p-3 text-sm space-y-1">
+                            <span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold {{ $relatedEnrollment->status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600" }}">
+                                {{ strtoupper($relatedEnrollment->status) }}
+                            </span>
+                            <p class="text-gray-500">Kelas: {{ $relatedEnrollment->classPeriod?->name ?? "—" }}</p>
+                            @if($relatedEnrollment->enrolled_at)
+                                <p class="text-xs text-gray-400">Terdaftar: {{ $relatedEnrollment->enrolled_at->format("d M Y") }}</p>
+                            @endif
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-400 italic">Belum terdaftar di kelas.</p>
+                    @endif
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <a href="{{ route("students.show", $lead->convertedUser) }}" class="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        Lihat Profil Student Lengkap
+                    </a>
+                </div>
+            </div>
+            @endif
+
+
         </div>
 
         {{-- Right: Status & Admin --}}
@@ -339,17 +436,57 @@
                     <form action="{{ route('admin.registration-leads.convert', $lead) }}" method="POST" class="mt-4 pt-4 border-t border-gray-100">
                         @csrf
                         <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-xl text-sm transition"
-                                onclick="return confirm('Konversi lead ini menjadi akun student sekarang?')">
-                            Convert Jadi Student
+                                onclick="return confirm('Konfirmasi bukti transfer dan konversi lead ini menjadi akun student sekarang?')">
+                            Konfirmasi Transfer & Convert
                         </button>
                     </form>
                 @elseif($lead->convertedUser)
-                    <div class="mt-4 pt-4 border-t border-gray-100 space-y-2">
-                        <a href="https://wa.me/62{{ ltrim(preg_replace('/[^0-9]/', '', $lead->whatsapp), '0') }}?text={{ urlencode('Halo ' . $lead->full_name . ', akun student kamu sudah dibuat. Silakan login menggunakan email ' . $lead->convertedUser->email . '.') }}"
-                           target="_blank" rel="noopener noreferrer"
-                           class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-xl text-sm transition">
-                            Kirim Info Login via WhatsApp
-                        </a>
+                    <div class="mt-4 pt-4 border-t border-gray-100 space-y-3">
+                        @php
+                            $passwordText = $lead->password ? "Password: (Sesuai yang Anda buat saat pendaftaran)\n\nSilakan login ke " . url('/login') . "\n" : "Password sementara Anda telah dikirimkan via email beserta invoice.\n\nSilakan login ke " . url('/login') . " dan segera ubah password Anda.\n";
+                            
+                            $payment = \App\Models\Payment::where('user_id', $lead->converted_user_id)->where('status', 'paid')->latest()->first();
+                            $invoiceUrl = $payment ? asset('storage/invoices/invoice-' . $payment->invoice_number . '.pdf') : null;
+                            
+                            $invoiceText = "";
+                            if ($payment) {
+                                $formattedAmount = "Rp " . number_format($payment->amount, 0, ',', '.');
+                                $invoiceText = "No. Invoice: {$payment->invoice_number}\nTotal Pembayaran: {$formattedAmount}\n\n";
+                            }
+                            
+                            $waMsg = "Halo {$lead->full_name},\n\n" .
+                                "Pendaftaran Anda di Target Bahasa telah berhasil dikonfirmasi!\n\n" .
+                                "Berikut adalah detail akses akun Anda:\n" .
+                                "Email: {$lead->convertedUser->email}\n" .
+                                $passwordText . "\n" .
+                                $invoiceText .
+                                "Invoice dan detail lebih lengkap juga telah kami kirimkan ke email Anda.\n\n" .
+                                "Terima kasih!";
+                        @endphp
+                        
+                        <p class="text-xs font-semibold text-gray-700">Template Pesan WhatsApp:</p>
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-800 whitespace-pre-wrap font-mono break-words break-all">{{ $waMsg }}</div>
+                        
+                        <div class="flex flex-col gap-2">
+                            <button type="button" onclick="navigator.clipboard.writeText(`{{ $waMsg }}`); alert('Teks berhasil disalin!');" class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl text-sm transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                Copy Text
+                            </button>
+                            
+                            @if($invoiceUrl)
+                            <a href="{{ $invoiceUrl }}" target="_blank" class="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold py-2 rounded-xl text-sm transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Buka & Download Invoice PDF
+                            </a>
+                            @endif
+                            
+                            <a href="https://wa.me/62{{ ltrim(preg_replace('/[^0-9]/', '', $lead->whatsapp), '0') }}?text={{ urlencode($waMsg) }}"
+                               target="_blank" rel="noopener noreferrer"
+                               class="w-full text-center flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 rounded-xl text-sm transition">
+                               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.134.558 4.143 1.535 5.886L.057 23.857a.5.5 0 00.614.617l6.077-1.475A11.942 11.942 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.693-.519-5.218-1.422l-.374-.222-3.876.942.96-3.785-.245-.389A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+                                Kirim via WA Web
+                            </a>
+                        </div>
                     </div>
                 @endif
             </div>
@@ -393,6 +530,7 @@
 <script>
 function leadEditor() {
     return {
+        isEditing: {{ $errors->any() ? 'true' : 'false' }},
         confirmDelete: false,
         form: {
             program_id: '{{ old('program_id', $lead->program_id) }}',
@@ -409,11 +547,14 @@ function leadEditor() {
                 return;
             }
 
-            const batchMap = @json($classPeriods->map(fn ($period) => [
-                'id' => (string) $period->id,
-                'program_id' => (string) ($period->program_id ?? ''),
-                'learning_mode' => $period->learning_mode,
-            ])->values());
+            @php
+                $mappedBatches = $classPeriods->map(fn ($period) => [
+                    'id' => (string) $period->id,
+                    'program_id' => (string) ($period->program_id ?? ''),
+                    'learning_mode' => $period->learning_mode,
+                ])->values();
+            @endphp
+            const batchMap = @json($mappedBatches);
 
             const selected = batchMap.find((item) => item.id === String(this.form.class_period_id));
             if (!selected) {

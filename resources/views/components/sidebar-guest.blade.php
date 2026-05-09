@@ -1,16 +1,59 @@
 {{-- Guest Sidebar Component --}}
-<aside class="w-64 bg-white shadow-md fixed h-full z-10 hidden md:block">
+<style>
+    .guest-sidebar-shell {
+        width: 16rem;
+    }
+
+    @media (min-width: 768px) {
+        body.has-guest-sidebar main {
+            margin-left: var(--guest-sidebar-offset, 16rem) !important;
+            transition: margin-left .2s ease;
+        }
+
+        .guest-sidebar-shell {
+            width: var(--guest-sidebar-width, 16rem);
+        }
+
+        body.sidebar-collapsed main {
+            margin-left: 4rem !important;
+        }
+    }
+
+    .sidebar-collapsed .sidebar-title,
+    .sidebar-collapsed .sidebar-menu p,
+    .sidebar-collapsed .sidebar-menu .sidebar-cta {
+        display: none;
+    }
+
+    .sidebar-collapsed .sidebar-menu nav a,
+    .sidebar-collapsed .sidebar-menu nav button {
+        justify-content: center;
+        padding-left: 0.625rem;
+        padding-right: 0.625rem;
+        font-size: 0;
+    }
+
+    .sidebar-collapsed .sidebar-menu nav a svg,
+    .sidebar-collapsed .sidebar-menu nav button svg {
+        margin-right: 0;
+        flex-shrink: 0;
+    }
+</style>
+<div>
+<aside class="guest-sidebar-shell bg-white shadow-md fixed h-full z-10 hidden md:block transition-all duration-200">
     <div class="flex flex-col h-full">
         <div class="flex-1 overflow-y-auto pb-4">
 
             {{-- Brand --}}
-            <div class="p-6 flex items-center gap-3">
-                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">TB</div>
-                <span class="text-xl font-bold text-gray-800">Target Bahasa</span>
+            <div class="p-6 flex items-center gap-3 justify-between relative">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">TB</div>
+                    <span class="sidebar-title text-xl font-bold text-gray-800">Target Bahasa</span>
+                </div>
             </div>
 
             {{-- Free Test Section --}}
-            <div class="px-6 py-4">
+            <div class="sidebar-menu px-6 py-4">
                 <p class="text-xs font-semibold text-gray-400 mb-4 uppercase tracking-wider">Explore</p>
                 <nav class="space-y-1">
                     {{-- Free Lesson --}}
@@ -52,11 +95,11 @@
             </div>
 
             {{-- CTA to Register --}}
-            <div class="px-6 mt-4">
+            <div class="sidebar-menu sidebar-cta px-6 mt-4">
                 <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-4 text-white">
                     <p class="text-sm font-bold mb-1">🎯 Mulai Belajar</p>
                     <p class="text-xs text-blue-100 mb-3">Daftar sekarang untuk mengakses semua fitur belajar.</p>
-                    <a href="{{ route('student.register') }}" class="block text-center bg-white text-blue-700 font-bold text-xs py-2 px-3 rounded-lg hover:bg-blue-50 transition">
+                    <a href="{{ route('student.register.entry') }}" class="block text-center bg-white text-blue-700 font-bold text-xs py-2 px-3 rounded-lg hover:bg-blue-50 transition">
                         Daftar Gratis
                     </a>
                 </div>
@@ -65,7 +108,7 @@
         </div>
 
         {{-- Footer Auth Links --}}
-        <div class="mt-auto px-6 py-6 border-t border-gray-100 bg-white flex-shrink-0">
+        <div class="sidebar-menu mt-auto px-6 py-6 border-t border-gray-100 bg-white flex-shrink-0">
             <nav class="space-y-1 mb-4">
                 <a href="{{ url('/') }}" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-xl font-medium transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
@@ -87,7 +130,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
                         Log In
                     </a>
-                    <a href="{{ route('student.register') }}" class="flex items-center gap-3 px-4 py-3 text-blue-600 hover:bg-blue-50 rounded-xl font-medium transition">
+                    <a href="{{ route('student.register.entry') }}" class="flex items-center gap-3 px-4 py-3 text-blue-600 hover:bg-blue-50 rounded-xl font-medium transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
                         Sign Up
                     </a>
@@ -96,3 +139,4 @@
         </div>
     </div>
 </aside>
+</div>

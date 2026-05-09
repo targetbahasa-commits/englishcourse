@@ -31,7 +31,7 @@
         <form method="GET" action="{{ route('class-periods.index') }}" class="flex gap-4 mb-6">
                  <select name="program_id" onchange="this.form.submit()" class="rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 shadow-sm">
                     <option value="">All Programs</option>
-                    @foreach (\App\Models\Program::all() as $program)
+                    @foreach (\App\Models\Program::whereNot('slug', 'like', 'cambridge-%')->whereNot('slug', 'like', 'toefl-itp-mock-package-%')->get() as $program)
                         <option value="{{ $program->id }}" {{ request('program_id') == $program->id ? 'selected' : '' }}>
                             {{ $program->name }}
                         </option>
@@ -46,7 +46,7 @@
             </form>
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100">
-                @if($periods->isEmpty())
+                @if(empty($periods))
                     <!-- Empty State -->
                     <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
                         <div class="bg-gray-50 p-4 rounded-full mb-4">
@@ -66,6 +66,7 @@
                                 <tr class="bg-gray-50">
                                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Class Period Name</th>
                                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Program</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Teacher</th>
                                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date Range</th>
                                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Mode</th>
                                     <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Students</th>
@@ -77,12 +78,27 @@
                                 @foreach ($periods as $period)
                                     <tr class="hover:bg-gray-50 transition-colors">
                                         <td class="px-6 py-4 whitespace-nowrap">
+                                            @if($period->batch_number)
+                                                <span class="inline-flex items-center justify-center bg-blue-100 text-blue-800 rounded px-2 py-0.5 text-xs font-bold mb-1">Batch {{ $period->batch_number }}</span>
+                                            @endif
                                             <div class="text-sm font-bold text-gray-900">{{ $period->name }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                                 {{ $period->program ? $period->program->name : 'All Programs' }}
                                             </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if($period->teacher)
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold shrink-0">
+                                                        {{ strtoupper(substr($period->teacher->name, 0, 1)) }}
+                                                    </div>
+                                                    <span class="text-sm text-gray-800 font-medium">{{ $period->teacher->name }}</span>
+                                                </div>
+                                            @else
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-400 italic">Unassigned</span>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm text-gray-900">{{ $period->start_date ? $period->start_date->format('M d, Y') : 'TBD' }}</div>
@@ -135,20 +151,42 @@
         <div class="p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-4">Create New Class Period</h2>
             
-            <form method="POST" action="{{ route('class-periods.store') }}" class="space-y-4" x-data="classPeriodDateForm()">
+            <form method="POST" action="{{ route('class-periods.store') }}" class="space-y-4" x-data="classPeriodForm()">
                 @csrf
                 
                 <div>
                     <x-input-label for="program_id" value="Program" />
-                     <select name="program_id" id="program_id" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full" required>
-                        @foreach (\App\Models\Program::all() as $program)
+                    <select name="program_id" id="program_id"
+                            x-model="programId"
+                            @change="fetchBatchNumber($event.target.value)"
+                            class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full" required>
+                        <option value="">-- Select Program --</option>
+                        @foreach (\App\Models\Program::whereNot('slug', 'like', 'cambridge-%')->whereNot('slug', 'like', 'toefl-itp-mock-package-%')->get() as $program)
                             <option value="{{ $program->id }}">{{ $program->name }}</option>
                         @endforeach
                     </select>
-                    <p class="text-xs text-gray-500 mt-1">Select the curriculum program for this batch.</p>
+                    <p class="text-xs text-gray-500 mt-1">Pilih program untuk batch ini.</p>
                 </div>
 
                 <input type="hidden" name="batch_type" value="regular">
+                <input type="hidden" name="batch_number" :value="batchNumber">
+
+                <div>
+                    <x-input-label for="batch_number_preview" value="Batch Number (Auto)" />
+                    <div class="mt-1 relative flex items-center">
+                        <input type="text" id="batch_number_preview"
+                               :value="batchNumber ? 'Batch #' + batchNumber : '\u2014 (pilih program dulu)'"
+                               class="block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm text-sm text-gray-600 px-3 py-2 focus:outline-none"
+                               readonly>
+                        <div x-show="fetchingBatch" class="absolute right-3">
+                            <svg class="animate-spin h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Nomor batch dikalkulasi otomatis berdasarkan riwayat program.</p>
+                </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -164,7 +202,19 @@
                 <div>
                     <x-input-label for="name" value="Period Name (Auto)" />
                     <x-text-input id="name" name="name" type="text" class="mt-1 block w-full bg-gray-50" x-model="periodName" readonly required />
-                    <p class="text-xs text-gray-500 mt-1">Nama batch dibuat otomatis berdasarkan tanggal periode.</p>
+                    <p class="text-xs text-gray-500 mt-1">Nama batch dibuat otomatis berdasarkan program dan tanggal.</p>
+                </div>
+
+                <div>
+                    <x-input-label for="teacher_id_create" value="Teacher (Optional)" />
+                    <select name="teacher_id" id="teacher_id_create"
+                            class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full">
+                        <option value="">— Unassigned (dapat diassign menyusul) —</option>
+                        @foreach (\App\Models\User::where('role', 'teacher')->orderBy('name')->get() as $t)
+                            <option value="{{ $t->id }}">{{ $t->name }}</option>
+                        @endforeach
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Pengajar dapat di-assign setelah batch dibuat.</p>
                 </div>
                 
                  <div>
@@ -205,29 +255,50 @@
     </x-modal>
 
     <script>
-        function classPeriodDateForm() {
+        function classPeriodForm() {
             return {
+                programId: '',
+                batchNumber: '',
+                fetchingBatch: false,
                 startDate: '',
                 endDate: '',
                 periodName: '',
-                syncName() {
-                    if (!this.startDate || !this.endDate) {
-                        this.periodName = '';
+
+                async fetchBatchNumber(programId) {
+                    if (!programId) {
+                        this.batchNumber = '';
+                        this.syncName();
                         return;
                     }
+                    this.fetchingBatch = true;
+                    try {
+                        const res = await fetch(`/admin/class-periods/next-batch-number?program_id=${programId}`, {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+                        const data = await res.json();
+                        this.batchNumber = data.next_batch_number;
+                    } catch (e) {
+                        this.batchNumber = '';
+                    } finally {
+                        this.fetchingBatch = false;
+                    }
+                    this.syncName();
+                },
+
+                syncName() {
+                    if (!this.startDate || !this.endDate) return;
 
                     const start = new Date(this.startDate + 'T00:00:00');
-                    const end = new Date(this.endDate + 'T00:00:00');
+                    const end   = new Date(this.endDate   + 'T00:00:00');
 
-                    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-                        this.periodName = '';
-                        return;
-                    }
+                    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return;
 
-                    const locale = 'id-ID';
+                    const locale     = 'id-ID';
                     const startLabel = start.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
-                    const endLabel = end.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
-                    this.periodName = `Batch ${startLabel} - ${endLabel}`;
+                    const endLabel   = end.toLocaleDateString(locale,   { day: '2-digit', month: 'short', year: 'numeric' });
+
+                    const batchStr  = this.batchNumber ? `Batch ${this.batchNumber} - ` : 'Batch ';
+                    this.periodName = `${batchStr}${startLabel} to ${endLabel}`;
                 }
             };
         }

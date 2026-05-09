@@ -2,24 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Application\WHV\GetFeaturedWHVApplication;
 use App\Models\WHVApplication;
 
 class WHVApplicationController extends Controller
 {
-    /**
-     * Display the dedicated WHV information page.
-     */
+    public function __construct(
+        private readonly GetFeaturedWHVApplication $getFeaturedWHVApplication,
+    ) {
+    }
+
     public function index()
     {
-        $featuredApplication = WHVApplication::where('is_active', true)
-            ->where('status', 'open')
-            ->where(function ($q) {
-                $q->whereNull('application_deadline')
-                  ->orWhere('application_deadline', '>=', now()->startOfDay());
-            })
-            ->orderByRaw('opening_date IS NULL, opening_date DESC')
-            ->orderBy('created_at', 'desc')
-            ->first();
+        $featuredApplication = $this->getFeaturedWHVApplication->handle();
 
         return view('whv-applications.index', [
             'featuredApplication' => $featuredApplication,
