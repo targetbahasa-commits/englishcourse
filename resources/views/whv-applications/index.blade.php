@@ -370,7 +370,7 @@
             </div>
 
             <div class="mt-5 grid gap-4 xl:grid-cols-2">
-                <article class="rounded-[1.6rem] border border-blue-100 bg-white/95 p-4 transition-all duration-300 hover:shadow-md hover:shadow-blue-500/10 sm:p-5" style="background-image: linear-gradient(180deg, rgba(239,246,255,0.82), rgba(255,255,255,0.96)), url('{{ $whvContextBackground }}'); background-size: cover; background-position: center;">
+                <article class="rounded-[1.6rem] border border-blue-100 bg-gradient-to-b from-blue-50/70 to-white p-4 transition-all duration-300 hover:shadow-md hover:shadow-blue-500/10 sm:p-5">
                     <p class="text-xs font-bold uppercase tracking-[0.14em] text-blue-700/90">Kanal Informasi Resmi (Wajib Pantau)</p>
                     <p class="mt-1.5 text-sm leading-6 text-slate-600">Karena istilah War muncul karena kuota sering habis dalam hitungan menit, pantau kanal resmi berikut agar tidak tertinggal.</p>
 
