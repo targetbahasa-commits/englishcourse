@@ -14,13 +14,20 @@
         </div>
     </div>
 @else
-    <div class="-mx-4 px-4 py-6 pb-24 md:-mx-8 md:px-8 md:py-8 md:pb-8">
+    @php
+        $whvPageBackground = asset('images/background-container/background-container.png');
+        $whvHeroBackground = asset('images/background-container/background-container1.png');
+        $whvGuideBackground = asset('images/background-container/background-kelas.png');
+        $whvContextBackground = asset('images/background-container/referensi-background-kelas.png');
+    @endphp
+    <div class="relative -mx-4 overflow-hidden px-4 py-6 pb-24 md:-mx-8 md:px-8 md:py-8 md:pb-8" style="background: linear-gradient(180deg, #7DD3C0 0%, #A8DFD0 25%, #D4E8D4 50%, #F4C9B8 75%, #F4B5A0 100%); background-size: cover; background-position: center top; background-attachment: scroll;">
+        <div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-white/20"></div>
         <!-- Hero Section -->
-        <section data-whv-section="hero" class="relative overflow-hidden rounded-[2.25rem] bg-gradient-to-r from-cyan-50 via-amber-50 to-rose-50 px-6 py-8 shadow-xl ring-1 ring-cyan-200 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
+            <section data-whv-section="hero" class="relative overflow-hidden rounded-[2.25rem] bg-cover bg-center px-6 py-8 shadow-xl ring-1 ring-white/40 sm:px-8 sm:py-10 lg:px-10 lg:py-12" style="background: linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(255, 245, 240, 0.88));">
             <!-- Decorative Elements -->
-            <div class="absolute inset-0 bg-gradient-to-br from-cyan-100/30 via-transparent to-amber-100/30"></div>
-            <div class="absolute -right-6 top-6 h-64 w-64 rounded-full bg-cyan-300/35 blur-3xl"></div>
-            <div class="absolute bottom-6 left-6 h-40 w-40 rounded-full bg-amber-300/35 blur-3xl"></div>
+                <div class="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-orange-100/15"></div>
+                <div class="absolute -right-6 top-6 h-64 w-64 rounded-full bg-cyan-200/35 blur-3xl"></div>
+                <div class="absolute bottom-6 left-6 h-40 w-40 rounded-full bg-amber-200/30 blur-3xl"></div>
             
             <div class="relative grid gap-10 xl:grid-cols-[1.3fr_0.7fr] xl:items-start">
                 <div>
@@ -88,11 +95,11 @@
 
                 <!-- Visa Snapshot Card -->
                 <div class="relative">
-                    <div class="absolute -inset-1 rounded-[2.5rem] bg-cyan-300/40 blur-xl"></div>
-                    <div class="relative rounded-[2rem] bg-slate-900 p-8 text-white shadow-2xl ring-1 ring-cyan-200/30">
-                        <div class="flex items-center justify-between border-b border-white/20 pb-6">
+                    <div class="absolute -inset-1 rounded-[2.5rem] bg-cyan-200/55 blur-xl"></div>
+                    <div class="relative rounded-[2rem] bg-white/92 p-8 text-slate-900 shadow-2xl ring-1 ring-cyan-100 backdrop-blur-sm">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-6">
                             <div>
-                                <p class="text-xs font-bold uppercase tracking-[0.2em] text-cyan-100">Visa Snapshot</p>
+                                <p class="text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">Visa Snapshot</p>
                                 <h2 class="mt-2 text-3xl font-black">Subclass 462</h2>
                             </div>
                             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-300 to-orange-400 text-white shadow-lg shadow-orange-300/40">
@@ -101,26 +108,26 @@
                         </div>
 
                         <div class="mt-8 grid grid-cols-2 gap-4">
-                            <div class="rounded-2xl bg-white/10 p-4 ring-1 ring-white/20 transition hover:bg-white/15">
-                                <div class="text-[10px] font-bold uppercase tracking-wider text-cyan-100/80">Usia</div>
-                                <div class="mt-1 text-lg font-bold text-white">{{ $featuredApplication->age_requirement ?: '18-30' }}</div>
+                            <div class="rounded-2xl bg-cyan-50/90 p-4 ring-1 ring-cyan-100 transition hover:bg-cyan-100/90">
+                                <div class="text-[10px] font-bold uppercase tracking-wider text-cyan-700/80">Usia</div>
+                                <div class="mt-1 text-lg font-bold text-slate-900">{{ $featuredApplication->age_requirement ?: '18-30' }}</div>
                             </div>
-                            <div class="rounded-2xl bg-white/10 p-4 ring-1 ring-white/20 transition hover:bg-white/15">
-                                <div class="text-[10px] font-bold uppercase tracking-wider text-cyan-100/80">Durasi</div>
-                                <div class="mt-1 text-lg font-bold text-white">{{ $featuredApplication->visa_duration ?: '12 Bulan' }}</div>
+                            <div class="rounded-2xl bg-cyan-50/90 p-4 ring-1 ring-cyan-100 transition hover:bg-cyan-100/90">
+                                <div class="text-[10px] font-bold uppercase tracking-wider text-cyan-700/80">Durasi</div>
+                                <div class="mt-1 text-lg font-bold text-slate-900">{{ $featuredApplication->visa_duration ?: '12 Bulan' }}</div>
                             </div>
-                            <div class="rounded-2xl bg-white/10 p-4 ring-1 ring-white/20 transition hover:bg-white/15">
-                                <div class="text-[10px] font-bold uppercase tracking-wider text-cyan-100/80">Biaya Visa</div>
-                                <div class="mt-1 text-lg font-bold text-white">{{ $featuredApplication->application_fee ?: 'AUD 635+' }}</div>
+                            <div class="rounded-2xl bg-cyan-50/90 p-4 ring-1 ring-cyan-100 transition hover:bg-cyan-100/90">
+                                <div class="text-[10px] font-bold uppercase tracking-wider text-cyan-700/80">Biaya Visa</div>
+                                <div class="mt-1 text-lg font-bold text-slate-900">{{ $featuredApplication->application_fee ?: 'AUD 635+' }}</div>
                             </div>
-                            <div class="rounded-2xl bg-white/10 p-4 ring-1 ring-white/20 transition hover:bg-white/15">
-                                <div class="text-[10px] font-bold uppercase tracking-wider text-cyan-100/80">Proses</div>
-                                <div class="mt-1 text-lg font-bold text-white">{{ $featuredApplication->processing_time ?: 'Bervariasi' }}</div>
+                            <div class="rounded-2xl bg-cyan-50/90 p-4 ring-1 ring-cyan-100 transition hover:bg-cyan-100/90">
+                                <div class="text-[10px] font-bold uppercase tracking-wider text-cyan-700/80">Proses</div>
+                                <div class="mt-1 text-lg font-bold text-slate-900">{{ $featuredApplication->processing_time ?: 'Bervariasi' }}</div>
                             </div>
                         </div>
                         
                         @if($featuredApplication->sponsored_by)
-                        <div class="mt-6 flex items-center gap-3 rounded-xl bg-emerald-500/10 p-4 text-sm text-emerald-200 ring-1 ring-emerald-500/20">
+                        <div class="mt-6 flex items-center gap-3 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-700 ring-1 ring-emerald-100">
                             <svg class="h-5 w-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             <span>{{ $featuredApplication->sponsored_by }}</span>
                         </div>
@@ -350,7 +357,7 @@
             </article>
         </div>
 
-        <section data-whv-section="war-info-panels" class="mt-6 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:p-6">
+        <section data-whv-section="war-info-panels" class="mt-6 rounded-[2rem] bg-cover bg-center p-5 shadow-sm ring-1 ring-slate-200 sm:p-6" style="background-image: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.96)), url('{{ $whvGuideBackground }}');">
             <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
                     <p class="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">War Preparation Guide</p>
@@ -363,7 +370,7 @@
             </div>
 
             <div class="mt-5 grid gap-4 xl:grid-cols-2">
-                <article class="rounded-[1.6rem] border border-blue-100 bg-gradient-to-b from-blue-50/70 to-white p-4 transition-all duration-300 hover:shadow-md hover:shadow-blue-500/10 sm:p-5">
+                <article class="rounded-[1.6rem] border border-blue-100 bg-white/95 p-4 transition-all duration-300 hover:shadow-md hover:shadow-blue-500/10 sm:p-5" style="background-image: linear-gradient(180deg, rgba(239,246,255,0.82), rgba(255,255,255,0.96)), url('{{ $whvContextBackground }}'); background-size: cover; background-position: center;">
                     <p class="text-xs font-bold uppercase tracking-[0.14em] text-blue-700/90">Kanal Informasi Resmi (Wajib Pantau)</p>
                     <p class="mt-1.5 text-sm leading-6 text-slate-600">Karena istilah War muncul karena kuota sering habis dalam hitungan menit, pantau kanal resmi berikut agar tidak tertinggal.</p>
 
@@ -742,22 +749,22 @@
         </section>
 
         <!-- CTA Footer -->
-           <section data-whv-section="final_cta" class="mt-8 rounded-[2.5rem] bg-slate-900 p-8 text-center text-white shadow-2xl shadow-cyan-900/20 ring-1 ring-cyan-200/30 sm:p-12 relative overflow-hidden">
-               <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-transparent to-amber-400/10"></div>
+           <section data-whv-section="final_cta" class="mt-8 rounded-[2.5rem] p-8 text-center text-white shadow-2xl shadow-cyan-900/20 ring-1 ring-cyan-200/30 sm:p-12 relative overflow-hidden" style="background-image: url('{{ asset('images/whv/footerwhv.jpg') }}'); background-size: cover; background-position: center; background-color: #1f2937;">
+               <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950 to-slate-950"></div>
              <div class="relative">
-            <p class="text-xs font-bold uppercase tracking-[0.2em] text-amber-200/90">Ready to Start?</p>
-                <h2 class="mt-3 text-3xl font-black">Ready to Start Your WHV Journey?</h2>
-                <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-300">Mulai dari tes bahasa Inggris, rapikan dokumen, lalu masuk ke jalur aplikasi resmi dengan persiapan yang matang.</p>
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-amber-200" style="text-shadow: 0 2px 8px rgba(0,0,0,0.8);">Ready to Start?</p>
+                <h2 class="mt-3 text-3xl font-black" style="text-shadow: 0 3px 12px rgba(0,0,0,0.9);">Ready to Start Your WHV Journey?</h2>
+                <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white" style="text-shadow: 0 2px 8px rgba(0,0,0,0.9);">Mulai dari tes bahasa Inggris, rapikan dokumen, lalu masuk ke jalur aplikasi resmi dengan persiapan yang matang.</p>
 
                 <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                    <a href="{{ route('guest.free-tests') }}" data-whv-cta="footer_free_test" data-whv-preserve-attribution="true" class="inline-flex min-w-[200px] items-center justify-center rounded-2xl bg-amber-300 px-8 py-4 text-sm font-black text-slate-900 shadow-lg shadow-amber-300/30 transition hover:bg-yellow-300 hover:-translate-y-1">
+                    <a href="{{ route('guest.free-tests') }}" data-whv-cta="footer_free_test" data-whv-preserve-attribution="true" class="inline-flex min-w-[200px] items-center justify-center rounded-2xl bg-amber-400 px-8 py-4 text-sm font-black text-slate-900 shadow-lg shadow-amber-400/40 transition hover:bg-amber-500 hover:-translate-y-1">
                         <span data-whv-copy-key="footer_test">Take Free English Test</span>
                     </a>
-                    <a href="{{ route('student.register') }}" data-whv-cta="footer_register_now" data-whv-preserve-attribution="true" class="inline-flex min-w-[200px] items-center justify-center rounded-2xl bg-sky-500 px-8 py-4 text-sm font-black text-white shadow-lg shadow-sky-500/30 transition hover:bg-sky-400 hover:-translate-y-1">
+                    <a href="{{ route('student.register') }}" data-whv-cta="footer_register_now" data-whv-preserve-attribution="true" class="inline-flex min-w-[200px] items-center justify-center rounded-2xl bg-blue-600 px-8 py-4 text-sm font-black text-white shadow-lg shadow-blue-600/40 transition hover:bg-blue-700 hover:-translate-y-1">
                         <span data-whv-copy-key="footer_register">Register Now</span>
                     </a>
                     @if($featuredApplication->url)
-                        <a href="{{ $featuredApplication->url }}" data-whv-cta="footer_official_website" target="_blank" rel="noopener noreferrer" class="inline-flex min-w-[200px] items-center justify-center rounded-2xl border border-white/20 bg-white/5 px-8 py-4 text-sm font-black text-white hover:bg-white/10 transition">
+                        <a href="{{ $featuredApplication->url }}" data-whv-cta="footer_official_website" target="_blank" rel="noopener noreferrer" class="inline-flex min-w-[200px] items-center justify-center rounded-2xl border border-emerald-300 bg-emerald-400 px-8 py-4 text-sm font-black text-slate-900 shadow-lg shadow-emerald-400/40 transition hover:bg-emerald-500 hover:-translate-y-1">
                             Official Website
                         </a>
                     @endif
