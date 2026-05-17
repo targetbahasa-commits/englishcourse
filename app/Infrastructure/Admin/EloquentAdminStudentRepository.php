@@ -90,7 +90,7 @@ class EloquentAdminStudentRepository implements AdminStudentRepository
     public function getRecentActivity(int $userId): mixed
     {
         return MeetingScore::where('user_id', $userId)
-            ->with('classMeeting.assignment')
+            ->with('program')
             ->orderByDesc('submitted_at')
             ->limit(10)
             ->get();

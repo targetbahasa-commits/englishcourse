@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Auth;
 
 class AssignmentController extends Controller
 {
+    private const TEMP_FULL_ASSIGNMENT_ACCESS_EMAILS = [
+        'student4@dummy.com',
+    ];
+
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
@@ -113,6 +117,24 @@ class AssignmentController extends Controller
             return [];
         }
 
+        if ($this->hasTemporaryFullAssignmentAccess($user)) {
+            $allProgramSlugs = \App\Models\Program::query()
+                ->where('is_active', true)
+                ->pluck('slug')
+                ->filter()
+                ->map(fn ($slug) => $this->normalizeAssignmentProgramSlug($slug))
+                ->all();
+
+            return array_values(array_unique(array_filter(array_merge($allProgramSlugs, [
+                'grammar-for-writing',
+                'toefl-itp',
+                'pte-academic',
+                'ielts-academic',
+                'ielts-general',
+                'speaking',
+            ]))));
+        }
+
         // Only allow the program assigned to the user (from registration)
         $allowedProgramSlugs = [];
         if ($user->program && $user->program->slug) {
@@ -154,6 +176,10 @@ class AssignmentController extends Controller
             return true;
         }
 
+        if ($this->hasTemporaryFullAssignmentAccess($user)) {
+            return true;
+        }
+
         $allowedProgramSlugs = $this->resolveAllowedAssignmentProgramSlugsForUser($user);
 
         if ($allowedProgramSlugs === []) {
@@ -161,6 +187,17 @@ class AssignmentController extends Controller
         }
 
         return in_array($requiredProgramSlug, $allowedProgramSlugs, true);
+    }
+
+    private function hasTemporaryFullAssignmentAccess($user): bool
+    {
+        if (!$user || !$user->isStudent()) {
+            return false;
+        }
+
+        $email = strtolower((string) $user->email);
+
+        return in_array($email, self::TEMP_FULL_ASSIGNMENT_ACCESS_EMAILS, true);
     }
 
     public function ieltsListeningIndex()

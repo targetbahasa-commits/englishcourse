@@ -70,11 +70,15 @@ class EloquentAdminRepository implements AdminRepository
                     'users.name',
                     'users.role',
                     'programs.name as assigned_program_name',
+                    'sessions.payload as session_payload',
                     'sessions.last_activity as activity_at'
                 )
                 ->get(),
             fn (object $row): ?int => is_numeric($row->activity_at ?? null) ? (int) $row->activity_at : null,
-            fn (object $row): string => $row->assigned_program_name ?: 'Student Dashboard'
+            fn (object $row): string => $this->inferProgramFromSessionPayload(
+                $row->session_payload ?? null,
+                $row->assigned_program_name ?: 'Student Dashboard'
+            )
         );
 
         $rememberLatestActivity(
@@ -258,6 +262,62 @@ class EloquentAdminRepository implements AdminRepository
             'toefl_itp' => 'Free Test TOEFL ITP',
             'pte_academic' => 'Free Test PTE Academic',
             default => 'Free Test ' . str_replace('_', ' ', strtoupper($testType)),
+        };
+    }
+
+    private function inferProgramFromSessionPayload(?string $payload, string $fallback): string
+    {
+        if (!$payload) {
+            return $fallback;
+        }
+
+        $decoded = base64_decode($payload, true);
+        if ($decoded === false || $decoded === '') {
+            return $fallback;
+        }
+
+        $data = @unserialize($decoded, ['allowed_classes' => false]);
+        if (!is_array($data)) {
+            return $fallback;
+        }
+
+        $url = null;
+
+        if (isset($data['_previous']) && is_array($data['_previous'])) {
+            $url = $data['_previous']['url'] ?? null;
+        }
+
+        if (!$url && isset($data['url.intended']) && is_string($data['url.intended'])) {
+            $url = $data['url.intended'];
+        }
+
+        if (!is_string($url) || trim($url) === '') {
+            return $fallback;
+        }
+
+        return $this->mapUrlToProgramName($url, $fallback);
+    }
+
+    private function mapUrlToProgramName(string $url, string $fallback): string
+    {
+        $path = strtolower((string) parse_url($url, PHP_URL_PATH));
+
+        if ($path === '') {
+            return $fallback;
+        }
+
+        return match (true) {
+            str_starts_with($path, '/assignments/grammar-writing') => 'Grammar for Writing',
+            str_starts_with($path, '/assignments/toefl-itp') => 'TOEFL ITP',
+            str_starts_with($path, '/assignments/pte-academic') => 'PTE Academic',
+            str_starts_with($path, '/assignments/ielts-general') => 'IELTS General',
+            str_starts_with($path, '/assignments/ielts-academic'),
+            str_starts_with($path, '/assignments/ielts/') => 'IELTS Academic',
+            str_starts_with($path, '/assignments/speaking') => 'Speaking',
+            str_starts_with($path, '/assignments') => $fallback === 'Student Dashboard' ? 'Assignments' : $fallback,
+            str_starts_with($path, '/guest/free-tests') => 'Free Test',
+            str_starts_with($path, '/student') => 'Student Dashboard',
+            default => $fallback,
         };
     }
 }

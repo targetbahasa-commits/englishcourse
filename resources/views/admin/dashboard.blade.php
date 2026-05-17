@@ -307,7 +307,12 @@
                                             <span class="block font-medium capitalize" x-text="student.role"></span>
                                         </td>
                                         <td class="py-4 text-sm text-gray-700">
-                                            <span class="block text-xs text-gray-500" x-text="student.program"></span>
+                                            <template x-if="student.role === 'student'">
+                                                <a :href="`/admin/students/${student.id}/current-assignment`" target="_blank" rel="noopener" class="block text-xs text-blue-600 hover:text-blue-700 hover:underline" x-text="student.program"></a>
+                                            </template>
+                                            <template x-if="student.role !== 'student'">
+                                                <span class="block text-xs text-gray-500" x-text="student.program"></span>
+                                            </template>
                                         </td>
                                         <td class="py-4">
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100" x-text="formatTime(student.last_activity)">

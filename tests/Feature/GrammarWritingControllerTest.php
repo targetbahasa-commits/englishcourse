@@ -94,6 +94,77 @@ class GrammarWritingControllerTest extends TestCase
         $response->assertViewHas('paragraphData', ['id' => 'Paragraph id', 'en' => 'Paragraph en']);
     }
 
+    public function test_introductory_track_renders_ten_meetings(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response = $this->get(route('assignments.grammar-writing.track', 'introductory'));
+
+        $response->assertOk();
+        $response->assertViewIs('assignments.grammar-writing-track');
+        $response->assertViewHas('trackData', function (array $trackData): bool {
+            return $trackData['title'] === 'Introductory Grammar for Writing'
+                && count($trackData['meetings']) === 10
+                && $trackData['meetings'][0]['title'] === 'Meeting 1'
+                && $trackData['meetings'][9]['title'] === 'Meeting 10'
+                && $trackData['meetings'][0]['available'] === true;
+        });
+    }
+
+    public function test_proficiency_track_renders_ten_meetings(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response = $this->get(route('assignments.grammar-writing.track', 'proficiency'));
+
+        $response->assertOk();
+        $response->assertViewIs('assignments.grammar-writing-track');
+        $response->assertViewHas('trackData', function (array $trackData): bool {
+            return $trackData['title'] === 'Proficiency Grammar for Writing'
+                && count($trackData['meetings']) === 10
+                && $trackData['meetings'][0]['topic'] === 'Hedging and cautious claims'
+                && $trackData['meetings'][9]['topic'] === 'Editing for precision and style'
+                && $trackData['meetings'][0]['available'] === true;
+        });
+    }
+
+    public function test_complexity_track_renders_ten_meetings(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response = $this->get(route('assignments.grammar-writing.track', 'complexity'));
+
+        $response->assertOk();
+        $response->assertViewIs('assignments.grammar-writing-track');
+        $response->assertViewHas('trackData', function (array $trackData): bool {
+            return $trackData['title'] === 'Complexity Grammar for Writing'
+                && count($trackData['meetings']) === 10
+                && $trackData['meetings'][0]['title'] === 'Meeting 1'
+                && $trackData['meetings'][9]['title'] === 'Meeting 10'
+                && $trackData['meetings'][0]['source_meeting_number'] === 11
+                && $trackData['meetings'][0]['available'] === true;
+        });
+    }
+
+    public function test_proficiency_meeting_page_renders_focus_points(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response = $this->get(route('assignments.grammar-writing.proficiency.meeting', 1));
+
+        $response->assertOk();
+        $response->assertViewIs('assignments.grammar-writing-proficiency-meeting');
+        $response->assertViewHas('meetingData', function (array $meetingData): bool {
+            return $meetingData['title'] === 'Meeting 1'
+                && $meetingData['topic'] === 'Hedging and cautious claims'
+                && count($meetingData['focus_points']) === 3;
+        });
+    }
+
     public function test_meeting1_submit_renders_view_using_builder_composed_payload(): void
     {
         $user = User::factory()->create();

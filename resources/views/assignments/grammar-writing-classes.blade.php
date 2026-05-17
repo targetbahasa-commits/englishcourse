@@ -53,14 +53,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                     <!-- Introductory Grammar for Writing -->
-                    <div class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+                    <a href="{{ route('assignments.grammar-writing.track', 'introductory') }}" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
                         <div class="h-32 bg-gradient-to-br from-orange-400 to-orange-600 relative overflow-hidden shrink-0">
-                            <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                            <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-orange-600 shadow-sm">
-                                Coming Soon
-                            </div>
+                            <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                             <div class="absolute bottom-4 left-6">
-                                <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center">
+                                <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300">
                                     <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                                     </svg>
@@ -70,18 +67,21 @@
                         <div class="flex flex-col flex-1 px-6 pt-4 pb-4">
                             <h3 class="text-lg font-bold text-gray-800 mb-1">Introductory Grammar for Writing</h3>
                             <p class="text-gray-600 text-sm leading-relaxed flex-1">Kelas dasar tata bahasa Inggris untuk penulisan akademik.</p>
-                            <div class="w-full text-center bg-orange-100 text-orange-500 font-bold py-3 px-6 rounded-xl text-sm mt-4">
-                                Coming Soon
+                            <div class="w-full text-center bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg mt-4">
+                                Start Learning
+                                <svg class="w-4 h-4 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                </svg>
                             </div>
                         </div>
-                    </div>
+                    </a>
 
                     <!-- Complexity Grammar for Writing -->
-                    <div class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+                    <a href="{{ route('assignments.grammar-writing.track', 'complexity') }}" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1">
                         <div class="h-32 bg-gradient-to-br from-green-400 to-green-600 relative overflow-hidden shrink-0">
                             <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                             <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-green-600 shadow-sm">
-                                Coming Soon
+                                10 Meetings
                             </div>
                             <div class="absolute bottom-4 left-6">
                                 <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center">
@@ -94,18 +94,18 @@
                         <div class="flex flex-col flex-1 px-6 pt-4 pb-4">
                             <h3 class="text-lg font-bold text-gray-800 mb-1">Complexity Grammar for Writing</h3>
                             <p class="text-gray-600 text-sm leading-relaxed flex-1">Penguasaan struktur kalimat kompleks untuk penulisan lanjutan.</p>
-                            <div class="w-full text-center bg-green-100 text-green-500 font-bold py-3 px-6 rounded-xl text-sm mt-4">
-                                Coming Soon
+                            <div class="w-full text-center bg-green-500 text-white font-bold py-3 px-6 rounded-xl text-sm mt-4 group-hover:bg-green-600 transition">
+                                Start Learning
                             </div>
                         </div>
-                    </div>
+                    </a>
 
                     <!-- Proficiency Grammar for Writing -->
-                    <div class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+                    <a href="{{ route('assignments.grammar-writing.track', 'proficiency') }}" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1">
                         <div class="h-32 bg-gradient-to-br from-purple-400 to-purple-600 relative overflow-hidden shrink-0">
                             <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                             <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-purple-600 shadow-sm">
-                                Coming Soon
+                                10 Meetings
                             </div>
                             <div class="absolute bottom-4 left-6">
                                 <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center">
@@ -118,11 +118,11 @@
                         <div class="flex flex-col flex-1 px-6 pt-4 pb-4">
                             <h3 class="text-lg font-bold text-gray-800 mb-1">Proficiency Grammar for Writing</h3>
                             <p class="text-gray-600 text-sm leading-relaxed flex-1">Tingkat mahir tata bahasa untuk penulisan akademik dan profesional.</p>
-                            <div class="w-full text-center bg-purple-100 text-purple-500 font-bold py-3 px-6 rounded-xl text-sm mt-4">
-                                Coming Soon
+                            <div class="w-full text-center bg-purple-500 text-white font-bold py-3 px-6 rounded-xl text-sm mt-4 group-hover:bg-purple-600 transition">
+                                Start Learning
                             </div>
                         </div>
-                    </div>
+                    </a>
 
                     <!-- Fast Track Grammar for Writing -->
                     <div class="md:col-start-2 md:col-span-1">

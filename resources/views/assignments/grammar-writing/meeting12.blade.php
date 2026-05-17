@@ -17,7 +17,7 @@
     @include('components.program-sidebar')
     <div class="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
         <div class="flex justify-between items-center mb-8">
-            <a href="{{ route('assignments.grammar-writing') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium">
+            <a href="{{ $backRoute ?? route('assignments.grammar-writing') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium">
                 &laquo; Kembali
             </a>
         </div>
@@ -77,8 +77,8 @@
                                              style="display: none;"
                                              class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 text-center leading-relaxed">
                                             <strong class="block mb-1 text-yellow-300">Contoh ({{ $data['conjunction'] }}):</strong>
-                                            {{ $data['example']['id'] }}<br>
-                                            <em class="text-gray-300">{{ $data['example']['en'] }}</em>
+                                            {{ data_get($data, 'example.id', '-') }}<br>
+                                            <em class="text-gray-300">{{ data_get($data, 'example.en', '-') }}</em>
                                             <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
                                         </div>
                                     </div>
@@ -98,13 +98,16 @@
                                              style="display: none;"
                                              class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 text-left leading-relaxed">
                                             <strong class="block mb-2 text-green-300 border-b border-gray-600 pb-1">Vocabulary Helper:</strong>
+                                            @php($vocabItems = is_array($data['vocab'] ?? null) ? $data['vocab'] : [])
                                             <ul class="space-y-1">
-                                                @foreach($data['vocab'] as $en => $vocabData)
+                                                @forelse($vocabItems as $en => $vocabData)
                                                     <li class="flex justify-between">
-                                                        <span class="text-green-300 font-mono">{{ $en }} <span class="text-gray-400 text-xs">{{ $vocabData['pos'] }}</span></span>
-                                                        <span>{{ $vocabData['id'] }}</span>
+                                                        <span class="text-green-300 font-mono">{{ $en }} <span class="text-gray-400 text-xs">{{ data_get($vocabData, 'pos', '') }}</span></span>
+                                                        <span>{{ data_get($vocabData, 'id', '-') }}</span>
                                                     </li>
-                                                @endforeach
+                                                @empty
+                                                    <li class="text-gray-300">Tidak ada vocabulary helper.</li>
+                                                @endforelse
                                             </ul>
                                             <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
                                         </div>
@@ -488,6 +491,7 @@
         debounceTimer: null,
         debounceDelay: 500, // milliseconds
         userId: null,
+        draftSyncTimer: null,
 
         /**
          * Initialize auto-save for a specific meeting
@@ -546,7 +550,7 @@
          */
         setupAutoSave() {
             // Find all input and textarea elements in the form
-            const form = document.querySelector('form[method="POST"]');
+            const form = document.querySelector('form[action*="/assignments/grammar-writing/meeting"][method="POST"]');
             if (!form) {
                 console.log('No form found for auto-save');
                 return;
@@ -589,7 +593,7 @@
                 return;
             }
 
-            const form = document.querySelector('form[method="POST"]');
+            const form = document.querySelector('form[action*="/assignments/grammar-writing/meeting"][method="POST"]');
             if (!form) {
                 console.log('No form found');
                 return;
@@ -609,6 +613,74 @@
                 this.showSaveIndicator();
             } catch (e) {
                 console.error('Failed to save to localStorage:', e);
+            }
+        },
+
+        queueDraftSync(form) {
+            clearTimeout(this.draftSyncTimer);
+            this.draftSyncTimer = setTimeout(() => {
+                this.syncDraftToServer(form);
+            }, this.debounceDelay);
+        },
+
+        async syncDraftToServer(form) {
+            if (!form) {
+                return;
+            }
+
+            const action = form.getAttribute('action') || '';
+            const match = action.match(/\/assignments\/grammar-writing\/meeting(\d+)/);
+            if (!match) {
+                return;
+            }
+
+            const meetingNumber = match[1];
+            const draftEndpoint = '/assignments/grammar-writing/meeting' + meetingNumber + '/draft';
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+            const payload = {};
+            const assignNestedValue = (obj, key, value) => {
+                const parts = String(key).replace(/\]/g, '').split('[');
+                let ref = obj;
+
+                for (let i = 0; i < parts.length; i++) {
+                    const part = parts[i];
+                    const isLast = i === parts.length - 1;
+
+                    if (isLast) {
+                        ref[part] = value;
+                        return;
+                    }
+
+                    if (typeof ref[part] !== 'object' || ref[part] === null) {
+                        ref[part] = {};
+                    }
+
+                    ref = ref[part];
+                }
+            };
+
+            new FormData(form).forEach((value, key) => {
+                if (key === '_token') {
+                    return;
+                }
+
+                assignNestedValue(payload, key, value);
+            });
+
+            try {
+                await fetch(draftEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify(payload),
+                    keepalive: true,
+                });
+            } catch (e) {
+                console.error('Failed to sync draft to server:', e);
             }
         },
 

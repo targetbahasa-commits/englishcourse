@@ -51,7 +51,13 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('assignments.grammar-writing.meeting3.submit') }}">
+        @if($errors->any())
+            <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {{ $errors->first() }}
+            </div>
+        @endif
+
+        <form id="meeting3-main-form" method="POST" action="{{ route('assignments.grammar-writing.meeting3.submit') }}">
             @csrf
             <div class="space-y-6">
                 @if(auth()->check() && auth()->user()->isAdmin())
@@ -258,7 +264,8 @@
 
             <div class="mt-8">
                 @if(!$submitted)
-                    <button type="submit" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors shadow-lg">
+                    <p id="translate-progress-text" class="mb-3 text-sm font-medium text-gray-600">Progress Translate: 0/20</p>
+                    <button id="meeting3-submit-button" type="submit" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors shadow-lg disabled:opacity-60 disabled:cursor-not-allowed">
                         Cek Jawaban
                     </button>
                 @endif
@@ -272,6 +279,19 @@
                     Coba Lagi
                 </button>
             </form>
+        @endif
+
+        @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->role === 'teacher'))
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <p class="text-sm text-gray-600 mb-3 font-medium">🔐 Admin/Teacher Area:</p>
+                <form method="POST" action="{{ route('assignments.grammar-writing.meeting3.admin-reset') }}" class="inline-block">
+                    @csrf
+                    <button type="submit" onclick="return confirm('Hapus semua grading dan catatan Anda? Jawaban student tetap tersimpan.')" class="px-6 py-3 bg-orange-600 text-white rounded-xl font-bold hover:bg-orange-700 transition-colors shadow-lg text-sm">
+                        🔄 Reset Grading Saya
+                    </button>
+                </form>
+                <p class="text-xs text-gray-500 mt-2 italic">Tombol ini hanya menghapus grading dan catatan Anda, jawaban student tidak terpengaruh.</p>
+            </div>
         @endif
     </div>
     
@@ -326,6 +346,37 @@
     <x-irregular-verbs-button />
     
     <!-- Auto-Save Script -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainForm = document.getElementById('meeting3-main-form');
+            const submitButton = document.getElementById('meeting3-submit-button');
+            const progressText = document.getElementById('translate-progress-text');
+            const minimumRequired = 20;
+
+            if (!mainForm || !submitButton || !progressText) {
+                return;
+            }
+
+            const translationInputs = Array.from(mainForm.querySelectorAll('input[name^="userAnswers"][name$="[trans]"]'));
+
+            const updateProgress = () => {
+                const filled = translationInputs.reduce((total, input) => {
+                    return total + (input.value.trim() !== '' ? 1 : 0);
+                }, 0);
+
+                progressText.textContent = `Progress Translate: ${filled}/${minimumRequired}`;
+                submitButton.disabled = filled < minimumRequired;
+            };
+
+            translationInputs.forEach((input) => {
+                input.addEventListener('input', updateProgress);
+                input.addEventListener('blur', updateProgress);
+            });
+
+            updateProgress();
+        });
+    </script>
 
     <script>
         window.openMeeting3EditModal = function(id, question, answer, tense, vocab) {
@@ -407,6 +458,8 @@
         debounceTimer: null,
         debounceDelay: 500, // milliseconds
         userId: null,
+        draftSyncTimer: null,
+        draftEndpoint: '/assignments/grammar-writing/meeting3/draft',
 
         /**
          * Initialize auto-save for a specific meeting
@@ -453,9 +506,13 @@
          * Check if form has been submitted
          */
         checkIfSubmitted() {
-            // Check if inputs are readonly (server renders them readonly when submitted)
-            // We strictly check for readonly attribute on text inputs to avoid false positives
-            const isReadonly = document.querySelector('input[type="text"][readonly]');
+            const form = document.getElementById('meeting3-main-form');
+            if (!form) {
+                return false;
+            }
+
+            // Scope readonly check to the main meeting form only.
+            const isReadonly = form.querySelector('input[type="text"][readonly]');
             
             return !!isReadonly;
         },
@@ -465,28 +522,32 @@
          */
         setupAutoSave() {
             // Find all input and textarea elements in the form
-            const form = document.querySelector('form[method="POST"]');
+            const form = document.getElementById('meeting3-main-form');
             if (!form) {
-                console.log('No form found for auto-save');
+                console.log('[AutoSave] No form found for auto-save');
                 return;
             }
 
             const inputs = form.querySelectorAll('input[type="text"], textarea');
-            console.log(`Found ${inputs.length} input fields`);
+            console.log(`[AutoSave] Found ${inputs.length} input fields to monitor`);
 
-            inputs.forEach(input => {
+            inputs.forEach((input, index) => {
                 // Skip if readonly (already submitted)
                 if (input.readOnly || input.disabled) {
                     return;
                 }
 
+                const inputName = input.name || `input-${index}`;
+
                 // Save immediately on every keystroke (input event)
                 input.addEventListener('input', () => {
+                    console.log(`[AutoSave] Input changed: ${inputName}`);
                     this.saveAnswers();
                 });
 
                 // Also save on blur (when moving to next field)
                 input.addEventListener('blur', () => {
+                    console.log(`[AutoSave] Input blurred: ${inputName}`);
                     this.saveAnswers();
                 });
 
@@ -496,7 +557,7 @@
                 });
             });
 
-            console.log(`Auto-save listeners attached to ${inputs.length} fields`);
+            console.log(`[AutoSave] Auto-save listeners attached to ${inputs.length} fields`);
         },
 
         /**
@@ -504,15 +565,22 @@
          */
         saveAnswers() {
             if (this.isSubmitted) {
-                console.log('Skipping save - form already submitted');
+                console.log('[AutoSave] Skipping save - form already submitted');
                 return;
             }
 
-            const form = document.querySelector('form[method="POST"]');
+            const form = document.getElementById('meeting3-main-form');
             if (!form) {
-                console.log('No form found');
+                console.error('[AutoSave] ERROR: No form found! Looking for #meeting3-main-form');
+                const allForms = document.querySelectorAll('form');
+                console.log('[AutoSave] Total forms on page:', allForms.length);
+                allForms.forEach((f, i) => {
+                    console.log(`  Form ${i}:`, { method: f.method, id: f.id, action: f.action });
+                });
                 return;
             }
+
+            console.log('[AutoSave] Form found:', { formId: form.id, formMethod: form.method });
 
             const inputs = form.querySelectorAll('input[type="text"], textarea');
             const answers = {};
@@ -526,8 +594,74 @@
             try {
                 localStorage.setItem(this.storageKey, JSON.stringify(answers));
                 this.showSaveIndicator();
+
+                console.log('[AutoSave] Queueing draft sync...');
+                this.queueDraftSync(form);
             } catch (e) {
-                console.error('Failed to save to localStorage:', e);
+                console.error('[AutoSave] Failed to save to localStorage:', e);
+            }
+        },
+
+        queueDraftSync(form) {
+            console.log('[AutoSave] Queue drift sync with 500ms delay');
+            clearTimeout(this.draftSyncTimer);
+            this.draftSyncTimer = setTimeout(() => {
+                console.log('[AutoSave] Executing deferred sync...');
+                this.syncDraftToServer(form);
+            }, this.debounceDelay);
+        },
+
+        async syncDraftToServer(form) {
+            if (!this.draftEndpoint || !form) {
+                console.log('[AutoSave] Skipping sync - missing endpoint or form');
+                return;
+            }
+
+            const userAnswers = {};
+            const answerInputs = form.querySelectorAll('input[name^="userAnswers["]');
+            answerInputs.forEach((input) => {
+                const match = input.name.match(/^userAnswers\[(\d+)\]\[(tense|trans)\]$/);
+                if (!match) {
+                    return;
+                }
+
+                const qNum = match[1];
+                const field = match[2];
+                if (!userAnswers[qNum]) {
+                    userAnswers[qNum] = {};
+                }
+                userAnswers[qNum][field] = input.value || '';
+            });
+
+            const paragraphInput = form.querySelector('textarea[name="userParagraphAnswer"]');
+            const userParagraphAnswer = paragraphInput ? paragraphInput.value || '' : '';
+
+            console.log('[AutoSave] Syncing to server:', { userAnswers, userParagraphAnswer });
+
+            try {
+                const response = await fetch(this.draftEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({
+                        userAnswers,
+                        userParagraphAnswer,
+                    }),
+                    keepalive: true,
+                });
+
+                if (!response.ok) {
+                    console.error('[AutoSave] Sync failed:', response.status, response.statusText);
+                    return;
+                }
+
+                const data = await response.json();
+                console.log('[AutoSave] Sync success:', data);
+            } catch (e) {
+                console.error('[AutoSave] Fetch error:', e);
             }
         },
 

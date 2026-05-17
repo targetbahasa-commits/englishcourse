@@ -193,7 +193,7 @@
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">
-                                        {{ $activity->classMeeting->assignment->title ?? 'Meeting ' . $activity->meeting_number }}
+                                        {{ $activity->program->name ?? 'Assignment' }} - Meeting {{ $activity->meeting_number }}
                                     </div>
                                     <div class="text-xs text-gray-500">M-{{ str_pad($activity->meeting_number, 2, '0', STR_PAD_LEFT) }}</div>
                                 </td>

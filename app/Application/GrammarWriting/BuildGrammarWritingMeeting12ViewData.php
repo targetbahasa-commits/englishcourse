@@ -49,8 +49,8 @@ class BuildGrammarWritingMeeting12ViewData
                     'en' => $question->correct_answer,
                     'type' => $question->structure,
                     'conjunction' => $question->formula,
-                    'example' => $question->example,
-                    'vocab' => $question->vocab,
+                    'example' => is_array($question->example) ? $question->example : ['id' => '', 'en' => ''],
+                    'vocab' => is_array($question->vocab) ? $question->vocab : [],
                     'db_id' => $question->id,
                 ];
             },

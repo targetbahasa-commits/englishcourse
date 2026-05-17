@@ -155,6 +155,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 @foreach($program->meetings as $meeting)
                 <div class="bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition group relative">
+                    @php $showAchievement = Auth::user()->isStudent(); @endphp
                     <div class="flex justify-between items-start mb-4">
                         <span class="px-3 py-1 {{ $meeting->is_locked ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600' }} rounded-full text-xs font-bold">
                             {{ $meeting->is_locked ? 'LOCKED' : 'OPEN' }}
@@ -178,7 +179,7 @@
                         @endif
                     </div>
                     
-                    @if(isset($scores[$meeting->meeting_number]))
+                    @if($showAchievement && isset($scores[$meeting->meeting_number]))
                         @php
                             $score = $scores[$meeting->meeting_number];
                             $scoreRounded = round($score / 10, 1);
@@ -244,11 +245,15 @@
                     
                     @if(!$meeting->is_locked)
                         @php
-                            $meetingRouteName = 'assignments.grammar-writing.meeting' . $meeting->meeting_number;
+                            $meetingNumber = (int) $meeting->meeting_number;
+                            $meetingRouteName = 'assignments.grammar-writing.meeting' . $meetingNumber;
                             $hasMeetingRoute = \Illuminate\Support\Facades\Route::has($meetingRouteName);
+                            $meetingStartUrl = $meetingNumber === 1
+                                ? url('/assignments/grammar-writing/fast-track/meeting1')
+                                : ($hasMeetingRoute ? route($meetingRouteName) : '#');
                         @endphp
                         @if($hasMeetingRoute)
-                            <a href="{{ route($meetingRouteName) }}" class="js-start-link block w-full py-2 bg-blue-600 text-white text-center rounded-xl font-bold hover:bg-blue-700 transition">Start</a>
+                            <a href="{{ $meetingStartUrl }}" class="js-start-link block w-full py-2 bg-blue-600 text-white text-center rounded-xl font-bold hover:bg-blue-700 transition">Start</a>
                         @else
                             <a href="#" class="block w-full py-2 bg-gray-400 text-white text-center rounded-xl font-bold hover:bg-gray-500 transition cursor-not-allowed">Start</a>
                         @endif

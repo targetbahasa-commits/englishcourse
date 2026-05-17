@@ -539,6 +539,7 @@
         debounceTimer: null,
         debounceDelay: 500, // milliseconds
         userId: null,
+        draftSyncTimer: null,
 
         /**
          * Initialize auto-save for a specific meeting
@@ -597,7 +598,7 @@
          */
         setupAutoSave() {
             // Find all input and textarea elements in the form
-            const form = document.querySelector('form[method="POST"]');
+            const form = document.querySelector('form[action*="/assignments/grammar-writing/meeting"][method="POST"]');
             if (!form) {
                 console.log('No form found for auto-save');
                 return;
@@ -640,7 +641,7 @@
                 return;
             }
 
-            const form = document.querySelector('form[method="POST"]');
+            const form = document.querySelector('form[action*="/assignments/grammar-writing/meeting"][method="POST"]');
             if (!form) {
                 console.log('No form found');
                 return;
@@ -660,6 +661,74 @@
                 this.showSaveIndicator();
             } catch (e) {
                 console.error('Failed to save to localStorage:', e);
+            }
+        },
+
+        queueDraftSync(form) {
+            clearTimeout(this.draftSyncTimer);
+            this.draftSyncTimer = setTimeout(() => {
+                this.syncDraftToServer(form);
+            }, this.debounceDelay);
+        },
+
+        async syncDraftToServer(form) {
+            if (!form) {
+                return;
+            }
+
+            const action = form.getAttribute('action') || '';
+            const match = action.match(/\/assignments\/grammar-writing\/meeting(\d+)/);
+            if (!match) {
+                return;
+            }
+
+            const meetingNumber = match[1];
+            const draftEndpoint = '/assignments/grammar-writing/meeting' + meetingNumber + '/draft';
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+            const payload = {};
+            const assignNestedValue = (obj, key, value) => {
+                const parts = String(key).replace(/\]/g, '').split('[');
+                let ref = obj;
+
+                for (let i = 0; i < parts.length; i++) {
+                    const part = parts[i];
+                    const isLast = i === parts.length - 1;
+
+                    if (isLast) {
+                        ref[part] = value;
+                        return;
+                    }
+
+                    if (typeof ref[part] !== 'object' || ref[part] === null) {
+                        ref[part] = {};
+                    }
+
+                    ref = ref[part];
+                }
+            };
+
+            new FormData(form).forEach((value, key) => {
+                if (key === '_token') {
+                    return;
+                }
+
+                assignNestedValue(payload, key, value);
+            });
+
+            try {
+                await fetch(draftEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify(payload),
+                    keepalive: true,
+                });
+            } catch (e) {
+                console.error('Failed to sync draft to server:', e);
             }
         },
 

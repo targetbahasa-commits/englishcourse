@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Auth;
 
 trait HandlesAssignmentAccess
 {
+    private const TEMP_FULL_ASSIGNMENT_ACCESS_EMAILS = [
+        'student4@dummy.com',
+    ];
+
     protected function registerAssignmentAccessMiddleware(): void
     {
         $this->middleware(function ($request, $next) {
@@ -110,6 +114,10 @@ trait HandlesAssignmentAccess
             return true;
         }
 
+        if ($this->hasTemporaryFullAssignmentAccess($user?->email)) {
+            return true;
+        }
+
         $allowedProgramSlugs = $this->resolveAllowedAssignmentProgramSlugsForUser($user);
 
         if ($allowedProgramSlugs === []) {
@@ -117,5 +125,14 @@ trait HandlesAssignmentAccess
         }
 
         return in_array($requiredProgramSlug, $allowedProgramSlugs, true);
+    }
+
+    protected function hasTemporaryFullAssignmentAccess(?string $email): bool
+    {
+        if (!$email) {
+            return false;
+        }
+
+        return in_array(strtolower($email), self::TEMP_FULL_ASSIGNMENT_ACCESS_EMAILS, true);
     }
 }

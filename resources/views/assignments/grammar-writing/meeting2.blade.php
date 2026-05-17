@@ -23,7 +23,7 @@
     @include('components.program-sidebar')
     <div x-data="{ editMode: false, editId: null, editSection: '', editQ: '', editA: '', editTense: '', editStructure: '' }" class="max-w-7xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
         <div class="flex justify-between items-center mb-8">
-            <a href="{{ route('assignments.grammar-writing') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium">
+            <a href="{{ $backRoute ?? route('assignments.grammar-writing') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium">
                 &laquo; Kembali
             </a>
         </div>
@@ -84,6 +84,60 @@
                                                    class="w-full p-2 border border-gray-300 rounded focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 font-mono text-sm {{ $stage > 1 ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                                                    {{ $stage > 1 ? 'readonly' : '' }}
                                                    autocomplete="off">
+
+                                            <div class="mt-2 flex justify-end">
+                                                <div class="flex flex-col gap-1">
+                                                @if(isset($tenseExamples[$tenseName][$type]))
+                                                    <div x-data="{ open: false }" class="relative inline-block">
+                                                        <button type="button" @click="open = !open" @click.outside="open = false" class="text-yellow-600 hover:text-yellow-700 focus:outline-none transition-colors cursor-pointer text-xs font-bold bg-yellow-50 px-1.5 py-0.5 rounded border border-yellow-100 w-6 h-6 flex items-center justify-center">
+                                                            ?
+                                                        </button>
+                                                        <div x-show="open"
+                                                             x-transition:enter="transition ease-out duration-200"
+                                                             x-transition:enter-start="opacity-0 translate-y-2"
+                                                             x-transition:enter-end="opacity-100 translate-y-0"
+                                                             x-transition:leave="transition ease-in duration-150"
+                                                             x-transition:leave-start="opacity-100 translate-y-0"
+                                                             x-transition:leave-end="opacity-0 translate-y-2"
+                                                             style="display: none;"
+                                                             class="absolute bottom-full right-0 mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 text-center leading-relaxed">
+                                                            <strong class="block mb-1 text-yellow-300">Contoh ({{ $tenseName }} - {{ ucfirst($type) }}):</strong>
+                                                            {{ $tenseExamples[$tenseName][$type]['id'] }}<br>
+                                                            <em class="text-gray-300">{{ $tenseExamples[$tenseName][$type]['en'] }}</em>
+                                                            <div class="absolute top-full right-2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
+                                                        </div>
+                                                    </div>
+                                                @endif
+
+                                                @if(isset($vocabularies[$tenseName][$type]))
+                                                    <div x-data="{ open: false }" class="relative inline-block">
+                                                        <button type="button" @click="open = !open" @click.outside="open = false" class="text-green-600 hover:text-green-700 focus:outline-none transition-colors cursor-pointer text-xs font-bold bg-green-50 px-1.5 py-0.5 rounded border border-green-100 w-6 h-6 flex items-center justify-center">
+                                                            v
+                                                        </button>
+                                                        <div x-show="open"
+                                                             x-transition:enter="transition ease-out duration-200"
+                                                             x-transition:enter-start="opacity-0 translate-y-2"
+                                                             x-transition:enter-end="opacity-100 translate-y-0"
+                                                             x-transition:leave="transition ease-in duration-150"
+                                                             x-transition:leave-start="opacity-100 translate-y-0"
+                                                             x-transition:leave-end="opacity-0 translate-y-2"
+                                                             style="display: none;"
+                                                             class="absolute bottom-full right-0 mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 text-left leading-relaxed">
+                                                            <strong class="block mb-2 text-green-300 border-b border-gray-600 pb-1">Vocabulary Helper:</strong>
+                                                            <ul class="space-y-1">
+                                                                @foreach($vocabularies[$tenseName][$type] as $en => $vocabData)
+                                                                    <li class="flex justify-between gap-2">
+                                                                        <span class="text-green-300 font-mono">{{ $en }} <span class="text-gray-400 text-xs">{{ $vocabData['pos'] }}</span></span>
+                                                                        <span>{{ $vocabData['id'] }}</span>
+                                                                    </li>
+                                                                @endforeach
+                                                            </ul>
+                                                            <div class="absolute top-full right-2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                                </div>
+                                            </div>
                                            
                                             @if($stage > 1 && isset($results[$tenseName][$type]))
                                                 @php
@@ -491,6 +545,7 @@
         debounceTimer: null,
         debounceDelay: 500, // milliseconds
         userId: null,
+        draftSyncTimer: null,
 
         /**
          * Initialize auto-save for a specific meeting
@@ -549,7 +604,7 @@
          */
         setupAutoSave() {
             // Find all input and textarea elements in the form
-            const form = document.querySelector('form[method="POST"]');
+            const form = document.querySelector('form[action*="/assignments/grammar-writing/meeting"][method="POST"]');
             if (!form) {
                 console.log('No form found for auto-save');
                 return;
@@ -592,7 +647,7 @@
                 return;
             }
 
-            const form = document.querySelector('form[method="POST"]');
+            const form = document.querySelector('form[action*="/assignments/grammar-writing/meeting"][method="POST"]');
             if (!form) {
                 console.log('No form found');
                 return;
@@ -612,6 +667,74 @@
                 this.showSaveIndicator();
             } catch (e) {
                 console.error('Failed to save to localStorage:', e);
+            }
+        },
+
+        queueDraftSync(form) {
+            clearTimeout(this.draftSyncTimer);
+            this.draftSyncTimer = setTimeout(() => {
+                this.syncDraftToServer(form);
+            }, this.debounceDelay);
+        },
+
+        async syncDraftToServer(form) {
+            if (!form) {
+                return;
+            }
+
+            const action = form.getAttribute('action') || '';
+            const match = action.match(/\/assignments\/grammar-writing\/meeting(\d+)/);
+            if (!match) {
+                return;
+            }
+
+            const meetingNumber = match[1];
+            const draftEndpoint = '/assignments/grammar-writing/meeting' + meetingNumber + '/draft';
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+            const payload = {};
+            const assignNestedValue = (obj, key, value) => {
+                const parts = String(key).replace(/\]/g, '').split('[');
+                let ref = obj;
+
+                for (let i = 0; i < parts.length; i++) {
+                    const part = parts[i];
+                    const isLast = i === parts.length - 1;
+
+                    if (isLast) {
+                        ref[part] = value;
+                        return;
+                    }
+
+                    if (typeof ref[part] !== 'object' || ref[part] === null) {
+                        ref[part] = {};
+                    }
+
+                    ref = ref[part];
+                }
+            };
+
+            new FormData(form).forEach((value, key) => {
+                if (key === '_token') {
+                    return;
+                }
+
+                assignNestedValue(payload, key, value);
+            });
+
+            try {
+                await fetch(draftEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify(payload),
+                    keepalive: true,
+                });
+            } catch (e) {
+                console.error('Failed to sync draft to server:', e);
             }
         },
 

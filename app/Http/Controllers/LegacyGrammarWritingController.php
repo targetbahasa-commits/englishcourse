@@ -106,13 +106,36 @@ class LegacyGrammarWritingController extends Controller
         BuildGrammarWritingMeeting3ViewData $buildGrammarWritingMeeting3ViewData,
         EvaluateGrammarWritingMeeting3Submission $evaluateGrammarWritingMeeting3Submission,
     ) {
-        $userAnswers = $request->input('userAnswers', []);
-        $userParagraphAnswer = $request->input('userParagraphAnswer', '');
+        $userAnswers = (array) ($request->input('userAnswers') ?? []);
+        $userParagraphAnswer = (string) ($request->input('userParagraphAnswer') ?? '');
         $hasSectionColumn = $this->grammarQuestionsHasSectionColumn();
         $questions = $buildGrammarWritingMeeting3ViewData->loadQuestionModels(
             $this->meeting3FallbackQuestions,
             $hasSectionColumn,
         );
+        $minimumRequiredTranslations = 20;
+        $filledTranslations = 0;
+
+        foreach ($questions as $question) {
+            $questionNumber = (int) ($question->question_number ?? 0);
+            if ($questionNumber <= 0) {
+                continue;
+            }
+
+            $translation = trim((string) ($userAnswers[$questionNumber]['trans'] ?? ''));
+            if ($translation !== '') {
+                $filledTranslations++;
+            }
+        }
+
+        if ($filledTranslations < $minimumRequiredTranslations) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'userAnswers' => 'Kamu harus mengerjakan minimal 20 soal translate sebelum submit. Saat ini baru ' . $filledTranslations . '/20.',
+                ]);
+        }
+
         $paragraphRecord = $buildGrammarWritingMeeting3ViewData->resolveParagraphRecord($hasSectionColumn);
 
         $sessionPayload = $evaluateGrammarWritingMeeting3Submission->handle(
@@ -132,6 +155,14 @@ class LegacyGrammarWritingController extends Controller
 
     public function meeting3Reset()
     {
+        // Student can only reset if form was previously submitted
+        $isAdminOrTeacher = auth()->user() && (auth()->user()->isAdmin() || auth()->user()->role === 'teacher');
+        $wasFormSubmitted = session()->has('meeting3_submitted');
+        
+        if (!$isAdminOrTeacher && !$wasFormSubmitted) {
+            abort(403, 'Unauthorized: Only students with submitted forms can reset.');
+        }
+
         return $this->resetGrammarWritingMeetingSession(
             'assignments.grammar-writing.meeting3',
             [
@@ -143,6 +174,65 @@ class LegacyGrammarWritingController extends Controller
             'meeting3_user_paragraph_answer'
             ],
         );
+    }
+
+    /**
+     * Reset only admin/teacher grading and notes, leaving student answers intact
+     */
+    public function meeting3AdminReset()
+    {
+        // Only admin/teacher can reset their own grading
+        $isAdminOrTeacher = auth()->user() && (auth()->user()->isAdmin() || auth()->user()->role === 'teacher');
+        
+        if (!$isAdminOrTeacher) {
+            abort(403, 'Unauthorized: Only admin and teacher can reset their grading.');
+        }
+
+        // Clear only admin/teacher-specific session keys, NOT student answers
+        session()->forget([
+            'meeting3_admin_grading',
+            'meeting3_admin_notes',
+            'meeting3_admin_score',
+        ]);
+
+        return redirect()->route('assignments.grammar-writing.meeting3')->with('success', 'Reset grading Anda berhasil.');
+    }
+
+    public function meeting3Draft(Request $request)
+    {
+        return $this->meetingDraft($request, 3);
+    }
+
+    public function meetingDraft(Request $request, int $meeting)
+    {
+        if ($meeting < 1 || $meeting > 20) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Invalid meeting number.',
+            ], 422);
+        }
+
+        $userAnswers = $request->input('userAnswers', []);
+        if (!is_array($userAnswers) || $userAnswers === []) {
+            $rawPayload = $request->except(['_token', 'userParagraphAnswer']);
+            $userAnswers = is_array($rawPayload) ? $rawPayload : [];
+        }
+
+        $userParagraphAnswer = (string) ($request->input('userParagraphAnswer', '') ?? '');
+
+        session([
+            'meeting' . $meeting . '_user_answers' => $userAnswers,
+            'meeting' . $meeting . '_user_paragraph_answer' => $userParagraphAnswer,
+        ]);
+
+        // Persist immediately so admin snapshot polling can read latest draft data.
+        session()->save();
+
+        return response()->json([
+            'ok' => true,
+            'meeting' => $meeting,
+            'saved_at' => now()->toIso8601String(),
+        ]);
     }
 
     public function meeting4(BuildGrammarWritingMeeting4ViewData $buildGrammarWritingMeeting4ViewData)

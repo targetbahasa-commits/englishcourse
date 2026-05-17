@@ -9,6 +9,10 @@ use App\Models\Program;
 
 class CheckAssignmentProgramAccess
 {
+    private const TEMP_FULL_ASSIGNMENT_ACCESS_EMAILS = [
+        'student4@dummy.com',
+    ];
+
     /**
      * Handle an incoming request.
      *
@@ -20,6 +24,10 @@ class CheckAssignmentProgramAccess
     {
         $user = Auth::user();
         if (!$user || $user->role !== 'student') {
+            return $next($request);
+        }
+
+        if ($this->hasTemporaryFullAssignmentAccess($user?->email)) {
             return $next($request);
         }
 
@@ -53,5 +61,14 @@ class CheckAssignmentProgramAccess
         }
 
         return $next($request);
+    }
+
+    private function hasTemporaryFullAssignmentAccess(?string $email): bool
+    {
+        if (!$email) {
+            return false;
+        }
+
+        return in_array(strtolower($email), self::TEMP_FULL_ASSIGNMENT_ACCESS_EMAILS, true);
     }
 }

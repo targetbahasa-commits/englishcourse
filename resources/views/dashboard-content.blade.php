@@ -215,11 +215,17 @@
                     <ul class="list-disc pl-4 space-y-1 text-sm text-orange-700 font-medium">
                         @foreach($lowestScores as $weakness)
                             <li>
-                                @php $routeName = 'assignments.grammar-writing.meeting' . $weakness->meeting_number; @endphp
+                                @php
+                                    $meetingNumber = (int) $weakness->meeting_number;
+                                    $routeName = 'assignments.grammar-writing.meeting' . $meetingNumber;
+                                    $meetingUrl = $meetingNumber === 1
+                                        ? url('/assignments/grammar-writing/fast-track/meeting1')
+                                        : (Route::has($routeName) ? route($routeName) : null);
+                                @endphp
                                 @if(Route::has($routeName))
-                                    <a href="{{ route($routeName) }}" class="underline hover:text-orange-900">Meeting {{ $weakness->meeting_number }}</a>
+                                    <a href="{{ $meetingUrl }}" class="underline hover:text-orange-900">Meeting {{ $meetingNumber }}</a>
                                 @else
-                                    <span>Meeting {{ $weakness->meeting_number }}</span>
+                                    <span>Meeting {{ $meetingNumber }}</span>
                                 @endif
                                 (Score: <span class="font-bold text-red-600">{{ $weakness->score }}</span>)
                             </li>
