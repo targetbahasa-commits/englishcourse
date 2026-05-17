@@ -749,12 +749,12 @@
         </section>
 
         <!-- CTA Footer -->
-           <section data-whv-section="final_cta" class="mt-8 rounded-[2.5rem] p-8 text-center text-white shadow-2xl shadow-cyan-900/20 ring-1 ring-cyan-200/30 sm:p-12 relative overflow-hidden" style="background-image: url('{{ asset('images/whv/footerwhv.jpg') }}'); background-size: cover; background-position: center; background-color: #1f2937;">
-               <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950 to-slate-950"></div>
+           <section data-whv-section="final_cta" class="mt-8 rounded-[2.5rem] p-8 text-center shadow-2xl shadow-cyan-900/20 ring-1 ring-cyan-200/30 sm:p-12 relative overflow-hidden" style="background-image: url('{{ asset('images/whv/footerwhv.jpg') }}'); background-size: cover; background-position: center; background-color: #f8fafc;">
+               <div class="absolute inset-0 bg-white/30"></div>
              <div class="relative">
-            <p class="text-xs font-bold uppercase tracking-[0.2em] text-amber-200" style="text-shadow: 0 2px 8px rgba(0,0,0,0.8);">Ready to Start?</p>
-                <h2 class="mt-3 text-3xl font-black" style="text-shadow: 0 3px 12px rgba(0,0,0,0.9);">Ready to Start Your WHV Journey?</h2>
-                <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white" style="text-shadow: 0 2px 8px rgba(0,0,0,0.9);">Mulai dari tes bahasa Inggris, rapikan dokumen, lalu masuk ke jalur aplikasi resmi dengan persiapan yang matang.</p>
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-blue-700" style="text-shadow: 0 2px 8px rgba(255,255,255,0.9);">Ready to Start?</p>
+                <h2 class="mt-3 text-3xl font-black text-[#0B1F3A]" style="text-shadow: 0 2px 12px rgba(255,255,255,0.9);">Ready to Start Your WHV Journey?</h2>
+                <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#0B1F3A] font-medium" style="text-shadow: 0 2px 8px rgba(255,255,255,0.9);">Mulai dari tes bahasa Inggris, rapikan dokumen, lalu masuk ke jalur aplikasi resmi dengan persiapan yang matang.</p>
 
                 <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
                     <a href="{{ route('guest.free-tests') }}" data-whv-cta="footer_free_test" data-whv-preserve-attribution="true" class="inline-flex min-w-[200px] items-center justify-center rounded-2xl bg-amber-400 px-8 py-4 text-sm font-black text-slate-900 shadow-lg shadow-amber-400/40 transition hover:bg-amber-500 hover:-translate-y-1">
