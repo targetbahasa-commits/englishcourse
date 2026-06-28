@@ -32,6 +32,10 @@ class BuildStructureMeetingViewData
             (bool) $selectedClassPeriod
         );
 
+        if ($user && in_array($user->active_role ?? $user->role, ['guest', 'guest_quick', 'test-taker'], true)) {
+            $isLocked = ! ($meeting && $meeting->is_free_tier);
+        }
+
         if ($number < 50 && !$request->has('exercise')) {
             $main = $meeting;
             $exercises = $this->repository->getRelatedExercises($number, $main->title);

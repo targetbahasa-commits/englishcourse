@@ -15,6 +15,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\App\Http\Middleware\RedirectApexToWww::class);
         $middleware->authenticateSessions();
         $middleware->redirectGuestsTo(function ($request) {
+            if ($request->is('online-test') || $request->is('online-test/*')) {
+                return secure_url('/test-taker/register');
+            }
             if ($request->is('teacher') || $request->is('teacher/*')) {
                 return secure_url('/teacher/login');
             }

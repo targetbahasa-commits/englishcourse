@@ -20,7 +20,7 @@ class EloquentRegistrationRepository implements RegistrationRepository
                 $query->where('slug', 'not like', 'cambridge-%')
                       ->where('slug', 'not like', 'toefl-itp-mock-package-%');
             })
-            ->get(['id', 'name', 'color', 'icon'])
+            ->get(['id', 'name', 'color', 'icon', 'program_type', 'description'])
             ->all();
     }
 
@@ -50,9 +50,53 @@ class EloquentRegistrationRepository implements RegistrationRepository
             ->first();
     }
 
-    public function createRegistrationLead(array $data): void
+    public function createRegistrationLead(array $data): mixed
     {
-        RegistrationLead::create($data);
+        return RegistrationLead::create($data);
+    }
+
+    public function getLeadsForExport(array $filters): array
+    {
+        $query = RegistrationLead::with(['program', 'classPeriod', 'convertedUser'])->latest('id');
+        $this->applyFilters($query, $filters);
+
+        return $query->get()->all();
+    }
+
+    public function getRelatedPaymentForLead(mixed $lead): mixed
+    {
+        if (!$lead->converted_user_id || !$lead->program_id) {
+            return null;
+        }
+
+        return \App\Models\Payment::where('user_id', $lead->converted_user_id)
+            ->where('program_id', $lead->program_id)
+            ->with('program')
+            ->latest()
+            ->first();
+    }
+
+    public function getRelatedEnrollmentForLead(mixed $lead): mixed
+    {
+        if (!$lead->converted_user_id || !$lead->program_id) {
+            return null;
+        }
+
+        return Enrollment::where('user_id', $lead->converted_user_id)
+            ->where('program_id', $lead->program_id)
+            ->with('classPeriod')
+            ->first();
+    }
+
+    public function isEmailTaken(string $email, ?int $exceptUserId = null): bool
+    {
+        $query = User::where('email', $email);
+
+        if ($exceptUserId) {
+            $query->where('id', '!=', $exceptUserId);
+        }
+
+        return $query->exists();
     }
 
     public function listLeads(array $filters, int $perPage): mixed

@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\Teacher;
 
+use App\Application\Teacher\ManageTeacherEvaluations;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\TeacherEvaluation;
 use Illuminate\Support\Facades\Auth;
 
 class EvaluationController extends Controller
 {
+    public function __construct(
+        private readonly ManageTeacherEvaluations $manageTeacherEvaluations
+    ) {
+    }
+
     /**
      * Display a listing of evaluations for the authenticated teacher.
      */
@@ -16,18 +21,13 @@ class EvaluationController extends Controller
     {
         $teacher = Auth::user();
 
-        // Ensure user is actually a teacher
         if (!$teacher->isTeacher()) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
         }
 
-        $evaluations = TeacherEvaluation::with('student')
-            ->where('teacher_id', $teacher->id)
-            ->latest()
-            ->paginate(15);
-            
-        $averageRating = TeacherEvaluation::where('teacher_id', $teacher->id)->avg('rating');
-        $totalEvaluations = TeacherEvaluation::where('teacher_id', $teacher->id)->count();
+        $evaluations = $this->manageTeacherEvaluations->listTeacherEvaluations($teacher->id, 15);
+        $averageRating = $this->manageTeacherEvaluations->getTeacherAverageRating($teacher->id);
+        $totalEvaluations = $evaluations->total();
 
         return view('teacher.evaluations.index', compact('evaluations', 'averageRating', 'totalEvaluations'));
     }

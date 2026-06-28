@@ -136,7 +136,13 @@ class SpeakingVocabularyProvider
 
     public function getAdvancedAdverbsForTopic($slug)
     {
-        $commonAdverbs = [];
+        $commonAdverbs = [
+            ['phrase' => 'significantly', 'level' => 'B2', 'meaning' => 'in a sufficiently great or important way', 'meaning_id' => 'secara signifikan', 'example' => 'The situation has improved significantly.'],
+            ['phrase' => 'particularly', 'level' => 'B2', 'meaning' => 'so as to give special emphasis to a point', 'meaning_id' => 'terkhusus / terutama', 'example' => 'I am particularly interested in this topic.'],
+            ['phrase' => 'relatively', 'level' => 'B2', 'meaning' => 'in relation, comparison, or proportion to something else', 'meaning_id' => 'relatif', 'example' => 'It is a relatively easy task.'],
+            ['phrase' => 'consistently', 'level' => 'C1', 'meaning' => 'in every case or on every occasion', 'meaning_id' => 'secara konsisten', 'example' => 'She has consistently achieved high marks.'],
+            ['phrase' => 'undoubtedly', 'level' => 'C1', 'meaning' => 'without doubt; certainly', 'meaning_id' => 'tanpa keraguan / pasti', 'example' => 'He is undoubtedly the best candidate.']
+        ];
 
         $adverbsMap = [
             'hometown' => [
@@ -409,7 +415,13 @@ class SpeakingVocabularyProvider
 
     public function getAdvancedVerbsForTopic($slug)
     {
-        $commonVerbs = [];
+        $commonVerbs = [
+            ['phrase' => 'enhance', 'level' => 'B2', 'meaning' => 'intensify, increase, or further improve the quality', 'meaning_id' => 'meningkatkan / memperbaiki', 'example' => 'This will enhance your performance.'],
+            ['phrase' => 'demonstrate', 'level' => 'B2', 'meaning' => 'clearly show the existence or truth of', 'meaning_id' => 'menunjukkan / mendemonstrasikan', 'example' => 'The study demonstrates the benefits.'],
+            ['phrase' => 'evaluate', 'level' => 'B2', 'meaning' => 'form an idea of the amount, number, or value of', 'meaning_id' => 'mengevaluasi / menilai', 'example' => 'We need to evaluate the results.'],
+            ['phrase' => 'facilitate', 'level' => 'C1', 'meaning' => 'make (an action or process) easy or easier', 'meaning_id' => 'memfasilitasi / memudahkan', 'example' => 'The new software will facilitate the process.'],
+            ['phrase' => 'implement', 'level' => 'B2', 'meaning' => 'put (a decision, plan, agreement, etc.) into effect', 'meaning_id' => 'menerapkan', 'example' => 'We will implement the new policy next month.']
+        ];
 
         $verbsMap = [
             'hometown' => [
@@ -682,7 +694,13 @@ class SpeakingVocabularyProvider
 
     public function getAdvancedAdjectivesForTopic($slug)
     {
-        $commonAdjectives = [];
+        $commonAdjectives = [
+            ['phrase' => 'crucial', 'level' => 'B2', 'meaning' => 'decisive or critical, especially in the success or failure of something', 'meaning_id' => 'sangat penting / krusial', 'example' => 'It is a crucial step.'],
+            ['phrase' => 'beneficial', 'level' => 'B2', 'meaning' => 'favorable or advantageous', 'meaning_id' => 'bermanfaat', 'example' => 'The changes will be highly beneficial.'],
+            ['phrase' => 'significant', 'level' => 'B2', 'meaning' => 'sufficiently great or important to be worthy of attention', 'meaning_id' => 'penting / signifikan', 'example' => 'A significant difference was observed.'],
+            ['phrase' => 'diverse', 'level' => 'B2', 'meaning' => 'showing a great deal of variety', 'meaning_id' => 'beragam', 'example' => 'A culturally diverse population.'],
+            ['phrase' => 'fundamental', 'level' => 'C1', 'meaning' => 'forming a necessary base or core', 'meaning_id' => 'mendasar / fundamental', 'example' => 'A fundamental change in approach.']
+        ];
 
         $adjectivesMap = [
             'hometown' => [

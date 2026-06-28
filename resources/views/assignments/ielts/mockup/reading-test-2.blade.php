@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>IELTS Reading Mock Test {{ $testId }} - {{ config('app.name', 'Target Bahasa') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         html, body { height: 100%; overflow: hidden; }
@@ -92,7 +94,7 @@
                              @click="if(eraserMode) window.removeHighlight($event);">
 
                            <div class="flex justify-center mb-8">
-                               <img src="{{ asset('images/uffington_white_horse.png') }}" alt="The Uffington White Horse" class="w-full max-w-sm rounded-xl shadow-md border border-gray-200 object-cover">
+                               <img src="{{ asset('images/tests/uffington_white_horse.png') }}" alt="The Uffington White Horse" class="w-full max-w-sm rounded-xl shadow-md border border-gray-200 object-cover">
                            </div>
                            <p>The cutting of huge figures or ‘geoglyphs’ into the earth of English hillsides has taken place for more than 3,000 years. There are 56 hill figures scattered around England, with the vast majority on the chalk downlands of the country’s southern counties. The figures include giants, horses, crosses and regimental badges. Although the majority of these geoglyphs date within the last 300 years or so, there are one or two that are much older.</p>
                            <p>The most famous of these figures is perhaps also the most mysterious – the Uffington White Horse in Oxfordshire. The White Horse has recently been re-dated and shown to be even older than its previously assigned ancient pre-Roman Iron Age* date. More controversial is the date of the enigmatic Long Man of Wilmington in Sussex. While many historians are convinced the figure is prehistoric, others believe that it was the work of an artistic monk from a nearby priory and was created between the 11th and 15th centuries.</p>

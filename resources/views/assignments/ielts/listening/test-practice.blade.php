@@ -16,7 +16,7 @@
                 <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Part {{ $set }} - Test {{ $testId }}</h1>
                 <p class="text-gray-500 mt-1">IELTS Listening Practice</p>
             </div>
-            <a href="{{ route('assignments.ielts-academic.listening.practice-index.part', ['set' => $set]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors duration-200">
+            <a href="{{ route('assignments.ielts-academic.listening.practice-index.part', ['set' => $set]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back to Tests
             </a>
@@ -38,8 +38,13 @@
             $section = $meeting->ieltsSections->where('section_number', $set)->first();
         @endphp
 
-        {{-- Audio Player --}}
-        @include('assignments.ielts.listening.partials.audio-player', ['section' => $section, 'set' => $set])
+        {{-- Colored Audio Player (Indigo/Purple theme) --}}
+        @include('assignments.ielts.listening.partials.audio-player-practice', [
+            'section' => $section,
+            'meeting' => $meeting,
+            'set'     => $set,
+            'fixed'   => true,
+        ])
 
         <form method="POST" id="questionsForm" action="{{ route('assignment.ielts.listening.submit', ['meeting' => $meeting->id, 'set' => $set, 'test' => $testId]) }}" class="-mt-16 relative z-10">
             @csrf
@@ -73,13 +78,7 @@
 
     </div>
 
-    {{-- Admin Modals --}}
-    @if(auth()->check() && strtolower(auth()->user()->role) === 'admin')
-    @include('assignments.ielts.listening.partials.admin-modals', ['section' => $section])
-    @endif
-
-    {{-- Audio Player Scripts --}}
-    @include('assignments.ielts.listening.partials.audio-player-scripts')
+    {{-- (Audio player scripts included in audio-player-practice partial) -->
 
     <script>
     function toggleTranscriptDrawer() {

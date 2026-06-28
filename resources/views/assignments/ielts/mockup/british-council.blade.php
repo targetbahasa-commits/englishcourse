@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>British Council Mock Tests - {{ config('app.name', 'Target Bahasa') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased bg-gray-50">
@@ -33,7 +35,7 @@
                         </div>
                         <div>
                             <div class="flex items-center gap-2 text-sm text-gray-400 mb-1">
-                                <a href="{{ url('/ielts/academic') }}" class="hover:text-red-600 transition">IELTS Academic</a>
+                                <a href="{{ url('/mock-test/ielts-academic') }}" class="hover:text-red-600 transition">IELTS Academic</a>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                                 <span class="text-gray-600 font-medium">British Council</span>
                             </div>
@@ -41,7 +43,7 @@
                             <p class="text-gray-600 mt-1">Select a test to begin your exam</p>
                         </div>
                     </div>
-                    <a href="{{ url('/ielts/academic') }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2">
+                    <a href="{{ url('/mock-test/ielts-academic') }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         Back
                     </a>

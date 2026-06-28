@@ -29,4 +29,16 @@ interface TeacherRepository
     public function countEvaluations(): int;
 
     public function getTopTeachers(int $limit): array;
+
+    public function getTeacherForEvaluation(int $teacherId): mixed;
+
+    public function saveTeacherEvaluation(int $studentId, int $teacherId, int $rating, ?string $comment = null): void;
+
+    public function countTeachers(): int;
+
+    public function getTeacherRecentEvaluations(int $teacherId, int $limit = 5): array;
+
+    public function getTeacherAverageRating(int $teacherId): float;
+
+    public function getUpcomingClassesForTeacher(int $teacherId): array;
 }

@@ -36,9 +36,9 @@
                     <h2 class="text-lg font-bold text-indigo-900">Reference: Describing Numbers & Data</h2>
                 </div>
                 <div class="p-0 flex flex-col justify-center bg-gray-50">
-                    <img src="{{ asset('images/ielts_writing_task1_lesson5_v2.png') }}" class="w-full h-auto shadow-sm" alt="Lesson 5 Theory">
-                    <img src="{{ asset('images/ielts_writing_task1_lesson5_extended.png') }}" class="w-full h-auto shadow-sm border-t border-gray-100" alt="Lesson 5 Further Explanation">
-                    <img src="{{ asset('images/ielts_writing_task1_lesson5_variations.png') }}" class="w-full h-auto rounded-b shadow-sm border-t border-gray-100" alt="Lesson 5 Variations">
+                    <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson5_v2.png') }}" class="w-full h-auto shadow-sm" alt="Lesson 5 Theory">
+                    <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson5_extended.png') }}" class="w-full h-auto shadow-sm border-t border-gray-100" alt="Lesson 5 Further Explanation">
+                    <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson5_variations.png') }}" class="w-full h-auto rounded-b shadow-sm border-t border-gray-100" alt="Lesson 5 Variations">
                 </div>
             </div>
         </div>

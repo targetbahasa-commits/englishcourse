@@ -9,9 +9,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('toefl_listening_scores', function (Blueprint $table) {
-            if (!Schema::hasColumn('toefl_listening_scores', 'set_number')) {
-                $table->integer('set_number')->nullable()->after('meeting_number');
-            }
+            // Logic moved to 000001 to fix execution order
         });
     }
 

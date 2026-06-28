@@ -23,7 +23,7 @@ class InitiatePayment
      * @throws \RuntimeException if user is already enrolled or has a pending payment.
      * @return array{status: string, payment?: Payment, message?: string, redirect?: string}
      */
-    public function handle(Authenticatable $user, int $programId, string $paymentChannel): array
+    public function handle(Authenticatable $user, int $programId, string $paymentChannel, string $classType = 'regular'): array
     {
         $program = Program::query()->findOrFail($programId);
 
@@ -47,8 +47,25 @@ class InitiatePayment
             return ['status' => 'pending_exists', 'payment' => $existingPending];
         }
 
-        $paymentMethod = $paymentChannel === 'bank_transfer' ? 'manual_transfer' : 'offline_cash';
-        $baseAmount    = max(0, (int) ($program->price ?? 0));
+        $paymentMethod = in_array($paymentChannel, ['bank_transfer', 'qris']) ? 'manual_transfer' : 'offline_cash';
+        
+        $basePrice = $program->price ?? 0;
+        if ($classType === 'private') {
+            $basePrice = $program->price_private ?? $basePrice;
+        } elseif ($classType === 'semi_private') {
+            $basePrice = $program->price_semi_private ?? $basePrice;
+        }
+
+        if (in_array($user->learning_mode, ['offline', 'both'])) {
+            if ($classType === 'private' && !is_null($program->price_private_offline)) {
+                $basePrice = $program->price_private_offline;
+            } elseif ($classType === 'semi_private' && !is_null($program->price_semi_private_offline)) {
+                $basePrice = $program->price_semi_private_offline;
+            } elseif (!is_null($program->price_offline)) {
+                $basePrice = $program->price_offline;
+            }
+        }
+        $baseAmount    = max(0, (int) $basePrice);
         $discount      = $this->discountResolver->resolve($user, $program, $baseAmount);
 
         $payment = Payment::query()->create([
@@ -64,6 +81,7 @@ class InitiatePayment
             'payment_provider' => 'internal',
             'due_at'           => now()->addDays(3),
             'meta'             => [
+                'class_type'       => $classType,
                 'applied_discount' => $discount->meta,
                 'instructions'     => [
                     'bank_name'      => setting('bank_name', 'BCA'),

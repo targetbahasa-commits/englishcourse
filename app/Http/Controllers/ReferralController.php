@@ -65,4 +65,31 @@ class ReferralController extends Controller
 
         return back()->with('success', 'Link berhasil dikirim! Tim kami akan meninjau postingan Anda segera dan menambahkan poin/diskon ke akun Anda.');
     }
+
+    public function verify(Request $request)
+    {
+        $code = trim($request->input('code', ''));
+
+        if (!$code) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Kode referral tidak boleh kosong.'
+            ], 400);
+        }
+
+        $user = \App\Models\User::where('referral_code', $code)->first();
+
+        if ($user) {
+            return response()->json([
+                'valid' => true,
+                'message' => 'Kode referral valid!',
+                'referrer_name' => $user->name,
+            ]);
+        }
+
+        return response()->json([
+            'valid' => false,
+            'message' => 'Kode referral tidak ditemukan.'
+        ], 404);
+    }
 }

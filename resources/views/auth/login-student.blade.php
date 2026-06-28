@@ -6,6 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Target Bahasa') }} - Student Login</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -61,6 +63,12 @@
 <body class="font-sans antialiased text-gray-900 bg-gray-50">
 
     <!-- Background styling and layout -->
+    @php
+        $tb_auth_login_student_title = \App\Models\Setting::where('key', 'auth_login_student_title')->value('value') ?? 'Welcome Back!';
+        $tb_auth_login_student_subtitle = \App\Models\Setting::where('key', 'auth_login_student_subtitle')->value('value') ?? 'Please sign in to your student account.';
+        $tb_auth_login_student_brand_title = \App\Models\Setting::where('key', 'auth_login_student_brand_title')->value('value') ?? 'Target Bahasa';
+        $tb_auth_login_student_brand_desc = \App\Models\Setting::where('key', 'auth_login_student_brand_desc')->value('value') ?? 'Your journey to mastering the language starts here. Log in to access your dashboard, track progress, and continue learning.';
+    @endphp
     <div class="min-h-screen w-full flex">
         
         <!-- Left Side: Interactive Branding / Image Section -->
@@ -76,13 +84,10 @@
             <!-- Content overlay -->
             <div class="relative z-10 flex flex-col justify-center items-center w-full h-full p-12 text-white text-center">
                 <!-- App Logo/Icon -->
-                <div class="w-20 h-20 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center mb-8 shadow-2xl transform hover:scale-105 transition-transform duration-500 cursor-default">
-                    <span class="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-tr from-white to-blue-100">TB</span>
-                </div>
+                <img src="{{ asset('images/brand/TARGET.png') }}" alt="{{ $tb_auth_login_student_brand_title }}" class="mb-8 w-[400px] max-w-[80%] max-h-[40vh] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500">
                 
-                <h1 class="text-5xl font-extrabold mb-4 tracking-tight drop-shadow-md">Target Bahasa</h1>
                 <p class="text-blue-100 text-lg max-w-md mx-auto font-medium leading-relaxed drop-shadow-sm">
-                    Your journey to mastering the language starts here. Log in to access your dashboard, track progress, and continue learning.
+                    {{ $tb_auth_login_student_brand_desc }}
                 </p>
 
                 <!-- Floating Stats/Badges for visual interest -->
@@ -100,22 +105,32 @@
         <!-- Right Side: Login Form -->
         <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 relative">
             <!-- Mobile Logo (visible only on small screens) -->
-            <div class="lg:hidden absolute top-8 left-8 flex items-center gap-2">
-                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-                    <span class="text-lg font-bold text-white">TB</span>
-                </div>
-                <span class="text-xl font-bold text-gray-900 tracking-tight">Target Bahasa</span>
+            <div class="lg:hidden absolute top-8 left-8 flex items-center">
+                <img src="{{ asset('images/brand/TARGET.png') }}" alt="Target Bahasa" class="h-10">
             </div>
 
             <div class="w-full max-w-md mt-16 lg:mt-0">
-                <!-- Header -->
                 <div class="mb-10 text-center lg:text-left">
-                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Welcome Back!</h2>
-                    <p class="text-gray-500 text-sm">Please sign in to your student account.</p>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">{{ $tb_auth_login_student_title }}</h2>
+                    <p class="text-gray-500 text-sm">{{ $tb_auth_login_student_subtitle }}</p>
                 </div>
 
                 <!-- Session Status -->
                 <x-auth-session-status class="mb-4" :status="session('status')" />
+
+                <!-- Flash Messages -->
+                @if (session('error'))
+                    <div class="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-sm text-red-600 flex items-start gap-3">
+                        <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div>{{ session('error') }}</div>
+                    </div>
+                @endif
+                @if (session('message'))
+                    <div class="mb-4 p-4 rounded-xl bg-blue-50 border border-blue-200 text-sm text-blue-600 flex items-start gap-3">
+                        <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div>{{ session('message') }}</div>
+                    </div>
+                @endif
 
                 <form method="POST" action="{{ route('login') }}" class="space-y-6">
                     @csrf
@@ -161,8 +176,8 @@
                         <label for="remember_me" class="ml-2 text-sm font-medium text-gray-600 cursor-pointer select-none">Remember me for 30 days</label>
                     </div>
 
-                    {{-- <x-turnstile /> --}}
-                    {{-- <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2 text-sm text-red-500 text-center" /> --}}
+                    <x-turnstile />
+                    <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2 text-sm text-red-500 text-center" />
 
                     <!-- Submit Button -->
                     <button type="submit" class="w-full relative py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 focus:outline-none focus:ring-4 focus:ring-blue-600/20 active:scale-[0.98] transition-all duration-300 group overflow-hidden">

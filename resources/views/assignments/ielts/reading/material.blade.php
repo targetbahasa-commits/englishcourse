@@ -30,7 +30,7 @@
 
 <!-- Full-screen reading layout — fixed to viewport, bypasses admin layout chain -->
 <!-- Full-screen reading layout — fixed to viewport, bypasses admin layout chain -->
-<div id="mat-outer" class="fixed inset-0 z-0 grid grid-rows-[auto_1fr] bg-gray-50 md:pl-64">
+<div id="mat-outer" class="fixed inset-0 z-0 grid grid-rows-[auto_1fr] bg-gray-50 transition-[padding] duration-200 ease-in-out">
     <!-- Header (fixed height) -->
     <div id="mat-header" class="flex-none bg-white border-b border-gray-200 shadow-sm z-10">
         <div class="px-6 py-4">
@@ -223,7 +223,11 @@
                                 </div>
                             </div>
                         @endforeach
+
                     @endif
+                    
+                    
+
                 </div>
             </div>
 
@@ -371,7 +375,7 @@
                                                             
                                                             <div class="relative w-1/4 max-w-[140px]">
                                                                 <select 
-                                                                    x-model="selected['{{ $subQuestion['id'] }}']"
+                                                                    data-qid="{{ $subQuestion['id'] }}" x-model="selected['{{ $subQuestion['id'] }}']"
                                                                     class="appearance-none w-full bg-white border-2 border-gray-300 text-gray-700 py-2.5 px-3 pr-8 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-bold text-center cursor-pointer text-base md:text-lg shadow-sm transition-colors"
                                                                 >
                                                                     <option value="" disabled selected>-</option>
@@ -409,7 +413,7 @@
                                                                     <td class="py-2 px-4 text-center">
                                                                         <div class="relative inline-block w-full">
                                                                             <select 
-                                                                                x-model="selected['{{ $subQuestion['id'] }}']"
+                                                                                data-qid="{{ $subQuestion['id'] }}" x-model="selected['{{ $subQuestion['id'] }}']"
                                                                                 class="appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-3 pr-8 rounded font-semibold focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer"
                                                                                 :class="{'text-blue-600 border-blue-500': selected['{{ $subQuestion['id'] }}']}"
                                                                             >
@@ -472,7 +476,7 @@
                                                                                         if (str_contains($cellText, "[$key]")) {
                                                                                             $inputHtml = '<div class="inline-block relative mx-1 align-baseline">' . 
                                                                                                          '<span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-600 font-bold text-xs select-none">' . $qNum . '</span>' .
-                                                                                                         '<input type="text" placeholder=" _______ " class="border border-gray-300 focus:border-blue-500 rounded outline-none bg-white pl-10 pr-2 py-1 w-28 md:w-36 text-gray-900 font-medium shadow-sm transition-all focus:ring-1 focus:ring-blue-200 text-sm">' .
+                                                                                                         '<input type="text" data-qid="\' . $key . \'" placeholder=" _______ " class="border border-gray-300 focus:border-blue-500 rounded outline-none bg-white pl-10 pr-2 py-1 w-28 md:w-36 text-gray-900 font-medium shadow-sm transition-all focus:ring-1 focus:ring-blue-200 text-sm">' .
                                                                                                          '</div>';
                                                                                             $cellText = str_replace("[$key]", $inputHtml, $cellText);
                                                                                         }
@@ -503,7 +507,7 @@
                                                                 <div class="flex items-center border border-gray-400 rounded-md px-2 py-1 transition-all focus-within:border-blue-500 bg-white hover:border-blue-400 shadow-sm">
                                                                     <span class="font-bold text-blue-700 mr-2 text-sm select-none">{{ $subQuestion['label'] }}</span>
                                                                     <input type="text" 
-                                                                           x-model="selected['{{ $subQuestion['id'] }}']"
+                                                                           data-qid="{{ $subQuestion['id'] }}" x-model="selected['{{ $subQuestion['id'] }}']"
                                                                            class="bg-transparent border-none p-0 w-24 focus:ring-0 text-sm text-gray-900 placeholder-gray-600 font-bold"
                                                                            placeholder="Answer...">
                                                                 </div>
@@ -547,7 +551,7 @@
                                                             foreach ($placeholderMap as $key => $qNum) {
                                                                 $inputHtml = '<span class="inline-block relative mx-1 align-middle">' .
                                                                              '<span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-600 font-bold text-xs select-none">' . $qNum . '</span>' .
-                                                                             '<input type="text" data-id="' . $key . '" class="user-answer border-2 border-gray-300 focus:border-blue-500 rounded-md outline-none bg-white pl-8 pr-3 py-1.5 w-48 text-gray-800 font-medium shadow-sm transition-all focus:ring-2 focus:ring-blue-100">' .
+                                                                             '<input type="text" data-qid="\' . $key . \'" class="user-answer border-2 border-gray-300 focus:border-blue-500 rounded-md outline-none bg-white pl-8 pr-3 py-1.5 w-48 text-gray-800 font-medium shadow-sm transition-all focus:ring-2 focus:ring-blue-100">' .
                                                                              '</span>';
                                                                 // Match [N] bracket style (e.g. [10]) in summary_text
                                                                 $summaryText = str_replace('[' . $qNum . ']', $inputHtml, $summaryText);
@@ -572,7 +576,7 @@
                                                         </div>
                                                     @endif
                                                 </div>
-                                            @elseif(isset($question['type']) && $question['type'] === 'short_answer_group')
+                                            @elseif(isset($question['type']) && in_array($question['type'], ['short_answer_group', 'short_answer']) && isset($question['sub_questions']))
                                                 {{-- Short Answer Group: numbered questions with text inputs below --}}
                                                 <div class="space-y-5 mt-4">
                                                     @foreach($question['sub_questions'] ?? [] as $subIndex => $subQuestion)
@@ -585,7 +589,7 @@
                                                             </div>
                                                             <div class="pl-10">
                                                                 <input type="text"
-                                                                       x-model="selected['{{ $subQuestion['id'] }}']"
+                                                                       data-qid="{{ $subQuestion['id'] }}" x-model="selected['{{ $subQuestion['id'] }}']"
                                                                        class="w-full max-w-sm px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 text-gray-800 font-medium text-sm placeholder-gray-300 transition-all shadow-sm"
                                                                        placeholder="Type answer here...">
                                                             </div>
@@ -668,9 +672,9 @@
                                                                 </span>
                                                             
                                                             @if(isset($question['type']) && $question['type'] === 'checkbox')
-                                                                <input type="checkbox" name="question_{{ $qIndex }}[]" value="{{ $optKey }}" class="hidden" x-model="selected">
+                                                                <input type="checkbox" name="question_{{ $qIndex }}[]" value="{{ $optKey }}" class="hidden" x-model="selected" data-qid="{{ $question['id'] }}">
                                                             @else
-                                                                <input type="radio" name="question_{{ $qIndex }}" value="{{ $optKey }}" class="hidden" x-model="selected">
+                                                                <input type="radio" name="question_{{ $qIndex }}" value="{{ $optKey }}" class="hidden" x-model="selected" data-qid="{{ $question['id'] }}">
                                                           @endif
 
                                                     @if(isset($question['box_options']))
@@ -709,7 +713,52 @@
                                 @endforeach
                             </div>
                         @endforeach
+
                     @endif
+
+
+                    @if($hasAnswerKey)
+                        <!-- Evaluation Button -->
+                        <div class="mt-8 mb-12 flex justify-center">
+                            <button type="button" onclick="evaluateIeltsReading()" id="eval-button" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all text-lg flex items-center gap-2 transform hover:scale-105">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Selesai & Cek Jawaban
+                            </button>
+                        </div>
+
+                        <!-- Evaluation Summary Box -->
+                        <div id="eval-summary" class="hidden mt-8 mb-12 bg-white rounded-2xl shadow-xl border border-gray-100 p-8 transition-all duration-500">
+                            <div class="text-center mb-6">
+                                <h2 class="text-3xl font-bold text-gray-900 mb-2">Hasil Evaluasi</h2>
+                                <p class="text-gray-500">Berikut adalah analisis jawaban Anda</p>
+                            </div>
+                            <div class="flex justify-center items-center gap-8 mb-8">
+                                <div class="text-center">
+                                    <div class="text-5xl font-bold text-emerald-500 mb-1" id="eval-score">-</div>
+                                    <div class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Total Benar</div>
+                                </div>
+                                <div class="h-16 w-px bg-gray-200"></div>
+                                <div class="text-center">
+                                    <div class="text-5xl font-bold text-rose-500 mb-1" id="eval-wrong">-</div>
+                                    <div class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Salah/Kosong</div>
+                                </div>
+                            </div>
+                            <div class="bg-blue-50 rounded-xl p-4 text-center">
+                                <p class="text-blue-800 font-medium">Scroll ke atas untuk melihat penjelasan dan perbaikan pada setiap pertanyaan.</p>
+                            </div>
+                            <div class="mt-6 text-center">
+                                <button type="button" onclick="window.location.reload()" class="text-gray-500 hover:text-gray-800 font-medium underline">Ulangi Latihan</button>
+                            </div>
+                        </div>
+                    @else
+                        <div class="mt-8 mb-12 flex justify-center">
+                            <div class="px-8 py-3 bg-gray-100 text-gray-500 font-bold rounded-xl border border-gray-200 text-lg flex items-center gap-3">
+                                <svg class="w-6 h-6 animate-spin text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                Menunggu Kunci Jawaban & Pembahasan Diupload...
+                            </div>
+                        </div>
+                    @endif
+
                 </div>
             </div>
         </div>
@@ -720,6 +769,20 @@
 <style>
     /* Prevent page-level scrolling so only the two panels scroll */
     body, main { overflow: hidden !important; height: 100vh !important; }
+    
+    /* Handle dynamic padding when sidebar collapses */
+    @media (min-width: 768px) {
+        #mat-outer {
+            padding-left: 16rem;
+        }
+        body.sidebar-collapsed #mat-outer {
+            padding-left: 4rem;
+        }
+        body.has-admin-sidebar.sidebar-collapsed #mat-outer {
+            padding-left: 3.5rem;
+        }
+    }
+
     .passage-content p {
         margin-bottom: 1.25rem;
         font-size: 1.05rem;
@@ -1415,7 +1478,166 @@
     </div>
 </div>
 
+
 @push('scripts')
+<script>
+    // Generate Answer Key Data from PHP
+    const answerKeyData = {!! json_encode(collect($sections)->flatMap(fn($s) => $s['questions'] ?? [])->mapWithKeys(function($q) {
+        $keys = [];
+        $correctAnswers = $q['correct_answer'] ?? ($q['data']['correct_answer'] ?? []);
+        
+        if (isset($q['sub_questions'])) {
+            foreach ($q['sub_questions'] as $sq) {
+                $keys[$sq['id']] = [
+                    'correct' => $correctAnswers[$sq['id']] ?? null,
+                    'explanation' => $q['explanation'] ?? null
+                ];
+            }
+        } elseif (isset($q['blanks'])) {
+            foreach ($q['blanks'] as $key => $qNum) {
+                $keys[$key] = [
+                    'correct' => $correctAnswers[$key] ?? null,
+                    'explanation' => $q['explanation'] ?? null
+                ];
+            }
+        } elseif (isset($q['placeholders'])) {
+            foreach ($q['placeholders'] as $key => $qNum) {
+                $keys[$key] = [
+                    'correct' => $correctAnswers[$key] ?? null,
+                    'explanation' => $q['explanation'] ?? null
+                ];
+            }
+        } else {
+            // Single question
+            $keys[$q['id'] ?? $q['question_number']] = [
+                'correct' => $correctAnswers,
+                'explanation' => $q['explanation'] ?? null
+            ];
+        }
+        return $keys;
+    })->toArray()) !!};
+
+    function evaluateIeltsReading() {
+        let correctCount = 0;
+        let totalCount = Object.keys(answerKeyData).length;
+
+        // Prevent multiple clicks
+        document.getElementById('eval-button').classList.add('hidden');
+        const summaryBox = document.getElementById('eval-summary');
+        summaryBox.classList.remove('hidden');
+
+        // Check each question
+        Object.keys(answerKeyData).forEach(qid => {
+            const data = answerKeyData[qid];
+            if (!data.correct) return; // Skip if no correct answer is defined
+
+            let userAnswer = null;
+            
+            // Try to find the input element(s) for this question
+            const inputs = document.querySelectorAll(`[data-qid="${qid}"]`);
+            if (inputs.length === 0) return; // Cannot find input
+
+            const firstInput = inputs[0];
+            let isCorrect = false;
+
+            // Extract value based on input type
+            if (firstInput.type === 'checkbox' || firstInput.type === 'radio') {
+                const checked = Array.from(inputs).filter(i => i.checked).map(i => i.value);
+                if (firstInput.type === 'radio') {
+                    userAnswer = checked.length > 0 ? checked[0] : null;
+                } else {
+                    userAnswer = checked; // Array
+                }
+            } else {
+                userAnswer = firstInput.value;
+            }
+
+            // Normalize and compare
+            if (Array.isArray(data.correct)) {
+                // For multiple answers (e.g., checkboxes or alternatives)
+                if (Array.isArray(userAnswer)) {
+                    // Checkbox array match
+                    const sortedUser = [...userAnswer].sort();
+                    const sortedCorrect = [...data.correct].sort();
+                    isCorrect = JSON.stringify(sortedUser) === JSON.stringify(sortedCorrect);
+                } else {
+                    // Single answer that can be one of multiple correct options
+                    const normalizedCorrect = data.correct.map(c => c.toString().trim().toLowerCase());
+                    isCorrect = userAnswer && normalizedCorrect.includes(userAnswer.toString().trim().toLowerCase());
+                }
+            } else {
+                // String comparison
+                const ansStr = (userAnswer || '').toString().trim().toLowerCase();
+                const corrStr = (data.correct || '').toString().trim().toLowerCase();
+                isCorrect = ansStr === corrStr && ansStr !== '';
+            }
+
+            if (isCorrect) correctCount++;
+
+            // Inject Feedback into UI
+            // Find the closest wrapper to append the feedback
+            const wrapper = firstInput.closest('td') || firstInput.closest('.flex.items-center.justify-between') || firstInput.closest('.pl-10') || firstInput.closest('.mb-4') || firstInput.parentElement;
+            
+            if (wrapper) {
+                // Highlight input
+                if (isCorrect) {
+                    firstInput.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
+                    firstInput.classList.remove('border-gray-300', 'border-gray-200');
+                } else {
+                    firstInput.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-700');
+                    firstInput.classList.remove('border-gray-300', 'border-gray-200');
+                }
+
+                // Make input readonly
+                inputs.forEach(i => {
+                    i.setAttribute('disabled', 'true');
+                    i.classList.add('cursor-not-allowed', 'opacity-80');
+                });
+
+                // Create feedback box
+                const feedbackHtml = `
+                    <div class="mt-3 p-4 rounded-xl border ${isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'} shadow-sm text-left animate-fade-in">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-bold text-sm uppercase tracking-wide ${isCorrect ? 'text-emerald-700' : 'text-rose-700'}">
+                                ${isCorrect ? '✓ Benar' : '✕ Salah'}
+                            </span>
+                        </div>
+                        <div class="text-sm text-gray-800 mb-2">
+                            <span class="font-semibold text-gray-600">Jawaban Benar:</span> 
+                            <span class="font-bold bg-white px-2 py-0.5 rounded border border-gray-200">${Array.isArray(data.correct) ? data.correct.join(', ') : data.correct}</span>
+                        </div>
+                        ${data.explanation ? `
+                        <div class="mt-3 pt-3 border-t ${isCorrect ? 'border-emerald-200/60' : 'border-rose-200/60'}">
+                            <div class="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-1">Penjelasan:</div>
+                            <div class="text-sm text-gray-700 leading-relaxed">${data.explanation}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                // Append it safely
+                if (firstInput.closest('td')) {
+                    // For tables, append inside the cell if possible, or we might need to handle it carefully
+                    const div = document.createElement('div');
+                    div.innerHTML = feedbackHtml;
+                    wrapper.appendChild(div);
+                } else {
+                    const div = document.createElement('div');
+                    div.innerHTML = feedbackHtml;
+                    wrapper.parentNode.insertBefore(div, wrapper.nextSibling);
+                }
+            }
+        });
+
+        // Update summary numbers
+        document.getElementById('eval-score').innerText = correctCount;
+        document.getElementById('eval-wrong').innerText = totalCount - correctCount;
+
+        // Smooth scroll to the summary box
+        summaryBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+</script>
+
 <script>
     window.applyAnnotation = function(type, color = 'yellow') {
         const selection = window.getSelection();

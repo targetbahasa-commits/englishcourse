@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\EvaluatesClassPeriodEnd;
 use App\Http\Controllers\Concerns\HandlesAssignmentAccess;
 use Illuminate\Support\Facades\Auth;
 
 class ToeflItpController extends Controller
 {
-    use HandlesAssignmentAccess;
+    use HandlesAssignmentAccess, EvaluatesClassPeriodEnd;
 
     public function __construct()
     {
@@ -22,7 +23,9 @@ class ToeflItpController extends Controller
             return redirect()->route('assignments.index')->with('error', 'You can only access assignments for your registered program.');
         }
 
-        return view('assignments.toefl-itp');
+        $isClassEnded = $user?->isStudent() ? $this->isStudentClassPeriodEnded('toefl-itp') : false;
+
+        return view('assignments.toefl-itp', compact('isClassEnded'));
     }
 
     public function vocabulary()

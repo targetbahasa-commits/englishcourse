@@ -64,6 +64,7 @@ class ApprovePayment
                 'status'     => 'paid',
                 'paid_amount'=> $paidAmount,
                 'paid_at'    => now(),
+                'verified_by'=> $verifier->id,
                 'meta'       => $meta,
                 'notes'      => $notes !== '' ? $notes : $payment->notes,
             ]);

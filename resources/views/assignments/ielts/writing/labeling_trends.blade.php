@@ -37,7 +37,7 @@
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
                         <h3 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">Reference Graph</h3>
                         <div class="rounded-lg overflow-hidden border border-gray-100">
-                            <img src="{{ asset('images/labeling_trends.png') }}" 
+                            <img src="{{ asset('images/materials/ielts-writing/labeling_trends.png') }}" 
                                  alt="Radio Station Listeners Graph" 
                                  class="w-full h-auto object-contain">
                         </div>

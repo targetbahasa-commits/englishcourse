@@ -19,7 +19,7 @@ class BuildIeltsReadingIndexData
     {
         $program = $this->repository->findProgramBySlugWithMeetings('ielts-academic-reading');
         $batchProgram = $this->ieltsBatchResolver->resolveBatchProgramForIelts($user);
-        $selectedClassPeriod = $this->batchResolver->resolveSelectedClassPeriodForProgram($batchProgram);
+        $selectedClassPeriod = $this->batchResolver->resolveSelectedClassPeriodForProgram($batchProgram, $user);
         $meetings = $program ? collect($program->meetings)->sortBy('meeting_number') : collect();
 
         return [

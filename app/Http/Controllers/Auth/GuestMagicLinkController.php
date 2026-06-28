@@ -18,7 +18,7 @@ class GuestMagicLinkController extends Controller
     public function sendLink(Request $request)
     {
         $request->validate([
-            // 'cf-turnstile-response' => ['required', new \App\Rules\Turnstile()],
+            'cf-turnstile-response' => ['required', new \App\Rules\Turnstile()],
             'email' => 'required|email|exists:users,email',
         ]);
 

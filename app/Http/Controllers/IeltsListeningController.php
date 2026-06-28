@@ -9,6 +9,7 @@ use App\Application\IeltsListening\BuildIeltsListeningWarmUpData;
 use App\Application\IeltsListening\PrepareIeltsListeningPracticeData;
 use App\Http\Controllers\Concerns\HandlesAssignmentAccess;
 use App\Http\Controllers\Concerns\ResolvesAuthenticatedUser;
+use App\Http\Controllers\Concerns\EvaluatesClassPeriodEnd;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,6 +17,7 @@ class IeltsListeningController extends Controller
 {
     use HandlesAssignmentAccess;
     use ResolvesAuthenticatedUser;
+    use EvaluatesClassPeriodEnd;
 
     public function __construct(
         private readonly BuildIeltsListeningIndexData $buildIeltsListeningIndexData,
@@ -29,7 +31,10 @@ class IeltsListeningController extends Controller
 
     public function index()
     {
-        return view('assignments.ielts.listening.index', $this->buildIeltsListeningIndexData->handle(Auth::user()));
+        $data = $this->buildIeltsListeningIndexData->handle(Auth::user());
+        $data['isClassEnded'] = $this->isStudentClassPeriodEnded('ielts-academic-full-package');
+
+        return view('assignments.ielts.listening.index', $data);
     }
 
     public function practiceIndex()
@@ -39,10 +44,12 @@ class IeltsListeningController extends Controller
 
     public function material(Request $request, int $id)
     {
-        return view(
-            'assignments.ielts.listening.material',
-            $this->buildIeltsListeningMaterialData->material($id, (int) $request->get('practice', 1))
-        );
+        $data = $this->buildIeltsListeningMaterialData->material($id, (int) $request->get('practice', 1));
+        if (is_array($data)) {
+            $data['isClassEnded'] = $this->isStudentClassPeriodEnded('ielts-academic-full-package');
+        }
+
+        return view('assignments.ielts.listening.material', $data);
     }
 
     public function warmUp(Request $request, string $type)

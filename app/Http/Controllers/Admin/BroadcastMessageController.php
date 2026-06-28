@@ -37,7 +37,7 @@ class BroadcastMessageController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'target_role' => 'required|in:all,student,teacher',
+            'target_role' => 'required|in:all,student,teacher,lead',
         ]);
 
         $sendViaEmail = $request->has('send_via_email');

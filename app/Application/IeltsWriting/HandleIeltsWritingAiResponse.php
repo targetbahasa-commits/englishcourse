@@ -21,9 +21,11 @@ class HandleIeltsWritingAiResponse
         bool $useRobustDecoder = true,
         ?string $context = null,
         string $parseFailureMessage = 'AI Response Error',
+        ?int $taskType = null,
+        ?string $category = null,
     ): JsonResponse {
         try {
-            $json = $this->ieltsWritingAiSupport->runJsonPrompt($prompt, $timeout, $maxTokens, $sanitize, $useRobustDecoder);
+            $json = $this->ieltsWritingAiSupport->runJsonPrompt($prompt, $timeout, $maxTokens, $sanitize, $useRobustDecoder, $taskType, $category);
 
             if ($json) {
                 $json['status'] = 'success';
@@ -50,8 +52,10 @@ class HandleIeltsWritingAiResponse
         int $maxTokens,
         bool $sanitize = false,
         bool $useRobustDecoder = true,
+        ?int $taskType = null,
+        ?string $category = null,
     ): array {
-        $result = $this->ieltsWritingAiSupport->request($prompt, true, $timeout, $maxTokens);
+        $result = $this->ieltsWritingAiSupport->request($prompt, true, $timeout, $maxTokens, $taskType, $category);
         $content = $result['content'] ?? '';
 
         return [
@@ -60,10 +64,10 @@ class HandleIeltsWritingAiResponse
         ];
     }
 
-    public function respondWithFeedbackPrompt(string $prompt, int $timeout, int $maxTokens): JsonResponse
+    public function respondWithFeedbackPrompt(string $prompt, int $timeout, int $maxTokens, ?int $taskType = null, ?string $category = null): JsonResponse
     {
         try {
-            [$json, $content] = $this->requestDecodedJsonPrompt($prompt, $timeout, $maxTokens, true);
+            [$json, $content] = $this->requestDecodedJsonPrompt($prompt, $timeout, $maxTokens, true, true, $taskType, $category);
 
             if ($json) {
                 $json['status'] = 'success';
@@ -83,10 +87,10 @@ class HandleIeltsWritingAiResponse
         }
     }
 
-    public function respondWithCorrectionPrompt(string $prompt, string $essay, int $timeout, int $maxTokens): JsonResponse
+    public function respondWithCorrectionPrompt(string $prompt, string $essay, int $timeout, int $maxTokens, ?int $taskType = null, ?string $category = null): JsonResponse
     {
         try {
-            [$json] = $this->requestDecodedJsonPrompt($prompt, $timeout, $maxTokens, true);
+            [$json] = $this->requestDecodedJsonPrompt($prompt, $timeout, $maxTokens, true, true, $taskType, $category);
 
             if ($json) {
                 $json['correction_html'] = $this->normalizeCorrectionHtml($json['correction_html'] ?? '', $essay);

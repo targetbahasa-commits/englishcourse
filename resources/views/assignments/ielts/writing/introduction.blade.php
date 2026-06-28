@@ -41,8 +41,8 @@
                 </div>
                 <!-- Reference Image -->
                 <div class="border-t border-gray-100 p-4 bg-gray-50 flex flex-col gap-4">
-                    <img src="{{ asset('images/ielts_writing_task1_lesson8_intro_phrases.png') }}" class="w-full h-auto rounded shadow-sm" alt="Introductory Phrases">
-                    <img src="{{ asset('images/ielts_writing_task1_lesson8_useful_phrases.png') }}" class="w-full h-auto rounded shadow-sm border border-gray-200" alt="Useful Phrases List">
+                    <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson8_intro_phrases.png') }}" class="w-full h-auto rounded shadow-sm" alt="Introductory Phrases">
+                    <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson8_useful_phrases.png') }}" class="w-full h-auto rounded shadow-sm border border-gray-200" alt="Useful Phrases List">
                 </div>
             </div>
 
@@ -63,8 +63,8 @@
                 </div>
                 <!-- Reference Image -->
                 <div class="border-t border-gray-100 p-4 bg-gray-50 flex flex-col gap-4">
-                    <img src="{{ asset('images/ielts_writing_task1_lesson8_intro_phrases.png') }}" class="w-full h-auto rounded shadow-sm" alt="Introductory Phrases">
-                    <img src="{{ asset('images/ielts_writing_task1_lesson8_useful_phrases.png') }}" class="w-full h-auto rounded shadow-sm border border-gray-200" alt="Useful Phrases List">
+                    <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson8_intro_phrases.png') }}" class="w-full h-auto rounded shadow-sm" alt="Introductory Phrases">
+                    <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson8_useful_phrases.png') }}" class="w-full h-auto rounded shadow-sm border border-gray-200" alt="Useful Phrases List">
                 </div>
             </div>
         </div>

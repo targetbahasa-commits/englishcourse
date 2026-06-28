@@ -25,16 +25,16 @@ class MockupQuestionViewData
         return new self(
             id: (int) $question->id,
             question_number: (int) $question->question_number,
-            question_text: $question->question_text,
-            option_a: $question->option_a,
-            option_b: $question->option_b,
-            option_c: $question->option_c,
-            option_d: $question->option_d,
-            correct_answer: $question->correct_answer,
-            part: $question->part,
-            audio_file: $question->audio_file,
-            transcript_en: $question->transcript_en,
-            transcript_id: $question->transcript_id,
+            question_text: $question->question_text ?? null,
+            option_a: $question->option_a ?? null,
+            option_b: $question->option_b ?? null,
+            option_c: $question->option_c ?? null,
+            option_d: $question->option_d ?? null,
+            correct_answer: $question->correct_answer ?? null,
+            part: isset($question->part) ? $question->part : null,
+            audio_file: isset($question->audio_file) ? $question->audio_file : null,
+            transcript_en: isset($question->transcript_en) ? $question->transcript_en : null,
+            transcript_id: isset($question->transcript_id) ? $question->transcript_id : null,
         );
     }
 

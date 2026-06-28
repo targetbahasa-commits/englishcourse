@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>IELTS Listening Mock Up - {{ config('app.name', 'Target Bahasa') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
@@ -45,7 +47,7 @@
                 </div>
             </div>
 
-            <div x-data="{ step: 1 }">
+            <div x-data="{ step: 1 }" x-init="$watch('step', value => $dispatch('part-changed', value))">
                 <!-- Part 1 -->
                 <div x-show="step === 1">
                     <div class="max-w-4xl mx-auto bg-white p-8 rounded-none shadow-md border border-gray-300">
@@ -584,184 +586,17 @@
     {{-- Audio Player Partial --}}
     @include('assignments.ielts.listening.partials.audio-player', ['set' => 'Mock Up ' . $testId, 'section' => $material])
 
-    {{-- Admin Upload Modals --}}
-    @if(Auth::check() && Auth::user()->isAdmin())
-        {{-- Upload SRT Modal --}}
-        <div id="uploadSrtModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4 transition-opacity" onclick="if(event.target === this) this.classList.add('hidden')">
-            <div class="bg-white rounded-xl shadow-2xl p-6 md:p-8 max-w-md w-full mx-auto relative overflow-y-auto max-h-[90vh]">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-xl md:text-2xl font-bold text-gray-900">Upload SRT Transcript</h3>
-                    <button type="button" onclick="document.getElementById('uploadSrtModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-                <form action="{{ route('assignments.ielts-academic.mockup.cambridge.upload-srt', ['edition' => $edition, 'id' => $testId]) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-                    @csrf
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Language</label>
-                        <div class="flex gap-4">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="language" value="en" class="text-indigo-600 focus:ring-indigo-500" checked>
-                                <span class="text-gray-700">English 🇺🇸</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="language" value="id" class="text-indigo-600 focus:ring-indigo-500">
-                                <span class="text-gray-700">Indonesian 🇮🇩</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">SRT File (.srt - Max 2MB)</label>
-                        <div class="relative border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-indigo-500 transition-colors text-center cursor-pointer" onclick="document.getElementById('srtFileInput').click()">
-                            <input type="file" id="srtFileInput" name="srt_file" accept=".srt" class="hidden" onchange="document.getElementById('srtFileName').textContent = this.files[0] ? this.files[0].name : 'Click to select file'">
-                            <svg class="w-8 h-8 md:w-10 md:h-10 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                            <span class="text-sm text-gray-500" id="srtFileName">Click to select file</span>
-                        </div>
-                    </div>
-                    <div class="relative py-2 hidden md:block">
-                        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-200"></div></div>
-                        <div class="relative flex justify-center"><span class="px-2 bg-white text-xs text-gray-500 font-semibold uppercase">Or Paste Text</span></div>
-                    </div>
-                    <div class="hidden md:block">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Paste SRT Content</label>
-                        <textarea name="srt_content" rows="3" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none placeholder-gray-400 text-sm font-mono" placeholder="1
-00:00:10,000 --> 00:00:15,000
-Start translating here..."></textarea>
-                    </div>
-                    <div class="flex gap-3 pt-4">
-                        <button type="button" onclick="document.getElementById('uploadSrtModal').classList.add('hidden')" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors">Cancel</button>
-                        <button type="submit" class="flex-1 px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors shadow-sm">Upload & Parse</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+    {{-- Audio Player Scripts (autoscroll, highlight, progress bar) --}}
+    @include('assignments.ielts.listening.partials.audio-player-scripts')
 
-        {{-- Upload Audio Modal --}}
-        <div id="uploadAudioModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4 transition-opacity" onclick="if(event.target === this) this.classList.add('hidden')">
-            <div class="bg-white rounded-xl shadow-2xl p-6 md:p-8 max-w-md w-full mx-auto relative overflow-y-auto max-h-[90vh]">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-xl md:text-2xl font-bold text-gray-900">Upload Audio File</h3>
-                    <button type="button" onclick="document.getElementById('uploadAudioModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-                <form action="{{ route('assignments.ielts-academic.mockup.cambridge.upload-audio', ['edition' => $edition, 'id' => $testId]) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-                    @csrf
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Audio File (MP3, WAV, OGG - Max 50MB)</label>
-                        <input type="file" name="audio_file" accept=".mp3,.wav,.ogg,audio/*" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none">
-                    </div>
-                    @if(isset($material) && $material->audio_file)
-                        <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                            <p class="text-sm text-blue-800 break-all"><span class="font-semibold">Current file:</span> {{ basename($material->audio_file) }}</p>
-                        </div>
-                    @endif
-                    <div class="flex gap-3 pt-4">
-                        <button type="button" onclick="document.getElementById('uploadAudioModal').classList.add('hidden')" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors">Cancel</button>
-                        <button type="submit" class="flex-1 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">Upload</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        {{-- Upload Answer Key Modal --}}
-        <div id="uploadAnswerKeyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4 transition-opacity" onclick="if(event.target === this) this.classList.add('hidden')">
-            <div class="bg-white rounded-xl shadow-2xl p-6 md:p-8 max-w-md w-full mx-auto relative overflow-y-auto max-h-[90vh]">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-xl md:text-2xl font-bold text-gray-900">Upload Answer Key</h3>
-                    <button type="button" onclick="document.getElementById('uploadAnswerKeyModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-                <form action="{{ route('assignments.ielts-academic.mockup.cambridge.upload-answer-key', ['edition' => $edition, 'id' => $testId]) }}" method="POST" class="space-y-4">
-                    @csrf
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Answer Key Content</label>
-                        <textarea name="answer_key" rows="6" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none placeholder-gray-400 text-sm font-mono" placeholder="1. A\n2. B..."></textarea>
-                    </div>
-                    <div class="flex gap-3 pt-4">
-                        <button type="button" onclick="document.getElementById('uploadAnswerKeyModal').classList.add('hidden')" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors">Cancel</button>
-                        <button type="submit" class="flex-1 px-4 py-2 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors shadow-sm">Save Key</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    @endif
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const audio = document.getElementById('mainAudio');
-            const playIcon = document.getElementById('playIcon');
-            const pauseIcon = document.getElementById('pauseIcon');
-            const progressBar = document.getElementById('progressBar');
-            const progressHandle = document.getElementById('progressHandle');
-            const progressContainer = document.getElementById('progressContainer');
-            const currentTimeDisplay = document.getElementById('currentTime');
-            const durationDisplay = document.getElementById('duration');
-
-            if (!audio || !progressContainer) return;
-
-            let isDragging = false;
-
-            function formatTime(seconds) {
-                if (isNaN(seconds)) return '0:00';
-                const mins = Math.floor(seconds / 60);
-                const secs = Math.floor(seconds % 60);
-                return `${mins}:${secs.toString().padStart(2, '0')}`;
-            }
-
-            window.togglePlayPause = function() {
-                if (audio.paused) {
-                    audio.play();
-                    playIcon.classList.add('hidden');
-                    pauseIcon.classList.remove('hidden');
-                } else {
-                    audio.pause();
-                    playIcon.classList.remove('hidden');
-                    pauseIcon.classList.add('hidden');
-                }
-            };
-
-            window.skipAudio = function(seconds) {
-                if (audio && audio.duration) {
-                    audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + seconds));
-                }
-            };
-
-            function seekAudio(event) {
-                if (!audio.duration) return;
-                const rect = progressContainer.getBoundingClientRect();
-                const clientX = event.clientX || (event.touches ? event.touches[0].clientX : 0);
-                const percentage = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-                audio.currentTime = percentage * audio.duration;
-            }
-
-            progressContainer.addEventListener('mousedown', (e) => { isDragging = true; seekAudio(e); e.preventDefault(); });
-            document.addEventListener('mousemove', (e) => { if (isDragging) seekAudio(e); });
-            document.addEventListener('mouseup', () => { isDragging = false; });
-            
-            progressContainer.addEventListener('touchstart', (e) => { isDragging = true; seekAudio(e.touches[0]); e.preventDefault(); });
-            document.addEventListener('touchmove', (e) => { if (isDragging) seekAudio(e.touches[0]); });
-            document.addEventListener('touchend', () => { isDragging = false; });
-
-            audio.addEventListener('timeupdate', () => {
-                if (audio.duration && !isDragging) {
-                    const percentage = (audio.currentTime / audio.duration) * 100;
-                    progressBar.style.width = percentage + '%';
-                    progressHandle.style.left = percentage + '%';
-                    currentTimeDisplay.textContent = formatTime(audio.currentTime);
-                }
-            });
-
-            audio.addEventListener('loadedmetadata', () => { durationDisplay.textContent = formatTime(audio.duration); });
-            audio.addEventListener('ended', () => { playIcon.classList.remove('hidden'); pauseIcon.classList.add('hidden'); });
-            
-            window.toggleTranscriptDrawer = function() {
-                const transcriptDrawer = document.getElementById('transcriptDrawer');
-                if (transcriptDrawer) transcriptDrawer.classList.toggle('hidden');
-            };
-        });
-    </script>
+<script>
+    function toggleTranscriptDrawer() {
+        const drawer = document.getElementById('transcriptDrawer');
+        if (drawer) {
+            drawer.classList.toggle('hidden');
+        }
+    }
+</script>
     <style>
         main { padding-bottom: 250px !important; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }

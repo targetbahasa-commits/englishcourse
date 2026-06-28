@@ -51,6 +51,8 @@ class User extends Authenticatable
         'teacher_id',
         'program_id',
         'learning_mode',
+        'camp_id',
+        'camp_room_id',
         'bio',
     ];
 
@@ -87,6 +89,16 @@ class User extends Authenticatable
         return $this->belongsTo(Program::class, 'program_id');
     }
 
+    public function camp(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Camp::class, 'camp_id');
+    }
+
+    public function campRoom(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(CampRoom::class, 'camp_room_id');
+    }
+
     public function getActiveRoleAttribute()
     {
         if ($this->role === 'admin' && request()->hasSession() && session()->has('view_as_role')) {
@@ -113,6 +125,26 @@ class User extends Authenticatable
     public function isGuest()
     {
         return in_array($this->active_role, ['guest', 'guest_quick']);
+    }
+
+    public function isTestTaker()
+    {
+        return $this->active_role === 'test-taker';
+    }
+
+    public function isIntern()
+    {
+        return $this->active_role === 'intern';
+    }
+
+    public function internPermissions()
+    {
+        return $this->hasMany(InternPermission::class);
+    }
+
+    public function hasInternPermission(string $permission)
+    {
+        return $this->internPermissions()->where('permission', $permission)->exists();
     }
 
     public function isActive()
@@ -278,6 +310,11 @@ class User extends Authenticatable
     public function freeTestResults()
     {
         return $this->hasMany(FreeTestResult::class);
+    }
+
+    public function onlineTestResults()
+    {
+        return $this->hasMany(OnlineTestResult::class);
     }
 
     /**

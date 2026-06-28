@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>IELTS Listening Mock Up - {{ config('app.name', 'Target Bahasa') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
@@ -32,7 +34,7 @@
             </div>
         </div>
 
-        <div x-data="{ step: 1 }">
+        <div x-data="{ step: 1 }" x-init="$watch('step', value => $dispatch('part-changed', value))">
 
             {{-- PART 1 --}}
             <div x-show="step === 1">
@@ -595,65 +597,8 @@
 
 @include('assignments.ielts.listening.partials.audio-player', ['set' => 'Mock Up ' . $testId, 'section' => $material])
 
-@if(Auth::check() && Auth::user()->isAdmin())
-    <div id="uploadSrtModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4" onclick="if(event.target===this)this.classList.add('hidden')">
-        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-auto overflow-y-auto max-h-[90vh]">
-            <div class="flex items-center justify-between mb-6"><h3 class="text-xl font-bold text-gray-900">Upload SRT Transcript</h3><button onclick="document.getElementById('uploadSrtModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
-            <form action="{{ route('assignments.ielts-academic.mockup.cambridge.upload-srt', ['edition' => $edition, 'id' => $testId]) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-                @csrf
-                <div><label class="block text-sm font-semibold text-gray-700 mb-2">Language</label><div class="flex gap-4"><label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="language" value="en" checked> English</label><label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="language" value="id"> Indonesian</label></div></div>
-                <div><label class="block text-sm font-semibold text-gray-700 mb-2">SRT File (.srt)</label><input type="file" name="srt_file" accept=".srt" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg"></div>
-                <div class="flex gap-3 pt-4"><button type="button" onclick="document.getElementById('uploadSrtModal').classList.add('hidden')" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg">Cancel</button><button type="submit" class="flex-1 px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg">Upload & Parse</button></div>
-            </form>
-        </div>
-    </div>
-    <div id="uploadAudioModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4" onclick="if(event.target===this)this.classList.add('hidden')">
-        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-auto">
-            <div class="flex items-center justify-between mb-6"><h3 class="text-xl font-bold text-gray-900">Upload Audio File</h3><button onclick="document.getElementById('uploadAudioModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
-            <form action="{{ route('assignments.ielts-academic.mockup.cambridge.upload-audio', ['edition' => $edition, 'id' => $testId]) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-                @csrf
-                <div><label class="block text-sm font-semibold text-gray-700 mb-2">Audio File (MP3, WAV – Max 50MB)</label><input type="file" name="audio_file" accept=".mp3,.wav,.ogg,audio/*" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg"></div>
-                @if(isset($material) && $material->audio_file)<div class="p-3 bg-blue-50 rounded-lg"><p class="text-sm text-blue-800"><span class="font-semibold">Current file:</span> {{ basename($material->audio_file) }}</p></div>@endif
-                <div class="flex gap-3 pt-4"><button type="button" onclick="document.getElementById('uploadAudioModal').classList.add('hidden')" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg">Cancel</button><button type="submit" class="flex-1 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg">Upload</button></div>
-            </form>
-        </div>
-    </div>
-    <div id="uploadAnswerKeyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4" onclick="if(event.target===this)this.classList.add('hidden')">
-        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-auto">
-            <div class="flex items-center justify-between mb-6"><h3 class="text-xl font-bold text-gray-900">Upload Answer Key</h3><button onclick="document.getElementById('uploadAnswerKeyModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
-            <form action="{{ route('assignments.ielts-academic.mockup.cambridge.upload-answer-key', ['edition' => $edition, 'id' => $testId]) }}" method="POST" class="space-y-4">
-                @csrf
-                <div><label class="block text-sm font-semibold text-gray-700 mb-2">Answer Key Content</label><textarea name="answer_key" rows="6" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg font-mono text-sm" placeholder="1. A&#10;2. B..."></textarea></div>
-                <div class="flex gap-3 pt-4"><button type="button" onclick="document.getElementById('uploadAnswerKeyModal').classList.add('hidden')" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg">Cancel</button><button type="submit" class="flex-1 px-4 py-2 bg-teal-600 text-white font-semibold rounded-lg">Save Key</button></div>
-            </form>
-        </div>
-    </div>
-@endif
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const audio = document.getElementById('mainAudio');
-    const playIcon = document.getElementById('playIcon');
-    const pauseIcon = document.getElementById('pauseIcon');
-    const progressBar = document.getElementById('progressBar');
-    const progressHandle = document.getElementById('progressHandle');
-    const progressContainer = document.getElementById('progressContainer');
-    const currentTimeDisplay = document.getElementById('currentTime');
-    const durationDisplay = document.getElementById('duration');
-    if (!audio || !progressContainer) return;
-    let isDragging = false;
-    function formatTime(s) { if(isNaN(s))return'0:00'; const m=Math.floor(s/60); return`${m}:${Math.floor(s%60).toString().padStart(2,'0')}`; }
-    window.togglePlayPause = function() { if(audio.paused){audio.play();playIcon.classList.add('hidden');pauseIcon.classList.remove('hidden');}else{audio.pause();playIcon.classList.remove('hidden');pauseIcon.classList.add('hidden');} };
-    window.skipAudio = function(s) { if(audio&&audio.duration)audio.currentTime=Math.max(0,Math.min(audio.duration,audio.currentTime+s)); };
-    function seekAudio(e) { if(!audio.duration)return; const r=progressContainer.getBoundingClientRect(); const pct=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)); audio.currentTime=pct*audio.duration; }
-    progressContainer.addEventListener('mousedown',e=>{isDragging=true;seekAudio(e);e.preventDefault();});
-    document.addEventListener('mousemove',e=>{if(isDragging)seekAudio(e);});
-    document.addEventListener('mouseup',()=>{isDragging=false;});
-    audio.addEventListener('timeupdate',()=>{ if(audio.duration&&!isDragging){const pct=(audio.currentTime/audio.duration)*100;progressBar.style.width=pct+'%';progressHandle.style.left=pct+'%';currentTimeDisplay.textContent=formatTime(audio.currentTime);}});
-    audio.addEventListener('loadedmetadata',()=>{durationDisplay.textContent=formatTime(audio.duration);});
-    audio.addEventListener('ended',()=>{playIcon.classList.remove('hidden');pauseIcon.classList.add('hidden');});
-    window.toggleTranscriptDrawer = function() { const d=document.getElementById('transcriptDrawer'); if(d)d.classList.toggle('hidden'); };
-});
+document.addEventListener('DOMContentLoaded', function() {});
 </script>
 <style>main{padding-bottom:250px!important;}</style>
 </body>

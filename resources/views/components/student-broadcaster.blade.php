@@ -44,20 +44,25 @@
                 }
                 
                 // --- 1. Presence Channel for Monitoring (existing) ---
-                const channel = window.Echo.join('monitoring');
-                const broadcastCurrentPage = () => {
-                    channel.whisper('client-page-update', {
-                        id: userId,
-                        name: '{{ addslashes(auth()->user()->name) }}',
-                        url: window.location.href,
-                        title: document.title,
-                        timestamp: new Date().toISOString()
+                // Only initialize if broadcasting is enabled
+                if (typeof window.Echo !== 'undefined' && window.Echo._broadcastingEnabled === true) {
+                    const channel = typeof window.Echo.join === 'function' 
+                                    ? window.Echo.join('monitoring') 
+                                    : (typeof window.Echo.presence === 'function' ? window.Echo.presence('monitoring') : window.Echo.channel('monitoring'));
+                    const broadcastCurrentPage = () => {
+                        channel.whisper('client-page-update', {
+                            id: userId,
+                            name: '{{ addslashes(auth()->user()->name) }}',
+                            url: window.location.href,
+                            title: document.title,
+                            timestamp: new Date().toISOString()
+                        });
+                    };
+                    channel.here((users) => {
+                        broadcastCurrentPage();
                     });
-                };
-                channel.here((users) => {
-                    broadcastCurrentPage();
-                });
-                setInterval(broadcastCurrentPage, 30000);
+                    setInterval(broadcastCurrentPage, 30000);
+                }
 
                 // --- 2. WebRTC Signaling Channel (New) ---
                 const webrtcChannel = window.Echo.private('remote-view.' + userId);

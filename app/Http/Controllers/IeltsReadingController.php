@@ -6,6 +6,7 @@ use App\Application\IeltsReading\BuildIeltsReadingIndexData;
 use App\Application\IeltsReading\BuildLegacyIeltsReadingMaterialData;
 use App\Application\IeltsReading\BuildIeltsReadingMaterialData;
 use App\Http\Controllers\Concerns\HandlesAssignmentAccess;
+use App\Http\Controllers\Concerns\EvaluatesClassPeriodEnd;
 use App\Models\IeltsReadingPassage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 class IeltsReadingController extends Controller
 {
     use HandlesAssignmentAccess;
+    use EvaluatesClassPeriodEnd;
 
     public function __construct(
         private readonly BuildIeltsReadingIndexData $buildIeltsReadingIndexData,
@@ -24,7 +26,10 @@ class IeltsReadingController extends Controller
 
     public function index()
     {
-        return view('assignments.ielts.reading.index', $this->buildIeltsReadingIndexData->handle(Auth::user()));
+        $data = $this->buildIeltsReadingIndexData->handle(Auth::user());
+        $data['isClassEnded'] = $this->isStudentClassPeriodEnded('ielts-academic-full-package');
+
+        return view('assignments.ielts.reading.index', $data);
     }
 
     public function practiceIndex()
@@ -57,6 +62,10 @@ class IeltsReadingController extends Controller
         }
 
         if ($material !== null) {
+            if (is_array($material)) {
+                $material['isClassEnded'] = $this->isStudentClassPeriodEnded('ielts-academic-full-package');
+            }
+
             return view('assignments.ielts.reading.material', $material);
         }
 
@@ -64,6 +73,10 @@ class IeltsReadingController extends Controller
 
         if ($legacyMaterial === null) {
             abort(404);
+        }
+
+        if (is_array($legacyMaterial)) {
+            $legacyMaterial['isClassEnded'] = $this->isStudentClassPeriodEnded('ielts-academic-full-package');
         }
 
         return view('assignments.ielts.reading.material', $legacyMaterial);

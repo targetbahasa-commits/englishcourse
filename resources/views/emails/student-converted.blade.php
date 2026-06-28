@@ -3,6 +3,8 @@
 <head>
     <meta charset="utf-8">
     <title>Welcome to Target Bahasa</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     <style>
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; line-height: 1.6; background-color: #f9fafb; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }

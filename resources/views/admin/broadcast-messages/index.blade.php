@@ -46,6 +46,8 @@
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">Students</span>
                                     @elseif($message->target_role === 'teacher')
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-700">Teachers</span>
+                                    @elseif($message->target_role === 'lead')
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-50 text-orange-700">Registration Leads</span>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700">All Users</span>
                                     @endif

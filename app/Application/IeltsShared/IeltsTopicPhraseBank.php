@@ -342,7 +342,8 @@ class IeltsTopicPhraseBank
         });
 
         foreach ($keys as $key) {
-            if (str_contains($slug, $key)) {
+            $escapedKey = preg_quote($key, '/');
+            if (preg_match("/\b{$escapedKey}\b/i", $slug)) {
                 return $collocationsMap[$key];
             }
         }
@@ -686,7 +687,8 @@ class IeltsTopicPhraseBank
         });
 
         foreach ($keys as $key) {
-            if (str_contains($slug, $key)) {
+            $escapedKey = preg_quote($key, '/');
+            if (preg_match("/\b{$escapedKey}\b/i", $slug)) {
                 return $idiomsMap[$key];
             }
         }

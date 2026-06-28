@@ -29,24 +29,39 @@
 
 <div class="container mx-auto px-4 py-8" 
      x-data="part2Practice({{ json_encode($idioms ?? []) }}, {{ json_encode($collocations ?? []) }}, {{ json_encode($advanced_verbs ?? []) }}, {{ json_encode($advanced_adverbs ?? []) }}, {{ json_encode($advanced_adjectives ?? []) }})"
+     x-init="init()"
      x-cloak>
     
     <!-- Header with Back Button -->
     <div class="mb-8">
-        <a href="{{ route('assignments.ielts-academic.speaking.index', ['part' => 2]) }}" class="inline-flex items-center text-gray-600 hover:text-orange-500 transition-colors mb-4">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            Back to Topics
-        </a>
+
         
-        <div class="flex items-center gap-4">
-            <div class="p-3 {{ $theme['bg'] }} rounded-xl {{ $theme['text'] }}">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $topic['icon'] }}"></path>
-                </svg>
+
+        
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-4">
+                <div class="p-3 {{ $theme['bg'] }} rounded-xl {{ $theme['text'] }}">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $topic['icon'] }}"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">{{ $topic['title'] }}</h1>
+                    <p class="text-gray-500">IELTS Speaking Part 2 - The Long Turn</p>
+                </div>
             </div>
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">{{ $topic['title'] }}</h1>
-                <p class="text-gray-500">IELTS Speaking Part 2 - The Long Turn</p>
+            
+            <div class="flex items-center gap-3">
+                @if(auth()->user() && (auth()->user()->isTeacher() || auth()->user()->isAdmin()))
+                    <button @click="showEditModal = true" class="inline-flex items-center px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm font-semibold shadow-sm">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        Edit Soal
+                    </button>
+                @endif
+                <a href="{{ route('assignments.ielts-academic.speaking.index', ['part' => 2]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back to Topics
+                </a>
             </div>
         </div>
     </div>
@@ -65,10 +80,6 @@
                  <div class="flex-1 py-2 rounded-xl transition-colors"
                       :class="{'{{ $theme['bg'] }} {{ $theme['text'] }} ring-2 ring-offset-1 {{ $theme['ring'] }}': step === 'speaking', 'text-gray-400': step !== 'speaking'}">
                      2. SPEAK (2 min)
-                 </div>
-                 <div class="flex-1 py-2 rounded-xl transition-colors"
-                      :class="{'{{ $theme['bg'] }} {{ $theme['text'] }}': step === 'review', 'text-gray-400': step !== 'review'}">
-                     3. REVIEW
                  </div>
             </div>
 
@@ -147,10 +158,10 @@
 
                     <!-- Visualizer -->
                     <div class="h-24 flex items-center justify-center gap-1.5 mb-12 bg-gray-50 rounded-2xl p-4 border border-gray-100">
-                       <template x-for="i in 16">
-                           <div class="w-3 rounded-full transition-all duration-75 ease-in-out"
-                                :class="i % 2 === 0 ? 'bg-red-400' : 'bg-orange-400'"
-                                :style="'height: ' + (Math.random() * 80 + 20) + '%'"></div>
+                       <template x-for="(barHeight, index) in visualizerBars" :key="index">
+                           <div class="w-2 rounded-full transition-all duration-75 ease-linear"
+                                :class="index % 2 === 0 ? 'bg-red-400' : 'bg-orange-400'"
+                                :style="'height: ' + Math.max(10, barHeight) + '%;'"></div>
                        </template>
                     </div>
 
@@ -163,34 +174,12 @@
                     <p class="text-gray-400 text-sm mt-4 font-medium">Press stop when finished</p>
                 </div>
 
-                <!-- REVIEW PHASE -->
-                <div x-show="step === 'review'" class="text-center w-full max-w-lg mx-auto" x-transition:enter="transition ease-out duration-300">
-                    <div class="w-24 h-24 {{ $theme['bg'] }} rounded-full flex items-center justify-center mx-auto mb-6 text-5xl shadow-inner">
-                        🎉
-                    </div>
-                    <h3 class="text-3xl font-black text-gray-800 mb-2">Well Done!</h3>
-                    <p class="text-gray-500 mb-8 text-lg">You spoke for <span class="font-bold text-gray-900" x-text="formatMinSec(120 - speakingTimer)"></span></p>
-
-                    <!-- Audio Player -->
-                    <div class="mb-8 p-6 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm" x-show="audioUrl">
-                        <audio x-ref="audioPlayer" controls class="w-full"></audio>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <button @click="reset()" class="px-6 py-4 rounded-xl border-2 border-gray-200 text-gray-600 font-bold hover:border-gray-300 hover:bg-gray-50 transition-colors">
-                            Try Again
-                        </button>
-                        <a href="{{ route('assignments.ielts-academic.speaking.index', ['part' => 2]) }}" 
-                           class="px-6 py-4 rounded-xl bg-gray-900 text-white font-bold hover:bg-gray-800 transition-colors shadow-lg hover:shadow-xl">
-                            Finish Practice
-                        </a>
-                    </div>
-                </div>
+                <!-- (Review Phase removed) -->
 
             </div>
 
             <!-- Inline Helper Buttons (Part 1 Style) -->
-            <div class="bg-gray-50 p-4 border-t border-gray-100 flex justify-center gap-4" x-show="step !== 'review'">
+            <div class="bg-gray-50 p-4 border-t border-gray-100 flex justify-center gap-4">
                 <button @click="isCollocationsOpen = !isCollocationsOpen" 
                         class="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors bg-teal-100 text-teal-700 hover:bg-teal-200">
                     <span class="text-lg">🔗</span> Collocations
@@ -214,7 +203,203 @@
         </div>
     </div>
 
+    <!-- Loading Overlay -->
+    <div x-show="isGrading" 
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-cloak>
+        <div class="bg-white rounded-2xl p-8 flex flex-col items-center max-w-sm w-full shadow-2xl">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500 mb-4"></div>
+            <h3 class="text-xl font-bold text-gray-800">Analyzing Your Speech...</h3>
+            <p class="text-gray-500 text-center mt-2">Our AI is evaluating your fluency, vocabulary, grammar, and pronunciation.</p>
+        </div>
+    </div>
+
     <!-- Floating Advanced Vocab Buttons (Part 1 Style) - REPLACED BY COMPONENTS -->
+
+    <!-- Edit Questions Modal -->
+    @if(isset($topic['id']))
+    <template x-teleport="body">
+        <div x-show="showEditModal" 
+             class="fixed inset-0 z-[9999] overflow-y-auto" 
+             style="display: none;">
+            <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" @click="showEditModal = false"></div>
+
+            <div class="flex min-h-full items-center justify-center p-4 text-center">
+                <div class="relative w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all" @click.stop>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Edit Topic Content</h3>
+                        <button @click="showEditModal = false" class="text-gray-400 hover:text-gray-600">&times;</button>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="flex border-b border-gray-200 mb-4 gap-4 overflow-x-auto">
+                        <button class="pb-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap" :class="editTab === 'questions' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="editTab = 'questions'">Questions</button>
+                        <button class="pb-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap" :class="editTab === 'part3_questions' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="editTab = 'part3_questions'">Part 3 Questions</button>
+                        <button class="pb-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap" :class="editTab === 'idioms' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="editTab = 'idioms'">Idioms</button>
+                        <button class="pb-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap" :class="editTab === 'collocations' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="editTab = 'collocations'">Collocations</button>
+                        <button class="pb-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap" :class="editTab === 'adv_verbs' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="editTab = 'adv_verbs'">Adv. Verbs</button>
+                        <button class="pb-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap" :class="editTab === 'adv_adverbs' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="editTab = 'adv_adverbs'">Adv. Adverbs</button>
+                        <button class="pb-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap" :class="editTab === 'adv_adjectives' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="editTab = 'adv_adjectives'">Adv. Adjectives</button>
+                        <button class="pb-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap" :class="editTab === 'part3_idioms' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="editTab = 'part3_idioms'">Part 3 Idioms</button>
+                        <button class="pb-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap" :class="editTab === 'part3_collocations' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="editTab = 'part3_collocations'">Part 3 Collocations</button>
+                    </div>
+
+                    <form action="{{ route('admin.ielts.speaking.topics.update-questions', $topic['id']) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        
+                        <div class="max-h-[60vh] overflow-y-auto px-1 pb-4">
+                            <!-- Questions Tab -->
+                            <div x-show="editTab === 'questions'">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Questions (One per line)</label>
+                                <textarea name="questions_raw" x-model="editingQuestions" rows="10" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"></textarea>
+                                <div class="hidden">
+                                    <template x-for="(q, index) in editingQuestions.split('\n').map(q => q.trim()).filter(q => q)" :key="index">
+                                        <input type="hidden" x-bind:name="`questions[${index}]`" x-bind:value="q">
+                                    </template>
+                                </div>
+                            </div>
+                            
+                            <!-- Part 3 Questions Tab -->
+                            <div x-show="editTab === 'part3_questions'">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Part 3 Questions (One per line)</label>
+                                <textarea name="part3_questions_raw" x-model="editingPart3Questions" rows="10" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"></textarea>
+                                <div class="hidden">
+                                    <template x-for="(q, index) in editingPart3Questions.split('\n').map(q => q.trim()).filter(q => q)" :key="index">
+                                        <input type="hidden" x-bind:name="`part3_questions[${index}]`" x-bind:value="q">
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Idioms Tab -->
+                            <div x-show="editTab === 'idioms'" class="space-y-4">
+                                <template x-for="(item, index) in editIdioms" :key="index">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                        <button type="button" @click="editIdioms.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`idioms[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning</label><input type="text" x-model="item.meaning" x-bind:name="`idioms[${index}][meaning]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div class="col-span-2"><label class="text-xs font-bold">Example</label><input type="text" x-model="item.example" x-bind:name="`idioms[${index}][example]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <button type="button" @click="editIdioms.push({phrase:'', meaning:'', example:''})" class="text-orange-600 text-sm font-bold">+ Add Idiom</button>
+                            </div>
+
+                            <!-- Part 3 Idioms Tab -->
+                            <div x-show="editTab === 'part3_idioms'" class="space-y-4">
+                                <template x-for="(item, index) in editPart3Idioms" :key="index">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                        <button type="button" @click="editPart3Idioms.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`part3_idioms[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning</label><input type="text" x-model="item.meaning" x-bind:name="`part3_idioms[${index}][meaning]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div class="col-span-2"><label class="text-xs font-bold">Example</label><input type="text" x-model="item.example" x-bind:name="`part3_idioms[${index}][example]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <button type="button" @click="editPart3Idioms.push({phrase:'', meaning:'', example:''})" class="text-orange-600 text-sm font-bold">+ Add Part 3 Idiom</button>
+                            </div>
+
+                            <!-- Collocations Tab -->
+                            <div x-show="editTab === 'collocations'" class="space-y-4">
+                                <template x-for="(item, index) in editCollocations" :key="index">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                        <button type="button" @click="editCollocations.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`collocations[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning</label><input type="text" x-model="item.meaning" x-bind:name="`collocations[${index}][meaning]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div class="col-span-2"><label class="text-xs font-bold">Example</label><input type="text" x-model="item.example" x-bind:name="`collocations[${index}][example]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <button type="button" @click="editCollocations.push({phrase:'', meaning:'', example:''})" class="text-orange-600 text-sm font-bold">+ Add Collocation</button>
+                            </div>
+                            
+                            <!-- Part 3 Collocations Tab -->
+                            <div x-show="editTab === 'part3_collocations'" class="space-y-4">
+                                <template x-for="(item, index) in editPart3Collocations" :key="index">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                        <button type="button" @click="editPart3Collocations.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`part3_collocations[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning</label><input type="text" x-model="item.meaning" x-bind:name="`part3_collocations[${index}][meaning]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div class="col-span-2"><label class="text-xs font-bold">Example</label><input type="text" x-model="item.example" x-bind:name="`part3_collocations[${index}][example]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <button type="button" @click="editPart3Collocations.push({phrase:'', meaning:'', example:''})" class="text-orange-600 text-sm font-bold">+ Add Part 3 Collocation</button>
+                            </div>
+
+                            <!-- Adv Verbs Tab -->
+                            <div x-show="editTab === 'adv_verbs'" class="space-y-4">
+                                <template x-for="(item, index) in editAdvVerbs" :key="index">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                        <button type="button" @click="editAdvVerbs.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`advanced_verbs[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning</label><input type="text" x-model="item.meaning" x-bind:name="`advanced_verbs[${index}][meaning]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Level</label><input type="text" x-model="item.level" x-bind:name="`advanced_verbs[${index}][level]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning ID</label><input type="text" x-model="item.meaning_id" x-bind:name="`advanced_verbs[${index}][meaning_id]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div class="col-span-2"><label class="text-xs font-bold">Example</label><input type="text" x-model="item.example" x-bind:name="`advanced_verbs[${index}][example]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <button type="button" @click="editAdvVerbs.push({phrase:'', meaning:'', level:'', meaning_id:'', example:''})" class="text-orange-600 text-sm font-bold">+ Add Advanced Verb</button>
+                            </div>
+
+                            <!-- Adv Adverbs Tab -->
+                            <div x-show="editTab === 'adv_adverbs'" class="space-y-4">
+                                <template x-for="(item, index) in editAdvAdverbs" :key="index">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                        <button type="button" @click="editAdvAdverbs.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`advanced_adverbs[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning</label><input type="text" x-model="item.meaning" x-bind:name="`advanced_adverbs[${index}][meaning]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Level</label><input type="text" x-model="item.level" x-bind:name="`advanced_adverbs[${index}][level]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning ID</label><input type="text" x-model="item.meaning_id" x-bind:name="`advanced_adverbs[${index}][meaning_id]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div class="col-span-2"><label class="text-xs font-bold">Example</label><input type="text" x-model="item.example" x-bind:name="`advanced_adverbs[${index}][example]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <button type="button" @click="editAdvAdverbs.push({phrase:'', meaning:'', level:'', meaning_id:'', example:''})" class="text-orange-600 text-sm font-bold">+ Add Advanced Adverb</button>
+                            </div>
+
+                            <!-- Adv Adjectives Tab -->
+                            <div x-show="editTab === 'adv_adjectives'" class="space-y-4">
+                                <template x-for="(item, index) in editAdvAdjectives" :key="index">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                        <button type="button" @click="editAdvAdjectives.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`advanced_adjectives[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning</label><input type="text" x-model="item.meaning" x-bind:name="`advanced_adjectives[${index}][meaning]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Level</label><input type="text" x-model="item.level" x-bind:name="`advanced_adjectives[${index}][level]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning ID</label><input type="text" x-model="item.meaning_id" x-bind:name="`advanced_adjectives[${index}][meaning_id]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div class="col-span-2"><label class="text-xs font-bold">Example</label><input type="text" x-model="item.example" x-bind:name="`advanced_adjectives[${index}][example]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <button type="button" @click="editAdvAdjectives.push({phrase:'', meaning:'', level:'', meaning_id:'', example:''})" class="text-orange-600 text-sm font-bold">+ Add Advanced Adjective</button>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
+                            <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors" @click="showEditModal = false">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg shadow-sm transition-colors">
+                                Save All Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </template>
+    @endif
 
     <!-- SLIDE OVERS (Copied from Part 1) -->
     
@@ -273,54 +458,44 @@
         </div>
     </template>
 
-
-
-</div>
-
 <script>
     function part2Practice(idioms = [], collocations = [], advancedVerbs = [], advancedAdverbs = [], advancedAdjectives = []) {
+        const topicData = @json($topic);
         return {
-            step: 'prep', // prep, speaking, review
+            showEditModal: false,
+            editTab: 'questions',
+            editingQuestions: (topicData.questions || []).join('\n'),
+            editingPart3Questions: (topicData.part3_questions || []).join('\n'),
+            editIdioms: JSON.parse(JSON.stringify(idioms || [])),
+            editCollocations: JSON.parse(JSON.stringify(collocations || [])),
+            editAdvVerbs: JSON.parse(JSON.stringify(advancedVerbs || [])),
+            editAdvAdverbs: JSON.parse(JSON.stringify(advancedAdverbs || [])),
+            editAdvAdjectives: JSON.parse(JSON.stringify(advancedAdjectives || [])),
+            editPart3Idioms: JSON.parse(JSON.stringify(topicData.part3_idioms || [])),
+            editPart3Collocations: JSON.parse(JSON.stringify(topicData.part3_collocations || [])),
+
+            step: 'prep', // prep, speaking
             prepTimer: 60,
             speakingTimer: 120, // 2 minutes
             interval: null,
             mediaRecorder: null,
             audioChunks: [],
             audioUrl: null,
+            audioBlob: null,
             stream: null,
             isPaused: false,
+            isGrading: false,
             
-            // Whiteboard props
-            isBoardOpen: false,
-            bgContext: null,
-            isDrawing: false,
-            currentColor: '#000000',
-            currentTool: 'pen', // pen, eraser, text
-            lastX: 0,
-            lastY: 0,
+            // Visualizer props
+            visualizerBars: new Array(40).fill(5),
+            audioContext: null,
+            analyser: null,
+            source: null,
+            animationFrame: null,
             
-            // Text Tool props
-            isTyping: false,
-            currentText: '',
-            textX: 0,
-            textY: 0,
-            
-            // Draggable & Resizable props
-            boardX: window.innerWidth / 2 - 300,
-            boardY: window.innerHeight / 2 - 225,
-            boardWidth: 600,
-            boardHeight: 450,
-            
-            isDraggingBoard: false,
-            dragOffsetX: 0,
-            dragOffsetY: 0,
-            
-            isResizing: false,
-            resizeStartX: 0,
-            resizeStartY: 0,
-            startWidth: 0,
-            startHeight: 0,
-            
+            currentTranscript: '',
+            recognition: null,
+
             // Whiteboard props
             isBoardOpen: false,
             bgContext: null,
@@ -424,7 +599,6 @@
             finishSpeakingPhase() {
                 clearInterval(this.interval);
                 this.stopRecording();
-                this.step = 'review';
             },
 
             startRecording() {
@@ -432,27 +606,95 @@
                 this.audioChunks = [];
                 this.mediaRecorder = new MediaRecorder(this.stream);
                 
+                this.currentTranscript = '';
+                if ('webkitSpeechRecognition' in window) {
+                    this.recognition = new webkitSpeechRecognition();
+                    this.recognition.continuous = true;
+                    this.recognition.interimResults = true;
+                    this.recognition.lang = 'en-US';
+                    
+                    this.recognition.onresult = (event) => {
+                        let final = '';
+                        for (let i = event.resultIndex; i < event.results.length; ++i) {
+                            if (event.results[i].isFinal) {
+                                final += event.results[i][0].transcript;
+                            }
+                        }
+                        if (final) {
+                             this.currentTranscript += final + ' ';
+                        }
+                    };
+                    
+                    try {
+                        this.recognition.start();
+                    } catch (e) { console.error('Speech recognition start failed:', e); }
+                }
+
                 this.mediaRecorder.ondataavailable = event => {
                     this.audioChunks.push(event.data);
                 };
 
                 this.mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
-                    this.audioUrl = URL.createObjectURL(audioBlob);
-                    this.$nextTick(() => {
-                        if (this.$refs.audioPlayer) {
-                            this.$refs.audioPlayer.src = this.audioUrl;
-                        }
-                    });
+                    this.audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+                    this.audioUrl = URL.createObjectURL(this.audioBlob);
+                    this.submitForGrading();
                 };
 
                 this.mediaRecorder.start();
+                this.startVisualizer();
+            },
+
+            startVisualizer() {
+                if (!this.stream) return;
+
+                if (!this.audioContext) {
+                     this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } else if (this.audioContext.state === 'suspended') {
+                     this.audioContext.resume();
+                }
+                
+                if (!this.analyser) {
+                     this.analyser = this.audioContext.createAnalyser();
+                     this.analyser.fftSize = 256;
+                }
+                
+                if (!this.source) {
+                     this.source = this.audioContext.createMediaStreamSource(this.stream);
+                     this.source.connect(this.analyser);
+                }
+
+                const bufferLength = this.analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+
+                const update = () => {
+                    if (this.step !== 'speaking') return;
+                    
+                    this.animationFrame = requestAnimationFrame(update);
+                    this.analyser.getByteFrequencyData(dataArray);
+                    
+                    const step = Math.floor(bufferLength / 60); 
+                    const bars = [];
+                    for(let i=0; i<40; i++) {
+                        const val = dataArray[i * step];
+                        bars.push(Math.max(5, val / 255 * 100));
+                    }
+                    this.visualizerBars = bars;
+                };
+                
+                update();
             },
 
             stopRecording() {
                 if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
                     this.mediaRecorder.stop();
                 }
+                if (this.recognition) {
+                    try { this.recognition.stop(); } catch (e) {}
+                }
+                if (this.animationFrame) {
+                    cancelAnimationFrame(this.animationFrame);
+                }
+                this.visualizerBars = new Array(40).fill(5);
             },
 
             reset() {
@@ -472,6 +714,65 @@
                 const m = Math.floor(seconds / 60);
                 const s = seconds % 60;
                 return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+            },
+
+            async submitForGrading() {
+                if (!this.audioBlob) {
+                    alert("No audio recorded to submit.");
+                    return;
+                }
+
+                this.isGrading = true;
+                
+                const formData = new FormData();
+                formData.append('audio_blobs[]', this.audioBlob, 'question_0.webm');
+                
+                // Construct the full prompt/question
+                const cueCardText = "{{ $topic['questions'][0] ?? '' }}";
+                const bulletPoints = @json(array_slice($topic['questions'], 2, -1));
+                const finalPoint = "{{ end($topic['questions']) }}";
+                
+                let fullQuestion = cueCardText + "\n\nYou should say:\n";
+                bulletPoints.forEach(pt => fullQuestion += pt + "\n");
+                fullQuestion += "\n" + finalPoint;
+
+                formData.append('questions[0]', fullQuestion);
+                if (this.currentTranscript) {
+                    formData.append('transcripts[0]', this.currentTranscript.trim());
+                }
+                formData.append('part', '{{ $topic['part'] ?? 2 }}');
+                formData.append('topic_title', '{{ $topic['title'] ?? '' }}');
+                
+                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                try {
+                    const response = await fetch('{{ route('assignments.ielts-academic.speaking.practice.grade') }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': token,
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Grading failed: ${response.status} ${response.statusText}\n${errorText.substring(0, 200)}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.redirect_url) {
+                        window.location.href = data.redirect_url;
+                    } else {
+                        alert("Grading complete, but no redirect URL provided.");
+                        this.isGrading = false;
+                    }
+                    
+                } catch (error) {
+                    alert('Failed to submit for grading:\n' + error.message);
+                    this.isGrading = false;
+                }
             },
 
 
@@ -854,4 +1155,5 @@
             </div>
         </div>
     </div>
+</div>
 @endsection

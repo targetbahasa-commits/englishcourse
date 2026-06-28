@@ -318,7 +318,11 @@
                                 <a href="{{ route('assignments.ielts-academic.reading.material', $test['material_id']) }}"
                                    style="background-color: {{ $test['btn_color'] }}"
                                    class="block w-full py-3 text-white text-center rounded-xl font-bold transition shadow hover:shadow-md active:scale-95 hover:opacity-90">
-                                    Start Practice →
+                                    @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                                        Kerjakan Ulang ↺
+                                    @else
+                                        Start Practice →
+                                    @endif
                                 </a>
                             @else
                                 <button disabled

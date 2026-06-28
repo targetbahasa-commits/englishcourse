@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Target Bahasa') }} - My Payments</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
@@ -71,6 +73,15 @@
                         </div>
 
                         <div>
+                            <label for="class_type" class="block text-sm font-medium text-slate-700 mb-1">Jenis Kelas</label>
+                            <select id="class_type" name="class_type" class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500" required>
+                                <option value="regular" @selected(($prefillClassType ?? 'regular') === 'regular')>Regular</option>
+                                <option value="semi_private" @selected(($prefillClassType ?? 'regular') === 'semi_private')>Semi Private</option>
+                                <option value="private" @selected(($prefillClassType ?? 'regular') === 'private')>Private</option>
+                            </select>
+                        </div>
+
+                        <div>
                             <label for="payment_channel" class="block text-sm font-medium text-slate-700 mb-1">Metode Pembayaran</label>
                             <select id="payment_channel" name="payment_channel" class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500" required>
                                 <option value="bank_transfer" @selected(($prefillPaymentChannel ?? 'bank_transfer') === 'bank_transfer')>Transfer Bank</option>
@@ -130,7 +141,10 @@
                                     @endphp
                                     <tr class="border-b border-slate-100 text-slate-700">
                                         <td class="py-3 pr-4 font-medium">{{ $payment->invoice_number }}</td>
-                                        <td class="py-3 pr-4">{{ $payment->program->name ?? '-' }}</td>
+                                        <td class="py-3 pr-4">
+                                            <div class="font-medium text-slate-800">{{ $payment->program->name ?? '-' }}</div>
+                                            <div class="text-xs text-slate-500 mt-0.5 capitalize">{{ str_replace('_', ' ', $payment->meta['class_type'] ?? 'regular') }}</div>
+                                        </td>
                                         <td class="py-3 pr-4">
                                             <div class="font-semibold">Rp{{ number_format($netAmount, 0, ',', '.') }}</div>
                                             @if((int) $payment->discount_amount > 0)
@@ -181,7 +195,9 @@
             const previewDiscountLabel = document.getElementById('preview-discount-label');
             const previewNet = document.getElementById('preview-net');
 
-            if (!programSelect || !previewBox || !previewBase || !previewDiscount || !previewDiscountLabel || !previewNet) {
+            const classTypeSelect = document.getElementById('class_type');
+
+            if (!programSelect || !classTypeSelect || !previewBox || !previewBase || !previewDiscount || !previewDiscountLabel || !previewNet) {
                 return;
             }
 
@@ -192,12 +208,15 @@
 
             const renderPreview = () => {
                 const selectedId = String(programSelect.value || '');
-                const info = priceMap[selectedId];
+                const selectedClassType = classTypeSelect.value || 'regular';
+                const programInfo = priceMap[selectedId];
 
-                if (!selectedId || !info) {
+                if (!selectedId || !programInfo || !programInfo[selectedClassType]) {
                     previewBox.classList.add('hidden');
                     return;
                 }
+                
+                const info = programInfo[selectedClassType];
 
                 previewBox.classList.remove('hidden');
                 previewBase.textContent = formatIdr(info.base_amount || 0);
@@ -209,6 +228,7 @@
             };
 
             programSelect.addEventListener('change', renderPreview);
+            classTypeSelect.addEventListener('change', renderPreview);
             renderPreview();
         })();
     </script>

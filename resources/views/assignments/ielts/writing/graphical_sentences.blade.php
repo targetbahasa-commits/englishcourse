@@ -77,7 +77,7 @@
                 </div>
                 <div class="p-4 bg-gray-50">
                     <img
-                        src="{{ asset('images/trends_vocabulary.png') }}"
+                        src="{{ asset('images/materials/ielts-writing/trends_vocabulary.png') }}"
                         alt="Describing trends and language of change reference chart"
                         class="w-full h-auto rounded-lg border border-gray-200 bg-white"
                         loading="lazy"

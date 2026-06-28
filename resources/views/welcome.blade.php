@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Target Bahasa - Online English Course & Free Test</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/brand/icon.png') }}">
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/test-selection-modern.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v=20260517">
+    <link rel="stylesheet" href="{{ asset('css/test-selection-modern.css') }}?v=20260517">
 </head>
 
 <body>
@@ -39,11 +43,10 @@
         display: inline-block;
         padding-left: 100%;
         animation: marquee 25s linear infinite;
-        color: #ff4d4f;
+        color: #ffffff;
         font-weight: 700;
         font-size: 0.95rem;
         letter-spacing: 0.5px;
-        -webkit-text-stroke: 0.25px #000000;
         text-shadow: none;
     }
     .marquee-content:hover {
@@ -123,7 +126,7 @@
 <!-- HEADER FIXED -->
 <div class="landing-header" style="position: fixed; top: 0; left: 0; width: 100%; display:flex; justify-content:space-between; align-items:center; padding: 5px 30px; z-index: 9999; backdrop-filter: blur(10px); background: rgba(13, 71, 161, 0.95); border-bottom: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
     <div class="logo landing-logo">
-        <img src="/images/logo.png" alt="Target Bahasa" style="height: 110px; width: auto; margin-top: -20px; margin-bottom: -50px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
+        <img src="/images/brand/logo.png" alt="Target Bahasa" style="height: 110px; width: auto; margin-top: -20px; margin-bottom: -50px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
     </div>
     <div class="marquee-container">
         <div class="marquee-content">
@@ -160,7 +163,7 @@
             </span>
         </div>
         
-        <a href="#form-test" style="display:inline-block; background: #FFB800; color: #1e293b; font-weight:800; border-radius:8px; padding:18px 42px; font-size:1.2rem; text-decoration:none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.3s ease;">🎯 DAPATKAN SKOR SAYA SEKARANG</a>
+        <a href="{{ route('guest.free-tests') }}" style="display:inline-block; background: #FFB800; color: #1e293b; font-weight:800; border-radius:8px; padding:18px 42px; font-size:1.2rem; text-decoration:none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.3s ease;">🎯 DAPATKAN SKOR SAYA SEKARANG</a>
     </div>
 </section>
 
@@ -408,7 +411,7 @@
                 </div>
                 <div style="color:#64748B; font-size:0.95rem; margin-bottom:10px; line-height:1.5;">Syarat kelulusan kampus, melamar CPNS, atau kerja di perusahaan BUMN/Lokal.</div>
                 <div style="color:#94a3b8; font-size:0.9rem; margin-bottom:14px;"><i class="fas fa-clock" style="color:#e11d48;"></i> 15 Menit Simulasi</div>
-                <a href="/form-test?type=toefl" style="display:inline-block; background:linear-gradient(135deg,#e11d48,#be123c); color:#fff; font-weight:700; border-radius:10px; padding:11px 0; width:100%; text-decoration:none; font-size:0.95rem; box-shadow:0 4px 14px rgba(225,29,72,0.3); transition:all 0.3s;">🎯 Mulai Test TOEFL Gratis</a>
+                <a href="{{ route('guest.free-tests') }}" style="display:inline-block; background:linear-gradient(135deg,#e11d48,#be123c); color:#fff; font-weight:700; border-radius:10px; padding:11px 0; width:100%; text-decoration:none; font-size:0.95rem; box-shadow:0 4px 14px rgba(225,29,72,0.3); transition:all 0.3s;">🎯 Mulai Test TOEFL Gratis</a>
             </div>
 
             <!-- Card 2 — IELTS Academic -->
@@ -422,7 +425,7 @@
                 </div>
                 <div style="color:#64748B; font-size:0.95rem; margin-bottom:10px; line-height:1.5;">Daftar kuliah di luar negeri (Study Abroad) atau beasiswa internasional (AAS, LPDP).</div>
                 <div style="color:#94a3b8; font-size:0.9rem; margin-bottom:14px;"><i class="fas fa-clock" style="color:#e11d48;"></i> 20 Menit Simulasi</div>
-                <a href="/form-test?type=ielts-academic" style="display:inline-block; background:linear-gradient(135deg,#e11d48,#be123c); color:#fff; font-weight:700; border-radius:10px; padding:11px 0; width:100%; text-decoration:none; font-size:0.95rem; box-shadow:0 4px 14px rgba(225,29,72,0.3); transition:all 0.3s;">🎯 Cek Skor IELTS Sekarang</a>
+                    <a href="{{ route('guest.free-tests') }}" style="display:inline-block; background:linear-gradient(135deg,#e11d48,#be123c); color:#fff; font-weight:700; border-radius:10px; padding:11px 0; width:100%; text-decoration:none; font-size:0.95rem; box-shadow:0 4px 14px rgba(225,29,72,0.3); transition:all 0.3s;">🎯 Cek Skor IELTS Sekarang</a>
             </div>
 
             <!-- Card 3 — IELTS General (POPULER) -->
@@ -434,7 +437,7 @@
                 <div style="font-weight:800; font-size:1.15rem; margin-bottom:6px; color:#1e293b;">IELTS General</div>
                 <div style="color:#64748B; font-size:0.95rem; margin-bottom:10px; line-height:1.5;">Visa Kerja (WHV Australia), migrasi, atau training internasional.</div>
                 <div style="color:#94a3b8; font-size:0.9rem; margin-bottom:14px;"><i class="fas fa-clock" style="color:#e11d48;"></i> 20 Menit Simulasi</div>
-                <a href="/form-test?type=ielts-general" style="display:inline-block; background:linear-gradient(135deg,#e11d48,#be123c); color:#fff; font-weight:700; border-radius:10px; padding:11px 0; width:100%; text-decoration:none; font-size:0.95rem; box-shadow:0 4px 14px rgba(225,29,72,0.3); transition:all 0.3s;">🎯 Cek Skor IELTS Sekarang</a>
+                    <a href="{{ route('guest.free-tests') }}" style="display:inline-block; background:linear-gradient(135deg,#e11d48,#be123c); color:#fff; font-weight:700; border-radius:10px; padding:11px 0; width:100%; text-decoration:none; font-size:0.95rem; box-shadow:0 4px 14px rgba(225,29,72,0.3); transition:all 0.3s;">🎯 Cek Skor IELTS Sekarang</a>
             </div>
 
             <!-- Card 4 — PTE Academic -->
@@ -448,7 +451,7 @@
                 </div>
                 <div style="color:#64748B; font-size:0.95rem; margin-bottom:10px; line-height:1.5;">Alternatif IELTS untuk WHV Australia atau studi UK/Aus dengan sistem komputer.</div>
                 <div style="color:#94a3b8; font-size:0.9rem; margin-bottom:14px;"><i class="fas fa-clock" style="color:#e11d48;"></i> 15 Menit Simulasi</div>
-                <a href="/form-test?type=pte" style="display:inline-block; background:linear-gradient(135deg,#e11d48,#be123c); color:#fff; font-weight:700; border-radius:10px; padding:11px 0; width:100%; text-decoration:none; font-size:0.95rem; box-shadow:0 4px 14px rgba(225,29,72,0.3); transition:all 0.3s;">🎯 Mulai Test PTE Gratis</a>
+                <a href="{{ route('guest.free-tests') }}" style="display:inline-block; background:linear-gradient(135deg,#e11d48,#be123c); color:#fff; font-weight:700; border-radius:10px; padding:11px 0; width:100%; text-decoration:none; font-size:0.95rem; box-shadow:0 4px 14px rgba(225,29,72,0.3); transition:all 0.3s;">🎯 Mulai Test PTE Gratis</a>
             </div>
 
             </div><!-- /#free-test-track -->
@@ -494,7 +497,7 @@
 
             <div class="problem-solution-trigger">
                 <h3>👉 Solusinya: Mulai dari Test Gratis untuk tahu level kamu secara presisi!</h3>
-                <a href="#form-test" class="btn-primary-large">Ambil Test Sekarang</a>
+                <a href="{{ route('guest.free-tests') }}" class="btn-primary-large">Ambil Test Sekarang</a>
             </div>
         </div>
     </div>
@@ -561,7 +564,7 @@
                 <p>Sistem akan memberi saran cerdas kelas mana yang 100% cocok untuk menambal kelemahanmu.</p>
             </div>
         </div>
-        <a href="#form-test" class="btn-primary-medium">Saya Mau Tahu Level Saya</a>
+        <a href="{{ route('guest.free-tests') }}" class="btn-primary-medium">Saya Mau Tahu Level Saya</a>
     </div>
 </section>
 
@@ -584,7 +587,7 @@
                         </div>
                         <div class="card-bottom">
                             <p class="prog-desc">Membangun pondasi speaking dari nol agar berani bicara.</p>
-                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('speaking_basic')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
+                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="{{ route('registration.show') }}" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('speaking_basic')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
                         </div>
                     </div>
                     <div class="program-card card-intermediate pricing-style">
@@ -594,7 +597,7 @@
                         </div>
                         <div class="card-bottom">
                             <p class="prog-desc">Memperlancar percakapan dengan grammar yang tepat.</p>
-                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('speaking_intermediate')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
+                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="{{ route('registration.show') }}" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('speaking_intermediate')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
                         </div>
                     </div>
                     <div class="program-card card-advanced pricing-style">
@@ -604,7 +607,7 @@
                         </div>
                         <div class="card-bottom">
                             <p class="prog-desc">Level mahir untuk presentasi dan diskusi profesional.</p>
-                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('speaking_advanced')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
+                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="{{ route('registration.show') }}" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('speaking_advanced')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
                         </div>
                     </div>
                     <div class="program-card card-toefl pricing-style">
@@ -614,7 +617,7 @@
                         </div>
                         <div class="card-bottom">
                             <p class="prog-desc">Kelas intensif mengejar target skor 550+ TOEFL ITP.</p>
-                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('toefl_itp')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
+                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="{{ route('registration.show') }}" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('toefl_itp')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
                         </div>
                     </div>
                     <div class="program-card card-ielts pricing-style">
@@ -625,7 +628,7 @@
                         </div>
                         <div class="card-bottom">
                             <p class="prog-desc">Kuasai 4 skill spesifik IELTS untuk gapai band 7.0+.</p>
-                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('ielts_prep')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
+                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="{{ route('registration.show') }}" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('ielts_prep')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
                         </div>
                     </div>
                     <div class="program-card card-marlins pricing-style">
@@ -647,7 +650,7 @@
                         </div>
                         <div class="card-bottom">
                             <p class="prog-desc">Kuasai Task 1 & Task 2 Academic: grafik, diagram, hingga essay argumentatif band 7+.</p>
-                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('ielts_writing')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
+                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="{{ route('registration.show') }}" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('ielts_writing')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
                         </div>
                     </div>
                     <!-- IELTS Listening Academic -->
@@ -658,7 +661,7 @@
                         </div>
                         <div class="card-bottom">
                             <p class="prog-desc">Latihan intensif 4 section audio untuk mencapai skor Listening 7.5–8.5.</p>
-                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('ielts_listening')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
+                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="{{ route('registration.show') }}" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('ielts_listening')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
                         </div>
                     </div>
                     <!-- IELTS Reading Academic -->
@@ -669,7 +672,7 @@
                         </div>
                         <div class="card-bottom">
                             <p class="prog-desc">Strategi menjawab 40 soal Reading Academic dengan cepat dan tepat untuk band 7+.</p>
-                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('ielts_reading')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
+                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="{{ route('registration.show') }}" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('ielts_reading')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
                         </div>
                     </div>
                     <!-- IELTS Speaking Academic -->
@@ -680,7 +683,7 @@
                         </div>
                         <div class="card-bottom">
                             <p class="prog-desc">Simulasi face-to-face examiner Part 1–3 untuk meraih skor Speaking 7.0+.</p>
-                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="/daftar" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('ielts_speaking_ac')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
+                            <div style="display:flex; flex-direction:column; gap:8px;"><a href="{{ route('registration.show') }}" class="btn-pricing">Daftar Kelas Sekarang</a><button type="button" onclick="openBrochure('ielts_speaking_ac')" class="btn-info-more">Informasi Lebih Lanjut</button></div>
                         </div>
                     </div>
                 </div>
@@ -1515,8 +1518,9 @@
             <div class="trust-item"><i class="fas fa-paper-plane text-yellow"></i> Link Test dikirim ke WhatsApp dalam <strong>< 1 Menit</strong>.</div>
         </div>
         
-        <form class="lead-form compact-form mt-4" action="{{ route('guest.register.submit') }}" method="POST">
+        <form class="lead-form compact-form mt-4" action="/guest/register" method="POST" id="lead-form">
             @csrf
+            <input type="hidden" name="test_type" id="test-type-input" value="ielts_academic">
 
             @if ($errors->any())
                 <div class="text-left mb-4" style="background:rgba(254, 226, 226, 0.96); color:#b91c1c; border:1px solid rgba(248, 113, 113, 0.35); border-radius:14px; padding:14px 16px;">
@@ -1820,13 +1824,13 @@
 
             <!-- Col 1: Brand -->
             <div>
-                <img src="/images/logo.png" alt="Target Bahasa" class="footer-brand-logo">
+                <img src="/images/brand/logo.png" alt="Target Bahasa" class="footer-brand-logo">
                 <p class="footer-brand-desc">
                     Lembaga kursus bahasa Inggris terpercaya di Pare, Kediri.<br>
                     Membantu ribuan siswa meraih skor IELTS, TOEFL &amp; PTE impian mereka sejak 2015.
                 </p>
                 <div class="footer-socials">
-                    <a href="https://wa.me/6285706615607" target="_blank" rel="noopener" class="footer-social-link" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="https://api.whatsapp.com/send?phone=6285706615607" target="_blank" rel="noopener" class="footer-social-link" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                     <a href="#" class="footer-social-link" title="Instagram"><i class="fab fa-instagram"></i></a>
                     <a href="#" class="footer-social-link" title="YouTube"><i class="fab fa-youtube"></i></a>
                     <a href="#" class="footer-social-link" title="Facebook"><i class="fab fa-facebook-f"></i></a>
@@ -1843,12 +1847,12 @@
             <div>
                 <h4 class="footer-col-title">Program</h4>
                 <ul class="footer-nav-list">
-                    <li><a href="/daftar"><i class="fas fa-chevron-right"></i> Speaking Basic</a></li>
-                    <li><a href="/daftar"><i class="fas fa-chevron-right"></i> Speaking Intermediate</a></li>
-                    <li><a href="/daftar"><i class="fas fa-chevron-right"></i> Speaking Advanced</a></li>
-                    <li><a href="/daftar"><i class="fas fa-chevron-right"></i> TOEFL ITP Prep</a></li>
-                    <li><a href="/daftar"><i class="fas fa-chevron-right"></i> IELTS Preparation</a></li>
-                    <li><a href="/daftar"><i class="fas fa-chevron-right"></i> Marlins Test</a></li>
+                    <li><a href="{{ route('registration.show') }}"><i class="fas fa-chevron-right"></i> Speaking Basic</a></li>
+                    <li><a href="{{ route('registration.show') }}"><i class="fas fa-chevron-right"></i> Speaking Intermediate</a></li>
+                    <li><a href="{{ route('registration.show') }}"><i class="fas fa-chevron-right"></i> Speaking Advanced</a></li>
+                    <li><a href="{{ route('registration.show') }}"><i class="fas fa-chevron-right"></i> TOEFL ITP Prep</a></li>
+                    <li><a href="{{ route('registration.show') }}"><i class="fas fa-chevron-right"></i> IELTS Preparation</a></li>
+                    <li><a href="{{ route('registration.show') }}"><i class="fas fa-chevron-right"></i> Marlins Test</a></li>
                     <li><a href="{{ url('/whv-australia') }}"><i class="fas fa-chevron-right"></i> WHV Australia</a></li>
                 </ul>
             </div>
@@ -1857,12 +1861,12 @@
             <div>
                 <h4 class="footer-col-title">Tautan</h4>
                 <ul class="footer-nav-list">
-                    <li><a href="#form-test"><i class="fas fa-chevron-right"></i> Test Gratis</a></li>
-                    <li><a href="/daftar"><i class="fas fa-chevron-right"></i> Daftar Kelas</a></li>
+                    <li><a href="{{ route('guest.free-tests') }}"><i class="fas fa-chevron-right"></i> Test Gratis</a></li>
+                    <li><a href="{{ route('registration.show') }}"><i class="fas fa-chevron-right"></i> Daftar Kelas</a></li>
                     <li><a href="{{ route('student.login') }}"><i class="fas fa-chevron-right"></i> Student Login</a></li>
                     <li><a href="{{ route('teacher.login') }}"><i class="fas fa-chevron-right"></i> Teacher Login</a></li>
                     <li><a href="{{ route('guest.login') }}"><i class="fas fa-chevron-right"></i> Akses Tamu</a></li>
-                    <li><a href="https://wa.me/6285706615607" target="_blank" rel="noopener"><i class="fas fa-chevron-right"></i> Konsultasi WA</a></li>
+                    <li><a href="https://api.whatsapp.com/send?phone=6285706615607" target="_blank" rel="noopener"><i class="fas fa-chevron-right"></i> Konsultasi WA</a></li>
                 </ul>
             </div>
 
@@ -1876,7 +1880,7 @@
                     </li>
                     <li class="footer-contact-item">
                         <div class="footer-contact-icon"><i class="fab fa-whatsapp"></i></div>
-                        <a href="https://wa.me/6285706615607" target="_blank" rel="noopener">+62 857-0661-5607</a>
+                        <a href="https://api.whatsapp.com/send?phone=6285706615607" target="_blank" rel="noopener">+62 857-0661-5607</a>
                     </li>
                     <li class="footer-contact-item">
                         <div class="footer-contact-icon"><i class="fas fa-envelope"></i></div>
@@ -1910,14 +1914,39 @@
 
 <!-- Floating Mobile CTA -->
 <div class="floating-cta-mobile">
-    <a href="https://wa.me/6285706615607" target="_blank" rel="noopener" class="floating-cta-btn wa-btn">Chat WA</a>
-    <a href="/daftar" class="floating-cta-btn daftar-btn">Daftar</a>
-    <a href="#form-test" class="floating-cta-btn test-btn">Mulai Test</a>
+    <a href="https://api.whatsapp.com/send?phone=6285706615607" target="_blank" rel="noopener" class="floating-cta-btn wa-btn">Chat WA</a>
+    <a href="{{ route('registration.show') }}" class="floating-cta-btn daftar-btn">Daftar</a>
+    <a href="{{ route('guest.free-tests') }}" class="floating-cta-btn test-btn">Mulai Test</a>
 </div>
 
 <!-- Free Test Carousel JS — circular -->
 <script>
 (function() {
+    // Handle test type from URL hash
+    function extractTestTypeFromHash() {
+        const hash = window.location.hash;
+        if (hash.includes('type=')) {
+            const typeParam = new URLSearchParams(hash.split('?')[1]);
+            const testType = typeParam.get('type');
+            if (testType) {
+                const input = document.getElementById('test-type-input');
+                if (input) {
+                    input.value = testType;
+                }
+            }
+        }
+    }
+
+    // Extract test type on page load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', extractTestTypeFromHash);
+    } else {
+        extractTestTypeFromHash();
+    }
+
+    // Also listen for hash changes
+    window.addEventListener('hashchange', extractTestTypeFromHash);
+
     var CARDS, currentIdx;
 
     function getCards() {
@@ -1983,7 +2012,7 @@
         <div id="brochure-desc" style="color:#475569; font-size:1rem; line-height:1.75; margin-bottom:2rem; text-align:left; white-space: pre-line;">
             Description goes here.
         </div>
-        <a href="/daftar" class="btn-pricing" style="text-align:center;">Daftar Kelas Sekarang</a>
+        <a href="{{ route('registration.show') }}" class="btn-pricing" style="text-align:center;">Daftar Kelas Sekarang</a>
     </div>
 </div>
 

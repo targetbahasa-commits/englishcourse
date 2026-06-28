@@ -5,6 +5,7 @@ namespace App\Infrastructure\Broadcast;
 use App\Domain\Broadcast\Contracts\BroadcastAudienceGateway;
 use App\Domain\Notification\Contracts\WhatsAppGateway;
 use App\Models\User;
+use App\Models\RegistrationLead;
 use App\Notifications\BroadcastInboxNotification;
 
 class EloquentBroadcastAudienceGateway implements BroadcastAudienceGateway
@@ -29,20 +30,31 @@ class EloquentBroadcastAudienceGateway implements BroadcastAudienceGateway
 
         foreach ($users as $user) {
             if ($sendViaInbox || $sendViaEmail) {
-                $user->notify(new BroadcastInboxNotification($broadcast));
+                // If it's a RegistrationLead, we only send email if they have an email address
+                // Notifiable handles the email part automatically via the 'mail' channel if they have an 'email' attribute.
+                if (!($user instanceof RegistrationLead) || !empty($user->email)) {
+                    $user->notify(new BroadcastInboxNotification($broadcast));
+                }
             }
 
-            if ($sendViaWhatsapp && !empty($user->phone_number)) {
-                $this->whatsapp->sendMessage(
-                    $user->phone_number,
-                    '*' . $broadcast->title . "*\n\n" . $broadcast->content
-                );
+            if ($sendViaWhatsapp) {
+                $phone = $user instanceof RegistrationLead ? $user->whatsapp : $user->phone_number;
+                if (!empty($phone)) {
+                    $this->whatsapp->sendMessage(
+                        $phone,
+                        '*' . $broadcast->title . "*\n\n" . $broadcast->content
+                    );
+                }
             }
         }
     }
 
     private function recipientQuery(string $targetRole): mixed
     {
+        if ($targetRole === 'lead') {
+            return RegistrationLead::query();
+        }
+
         $query = User::query();
 
         if ($targetRole !== 'all') {

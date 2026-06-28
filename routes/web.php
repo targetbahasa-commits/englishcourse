@@ -2,10 +2,46 @@
 
 use Illuminate\Support\Facades\Route;
 
+// Public Kokoro TTS stream route (accessible without login - just serves/generates audio)
+Route::get('/tts/stream', [App\Http\Controllers\OnlineTestController::class, 'streamKokoroSpeech'])->name('tts.stream');
+
 Route::get('/guest/quick-access/{testType}', [App\Http\Controllers\GuestQuickAccessController::class, 'quickAccess'])->name('guest.quick-access');
+Route::get('/guest/quick-access-toefl/{type}/{number}', [App\Http\Controllers\GuestQuickAccessController::class, 'quickAccessToeflPromo'])->name('guest.quick-access-toefl');
 Route::get('/guest/dashboard', [App\Http\Controllers\GuestController::class, 'dashboard'])->name('guest.dashboard');
 Route::get('/guest/register', [App\Http\Controllers\GuestController::class, 'showRegisterForm'])->name('guest.register');
 Route::post('/guest/register', [App\Http\Controllers\GuestController::class, 'register'])->name('guest.register.submit');
+
+// Public Quick Inquiry API (used by modals on Scholarships, Jobs, WHV)
+Route::post('/public-inquiry', [App\Http\Controllers\PublicRegistrationLeadController::class, 'ajaxStore'])->name('public.inquiry.store');
+
+// Free AI Test Promo Routes
+Route::prefix('promo/test')->name('promo.test.')->group(function () {
+    Route::get('/', [App\Http\Controllers\PromoTestController::class, 'index'])->name('index');
+    Route::view('/expired', 'promo.expired')->name('expired');
+    Route::get('/toefl_listening', [App\Http\Controllers\PromoTestController::class, 'showToeflListening'])->name('toefl_listening');
+    Route::post('/toefl_listening/submit', [App\Http\Controllers\PromoTestController::class, 'submitToeflListening'])->name('toefl_listening.submit');
+    Route::get('/ielts_listening/{meeting}/test/{test}', [App\Http\Controllers\PromoTestController::class, 'showIeltsListeningPromo'])->name('ielts_listening.show');
+    Route::post('/ielts_listening/{meeting}/test/{test}/submit', [App\Http\Controllers\PromoTestController::class, 'submitIeltsListeningPromo'])->name('ielts_listening.submit');
+    
+    // Grammar Promo Test Routes
+    Route::get('/grammar-promo/{meeting}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingIntroductoryMeetingPromo'])->name('grammar.show');
+    Route::post('/grammar-promo/{meeting}/submit', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingIntroductoryMeetingSubmitPromo'])->name('grammar.submit');
+
+    // Admin Edit Promo Test Routes
+    Route::get('/ieltswritingacademic/{task}/meeting/{id}', [App\Http\Controllers\IeltsWritingController::class, 'showMeeting'])->name('ieltswritingacademic.meeting');
+    Route::get('/ieltswritinggeneral/{task}/meeting/{id}', [App\Http\Controllers\IeltsWritingController::class, 'showMeeting'])->name('ieltswritinggeneral.meeting');
+    Route::get('/toeflitplistening/{number}', [App\Http\Controllers\ToeflListeningController::class, 'showMeeting'])->name('toeflitplistening.meeting');
+    Route::get('/toeflitpstructure/{number}', [App\Http\Controllers\ToeflStructureController::class, 'showMeeting'])->name('toeflitpstructure.meeting');
+    Route::get('/toeflitpreading/{number}', [App\Http\Controllers\ToeflReadingController::class, 'showMeeting'])->name('toeflitpreading.meeting');
+    Route::get('/grammar/{meeting}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingIntroductoryMeeting'])->name('grammar.meeting');
+
+    Route::get('/{type}/{id}', [App\Http\Controllers\PromoTestController::class, 'show'])->name('show');
+    Route::post('/{type}/{id}/submit', [App\Http\Controllers\PromoTestController::class, 'submit'])->name('submit');
+    Route::get('/{type}/{id}/result/{submission_id}', [App\Http\Controllers\PromoTestController::class, 'result'])->name('result');
+    Route::post('/{type}/{id}/result/{submission_id}/send-wa', [App\Http\Controllers\PromoTestController::class, 'sendWaResult'])->name('send-wa-result');
+    Route::post('/{type}/{id}/update-admin', [App\Http\Controllers\PromoTestController::class, 'updateAdmin'])->name('update.admin');
+    Route::get('/echomimic-avatar', [App\Http\Controllers\PromoTestController::class, 'getEchomimicAvatar'])->name('echomimic-avatar');
+});
 
 // Cambridge Test Registration (Guest)
 Route::get('/test-daftar', [App\Http\Controllers\GuestCambridgeTestController::class, 'showRegisterForm'])->name('guest.cambridge-test-register');
@@ -70,6 +106,25 @@ Route::post('/assignments/program-access/{program}', [App\Http\Controllers\Assig
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/brochure/{type?}', function ($type = 'offline') {
+    if (!in_array($type, ['online', 'offline'])) {
+        abort(404);
+    }
+
+    $query = \App\Models\Program::where('is_active', true)
+        ->where('slug', 'not like', 'cambridge-%')
+        ->where('slug', 'not like', 'toefl-itp-mock-package-%')
+        ->with('classPeriods');
+
+    // if ($type === 'offline') {
+    //     $query->where('price_offline', '>', 0);
+    // }
+
+    $programs = $query->get();
+
+    return view('brochure', compact('programs', 'type'));
+})->name('brochure');
 
 Route::get('/debug-reading-test', function() {
     return view('assignments.ielts.mockup.c20-reading-test-4', ['testId' => 4, 'edition' => 20]);
@@ -144,7 +199,9 @@ Route::post('/free-test/register/{type}', [App\Http\Controllers\GuestFreeTestCon
 Route::get('/api/scholarships/calendar-events', [App\Http\Controllers\ScholarshipSearchController::class, 'getCalendarEvents'])->name('api.scholarships.calendar-events');
 
 // Cambridge Mockup Test - Publicly accessible (unauthenticated users see sign-up popup)
-Route::get('/assignments/ielts-academic/mockup/cambridge', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'index'])->name('assignments.ielts-academic.mockup.cambridge');
+Route::get('/assignments/ielts-academic/mockup/cambridge', function () {
+    return redirect()->route('mock-test.ielts-academic.cambridge', [], 301);
+})->name('assignments.ielts-academic.mockup.cambridge');
 Route::get('/assignments/ielts-academic/mockup/cambridge/{edition}', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'edition'])->name('assignments.ielts-academic.mockup.cambridge.edition');
 Route::get('/assignments/ielts-academic/mockup/cambridge/{edition}/test-{id}', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'skills'])->name('assignments.ielts-academic.mockup.cambridge.skills');
 Route::get('/assignments/ielts-academic/mockup/cambridge/{edition}/test-{id}/{skill}', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'test'])->name('assignments.ielts-academic.mockup.cambridge.test');
@@ -159,6 +216,19 @@ Route::get('/assignments/ielts-academic/mockup/british-council/test-{id}', funct
 
 // Guest sign-up via Cambridge test modal (public POST)
 Route::post('/cambridge/guest-register', [App\Http\Controllers\CambridgeGuestSignupController::class, 'register'])->name('cambridge.guest.register');
+
+// Public AI APIs (Used by promo pages and public tests)
+Route::get('/api/dictionary/lookup', [App\Http\Controllers\ToeflDictionaryController::class, 'lookup'])->name('api.dictionary.lookup');
+Route::get('/api/dictionary/synonyms', [App\Http\Controllers\ToeflDictionaryController::class, 'synonyms'])->name('api.dictionary.synonyms');
+Route::get('/api/ollama/collocation', [App\Http\Controllers\AiController::class, 'getCollocations'])->name('api.ollama.collocation');
+Route::post('/api/ollama/topic-collocations', [App\Http\Controllers\AiController::class, 'getTopicCollocations'])->name('api.ollama.topicCollocations');
+Route::post('/api/ollama/topic-idioms', [App\Http\Controllers\AiController::class, 'getTopicIdioms'])->name('api.ollama.topicIdioms');
+Route::post('/api/ollama/ideas', [App\Http\Controllers\AiController::class, 'getIdeas'])->name('api.ollama.ideas');
+Route::post('/api/ollama/translate', [App\Http\Controllers\AiController::class, 'translate'])->name('api.ollama.translate');
+Route::post('/api/ollama/translate-sentence', [App\Http\Controllers\AiController::class, 'translateSentence'])->name('api.ollama.translateSentence');
+Route::post('/api/ollama/academic-words', [App\Http\Controllers\AiController::class, 'academicWords'])->name('api.ollama.academicWords');
+Route::post('/api/lmstudio/chat', [App\Http\Controllers\AiController::class, 'chat'])->name('api.lmstudio.chat');
+Route::post('/api/groq/grammar-eval', [App\Http\Controllers\AiController::class, 'evaluateGrammar'])->name('api.groq.grammarEval');
 
 Route::middleware([
     'auth',
@@ -222,13 +292,194 @@ Route::middleware([
 });
 
 Route::middleware(['auth'])->group(function () {
+    Route::prefix('online-test')->name('online-test.')->group(function () {
+        Route::get('/', [App\Http\Controllers\OnlineTestController::class, 'index'])->name('index');
+        Route::post('/{slug}/verify-access-code', [App\Http\Controllers\OnlineTestController::class, 'verifyAccessCode'])->name('verify-access-code');
+        Route::get('/{slug}', [App\Http\Controllers\OnlineTestController::class, 'show'])->name('show');
+        Route::post('/{slug}/start', [App\Http\Controllers\OnlineTestResultController::class, 'start'])->name('start');
+        Route::get('/{slug}/exam/{onlineTestResult}', [App\Http\Controllers\OnlineTestController::class, 'exam'])->name('exam');
+        Route::post('/{slug}/exam/{onlineTestResult}', [App\Http\Controllers\OnlineTestResultController::class, 'submit'])->name('submit');
+        Route::get('/{slug}/result/{onlineTestResult}', [App\Http\Controllers\OnlineTestController::class, 'result'])->name('result');
+        Route::get('/kokoro-tts/stream', [App\Http\Controllers\OnlineTestController::class, 'streamKokoroSpeech'])->name('kokoro-tts.stream');
+        Route::post('/kokoro-tts', [App\Http\Controllers\OnlineTestController::class, 'synthesizeKokoroSpeech'])->name('kokoro-tts');
+        Route::get('/kokoro-tts/{filename}', [App\Http\Controllers\OnlineTestController::class, 'serveSynthesizedSpeech'])->name('kokoro-tts.file');
+        Route::get('/ielts-academic/paket{package}/band-report', [App\Http\Controllers\OnlineTestController::class, 'ieltsAcademicBandReport'])->whereNumber('package')->name('ielts-academic.band-report');
+        Route::post('/ielts-academic/paket{package}/band-report/certificate', [App\Http\Controllers\OnlineTestController::class, 'updateIeltsAcademicCertificate'])->whereNumber('package')->name('ielts-academic.band-report.certificate');
+        Route::get('/ielts-general/paket{package}/band-report', [App\Http\Controllers\OnlineTestController::class, 'ieltsGeneralBandReport'])->whereNumber('package')->name('ielts-general.band-report');
+        Route::get('/toefl-itp/paket{package}/score-report', [App\Http\Controllers\OnlineTestController::class, 'toeflItpScoreReport'])->whereNumber('package')->name('toefl-itp.score-report');
+        Route::get('/{slugAlias}/paket{package}/{section}', [App\Http\Controllers\OnlineTestController::class, 'packageSection'])->whereNumber('package')->name('package-section');
+        Route::post('/{slugAlias}/paket{package}/{section}', [App\Http\Controllers\OnlineTestController::class, 'submitPackageSection'])->whereNumber('package')->name('package-section.submit');
+        Route::post('/{slug}/end-session', [App\Http\Controllers\OnlineTestController::class, 'endSession'])->name('end-session');
+    });
+
+    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/leads', [App\Http\Controllers\AdminLeadController::class, 'index'])->name('leads.index');
+        Route::post('/leads/{id}/status', [App\Http\Controllers\AdminLeadController::class, 'updateStatus'])->name('leads.status.update');
+        
+        // ── Listening Machine (full AI pipeline) ─────────────────────────────
+        Route::prefix('listening-machine')->name('listening-machine.')->group(function () {
+            // AJAX endpoints must come BEFORE the {bank} wildcard
+            Route::post('/api/humanize',           [App\Http\Controllers\Admin\AdminListeningMachineController::class, 'humanize'])->name('humanize');
+            Route::post('/api/generate-audio',     [App\Http\Controllers\Admin\AdminListeningMachineController::class, 'generateAudio'])->name('generate-audio');
+            Route::post('/api/generate-sfx',       [App\Http\Controllers\Admin\AdminListeningMachineController::class, 'generateSfx'])->name('generate-sfx');
+            Route::post('/api/upload-sfx',         [App\Http\Controllers\Admin\AdminListeningMachineController::class, 'uploadSfx'])->name('upload-sfx');
+            Route::post('/api/compile-audio',      [App\Http\Controllers\Admin\AdminListeningMachineController::class, 'compileAudio'])->name('compile-audio');
+            Route::post('/api/generate-questions', [App\Http\Controllers\Admin\AdminListeningMachineController::class, 'generateQuestions'])->name('generate-questions');
+            Route::get('/api/job-status/{jobId}',  [App\Http\Controllers\Admin\AdminListeningMachineController::class, 'jobStatus'])->name('job-status');
+            Route::post('/api/export-to-public',   [App\Http\Controllers\Admin\AdminListeningMachineController::class, 'exportToPublic'])->name('export-to-public');
+            Route::get('/',          [App\Http\Controllers\Admin\AdminListeningMachineController::class, 'index'])->name('index');
+            Route::get('/create',    [App\Http\Controllers\Admin\AdminListeningMachineController::class, 'create'])->name('create');
+            Route::post('/',         [App\Http\Controllers\Admin\AdminListeningMachineController::class, 'store'])->name('store');
+            Route::get('/{bank}',    [App\Http\Controllers\Admin\AdminListeningMachineController::class, 'show'])->name('show');
+            Route::delete('/{bank}', [App\Http\Controllers\Admin\AdminListeningMachineController::class, 'destroy'])->name('destroy');
+        });
+        // ── Audio / Media Library Manager ─────────────────────────────
+        Route::prefix('audio-library')->name('audio-library.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Admin\AdminAudioLibraryController::class, 'index'])->name('index');
+            Route::delete('/delete', [App\Http\Controllers\Admin\AdminAudioLibraryController::class, 'destroy'])->name('destroy');
+            Route::get('/stats', [App\Http\Controllers\Admin\AdminAudioLibraryController::class, 'stats'])->name('stats');
+        });
+
+
+        Route::get('/promo-tests', [App\Http\Controllers\AdminPromoTestController::class, 'index'])->name('promo-tests.index');
+        Route::get('/promo-tests/preview/writing', [App\Http\Controllers\AdminPromoTestController::class, 'previewWriting'])->name('promo-tests.preview.writing');
+        Route::get('/promo-tests/preview/speaking', [App\Http\Controllers\AdminPromoTestController::class, 'previewSpeaking'])->name('promo-tests.preview.speaking');
+        Route::get('/promo-tests/preview/toefl', [App\Http\Controllers\AdminPromoTestController::class, 'previewToefl'])->name('promo-tests.preview.toefl');
+
+        Route::get('/ai-management', [App\Http\Controllers\Admin\AiManagementController::class, 'index'])->name('ai-management.index');
+        Route::post('/ai-management/update-key', [App\Http\Controllers\Admin\AiManagementController::class, 'updateKey'])->name('ai-management.update-key');
+        Route::post('/ai-management/save-groq-keys', [App\Http\Controllers\Admin\AiManagementController::class, 'saveGroqKeys'])->name('ai-management.save-groq-keys');
+        Route::post('/ai-management/save-other-provider-keys', [App\Http\Controllers\Admin\AiManagementController::class, 'saveOtherProviderKeys'])->name('ai-management.save-other-provider-keys');
+        Route::post('/ai-management/toggle-local-api', [App\Http\Controllers\Admin\AiManagementController::class, 'toggleLocalApi'])->name('ai-management.toggle-local-api');
+        Route::get('/ai-management/tts-server-status', [App\Http\Controllers\Admin\AiManagementController::class, 'ttsServerStatus'])->name('ai-management.tts-server-status');
+        Route::post('/promo-tests/colab', [App\Http\Controllers\AdminPromoTestController::class, 'updateColab'])->name('promo-tests.update-colab');
+        Route::post('/promo-tests/bulk', [App\Http\Controllers\AdminPromoTestController::class, 'bulkUpdate'])->name('promo-tests.bulk-update');
+        Route::post('/promo-tests/writing', [App\Http\Controllers\AdminPromoTestController::class, 'storeWriting'])->name('promo-tests.writing.store');
+        Route::delete('/promo-tests/writing/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'destroyWriting'])->name('promo-tests.writing.destroy');
+        Route::post('/promo-tests/writing/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'updateWriting'])->name('promo-tests.writing.update');
+        Route::post('/promo-tests/speaking', [App\Http\Controllers\AdminPromoTestController::class, 'storeSpeaking'])->name('promo-tests.speaking.store');
+        Route::delete('/promo-tests/speaking/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'destroySpeaking'])->name('promo-tests.speaking.destroy');
+        Route::post('/promo-tests/speaking/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'updateSpeaking'])->name('promo-tests.speaking.update');
+        Route::post('/promo-tests/speaking/{id}/render', [App\Http\Controllers\AdminPromoTestController::class, 'renderSpeaking'])->name('promo-tests.speaking.render');
+        Route::post('/promo-tests/listening/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'updateListening'])->name('promo-tests.listening.update');
+        Route::post('/promo-tests/grammar/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'updateGrammar'])->name('promo-tests.grammar.update');
+        Route::post('/promo-tests/reading-general/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'updateReadingGeneral'])->name('promo-tests.reading-general.update');
+        Route::post('/promo-tests/reading-academic/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'updateReadingAcademic'])->name('promo-tests.reading-academic.update');
+        Route::post('/promo-tests/toefl-listening/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'updateToeflListening'])->name('promo-tests.toefl-listening.update');
+        Route::post('/promo-tests/toefl-structure/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'updateToeflStructure'])->name('promo-tests.toefl-structure.update');
+        Route::post('/promo-tests/toefl-reading/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'updateToeflReading'])->name('promo-tests.toefl-reading.update');
+
+        Route::get('/online-tests', [App\Http\Controllers\Admin\OnlineTestController::class, 'index'])->name('online-tests.index');
+        Route::post('/online-tests', [App\Http\Controllers\Admin\OnlineTestController::class, 'update'])->name('online-tests.update');
+        Route::post('/online-tests/{slug}/generate-code', [App\Http\Controllers\Admin\OnlineTestController::class, 'generateCode'])->name('online-tests.generate-code');
+        Route::post('/online-tests/{slug}/toggle-code-access', [App\Http\Controllers\Admin\OnlineTestController::class, 'toggleCodeAccess'])->name('online-tests.toggle-code-access');
+        Route::post('/online-tests/batches/{id}/archive', [App\Http\Controllers\Admin\OnlineTestController::class, 'archiveBatch'])->whereNumber('id')->name('online-tests.batch.archive');
+        Route::post('/online-tests/batches/{id}/toggle-active', [App\Http\Controllers\Admin\OnlineTestController::class, 'toggleBatchActive'])->whereNumber('id')->name('online-tests.batch.toggle-active');
+        Route::delete('/online-tests/batches/{id}', [App\Http\Controllers\Admin\OnlineTestController::class, 'destroyBatch'])->whereNumber('id')->name('online-tests.batch.destroy');
+        Route::post('/online-tests/user-access/toggle', [App\Http\Controllers\Admin\OnlineTestController::class, 'toggleUserAccess'])->name('online-tests.user-access.toggle');
+        Route::post('/online-tests/{slug}/sections/{section}/video', [App\Http\Controllers\Admin\OnlineTestController::class, 'updateSectionVideo'])->name('online-tests.section-video.update');
+        Route::get('/online-tests/{slug}/package-bank', [App\Http\Controllers\Admin\OnlineTestController::class, 'packageBank'])->name('online-tests.package-bank');
+        Route::post('/online-tests/{slug}/package-bank', [App\Http\Controllers\Admin\OnlineTestController::class, 'updatePackageBank'])->name('online-tests.package-bank.update');
+        Route::get('/online-tests/{slug}/paket{package}/{section}/answer-key', [App\Http\Controllers\Admin\OnlineTestController::class, 'editPackageAnswerKey'])->whereNumber('package')->name('online-tests.package-answer-key.edit');
+        Route::post('/online-tests/{slug}/paket{package}/{section}/answer-key', [App\Http\Controllers\Admin\OnlineTestController::class, 'updatePackageAnswerKey'])->whereNumber('package')->name('online-tests.package-answer-key.update');
+        Route::get('/online-tests/{slug}/paket{package}/{section}/answer-key/json', [App\Http\Controllers\Admin\OnlineTestController::class, 'packageAnswerKeyJson'])->whereNumber('package')->name('online-tests.package-answer-key.json');
+        Route::post('/online-tests/{slug}/paket{package}/{section}/answer-key/json', [App\Http\Controllers\Admin\OnlineTestController::class, 'updatePackageAnswerKeyJson'])->whereNumber('package')->name('online-tests.package-answer-key.json.update');
+        Route::get('/online-tests/toefl-score', [App\Http\Controllers\Admin\OnlineTestController::class, 'editToeflScore'])->name('online-tests.toefl-score.edit');
+        Route::post('/online-tests/toefl-score', [App\Http\Controllers\Admin\OnlineTestController::class, 'updateToeflScore'])->name('online-tests.toefl-score.update');
+        Route::get('/online-tests/reference/availability', [App\Http\Controllers\Admin\OnlineTestController::class, 'referenceAvailability'])->name('online-tests.reference.availability');
+        Route::post('/online-tests/reference/suggestion', [App\Http\Controllers\Admin\OnlineTestController::class, 'referenceSuggestion'])->name('online-tests.reference.suggestion');
+        Route::get('/online-test-results', [App\Http\Controllers\Admin\OnlineTestResultController::class, 'index'])->name('online-test-results.index');
+        Route::get('/online-test-results/{id}', [App\Http\Controllers\Admin\OnlineTestResultController::class, 'show'])->whereNumber('id')->name('online-test-results.show');
+        Route::patch('/online-test-results/{id}/status', [App\Http\Controllers\Admin\OnlineTestResultController::class, 'updateStatus'])->whereNumber('id')->name('online-test-results.update-status');
+        Route::get('/online-test-results/{id}/certificate', [App\Http\Controllers\Admin\OnlineTestResultController::class, 'certificate'])->whereNumber('id')->name('online-test-results.certificate');
+        Route::get('/final-test-results', [App\Http\Controllers\Admin\FinalTestResultController::class, 'index'])->name('final-test-results.index');
+        Route::get('/final-test-results/{id}', [App\Http\Controllers\Admin\FinalTestResultController::class, 'show'])->whereNumber('id')->name('final-test-results.show');
+        Route::patch('/final-test-results/{id}/status', [App\Http\Controllers\Admin\FinalTestResultController::class, 'updateStatus'])->whereNumber('id')->name('final-test-results.update-status');
+        Route::get('/final-test-results/{id}/certificate', [App\Http\Controllers\Admin\FinalTestResultController::class, 'certificate'])->whereNumber('id')->name('final-test-results.certificate');
+        // Admin: fetch class period meetings (returns JSON)
+        Route::get('/class-periods/{classPeriod}/meetings', [App\Http\Controllers\TeacherAttendanceController::class, 'getMeetings'])
+            ->whereNumber('classPeriod')
+            ->name('class-periods.meetings');
+    });
+
     // Scholarships Routes
     Route::get('/scholarships', [App\Http\Controllers\ScholarshipController::class, 'index'])->name('scholarships.index');
     Route::get('/scholarships/{scholarship}', [App\Http\Controllers\ScholarshipController::class, 'show'])->name('scholarships.show');
 
+    Route::get('/mock-test', function () {
+        return view('mock-test.index');
+    })->name('mock-test');
+
+    Route::get('/mock-test/toefl-itp', [App\Http\Controllers\ToeflMockupController::class, 'index'])->name('mock-test.toefl-itp');
+    Route::get('/mock-test/ielts-academic', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'index'])->name('mock-test.ielts-academic');
+    Route::get('/mock-test/ielts-academic/cambridge', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'index'])->name('mock-test.ielts-academic.cambridge');
+    Route::get('/mock-test/ielts-academic/cambridge/{edition}', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'edition'])->name('mock-test.ielts-academic.cambridge.edition');
+
     Route::get('/assignments', [App\Http\Controllers\AssignmentController::class, 'index'])
         ->name('assignments.index')
         ->middleware('check.assignment.program.access');
+    Route::get('/assignments/final-test', function () {
+        return redirect()->route('final-test');
+    })->name('assignments.final-test')
+        ->middleware('check.assignment.program.access');
+
+    Route::get('/final-test', [App\Http\Controllers\AssignmentController::class, 'finalTestIndex'])
+        ->name('final-test')
+        ->middleware('check.assignment.program.access');
+
+    // Admin manage final test (shows editor UI for admins)
+    Route::get('/admin/manage-final-test', [App\Http\Controllers\AssignmentController::class, 'finalTestIndex'])
+        ->name('admin.manage-final-test')
+        ->middleware(['role:admin', 'check.assignment.program.access']);
+
+    Route::post('/final-test/settings', [App\Http\Controllers\AssignmentController::class, 'updateFinalTestSettings'])
+        ->name('final-test.settings.update')
+        ->middleware(['role:admin', 'check.assignment.program.access']);
+
+    Route::get('/final-test/results/{result}', [App\Http\Controllers\AssignmentController::class, 'showFinalTestResult'])
+        ->whereNumber('result')
+        ->name('final-test.results.show')
+        ->middleware('check.assignment.program.access');
+
+    Route::get('/final-test/results/{result}/certificate', [App\Http\Controllers\AssignmentController::class, 'downloadFinalTestCertificate'])
+        ->whereNumber('result')
+        ->name('final-test.certificate.download')
+        ->middleware('check.assignment.program.access');
+
+    Route::post('/final-test/{program}/{variant?}/complete', [App\Http\Controllers\AssignmentController::class, 'completeFinalTest'])
+        ->where('program', 'grammar-for-writing|toefl-itp|ielts-academic|pte-academic|ielts-general|speaking')
+        ->where('variant', 'introductory|complexity|proficiency|fast-track|intermediate|advanced')
+        ->name('final-test.complete')
+        ->middleware('check.assignment.program.access');
+
+    Route::get('/final-test/{program}/{variant?}', [App\Http\Controllers\AssignmentController::class, 'finalTestProgram'])
+        ->where('program', 'grammar-for-writing|toefl-itp|ielts-academic|pte-academic|ielts-general|speaking')
+        ->where('variant', 'introductory|complexity|proficiency|fast-track|intermediate|advanced')
+        ->name('final-test.show')
+        ->middleware('check.assignment.program.access');
+
+    // Meetings: allow authenticated users (students/teachers/admins) to fetch meetings for a class period
+    Route::get('/class-periods/{classPeriod}/meetings', [App\Http\Controllers\TeacherAttendanceController::class, 'getMeetings'])
+        ->whereNumber('classPeriod')
+        ->name('class-periods.meetings');
+
+    // Update meeting date (PATCH) - only authorized users allowed by controller
+    Route::patch('/class-meetings/{classMeeting}', [App\Http\Controllers\TeacherAttendanceController::class, 'updateMeeting'])
+        ->whereNumber('classMeeting')
+        ->name('class-meetings.update');
+
+    // Note: the admin group earlier also exposes /admin/class-periods/{classPeriod}/meetings — keep both for backwards compatibility.
+
+    Route::get('/assignments/final-test/{program}/{variant?}', function (string $program, ?string $variant = null) {
+        return redirect()->route('final-test.show', array_filter([
+            'program' => $program,
+            'variant' => $variant,
+        ]));
+    })->where('program', 'grammar-for-writing|toefl-itp|ielts-academic|pte-academic|ielts-general|speaking')
+        ->where('variant', 'introductory|complexity|proficiency|fast-track|intermediate|advanced')
+        ->name('assignments.final-test.show')
+        ->middleware('check.assignment.program.access');
+
     // Cleanup Route (Temporary) - Outside this block in next step or just accessed via browser tool logged in?
     // Actually, I'll just remove it from here and put it at the top of the file in a separate replace call if needed, 
     // but the tool allows me to just replace this block.
@@ -573,12 +824,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/assignments/ielts-academic/speaking/practice-index', [App\Http\Controllers\IeltsSpeakingController::class, 'practiceIndex'])->name('assignments.ielts-academic.speaking.practice.index');
     Route::get('/assignments/ielts-academic/speaking/practice-index/part{part}', [App\Http\Controllers\IeltsSpeakingController::class, 'practiceIndexPart'])->name('assignments.ielts-academic.speaking.practice-index.part');
     Route::get('/assignments/ielts-academic/writing/practice-index', [App\Http\Controllers\IeltsWritingController::class, 'practiceIndex'])->name('assignments.ielts-academic.writing.practice.index');
+    Route::get('/assignments/ielts-academic/writing/practice-index/grammar-practice', [App\Http\Controllers\IeltsWritingController::class, 'grammarPractice'])->name('assignments.ielts-academic.writing.grammar-practice');
     Route::get('/assignments/ielts-academic/listening/warm-up/{type}', [App\Http\Controllers\IeltsListeningController::class, 'warmUp'])->name('assignments.ielts-academic.listening.warmup');
-    Route::get('/api/dictionary/lookup', [App\Http\Controllers\ToeflDictionaryController::class, 'lookup'])->name('api.dictionary.lookup');
-    Route::get('/api/dictionary/synonyms', [App\Http\Controllers\ToeflDictionaryController::class, 'synonyms'])->name('api.dictionary.synonyms');
-    Route::get('/api/ollama/collocation', [App\Http\Controllers\OllamaController::class, 'getCollocations'])->name('api.ollama.collocation');
-    Route::post('/api/ollama/translate', [App\Http\Controllers\OllamaController::class, 'translate'])->name('api.ollama.translate');
-    Route::post('/api/lmstudio/chat', [App\Http\Controllers\OllamaController::class, 'chat'])->name('api.lmstudio.chat');
+    
     Route::get('/api/audio-files', [App\Http\Controllers\ToeflListeningAdminController::class, 'getSourceAudioFilesList'])->name('api.audio.files');
     
     // Legacy / Other Routes
@@ -593,8 +841,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/assignments/ielts-academic/listening/practice-index/part{set}/test{test}', [App\Http\Controllers\IeltsListeningController::class, 'practiceIndexTest'])->name('assignments.ielts-academic.listening.practice-index.test');
     Route::get('/assignments/ielts-academic/listening/practice/{meeting}/part/{set}/test/{test}', [App\Http\Controllers\IeltsListeningController::class, 'showPracticeTest'])->name('assignments.ielts-academic.listening.part1.practice.test');
     Route::post('/assignments/ielts-academic/listening/practice/{meeting}/part/{set}/test/{test}/submit', [App\Http\Controllers\IeltsListeningController::class, 'submitPractice'])->name('assignment.ielts.listening.submit');
+    
+
     Route::post('/assignments/ielts-academic/listening/practice/{meeting}/part/{set}/upload-audio', [App\Http\Controllers\IeltsListeningAdminController::class, 'uploadAudio'])->name('assignments.ielts.listening.upload-audio');
     Route::post('/assignments/ielts-academic/listening/practice/{meeting}/part/{set}/upload-srt', [App\Http\Controllers\IeltsListeningAdminController::class, 'uploadTranscript'])->name('assignments.ielts.listening.upload-srt');
+    Route::post('/assignments/ielts-academic/listening/practice/{meeting}/part/{set}/upload-answer-key', [App\Http\Controllers\IeltsListeningAdminController::class, 'uploadSectionAnswerKey'])->name('assignments.ielts.listening.upload-answer-key');
+    Route::post('/assignments/ielts-academic/listening/material/{id}/upload-answer-key-practice', [App\Http\Controllers\IeltsListeningAdminController::class, 'uploadMaterialPracticeAnswerKey'])->name('assignments.ielts-academic.listening.material.upload-answer-key-practice');
 
     // IELTS Academic Reading Routes
     Route::get('/assignments/ielts-academic/reading', [App\Http\Controllers\IeltsReadingController::class, 'index'])->name('assignments.ielts-academic.reading.index');
@@ -621,6 +873,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Admin Upload Routes for Cambridge Test (auth required)
     Route::post('/assignments/ielts-academic/mockup/cambridge/{edition}/test-{id}/upload-audio', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'uploadAudio'])->name('assignments.ielts-academic.mockup.cambridge.upload-audio');
+    Route::post('/assignments/ielts-academic/mockup/cambridge/{edition}/test-{id}/transcribe', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'transcribeAudio'])->name('assignments.ielts-academic.mockup.cambridge.transcribe');
     Route::post('/assignments/ielts-academic/mockup/cambridge/{edition}/test-{id}/upload-srt', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'uploadSrt'])->name('assignments.ielts-academic.mockup.cambridge.upload-srt');
     Route::post('/assignments/ielts-academic/mockup/cambridge/{edition}/test-{id}/upload-answer-key', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'uploadAnswerKey'])->name('assignments.ielts-academic.mockup.cambridge.upload-answer-key');
 
@@ -656,6 +909,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Speaking
     Route::get('/assignments/ielts-academic/speaking', [App\Http\Controllers\IeltsSpeakingController::class, 'index'])->name('assignments.ielts-academic.speaking.index');
+    Route::get('/assignments/ielts-academic/speaking/tts-stream', [App\Http\Controllers\OnlineTestController::class, 'streamKokoroSpeech'])->name('assignments.ielts-academic.speaking.tts-stream');
     Route::get('/assignments/ielts-academic/speaking/practice', [App\Http\Controllers\IeltsSpeakingController::class, 'practice'])->name('assignments.ielts-academic.speaking.practice');
     Route::post('/assignments/ielts-academic/speaking/practice/grade', [App\Http\Controllers\IeltsSpeakingController::class, 'grade'])->name('assignments.ielts-academic.speaking.practice.grade');
     Route::get('/assignments/ielts-academic/speaking/practice/evaluation', [App\Http\Controllers\IeltsSpeakingController::class, 'evaluation'])->name('assignments.ielts-academic.speaking.evaluation');
@@ -665,6 +919,7 @@ Route::middleware(['auth'])->group(function () {
     // Speaking Topics CRUD
     Route::post('/admin/ielts-speaking/topics', [App\Http\Controllers\IeltsSpeakingAdminController::class, 'storeTopic'])->name('admin.ielts.speaking.topics.store');
     Route::put('/admin/ielts-speaking/topics/{id}', [App\Http\Controllers\IeltsSpeakingAdminController::class, 'updateTopic'])->name('admin.ielts.speaking.topics.update');
+    Route::put('/admin/ielts-speaking/topics/{id}/questions', [App\Http\Controllers\IeltsSpeakingAdminController::class, 'updateContent'])->name('admin.ielts.speaking.topics.update-questions');
     Route::delete('/admin/ielts-speaking/topics/{id}', [App\Http\Controllers\IeltsSpeakingAdminController::class, 'destroyTopic'])->name('admin.ielts.speaking.topics.delete');
     Route::post('/admin/ielts-speaking/topics/{id}/toggle-lock', [App\Http\Controllers\IeltsSpeakingAdminController::class, 'toggleLock'])->name('admin.ielts.speaking.topics.toggle-lock');
     Route::post('/assignments/ielts-academic/speaking/practice/check-grammar', [App\Http\Controllers\IeltsSpeakingController::class, 'checkGrammar'])->name('assignments.ielts-academic.speaking.check-grammar');
@@ -752,7 +1007,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/assignments/toefl-itp/reading/question/{question}/destroy', [App\Http\Controllers\ToeflReadingAdminController::class, 'destroyQuestion'])->name('assignments.toefl-itp.reading.question.destroy');
     Route::post('/assignments/toefl-itp/reading/question/{id}/update-answer', [App\Http\Controllers\ToeflReadingAdminController::class, 'updateQuestionAnswer'])->name('assignments.toefl-itp.reading.question.update-answer');
     Route::get('/assignments/toefl-itp/vocabulary', [App\Http\Controllers\ToeflItpController::class, 'vocabulary'])->name('assignments.toefl-itp.vocabulary');
-    Route::get('/assignments/toefl-itp/mockup', [App\Http\Controllers\ToeflMockupController::class, 'index'])->name('assignments.toefl-itp.mockup');
+    Route::get('/assignments/toefl-itp/mock-test', [App\Http\Controllers\ToeflMockupController::class, 'index'])->name('assignments.toefl-itp.mockup');
+    Route::redirect('/assignments/toefl-itp/mockup', '/assignments/toefl-itp/mock-test');
     Route::get('/assignments/toefl-itp/mockup/package/{package}', [App\Http\Controllers\ToeflMockupController::class, 'showPackage'])->whereNumber('package')->name('assignments.toefl-itp.mockup.package');
     Route::post('/assignments/toefl-itp/mockup/package/{package}/submit', [App\Http\Controllers\ToeflMockupController::class, 'submit'])->whereNumber('package')->name('assignments.toefl-itp.mockup.submit');
     Route::get('/assignments/mock-tests/results/{result}', [App\Http\Controllers\ToeflMockupController::class, 'showResult'])->whereNumber('result')->name('assignments.mock-tests.results.show');
@@ -762,6 +1018,33 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/assignments/toefl-itp/mockup/package/{package}/question/{question_id}/upload-audio', [App\Http\Controllers\ToeflMockupController::class, 'uploadQuestionAudio'])->whereNumber('package')->whereNumber('question_id')->name('assignments.toefl-itp.mockup.package.question.upload-audio');
     
     Route::get('/assignments/grammar-writing', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingClasses'])->name('assignments.grammar-writing.classes');
+    Route::get('/assignments/grammar-writing/practice', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingPractice'])->name('assignments.grammar-writing.practice');
+    Route::post('/assignments/grammar-writing/practice', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingPracticeStore'])->name('assignments.grammar-writing.practice.store')->middleware('role:admin');
+    Route::post('/assignments/grammar-writing/practice/reorder', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingPracticeReorder'])->name('assignments.grammar-writing.practice.reorder')->middleware('role:admin');
+    Route::put('/assignments/grammar-writing/practice/{topic}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingPracticeUpdate'])->name('assignments.grammar-writing.practice.update')->middleware('role:admin');
+    Route::delete('/assignments/grammar-writing/practice/{topic}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingPracticeDestroy'])->name('assignments.grammar-writing.practice.destroy')->middleware('role:admin');
+    Route::get('/assignments/grammar-writing/practice/topic/{topic}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingPracticeTopic'])->name('assignments.grammar-writing.practice.topic');
+    Route::post('/assignments/grammar-writing/practice/topic/{topic}/question', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingPracticeQuestionStore'])->name('assignments.grammar-writing.practice.question.store')->middleware('role:admin');
+    Route::put('/assignments/grammar-writing/practice/question/{question}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingPracticeQuestionUpdate'])->name('assignments.grammar-writing.practice.question.update')->middleware('role:admin');
+    Route::delete('/assignments/grammar-writing/practice/question/{question}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingPracticeQuestionDestroy'])->name('assignments.grammar-writing.practice.question.destroy')->middleware('role:admin');
+    Route::post('/assignments/grammar-writing/practice/topic/{topic}/submit', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingPracticeTopicSubmit'])->name('assignments.grammar-writing.practice.topic.submit');
+    Route::post('/assignments/grammar-writing/practice/topic/{topic}/reset', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingPracticeTopicReset'])->name('assignments.grammar-writing.practice.topic.reset');
+    Route::get('/assignments/grammar-writing/practice/level/{level}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingPracticeLevel'])->name('assignments.grammar-writing.practice.level');
+    // Admin CRUD for Introductory Topics
+    Route::get('/assignments/grammar-writing/intro-topics', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingIntroTopics'])->name('assignments.grammar-writing.intro-topics')->middleware('role:admin');
+    Route::post('/assignments/grammar-writing/intro-topics', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingIntroTopicStore'])->name('assignments.grammar-writing.intro-topics.store')->middleware('role:admin');
+    Route::put('/assignments/grammar-writing/intro-topics/{topic}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingIntroTopicUpdate'])->name('assignments.grammar-writing.intro-topics.update')->middleware('role:admin');
+    Route::delete('/assignments/grammar-writing/intro-topics/{topic}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingIntroTopicDestroy'])->name('assignments.grammar-writing.intro-topics.destroy')->middleware('role:admin');
+    Route::post('/assignments/grammar-writing/intro-topics/reorder', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingIntroTopicReorder'])->name('assignments.grammar-writing.intro-topics.reorder')->middleware('role:admin');
+    Route::get('/assignments/grammar-writing/introductory', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingTrack'])
+        ->defaults('track', 'introductory')
+        ->name('assignments.grammar-writing.introductory');
+    Route::get('/assignments/grammar-writing/complexity', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingTrack'])
+        ->defaults('track', 'complexity')
+        ->name('assignments.grammar-writing.complexity');
+    Route::get('/assignments/grammar-writing/proficiency', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingTrack'])
+        ->defaults('track', 'proficiency')
+        ->name('assignments.grammar-writing.proficiency');
     Route::get('/assignments/grammar-writing/introductory/meeting/{meeting}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingIntroductoryMeeting'])
         ->whereNumber('meeting')
         ->name('assignments.grammar-writing.introductory.meeting');
@@ -777,6 +1060,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/assignments/grammar-writing/proficiency/meeting/{meeting}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingProficiencyMeeting'])
         ->whereNumber('meeting')
         ->name('assignments.grammar-writing.proficiency.meeting');
+    Route::post('/assignments/grammar-writing/proficiency/meeting/{meeting}/submit', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingProficiencyMeetingSubmit'])
+        ->whereNumber('meeting')
+        ->name('assignments.grammar-writing.proficiency.meeting.submit');
+    Route::get('/assignments/grammar-writing/proficiency/meeting/{meeting}/reset', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingProficiencyMeetingReset'])
+        ->whereNumber('meeting')
+        ->name('assignments.grammar-writing.proficiency.meeting.reset');
     Route::get('/assignments/grammar-writing/{track}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingTrack'])
         ->whereIn('track', ['introductory', 'complexity', 'proficiency'])
         ->name('assignments.grammar-writing.track');
@@ -785,6 +1074,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/assignments/batch-period', [App\Http\Controllers\GrammarWritingAdminController::class, 'updateBatchPeriod'])->name('assignments.batch-period');
 
     Route::get('/assignments/speaking', [App\Http\Controllers\SpeakingAdminController::class, 'speakingClasses'])->name('assignments.speaking.classes');
+    Route::get('/assignments/speaking/{level}', [App\Http\Controllers\SpeakingAdminController::class, 'speakingLevel'])
+        ->whereIn('level', ['introductory', 'intermediate', 'advanced'])
+        ->name('assignments.speaking.level');
     Route::get('/assignments/speaking/fast-track', [App\Http\Controllers\SpeakingAdminController::class, 'speaking'])->name('assignments.speaking');
     Route::post('/assignments/meeting/{meeting}/toggle-lock', [App\Http\Controllers\GrammarWritingAdminController::class, 'toggleLock'])->name('assignments.meeting.toggle-lock');
     Route::get('/assignments/grammar-writing/fast-track/meeting1', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting1'])->name('assignments.grammar-writing.meeting1');
@@ -846,6 +1138,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/admin/assignments/grammar-writing/vocab/{id}', [App\Http\Controllers\GrammarWritingAdminController::class, 'updateGrammarVocabulary'])->name('admin.grammar.vocab.update');
     Route::delete('/admin/assignments/grammar-writing/vocab/{id}', [App\Http\Controllers\GrammarWritingAdminController::class, 'destroyGrammarVocabulary'])->name('admin.grammar.vocab.destroy');
 
+    Route::post('/admin/assignments/grammar-writing/questions/bulk-introductory', [App\Http\Controllers\GrammarWritingAdminController::class, 'bulkStoreIntroductoryQuestions'])->name('admin.grammar.question.bulk-introductory');
     Route::post('/admin/assignments/grammar-writing/questions', [App\Http\Controllers\GrammarWritingAdminController::class, 'storeGrammarQuestion'])->name('admin.grammar.question.store');
     Route::put('/admin/assignments/grammar-writing/questions/{id}', [App\Http\Controllers\GrammarWritingAdminController::class, 'updateGrammarQuestion'])->name('admin.grammar.question.update');
     Route::delete('/admin/assignments/grammar-writing/questions/{id}', [App\Http\Controllers\GrammarWritingAdminController::class, 'destroyGrammarQuestion'])->name('admin.grammar.question.destroy');
@@ -868,9 +1161,11 @@ Route::middleware(['auth'])->group(function () {
     // Admin Users Management
     Route::post('/admin/users/bulk-assign-teacher', [App\Http\Controllers\Admin\UserController::class, 'bulkAssignTeacher'])->name('admin.users.bulk_assign_teacher')->middleware('role:admin');
     Route::post('/admin/users/bulk-assign-program', [App\Http\Controllers\Admin\UserController::class, 'bulkAssignProgram'])->name('admin.users.bulk_assign_program')->middleware('role:admin');
+    Route::post('/admin/users/bulk-update-status', [App\Http\Controllers\Admin\UserController::class, 'bulkUpdateStatus'])->name('admin.users.bulk_update_status')->middleware('role:admin');
     Route::post('/admin/users/{user}/convert', [App\Http\Controllers\Admin\UserController::class, 'convertGuest'])->name('users.convertGuest')->middleware('role:admin');
     Route::post('/admin/users/{user}/toggle-status', [App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.toggle-status')->middleware('role:admin');
     Route::resource('admin/users', App\Http\Controllers\Admin\UserController::class)->names('users')->middleware('role:admin');
+    Route::post('/admin/users/{user}/intern-permissions', [App\Http\Controllers\Admin\InternPermissionController::class, 'update'])->name('users.intern-permissions.update')->middleware('role:admin');
     
     // Admin Teachers Management
     Route::post('/admin/teachers/assign-student', [App\Http\Controllers\TeacherController::class, 'assignStudent'])->name('admin.teachers.assign_student')->middleware('role:admin');
@@ -886,15 +1181,36 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('admin/students', App\Http\Controllers\Admin\StudentController::class)->names('students')->middleware('role:admin');
 
     Route::get('/admin', [App\Http\Controllers\AdminController::class, 'index'])->name('admin.dashboard')->middleware('role:admin');
+    Route::get('/admin/api/active-students', [App\Http\Controllers\AdminController::class, 'activeStudentsJson'])->name('admin.api.active-students')->middleware('role:admin');
+    Route::get('/admin/api/active-teachers', [App\Http\Controllers\AdminController::class, 'activeTeachersJson'])->name('admin.api.active-teachers')->middleware('role:admin');
+    Route::get('/admin/chat', function () { 
+        $isLiveChatEnabled = setting('live_chat_enabled', '1') === '1';
+        return view('admin.chat.index', compact('isLiveChatEnabled')); 
+    })->name('admin.chat.index')->middleware('role:admin');
+
+    Route::post('/admin/chat/toggle', function () {
+        $enabled = setting('live_chat_enabled', '1');
+        $newValue = $enabled === '1' ? '0' : '1';
+        \App\Models\Setting::updateOrCreate(
+            ['key' => 'live_chat_enabled'],
+            ['value' => $newValue, 'type' => 'boolean']
+        );
+        \Illuminate\Support\Facades\Cache::forget('app_settings');
+        return response()->json(['enabled' => $newValue === '1']);
+    })->name('admin.chat.toggle')->middleware('role:admin');
     Route::get('/admin/campaign-signups/export', [App\Http\Controllers\Admin\WHVApplicationController::class, 'exportCampaignSignups'])->name('admin.campaign-signups.export')->middleware('role:admin');
     
     // Admin Class Periods Management
     Route::get('/admin/class-periods/next-batch-number', [App\Http\Controllers\Admin\ClassPeriodController::class, 'nextBatchNumber'])->name('class-periods.next-batch-number')->middleware('role:admin');
-    Route::post('/admin/class-periods/{classPeriod}/status', [App\Http\Controllers\Admin\ClassPeriodController::class, 'updateStatus'])->name('class-periods.status');
+    Route::patch('/admin/class-periods/{classPeriod}/status', [App\Http\Controllers\Admin\ClassPeriodController::class, 'updateStatus'])->name('class-periods.status');
     Route::post('/admin/class-periods/{classPeriod}/assign-student', [App\Http\Controllers\Admin\ClassPeriodController::class, 'assignStudent'])->name('class-periods.assign-student');
     Route::delete('/admin/class-periods/{classPeriod}/remove-student/{user}', [App\Http\Controllers\Admin\ClassPeriodController::class, 'removeStudent'])->name('class-periods.remove-student');
     Route::post('/admin/class-periods/{classPeriod}/toggle-meeting/{meeting}', [App\Http\Controllers\Admin\ClassPeriodController::class, 'toggleMeeting'])->name('class-periods.toggle-meeting');
     Route::resource('admin/class-periods', App\Http\Controllers\Admin\ClassPeriodController::class)->names('class-periods')->middleware('role:admin');
+
+    Route::get('/admin/class-schedules', [App\Http\Controllers\Admin\ClassScheduleController::class, 'index'])->name('admin.class-schedules.index')->middleware('role:admin');
+    Route::get('/api/admin/class-schedules/events', [App\Http\Controllers\Admin\ClassScheduleController::class, 'apiEvents'])->name('admin.class-schedules.events')->middleware('role:admin');
+    Route::patch('/admin/class-schedules/{meeting}', [App\Http\Controllers\Admin\ClassScheduleController::class, 'update'])->name('admin.class-schedules.update')->middleware('role:admin');
     
     // Admin Impersonation Routes
     Route::get('/admin/impersonate/{role}', [App\Http\Controllers\AdminController::class, 'impersonate'])->name('admin.impersonate');
@@ -951,12 +1267,24 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/admin/scores', [App\Http\Controllers\ScoreController::class, 'index'])->name('admin.scores.index')->middleware('role:admin');
     Route::get('/admin/toefl-mockup-results', [App\Http\Controllers\Admin\ToeflMockupResultController::class, 'index'])->name('admin.toefl-mockup-results.index')->middleware('role:admin');
+    Route::get('/admin/toefl-mockup-results/{id}', [App\Http\Controllers\Admin\ToeflMockupResultController::class, 'show'])->whereNumber('id')->name('admin.toefl-mockup-results.show')->middleware('role:admin');
+    Route::patch('/admin/toefl-mockup-results/{id}/status', [App\Http\Controllers\Admin\ToeflMockupResultController::class, 'updateStatus'])->whereNumber('id')->name('admin.toefl-mockup-results.update-status')->middleware('role:admin');
+    Route::get('/admin/toefl-mockup-results/{id}/certificate', [App\Http\Controllers\Admin\ToeflMockupResultController::class, 'certificate'])->whereNumber('id')->name('admin.toefl-mockup-results.certificate')->middleware('role:admin');
     
     // Attendance
     Route::get('/admin/attendance', [App\Http\Controllers\Admin\AttendanceController::class, 'index'])->name('admin.attendance.index')->middleware('role:admin');
     Route::get('/admin/attendance/meetings/{classPeriod}', [App\Http\Controllers\Admin\AttendanceController::class, 'getMeetings'])->name('admin.attendance.meetings')->middleware('role:admin');
     Route::get('/admin/attendance/records/{classMeeting}', [App\Http\Controllers\Admin\AttendanceController::class, 'getAttendance'])->name('admin.attendance.records')->middleware('role:admin');
     Route::post('/admin/attendance/store', [App\Http\Controllers\Admin\AttendanceController::class, 'store'])->name('admin.attendance.store')->middleware('role:admin');
+    Route::post('/admin/attendance/meetings/{classPeriod}/create', [App\Http\Controllers\Admin\AttendanceController::class, 'createMeeting'])->name('admin.attendance.meeting.create')->middleware('role:admin');
+    Route::delete('/admin/attendance/meetings/delete/{classMeeting}', [App\Http\Controllers\Admin\AttendanceController::class, 'deleteMeeting'])->name('admin.attendance.meeting.delete')->middleware('role:admin');
+    Route::patch('/admin/attendance/meetings/{classMeeting}', [App\Http\Controllers\Admin\AttendanceController::class, 'updateMeeting'])->name('admin.attendance.meeting.update')->middleware('role:admin');
+    
+    // Attendance Batch Routes
+    Route::get('/admin/attendance/batch/{batchType}/{batchNumber?}', [App\Http\Controllers\Admin\AttendanceController::class, 'getBatchInfo'])->name('admin.attendance.batch.info')->middleware('role:admin');
+    Route::get('/admin/attendance/batch/{batchType}/classes/{batchNumber?}', [App\Http\Controllers\Admin\AttendanceController::class, 'getClassesByBatch'])->name('admin.attendance.batch.classes')->middleware('role:admin');
+    Route::get('/admin/attendance/batch/{batchType}/meetings/{batchNumber?}', [App\Http\Controllers\Admin\AttendanceController::class, 'getMeetingsByBatch'])->name('admin.attendance.batch.meetings')->middleware('role:admin');
+    Route::get('/admin/attendance/batch/{batchType}/students/{batchNumber?}', [App\Http\Controllers\Admin\AttendanceController::class, 'getStudentsByBatch'])->name('admin.attendance.batch.students')->middleware('role:admin');
     
     // Reports
     Route::get('/admin/reports/{tab?}', [App\Http\Controllers\Admin\ReportController::class, 'index'])
@@ -967,6 +1295,12 @@ Route::middleware(['auth'])->group(function () {
     // Admin Payment Verification
     Route::get('/admin/payments', [App\Http\Controllers\PaymentController::class, 'adminIndex'])
         ->name('admin.payments.index')
+        ->middleware('role:admin');
+    Route::get('/admin/payments/queue', [App\Http\Controllers\PaymentController::class, 'adminQueue'])
+        ->name('admin.payments.queue')
+        ->middleware('role:admin');
+    Route::get('/admin/payments/proofs', [App\Http\Controllers\PaymentController::class, 'proofsIndex'])
+        ->name('admin.payments.proofs')
         ->middleware('role:admin');
     Route::get('/admin/payments/export-csv', [App\Http\Controllers\PaymentController::class, 'adminExportCsv'])
         ->name('admin.payments.export-csv')
@@ -980,10 +1314,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/payments/{payment}/reject', [App\Http\Controllers\PaymentController::class, 'reject'])
         ->name('admin.payments.reject')
         ->middleware('role:admin');
+    Route::post('/admin/payments/purge-proofs', [App\Http\Controllers\PaymentController::class, 'purgeProofs'])
+        ->name('admin.payments.purge-proofs')
+        ->middleware('role:admin');
     
     // Teacher Evaluations (Admin)
     Route::get('/admin/teacher-evaluations', [App\Http\Controllers\Admin\TeacherEvaluationController::class, 'index'])->name('admin.evaluations.index')->middleware('role:admin');
     
+    // Class Evaluations (Admin)
+    Route::get('/admin/class-evaluations', [App\Http\Controllers\Admin\ClassEvaluationController::class, 'index'])->name('admin.class-evaluations.index')->middleware('role:admin');
     // Announcements (Admin)
     Route::get('admin/announcements', [App\Http\Controllers\Admin\AnnouncementController::class, 'index'])->name('admin.announcements.index')->middleware('role:admin');
     Route::get('admin/announcements/create', [App\Http\Controllers\Admin\AnnouncementController::class, 'create'])->name('admin.announcements.create')->middleware('role:admin');
@@ -1012,13 +1351,45 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/referrals/rewards', [App\Http\Controllers\Admin\ReferralController::class, 'storeReward'])->name('admin.referrals.rewards.store')->middleware('role:admin');
     Route::put('/admin/referrals/social/{id}', [App\Http\Controllers\Admin\ReferralController::class, 'updateSocialMedia'])->name('admin.referrals.social.update')->middleware('role:admin');
     
+    // Admin Assignment Results
+    Route::get('/admin/assignment-results', [App\Http\Controllers\Admin\AssignmentResultController::class, 'index'])->name('admin.assignment-results.index')->middleware('role:admin');
+    Route::get('/admin/assignment-results/{program}', [App\Http\Controllers\Admin\AssignmentResultController::class, 'show'])->name('admin.assignment-results.show')->middleware('role:admin');
+    Route::get('/admin/assignment-results/{program}/submissions/{submission}', [App\Http\Controllers\Admin\AssignmentResultController::class, 'showSubmission'])->name('admin.assignment-results.submission')->middleware('role:admin');
+
     // Admin Free Test Certificates
+    // Camp Management
+    Route::get('/admin/camp-management', [App\Http\Controllers\Admin\CampManagementController::class, 'index'])->name('admin.camp-management.index')->middleware('role:admin');
+    Route::resource('/admin/camps', App\Http\Controllers\Admin\CampController::class, ['as' => 'admin'])->middleware('role:admin');
+    Route::resource('/admin/camps.rooms', App\Http\Controllers\Admin\CampRoomController::class, ['as' => 'admin'])->shallow()->except(['index', 'show'])->middleware('role:admin');
+    Route::get('/admin/camp-reviews', [App\Http\Controllers\Admin\CampReviewController::class, 'index'])->name('admin.camp-reviews.index')->middleware('role:admin');
+    Route::delete('/admin/camp-reviews/{camp_review}', [App\Http\Controllers\Admin\CampReviewController::class, 'destroy'])->name('admin.camp-reviews.destroy')->middleware('role:admin');
     Route::get('/admin/free-test-certificates', [App\Http\Controllers\Admin\FreeTestCertificateController::class, 'index'])->name('admin.free-tests.certificates.index')->middleware('role:admin');
     Route::put('/admin/free-test-certificates/{id}', [App\Http\Controllers\Admin\FreeTestCertificateController::class, 'update'])->name('admin.free-tests.certificates.update')->middleware('role:admin');
+    Route::get('/admin/free-test-certificates/{id}/preview/{resultId?}', [App\Http\Controllers\Admin\FreeTestCertificateController::class, 'preview'])->name('admin.free-tests.certificates.preview')->middleware('role:admin');
+    Route::get('/admin/free-test-certificates/{id}/background', [App\Http\Controllers\Admin\FreeTestCertificateController::class, 'backgroundImage'])->name('admin.free-tests.certificates.background')->middleware('role:admin');
     
     // System Settings
     Route::get('/admin/settings', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('admin.settings.index')->middleware('role:admin');
     Route::post('/admin/settings', [App\Http\Controllers\Admin\SettingController::class, 'update'])->name('admin.settings.update')->middleware('role:admin');
+
+    // Admin WAHA Management
+    Route::prefix('admin/whatsapp-management')->name('admin.waha.')->middleware('role:admin')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\WahaManagementController::class, 'index'])->name('index');
+        Route::get('/status', [App\Http\Controllers\Admin\WahaManagementController::class, 'status'])->name('status');
+        Route::post('/start', [App\Http\Controllers\Admin\WahaManagementController::class, 'start'])->name('start');
+        Route::post('/stop', [App\Http\Controllers\Admin\WahaManagementController::class, 'stop'])->name('stop');
+        Route::post('/logout', [App\Http\Controllers\Admin\WahaManagementController::class, 'logout'])->name('logout');
+        Route::post('/update-session', [App\Http\Controllers\Admin\WahaManagementController::class, 'updateSessionName'])->name('update-session');
+        Route::post('/update-api', [App\Http\Controllers\Admin\WahaManagementController::class, 'updateApiConfig'])->name('update-api');
+    });
+
+    // Admin Pricing Management
+    Route::prefix('admin/pricing')->name('admin.pricing.')->middleware('role:admin')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\PricingController::class, 'index'])->name('index');
+        Route::patch('/mock-test', [App\Http\Controllers\Admin\PricingController::class, 'updateMockTest'])->name('mock-test.update');
+        Route::patch('/mock-test/{program}', [App\Http\Controllers\Admin\PricingController::class, 'updateSingleProgram'])->name('mock-test.update-single');
+        Route::patch('/online-test', [App\Http\Controllers\Admin\PricingController::class, 'updateOnlineTest'])->name('online-test.update');
+    });
 
     // Admin Scholarship Management
     Route::resource('admin/scholarships', App\Http\Controllers\Admin\ScholarshipController::class)->names('admin.scholarships')->middleware('role:admin');
@@ -1053,16 +1424,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/email-logs', [App\Http\Controllers\Admin\EmailLogController::class, 'index'])->name('admin.email-logs.index')->middleware('role:admin');
     Route::get('/admin/email-logs/{emailLog}', [App\Http\Controllers\Admin\EmailLogController::class, 'show'])->name('admin.email-logs.show')->middleware('role:admin');
 
-    // Admin Enrollment Requests
-    Route::get('/admin/enrollment-requests', [App\Http\Controllers\Admin\EnrollmentRequestController::class, 'index'])->name('admin.enrollment-requests.index')->middleware('role:admin');
-    Route::post('/admin/enrollment-requests/{enrollmentRequest}/approve', [App\Http\Controllers\Admin\EnrollmentRequestController::class, 'approve'])->name('admin.enrollment-requests.approve')->middleware('role:admin');
-    Route::post('/admin/enrollment-requests/{enrollmentRequest}/reject', [App\Http\Controllers\Admin\EnrollmentRequestController::class, 'reject'])->name('admin.enrollment-requests.reject')->middleware('role:admin');
 });
 
 // Public Registration Form
 Route::get('/daftar', [App\Http\Controllers\RegistrationController::class, 'show'])->name('registration.show');
-Route::post('/daftar', [App\Http\Controllers\RegistrationController::class, 'store'])->name('registration.store');
+Route::post('/daftar', [App\Http\Controllers\RegistrationController::class, 'store'])->name('registration.store')->middleware('throttle:5,10');
 Route::get('/daftar/success', [App\Http\Controllers\RegistrationController::class, 'success'])->name('registration.success');
+Route::post('/api/verify-referral', [App\Http\Controllers\ReferralController::class, 'verify'])->name('api.verify-referral');
 
 // Landing Page Class Registration Lead (saves to RegistrationLead + redirects to student register)
 Route::post('/daftar-kelas', [App\Http\Controllers\PublicRegistrationLeadController::class, 'store'])->name('class-lead.store');
@@ -1073,6 +1441,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/inbox', [App\Http\Controllers\InboxController::class, 'index'])->name('inbox.index');
     Route::post('/inbox', [App\Http\Controllers\InboxController::class, 'store'])->name('inbox.store');
     Route::post('/inbox/{id}/read', [App\Http\Controllers\InboxController::class, 'markAsRead'])->name('inbox.read');
+
+    // In-App Chat Widget API
+    Route::prefix('api/chat')->name('chat.')->group(function () {
+        Route::get('/messages',       [App\Http\Controllers\ChatWidgetController::class, 'messages'])->name('messages');
+        Route::post('/send',          [App\Http\Controllers\ChatWidgetController::class, 'send'])->name('send');
+        Route::post('/reply',         [App\Http\Controllers\ChatWidgetController::class, 'reply'])->name('reply');
+        Route::post('/mark-read',     [App\Http\Controllers\ChatWidgetController::class, 'markRead'])->name('markRead');
+        Route::get('/conversations',  [App\Http\Controllers\ChatWidgetController::class, 'conversations'])->name('conversations');
+        Route::get('/search',         [App\Http\Controllers\ChatWidgetController::class, 'search'])->name('search');
+        Route::get('/unread-count',   [App\Http\Controllers\ChatWidgetController::class, 'unreadCount'])->name('unreadCount');
+    });
 });
 
 // OTP Routes for Registration
@@ -1082,3 +1461,27 @@ Route::post('/otp/verify', [App\Http\Controllers\Auth\OtpController::class, 'ver
 require __DIR__.'/auth.php';
 
 Route::post('admin/scholarships/bulk-publish', [App\Http\Controllers\Admin\ScholarshipController::class, 'bulkPublish'])->name('admin.scholarships.bulk-publish')->middleware('role:admin');
+
+// ======================================================
+// Social Media Management Routes
+// ======================================================
+Route::middleware(['auth', config('jetstream.auth_session'), 'verified', 'role:admin'])->prefix('admin/social-media')->name('admin.social-media.')->group(function () {
+    // All Programs Overview
+    Route::get('/', [App\Http\Controllers\SocialMediaManagementController::class, 'allPrograms'])->name('all');
+    Route::get('/export-csv', [App\Http\Controllers\SocialMediaManagementController::class, 'exportCsv'])->defaults('program', 'all')->name('export-all');
+
+    // Per-Program Routes
+    Route::prefix('{program}')->group(function () {
+        Route::get('/',              [App\Http\Controllers\SocialMediaManagementController::class, 'index'])->name('index');
+        Route::post('/',             [App\Http\Controllers\SocialMediaManagementController::class, 'store'])->name('store');
+        Route::get('/export-csv',    [App\Http\Controllers\SocialMediaManagementController::class, 'exportCsv'])->name('export');
+        Route::get('/{id}',          [App\Http\Controllers\SocialMediaManagementController::class, 'show'])->name('show');
+        Route::put('/{id}',          [App\Http\Controllers\SocialMediaManagementController::class, 'update'])->name('update');
+        Route::delete('/{id}',       [App\Http\Controllers\SocialMediaManagementController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/duplicate',      [App\Http\Controllers\SocialMediaManagementController::class, 'duplicate'])->name('duplicate');
+        Route::post('/{id}/mark-published', [App\Http\Controllers\SocialMediaManagementController::class, 'markPublished'])->name('mark-published');
+        Route::post('/{id}/archive',        [App\Http\Controllers\SocialMediaManagementController::class, 'archive'])->name('archive');
+        Route::post('/{id}/checklist',      [App\Http\Controllers\SocialMediaManagementController::class, 'updateChecklist'])->name('checklist');
+        Route::post('/{id}/stats',          [App\Http\Controllers\SocialMediaManagementController::class, 'updateStats'])->name('stats');
+    });
+});

@@ -33,17 +33,21 @@ class ResolveIeltsWritingNavigation
 
     public function determineBackUrl(int $task, IeltsWritingMeeting $meeting): string
     {
-        $backUrl = route('assignments.ielts-academic.writing.index', ['task' => $task]);
-
         if ($meeting->category === 'practice' && (int) $meeting->task_type === 2) {
-            $backUrl = route('assignments.ielts-academic.writing.practice.index', [
+            return route('assignments.ielts-academic.writing.practice.index', [
                 'task' => 2,
                 'type' => $meeting->view_type,
             ]);
         }
 
         if ($meeting->category === 'practice_item') {
-            $backUrl = $this->appendPracticeItemType($backUrl, $meeting->meeting_number);
+            $practiceType = $this->practiceItemType($meeting->meeting_number);
+            if ($practiceType !== null) {
+                return route('assignments.ielts-academic.writing.practice.index', [
+                    'task' => $task,
+                    'type' => $practiceType,
+                ]);
+            }
 
             $parent = $this->resolvePracticeItemParent($meeting->meeting_number);
             if ($parent) {
@@ -51,7 +55,7 @@ class ResolveIeltsWritingNavigation
             }
         }
 
-        return $backUrl;
+        return route('assignments.ielts-academic.writing.index', ['task' => $task]);
     }
 
     public function practiceSelectionRange(int $meetingNumber): array
@@ -95,7 +99,7 @@ class ResolveIeltsWritingNavigation
         };
     }
 
-    private function practiceRanges(): array
+    public function practiceRanges(): array
     {
         return [
             'line' => [1010, 1029],
@@ -108,21 +112,21 @@ class ResolveIeltsWritingNavigation
         ];
     }
 
-    private function appendPracticeItemType(string $backUrl, int $meetingNumber): string
+    public function practiceItemType(int $meetingNumber): ?string
     {
         return match (true) {
-            $meetingNumber >= 1010 && $meetingNumber <= 1029 => $backUrl . '?type=line',
-            $meetingNumber >= 1030 && $meetingNumber <= 1049 => $backUrl . '?type=bar',
-            $meetingNumber >= 1050 && $meetingNumber <= 1069 => $backUrl . '?type=pie',
-            $meetingNumber >= 1070 && $meetingNumber <= 1089 => $backUrl . '?type=table',
-            $meetingNumber >= 1090 && $meetingNumber <= 1109 => $backUrl . '?type=mixed',
-            $meetingNumber >= 1110 && $meetingNumber <= 1129 => $backUrl . '?type=flowchart',
-            $meetingNumber >= 1130 && $meetingNumber <= 1149 => $backUrl . '?type=mapping',
-            default => $backUrl,
+            $meetingNumber >= 1010 && $meetingNumber <= 1029 => 'line',
+            $meetingNumber >= 1030 && $meetingNumber <= 1049 => 'bar',
+            $meetingNumber >= 1050 && $meetingNumber <= 1069 => 'pie',
+            $meetingNumber >= 1070 && $meetingNumber <= 1089 => 'table',
+            $meetingNumber >= 1090 && $meetingNumber <= 1109 => 'mixed',
+            $meetingNumber >= 1110 && $meetingNumber <= 1129 => 'flowchart',
+            $meetingNumber >= 1130 && $meetingNumber <= 1149 => 'mapping',
+            default => null,
         };
     }
 
-    private function resolvePracticeItemParent(int $meetingNumber): mixed
+    public function resolvePracticeItemParent(int $meetingNumber): mixed
     {
         $parentNumber = match (true) {
             $meetingNumber >= 101 && $meetingNumber <= 105 => 100,

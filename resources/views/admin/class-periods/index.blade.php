@@ -31,10 +31,14 @@
         <form method="GET" action="{{ route('class-periods.index') }}" class="flex gap-4 mb-6">
                  <select name="program_id" onchange="this.form.submit()" class="rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 shadow-sm">
                     <option value="">All Programs</option>
-                    @foreach (\App\Models\Program::whereNot('slug', 'like', 'cambridge-%')->whereNot('slug', 'like', 'toefl-itp-mock-package-%')->get() as $program)
-                        <option value="{{ $program->id }}" {{ request('program_id') == $program->id ? 'selected' : '' }}>
-                            {{ $program->name }}
-                        </option>
+                    @foreach (\App\Models\Program::whereNot('slug', 'like', 'cambridge-%')->whereNot('slug', 'like', 'toefl-itp-mock-package-%')->get()->groupBy('category') as $category => $categoryPrograms)
+                        <optgroup label="{{ $category }}">
+                            @foreach($categoryPrograms as $program)
+                                <option value="{{ $program->id }}" {{ request('program_id') == $program->id ? 'selected' : '' }}>
+                                    {{ $program->name }}
+                                </option>
+                            @endforeach
+                        </optgroup>
                     @endforeach
                 </select>
                 <select name="status" onchange="this.form.submit()" class="rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 shadow-sm">
@@ -161,8 +165,12 @@
                             @change="fetchBatchNumber($event.target.value)"
                             class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full" required>
                         <option value="">-- Select Program --</option>
-                        @foreach (\App\Models\Program::whereNot('slug', 'like', 'cambridge-%')->whereNot('slug', 'like', 'toefl-itp-mock-package-%')->get() as $program)
-                            <option value="{{ $program->id }}">{{ $program->name }}</option>
+                        @foreach (\App\Models\Program::whereNot('slug', 'like', 'cambridge-%')->whereNot('slug', 'like', 'toefl-itp-mock-package-%')->get()->groupBy('category') as $category => $categoryPrograms)
+                            <optgroup label="{{ $category }}">
+                                @foreach($categoryPrograms as $program)
+                                    <option value="{{ $program->id }}">{{ $program->name }}</option>
+                                @endforeach
+                            </optgroup>
                         @endforeach
                     </select>
                     <p class="text-xs text-gray-500 mt-1">Pilih program untuk batch ini.</p>

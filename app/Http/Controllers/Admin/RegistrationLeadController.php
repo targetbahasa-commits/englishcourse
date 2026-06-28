@@ -54,16 +54,13 @@ class RegistrationLeadController extends Controller
 
     public function export(Request $request)
     {
-        $query = RegistrationLead::with(['program', 'classPeriod', 'convertedUser'])->latest('id');
-        $this->applyIndexFilters($query, $request);
-
-        $rows = $query->get();
+        $rows = $this->manageRegistrationLeads->exportLeads($request->query());
         $filename = 'registration_leads_' . Carbon::now()->format('Ymd_His') . '.csv';
 
         $preset = (string) $request->query('export_preset', 'registration_leads_filtered');
         $this->logExportAction($preset, [
             'filters' => $request->query(),
-            'rows' => $rows->count(),
+            'rows' => count($rows),
         ]);
 
         return response()->streamDownload(function () use ($rows) {
@@ -127,28 +124,7 @@ class RegistrationLeadController extends Controller
 
     public function show(RegistrationLead $registrationLead)
     {
-        $programs = Program::where('is_active', true)->orderBy('name')->get(['id', 'name']);
-        $classPeriods = ClassPeriod::with('program:id,name')
-            ->whereIn('status', ['active', 'upcoming'])
-            ->orderBy('start_date')
-            ->get(['id', 'name', 'program_id', 'start_date', 'learning_mode']);
-
-        $lead = $registrationLead->load(['program', 'classPeriod.program', 'convertedUser']);
-
-        // Load related payment & enrollment when this lead has been converted
-        $relatedPayment = null;
-        $relatedEnrollment = null;
-        if ($lead->converted_user_id && $lead->program_id) {
-            $relatedPayment = \App\Models\Payment::where('user_id', $lead->converted_user_id)
-                ->where('program_id', $lead->program_id)
-                ->with('program')
-                ->latest()
-                ->first();
-            $relatedEnrollment = \App\Models\Enrollment::where('user_id', $lead->converted_user_id)
-                ->where('program_id', $lead->program_id)
-                ->with('classPeriod')
-                ->first();
-        }
+        ['lead' => $lead, 'programs' => $programs, 'classPeriods' => $classPeriods, 'relatedPayment' => $relatedPayment, 'relatedEnrollment' => $relatedEnrollment] = $this->manageRegistrationLeads->getLeadDetails($registrationLead);
 
         return view('admin.registration-leads.show', [
             'lead'              => $lead,
@@ -164,7 +140,7 @@ class RegistrationLeadController extends Controller
         $validated = $request->validated();
 
         if (!empty($validated['class_period_id'])) {
-            $selectedPeriod = ClassPeriod::find($validated['class_period_id']);
+            $selectedPeriod = $this->manageRegistrationLeads->findClassPeriod((int) $validated['class_period_id']);
 
             if (!$selectedPeriod || !in_array($selectedPeriod->status, ['active', 'upcoming'], true)) {
                 return back()->withErrors(['class_period_id' => 'Batch kelas tidak tersedia.'])->withInput();
@@ -205,7 +181,7 @@ class RegistrationLeadController extends Controller
         }
 
         $email = trim((string) $registrationLead->email);
-        if ($email !== '' && User::where('email', $email)->exists()) {
+        if ($email !== '' && $this->manageRegistrationLeads->isEmailTaken($email)) {
             return back()->with('error', 'Email sudah dipakai user lain. Silakan ubah email lead terlebih dahulu.');
         }
         

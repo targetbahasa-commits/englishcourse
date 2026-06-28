@@ -27,7 +27,29 @@ class ReferralController extends Controller
             'socialSubmissions' => $socialSubmissions,
         ] = $this->manageAdminReferrals->index();
 
-        return view('admin.referrals.index', compact('claims', 'rewards', 'socialSubmissions'));
+        // Build payment map for claim users: user_id => latest payment
+        $claimUserIds = $claims->pluck('user_id')->unique()->filter();
+        $paymentMap = \App\Models\Payment::whereIn('user_id', $claimUserIds)
+            ->orderByDesc('created_at')
+            ->get()
+            ->groupBy('user_id')
+            ->map(fn($g) => $g->first());
+
+        // Build registration lead map for claim users: user_id => lead
+        $leadMap = \App\Models\RegistrationLead::whereIn('converted_user_id', $claimUserIds)
+            ->whereNotNull('converted_user_id')
+            ->get()
+            ->keyBy('converted_user_id');
+
+        // Build enrollment map for social submission users
+        $socialUserIds = $socialSubmissions->pluck('user_id')->unique()->filter();
+        $enrollmentMap = \App\Models\Enrollment::with('program')
+            ->whereIn('user_id', $socialUserIds)
+            ->where('status', 'active')
+            ->get()
+            ->keyBy('user_id');
+
+        return view('admin.referrals.index', compact('claims', 'rewards', 'socialSubmissions', 'paymentMap', 'leadMap', 'enrollmentMap'));
     }
 
     /**

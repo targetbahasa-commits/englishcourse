@@ -56,6 +56,21 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">{{ $claim->user->name ?? 'Unknown' }}</div>
                                 <div class="text-xs text-gray-500">{{ $claim->user->email ?? '' }}</div>
+                                <div class="mt-1 flex flex-wrap gap-1">
+                                    @php
+                                        $claimLead = $leadMap[$claim->user_id] ?? null;
+                                        $claimPayment = $paymentMap[$claim->user_id] ?? null;
+                                    @endphp
+                                    @if($claimLead)
+                                        <a href="{{ route('admin.registration-leads.show', $claimLead) }}" class="text-[10px] text-indigo-600 hover:underline">📋 Lead</a>
+                                    @endif
+                                    @if($claimPayment)
+                                        <a href="{{ route('admin.payments.index', ['q' => $claimPayment->invoice_number]) }}" class="text-[10px] text-blue-600 hover:underline">💳 Payment</a>
+                                    @endif
+                                    @if($claim->user?->email)
+                                        <a href="{{ route('admin.email-logs.index', ['search' => $claim->user->email]) }}" class="text-[10px] text-purple-600 hover:underline">✉️ Email</a>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                                 {{ $claim->reward->name ?? 'Reward Dihapus' }}
@@ -123,6 +138,14 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">{{ $submission->user->name ?? 'Unknown' }}</div>
                                 <div class="text-xs text-gray-500">{{ $submission->user->email ?? '' }}</div>
+                                @php
+                                    $subEnrollment = $enrollmentMap[$submission->user_id] ?? null;
+                                @endphp
+                                @if($subEnrollment)
+                                    <div class="mt-1 text-[10px] text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded inline-block">
+                                        🎓 {{ $subEnrollment->program->name ?? 'Enrolled' }}
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-900">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize bg-purple-100 text-purple-800 mb-1">

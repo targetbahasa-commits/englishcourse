@@ -10,13 +10,23 @@ class BuildGrammarWritingIndexData
         private readonly GrammarWritingRepository $repository
     ) {}
 
-    public function handle(mixed $user): array
+    public function handle(mixed $user, string $programSlug = 'fast-track-grammar-for-writing'): array
     {
-        $program = $this->repository->findProgramBySlugWithMeetingsAndClassPeriods('grammar-for-writing');
+        $program = $this->repository->findProgramBySlugWithMeetingsAndClassPeriods($programSlug);
 
         $selectedClassPeriod = null;
-        if (!empty($program->period)) {
-            $selectedClassPeriod = $program->classPeriods->firstWhere('name', $program->period);
+        if ($user && $user->isStudent()) {
+            $enrollment = $user->enrollments()->where('program_id', $program->id)->whereHas('classPeriod')->first();
+            if ($enrollment) {
+                $selectedClassPeriod = $enrollment->classPeriod;
+            }
+        } elseif ($program->active_class_period_id) {
+            $selectedClassPeriod = $program->classPeriods->firstWhere('id', $program->active_class_period_id);
+        }
+
+        $classMeetings = collect();
+        if ($selectedClassPeriod) {
+            $classMeetings = $selectedClassPeriod->classMeetings()->whereIn('meeting_id', $program->meetings->pluck('id'))->get()->keyBy('meeting_id');
         }
 
         $periodMeetingStatus = collect();
@@ -25,12 +35,14 @@ class BuildGrammarWritingIndexData
                 ->pluck('class_period_meetings.is_open', 'meetings.id');
         }
 
-        $program->meetings->transform(function ($meeting) use ($user, $selectedClassPeriod, $periodMeetingStatus) {
+        $program->meetings->transform(function ($meeting) use ($user, $selectedClassPeriod, $periodMeetingStatus, $classMeetings) {
             if ($selectedClassPeriod) {
                 $meeting->is_locked = !((bool) ($periodMeetingStatus[$meeting->id] ?? false));
             } else {
                 $meeting->is_locked = $meeting->isLockedFor($user);
             }
+            
+            $meeting->classMeeting = $classMeetings->get($meeting->id);
 
             return $meeting;
         });
@@ -43,7 +55,7 @@ class BuildGrammarWritingIndexData
         ];
     }
 
-    private function meetingTopics(): array
+    public function meetingTopics(): array
     {
         return [
             1 => 'Pronoun',

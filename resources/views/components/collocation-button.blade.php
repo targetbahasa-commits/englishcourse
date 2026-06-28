@@ -56,8 +56,13 @@
             const response = await fetch(`/api/ollama/collocation?word=${encodeURIComponent(this.query.trim())}`);
             
             if (!response.ok) {
-                if (response.status === 500) throw new Error('AI Brain (Ollama) is offline or busy.');
-                throw new Error('Failed to fetch collocations.');
+                let errMessage = 'Failed to fetch collocations.';
+                try {
+                    const errData = await response.json();
+                    if (errData.error) errMessage = errData.error;
+                    if (errData.debug) errMessage += ' - ' + errData.debug;
+                } catch(e) {}
+                throw new Error(errMessage);
             }
 
             const data = await response.json();
@@ -162,7 +167,7 @@ class="fixed z-50"
                 <div x-show="error" class="text-center py-8">
                      <div class="text-red-500 text-lg font-bold mb-2">Connection Error</div>
                      <p class="text-gray-600" x-text="error"></p>
-                     <p class="text-xs text-gray-400 mt-2">Ensure Ollama is running: `ollama run llama3`</p>
+                     <p class="text-xs text-gray-400 mt-2">To fix this, check your Groq/Gemini API limits or turn on your Local Llama 3 (via LM Studio or Ollama).</p>
                 </div>
 
                 <!-- Content -->

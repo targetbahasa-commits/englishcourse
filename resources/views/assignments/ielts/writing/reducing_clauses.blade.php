@@ -36,7 +36,7 @@
                     <h2 class="text-lg font-bold text-indigo-900">Reference: Reducing Clauses</h2>
                 </div>
                 <div class="p-0 flex flex-col justify-center bg-gray-50">
-                    <img src="{{ asset('images/ielts_writing_task1_lesson7_reducing.png') }}" class="w-full h-auto shadow-sm" alt="Reducing Clauses Explanation">
+                    <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson7_reducing.png') }}" class="w-full h-auto shadow-sm" alt="Reducing Clauses Explanation">
                 </div>
             </div>
             

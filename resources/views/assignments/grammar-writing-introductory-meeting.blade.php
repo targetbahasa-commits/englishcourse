@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'SchoolHub') }} - {{ $trackTitle }} - Meeting {{ $meetingLabel ?? $meetingNumber }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -73,9 +75,18 @@
                                 <h3 class="text-xl sm:text-2xl font-bold text-gray-800">Soal Meeting {{ $meetingLabel ?? $meetingNumber }}</h3>
                                 <p class="text-gray-600 mt-1 text-sm sm:text-base">Terjemahkan dan isi jawaban untuk setiap soal di bawah ini.</p>
                             </div>
-                            <span class="inline-flex items-center justify-center rounded-full bg-orange-500 text-white text-xs font-bold px-3 py-1.5 w-fit">
-                                {{ count($questions) }} Soal
-                            </span>
+                            <div class="flex items-center gap-2">
+                                <span class="inline-flex items-center justify-center rounded-full bg-orange-500 text-white text-xs font-bold px-3 py-1.5 w-fit">
+                                    {{ count($questions) }} Soal
+                                </span>
+                                @if(Auth::user()->isAdmin() && (int) $meetingNumber === 1)
+                                    <button type="button"
+                                            onclick="openBulkIntroQuestionEditor({{ (int) $meetingNumber }})"
+                                            class="inline-flex items-center justify-center rounded-full bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold px-3 py-1.5 w-fit transition cursor-pointer">
+                                        Bulk Edit Soal
+                                    </button>
+                                @endif
+                            </div>
                         </div>
 
                         @if(($submitted ?? false) === true)
@@ -101,6 +112,40 @@
                     </div>
 
                     <div class="p-5 sm:p-8 space-y-4 sm:space-y-5">
+                        @if(!empty($cheatSheet))
+                            <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-5 rounded-xl mb-2">
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h3 class="font-bold mb-2 flex items-center">
+                                            <span class="bg-yellow-200 text-yellow-800 w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">1</span>
+                                            Identifikasi Tenses
+                                        </h3>
+                                        <p class="text-sm text-yellow-700">Lihat materi untuk mengetahui pola kalimat yang harus digunakan.</p>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold mb-2 flex items-center">
+                                            <span class="bg-yellow-200 text-yellow-800 w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">2</span>
+                                            Terjemahkan
+                                        </h3>
+                                        <p class="text-sm text-yellow-700">Tulis terjemahan bahasa Inggris yang sesuai dengan rumus tenses tersebut.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                @foreach($cheatSheet as $title => $rules)
+                                <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-100 text-sm">
+                                    <h4 class="font-bold text-yellow-800 mb-2">{{ $title }}</h4>
+                                    <ul class="space-y-1 text-gray-700">
+                                        @foreach($rules as $rule)
+                                        <li>{!! $rule !!}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                                @endforeach
+                            </div>
+                        @endif
+
                         @if(($submitted ?? false) === true)
                             <div class="mb-6">
                                 <h4 class="text-lg font-bold text-gray-800 mb-3">Laporan Hasil</h4>
@@ -658,9 +703,58 @@
         </div>
     </div>
 
+    <!-- Bulk Edit Modal -->
+    <div id="intro-bulk-editor-modal" class="fixed inset-0 z-[100] hidden" aria-hidden="true">
+        <div class="absolute inset-0 bg-black/50" onclick="closeBulkIntroQuestionEditor()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="w-full max-w-3xl rounded-2xl bg-white shadow-2xl border border-gray-200 overflow-hidden relative z-10 flex flex-col max-h-full">
+                <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
+                    <h3 class="text-lg font-bold text-gray-800" id="intro-bulk-editor-title">Bulk Edit Soal</h3>
+                    <button type="button" onclick="closeBulkIntroQuestionEditor()" class="text-gray-500 hover:text-gray-700 text-sm font-semibold">Tutup</button>
+                </div>
+                <form id="intro-bulk-question-form" method="POST" action="{{ route('admin.grammar.question.bulk-introductory') }}" class="flex flex-col overflow-hidden min-h-[400px]">
+                    @csrf
+                    <input type="hidden" name="meeting_number" id="intro-bulk-meeting-number" value="">
+                    <div class="p-5 flex-1 overflow-y-auto">
+                        <div class="mb-2">
+                            <label for="intro-bulk-editor-text" class="block text-sm font-semibold text-gray-700 mb-1">List Soal (1 baris per soal)</label>
+                            <p class="text-xs text-gray-500 mb-2">Paste semua kalimat di sini. Setiap baris baru (enter) akan dianggap sebagai soal baru. Kunci jawaban (jika sudah ada) tidak akan terhapus.</p>
+                            <textarea id="intro-bulk-editor-text" name="questions_text" rows="15" class="w-full h-full min-h-[300px] rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono whitespace-pre" required></textarea>
+                        </div>
+                    </div>
+                    <div class="px-5 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-end gap-2 shrink-0">
+                        <button type="button" onclick="closeBulkIntroQuestionEditor()" class="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 text-sm font-semibold hover:bg-gray-50">Batal</button>
+                        <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700">Simpan Bulk</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentIntroEditorPayload = null;
         let currentIntroParagraphPayload = null;
+
+        function openBulkIntroQuestionEditor(meetingNumber) {
+            document.getElementById('intro-bulk-meeting-number').value = meetingNumber;
+            // Pre-fill with existing questions if possible
+            const questionTexts = [];
+            document.querySelectorAll('.group p.text-gray-800.leading-relaxed').forEach(p => {
+                questionTexts.push(p.textContent.trim());
+            });
+            document.getElementById('intro-bulk-editor-text').value = questionTexts.join('\n');
+
+            const modal = document.getElementById('intro-bulk-editor-modal');
+            modal.classList.remove('hidden');
+            modal.setAttribute('aria-hidden', 'false');
+            setTimeout(() => document.getElementById('intro-bulk-editor-text').focus(), 0);
+        }
+
+        function closeBulkIntroQuestionEditor() {
+            const modal = document.getElementById('intro-bulk-editor-modal');
+            modal.classList.add('hidden');
+            modal.setAttribute('aria-hidden', 'true');
+        }
 
         function openIntroQuestionEditor(payload) {
             currentIntroEditorPayload = payload;
@@ -828,7 +922,11 @@
     </script>
 
     <x-irregular-verbs-button />
+    <x-dictionary-button />
 
+    @if((int) ($meetingNumber ?? 0) === 10)
+        <x-pronouns-button />
+    @endif
     @include('components.student-broadcaster')
 </body>
 </html>

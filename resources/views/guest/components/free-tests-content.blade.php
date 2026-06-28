@@ -65,197 +65,218 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
-        <!-- IELTS Academic -->
-        <div class="group relative bg-white rounded-[2rem] shadow-lg hover:shadow-2xl transition-all duration-500 ease-out p-8 flex flex-col h-full overflow-hidden border border-gray-100 hover:border-blue-300 hover:-translate-y-2">
-            <!-- Background Icon Watermark -->
-            <svg class="absolute -right-6 -bottom-6 w-32 h-32 text-gray-100 opacity-50 transform rotate-12 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 ease-out pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+    <!-- Test Cards Carousel -->
+    <div x-data="{ 
+        currentIndex: 0,
+        itemsPerView: 3,
+        init() {
+            const updateView = () => {
+                if (window.innerWidth < 768) this.itemsPerView = 1;
+                else if (window.innerWidth < 1024) this.itemsPerView = 2;
+                else this.itemsPerView = 3;
+            };
+            updateView();
+            window.addEventListener('resize', updateView);
+        },
+        canPrev() { return this.currentIndex > 0; },
+        canNext() { return this.currentIndex < 4 - this.itemsPerView; },
+        prev() { if (this.canPrev()) this.currentIndex--; },
+        next() { if (this.canNext()) this.currentIndex++; }
+    }" class="relative px-16">
+        
+        <!-- Left Arrow -->
+        <button @click="prev()" :disabled="!canPrev()" class="absolute -left-2 top-1/3 z-20 flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-lg border-2 border-gray-200 hover:border-blue-400 hover:shadow-xl transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed">
+            <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
 
-            <!-- Top Accent Line -->
-            <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-blue-400 to-blue-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
-
-            <!-- Header -->
-            <div class="relative z-10 flex items-start justify-between mb-6">
-                <div class="w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center border border-blue-100 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-inner">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
-                    </div>
-                </div>
-                <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wider border border-blue-200">
-                    Academic
-                </span>
-            </div>
-
-            <!-- Content -->
-            <h3 class="text-2xl font-bold text-gray-900 mb-3 relative z-10 group-hover:text-blue-600 transition-colors duration-300 tracking-tight">IELTS Academic</h3>
-            
-            <div class="flex-1 flex flex-col relative z-10">
-                <p class="text-gray-500 text-sm leading-relaxed mb-6 min-h-[40px]">Bagi yang ingin studi ke luar negeri.</p>
+        <!-- Carousel Container -->
+        <div class="overflow-hidden">
+            <div class="flex gap-8 transition-transform duration-500 ease-out" :style="`transform: translateX(-${currentIndex * (100 / itemsPerView)}%)`">
                 
-                <div class="space-y-3 mb-8">
-                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-blue-50 group-hover:border-blue-200 transition-colors duration-300">
-                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0 text-blue-600">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <!-- Card 1: IELTS Academic -->
+                <div class="flex-shrink-0" :style="`width: ${100 / itemsPerView}%`">
+                    <div class="group relative bg-white rounded-[2rem] shadow-lg hover:shadow-2xl transition-all duration-500 ease-out p-8 flex flex-col h-full overflow-hidden border border-gray-100 hover:border-blue-300 hover:-translate-y-2">
+                        <svg class="absolute -right-6 -bottom-6 w-32 h-32 text-gray-100 opacity-50 transform rotate-12 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 ease-out pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+                        <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-blue-400 to-blue-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
+                        
+                        <div class="relative z-10 flex items-start justify-between mb-6">
+                            <div class="w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center border border-blue-100 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-inner">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+                                </div>
+                            </div>
+                            <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wider border border-blue-200">Academic</span>
                         </div>
-                        <span class="text-sm font-semibold text-gray-700">15 Menit</span>
-                    </div>
-                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-blue-50 group-hover:border-blue-200 transition-colors duration-300">
-                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0 text-blue-600">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3 relative z-10 group-hover:text-blue-600 transition-colors duration-300 tracking-tight">IELTS Academic</h3>
+                        <div class="flex-1 flex flex-col relative z-10">
+                            <p class="text-gray-500 text-sm leading-relaxed mb-6">Bagi yang ingin studi ke luar negeri.</p>
+                            <div class="space-y-3 mb-8">
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-blue-50 group-hover:border-blue-200 transition-colors duration-300">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0 text-blue-600">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">15 Menit</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-blue-50 group-hover:border-blue-200 transition-colors duration-300">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0 text-blue-600">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">Reading & Listening</span>
+                                </div>
+                            </div>
+                            <div class="mt-auto relative">
+                                <a href="{{ route('guest.quick-access', 'ielts_academic') }}" class="flex items-center justify-center gap-2 w-full font-bold text-white bg-blue-600 hover:bg-blue-700 py-3.5 px-6 rounded-xl transition-colors duration-300 shadow-md">
+                                    <span>Start Free Test</span>
+                                    <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                                </a>
+                            </div>
                         </div>
-                        <span class="text-sm font-semibold text-gray-700">Reading & Listening</span>
                     </div>
                 </div>
 
-                <!-- Action Button -->
-                <div class="mt-auto relative">
-                    <a href="{{ route('guest.quick-access', 'ielts_academic') }}" class="flex items-center justify-center gap-2 w-full font-bold text-white bg-blue-600 hover:bg-blue-700 py-3.5 px-6 rounded-xl transition-colors duration-300 shadow-md">
-                        <span>Start Free Test</span>
-                        <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                    </a>
+                <!-- Card 2: IELTS General -->
+                <div class="flex-shrink-0" :style="`width: ${100 / itemsPerView}%`">
+                    <div class="group relative bg-white rounded-[2rem] shadow-lg hover:shadow-2xl transition-all duration-500 ease-out p-8 flex flex-col h-full overflow-hidden border border-gray-100 hover:border-emerald-300 hover:-translate-y-2">
+                        <svg class="absolute -right-6 -bottom-6 w-32 h-32 text-gray-100 opacity-50 transform rotate-12 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 ease-out pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
+                        
+                        <div class="relative z-10 flex items-start justify-between mb-6">
+                            <div class="w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center border border-emerald-100 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white shadow-inner">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                </div>
+                            </div>
+                            <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-bold uppercase tracking-wider border border-emerald-200">General</span>
+                        </div>
+                        
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3 relative z-10 group-hover:text-emerald-600 transition-colors duration-300 tracking-tight">IELTS General</h3>
+                        <div class="flex-1 flex flex-col relative z-10">
+                            <p class="text-gray-500 text-sm leading-relaxed mb-6">Untuk bekerja atau imigrasi.</p>
+                            <div class="space-y-3 mb-8">
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-emerald-50 group-hover:border-emerald-200 transition-colors duration-300">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0 text-emerald-600">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">15 Menit</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-emerald-50 group-hover:border-emerald-200 transition-colors duration-300">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0 text-emerald-600">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">Reading & Listening</span>
+                                </div>
+                            </div>
+                            <div class="mt-auto relative">
+                                <a href="{{ route('guest.quick-access', 'ielts_general') }}" class="flex items-center justify-center gap-2 w-full font-bold text-white bg-emerald-500 hover:bg-emerald-600 py-3.5 px-6 rounded-xl transition-colors duration-300 shadow-md">
+                                    <span>Start Free Test</span>
+                                    <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Card 3: TOEFL ITP -->
+                <div class="flex-shrink-0" :style="`width: ${100 / itemsPerView}%`">
+                    <div class="group relative bg-white rounded-[2rem] shadow-lg hover:shadow-2xl transition-all duration-500 ease-out p-8 flex flex-col h-full overflow-hidden border border-gray-100 hover:border-purple-300 hover:-translate-y-2">
+                        <svg class="absolute -right-6 -bottom-6 w-32 h-32 text-gray-100 opacity-50 transform rotate-12 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 ease-out pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-purple-400 to-purple-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
+                        
+                        <div class="relative z-10 flex items-start justify-between mb-6">
+                            <div class="w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center border border-purple-100 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white shadow-inner">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                </div>
+                            </div>
+                            <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-purple-50 text-purple-600 text-xs font-bold uppercase tracking-wider border border-purple-200">ITP</span>
+                        </div>
+                        
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3 relative z-10 group-hover:text-purple-600 transition-colors duration-300 tracking-tight">TOEFL ITP</h3>
+                        <div class="flex-1 flex flex-col relative z-10">
+                            <p class="text-gray-500 text-sm leading-relaxed mb-6">Model soal institusi lokal/beasiswa.</p>
+                            <div class="space-y-3 mb-8">
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-purple-50 group-hover:border-purple-200 transition-colors duration-300">
+                                    <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0 text-purple-600">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">20 Menit</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-purple-50 group-hover:border-purple-200 transition-colors duration-300">
+                                    <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0 text-purple-600">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">All Sections</span>
+                                </div>
+                            </div>
+                            <div class="mt-auto relative">
+                                <a href="{{ route('guest.quick-access', 'toefl_itp') }}" class="flex items-center justify-center gap-2 w-full font-bold text-white bg-purple-600 hover:bg-purple-700 py-3.5 px-6 rounded-xl transition-colors duration-300 shadow-md">
+                                    <span>Start Free Test</span>
+                                    <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: PTE Academic -->
+                <div class="flex-shrink-0" :style="`width: ${100 / itemsPerView}%`">
+                    <div class="group relative bg-white rounded-[2rem] shadow-lg hover:shadow-2xl transition-all duration-500 ease-out p-8 flex flex-col h-full overflow-hidden border border-gray-100 hover:border-orange-300 hover:-translate-y-2">
+                        <svg class="absolute -right-6 -bottom-6 w-32 h-32 text-gray-100 opacity-50 transform rotate-12 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 ease-out pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-orange-400 to-orange-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
+                        
+                        <div class="relative z-10 flex items-start justify-between mb-6">
+                            <div class="w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center border border-orange-100 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white shadow-inner">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                </div>
+                            </div>
+                            <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-bold uppercase tracking-wider border border-orange-200">Academic</span>
+                        </div>
+                        
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3 relative z-10 group-hover:text-orange-600 transition-colors duration-300 tracking-tight">PTE Academic</h3>
+                        <div class="flex-1 flex flex-col relative z-10">
+                            <p class="text-gray-500 text-sm leading-relaxed mb-6">Sistem tes integrated skills.</p>
+                            <div class="space-y-3 mb-8">
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-orange-50 group-hover:border-orange-200 transition-colors duration-300">
+                                    <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 text-orange-600">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">15 Menit</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-orange-50 group-hover:border-orange-200 transition-colors duration-300">
+                                    <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 text-orange-600">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-700">Computer Based</span>
+                                </div>
+                            </div>
+                            <div class="mt-auto relative">
+                                <a href="{{ route('guest.quick-access', 'pte_academic') }}" class="flex items-center justify-center gap-2 w-full font-bold text-white bg-orange-500 hover:bg-orange-600 py-3.5 px-6 rounded-xl transition-colors duration-300 shadow-md">
+                                    <span>Start Free Test</span>
+                                    <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
-        <!-- IELTS General -->
-        <div class="group relative bg-white rounded-[2rem] shadow-lg hover:shadow-2xl transition-all duration-500 ease-out p-8 flex flex-col h-full overflow-hidden border border-gray-100 hover:border-emerald-300 hover:-translate-y-2">
-            <svg class="absolute -right-6 -bottom-6 w-32 h-32 text-gray-100 opacity-50 transform rotate-12 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 ease-out pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-
-            <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
-
-            <div class="relative z-10 flex items-start justify-between mb-6">
-                <div class="w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center border border-emerald-100 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white shadow-inner">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                    </div>
-                </div>
-                <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-bold uppercase tracking-wider border border-emerald-200">
-                    General
-                </span>
-            </div>
-
-            <h3 class="text-2xl font-bold text-gray-900 mb-3 relative z-10 group-hover:text-emerald-600 transition-colors duration-300 tracking-tight">IELTS General</h3>
-            
-            <div class="flex-1 flex flex-col relative z-10">
-                <p class="text-gray-500 text-sm leading-relaxed mb-6 min-h-[40px]">Untuk bekerja atau imigrasi.</p>
-                
-                <div class="space-y-3 mb-8">
-                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-emerald-50 group-hover:border-emerald-200 transition-colors duration-300">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0 text-emerald-600">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                        <span class="text-sm font-semibold text-gray-700">15 Menit</span>
-                    </div>
-                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-emerald-50 group-hover:border-emerald-200 transition-colors duration-300">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0 text-emerald-600">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        </div>
-                        <span class="text-sm font-semibold text-gray-700">Reading & Listening</span>
-                    </div>
-                </div>
-
-                <div class="mt-auto relative">
-                    <a href="{{ route('guest.quick-access', 'ielts_general') }}" class="flex items-center justify-center gap-2 w-full font-bold text-white bg-emerald-500 hover:bg-emerald-600 py-3.5 px-6 rounded-xl transition-colors duration-300 shadow-md">
-                        <span>Start Free Test</span>
-                        <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- TOEFL ITP -->
-        <div class="group relative bg-white rounded-[2rem] shadow-lg hover:shadow-2xl transition-all duration-500 ease-out p-8 flex flex-col h-full overflow-hidden border border-gray-100 hover:border-purple-300 hover:-translate-y-2">
-            <svg class="absolute -right-6 -bottom-6 w-32 h-32 text-gray-100 opacity-50 transform rotate-12 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 ease-out pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-
-            <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-purple-400 to-purple-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
-
-            <div class="relative z-10 flex items-start justify-between mb-6">
-                <div class="w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center border border-purple-100 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white shadow-inner">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                    </div>
-                </div>
-                <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-purple-50 text-purple-600 text-xs font-bold uppercase tracking-wider border border-purple-200">
-                    ITP
-                </span>
-            </div>
-
-            <h3 class="text-2xl font-bold text-gray-900 mb-3 relative z-10 group-hover:text-purple-600 transition-colors duration-300 tracking-tight">TOEFL ITP</h3>
-            
-            <div class="flex-1 flex flex-col relative z-10">
-                <p class="text-gray-500 text-sm leading-relaxed mb-6 min-h-[40px]">Model soal institusi lokal/beasiswa.</p>
-                
-                <div class="space-y-3 mb-8">
-                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-purple-50 group-hover:border-purple-200 transition-colors duration-300">
-                        <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0 text-purple-600">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                        <span class="text-sm font-semibold text-gray-700">20 Menit</span>
-                    </div>
-                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-purple-50 group-hover:border-purple-200 transition-colors duration-300">
-                        <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0 text-purple-600">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        </div>
-                        <span class="text-sm font-semibold text-gray-700">All Sections</span>
-                    </div>
-                </div>
-
-                <div class="mt-auto relative">
-                    <a href="{{ route('guest.quick-access', 'toefl_itp') }}" class="flex items-center justify-center gap-2 w-full font-bold text-white bg-purple-600 hover:bg-purple-700 py-3.5 px-6 rounded-xl transition-colors duration-300 shadow-md">
-                        <span>Start Free Test</span>
-                        <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- PTE Academic -->
-        <div class="group relative bg-white rounded-[2rem] shadow-lg hover:shadow-2xl transition-all duration-500 ease-out p-8 flex flex-col h-full overflow-hidden border border-gray-100 hover:border-orange-300 hover:-translate-y-2">
-            <svg class="absolute -right-6 -bottom-6 w-32 h-32 text-gray-100 opacity-50 transform rotate-12 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 ease-out pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-
-            <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-orange-400 to-orange-600 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"></div>
-
-            <div class="relative z-10 flex items-start justify-between mb-6">
-                <div class="w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center border border-orange-100 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white shadow-inner">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                    </div>
-                </div>
-                <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-bold uppercase tracking-wider border border-orange-200">
-                    Academic
-                </span>
-            </div>
-
-            <h3 class="text-2xl font-bold text-gray-900 mb-3 relative z-10 group-hover:text-orange-600 transition-colors duration-300 tracking-tight">PTE Academic</h3>
-            
-            <div class="flex-1 flex flex-col relative z-10">
-                <p class="text-gray-500 text-sm leading-relaxed mb-6 min-h-[40px]">Sistem tes integrated skills.</p>
-                
-                <div class="space-y-3 mb-8">
-                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-orange-50 group-hover:border-orange-200 transition-colors duration-300">
-                        <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 text-orange-600">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                        <span class="text-sm font-semibold text-gray-700">15 Menit</span>
-                    </div>
-                    <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-orange-50 group-hover:border-orange-200 transition-colors duration-300">
-                        <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 text-orange-600">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        </div>
-                        <span class="text-sm font-semibold text-gray-700">Computer Based</span>
-                    </div>
-                </div>
-
-                <div class="mt-auto relative">
-                    <a href="{{ route('guest.quick-access', 'pte_academic') }}" class="flex items-center justify-center gap-2 w-full font-bold text-white bg-orange-500 hover:bg-orange-600 py-3.5 px-6 rounded-xl transition-colors duration-300 shadow-md">
-                        <span>Start Free Test</span>
-                        <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                    </a>
-                </div>
-            </div>
-        </div>
+        <!-- Right Arrow -->
+        <button @click="next()" :disabled="!canNext()" class="absolute -right-2 top-1/3 z-20 flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-lg border-2 border-gray-200 hover:border-blue-400 hover:shadow-xl transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed">
+            <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
     </div>
-</div>
+
+    <!-- Carousel Indicators -->
+    <div class="flex justify-center gap-2 mt-8">
+        <button @click="currentIndex = 0" :class="`h-2 rounded-full transition-all duration-300 ${currentIndex === 0 ? 'bg-blue-600 w-8' : 'bg-gray-300 w-2'}`"></button>
+        <button @click="currentIndex = Math.min(1, 4 - itemsPerView)" :class="`h-2 rounded-full transition-all duration-300 ${currentIndex === 1 && 1 <= 4 - itemsPerView ? 'bg-blue-600 w-8' : 'bg-gray-300 w-2'}`"></button>
+        <button @click="currentIndex = Math.min(2, 4 - itemsPerView)" :class="`h-2 rounded-full transition-all duration-300 ${currentIndex === 2 && 2 <= 4 - itemsPerView ? 'bg-blue-600 w-8' : 'bg-gray-300 w-2'}`"></button>
+        <button @click="currentIndex = Math.min(3, 4 - itemsPerView)" :class="`h-2 rounded-full transition-all duration-300 ${currentIndex === 3 && 3 <= 4 - itemsPerView ? 'bg-blue-600 w-8' : 'bg-gray-300 w-2'}`"></button>
+    </div>
 
 <!-- Why Take Our Free Test? -->
 <div class="mb-16">

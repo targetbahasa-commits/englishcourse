@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'SchoolHub') }} - Assignments</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
@@ -109,10 +111,21 @@
                         ];
                         $colors = $colorClasses[$program->color] ?? $colorClasses['blue'];
                         $programSlug = match ($program->slug) {
-                        'grammar-writing' => 'grammar-for-writing',
+                        'grammar-writing',
+                        'introductory-grammar-for-writing',
+                        'complexity-grammar-for-writing',
+                        'proficiency-grammar-for-writing',
+                        'fast-track-grammar-for-writing' => 'grammar-for-writing',
+                        'introductory-speaking',
+                        'intermediate-speaking',
+                        'advanced-speaking' => 'speaking',
                         'speaking' => 'speaking',
                         'grammar-for-speaking' => 'speaking',
-                        'ielts-academic-listening', 'ielts-academic-reading', 'ielts-academic-full-package' => 'ielts-academic',
+                        'ielts-academic-listening' => 'ielts-academic-listening',
+                        'ielts-academic-reading' => 'ielts-academic-reading',
+                        'ielts-academic-writing' => 'ielts-academic-writing',
+                        'ielts-academic-speaking' => 'ielts-academic-speaking',
+                        'ielts-academic-full-package' => 'ielts-academic-full-package',
                         default => $program->slug,
                         };
 
@@ -124,7 +137,15 @@
                         $routeName = route('assignments.speaking.classes');
                         } elseif ($programSlug === 'toefl-itp') {
                         $routeName = route('assignments.toefl-itp');
-                        } elseif ($programSlug === 'ielts-academic') {
+                        } elseif ($programSlug === 'ielts-academic-listening') {
+                        $routeName = route('assignments.ielts-academic.listening.index');
+                        } elseif ($programSlug === 'ielts-academic-reading') {
+                        $routeName = route('assignments.ielts-academic.reading.index');
+                        } elseif ($programSlug === 'ielts-academic-writing') {
+                        $routeName = route('assignments.ielts-academic.writing.index');
+                        } elseif ($programSlug === 'ielts-academic-speaking') {
+                        $routeName = route('assignments.ielts-academic.speaking.index');
+                        } elseif ($programSlug === 'ielts-academic-full-package') {
                         $routeName = route('assignments.ielts-academic');
                         } elseif ($programSlug === 'pte-academic') {
                         $routeName = route('assignments.pte-academic');
@@ -145,12 +166,7 @@
                             $lockedCardClasses = "group relative bg-white/95 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-2 border-gray-200";
                         @endphp
 
-                        {{-- Locked cards use <div> to avoid nested <a> tags (invalid HTML) --}}
-                        @if($isLocked)
-                        <div class="{{ $lockedCardClasses }}">
-                        @else
-                        <a href="{{ $cardRoute }}" class="{{ $cardClasses }}">
-                        @endif
+                        <div class="{{ $isLocked ? $lockedCardClasses : $cardClasses }}">
                             <!-- Gradient Header -->
                             <div class="h-32 bg-gradient-to-br {{ $colors['gradient'] }} relative overflow-hidden">
                                 <div class="absolute inset-0 bg-black {{ $isLocked ? 'opacity-20' : 'opacity-0 group-hover:opacity-10' }} transition-opacity duration-300"></div>
@@ -190,22 +206,18 @@
                                     </a>
                                 @else
                                     <!-- Start Learning Button -->
-                                    <div class="w-full text-center {{ $colors['bg'] . ' ' . $colors['hover'] }} text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+                                    <a href="{{ $cardRoute }}" class="block w-full text-center {{ $colors['bg'] . ' ' . $colors['hover'] }} text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
                                         Start Learning
                                         <svg class="w-4 h-4 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                         </svg>
-                                    </div>
+                                    </a>
                                 @endif
                             </div>
 
                             <!-- Decorative Element -->
                             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br {{ $colors['gradient'] }} opacity-5 rounded-full -mr-16 -mt-16 group-hover:opacity-10 transition-opacity duration-300"></div>
-                        @if($isLocked)
                         </div>
-                        @else
-                        </a>
-                        @endif
                         @endforeach
 
 
@@ -214,6 +226,7 @@
         </main>
     </div>
 
+    @include('components.meetings-calendar-modal')
     @include('components.student-broadcaster')
 </body>
 

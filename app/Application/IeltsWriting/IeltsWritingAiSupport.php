@@ -3,6 +3,9 @@
 namespace App\Application\IeltsWriting;
 
 use App\Domain\IeltsWriting\Contracts\IeltsWritingAiHttpClient;
+use App\Services\GroqKeyManager;
+use App\Services\LlmServerManager;
+use Illuminate\Support\Facades\Http;
 
 class IeltsWritingAiSupport
 {
@@ -11,46 +14,87 @@ class IeltsWritingAiSupport
     ) {
     }
 
-    public function request(string $prompt, bool $jsonMode = true, int $timeout = 300, int $maxTokens = 4096): array
+    public function request(string $prompt, bool $jsonMode = true, int $timeout = 300, int $maxTokens = 4096, ?int $taskType = null, ?string $category = null): array
     {
-        $ports = [1234, 11434];
+        $messages = [
+            ['role' => 'system', 'content' => $jsonMode ? 'Output ONLY valid JSON.' : 'You are a helpful assistant.'],
+            ['role' => 'user', 'content' => $prompt]
+        ];
 
-        foreach ($ports as $port) {
+        $payload = [
+            'messages' => $messages,
+            'temperature' => 0.3,
+            'max_tokens' => $maxTokens,
+            'stream' => false,
+        ];
+        if ($jsonMode) {
+            $payload['response_format'] = ['type' => 'json_object'];
+        }
+
+        // Routing Logic: SambaNova FIRST for everything
+        $sambaModel = 'Meta-Llama-3.3-70B-Instruct';
+        if ($taskType === 1 && $category === 'task_achievement') {
+            $sambaModel = 'DeepSeek-V3.1'; // Using latest available
+        }
+        $payload['model'] = $sambaModel;
+        
+        $sambaKeys = \App\Services\AiProviderKeyManager::getKeys('sambanova');
+        $sambaSuccess = false;
+        
+        foreach ($sambaKeys as $sambaIndex => $sambaKey) {
             try {
-                $url = "http://127.0.0.1:{$port}/v1/chat/completions";
-                $modelName = $port === 1234 ? 'local-model' : 'llama3';
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $sambaKey,
+                ])->timeout($timeout)->post("https://api.sambanova.ai/v1/chat/completions", $payload);
 
-                $payload = [
-                    'model' => $modelName,
-                    'messages' => [
-                        ['role' => 'system', 'content' => $jsonMode ? 'Output ONLY valid JSON.' : 'You are a helpful assistant.'],
-                        ['role' => 'user', 'content' => $prompt],
-                    ],
-                    'max_tokens' => $maxTokens,
-                    'temperature' => 0.3,
-                    'stream' => false,
-                ];
-
-                $data = $this->httpClient->postJson($url, $payload, $timeout);
-
-                if (!is_array($data)) {
-                    continue;
+                if ($response->successful() && isset($response->json()['choices'][0]['message']['content'])) {
+                    return [
+                        'content' => $response->json()['choices'][0]['message']['content'],
+                        'source' => 'SambaNova (' . $sambaModel . ') [key ' . \App\Services\GroqKeyManager::maskKey($sambaKey) . ']'
+                    ];
                 }
+                \Log::warning("SambaNova key #{$sambaIndex} failed, attempting next...", ['status' => $response->status()]);
+            } catch (\Exception $e) {
+                \Log::warning("SambaNova key #{$sambaIndex} exception, attempting next...", ['error' => $e->getMessage()]);
+            }
+        }
+        \Log::warning("All SambaNova keys failed, attempting fallback...");
 
-                if (!isset($data['choices'][0]['message']['content'])) {
-                    continue;
+        try {
+            // TRY GROQ SECOND (with sequential fallback across all writing keys)
+            $payload['model'] = 'llama-3.3-70b-versatile';
+            $result = GroqKeyManager::callWithFallback('writing', $payload, $timeout);
+            return [
+                'content' => $result['body']['choices'][0]['message']['content'],
+                'source'  => 'Groq (Llama 3.3) [key ' . $result['key_used'] . ']',
+            ];
+        } catch (\Exception $e) {
+            \Log::warning("Groq (all writing keys) failed, attempting Gemini API...", ['error' => $e->getMessage()]);
+        }
+
+        // FALLBACK TO GEMINI
+        $payload['model'] = 'gemini-2.5-flash';
+        $geminiKeys = \App\Services\AiProviderKeyManager::getKeys('gemini');
+        
+        foreach ($geminiKeys as $geminiIndex => $geminiKey) {
+            try {
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $geminiKey,
+                ])->timeout($timeout)->post("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", $payload);
+
+                if ($response->successful() && isset($response->json()['choices'][0]['message']['content'])) {
+                    return [
+                        'content' => $response->json()['choices'][0]['message']['content'],
+                        'source' => 'Gemini API [key ' . \App\Services\GroqKeyManager::maskKey($geminiKey) . ']'
+                    ];
                 }
-
-                return [
-                    'content' => $data['choices'][0]['message']['content'],
-                    'source' => $port === 1234 ? 'LM Studio' : 'Ollama',
-                ];
-            } catch (\Exception) {
-                continue;
+                \Log::error("Gemini fallback key #{$geminiIndex} failed", ['status' => $response->status()]);
+            } catch (\Exception $e) {
+                \Log::error("Gemini exception during fallback key #{$geminiIndex}: " . $e->getMessage());
             }
         }
 
-        throw new \Exception('No Local AI reachable on ports 1234 or 11434');
+        throw new \Exception('All AI services failed (Groq and Gemini)');
     }
 
     public function runJsonPrompt(
@@ -59,8 +103,10 @@ class IeltsWritingAiSupport
         int $maxTokens = 4096,
         bool $sanitize = false,
         bool $useRobustDecoder = true,
+        ?int $taskType = null,
+        ?string $category = null,
     ): ?array {
-        $result = $this->request($prompt, true, $timeout, $maxTokens);
+        $result = $this->request($prompt, true, $timeout, $maxTokens, $taskType, $category);
 
         return $this->decodeJson($result['content'] ?? '', $sanitize, $useRobustDecoder);
     }
@@ -135,7 +181,7 @@ class IeltsWritingAiSupport
         $json = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $json) ?? $json;
 
         $json = preg_replace_callback(
-            '/"(?:[^"\\]|\\.)*"/s',
+            '/"[^"\\\\]*(?:\\\\.[^"\\\\]*)*"/s',
             static function ($matches) {
                 return str_replace(["\r\n", "\n", "\r", "\t"], ['\\n', '\\n', '\\r', '\\t'], $matches[0]);
             },

@@ -78,6 +78,10 @@ class BuildIeltsWritingAiPrompt
            - **Overall**: Summarize performance. If Band 6+, be positive but point out the gap to Band 7.
            - The 'feedback' content MUST be in Indonesian.
            - **CRITICAL**: The feedback for EACH category MUST be concise, bulleted, and direct (max 3 bullet points).
+           - For 'grammar_improvements', identify AS MANY specific grammatical errors or weak sentences from the essay AS POSSIBLE (maximum 20). Provide the original text, the corrected version, and a brief explanation in Indonesian.
+           - For 'cohesive_devices_used', list the linking words and cohesive devices that the candidate ACTUALLY used in the essay. Evaluate if they are overused or used correctly (in Indonesian).
+           - For 'good_vocabulary_used', list up to 5 advanced or topic-specific words/collocations the candidate ACTUALLY used in the essay, along with their meaning in Indonesian.
+           - For 'vocabulary_improvements', list 3 basic or repetitive words used by the candidate and suggest Band 7-9 alternatives, with an explanation in Indonesian.
            - For 'overall_comment', provide a brief summary of the candidate's performance.
 
         
@@ -88,6 +92,32 @@ class BuildIeltsWritingAiPrompt
                 \"coherence_cohesion\": \"... (Concise Indonesian feedback, max 3 bullet points)\",
                 \"lexical_resource\": \"... (Concise Indonesian feedback, max 3 bullet points)\",
                 \"grammatical_range\": \"... (Concise Indonesian feedback, max 3 bullet points)\",
+                \"cohesive_devices_used\": [
+                    {
+                        \"word\": \"linking word used\",
+                        \"evaluation\": \"brief evaluation in Indonesian (e.g. 'Tepat', 'Terlalu sering', 'Kurang natural')\"
+                    }
+                ],
+                \"good_vocabulary_used\": [
+                    {
+                        \"word\": \"advanced word/collocation\",
+                        \"meaning\": \"Indonesian meaning\"
+                    }
+                ],
+                \"vocabulary_improvements\": [
+                    {
+                        \"text\": \"basic word used\",
+                        \"improved\": \"Band 7-9 alternative\",
+                        \"explanation\": \"Why it's better (in Indonesian)\"
+                    }
+                ],
+                \"grammar_improvements\": [
+                    {
+                        \"text\": \"original weak/incorrect sentence\",
+                        \"improved\": \"better/corrected sentence\",
+                        \"explanation\": \"Explanation of grammar error/improvement (in Indonesian)\"
+                    }
+                ],
                 \"overall_comment\": \"... (Brief Indonesian summary)\"
             }
         }
@@ -130,14 +160,14 @@ class BuildIeltsWritingAiPrompt
 
         Perform the following task:
         1. Identify SPECIFIC Lexical Resource issues (Vocabulary & Collocations).
-           - Create a list of 'lexical_improvements'.
+           - Create a list of 'lexical_improvements'. You MUST provide EXACTLY 10 items. If there are fewer than 10 bad words, pick simple but correct words and upgrade them to advanced (Band 7-9) vocabulary.
            - Identify simple words or weak collocations used in the essay.
            - Provide higher-level (Band 7-9) synonyms or collocations.
            - Explain why the improvement is better in Bahasa Indonesia.
         
         2. Provide a list of 'topic_vocabularies' (Band 8/9) that matches the SPECIFIC TOPIC of this essay.
            - These should be words/phrases the candidate *could have used* to boost their score.
-           - Include 6 items.
+           - You MUST include EXACTLY 10 items.
            - 'meaning' MUST be in Bahasa Indonesia.
 
         Provide a strictly JSON response with this structure:
@@ -170,7 +200,7 @@ class BuildIeltsWritingAiPrompt
 
         Perform the following task:
         Identify SPECIFIC Coherence & Cohesion issues related to Conjunctions/Linking Words.
-        - Create a list of 'coherence_improvements'.
+        - Create a list of 'coherence_improvements'. You MUST provide EXACTLY 10 items. If there are fewer than 10 missing/bad cohesive devices, pick existing simple linking words and upgrade them to Band 7-9 alternatives.
         - Find linking words preventing a higher band or suggest where they are missing.
         - Provide better, high-level alternatives (Band 7-9 style).
         - Explain why the improvement is better in Bahasa Indonesia.
@@ -198,7 +228,7 @@ class BuildIeltsWritingAiPrompt
 
         Perform the following task:
         Identify SPECIFIC Task Response / Task Achievement issues.
-        - Create a list of 'task_response_improvements'.
+        - Create a list of 'task_response_improvements'. You MUST provide EXACTLY 10 items. If there are fewer than 10 major issues, pick any sentences/arguments and provide a more fully developed Band 7-9 version.
         - Identify arguments that are underdeveloped, unclear, or lack supporting examples.
         - Identify if the writer's position is unclear or not maintained.
         - Provide a concrete 'improved' version of the argument or paragraph (Band 7-9 style).
@@ -228,9 +258,8 @@ class BuildIeltsWritingAiPrompt
 
         Perform the following task:
         1. Identify SPECIFIC Grammatical Structure issues.
-           - Create a list of 'grammar_improvements'.
-           - Identify sentences that are too simple, repetitive, or grammatically weak.
-           - Suggest a 'better_structure' (e.g., using passive voice, complex sentence, conditional, inversion) to increase the band score.
+           - Create a list of 'grammar_improvements'. You MUST provide EXACTLY 10 items.
+           - If the essay has fewer than 10 grammatical errors, pick correct but simple sentences and suggest a more advanced 'better_structure' (e.g., using passive voice, complex sentence, conditional, inversion) to increase the band score.
            - Provide the 'improved' sentence.
            - Explain the specific grammar rule or structure used in the improvement (in Bahasa Indonesia).
 
@@ -273,11 +302,11 @@ class BuildIeltsWritingAiPrompt
 
         Perform the following tasks:
         1. Write a 'better_version' of the essay that scores a perfect Band 9. It should be sophisticated but natural (English).
-        - CRITICAL: Do NOT use actual newlines inside strings. Use '\\n' for line breaks.
+        - CRITICAL: Do NOT use actual newlines inside strings. You MUST wrap EVERY single paragraph with <p class=\"mb-4\"> and </p> tags to ensure proper spacing between paragraphs.
 
         Provide a strictly JSON response with this structure:
         {
-            \"better_version\": \"Full Band 9 example essay...\"
+            \"better_version\": \"<p class=\\\"mb-4\\\">Full Band 9 example essay paragraph 1...</p><p class=\\\"mb-4\\\">Paragraph 2...</p>\"
         }
 
         Do NOT output markdown code blocks. Output ONLY raw JSON.";

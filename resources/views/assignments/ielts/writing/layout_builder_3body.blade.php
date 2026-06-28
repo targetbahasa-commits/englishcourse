@@ -48,6 +48,21 @@
             this.$watch('essay', saver);
         },
 
+        refreshEssay() {
+            if (!confirm('Reset semua teks essay?')) {
+                return;
+            }
+
+            this.essay = '';
+            this.error = null;
+            this.result = null;
+            this.showResults = false;
+
+            if (typeof window.AutoSave !== 'undefined' && typeof window.AutoSave.clearSaved === 'function') {
+                try { window.AutoSave.clearSaved(); } catch (e) { console.warn('AutoSave clearSaved failed', e); }
+            }
+        },
+
          async submitEssay() {
             if (this.essay.trim().length < 50) {
                 alert('Please write at least 50 characters.');
@@ -131,20 +146,23 @@
             </div>
         </div>
         
-        <div class="flex gap-3">
-             <button x-show="mode === 'planning'" @click="mode = 'writing'" class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition-colors flex items-center">
-                <span>Start Writing</span>
-                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-             </button>
-             <button x-show="mode === 'writing'" @click="mode = 'planning'" class="px-6 py-2 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition-colors">
-                Back to Plan
-             </button>
-             <button x-show="mode === 'writing'" @click="submitEssay()" :disabled="loading" class="px-6 py-2 bg-orange-600 text-white font-bold rounded-lg shadow-md hover:bg-orange-700 transition-colors flex items-center gap-2">
-                <span x-show="!loading">Submit Essay</span>
-                <span x-show="loading" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
-                <span x-show="loading">Evaluating...</span>
-             </button>
-        </div>
+          <div class="flex gap-3">
+                 <button x-show="mode === 'planning'" @click="mode = 'writing'" class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition-colors flex items-center">
+                     <span>Start Writing</span>
+                     <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                 </button>
+                 <button x-show="mode === 'writing'" @click="mode = 'planning'" class="px-6 py-2 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition-colors">
+                     Back to Plan
+                 </button>
+                 <button x-show="mode === 'writing'" @click.prevent="refreshEssay()" type="button" class="px-5 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+                     Reset Essay
+                 </button>
+                 <button x-show="mode === 'writing'" @click="submitEssay()" :disabled="loading" class="px-6 py-2 bg-orange-600 text-white font-bold rounded-lg shadow-md hover:bg-orange-700 transition-colors flex items-center gap-2">
+                     <span x-show="!loading">Submit Essay</span>
+                     <span x-show="loading" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+                     <span x-show="loading">Evaluating...</span>
+                 </button>
+          </div>
     </div>
 
     <!-- Error Alert -->
@@ -431,7 +449,7 @@
                     <div class="flex justify-between items-center mb-2">
                         <h3 class="font-bold text-blue-700">Penulisan Esai</h3>
                         <span class="text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-full shadow-sm" 
-                              x-text="(essay ? essay.trim().split(/\s+/).filter(w => w.length > 0).length : 0) + ' Words'">
+                            x-text="(essay ? essay.trim().split(/\s+/).filter(w => /[A-Za-z]/.test(w)).length : 0) + ' Words'">
                         </span>
                     </div>
                     <textarea x-model="essay" class="flex-1 w-full p-4 bg-gray-50 rounded-lg border-transparent focus:bg-white focus:ring-2 focus:ring-blue-100 transition-colors resize-none font-serif text-lg leading-relaxed" placeholder="Tuliskan ketiga paragraf tubuh Anda di sini... Gunakan argumen dan ide pendukung yang telah Anda susun."></textarea>
@@ -450,31 +468,31 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </button>
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Your Evaluation Results</h2>
+                    <h2 class="text-2xl font-bold text-red-600">Your Evaluation Results</h2>
                     <div class="flex items-center gap-2 mt-1">
                         <span class="text-gray-500 text-sm">Overall Band Score:</span>
-                        <span class="px-3 py-0.5 bg-{{ $task == 1 ? 'teal' : 'orange' }}-100 text-{{ $task == 1 ? 'teal' : 'orange' }}-700 font-bold rounded-full text-lg" x-text="result?.scores?.overall_band"></span>
+                        <span class="px-3 py-0.5 bg-red-100 text-red-700 font-bold rounded-full text-lg" x-text="result?.scores?.overall_band"></span>
                     </div>
                 </div>
             </div>
 
             <!-- Score Summary Cards -->
-            <div v-if="result" class="flex gap-4">
+            <div x-show="result" class="flex gap-4">
                  <div class="flex flex-col items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm min-w-[100px]">
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Task</span>
-                    <span class="text-xl font-bold text-gray-800" x-text="result?.scores?.task_achievement"></span>
+                    <span class="text-xl font-bold text-red-700" x-text="result?.scores?.task_achievement"></span>
                 </div>
                  <div class="flex flex-col items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm min-w-[100px]">
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Coherence</span>
-                    <span class="text-xl font-bold text-gray-800" x-text="result?.scores?.coherence_cohesion"></span>
+                    <span class="text-xl font-bold text-red-700" x-text="result?.scores?.coherence_cohesion"></span>
                 </div>
                  <div class="flex flex-col items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm min-w-[100px]">
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Lexical</span>
-                    <span class="text-xl font-bold text-gray-800" x-text="result?.scores?.lexical_resource"></span>
+                    <span class="text-xl font-bold text-red-700" x-text="result?.scores?.lexical_resource"></span>
                 </div>
                  <div class="flex flex-col items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm min-w-[100px]">
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Grammar</span>
-                    <span class="text-xl font-bold text-gray-800" x-text="result?.scores?.grammatical_range"></span>
+                    <span class="text-xl font-bold text-red-700" x-text="result?.scores?.grammatical_range"></span>
                 </div>
             </div>
         </div>
@@ -568,7 +586,7 @@
                         <div x-show="result?.vocabulary_improvements?.length > 0">
                             <h4 class="font-bold text-gray-800 mb-3">Suggested Improvements</h4>
                             <div class="space-y-3">
-                                <template x-for="item in result?.vocabulary_improvements">
+                                <template x-for="item in result?.vocabulary_improvements || []">
                                     <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100">
                                         <div class="flex items-center gap-2 mb-1">
                                             <span class="text-red-500 line-through" x-text="item.original"></span>
@@ -584,7 +602,7 @@
                         <div x-show="result?.collocations?.length > 0">
                              <h4 class="font-bold text-gray-800 mb-3 border-t border-gray-200 pt-4">Relevant Collocations</h4>
                              <div class="flex flex-wrap gap-2">
-                                <template x-for="col in result?.collocations">
+                                <template x-for="col in result?.collocations || []">
                                     <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium" x-text="col"></span>
                                 </template>
                              </div>

@@ -18,7 +18,7 @@ class EloquentScholarshipRepository implements ScholarshipRepository
 
     public function getOpenScholarships(int $limit): mixed
     {
-        return Scholarship::where('status', 'open')
+        return Scholarship::where('is_active', true)
             ->orderBy('deadline', 'asc')
             ->take($limit)
             ->get();

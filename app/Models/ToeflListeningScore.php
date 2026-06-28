@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ToeflListeningScore extends Model
 {
     protected $fillable = [
+        'is_reported',
         'user_id',
         'meeting_number',
         'set_number',

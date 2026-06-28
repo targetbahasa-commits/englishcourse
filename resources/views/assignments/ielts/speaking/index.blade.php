@@ -19,7 +19,10 @@
                 slug: '',
                 icon: '',
                 color: '',
-                order: 0
+                order: 0,
+                is_free_tier: 0,
+                test_type: '',
+                system_prompt_override: ''
             },
             init() {
                 console.log('Component mounted', this.lessons);
@@ -39,7 +42,10 @@
                     slug: topic.slug,
                     icon: topic.icon,
                     color: topic.color ?? 'blue',
-                    order: topic.order ?? 0
+                    order: topic.order ?? 0,
+                    is_free_tier: topic.is_free_tier ?? 0,
+                    test_type: topic.test_type ?? '',
+                    system_prompt_override: topic.system_prompt_override ?? ''
                 };
                 this.showModal = true;
             },
@@ -51,7 +57,10 @@
                     slug: '',
                     icon: '',
                     color: 'blue',
-                    order: 0
+                    order: 0,
+                    is_free_tier: 0,
+                    test_type: '',
+                    system_prompt_override: ''
                 };
                 this.showModal = true;
             },
@@ -119,6 +128,16 @@
                         {{ $selectedClassPeriod->name ?? ($batchProgram->period ?? 'Not selected') }}
                     </span>
                 </div>
+            @endif
+
+            @php
+                $calendarClassPeriodId = $selectedClassPeriod->id ?? Auth::user()->class_period_id ?? optional($batchProgram->classPeriods->first())->id ?? '';
+                $calendarBatchName = addslashes($batchProgram->name ?? 'Assignments');
+            @endphp
+            @if($calendarClassPeriodId)
+                <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 text-sm text-gray-600">
+                    Lihat Kalender
+                </button>
             @endif
         </div>
     </div>
@@ -304,6 +323,7 @@
                                 <label class="block text-sm font-medium text-gray-700">Order</label>
                                 <input type="number" name="order" x-model="formData.order" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
                             </div>
+
                         </div>
 
                         <div class="mt-6 flex justify-end gap-3">
@@ -319,5 +339,6 @@
             </div>
         </div>
     </template>
+    @include('components.meetings-calendar-modal')
 </div>
 @endsection

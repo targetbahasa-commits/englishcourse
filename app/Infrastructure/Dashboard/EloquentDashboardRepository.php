@@ -20,27 +20,27 @@ class EloquentDashboardRepository implements DashboardRepository
 
     public function countMeetingScoresByUser(int $userId): int
     {
-        return MeetingScore::where('user_id', $userId)->count();
+        return MeetingScore::where('is_reported', true)->where('user_id', $userId)->count();
     }
 
     public function averageMeetingScore(int $userId): float
     {
-        return (float) (MeetingScore::where('user_id', $userId)->avg('score') ?? 0);
+        return (float) (MeetingScore::where('is_reported', true)->where('user_id', $userId)->avg('score') ?? 0);
     }
 
     public function highestMeetingScore(int $userId): int
     {
-        return (int) (MeetingScore::where('user_id', $userId)->max('score') ?? 0);
+        return (int) (MeetingScore::where('is_reported', true)->where('user_id', $userId)->max('score') ?? 0);
     }
 
     public function totalMeetingPoints(int $userId): int
     {
-        return (int) MeetingScore::where('user_id', $userId)->sum('score');
+        return (int) MeetingScore::where('is_reported', true)->where('user_id', $userId)->sum('score');
     }
 
     public function recentMeetingActivity(int $userId, int $limit = 5): array
     {
-        return MeetingScore::where('user_id', $userId)
+        return MeetingScore::where('is_reported', true)->where('user_id', $userId)
             ->orderByDesc('submitted_at')
             ->limit($limit)
             ->get()->all();
@@ -79,7 +79,7 @@ class EloquentDashboardRepository implements DashboardRepository
 
     public function allMeetingScoresByUser(int $userId): array
     {
-        return MeetingScore::where('user_id', $userId)->get()->all();
+        return MeetingScore::where('is_reported', true)->where('user_id', $userId)->get()->all();
     }
 
     public function enrollmentsWithProgram(int $userId): array
@@ -92,7 +92,7 @@ class EloquentDashboardRepository implements DashboardRepository
 
     public function scoresBelow(int $userId, int $threshold, int $limit = 2): array
     {
-        return MeetingScore::where('user_id', $userId)
+        return MeetingScore::where('is_reported', true)->where('user_id', $userId)
             ->where('score', '<', $threshold)
             ->orderBy('score', 'asc')
             ->orderBy('submitted_at', 'desc')
@@ -102,7 +102,7 @@ class EloquentDashboardRepository implements DashboardRepository
 
     public function pluckScores(int $userId): array
     {
-        return MeetingScore::where('user_id', $userId)->pluck('score')->all();
+        return MeetingScore::where('is_reported', true)->where('user_id', $userId)->pluck('score')->all();
     }
 
     public function findProgramBySlug(string $slug): mixed

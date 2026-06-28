@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Application\Teacher\ManageTeacherEvaluations;
 use Illuminate\Http\Request;
-use App\Models\TeacherEvaluation;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class TeacherEvaluationController extends Controller
 {
+    public function __construct(
+        private readonly ManageTeacherEvaluations $manageTeacherEvaluations
+    ) {
+    }
+
     /**
      * Show the form for creating a new evaluation.
      */
@@ -17,12 +21,11 @@ class TeacherEvaluationController extends Controller
     {
         $user = Auth::user();
         
-        // Ensure the user is a student and has a teacher assigned
         if (!$user->isStudent() || !$user->teacher_id) {
             return redirect()->route('dashboard')->with('error', 'You must be assigned a teacher to evaluate them.');
         }
 
-        $teacher = User::find($user->teacher_id);
+        $teacher = $this->manageTeacherEvaluations->getTeacherForEvaluation($user->teacher_id);
         
         return view('student.evaluations.create', compact('teacher'));
     }
@@ -34,7 +37,6 @@ class TeacherEvaluationController extends Controller
     {
         $user = Auth::user();
 
-        // Ensure the user is a student and has a teacher assigned
         if (!$user->isStudent() || !$user->teacher_id) {
             return redirect()->route('dashboard')->with('error', 'You must be assigned a teacher to evaluate them.');
         }
@@ -44,12 +46,12 @@ class TeacherEvaluationController extends Controller
             'comment' => 'nullable|string|max:1000',
         ]);
 
-        TeacherEvaluation::create([
-            'student_id' => $user->id,
-            'teacher_id' => $user->teacher_id,
-            'rating' => $request->rating,
-            'comment' => $request->comment,
-        ]);
+        $this->manageTeacherEvaluations->submitEvaluation(
+            $user->id,
+            $user->teacher_id,
+            $request->integer('rating'),
+            $request->input('comment')
+        );
 
         return redirect()->route('dashboard')->with('success', 'Thank you! Your evaluation has been submitted.');
     }

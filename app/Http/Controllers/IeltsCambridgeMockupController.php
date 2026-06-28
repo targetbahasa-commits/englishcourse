@@ -14,7 +14,7 @@ class IeltsCambridgeMockupController extends Controller
 {
     use HandlesAssignmentAccess;
 
-    private const VALID_EDITIONS = [16, 17, 18, 19, 20];
+    private const VALID_EDITIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 
     private const VALID_TEST_IDS = [1, 2, 3, 4];
 
@@ -60,6 +60,29 @@ class IeltsCambridgeMockupController extends Controller
             'testId'        => $id,
             'requiresSignup'=> $requiresSignup,
         ]);
+    }
+
+    public function transcribeAudio(int $edition, int $id, Request $request)
+    {
+        if (strtolower(Auth::user()->role) !== 'admin') {
+            abort(403);
+        }
+
+        $request->validate([
+            'part' => 'required|integer|min:1|max:4',
+        ]);
+
+        $part = (int) $request->input('part');
+
+        try {
+            $this->manageCambridgeMockupMaterial->transcribeExistingAudio($edition, $id, $part);
+            return back()->with('success', "Proses transkripsi ulang (Whisper) untuk Part {$part} berhasil dijalankan.");
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Manual transcribe failed: " . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat memproses transkripsi: ' . $e->getMessage());
+        }
     }
 
     public function test(int $edition, int $id, string $skill = 'listening')
@@ -159,12 +182,23 @@ class IeltsCambridgeMockupController extends Controller
 
         $request->validate([
             'audio_file' => 'required|file|mimes:mp3,wav,ogg|max:51200',
+            'part' => 'required|integer|min:1|max:4',
         ]);
 
         if ($request->hasFile('audio_file')) {
-            $this->manageCambridgeMockupMaterial->uploadAudio($edition, $id, $request->file('audio_file'));
+            $autoTranscribe = $request->boolean('auto_transcribe', true);
+            $this->manageCambridgeMockupMaterial->uploadAudio(
+                $edition, 
+                $id, 
+                $request->integer('part'), 
+                $request->file('audio_file'),
+                $autoTranscribe
+            );
 
-            return back()->with('success', 'Audio uploaded successfully.');
+            if ($autoTranscribe) {
+                return back()->with('success', 'Audio berhasil diupload dan proses transkripsi AI berjalan di latar belakang.');
+            }
+            return back()->with('success', 'Audio berhasil diupload (Tanpa proses transkripsi AI).');
         }
 
         return back()->with('error', 'No file uploaded.');
@@ -181,6 +215,7 @@ class IeltsCambridgeMockupController extends Controller
             'srt_file' => 'required_without:srt_content|nullable|file|extensions:srt|max:2048',
             'srt_content' => 'required_without:srt_file|nullable|string',
             'language' => 'required|in:en,id',
+            'part' => 'required|integer|min:1|max:4',
         ]);
 
         if ($request->hasFile('srt_file')) {
@@ -193,6 +228,7 @@ class IeltsCambridgeMockupController extends Controller
             $this->manageCambridgeMockupMaterial->uploadSrt(
                 $edition,
                 $id,
+                $request->integer('part'),
                 (string) $content,
                 (string) $request->input('language')
             );
@@ -212,9 +248,10 @@ class IeltsCambridgeMockupController extends Controller
 
         $request->validate([
             'answer_key' => 'required|string',
+            'part' => 'required|integer|min:1|max:4',
         ]);
 
-        $this->manageCambridgeMockupMaterial->updateAnswerKey($edition, $id, (string) $request->input('answer_key'));
+        $this->manageCambridgeMockupMaterial->updateAnswerKey($edition, $id, $request->integer('part'), (string) $request->input('answer_key'));
 
         return back()->with('success', 'Answer Key uploaded/updated successfully.');
     }

@@ -67,6 +67,44 @@ class ManageRegistrationLeads
         return $this->repository->convertLeadToStudent($lead);
     }
 
+    public function exportLeads(array $filters): array
+    {
+        return $this->repository->getLeadsForExport($filters);
+    }
+
+    public function getLeadDetails(mixed $lead): array
+    {
+        $lead = $lead->load(['program', 'classPeriod.program', 'convertedUser', 'emailLogs', 'payments']);
+
+        $programs = $this->collect($this->repository->getActivePrograms())
+            ->map(fn ($p) => (object) ['id' => $p->id, 'name' => $p->name]);
+
+        $classPeriods = $this->collect($this->repository->getActiveAndUpcomingClassPeriods())
+            ->map(fn ($c) => (object) [
+                'id' => $c->id,
+                'name' => $c->name,
+                'program_id' => $c->program_id,
+                'start_date' => $c->start_date,
+                'learning_mode' => $c->learning_mode,
+                'program' => $c->program,
+            ]);
+
+        $relatedPayment = $this->repository->getRelatedPaymentForLead($lead);
+        $relatedEnrollment = $this->repository->getRelatedEnrollmentForLead($lead);
+
+        return compact('lead', 'programs', 'classPeriods', 'relatedPayment', 'relatedEnrollment');
+    }
+
+    public function isEmailTaken(string $email, ?int $exceptUserId = null): bool
+    {
+        return $this->repository->isEmailTaken($email, $exceptUserId);
+    }
+
+    public function findClassPeriod(int $id): mixed
+    {
+        return $this->repository->findClassPeriod($id);
+    }
+
     private function collect(array $items): Collection
     {
         return collect($items);

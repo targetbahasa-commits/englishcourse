@@ -3,46 +3,34 @@
 namespace App\Application\GrammarWriting;
 
 use App\Application\GrammarWriting\Concerns\ScoresWordMatchAnswers;
-use Illuminate\Support\Collection;
 
 class EvaluateGrammarWritingMeeting5Submission
 {
     use ScoresWordMatchAnswers;
 
-    public function handle(array $userAnswers, Collection $sentenceQuestions, Collection $matrixQuestions, Collection $prQuestions): array
+    public function handle(array $userAnswers, array $gerundInfinitiveComplex, array $toInfinitive, array $gerund, array $paragraph): array
     {
         $results = [];
         $totalScore = 0;
         $totalItems = 0;
 
-        foreach ($sentenceQuestions as $question) {
-            $questionKey = $question->question_number;
-            $userTranslation = trim((string) ($userAnswers['sentences'][$questionKey] ?? ''));
-            $result = $this->evaluateAnswer($userTranslation, (string) $question->correct_answer);
+        [$results['gerundInfinitiveComplex'], $score, $count] = $this->evaluateGroup($userAnswers['gerundInfinitiveComplex'] ?? [], $gerundInfinitiveComplex);
+        $totalScore += $score;
+        $totalItems += $count;
 
-            $results['sentences'][$questionKey] = $result + ['correct_answer' => $question->correct_answer];
-            $totalScore += $result['score'];
-            $totalItems++;
-        }
+        [$results['toInfinitive'], $score, $count] = $this->evaluateGroup($userAnswers['toInfinitive'] ?? [], $toInfinitive);
+        $totalScore += $score;
+        $totalItems += $count;
 
-        foreach ($matrixQuestions as $question) {
-            $key = str_replace(' ', '_', strtolower((string) $question->tense)) . '_' . $question->structure;
-            $userTranslation = trim((string) ($userAnswers['matrix'][$key] ?? ''));
-            $result = $this->evaluateAnswer($userTranslation, (string) $question->correct_answer);
+        [$results['gerund'], $score, $count] = $this->evaluateGroup($userAnswers['gerund'] ?? [], $gerund);
+        $totalScore += $score;
+        $totalItems += $count;
 
-            $results['matrix'][$question->tense][$question->structure] = $result + ['correct_answer' => $question->correct_answer];
-            $totalScore += $result['score'];
-            $totalItems++;
-        }
-
-        foreach ($prQuestions->values() as $index => $question) {
-            $userTranslation = trim((string) ($userAnswers['pr'][$index] ?? ''));
-            $result = $this->evaluateAnswer($userTranslation, (string) $question->correct_answer);
-
-            $results['pr'][$index] = $result + ['correct_answer' => $question->correct_answer];
-            $totalScore += $result['score'];
-            $totalItems++;
-        }
+        $paragraphAnswer = trim((string) ($userAnswers['paragraph'] ?? ''));
+        $paragraphResult = $this->evaluateAnswer($paragraphAnswer, (string) ($paragraph['en'] ?? ''));
+        $results['paragraph'] = $paragraphResult + ['correct_answer' => $paragraph['en'] ?? ''];
+        $totalScore += $paragraphResult['score'];
+        $totalItems++;
 
         return [
             'meeting5_submitted' => true,
@@ -50,6 +38,24 @@ class EvaluateGrammarWritingMeeting5Submission
             'meeting5_final_score' => $totalItems > 0 ? round($totalScore / $totalItems) : 0,
             'meeting5_user_answers' => $userAnswers,
         ];
+    }
+
+    private function evaluateGroup(array $groupAnswers, array $questions): array
+    {
+        $results = [];
+        $totalScore = 0;
+        $totalItems = 0;
+
+        foreach ($questions as $index => $question) {
+            $userTranslation = trim((string) ($groupAnswers[$index] ?? ''));
+            $result = $this->evaluateAnswer($userTranslation, (string) $question['en']);
+
+            $results[$index] = $result + ['correct_answer' => $question['en']];
+            $totalScore += $result['score'];
+            $totalItems++;
+        }
+
+        return [$results, $totalScore, $totalItems];
     }
 
     private function evaluateAnswer(string $userTranslation, string $correctAnswer): array

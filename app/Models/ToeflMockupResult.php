@@ -8,6 +8,7 @@ class ToeflMockupResult extends Model
 {
     protected $fillable = [
         'user_id',
+        'is_reported',
         'name',
         'email',
         'exam_type',

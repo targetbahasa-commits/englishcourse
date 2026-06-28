@@ -10,15 +10,18 @@ class MeetingScore extends Model
     use HasFactory;
 
     protected $fillable = [
+        'is_reported',
         'user_id',
         'program_id',
         'meeting_number',
         'score',
-        'submitted_at'
+        'submitted_at',
+        'answers_data'
     ];
 
     protected $casts = [
         'submitted_at' => 'datetime',
+        'answers_data' => 'array',
     ];
 
     /**

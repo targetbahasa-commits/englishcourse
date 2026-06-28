@@ -195,7 +195,7 @@ class FreeLessonController extends Controller
     public function vocabularyVerbLevel($level)
     {
         $title = 'Verbs ' . strtoupper($level);
-        $jsonPath = storage_path('app/' . strtolower($level) . '_verbs.json');
+        $jsonPath = storage_path('app/vocabularies/' . strtolower($level) . '_verbs.json');
         $vocabularies = [];
         if (file_exists($jsonPath)) {
             $vocabularies = json_decode(file_get_contents($jsonPath), true) ?? [];
@@ -222,7 +222,7 @@ class FreeLessonController extends Controller
     public function vocabularyAdjectiveLevel($level)
     {
         $title = 'Adjectives ' . strtoupper($level);
-        $jsonPath = storage_path('app/' . strtolower($level) . '_adjectives.json');
+        $jsonPath = storage_path('app/vocabularies/' . strtolower($level) . '_adjectives.json');
         $vocabularies = [];
         if (file_exists($jsonPath)) {
             $vocabularies = json_decode(file_get_contents($jsonPath), true) ?? [];
@@ -249,7 +249,7 @@ class FreeLessonController extends Controller
     public function vocabularyAdverbLevel($level)
     {
         $title = 'Adverbs ' . strtoupper($level);
-        $jsonPath = storage_path('app/' . strtolower($level) . '_adverbs.json');
+        $jsonPath = storage_path('app/vocabularies/' . strtolower($level) . '_adverbs.json');
         $vocabularies = [];
         if (file_exists($jsonPath)) {
             $vocabularies = json_decode(file_get_contents($jsonPath), true) ?? [];
@@ -352,7 +352,7 @@ class FreeLessonController extends Controller
     {
         $title = "Irregular Verbs Mastery";
         $vocabularies = [];
-        $filePath = storage_path('app/irregular_verbs.json');
+        $filePath = storage_path('app/vocabularies/irregular_verbs.json');
         
         if (file_exists($filePath)) {
             $vocabularies = json_decode(file_get_contents($filePath), true);

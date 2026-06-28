@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class IeltsSection extends Model
 {
-    protected $fillable = ['meeting_id', 'section_number', 'title', 'description', 'audio_file', 'transcript_en', 'transcript_id'];
+    protected $fillable = ['meeting_id', 'section_number', 'title', 'description', 'audio_file', 'transcript_en', 'transcript_id', 'answer_key'];
 
     public function meeting(): BelongsTo
     {

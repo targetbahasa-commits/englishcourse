@@ -1,4 +1,35 @@
-<div class="p-8 space-y-8">
+<div class="p-8 space-y-8" x-data="{
+    role: '{{ old('role', $user->role ?? '') }}',
+    learningMode: '{{ old('learning_mode', $user->learning_mode ?? 'online') }}',
+    campId: '{{ old('camp_id', $user->camp_id ?? '') }}',
+    campsData: {{ Js::from($camps ?? []) }},
+    showCamp: false,
+    
+    init() {
+        this.updateVisibility();
+        $watch('role', () => this.updateVisibility());
+        $watch('learningMode', () => this.updateVisibility());
+        $watch('campId', () => {
+            if(!this.campId) document.getElementById('camp_room_id').value = '';
+        });
+    },
+    updateVisibility() {
+        if (this.role === 'teacher') {
+            this.showCamp = true;
+        } else if (this.role === 'student' && (this.learningMode === 'offline' || this.learningMode === 'both')) {
+            this.showCamp = true;
+        } else {
+            this.showCamp = false;
+            // Clear selections when hiding
+            this.campId = '';
+        }
+    },
+    availableRooms() {
+        if (!this.campId) return [];
+        let camp = this.campsData.find(c => c.id == this.campId);
+        return camp ? camp.rooms : [];
+    }
+}">
     
     <!-- Section 1: Personal Information -->
     <div>
@@ -61,12 +92,14 @@
             <!-- Role -->
             <div>
                 <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Account Role <span class="text-red-500">*</span></label>
-                <select id="role" name="role" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-shadow @error('role') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                <select id="role" name="role" x-model="role" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-shadow @error('role') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
                     <option value="">-- Select Role --</option>
                     <option value="student" {{ old('role', $user->role ?? '') == 'student' ? 'selected' : '' }}>Student</option>
                     <option value="teacher" {{ old('role', $user->role ?? '') == 'teacher' ? 'selected' : '' }}>Teacher</option>
                     <option value="guest" {{ old('role', $user->role ?? '') == 'guest' ? 'selected' : '' }}>Guest</option>
+                    <option value="test-taker" {{ old('role', $user->role ?? '') == 'test-taker' ? 'selected' : '' }}>Test Taker</option>
                     <option value="admin" {{ old('role', $user->role ?? '') == 'admin' ? 'selected' : '' }}>Admin</option>
+                    <option value="intern" {{ old('role', $user->role ?? '') == 'intern' ? 'selected' : '' }}>Intern</option>
                 </select>
                 @error('role')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -76,7 +109,7 @@
             <!-- Learning Mode -->
             <div>
                 <label for="learning_mode" class="block text-sm font-medium text-gray-700 mb-1">Learning Mode <span class="text-red-500">*</span></label>
-                <select id="learning_mode" name="learning_mode" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-shadow @error('learning_mode') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                <select id="learning_mode" name="learning_mode" x-model="learningMode" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-shadow @error('learning_mode') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
                     <option value="online" {{ old('learning_mode', $user->learning_mode ?? 'online') == 'online' ? 'selected' : '' }}>Online</option>
                     <option value="offline" {{ old('learning_mode', $user->learning_mode ?? '') == 'offline' ? 'selected' : '' }}>Offline</option>
                     <option value="both" {{ old('learning_mode', $user->learning_mode ?? '') == 'both' ? 'selected' : '' }}>Both (Hybrid/Flexible)</option>
@@ -180,11 +213,54 @@
             </div>
         </div>
     </div>
+    
+    <!-- Section 4: Camp Management (Conditional) -->
+    <div x-show="showCamp" x-transition.opacity style="display: none;">
+        <h3 class="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2 mb-4">Camp Assignment</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Assigned Camp -->
+            <div>
+                <label for="camp_id" class="block text-sm font-medium text-gray-700 mb-1">Camp Location</label>
+                <select id="camp_id" name="camp_id" x-model="campId" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-shadow @error('camp_id') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                    <option value="">-- Tidak tinggal di camp --</option>
+                    <template x-for="camp in campsData" :key="camp.id">
+                        <option :value="camp.id" x-text="camp.nama_camp + ' (' + camp.gender_khusus + ')'" :selected="camp.id == '{{ old('camp_id', $user->camp_id ?? '') }}'"></option>
+                    </template>
+                </select>
+                <p class="mt-1 text-xs text-gray-500">Select the camp if they are staying in one.</p>
+                @error('camp_id')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+            
+            <!-- Assigned Room -->
+            <div>
+                <label for="camp_room_id" class="block text-sm font-medium text-gray-700 mb-1">Camp Room</label>
+                <select id="camp_room_id" name="camp_room_id" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-shadow @error('camp_room_id') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror">
+                    <option value="">-- Select Room (Optional) --</option>
+                    <template x-for="room in availableRooms()" :key="room.id">
+                        <option :value="room.id" x-text="room.nama_kamar + ' (' + room.jumlah_penghuni + '/' + room.kapasitas_per_kamar + ')'" :selected="room.id == '{{ old('camp_room_id', $user->camp_room_id ?? '') }}'"></option>
+                    </template>
+                </select>
+                <p class="mt-1 text-xs text-gray-500">Assign to a specific room if known.</p>
+                @error('camp_room_id')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Form Actions / Submit Button Footer -->
 <div class="px-8 py-5 bg-gray-50/80 border-t border-gray-100 flex items-center justify-end gap-3 rounded-b-2xl">
-    <a href="{{ route('users.index') }}" class="px-5 py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-300 rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+    @php
+        $cancelRoute = route('users.index');
+        if (isset($user)) {
+            if ($user->role === 'student') $cancelRoute = route('students.index');
+            elseif ($user->role === 'teacher') $cancelRoute = route('teachers.index');
+        }
+    @endphp
+    <a href="{{ $cancelRoute }}" class="px-5 py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-300 rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
         Cancel
     </a>
     <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center gap-2">

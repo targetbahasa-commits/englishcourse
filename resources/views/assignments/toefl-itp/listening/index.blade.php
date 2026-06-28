@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>TOEFL ITP Listening - {{ config('app.name', 'Target Bahasa') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -48,21 +50,21 @@
 
         <div class="flex flex-wrap items-center gap-3">
             <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-100 text-xs">
-                Active Batch: {{ $selectedClassPeriod->name ?? ($batchProgram->period ?? 'Not selected') }}
+                Active Batch: {{ $selectedClassPeriod->name ?? 'No Batch Active' }}
             </span>
             @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
                 <form action="{{ route('assignments.batch-period') }}" method="POST" class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
                     @csrf
                     <input type="hidden" name="program_id" value="{{ $batchProgram?->id }}">
                     <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                    <select name="period" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
+                    <select name="class_period_id" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
                         @if(!$batchProgram)
                             <option value="" selected>No program found</option>
                         @elseif($batchProgram->classPeriods->isEmpty())
-                            <option value="{{ $batchProgram->period }}" selected>{{ $batchProgram->period ?: 'No batch available' }}</option>
+                            <option value="" disabled selected>No batch available</option>
                         @else
                             @foreach($batchProgram->classPeriods->sortByDesc('start_date') as $classPeriod)
-                                <option value="{{ $classPeriod->name }}" {{ $batchProgram->period === $classPeriod->name ? 'selected' : '' }}>
+                                <option value="{{ $classPeriod->id }}" {{ $batchProgram->active_class_period_id === $classPeriod->id ? 'selected' : '' }}>
                                     {{ $classPeriod->name }}
                                 </option>
                             @endforeach
@@ -75,10 +77,20 @@
             @else
                 <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
                     <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                    <span class="text-sm text-gray-800 px-2 py-1 bg-gray-50 rounded-lg">
-                        {{ $selectedClassPeriod->name ?? ($batchProgram->period ?? 'Not selected') }}
-                    </span>
+                    <div class="bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium text-gray-800 min-w-[220px]">
+                        {{ $selectedClassPeriod->name ?? 'No Batch Active' }}
+                    </div>
                 </div>
+            @endif
+            
+            @php
+                $calendarClassPeriodId = $selectedClassPeriod->id ?? Auth::user()->class_period_id ?? optional($batchProgram->classPeriods->first())->id ?? '';
+                $calendarBatchName = addslashes($batchProgram->name ?? 'Assignments');
+            @endphp
+            @if($calendarClassPeriodId)
+                <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 text-sm text-gray-600">
+                    Lihat Kalender
+                </button>
             @endif
         </div>
     </div>
@@ -214,6 +226,29 @@
                                     Locked
                                 </button>
                             @endif
+                            
+                            @php
+                                $classMeeting = !empty($selectedClassPeriod) ? $selectedClassPeriod->classMeetings->firstWhere('meeting_number', $number) : null;
+                            @endphp
+                            @if($classMeeting)
+                                <div class="mt-4 pt-4 border-t border-gray-100">
+                                    <div class="flex flex-col gap-2">
+                                        <div class="flex items-center gap-2 text-xs text-gray-600">
+                                            <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            <span>{{ $classMeeting->meeting_date ? $classMeeting->meeting_date->format('d M Y') : 'TBA' }}</span>
+                                            <span class="mx-0.5">•</span>
+                                            <svg class="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <span>{{ $classMeeting->start_time ? $classMeeting->start_time->format('H:i') . ' - ' . $classMeeting->end_time->format('H:i') . ' WIB' : 'TBA' }}</span>
+                                        </div>
+                                        @if($classMeeting->meeting_link)
+                                            <a href="{{ $classMeeting->meeting_link }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 mt-1">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                                Join Virtual Class
+                                            </a>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     @endforeach
                 </div>
@@ -223,5 +258,6 @@
 </div>
         </main>
     </div>
+    @include('components.meetings-calendar-modal')
 </body>
 </html>

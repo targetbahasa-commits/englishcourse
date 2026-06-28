@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Target Bahasa') }} - Student Dashboard</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
@@ -223,16 +225,28 @@
                             </div>
 
                             <!-- Action Button -->
+                                @php
+                            $classPeriodId = data_get($program, 'class_period_id') ?? '';
+                            $studentClassPeriodId = Auth::user()->class_period_id ?? '';
+                            $calendarClassPeriodId = $classPeriodId ?: $studentClassPeriodId;
+                        @endphp
+                        <div class="flex gap-2">
                             @if($program['slug'] === 'grammar-for-writing')
-                                <a href="{{ route('assignments.grammar-writing') }}" 
-                                   class="block w-full py-2 px-4 bg-blue-600 text-white text-center rounded-xl font-medium hover:bg-blue-700 transition">
-                                    Lanjutkan Belajar
-                                </a>
+                            <a href="{{ route('assignments.grammar-writing') }}" 
+                               class="flex-1 py-2 px-4 bg-blue-600 text-white text-center rounded-xl font-medium hover:bg-blue-700 transition">
+                                Lanjutkan Belajar
+                            </a>
                             @else
-                                <button class="block w-full py-2 px-4 bg-gray-300 text-gray-500 text-center rounded-xl font-medium cursor-not-allowed" disabled>
-                                    Coming Soon
-                                </button>
+                            <button class="flex-1 py-2 px-4 bg-gray-300 text-gray-500 text-center rounded-xl font-medium cursor-not-allowed" disabled>
+                                Coming Soon
+                            </button>
                             @endif
+
+                            <button type="button" onclick="(function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Class information not available'); return; } const name='{{ addslashes($program['name'] ?? $program->name ?? '') }}'; window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:name}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 text-sm">
+                                <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                Lihat Kalender
+                            </button>
+                        </div>
                         </div>
                     @empty
                         <div class="col-span-full bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center">
@@ -417,6 +431,7 @@
             });
         });
     </script>
+    @include('components.meetings-calendar-modal')
     @include('components.student-broadcaster')
 </body>
 </html>

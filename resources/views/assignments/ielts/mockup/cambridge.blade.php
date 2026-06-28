@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>IELTS Mock Tests - {{ config('app.name', 'Target Bahasa') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased bg-gray-50">
@@ -37,12 +39,12 @@
                         </div>
                     </div>
                     @if(Auth::user()->active_role === 'guest_quick')
-                    <a href="{{ request()->has('editions') ? route('assignments.ielts-academic.mockup.cambridge') : route('guest.free-tests') }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2">
+                    <a href="{{ request()->routeIs('mock-test.ielts-academic.cambridge') ? route('mock-test.ielts-academic') : (request()->has('editions') ? route('assignments.ielts-academic.mockup.cambridge') : route('guest.free-tests')) }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                             {{ 'Kembali ke Pilihan' }}
                     </a>
                     @else
-                    <a href="{{ route('assignments.ielts-academic') }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2">
+                    <a href="{{ request()->routeIs('mock-test.ielts-academic.cambridge') ? route('mock-test.ielts-academic') : (request()->routeIs('mock-test.ielts-academic') ? route('mock-test') : route('assignments.ielts-academic')) }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         Back
                     </a>
@@ -67,10 +69,11 @@
             </div>
             @endif
 
-            @if(Auth::user()->active_role === 'guest_quick' && !request()->has('editions'))
-                {{-- Guest View: Cambridge (unlocked) vs British Council (locked) --}}
+            @php $isGuestQuick = Auth::user()->active_role === 'guest_quick'; @endphp
+            @if(!request()->has('editions') && !request()->routeIs('mock-test.ielts-academic.cambridge'))
+                {{-- View: Cambridge vs British Council --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-                    {{-- Cambridge: Unlocked --}}
+                    {{-- Cambridge: Unlocked for everyone --}}
                     <div class="bg-white rounded-2xl shadow-md border border-purple-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                         <div class="h-44 bg-gradient-to-br from-purple-500 to-purple-700 relative flex items-center justify-center overflow-hidden">
                             <div class="absolute top-3 right-3 bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-lg border border-white/30 backdrop-blur-sm">MOCK UP</div>
@@ -81,18 +84,20 @@
                             </div>
                         </div>
                         <div class="p-6">
+                            @if($isGuestQuick)
                             <div class="flex items-center gap-2 mb-1">
                                 <span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">✓ Gratis</span>
                             </div>
+                            @endif
                             <h3 class="text-xl font-bold text-gray-800 mb-2">Cambridge IELTS TEST</h3>
-                            <p class="text-gray-500 text-sm mb-6">Full mock exam. Cambridge 16–20 tersedia untuk dicoba gratis.</p>
-                            <a href="{{ route('assignments.ielts-academic.mockup.cambridge') }}?editions=1" class="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition">
+                            <p class="text-gray-500 text-sm mb-6">Full mock exam. @if($isGuestQuick) Cambridge 16–20 tersedia untuk dicoba gratis. @endif</p>
+                            <a href="{{ request()->routeIs('mock-test.ielts-academic') ? route('mock-test.ielts-academic.cambridge') : route('assignments.ielts-academic.mockup.cambridge') . '?editions=1' }}" class="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition">
                                 Start Test →
                             </a>
                         </div>
                     </div>
 
-                    {{-- British Council: Locked --}}
+                    {{-- British Council: Locked for Guests, Unlocked for Students --}}
                     <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden relative">
                         <div class="h-44 bg-gradient-to-br from-red-500 to-red-700 relative flex items-center justify-center overflow-hidden">
                             <div class="absolute top-3 right-3 bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-lg border border-white/30 backdrop-blur-sm">MOCK UP</div>
@@ -102,6 +107,7 @@
                                 </svg>
                             </div>
                             {{-- Lock Overlay --}}
+                            @if($isGuestQuick)
                             <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
                                 <div class="text-center">
                                     <svg class="w-10 h-10 text-white mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,16 +116,26 @@
                                     <span class="text-white font-bold text-sm">Khusus Student</span>
                                 </div>
                             </div>
+                            @endif
                         </div>
                         <div class="p-6">
+                            @if($isGuestQuick)
                             <div class="flex items-center gap-2 mb-1">
                                 <span class="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">🔒 Student Only</span>
                             </div>
+                            @endif
                             <h3 class="text-xl font-bold text-gray-800 mb-2">British Council IELTS TEST</h3>
-                            <p class="text-gray-500 text-sm mb-6">Full mock exam. Daftar sebagai student untuk mengakses British Council mock test.</p>
+                            <p class="text-gray-500 text-sm mb-6">Full mock exam. @if($isGuestQuick) Daftar sebagai student untuk mengakses British Council mock test. @endif</p>
+                            @if($isGuestQuick)
                             <a href="{{ route('mock-test.register-or-pay') . '?program=ielts-academic' }}" class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition">
                                 Daftar untuk Akses →
                             </a>
+                            @else
+                            <a href="{{ route('assignments.ielts-academic.mockup.british-council') }}" class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition shadow-md hover:shadow-lg transform hover:scale-105">
+                                Start Test
+                                <svg class="w-4 h-4 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                            </a>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -155,7 +171,7 @@
                                     Full Exam
                                 </span>
                             </div>
-                            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.edition', ['edition' => $edition]) }}" class="hover:text-purple-600 transition">
+                            <a href="{{ route('mock-test.ielts-academic.cambridge.edition', ['edition' => $edition]) }}" class="hover:text-purple-600 transition">
                                 <h3 class="text-2xl font-bold {{ $locked ? 'text-gray-400' : 'text-gray-800' }} mb-2">CAMBRIDGE {{ $edition }}</h3>
                             </a>
                             <p class="{{ $locked ? 'text-gray-400' : 'text-gray-600' }} text-sm mb-6">Complete listening, reading, writing, and speaking mock tests from Cambridge {{ $edition }}.</p>
@@ -165,13 +181,13 @@
                                         Buy Full Edition {{ $priceText ? "({$priceText})" : '' }}
                                         <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                                     </a>
-                                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge.edition', ['edition' => $edition]) }}" class="flex items-center justify-center gap-2 w-full text-center bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-2.5 rounded-xl transition text-sm shadow-sm">
+                                    <a href="{{ route('mock-test.ielts-academic.cambridge.edition', ['edition' => $edition]) }}" class="flex items-center justify-center gap-2 w-full text-center bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-2.5 rounded-xl transition text-sm shadow-sm">
                                         Buy Per Test (IDR 50.000)
                                         <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                                     </a>
                                 </div>
                             @else
-                                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.edition', ['edition' => $edition]) }}" class="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition">
+                                <a href="{{ route('mock-test.ielts-academic.cambridge.edition', ['edition' => $edition]) }}" class="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition">
                                     Start Exam
                                 </a>
                             @endif

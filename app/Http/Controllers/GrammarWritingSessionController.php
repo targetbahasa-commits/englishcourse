@@ -89,9 +89,7 @@ class GrammarWritingSessionController extends Controller
 
     public function meeting5(BuildGrammarWritingMeeting5ViewData $buildGrammarWritingMeeting5ViewData)
     {
-        return view('assignments.grammar-writing.meeting5', $buildGrammarWritingMeeting5ViewData->handle(
-            $this->data->meeting5TenseExamples,
-        ));
+        return view('assignments.grammar-writing.meeting5', $buildGrammarWritingMeeting5ViewData->handle());
     }
 
     public function meeting5Submit(
@@ -100,27 +98,14 @@ class GrammarWritingSessionController extends Controller
         EvaluateGrammarWritingMeeting5Submission $evaluateGrammarWritingMeeting5Submission,
     ) {
         $userAnswers = $request->input('userAnswers', []);
+        [$gerundInfinitiveComplex, $toInfinitive, $gerund, $paragraph] = $buildGrammarWritingMeeting5ViewData->loadSections();
+
         $sessionPayload = $evaluateGrammarWritingMeeting5Submission->handle(
             $userAnswers,
-            $buildGrammarWritingMeeting5ViewData->loadSentenceQuestions()->values(),
-            collect($buildGrammarWritingMeeting5ViewData->loadMatrix(array_keys($this->data->meeting5TenseExamples)))
-                ->flatMap(function ($structures, $tense) {
-                    return collect($structures)
-                        ->filter()
-                        ->map(function ($question, $structure) use ($tense) {
-                            return (object) [
-                                'tense' => $tense,
-                                'structure' => $structure,
-                                'correct_answer' => $question['en'],
-                            ];
-                        });
-                })
-                ->values(),
-            $buildGrammarWritingMeeting5ViewData->loadPrQuestions()->map(function ($question) {
-                return (object) [
-                    'correct_answer' => $question['en'],
-                ];
-            })->values(),
+            $gerundInfinitiveComplex,
+            $toInfinitive,
+            $gerund,
+            $paragraph ?? [],
         );
 
         return $this->completeGrammarWritingMeetingSubmission(

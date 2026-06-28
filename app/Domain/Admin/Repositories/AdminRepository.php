@@ -13,6 +13,7 @@ interface AdminRepository
     public function countMeetings(): int;
 
     public function getActiveStudents(int $threshold): array;
+    public function getActiveTeachers(int $threshold): array;
 
     public function getProgramPerformance(int $threshold): array;
 

@@ -24,4 +24,6 @@ interface FreeTestRepository
     public function findCertificateById(int $id): mixed;
 
     public function updateCertificate(mixed $certificate, array $data): void;
+
+
 }

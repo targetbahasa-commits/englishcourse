@@ -175,26 +175,15 @@
                         </td>
                         <td class="px-6 py-4">
                             @if($teacher->status == 'active')
-                                <!-- We dummy out 'In Class' logic for now since explicit times schedules don't exist yet -->
-                                @if(rand(1,3) == 1)
-                                    <span class="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-green-100 text-green-700 border border-green-200 shrink-0 w-max">
-                                        <span class="relative flex h-2 w-2">
-                                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                          <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                                        </span>
-                                        In Class
-                                    </span>
-                                @else
-                                    <span class="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-gray-100 text-gray-600 border border-gray-200 shrink-0 w-max">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
-                                        Available
-                                    </span>
-                                @endif
+                                <button class="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-colors shrink-0 w-max" data-user-id="{{ $teacher->id }}" onclick="toggleStatus(this)">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                    <span class="status-text">Active</span>
+                                </button>
                             @else
-                                <span class="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-red-50 text-red-600 border border-red-200 shrink-0 w-max">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                                    Inactive
-                                </span>
+                                <button class="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 transition-colors shrink-0 w-max" data-user-id="{{ $teacher->id }}" onclick="toggleStatus(this)">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                                    <span class="status-text">Inactive</span>
+                                </button>
                             @endif
                         </td>
                         <td class="px-6 py-4 text-center">
@@ -225,7 +214,7 @@
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                                 </button>
 
-                                <a href="#" class="p-1.5 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-transparent hover:border-indigo-100" title="View Schedule">
+                                <a href="{{ route('teachers.show', $teacher) }}#classes" class="p-1.5 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-transparent hover:border-indigo-100" title="View Schedule">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                 </a>
 
@@ -357,4 +346,32 @@
         </div>
     </div>
 </div>
+
+<script>
+    function toggleStatus(btn) {
+        const userId = btn.dataset.userId;
+        const currentSpan = btn.querySelector('.w-1\\.5');
+        const textSpan = btn.querySelector('.status-text');
+        
+        fetch(`/admin/users/${userId}/toggle-status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'active') {
+                btn.className = 'flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-colors shrink-0 w-max';
+                currentSpan.className = 'w-1.5 h-1.5 rounded-full bg-green-500';
+                textSpan.innerText = 'Active';
+            } else {
+                btn.className = 'flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 transition-colors shrink-0 w-max';
+                currentSpan.className = 'w-1.5 h-1.5 rounded-full bg-gray-400';
+                textSpan.innerText = 'Inactive';
+            }
+        });
+    }
+</script>
 @endsection

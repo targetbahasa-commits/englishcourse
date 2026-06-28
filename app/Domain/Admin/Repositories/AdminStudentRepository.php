@@ -10,6 +10,8 @@ interface AdminStudentRepository
 
     public function getTeacherOptions(): array;
 
+    public function getTeacherOrFail(int $teacherId): mixed;
+
     public function getProgramOptions(): array;
 
     public function getStudentMetrics(): array;
@@ -25,4 +27,14 @@ interface AdminStudentRepository
     public function quickUpdate(mixed $student, array $data): void;
 
     public function bulkGenerateReferralCodes(): int;
+
+    public function getLatestSessionForStudent(int $userId): mixed;
+
+    public function getLatestReportedListeningScore(int $userId): mixed;
+
+    public function findToeflListeningQuestion(int $questionId): mixed;
+
+    public function getLatestReportedMockupResult(int $userId): mixed;
+
+    public function getGrammarQuestionsForMeeting(int $meetingNumber, bool $hasSectionColumn): mixed;
 }

@@ -14,7 +14,15 @@ interface RegistrationRepository
 
     public function findProgramByNameLike(string $name): mixed;
 
-    public function createRegistrationLead(array $data): void;
+    public function createRegistrationLead(array $data): mixed;
+
+    public function getLeadsForExport(array $filters): array;
+
+    public function getRelatedPaymentForLead(mixed $lead): mixed;
+
+    public function getRelatedEnrollmentForLead(mixed $lead): mixed;
+
+    public function isEmailTaken(string $email, ?int $exceptUserId = null): bool;
 
     // Admin CRUD methods
     public function listLeads(array $filters, int $perPage): mixed;

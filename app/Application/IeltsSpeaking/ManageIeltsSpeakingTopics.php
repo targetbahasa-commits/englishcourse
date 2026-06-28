@@ -26,6 +26,9 @@ class ManageIeltsSpeakingTopics
             'icon'      => $attributes['icon'],
             'color'     => $attributes['color'] ?? 'indigo',
             'order'     => $attributes['order'] ?? 0,
+            'is_free_tier' => $attributes['is_free_tier'] ?? false,
+            'test_type' => $attributes['test_type'] ?? null,
+            'system_prompt_override' => $attributes['system_prompt_override'] ?? null,
             'questions' => [],
             'subtopics' => [],
             'is_locked' => false,
@@ -42,6 +45,9 @@ class ManageIeltsSpeakingTopics
             'icon'  => $attributes['icon'],
             'color' => $attributes['color'] ?? $topic->color,
             'order' => $attributes['order'] ?? $topic->order,
+            'is_free_tier' => $attributes['is_free_tier'] ?? $topic->is_free_tier,
+            'test_type' => $attributes['test_type'] ?? $topic->test_type,
+            'system_prompt_override' => $attributes['system_prompt_override'] ?? $topic->system_prompt_override,
         ]);
     }
 

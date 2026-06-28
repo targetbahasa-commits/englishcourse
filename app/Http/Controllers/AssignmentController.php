@@ -5,10 +5,22 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Enrollment;
 use App\Models\MeetingScore;
+use App\Models\ClassPeriod;
+use App\Models\FinalTestResult;
+use App\Models\FreeTestCertificate;
+use App\Models\Setting;
+use App\Application\FinalTest\StudentFinalTestAccess;
+use App\Http\Controllers\Concerns\EvaluatesClassPeriodEnd;
+use App\Jobs\SendFinalTestCertificateEmailJob;
+use App\Mail\FinalTestCertificateMail;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class AssignmentController extends Controller
 {
+    use EvaluatesClassPeriodEnd;
     private const TEMP_FULL_ASSIGNMENT_ACCESS_EMAILS = [
         'student4@dummy.com',
     ];
@@ -18,7 +30,7 @@ class AssignmentController extends Controller
         $this->middleware(function ($request, $next) {
             $user = Auth::user();
 
-            if ($user && $user->isGuest()) {
+            if ($user && ($user->isGuest() || $user->isTestTaker())) {
                 return redirect()->route('guest.free-tests')
                     ->with('error', 'Guest account does not have access to assignments.');
             }
@@ -30,22 +42,84 @@ class AssignmentController extends Controller
                     ->with('error', 'You can only access assignments for your registered program.');
             }
 
+            $routeName = $request->route()?->getName() ?? '';
+            if ($user && $user->isStudent() && $requiredProgramSlug === 'ielts-academic' && $routeName && !preg_match('/^assignments\.[^.]+$/', $routeName)) {
+                $rawSlugs = [];
+                if ($user->program && $user->class_period_id) $rawSlugs[] = $user->program->slug;
+                $enrollments = \App\Models\Enrollment::where('user_id', $user->id)->whereIn('status', ['active', 'completed'])->whereNotNull('class_period_id')->with('program')->get();
+                foreach ($enrollments as $enr) { if ($enr->program) $rawSlugs[] = $enr->program->slug; }
+                
+                $hasFullAccess = in_array('ielts-academic-full-package', $rawSlugs) || in_array('ielts-academic', $rawSlugs) || $this->hasTemporaryFullAssignmentAccess($user);
+                
+                if (!$hasFullAccess) {
+                    if (str_contains($routeName, '.listening.') && !in_array('ielts-academic-listening', $rawSlugs)) {
+                        return redirect()->route('assignments.ielts-academic')->with('error', 'Anda tidak memiliki akses ke kelas IELTS Listening.');
+                    }
+                    if (str_contains($routeName, '.reading.') && !in_array('ielts-academic-reading', $rawSlugs)) {
+                        return redirect()->route('assignments.ielts-academic')->with('error', 'Anda tidak memiliki akses ke kelas IELTS Reading.');
+                    }
+                    if (str_contains($routeName, '.writing.') && !in_array('ielts-academic-writing', $rawSlugs)) {
+                        return redirect()->route('assignments.ielts-academic')->with('error', 'Anda tidak memiliki akses ke kelas IELTS Writing.');
+                    }
+                    if (str_contains($routeName, '.speaking.') && !in_array('ielts-academic-speaking', $rawSlugs)) {
+                        return redirect()->route('assignments.ielts-academic')->with('error', 'Anda tidak memiliki akses ke kelas IELTS Speaking.');
+                    }
+                }
+            }
+
             return $next($request);
         });
     }
 
     public function index()
     {
-        // Exclude internal/helper programs from the main dashboard
-        $programs = \App\Models\Program::whereNotIn('slug', ['ielts-academic-listening', 'ielts-academic-reading'])
+        // Slugs for the 4 Grammar for Writing sub-classes (shown inside the group page)
+        $grammarSubSlugs = [
+            'introductory-grammar-for-writing',
+            'complexity-grammar-for-writing',
+            'proficiency-grammar-for-writing',
+            'fast-track-grammar-for-writing',
+        ];
+
+        // Slugs for the 3 Speaking sub-classes (shown inside the group page)
+        $speakingSubSlugs = [
+            'introductory-speaking',
+            'intermediate-speaking',
+            'advanced-speaking',
+        ];
+
+        // Exclude internal/helper programs AND the Grammar/Speaking sub-programs from the main dashboard
+        $programs = \App\Models\Program::with('classPeriods')
+            ->whereNotIn('slug', array_merge(
+                [
+                    'ielts-academic-listening',
+                    'ielts-academic-reading',
+                    'ielts-academic-writing',
+                    'ielts-academic-speaking',
+                    'ielts-speaking', // sub-program of IELTS Academic, shown inside its own page
+                ],
+                $grammarSubSlugs,
+                $speakingSubSlugs
+            ))
             ->whereRaw('LOWER(name) NOT LIKE ?', ['%mock test%'])
             ->whereRaw('LOWER(slug) NOT LIKE ?', ['%mock%'])
             ->whereRaw('LOWER(slug) NOT LIKE ?', ['%cambridge%'])
             ->where('is_active', true)
             ->get();
+
+        // Add a synthetic "Grammar for Writing" group entry
+        $grammarGroup = new \App\Models\Program([
+            'name' => 'Grammar for Writing',
+            'slug' => 'grammar-for-writing',
+            'description' => 'Master the fundamentals of English grammar specifically tailored for academic and professional writing.',
+            'color' => 'blue',
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>',
+            'is_active' => true,
+        ]);
+        $programs->prepend($grammarGroup);
+
         $allowedAssignmentProgramSlugs = $this->resolveAllowedAssignmentProgramSlugsForUser(Auth::user());
 
-        // dd('Hit index method');
         return view('assignments.index', compact('programs', 'allowedAssignmentProgramSlugs'));
     }
 
@@ -65,7 +139,33 @@ class AssignmentController extends Controller
         if (!$this->userCanAccessAssignmentProgram($user, 'ielts-academic')) {
             return redirect()->route('assignments.index')->with('error', 'You can only access assignments for your registered program.');
         }
-        return view('ielts.writing.index');
+
+        $rawSlugs = [];
+        if ($user && $user->isStudent()) {
+            if ($user->program) {
+                $rawSlugs[] = $user->program->slug;
+            }
+            $enrollments = \App\Models\Enrollment::where('user_id', $user->id)
+                ->whereIn('status', ['active', 'completed'])
+                ->with('program')
+                ->get();
+            foreach ($enrollments as $enrollment) {
+                if ($enrollment->program) {
+                    $rawSlugs[] = $enrollment->program->slug;
+                }
+            }
+        }
+
+        $hasFullAccess = $user && ($user->isAdmin() || $user->isTeacher() || in_array('ielts-academic-full-package', $rawSlugs) || in_array('ielts-academic', $rawSlugs));
+        
+        $hasListening = $hasFullAccess || in_array('ielts-academic-listening', $rawSlugs);
+        $hasReading = $hasFullAccess || in_array('ielts-academic-reading', $rawSlugs);
+        $hasWriting = $hasFullAccess || in_array('ielts-academic-writing', $rawSlugs);
+        $hasSpeaking = $hasFullAccess || in_array('ielts-academic-speaking', $rawSlugs);
+
+        $isClassEnded = $user?->isStudent() ? $this->isStudentClassPeriodEnded('ielts-academic-full-package') : false;
+
+        return view('ielts.writing.index', compact('hasListening', 'hasReading', 'hasWriting', 'hasSpeaking', 'hasFullAccess', 'isClassEnded'));
     }
 
     public function pteAcademic()
@@ -74,7 +174,474 @@ class AssignmentController extends Controller
         if (!$this->userCanAccessAssignmentProgram($user, 'pte-academic')) {
             return redirect()->route('assignments.index')->with('error', 'You can only access assignments for your registered program.');
         }
-        return view('assignments.pte-academic');
+
+        $isClassEnded = $user?->isStudent() ? $this->isStudentClassPeriodEnded('pte-academic') : false;
+
+        return view('assignments.pte-academic', compact('isClassEnded'));
+    }
+
+    public function finalTestIndex()
+    {
+        $user = Auth::user();
+        $studentFinalTestAccess = $this->studentFinalTestAccess();
+
+        // if ($user?->isStudent() && !$studentFinalTestAccess->canAccessMenu($user)) {
+        //     return redirect()->route('assignments.index')
+        //         ->with('error', 'Final Test akan tersedia setelah Anda menyelesaikan semua meeting di Assignment.');
+        // }
+
+        $allowedAssignmentProgramSlugs = $this->resolveAllowedAssignmentProgramSlugsForUser($user);
+        $finalTestSettings = $this->resolveFinalTestSettings();
+        $userClassPeriodIds = $this->resolveUserClassPeriodIds($user);
+        $classPeriods = ClassPeriod::with('program')
+            ->withCount('users')
+            ->whereIn('status', ['active', 'upcoming'])
+            ->orderBy('program_id')
+            ->orderBy('batch_number')
+            ->orderBy('name')
+            ->get();
+        $classPeriodsByFinalTest = collect($this->finalTestSettingSlugs())
+            ->mapWithKeys(fn (string $slug) => [$slug => $this->filterClassPeriodsForFinalTest($classPeriods, $slug)])
+            ->all();
+        $finalTestSettings = $this->filterFinalTestSettingsToAvailableBatches($finalTestSettings, $classPeriodsByFinalTest);
+
+        $primaryPrograms = [
+            [
+                'name' => 'TOEFL ITP',
+                'description' => 'Start the TOEFL ITP final assessment with full mockup coverage.',
+                'route' => route('final-test.show', ['program' => 'toefl-itp']),
+                'slug' => 'toefl-itp',
+                'color' => 'green',
+            ],
+            [
+                'name' => 'IELTS Academic',
+                'description' => 'Open the IELTS Academic final test experience.',
+                'route' => route('final-test.show', ['program' => 'ielts-academic']),
+                'slug' => 'ielts-academic',
+                'color' => 'purple',
+            ],
+            [
+                'name' => 'IELTS General',
+                'description' => 'Access the IELTS General program final test page.',
+                'route' => route('final-test.show', ['program' => 'ielts-general']),
+                'slug' => 'ielts-general',
+                'color' => 'red',
+            ],
+            [
+                'name' => 'PTE Academic',
+                'description' => 'View the PTE Academic final assessment and practice materials.',
+                'route' => route('final-test.show', ['program' => 'pte-academic']),
+                'slug' => 'pte-academic',
+                'color' => 'orange',
+            ],
+        ];
+
+        $primaryPrograms = collect($primaryPrograms)
+            ->map(function (array $program) use ($finalTestSettings, $user, $userClassPeriodIds) {
+                $settings = $finalTestSettings[$program['slug']] ?? ['enabled' => true, 'class_period_ids' => []];
+                $program['enabled'] = (bool) ($settings['enabled'] ?? true);
+                $program['class_period_ids'] = array_values(array_map('intval', $settings['class_period_ids'] ?? []));
+                $program['batch_restricted'] = !empty($program['class_period_ids']);
+                $program['batch_allowed'] = $this->userCanAccessFinalTestBatch($user, $program['class_period_ids'], $userClassPeriodIds);
+
+                return $program;
+            })
+            ->filter(fn (array $program) => $user?->isAdmin() || $program['enabled'])
+            ->values()
+            ->all();
+
+        $grammarPrograms = collect([
+            [
+                'name' => 'Introductory Grammar for Writing',
+                'variant' => 'introductory',
+                'settings_slug' => 'introductory-grammar-for-writing',
+                'route' => route('final-test.show', ['program' => 'grammar-for-writing', 'variant' => 'introductory']),
+            ],
+            [
+                'name' => 'Grammar for Writing Complexity',
+                'variant' => 'complexity',
+                'settings_slug' => 'complexity-grammar-for-writing',
+                'route' => route('final-test.show', ['program' => 'grammar-for-writing', 'variant' => 'complexity']),
+            ],
+            [
+                'name' => 'Grammar for Writing Proficiency',
+                'variant' => 'proficiency',
+                'settings_slug' => 'proficiency-grammar-for-writing',
+                'route' => route('final-test.show', ['program' => 'grammar-for-writing', 'variant' => 'proficiency']),
+            ],
+            [
+                'name' => 'Grammar for Writing Fast Track',
+                'variant' => 'fast-track',
+                'settings_slug' => 'fast-track-grammar-for-writing',
+                'route' => route('final-test.show', ['program' => 'grammar-for-writing', 'variant' => 'fast-track']),
+            ],
+        ])
+            ->map(function (array $program) use ($finalTestSettings, $user, $userClassPeriodIds) {
+                $settings = $finalTestSettings[$program['settings_slug']] ?? ['enabled' => true, 'class_period_ids' => []];
+                $program['enabled'] = (bool) ($settings['enabled'] ?? true);
+                $program['class_period_ids'] = array_values(array_map('intval', $settings['class_period_ids'] ?? []));
+                $program['batch_allowed'] = $this->userCanAccessFinalTestBatch($user, $program['class_period_ids'], $userClassPeriodIds);
+
+                return $program;
+            })
+            ->filter(fn (array $program) => $user?->isAdmin() || ($program['enabled'] && $program['batch_allowed']))
+            ->values()
+            ->all();
+
+        $speakingPrograms = collect([
+            [
+                'name' => 'Introductory Speaking',
+                'variant' => 'introductory',
+                'settings_slug' => 'introductory-speaking',
+                'route' => route('final-test.show', ['program' => 'speaking', 'variant' => 'introductory']),
+            ],
+            [
+                'name' => 'Intermediate Speaking',
+                'variant' => 'intermediate',
+                'settings_slug' => 'intermediate-speaking',
+                'route' => route('final-test.show', ['program' => 'speaking', 'variant' => 'intermediate']),
+            ],
+            [
+                'name' => 'Advanced Speaking',
+                'variant' => 'advanced',
+                'settings_slug' => 'advanced-speaking',
+                'route' => route('final-test.show', ['program' => 'speaking', 'variant' => 'advanced']),
+            ],
+        ])
+            ->map(function (array $program) use ($finalTestSettings, $user, $userClassPeriodIds) {
+                $settings = $finalTestSettings[$program['settings_slug']] ?? ['enabled' => true, 'class_period_ids' => []];
+                $program['enabled'] = (bool) ($settings['enabled'] ?? true);
+                $program['class_period_ids'] = array_values(array_map('intval', $settings['class_period_ids'] ?? []));
+                $program['batch_allowed'] = $this->userCanAccessFinalTestBatch($user, $program['class_period_ids'], $userClassPeriodIds);
+
+                return $program;
+            })
+            ->filter(fn (array $program) => $user?->isAdmin() || ($program['enabled'] && $program['batch_allowed']))
+            ->values()
+            ->all();
+
+        $studentFocusedView = (bool) ($user?->isStudent());
+        $enrolledFinalTestSlugs = $studentFocusedView
+            ? $studentFinalTestAccess->resolveEnrolledFinalTestSlugs($user)
+            : [];
+        $studentFinalTestCards = [];
+
+        if ($studentFocusedView) {
+            foreach ($primaryPrograms as $program) {
+                if (!in_array($program['slug'], $enrolledFinalTestSlugs, true) || empty($program['batch_allowed'])) {
+                    continue;
+                }
+
+                $studentFinalTestCards[] = array_merge($program, ['card_type' => 'primary']);
+            }
+
+            foreach ($grammarPrograms as $program) {
+                if (!in_array($program['settings_slug'], $enrolledFinalTestSlugs, true)) {
+                    continue;
+                }
+
+                $studentFinalTestCards[] = array_merge($program, [
+                    'card_type' => 'track',
+                    'slug' => $program['settings_slug'],
+                    'description' => 'Final assessment untuk ' . $program['name'] . '.',
+                ]);
+            }
+
+            foreach ($speakingPrograms as $program) {
+                if (!in_array($program['settings_slug'], $enrolledFinalTestSlugs, true)) {
+                    continue;
+                }
+
+                $studentFinalTestCards[] = array_merge($program, [
+                    'card_type' => 'track',
+                    'slug' => $program['settings_slug'],
+                    'description' => 'Final assessment untuk ' . $program['name'] . '.',
+                ]);
+            }
+
+            $primaryPrograms = collect($primaryPrograms)
+                ->filter(fn (array $program) => in_array($program['slug'], $enrolledFinalTestSlugs, true))
+                ->values()
+                ->all();
+        }
+
+        return view('assignments.final-test.index', compact(
+            'primaryPrograms',
+            'grammarPrograms',
+            'speakingPrograms',
+            'allowedAssignmentProgramSlugs',
+            'classPeriods',
+            'classPeriodsByFinalTest',
+            'finalTestSettings',
+            'userClassPeriodIds',
+            'studentFocusedView',
+            'studentFinalTestCards',
+        ));
+    }
+
+    public function updateFinalTestSettings(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user || !$user->isAdmin()) {
+            abort(403);
+        }
+
+        $programSlugs = $this->finalTestSettingSlugs();
+
+        $validated = $request->validate([
+            'tests' => ['nullable', 'array'],
+            'tests.*.enabled' => ['nullable', 'in:0,1'],
+            'tests.*.class_period_ids' => ['nullable', 'array'],
+            'tests.*.class_period_ids.*' => ['integer', 'exists:class_periods,id'],
+        ]);
+
+        // Load current settings and only update keys provided in the request
+        $currentSettings = $this->resolveFinalTestSettings();
+        $activeClassPeriods = ClassPeriod::with('program')
+            ->withCount('users')
+            ->whereIn('status', ['active', 'upcoming'])
+            ->get();
+        $classPeriodsByFinalTest = collect($programSlugs)
+            ->mapWithKeys(fn (string $slug) => [$slug => $this->filterClassPeriodsForFinalTest($activeClassPeriods, $slug)])
+            ->all();
+
+        $inputTests = $validated['tests'] ?? [];
+        foreach ($programSlugs as $slug) {
+            if (! array_key_exists($slug, $inputTests)) {
+                // preserve existing setting for this slug
+                continue;
+            }
+
+            $testInput = $inputTests[$slug] ?? [];
+            $allowedIds = $classPeriodsByFinalTest[$slug]->pluck('id')->map(fn ($id) => (int) $id)->all();
+            $selectedIds = array_values(array_unique(array_map('intval', $testInput['class_period_ids'] ?? [])));
+
+            $currentSettings[$slug] = [
+                'enabled' => ($testInput['enabled'] ?? '0') === '1',
+                'class_period_ids' => array_values(array_intersect($selectedIds, $allowedIds)),
+            ];
+        }
+
+        Setting::updateOrCreate(
+            ['key' => 'final_test_management'],
+            ['value' => json_encode($currentSettings, JSON_UNESCAPED_SLASHES), 'type' => 'json']
+        );
+
+        if ($request->input('return_to') === 'admin.manage-final-test') {
+            return redirect()->route('admin.manage-final-test')->with('success', 'Final test management settings updated.');
+        }
+
+        return redirect()->route('final-test')->with('success', 'Final test management settings updated.');
+    }
+
+    public function finalTestProgram(Request $request, string $program, ?string $variant = null)
+    {
+        $programs = [
+            'grammar-for-writing' => [
+                'name' => 'Grammar for Writing',
+                'description' => 'Final assessment page for Grammar for Writing.',
+                'accent' => 'blue',
+                'variants' => ['introductory', 'complexity', 'proficiency', 'fast-track'],
+            ],
+            'toefl-itp' => [
+                'name' => 'TOEFL ITP',
+                'description' => 'Final assessment page for TOEFL ITP.',
+                'accent' => 'green',
+                'variants' => [],
+            ],
+            'ielts-academic' => [
+                'name' => 'IELTS Academic',
+                'description' => 'Final assessment page for IELTS Academic.',
+                'accent' => 'purple',
+                'variants' => [],
+            ],
+            'pte-academic' => [
+                'name' => 'PTE Academic',
+                'description' => 'Final assessment page for PTE Academic.',
+                'accent' => 'orange',
+                'variants' => [],
+            ],
+            'ielts-general' => [
+                'name' => 'IELTS General',
+                'description' => 'Final assessment page for IELTS General.',
+                'accent' => 'red',
+                'variants' => [],
+            ],
+            'speaking' => [
+                'name' => 'Speaking',
+                'description' => 'Final assessment page for Speaking.',
+                'accent' => 'yellow',
+                'variants' => ['introductory', 'intermediate', 'advanced'],
+            ],
+        ];
+
+        if (! isset($programs[$program])) {
+            abort(404);
+        }
+
+        $selectedProgram = $programs[$program];
+
+        if ($variant !== null && ! in_array($variant, $selectedProgram['variants'], true)) {
+            abort(404);
+        }
+
+        $user = Auth::user();
+        $studentFinalTestAccess = $this->studentFinalTestAccess();
+
+        // if ($user?->isStudent() && !$studentFinalTestAccess->canAccessMenu($user)) {
+        //     return redirect()->route('assignments.index')
+        //         ->with('error', 'Final Test akan tersedia setelah Anda menyelesaikan semua meeting di Assignment.');
+        // }
+
+        $allowedAssignmentProgramSlugs = $this->resolveAllowedAssignmentProgramSlugsForUser($user);
+        $finalTestSettings = $this->resolveFinalTestSettings();
+        $settingsKey = $this->resolveFinalTestSettingsKey($program, $variant);
+        $programSettings = $finalTestSettings[$settingsKey] ?? ['enabled' => true, 'class_period_ids' => []];
+        $activeClassPeriods = ClassPeriod::with('program')
+            ->whereIn('status', ['active', 'upcoming'])
+            ->get();
+        $availableClassPeriodIds = $this->filterClassPeriodsForFinalTest($activeClassPeriods, $settingsKey)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+        $programSettings['class_period_ids'] = array_values(array_intersect(
+            array_map('intval', $programSettings['class_period_ids'] ?? []),
+            $availableClassPeriodIds
+        ));
+
+        if (!$user?->isAdmin() && empty($programSettings['enabled'])) {
+            return redirect()->route('final-test')
+                ->with('error', 'Final test ini belum ditampilkan oleh admin.');
+        }
+
+        if (!$this->userCanAccessFinalTestBatch($user, $programSettings['class_period_ids'] ?? [], $this->resolveUserClassPeriodIds($user))) {
+            return redirect()->route('final-test')
+                ->with('error', 'Batch Anda belum memiliki akses ke final test ini.');
+        }
+
+        if ($user?->isStudent()) {
+            $enrolledFinalTestSlugs = $studentFinalTestAccess->resolveEnrolledFinalTestSlugs($user);
+            if (!in_array($settingsKey, $enrolledFinalTestSlugs, true)) {
+                return redirect()->route('final-test')
+                    ->with('error', 'Anda hanya dapat mengakses Final Test untuk program kelas yang Anda ambil.');
+            }
+        } elseif (!empty($allowedAssignmentProgramSlugs) && !in_array($program, $allowedAssignmentProgramSlugs, true)) {
+            return redirect()->route('final-test')
+                ->with('error', 'You can only access final tests for your registered program.');
+        }
+
+        $variantLabel = $variant ? str($variant)->replace('-', ' ')->title()->toString() : null;
+
+        $allowedBatches = \App\Models\ClassPeriod::whereIn('id', $programSettings['class_period_ids'] ?? [])->get()->map(function($period) {
+            return ($period->batch_number ? 'Batch ' . $period->batch_number : 'Batch') . ' — ' . $period->name;
+        })->toArray();
+        $allowedBatchesText = empty($allowedBatches) ? 'All Batches (Public)' : implode(', ', $allowedBatches);
+
+        $studentBatchName = 'Unknown Batch';
+        if ($user?->isStudent()) {
+            $userClassPeriodIds = $this->resolveUserClassPeriodIds($user);
+            $intersect = array_intersect($userClassPeriodIds, $programSettings['class_period_ids'] ?? []);
+            $periodId = !empty($intersect) ? reset($intersect) : (reset($userClassPeriodIds) ?: null);
+            if ($periodId) {
+                $period = \App\Models\ClassPeriod::find($periodId);
+                $studentBatchName = $period ? (($period->batch_number ? 'Batch ' . $period->batch_number : 'Batch') . ' — ' . $period->name) : 'Unknown Batch';
+            }
+        }
+
+        $displayBatch = $user?->isAdmin() || $user?->isTeacher() ? $allowedBatchesText : $studentBatchName;
+
+        return view('assignments.final-test.show', compact('program', 'variant', 'selectedProgram', 'variantLabel', 'displayBatch'));
+    }
+
+    public function completeFinalTest(Request $request, string $program, ?string $variant = null)
+    {
+        $validated = $request->validate([
+            'score' => ['nullable', 'numeric', 'min:0', 'max:999'],
+            'time_spent_seconds' => ['nullable', 'integer', 'min:0'],
+            'answers' => ['nullable', 'array'],
+        ]);
+
+        $access = $this->resolveFinalTestAccess($program, $variant);
+
+        if ($access instanceof \Illuminate\Http\RedirectResponse) {
+            return $access;
+        }
+
+        $user = Auth::user();
+        $settingsKey = $this->resolveFinalTestSettingsKey($program, $variant);
+        $testType = $this->finalTestCertificateType($settingsKey);
+        $testLabel = $this->finalTestDisplayLabel($program, $variant, $access['selectedProgram']);
+        $timeSpent = (int) ($validated['time_spent_seconds'] ?? 0);
+        $score = $validated['score'] ?? 100;
+
+        $result = FinalTestResult::create([
+            'user_id' => $user?->id,
+            'name' => $user?->name,
+            'email' => $user?->email,
+            'candidate_id' => $user ? 'FT-' . str_pad((string) $user->id, 5, '0', STR_PAD_LEFT) : null,
+            'test_type' => $testType,
+            'test_label' => $testLabel,
+            'status' => 'completed',
+            'duration_minutes' => $timeSpent > 0 ? (int) ceil($timeSpent / 60) : null,
+            'time_spent_seconds' => $timeSpent ?: null,
+            'score' => $score,
+            'answers_data' => $validated['answers'] ?? [],
+            'evaluation_data' => [
+                'certificate_email_status' => 'pending',
+                'completed_from' => 'final_test',
+            ],
+            'started_at' => $timeSpent > 0 ? now()->subSeconds($timeSpent) : now(),
+            'completed_at' => now(),
+        ]);
+
+        $emailStatus = $this->sendFinalTestCertificateEmail($result);
+
+        return redirect()
+            ->route('final-test.results.show', $result)
+            ->with($emailStatus === 'queued' ? 'warning' : ($emailStatus === 'sent' ? 'success' : 'error'), $emailStatus === 'sent'
+                ? 'Final test completed. Certificate has been sent to your email.'
+                : ($emailStatus === 'queued'
+                    ? 'Final test completed. Certificate email has been queued for delivery.'
+                    : 'Final test completed, but sending the certificate email failed. Please contact support.'));
+    }
+
+    public function showFinalTestResult(FinalTestResult $result)
+    {
+        $this->authorizeFinalTestResultAccess($result);
+
+        $certificateAvailable = FreeTestCertificate::where('test_type', $result->test_type)
+            ->where('is_active', true)
+            ->exists();
+
+        return view('assignments.final-test.result', compact('result', 'certificateAvailable'));
+    }
+
+    public function downloadFinalTestCertificate(FinalTestResult $result)
+    {
+        $this->authorizeFinalTestResultAccess($result);
+
+        $certificate = FreeTestCertificate::where('test_type', $result->test_type)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$certificate) {
+            return back()->with('error', 'Sertifikat belum tersedia untuk final test ini.');
+        }
+
+        return $this->makeFinalTestCertificatePdf($result, $certificate)
+            ->download('Certificate_' . str_replace(' ', '_', $result->test_label ?: 'Final_Test') . '_' . str_replace(' ', '_', $result->name ?: 'Student') . '.pdf');
+    }
+
+    public function speakingLevel(string $level)
+    {
+        $allowedLevels = ['introductory', 'intermediate', 'advanced'];
+
+        if (! in_array($level, $allowedLevels, true)) {
+            abort(404);
+        }
+
+        return view('assignments.speaking-classes', ['level' => $level]);
     }
 
     public function ieltsGeneral()
@@ -108,7 +675,371 @@ class AssignmentController extends Controller
             return 'grammar-for-writing';
         }
 
+        if ($request->routeIs('final-test.show') || $request->routeIs('assignments.final-test.show')) {
+            return $request->route('program');
+        }
+
         return null;
+    }
+
+    protected function studentFinalTestAccess(): StudentFinalTestAccess
+    {
+        return app(StudentFinalTestAccess::class);
+    }
+
+    protected function finalTestSettingSlugs(): array
+    {
+        return [
+            'toefl-itp',
+            'ielts-academic',
+            'ielts-general',
+            'pte-academic',
+            'introductory-grammar-for-writing',
+            'complexity-grammar-for-writing',
+            'proficiency-grammar-for-writing',
+            'fast-track-grammar-for-writing',
+            'introductory-speaking',
+            'intermediate-speaking',
+            'advanced-speaking',
+        ];
+    }
+
+    protected function grammarWritingFinalTestTrackSlugs(): array
+    {
+        return [
+            'introductory' => 'introductory-grammar-for-writing',
+            'complexity' => 'complexity-grammar-for-writing',
+            'proficiency' => 'proficiency-grammar-for-writing',
+            'fast-track' => 'fast-track-grammar-for-writing',
+        ];
+    }
+
+    protected function speakingFinalTestTrackSlugs(): array
+    {
+        return [
+            'introductory' => 'introductory-speaking',
+            'intermediate' => 'intermediate-speaking',
+            'advanced' => 'advanced-speaking',
+        ];
+    }
+
+    protected function resolveFinalTestSettingsKey(string $program, ?string $variant = null): string
+    {
+        if ($program === 'grammar-for-writing' && $variant !== null) {
+            return $this->grammarWritingFinalTestTrackSlugs()[$variant] ?? $program;
+        }
+
+        if ($program === 'speaking' && $variant !== null) {
+            return $this->speakingFinalTestTrackSlugs()[$variant] ?? $program;
+        }
+
+        return $program;
+    }
+
+    protected function resolveFinalTestAccess(string $program, ?string $variant = null): array|\Illuminate\Http\RedirectResponse
+    {
+        $programs = [
+            'grammar-for-writing' => [
+                'name' => 'Grammar for Writing',
+                'description' => 'Final assessment page for Grammar for Writing.',
+                'accent' => 'blue',
+                'variants' => ['introductory', 'complexity', 'proficiency', 'fast-track'],
+            ],
+            'toefl-itp' => [
+                'name' => 'TOEFL ITP',
+                'description' => 'Final assessment page for TOEFL ITP.',
+                'accent' => 'green',
+                'variants' => [],
+            ],
+            'ielts-academic' => [
+                'name' => 'IELTS Academic',
+                'description' => 'Final assessment page for IELTS Academic.',
+                'accent' => 'purple',
+                'variants' => [],
+            ],
+            'pte-academic' => [
+                'name' => 'PTE Academic',
+                'description' => 'Final assessment page for PTE Academic.',
+                'accent' => 'orange',
+                'variants' => [],
+            ],
+            'ielts-general' => [
+                'name' => 'IELTS General',
+                'description' => 'Final assessment page for IELTS General.',
+                'accent' => 'red',
+                'variants' => [],
+            ],
+            'speaking' => [
+                'name' => 'Speaking',
+                'description' => 'Final assessment page for Speaking.',
+                'accent' => 'yellow',
+                'variants' => ['introductory', 'intermediate', 'advanced'],
+            ],
+        ];
+
+        if (!isset($programs[$program])) {
+            abort(404);
+        }
+
+        $selectedProgram = $programs[$program];
+
+        if ($variant !== null && !in_array($variant, $selectedProgram['variants'], true)) {
+            abort(404);
+        }
+
+        $user = Auth::user();
+        $studentFinalTestAccess = $this->studentFinalTestAccess();
+
+        // if ($user?->isStudent() && !$studentFinalTestAccess->canAccessMenu($user)) {
+        //     return redirect()->route('assignments.index')
+        //         ->with('error', 'Final Test akan tersedia setelah Anda menyelesaikan semua meeting di Assignment.');
+        // }
+
+        $settingsKey = $this->resolveFinalTestSettingsKey($program, $variant);
+        $programSettings = $this->resolveFinalTestSettings()[$settingsKey] ?? ['enabled' => true, 'class_period_ids' => []];
+        $activeClassPeriods = ClassPeriod::with('program')
+            ->whereIn('status', ['active', 'upcoming'])
+            ->get();
+        $availableClassPeriodIds = $this->filterClassPeriodsForFinalTest($activeClassPeriods, $settingsKey)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+        $programSettings['class_period_ids'] = array_values(array_intersect(
+            array_map('intval', $programSettings['class_period_ids'] ?? []),
+            $availableClassPeriodIds
+        ));
+
+        if (!$user?->isAdmin() && empty($programSettings['enabled'])) {
+            return redirect()->route('final-test')
+                ->with('error', 'Final test ini belum ditampilkan oleh admin.');
+        }
+
+        if (!$this->userCanAccessFinalTestBatch($user, $programSettings['class_period_ids'] ?? [], $this->resolveUserClassPeriodIds($user))) {
+            return redirect()->route('final-test')
+                ->with('error', 'Batch Anda belum memiliki akses ke final test ini.');
+        }
+
+        if ($user?->isStudent()) {
+            $enrolledFinalTestSlugs = $studentFinalTestAccess->resolveEnrolledFinalTestSlugs($user);
+            if (!in_array($settingsKey, $enrolledFinalTestSlugs, true)) {
+                return redirect()->route('final-test')
+                    ->with('error', 'Anda hanya dapat mengakses Final Test untuk program kelas yang Anda ambil.');
+            }
+        } else {
+            $allowedAssignmentProgramSlugs = $this->resolveAllowedAssignmentProgramSlugsForUser($user);
+            if (!empty($allowedAssignmentProgramSlugs) && !in_array($program, $allowedAssignmentProgramSlugs, true)) {
+                return redirect()->route('final-test')
+                    ->with('error', 'You can only access final tests for your registered program.');
+            }
+        }
+
+        return ['selectedProgram' => $selectedProgram, 'settingsKey' => $settingsKey];
+    }
+
+    protected function finalTestCertificateType(string $settingsKey): string
+    {
+        return str_replace('-', '_', $settingsKey);
+    }
+
+    protected function finalTestDisplayLabel(string $program, ?string $variant, array $selectedProgram): string
+    {
+        $labels = [
+            'toefl-itp' => 'TOEFL ITP',
+            'ielts-academic' => 'IELTS Academic',
+            'ielts-general' => 'IELTS General',
+            'pte-academic' => 'PTE Academic',
+            'introductory-grammar-for-writing' => 'Introductory Grammar For Writing',
+            'complexity-grammar-for-writing' => 'Complexity Grammar For Writing',
+            'proficiency-grammar-for-writing' => 'Proficiency Grammar For Writing',
+            'fast-track-grammar-for-writing' => 'Fast Track Grammar For Writing',
+            'introductory-speaking' => 'Introductory Speaking',
+            'intermediate-speaking' => 'Intermediate Speaking',
+            'advanced-speaking' => 'Advanced Speaking',
+        ];
+
+        $settingsKey = $this->resolveFinalTestSettingsKey($program, $variant);
+
+        return $labels[$settingsKey] ?? ($selectedProgram['name'] . ($variant ? ' - ' . str($variant)->replace('-', ' ')->title() : ''));
+    }
+
+    protected function authorizeFinalTestResultAccess(FinalTestResult $result): void
+    {
+        $user = Auth::user();
+
+        if (!$user || (!$user->isAdmin() && (int) $result->user_id !== (int) $user->id)) {
+            abort(403);
+        }
+    }
+
+    protected function makeFinalTestCertificatePdf(FinalTestResult $result, FreeTestCertificate $certificate)
+    {
+        $user = $result->user ?: (object) ['name' => $result->name ?: 'Student'];
+
+        return Pdf::loadView('final-tests.certificate-pdf', [
+            'user' => $user,
+            'result' => $result,
+            'certificate' => $certificate,
+            'testName' => $result->test_label ?: str($result->test_type)->replace('_', ' ')->title(),
+            'date' => optional($result->completed_at ?? $result->created_at)->format('d F Y') ?? now()->format('d F Y'),
+        ])->setPaper('a4', 'landscape');
+    }
+
+    protected function sendFinalTestCertificateEmail(FinalTestResult $result): string
+    {
+        $certificate = FreeTestCertificate::where('test_type', $result->test_type)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$certificate || !$result->email) {
+            $result->update([
+                'evaluation_data' => array_merge($result->evaluation_data ?? [], [
+                    'certificate_email_status' => 'skipped',
+                ]),
+            ]);
+
+            return 'skipped';
+        }
+
+        $result->update([
+            'evaluation_data' => array_merge($result->evaluation_data ?? [], [
+                'certificate_email_status' => 'queued',
+            ]),
+        ]);
+
+        SendFinalTestCertificateEmailJob::dispatch($result->id);
+
+        return 'queued';
+    }
+
+    protected function resolveFinalTestSettings(): array
+    {
+        $defaults = collect($this->finalTestSettingSlugs())
+            ->mapWithKeys(fn (string $slug) => [$slug => ['enabled' => true, 'class_period_ids' => []]])
+            ->all();
+
+        $setting = Setting::where('key', 'final_test_management')->first();
+
+        if (!$setting || !is_string($setting->value) || trim($setting->value) === '') {
+            return $defaults;
+        }
+
+        $decoded = json_decode($setting->value, true);
+
+        if (!is_array($decoded)) {
+            return $defaults;
+        }
+
+        if (is_array($decoded['grammar-for-writing'] ?? null)) {
+            $legacy = $decoded['grammar-for-writing'];
+            foreach ($this->grammarWritingFinalTestTrackSlugs() as $trackSlug) {
+                if (!isset($decoded[$trackSlug])) {
+                    $decoded[$trackSlug] = $legacy;
+                }
+            }
+        }
+
+        if (is_array($decoded['speaking'] ?? null)) {
+            $legacy = $decoded['speaking'];
+            foreach ($this->speakingFinalTestTrackSlugs() as $trackSlug) {
+                if (!isset($decoded[$trackSlug])) {
+                    $decoded[$trackSlug] = $legacy;
+                }
+            }
+        }
+
+        foreach ($defaults as $slug => $fallback) {
+            $item = is_array($decoded[$slug] ?? null) ? $decoded[$slug] : [];
+            $defaults[$slug] = [
+                'enabled' => array_key_exists('enabled', $item) ? (bool) $item['enabled'] : $fallback['enabled'],
+                'class_period_ids' => array_values(array_map('intval', $item['class_period_ids'] ?? [])),
+            ];
+        }
+
+        return $defaults;
+    }
+
+    protected function resolveUserClassPeriodIds($user): array
+    {
+        if (!$user) {
+            return [];
+        }
+
+        $ids = [];
+
+        if (!empty($user->class_period_id)) {
+            $ids[] = (int) $user->class_period_id;
+        }
+
+        if (method_exists($user, 'enrollments')) {
+            $enrollmentIds = $user->enrollments()
+                ->whereNotNull('class_period_id')
+                ->pluck('class_period_id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+
+            $ids = array_merge($ids, $enrollmentIds);
+        }
+
+        return array_values(array_unique(array_filter($ids)));
+    }
+
+    protected function userCanAccessFinalTestBatch($user, array $allowedClassPeriodIds, array $userClassPeriodIds): bool
+    {
+        if (!$user || $user->isAdmin() || empty($allowedClassPeriodIds)) {
+            return true;
+        }
+
+        return !empty(array_intersect(array_map('intval', $allowedClassPeriodIds), $userClassPeriodIds));
+    }
+
+    protected function filterClassPeriodsForFinalTest($classPeriods, string $slug)
+    {
+        $needles = match ($slug) {
+            'toefl-itp' => ['toefl-itp', 'toefl itp', 'toefl'],
+            'ielts-academic' => ['ielts-academic', 'ielts academic'],
+            'ielts-general' => ['ielts-general', 'ielts general'],
+            'pte-academic' => ['pte-academic', 'pte academic', 'pte'],
+            'introductory-grammar-for-writing' => ['introductory-grammar-for-writing', 'introductory grammar for writing'],
+            'complexity-grammar-for-writing' => ['complexity-grammar-for-writing', 'complexity grammar for writing'],
+            'proficiency-grammar-for-writing' => ['proficiency-grammar-for-writing', 'proficiency grammar for writing'],
+            'fast-track-grammar-for-writing' => ['fast-track-grammar-for-writing', 'fast track grammar for writing', 'fast-track grammar for writing'],
+            'grammar-for-writing' => ['grammar-for-writing', 'grammar for writing'],
+            'introductory-speaking' => ['introductory-speaking', 'introductory speaking'],
+            'intermediate-speaking' => ['intermediate-speaking', 'intermediate speaking'],
+            'advanced-speaking' => ['advanced-speaking', 'advanced speaking'],
+            'speaking' => ['speaking', 'grammar-for-speaking'],
+            default => [$slug],
+        };
+
+        return $classPeriods
+            ->filter(function (ClassPeriod $period) use ($needles) {
+                $program = $period->program;
+                $haystack = strtolower(trim(($program?->slug ?? '') . ' ' . ($program?->name ?? '') . ' ' . $period->name));
+
+                foreach ($needles as $needle) {
+                    if (str_contains($haystack, $needle)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            })
+            ->values();
+    }
+
+    protected function filterFinalTestSettingsToAvailableBatches(array $settings, array $classPeriodsByFinalTest): array
+    {
+        foreach ($settings as $slug => $item) {
+            $allowedIds = ($classPeriodsByFinalTest[$slug] ?? collect())
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+
+            $selectedIds = array_map('intval', $item['class_period_ids'] ?? []);
+            $settings[$slug]['class_period_ids'] = array_values(array_intersect($selectedIds, $allowedIds));
+        }
+
+        return $settings;
     }
 
     protected function resolveAllowedAssignmentProgramSlugsForUser($user): array
@@ -164,7 +1095,16 @@ class AssignmentController extends Controller
     protected function normalizeAssignmentProgramSlug(?string $slug): ?string
     {
         return match ($slug) {
-            'grammar-writing' => 'grammar-for-writing',
+            'grammar-writing',
+            'introductory-grammar-for-writing',
+            'complexity-grammar-for-writing',
+            'proficiency-grammar-for-writing',
+            'fast-track-grammar-for-writing' => 'grammar-for-writing',
+            'grammar-for-speaking',
+            'introductory-speaking',
+            'intermediate-speaking',
+            'advanced-speaking' => 'speaking',
+            'pte' => 'pte-academic',
             'ielts-academic-listening', 'ielts-academic-reading', 'ielts-academic-full-package' => 'ielts-academic',
             default => $slug,
         };
@@ -2206,7 +3146,7 @@ class AssignmentController extends Controller
 
     public function ieltsCambridgeEdition($edition)
     {
-        $validEditions = [16, 17, 18, 19, 20];
+        $validEditions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
         if (!in_array((int)$edition, $validEditions)) {
             abort(404);
         }
@@ -2422,7 +3362,17 @@ class AssignmentController extends Controller
             'category' => 'nullable|in:lesson,practice',
         ]);
 
-        \App\Models\IeltsWritingMeeting::create($request->all());
+        $data = $request->all();
+        if (isset($data['graph_data_json']) && is_string($data['graph_data_json'])) {
+            $decoded = json_decode($data['graph_data_json'], true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $data['graph_data_json'] = $decoded;
+            } else {
+                $data['graph_data_json'] = null; // or handle error
+            }
+        }
+
+        \App\Models\IeltsWritingMeeting::create($data);
 
         return back()->with('success', 'Lesson added successfully.');
     }
@@ -2438,6 +3388,18 @@ class AssignmentController extends Controller
         ]);
 
         $data = $request->except('image');
+        if (isset($data['graph_data_json']) && is_string($data['graph_data_json'])) {
+            if (trim($data['graph_data_json']) === '') {
+                $data['graph_data_json'] = null;
+            } else {
+                $decoded = json_decode($data['graph_data_json'], true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $data['graph_data_json'] = $decoded;
+                } else {
+                    return back()->with('error', 'Invalid JSON format for Graph Data JSON.');
+                }
+            }
+        }
 
         if ($request->hasFile('image')) {
             $imageName = time().'.'.$request->image->extension();  
@@ -5603,8 +6565,10 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         ];
 
         // 3. AI Grading
-        $ollama = new OllamaController();
-        $aiResult = $ollama->gradeSpeaking($transcriptsData);
+        $ai = new \App\Http\Controllers\AiController();
+        $part = 1;
+        $topicTitle = 'practice';
+        $aiResult = $ai->gradeSpeaking($transcriptsData, $part, $topicTitle);
 
         if ($aiResult) {
             $result = $aiResult;
@@ -9774,7 +10738,30 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
                 ->whereIn('part', ['A', 'B', 'C'])
                 ->update(['audio_file' => $audioPath]);
 
-            return redirect()->back()->with('success', 'Audio updated successfully for listening package.');
+            // ── Auto-transcribe + translate (Upload and Choose Audio) ──────────
+            try {
+                /** @var \App\Services\WhisperTranscriptionService $whisper */
+                $whisper = app(\App\Services\WhisperTranscriptionService::class);
+                $transcription = $whisper->transcribeAndTranslate(public_path($audioPath), $publicPath);
+
+                $updates = [];
+                if (!empty($transcription['en'])) {
+                    $updates['transcript_en'] = $transcription['en'];
+                }
+                if (!empty($transcription['id'])) {
+                    $updates['transcript_id'] = $transcription['id'];
+                }
+                if (!empty($updates)) {
+                    \App\Models\ToeflMockupQuestion::where('section', 'listening')
+                        ->whereIn('part', ['A', 'B', 'C'])
+                        ->update($updates);
+                }
+
+                $msg = $transcription['message'] ?: 'Audio berhasil diupload.';
+                return redirect()->back()->with('success', $msg);
+            } catch (\Exception $e) {
+                return redirect()->back()->with('success', 'Audio updated successfully for listening package.');
+            }
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Exception during audio processing: ' . $e->getMessage());
         }
@@ -10261,13 +11248,17 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             $score = ($correctCount / $totalQuestions) * 100; 
         }
 
+        $isReported = !$this->isStudentClassPeriodEnded('toefl-itp');
+
         \App\Models\ToeflReadingScore::updateOrCreate(
             [
                 'user_id' => Auth::id(),
                 'meeting_number' => $request->meeting_number,
+                'is_reported' => $isReported,
             ],
             [
                 'score' => $score,
+                'is_reported' => $isReported,
                 'correct_count' => $correctCount,
                 'total_questions' => $totalQuestions,
             ]
@@ -11402,10 +12393,13 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         // Calculate percentage score
         $score = $questions->count() > 0 ? ($correctCount / $questions->count()) * 100 : 0;
         
+        $isReported = !$this->isStudentClassPeriodEnded('toefl-itp');
+
         // Prepare update criteria
         $updateCriteria = [
             'user_id' => $user->id,
             'meeting_number' => $number,
+            'is_reported' => $isReported,
         ];
 
         if ($setNumber) {
@@ -11416,8 +12410,9 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         \App\Models\ToeflListeningScore::updateOrCreate(
             $updateCriteria,
             [
-                'score' => $score,
-                'answers' => $userAnswers,
+                'score'       => $score,
+                'is_reported' => $isReported,
+                'answers'     => $userAnswers,
                 'submitted_at' => now(),
             ]
         );
@@ -11562,7 +12557,9 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             20 => 'Writing Structure 3',
         ];
         
-        return view('assignments.grammar-writing', compact('program', 'scores', 'meetingTopics', 'selectedClassPeriod'));
+        $isClassEnded = $user?->isStudent() ? $this->isStudentClassPeriodEnded('grammar-for-writing') : false;
+
+        return view('assignments.grammar-writing', compact('program', 'scores', 'meetingTopics', 'selectedClassPeriod', 'isClassEnded'));
     }
 
     public function updatePeriod(Request $request)
@@ -11894,8 +12891,14 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         $maxRawScore = ($questions->count() * 10) + 50;
         $finalScore = $maxRawScore > 0 ? round(($score / $maxRawScore) * 100, 1) : 0;
 
-        // Save score to database
-        $this->saveMeetingScore(1, $finalScore);
+        // Save score to database with answers payload
+        $this->saveMeetingScore(1, $finalScore, [
+            'answers_data' => [
+                'results' => $results,
+                'paragraph_result' => $paragraphResult,
+                'final_score' => $finalScore
+            ]
+        ]);
         
         // Re-fetch vocab for view
         $vocabList = \App\Models\GrammarVocabulary::where('meeting_number', 1)
@@ -13047,8 +14050,15 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             'meeting3_user_paragraph_answer' => $userParagraphAnswer
         ]);
 
-        // Save score to database
-        $this->saveMeetingScore(3, $finalScore);
+        // Save score to database with answers payload
+        $this->saveMeetingScore(3, $finalScore, [
+            'answers_data' => [
+                'results' => $results,
+                'user_answers' => $userAnswers,
+                'user_paragraph_answer' => $userParagraphAnswer,
+                'final_score' => $finalScore
+            ]
+        ]);
 
         return redirect()->route('assignments.grammar-writing.meeting3');
     }
@@ -13575,8 +14585,14 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             'meeting5_user_answers' => $userAnswers
         ]);
 
-        // Save score to database
-        $this->saveMeetingScore(5, $finalScore);
+        // Save score to database with answers payload
+        $this->saveMeetingScore(5, $finalScore, [
+            'answers_data' => [
+                'results' => session('meeting5_results', []),
+                'user_answers' => session('meeting5_user_answers', []),
+                'final_score' => $finalScore
+            ]
+        ]);
 
         return redirect()->route('assignments.grammar-writing.meeting5');
     }
@@ -14268,8 +15284,14 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             'meeting6_user_answers' => $userAnswers
         ]);
 
-        // Save score to database
-        $this->saveMeetingScore(6, $finalScore);
+        // Save score to database with answers payload
+        $this->saveMeetingScore(6, $finalScore, [
+            'answers_data' => [
+                'results' => $results,
+                'user_answers' => $userAnswers,
+                'final_score' => $finalScore
+            ]
+        ]);
 
         return redirect()->route('assignments.grammar-writing.meeting6');
     }
@@ -19438,8 +20460,13 @@ $paraFormatted = $this->getDiffFeedback($paraUserWords, $paraCorrectWords);
             'meeting20_final_score' => $paragraphScore
         ]);
 
-        // Save score to database
-        $this->saveMeetingScore(20, $paragraphScore);
+        // Save score to database with answers payload
+        $this->saveMeetingScore(20, $paragraphScore, [
+            'answers_data' => [
+                'user_answers' => session('meeting20_user_answers', []),
+                'final_score' => $paragraphScore
+            ]
+        ]);
 
         return redirect()->route('assignments.grammar-writing.meeting20');
     }
@@ -20714,17 +21741,28 @@ $paraFormatted = $this->getDiffFeedback($paraUserWords, $paraCorrectWords);
     /**
      * Helper method to save meeting score to database
      */
-    private function saveMeetingScore($meetingNumber, $score)
+    private function saveMeetingScore($meetingNumber, $score, ?array $attributes = null)
     {
+        // Determine if this submission is in Practice Mode (class has ended)
+        $isReported = !$this->isStudentClassPeriodEnded();
+
+        $updateAttributes = [
+            'score'       => $score,
+            'is_reported' => $isReported,
+            'submitted_at' => now(),
+        ];
+
+        if (!empty($attributes) && is_array($attributes)) {
+            $updateAttributes = array_merge($updateAttributes, $attributes);
+        }
+
         MeetingScore::updateOrCreate(
             [
-                'user_id' => Auth::id(),
-                'meeting_number' => $meetingNumber
+                'user_id'        => Auth::id(),
+                'meeting_number' => $meetingNumber,
+                'is_reported'    => $isReported,
             ],
-            [
-                'score' => $score,
-                'submitted_at' => now()
-            ]
+            $updateAttributes
         );
     }
 }

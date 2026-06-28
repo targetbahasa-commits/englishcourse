@@ -4,25 +4,29 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Describe Image Practice - {{ $topic['title'] }} | Target Bahasa</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+<body class="font-sans antialiased bg-gray-50">
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         {{-- Sidebar --}}
-        @if(Auth::check())
-            @php($sidebarRole = strtolower(Auth::user()->active_role ?? 'student'))
-            @if($sidebarRole === 'admin')
-                @include('components.sidebar-admin')
-            @elseif($sidebarRole === 'teacher')
-                @include('components.sidebar-teacher')
-            @elseif(in_array($sidebarRole, ['guest', 'guest_quick']))
-                @include('components.sidebar-guest')
-            @else
-                @include('components.sidebar-student')
-            @endif
-        @else
+        @php
+            if(Auth::check()) {
+                $sidebarRole = strtolower(Auth::user()->active_role ?? 'student');
+            } else {
+                $sidebarRole = 'guest';
+            }
+        @endphp
+        @if($sidebarRole === 'admin')
+            @include('components.sidebar-admin')
+        @elseif($sidebarRole === 'teacher')
+            @include('components.sidebar-teacher')
+        @elseif(in_array($sidebarRole, ['guest', 'guest_quick']))
             @include('components.sidebar-guest')
+        @else
+            @include('components.sidebar-student')
         @endif
 
         {{-- Main Content --}}
@@ -31,13 +35,13 @@
 
                 <!-- Header with Back Button -->
                 <div class="mb-8">
-                    <a href="{{ route('assignments.pte-academic.speaking-writing.describe-image.index') }}" class="inline-flex items-center text-gray-600 hover:text-teal-500 transition-colors mb-4">
+                    <a href="{{ route('assignments.pte-academic.speaking-writing.describe-image.index') }}" class="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors mb-4">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         Back to Selection
                     </a>
 
                     <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 flex items-center justify-center rounded-full bg-gradient-to-br from-teal-400 to-teal-600 text-white shadow-lg shadow-teal-500/30">
+                        <div class="w-14 h-14 flex items-center justify-center rounded-full bg-gradient-to-br from-gray-500 to-gray-700 text-white shadow-lg shadow-gray-500/30">
                             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
@@ -52,17 +56,17 @@
                 <!-- Main UI Block -->
                 <div class="w-full">
                     <!-- Title Bar -->
-                    <div class="bg-teal-500 text-white font-bold text-lg py-3 px-6 rounded-xl shadow-sm mb-2">
+                    <div class="bg-gray-700 text-white font-bold text-lg py-3 px-6 rounded-xl shadow-sm mb-2">
                         Sample Question {{ $topicId }}:
                     </div>
 
                     <!-- Status Line -->
-                    <div class="py-2 px-1 text-base font-semibold" id="statusLine" style="color: #0d9488;">
+                    <div class="py-2 px-1 text-base font-semibold" id="statusLine" style="color: #374151;">
                         Click to Start
                     </div>
 
                     <!-- Image Display Box -->
-                    <div class="border-2 border-teal-300 rounded-xl overflow-hidden p-6 bg-white shadow-sm flex justify-center items-center min-h-96">
+                    <div class="border-2 border-gray-300 rounded-xl overflow-hidden p-6 bg-white shadow-sm flex justify-center items-center min-h-96">
                         @php
                             $imagePath = public_path('storage/images/pte/describe-image/questions/' . $topicId . '.png');
                             $imageExists = file_exists($imagePath);
@@ -83,11 +87,11 @@
                     </div>
 
                     <!-- Recording Controls Box -->
-                    <div class="bg-orange-50 rounded-xl p-5 mt-5 border border-gray-200 shadow-sm">
+                    <div class="bg-gray-100 rounded-xl p-5 mt-5 border border-gray-200 shadow-sm">
                         <div class="flex items-center gap-4">
                             <!-- Mic Button -->
                             <button id="micBtn" onclick="toggleRecording()"
-                                style="width:48px;height:48px;border-radius:50%;background:#fb923c;color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.3s;">
+                                style="width:48px;height:48px;border-radius:50%;background:#6b7280;color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.3s;">
                                 <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                                 </svg>
@@ -106,12 +110,12 @@
                     <!-- Action Buttons -->
                     <div class="flex justify-center items-center gap-4 mt-6">
                         <button id="startBtn" onclick="startSession()"
-                            style="background:#14b8a6;color:white;font-weight:700;padding:12px 24px;border-radius:9999px;border:none;cursor:pointer;box-shadow:0 4px 6px rgba(0,0,0,0.1);transition:background 0.2s;">
+                            style="background:#374151;color:white;font-weight:700;padding:12px 24px;border-radius:9999px;border:none;cursor:pointer;box-shadow:0 4px 6px rgba(0,0,0,0.1);transition:background 0.2s;">
                             Practice with AI Scoring
                         </button>
 
                         <button id="playBtn" onclick="playAnswer()"
-                            style="display:none;background:#14b8a6;color:white;font-weight:700;padding:12px 24px;border-radius:9999px;border:none;cursor:pointer;box-shadow:0 4px 6px rgba(0,0,0,0.1);align-items:center;gap:8px;">
+                            style="display:none;background:#374151;color:white;font-weight:700;padding:12px 24px;border-radius:9999px;border:none;cursor:pointer;box-shadow:0 4px 6px rgba(0,0,0,0.1);align-items:center;gap:8px;">
                             ▶ Play Answer
                         </button>
 
@@ -171,7 +175,7 @@
 
         function setStatus(txt, color) {
             statusLine.textContent = txt;
-            statusLine.style.color = color || '#0d9488';
+            statusLine.style.color = color || '#374151';
         }
 
         function startSession() {
@@ -191,12 +195,12 @@
                     startBtn.style.display = 'none';
                     playBtn.style.display = 'none';
                     restartBtn.style.display = 'inline-flex';
-                    micBtn.style.background = '#fb923c';
-                    setStatus('Beginning in ' + prepTimeLeft + ' sec', '#0d9488');
+                    micBtn.style.background = '#6b7280';
+                    setStatus('Beginning in ' + prepTimeLeft + ' sec', '#374151');
 
                     prepTimer = setInterval(function() {
                         prepTimeLeft--;
-                        setStatus('Beginning in ' + prepTimeLeft + ' sec', '#0d9488');
+                        setStatus('Beginning in ' + prepTimeLeft + ' sec', '#374151');
                         if (prepTimeLeft <= 0) {
                             clearInterval(prepTimer);
                             startRecording();
@@ -252,8 +256,8 @@
             micBtn.style.background = '#9ca3af';
             micBtn.style.boxShadow = 'none';
             progressBar.style.width = '100%';
-            progressBar.style.background = '#2dd4bf';
-            setStatus('Recording complete. Listen to your answer below.', '#0d9488');
+            progressBar.style.background = '#6b7280';
+            setStatus('Recording complete. Listen to your answer below.', '#374151');
         }
 
         function toggleRecording() {
@@ -295,9 +299,9 @@
             currentTime.textContent = '00:00';
             progressBar.style.width = '0%';
             progressBar.style.background = '#d1d5db';
-            micBtn.style.background = '#fb923c';
+            micBtn.style.background = '#6b7280';
             micBtn.style.boxShadow = 'none';
-            setStatus('Click to Start', '#0d9488');
+            setStatus('Click to Start', '#374151');
             startBtn.style.display = 'inline-flex';
             playBtn.style.display = 'none';
             restartBtn.style.display = 'none';
@@ -308,5 +312,6 @@
             clearInterval(recordTimer);
         }
     </script>
+    @include('assignments.ielts.writing.practice_toolbar', ['meeting' => (object)['task_type' => 1], 'grammarLevel' => 'all'])
 </body>
 </html>

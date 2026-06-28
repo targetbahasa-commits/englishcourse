@@ -201,8 +201,83 @@
             },
 
             refreshEssay() {
-                if (confirm('Are you sure you want to clear your answer? This cannot be undone.')) {
-                    this.essay = '';
+                if (!confirm('Reset semua teks essay?')) {
+                    return;
+                }
+
+                this.essay = '';
+                this.error = null;
+                this.statusMessage = '';
+                this.showResults = false;
+
+                const textarea = document.querySelector('textarea[x-model="essay"]');
+                if (textarea) {
+                    textarea.value = '';
+                    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+
+                if (window.AutoSave && typeof window.AutoSave.clearSaved === 'function') {
+                    try {
+                        // Clear only the saved data for THIS meeting (storageKey set during init)
+                        window.AutoSave.clearSaved();
+                    } catch (e) {
+                        console.warn('AutoSave clearSaved failed', e);
+                    }
+                }
+            },
+
+            highlightInEssay(original) {
+                this.tab = 'analysis';
+                const highlight = () => {
+                    try {
+                        const container = document.querySelector('.detailed-analysis') || document.querySelector('.p-6.prose');
+                        if (!container) return;
+
+                        // Clear previous highlights
+                        container.querySelectorAll('.tb-highlight').forEach(el => {
+                            el.classList.remove('tb-highlight');
+                            if (el.dataset && el.dataset.replaced === '1') {
+                                const parent = el.parentNode;
+                                while (el.firstChild) parent.insertBefore(el.firstChild, el);
+                                parent.removeChild(el);
+                            }
+                        });
+
+                        const phrase = String(original).trim();
+                        if (!phrase) return;
+
+                        // Find first element whose text contains the phrase
+                        const nodes = Array.from(container.querySelectorAll('*'));
+                        const matchingElement = nodes.find(el => el.childElementCount === 0 && el.innerText && el.innerText.toLowerCase().includes(phrase.toLowerCase()));
+
+                        if (matchingElement) {
+                            const text = matchingElement.innerText;
+                            const idx = text.toLowerCase().indexOf(phrase.toLowerCase());
+                            if (idx >= 0) {
+                                const before = text.slice(0, idx);
+                                const matchText = text.slice(idx, idx + phrase.length);
+                                const after = text.slice(idx + phrase.length);
+                                matchingElement.innerHTML = `${before}<span class="tb-highlight" data-replaced="1">${matchText}</span>${after}`;
+                                const wrapper = matchingElement.querySelector('.tb-highlight');
+                                if (wrapper) wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                return;
+                            }
+                        }
+
+                        const fallback = Array.from(container.querySelectorAll('*')).find(el => el.innerText && el.innerText.toLowerCase().includes(phrase.toLowerCase()));
+                        if (fallback) {
+                            fallback.classList.add('tb-highlight');
+                            fallback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    } catch (e) {
+                        console.error('Highlight failed', e);
+                    }
+                };
+
+                if (typeof this.$nextTick === 'function') {
+                    this.$nextTick(highlight);
+                } else {
+                    setTimeout(highlight, 50);
                 }
             },
 
@@ -348,13 +423,13 @@
     });
 </script>
 
-<div class="h-[calc(100vh-2rem)] flex flex-col overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 pb-24 lg:pb-28" 
+<div class="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50" 
      x-data="ieltsWritingTask({{ json_encode($meeting->idioms ?? []) }}, {{ json_encode($meeting->collocations ?? []) }})"
      @toggle-collocations.window="isCollocationsOpen = !isCollocationsOpen; if(isCollocationsOpen) isIdiomsOpen = false"
      @toggle-idioms.window="isIdiomsOpen = !isIdiomsOpen; if(isIdiomsOpen) isCollocationsOpen = false"
 >
     <!-- WRITING MODE HEADER -->
-    <div x-show="!showResults" class="flex items-center justify-between mb-6">
+    <div x-show="!showResults" class="flex items-center justify-between mb-6 px-4 pt-4 md:px-6 lg:px-8">
         <div class="flex items-center gap-3">
             <a href="{{ $backUrl ?? route('assignments.ielts-academic.writing.practice.index') }}" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
                 <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
@@ -365,25 +440,29 @@
             </div>
         </div>
         
-        <div class="flex gap-3">
-             <div class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-mono font-medium">
-                <span x-text="new Date(time * 1000).toISOString().substr(11, 8)">00:00:00</span>
-             </div>
-             <button @click="submitEssay()" :disabled="loading" class="px-6 py-2 bg-{{ $task == 1 ? 'teal' : 'orange' }}-600 text-white font-bold rounded-lg shadow-md hover:bg-{{ $task == 1 ? 'teal' : 'orange' }}-700 transition-colors flex items-center gap-2">
-                <span x-show="!loading">Submit Answer</span>
-                <span x-show="loading" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
-                <span x-show="loading" x-text="statusMessage || 'Evaluating...'"></span>
-             </button>
-        </div>
+          <div class="flex gap-3">
+                 <div class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-mono font-medium">
+                     <span x-text="new Date(time * 1000).toISOString().substr(11, 8)">00:00:00</span>
+                 </div>
+                 <button @click="refreshEssay()" type="button" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+                     Reset Essay
+                 </button>
+                 <button @click="submitEssay()" :disabled="loading" class="px-6 py-2 bg-{{ $task == 1 ? 'teal' : 'orange' }}-600 text-white font-bold rounded-lg shadow-md hover:bg-{{ $task == 1 ? 'teal' : 'orange' }}-700 transition-colors flex items-center gap-2">
+                     <span x-show="!loading">Submit Answer</span>
+                     <span x-show="loading" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+                     <span x-show="loading" x-text="statusMessage || 'Evaluating...'"></span>
+                 </button>
+          </div>
     </div>
 
     <!-- Error Alert -->
-    <div x-show="error" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700" style="display: none;">
+    <div x-show="error" class="mx-4 md:mx-6 lg:mx-8 mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700" style="display: none;">
         <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         <div>
             <span class="font-bold">Evaluation Failed:</span>
             <span x-text="error"></span>
             <p class="text-sm mt-1 text-red-600">Please ensure your local AI server (LM Studio or Ollama) is running.</p>
+            <p class="text-sm mt-2 text-red-600">💡 <strong>Coba ulang jika gagal memuat</strong></p>
         </div>
         <button @click="error = null" class="ml-auto text-red-400 hover:text-red-600">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -392,12 +471,12 @@
 
     <!-- WRITING MODE CONTENT -->
     <div x-show="!showResults" 
-         class="flex flex-col lg:flex-row flex-1 min-h-0 gap-0 lg:gap-0 overflow-hidden" 
+         class="flex flex-col lg:flex-row flex-1 min-h-0 gap-0 lg:gap-0 overflow-hidden px-4 md:px-6 lg:px-8 pb-4" 
          x-data="{
-             splitLeftWidth: 62,
+             splitLeftWidth: 40,
              isResizing: false,
              startX: 0,
-             startWidth: 62,
+             startWidth: 40,
              resizeMoveHandler: null,
              resizeUpHandler: null,
              splitStorageKey: 'ielts-writing-meeting-split-v2-{{ $meeting->id ?? 0 }}',
@@ -421,7 +500,7 @@
                  const containerWidth = this.$el.clientWidth;
                  if (!containerWidth) return;
                  const deltaPercent = ((event.clientX - this.startX) / containerWidth) * 100;
-                 this.splitLeftWidth = Math.max(40, Math.min(68, this.startWidth + deltaPercent));
+                 this.splitLeftWidth = Math.max(30, Math.min(70, this.startWidth + deltaPercent));
              },
              stopResize() {
                  this.isResizing = false;
@@ -432,7 +511,7 @@
              init() {
                  try {
                      const stored = parseFloat(localStorage.getItem(this.splitStorageKey) || '');
-                     if (!isNaN(stored)) this.splitLeftWidth = Math.max(40, Math.min(68, stored));
+                     if (!isNaN(stored)) this.splitLeftWidth = Math.max(30, Math.min(70, stored));
                  } catch(e) {}
              }
          }">
@@ -662,22 +741,31 @@
                     <h2 class="font-bold text-gray-700">Your Response</h2>
                     <p class="text-xs text-indigo-500 font-medium mt-0.5">Write at least {{ $task == 2 ? '250' : '150' }} words.</p>
                 </div>
-                <span class="text-xs font-semibold text-gray-400" x-data="{ count: 0 }" x-init="$watch('essay', value => count = value.trim().split(/\s+/).filter(a => a).length)">Word Count: <span x-text="count">0</span></span>
+                <span
+                    class="text-xs font-semibold text-gray-400"
+                    x-data="{
+                        count: 0,
+                        countWords(text) {
+                            const tokens = String(text || '').trim().split(/\s+/).filter(Boolean);
+
+                            // Count only tokens containing letters; pure numbers/punctuation are excluded.
+                            return tokens.filter(token => /[A-Za-z]/.test(token)).length;
+                        }
+                    }"
+                    x-init="count = countWords(essay || ''); $watch('essay', value => count = countWords(value))"
+                >Word Count: <span x-text="count">0</span></span>
             </div>
             <textarea x-model="essay" class="flex-1 min-h-0 w-full p-6 resize-none overflow-y-auto focus:outline-none focus:bg-blue-50/30 transition-colors font-serif leading-relaxed text-gray-800 text-lg" placeholder="Start typing your answer here..."></textarea>
             
-            <!-- Footer: Refresh/Reset -->
+            <!-- Footer -->
             <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
-                <button @click="refreshEssay()" class="text-gray-400 hover:text-red-500 text-sm font-medium flex items-center gap-2 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    Refresh Jawaban
-                </button>
+                <!-- Refresh button removed per UX update -->
             </div>
         </div>
     </div>
 
     <!-- RESULT MODE (FULL PAGE) -->
-    <div x-show="showResults" class="flex flex-col flex-1 min-h-0 overflow-hidden" style="display: none;">
+    <div x-show="showResults" class="flex flex-col flex-1 min-h-0 overflow-hidden px-4 md:px-6 lg:px-8 pt-4" style="display: none;">
         <!-- Result Header -->
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-4">
@@ -685,10 +773,10 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </button>
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Your Evaluation Results</h2>
+                    <h2 class="text-2xl font-bold text-red-600">Your Evaluation Results</h2>
                     <div class="flex items-center gap-2 mt-1">
                         <span class="text-gray-500 text-sm">Overall Band Score:</span>
-                        <span class="px-3 py-0.5 bg-{{ $task == 1 ? 'teal' : 'orange' }}-100 text-{{ $task == 1 ? 'teal' : 'orange' }}-700 font-bold rounded-full text-lg" x-text="result?.scores?.overall_band"></span>
+                        <span class="px-3 py-0.5 bg-red-100 text-red-700 font-bold rounded-full text-lg" x-text="result?.scores?.overall_band"></span>
                     </div>
                 </div>
             </div>
@@ -697,19 +785,19 @@
             <div v-if="result" class="flex gap-4">
                  <div class="flex flex-col items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm min-w-[100px]">
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Task</span>
-                    <span class="text-xl font-bold text-gray-800" x-text="result?.scores?.task_achievement"></span>
+                    <span class="text-xl font-bold text-red-700" x-text="result?.scores?.task_achievement"></span>
                 </div>
                  <div class="flex flex-col items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm min-w-[100px]">
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Coherence</span>
-                    <span class="text-xl font-bold text-gray-800" x-text="result?.scores?.coherence_cohesion"></span>
+                    <span class="text-xl font-bold text-red-700" x-text="result?.scores?.coherence_cohesion"></span>
                 </div>
                  <div class="flex flex-col items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm min-w-[100px]">
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Lexical</span>
-                    <span class="text-xl font-bold text-gray-800" x-text="result?.scores?.lexical_resource"></span>
+                    <span class="text-xl font-bold text-red-700" x-text="result?.scores?.lexical_resource"></span>
                 </div>
                  <div class="flex flex-col items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm min-w-[100px]">
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Grammar</span>
-                    <span class="text-xl font-bold text-gray-800" x-text="result?.scores?.grammatical_range"></span>
+                    <span class="text-xl font-bold text-red-700" x-text="result?.scores?.grammatical_range"></span>
                 </div>
             </div>
         </div>
@@ -735,6 +823,36 @@
                     <!-- Correction Content -->
                     <style>
                         .detailed-analysis .grammar-correction { display: none; }
+                    </style>
+                    <style>
+                        /* Highlight struck-through / error tokens to make them visible in the essay */
+                        .detailed-analysis s,
+                        .detailed-analysis del,
+                        .detailed-analysis .line-through,
+                        .detailed-analysis .text-red-600,
+                        .detailed-analysis .bg-red-100 {
+                            background: rgba(254, 202, 202, 0.3);
+                            padding: 0.12rem 0.25rem;
+                            border-radius: 6px;
+                            color: inherit;
+                            margin: 0 0.05rem;
+                        }
+
+                        /* Make sure removal markers remain visually crossed-out */
+                        .detailed-analysis s,
+                        .detailed-analysis del,
+                        .detailed-analysis .line-through {
+                            text-decoration: line-through;
+                        }
+                    </style>
+                    <style>
+                        /* Highlight wrapper applied when user clicks a vocab item */
+                        .tb-highlight {
+                            background: rgba(167,139,250,0.18);
+                            padding: 0.12rem 0.22rem;
+                            border-radius: 6px;
+                            box-shadow: 0 0 0 2px rgba(167,139,250,0.06) inset;
+                        }
                     </style>
                     <!-- Correction Content -->
                     <style>
@@ -884,9 +1002,9 @@
                                 <template x-for="item in result?.vocabulary_improvements">
                                     <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100">
                                         <div class="flex items-center gap-2 mb-1">
-                                            <span class="text-red-500 line-through" x-text="item.original"></span>
+                                            <button type="button" @click.prevent="highlightInEssay(item.original)" class="text-red-500 line-through hover:opacity-90 cursor-pointer" x-text="item.original"></button>
                                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                                            <span class="text-green-600 font-bold" x-text="item.improved"></span>
+                                            <button type="button" class="text-green-600 font-bold" @click.prevent="highlightInEssay(item.improved)" x-text="item.improved"></button>
                                         </div>
                                         <p class="text-sm text-gray-600" x-text="item.explanation"></p>
                                     </div>

@@ -3,6 +3,8 @@
 <head>
     <meta charset="utf-8">
     <title>Invoice {{ $payment->invoice_number }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     <style>
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;

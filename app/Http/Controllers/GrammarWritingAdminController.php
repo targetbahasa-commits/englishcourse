@@ -23,10 +23,12 @@ use App\Models\Meeting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Concerns\HasProficiencyMeetingContent;
 
 class GrammarWritingAdminController extends Controller
 {
     use ScoresWordMatchAnswers;
+    use HasProficiencyMeetingContent;
 
     /**
      * GrammarWritingAdminController
@@ -45,13 +47,47 @@ class GrammarWritingAdminController extends Controller
         return $user;
     }
 
+    /**
+     * Resolve the set of grammar program slugs the given user is enrolled in.
+     * Includes both direct program_id assignment and active/completed enrollments.
+     */
+    private function resolveGrammarEnrolledSlugs(?\App\Models\User $user): array
+    {
+        if (!$user) {
+            return [];
+        }
+
+        $slugs = [];
+
+        if ($user->program_id && $user->program) {
+            $slugs[] = $user->program->slug;
+        }
+
+        $enrollmentSlugs = $user->enrollments()
+            ->with('program:id,slug')
+            ->whereIn('status', ['active', 'completed'])
+            ->get()
+            ->pluck('program.slug')
+            ->filter()
+            ->toArray();
+
+        $accessSlugs = $user->programAccesses()
+            ->with('program:id,slug')
+            ->get()
+            ->pluck('program.slug')
+            ->filter()
+            ->toArray();
+
+        return array_values(array_unique(array_merge($slugs, $enrollmentSlugs, $accessSlugs)));
+    }
+
     public function updateBatchPeriod(UpdateAssignmentBatchPeriodRequest $request, ManageGrammarWritingMeetings $manageGrammarWritingMeetings)
     {
         $this->requireGrammarWritingAdminOrTeacher();
 
         $result = $manageGrammarWritingMeetings->updateBatchPeriod(
             $request->programId(),
-            $request->period(),
+            $request->classPeriodId(),
         );
 
         if (!$result['ok']) {
@@ -66,20 +102,495 @@ class GrammarWritingAdminController extends Controller
         return view('assignments.grammar-writing-classes');
     }
 
-    public function grammarWritingTrack(string $track)
+    public function grammarWritingPractice()
+    {
+        $topics = \App\Models\GrammarTopic::orderBy('order')->get();
+
+        if ($topics->isEmpty()) {
+            $defaultTopics = [
+                ['title' => 'Parts of Speech Dasar', 'desc' => 'Mengenal Nouns, Pronouns, Verbs, dan Adjectives.'],
+                ['title' => 'Articles', 'desc' => ''],
+                ['title' => 'Pronoun', 'desc' => ''],
+                ['title' => 'Simple Present Verbal', 'desc' => 'Memahami fakta dan kebiasaan.'],
+                ['title' => 'Simple Present Nominal', 'desc' => ''],
+                ['title' => 'Simple Present Passive', 'desc' => ''],
+                ['title' => 'Simple Present Verbal, Nominal, Passive', 'desc' => ''],
+                ['title' => 'Simple Past Tense', 'desc' => 'Memahami kejadian masa lalu.'],
+                ['title' => 'Simple Future Tense', 'desc' => 'Memahami rencana masa depan.'],
+                ['title' => 'Present Continuous Tense', 'desc' => 'Memahami kegiatan yang sedang berlangsung.'],
+                ['title' => 'Kalimat Dasar', 'desc' => 'Cara menyusun kalimat positif, negatif, dan tanya (interrogative).'],
+                ['title' => 'Adverbs', 'desc' => ''],
+                ['title' => 'Adjective', 'desc' => ''],
+                ['title' => 'Prepositions', 'desc' => ''],
+                ['title' => 'Conjunctions', 'desc' => ''],
+                ['title' => 'Present Perfect Tense', 'desc' => 'Kejadian yang sudah selesai namun berkaitan dengan masa sekarang.'],
+                ['title' => 'Past & Future Continuous Tense', 'desc' => 'Kejadian yang sedang berlangsung di masa lalu/depan.'],
+                ['title' => 'Modals', 'desc' => 'Penggunaan can, could, should, must, might, would.'],
+                ['title' => 'Negative Simple Present & Past Verbal', 'desc' => ''],
+                ['title' => 'Interogative Sentence', 'desc' => ''],
+                ['title' => 'Comparative & Superlative', 'desc' => 'Cara membandingkan sifat (contoh: bigger, biggest).'],
+                ['title' => 'Positive Degree', 'desc' => ''],
+                ['title' => 'Passive Voice', 'desc' => 'Mengubah kalimat aktif menjadi pasif'],
+                ['title' => 'Advanced Tenses', 'desc' => 'Past Perfect, Future Perfect, dan semua bentuk Perfect Continuous.'],
+                ['title' => 'Conditional Sentences', 'desc' => 'Kalimat pengandaian tipe 0, 1, 2, dan 3.'],
+                ['title' => 'Direct & Indirect Speech', 'desc' => 'Cara mengubah kalimat kutipan langsung menjadi tidak langsung.'],
+                ['title' => 'Relative Pronoun as Subject Clauses', 'desc' => 'Menggunakan kata hubung who, which, that, whom, whose.'],
+                ['title' => 'Relative Pronoun as Object', 'desc' => ''],
+                ['title' => 'Relative Pronoun as Possesive', 'desc' => ''],
+                ['title' => 'Relative Adverb', 'desc' => ''],
+                ['title' => 'Using Quantity and Quality', 'desc' => ''],
+                ['title' => 'Indefinite Quantity', 'desc' => ''],
+                ['title' => 'Suffixes', 'desc' => ''],
+                ['title' => 'Prefixes', 'desc' => ''],
+                ['title' => 'Regular Vs Irregular Verb', 'desc' => ''],
+                ['title' => 'Participle', 'desc' => ''],
+                ['title' => 'Noun Phrase', 'desc' => ''],
+                ['title' => 'Conditional Sentence', 'desc' => ''],
+                ['title' => 'Gerunds', 'desc' => ''],
+                ['title' => 'To Infinitives', 'desc' => 'Aturan penggunaan kata kerja dengan -ing atau to + verb.'],
+                ['title' => 'Subjunctive & Inversion', 'desc' => 'Struktur kalimat yang lebih formal dan kompleks.'],
+                ['title' => 'Adverbial Clause', 'desc' => ''],
+                ['title' => 'Noun Clause', 'desc' => ''],
+                ['title' => 'Reducing', 'desc' => ''],
+                ['title' => 'Abridgement', 'desc' => ''],
+                ['title' => 'Omitting', 'desc' => ''],
+            ];
+
+            foreach ($defaultTopics as $index => $topic) {
+                \App\Models\GrammarTopic::create([
+                    'title' => $topic['title'],
+                    'desc' => $topic['desc'],
+                    'order' => $index + 1
+                ]);
+            }
+        }
+
+        $user = Auth::user();
+        $enrolledSlugs = $this->resolveGrammarEnrolledSlugs($user instanceof \App\Models\User ? $user : null);
+
+        $isAdminOrTeacher = $user && ($user->isAdmin() || $user->isTeacher());
+
+        // Fast Track is its own standalone track — it does NOT grant access to the other tracks.
+        // Each track is only accessible if the student is enrolled in that specific program.
+        $accessIntroductory = $isAdminOrTeacher || in_array('introductory-grammar-for-writing', $enrolledSlugs);
+        $accessComplexity   = $isAdminOrTeacher || in_array('complexity-grammar-for-writing', $enrolledSlugs);
+        $accessProficiency  = $isAdminOrTeacher || in_array('proficiency-grammar-for-writing', $enrolledSlugs);
+        $accessAll = $isAdminOrTeacher || ($accessIntroductory && $accessComplexity && $accessProficiency);
+
+        return view('assignments.grammar-writing-practice', compact(
+            'topics', 'accessIntroductory', 'accessComplexity', 'accessProficiency', 'accessAll'
+        ));
+    }
+
+    public function grammarWritingPracticeReorder(Request $request)
+    {
+        $request->validate([
+            'order' => 'required|array',
+            'order.*.id' => 'required|exists:grammar_topics,id',
+            'order.*.order' => 'required|integer',
+        ]);
+
+        foreach ($request->order as $item) {
+            \App\Models\GrammarTopic::where('id', $item['id'])->update(['order' => $item['order']]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function grammarWritingPracticeUpdate(Request $request, \App\Models\GrammarTopic $topic)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'desc' => 'nullable|string',
+        ]);
+
+        $topic->update($request->only('title', 'desc'));
+
+        return response()->json(['success' => true]);
+    }
+
+    public function grammarWritingPracticeStore(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'desc' => 'nullable|string',
+        ]);
+
+        $maxOrder = \App\Models\GrammarTopic::max('order') ?? 0;
+
+        \App\Models\GrammarTopic::create([
+            'title' => $request->title,
+            'desc' => $request->desc,
+            'order' => $maxOrder + 1,
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function grammarWritingPracticeDestroy(\App\Models\GrammarTopic $topic)
+    {
+        $topic->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function grammarWritingPracticeQuestionStore(Request $request, \App\Models\GrammarTopic $topic)
+    {
+        $request->validate([
+            'type' => 'required|in:sentence,paragraph',
+            'question_id' => 'required|string',
+            'answer_en' => 'required|string',
+            'vocab_helper' => 'nullable|string',
+            'example' => 'nullable|string',
+        ]);
+
+        $vocabHelper = null;
+        if ($request->vocab_helper) {
+            $vocabHelper = json_decode($request->vocab_helper, true);
+        }
+
+        $example = null;
+        if ($request->example) {
+            $example = json_decode($request->example, true);
+        }
+
+        $order = $topic->questions()->max('order') + 1;
+
+        $topic->questions()->create([
+            'type' => $request->type,
+            'question_id' => $request->question_id,
+            'answer_en' => $request->answer_en,
+            'vocab_helper' => $vocabHelper,
+            'example' => $example,
+            'order' => $order,
+        ]);
+
+        return redirect()->back()->with('success', 'Soal berhasil ditambahkan.');
+    }
+
+    public function grammarWritingPracticeQuestionUpdate(Request $request, \App\Models\GrammarTopicQuestion $question)
+    {
+        $request->validate([
+            'question_id' => 'required|string',
+            'answer_en' => 'required|string',
+            'vocab_helper' => 'nullable|string',
+            'example' => 'nullable|string',
+        ]);
+
+        $vocabHelper = null;
+        if ($request->vocab_helper) {
+            $vocabHelper = json_decode($request->vocab_helper, true);
+        }
+
+        $example = null;
+        if ($request->example) {
+            $example = json_decode($request->example, true);
+        }
+
+        $question->update([
+            'question_id' => $request->question_id,
+            'answer_en' => $request->answer_en,
+            'vocab_helper' => $vocabHelper,
+            'example' => $example,
+        ]);
+
+        return redirect()->back()->with('success', 'Soal berhasil diperbarui.');
+    }
+
+    public function grammarWritingPracticeQuestionDestroy(\App\Models\GrammarTopicQuestion $question)
+    {
+        $question->delete();
+        return redirect()->back()->with('success', 'Soal berhasil dihapus.');
+    }
+
+    public function grammarWritingPracticeTopic(\App\Models\GrammarTopic $topic)
+    {
+        $questions = $topic->questions;
+        $sentences = $questions->where('type', 'sentence')->values();
+        $paragraph = $questions->where('type', 'paragraph')->first();
+
+        $sessionKey = 'practice_topic_' . $topic->id;
+        $submitted = session($sessionKey . '_submitted', false);
+        $userAnswers = session($sessionKey . '_answers', []);
+        $results = session($sessionKey . '_results', []);
+        $finalScore = session($sessionKey . '_score', 0);
+
+        return view('assignments.grammar-writing-practice-topic', compact(
+            'topic', 'sentences', 'paragraph', 'submitted', 'userAnswers', 'results', 'finalScore'
+        ));
+    }
+
+    use \App\Application\GrammarWriting\Concerns\ScoresWordMatchAnswers;
+
+    public function grammarWritingPracticeTopicSubmit(Request $request, \App\Models\GrammarTopic $topic)
+    {
+        $questions = $topic->questions;
+        $userAnswers = $request->input('userAnswers', []);
+        
+        $results = ['sentences' => [], 'paragraph' => null];
+        $totalScore = 0;
+        $totalItems = count($questions);
+
+        if ($totalItems === 0) {
+            return back()->with('error', 'Belum ada soal untuk dinilai.');
+        }
+
+        foreach ($questions as $idx => $q) {
+            if ($q->type === 'sentence') {
+                $userAns = $userAnswers['sentences'][$idx] ?? '';
+                $eval = $this->evaluateAnswer($userAns, $q->answer_en);
+                $results['sentences'][$idx] = $eval;
+                $totalScore += $eval['score'];
+            } else {
+                $userAns = $userAnswers['paragraph'] ?? '';
+                $eval = $this->evaluateAnswer($userAns, $q->answer_en);
+                $results['paragraph'] = $eval;
+                $totalScore += $eval['score'];
+            }
+        }
+
+        $finalScore = round($totalScore / $totalItems);
+
+        $sessionKey = 'practice_topic_' . $topic->id;
+        session([
+            $sessionKey . '_submitted' => true,
+            $sessionKey . '_answers' => $userAnswers,
+            $sessionKey . '_results' => $results,
+            $sessionKey . '_score' => $finalScore
+        ]);
+
+        return redirect()->route('assignments.grammar-writing.practice.topic', $topic->id)
+                         ->with('success', 'Jawaban berhasil disubmit!');
+    }
+
+    private function evaluateAnswer(string $userTranslation, string $correctAnswer): array
+    {
+        return $this->scoreWordMatchAnswer($userTranslation, $correctAnswer, 100);
+    }
+
+    public function grammarWritingPracticeTopicReset(\App\Models\GrammarTopic $topic)
+    {
+        $sessionKey = 'practice_topic_' . $topic->id;
+        session()->forget([
+            $sessionKey . '_submitted',
+            $sessionKey . '_answers',
+            $sessionKey . '_results',
+            $sessionKey . '_score'
+        ]);
+
+        return redirect()->route('assignments.grammar-writing.practice.topic', $topic->id);
+    }
+
+    public function grammarWritingPracticeLevel($level)
+    {
+        $user = Auth::user();
+        $enrolledSlugs = $this->resolveGrammarEnrolledSlugs($user instanceof \App\Models\User ? $user : null);
+
+        $isAdminOrTeacher = $user && ($user->isAdmin() || $user->isTeacher());
+
+        // Fast Track is its own standalone track — it does NOT grant access to other practice levels.
+        $access = [
+            'introductory' => $isAdminOrTeacher || in_array('introductory-grammar-for-writing', $enrolledSlugs),
+            'complexity'   => $isAdminOrTeacher || in_array('complexity-grammar-for-writing', $enrolledSlugs),
+            'proficiency'  => $isAdminOrTeacher || in_array('proficiency-grammar-for-writing', $enrolledSlugs),
+        ];
+        $access['all'] = $isAdminOrTeacher || ($access['introductory'] && $access['complexity'] && $access['proficiency']);
+
+        if (!$isAdminOrTeacher && (!isset($access[$level]) || !$access[$level])) {
+            return redirect()->route('assignments.grammar-writing.practice')->with('error', 'Anda tidak memiliki akses ke level practice ini. Silakan mendaftar program yang sesuai.');
+        }
+
+        $titles = [
+            'introductory' => 'Introductory Practice',
+            'complexity' => 'Complexity Practice',
+            'proficiency' => 'Proficiency Practice',
+            'all' => 'All Grammar Practice',
+        ];
+        
+        $title = $titles[$level] ?? 'Practice';
+        $desc = 'Latihan untuk ' . $title . ' sedang disiapkan.';
+        $topics = \App\Models\GrammarTopic::orderBy('order')->get();
+        
+        if ($level === 'introductory') {
+            // Use DB-stored intro topics if available, otherwise fall back to hardcoded catalog
+            $dbIntroTopics = \App\Models\GrammarIntroTopic::orderBy('order')->get();
+            if ($dbIntroTopics->isNotEmpty()) {
+                $availableTopics = $dbIntroTopics->pluck('topic');
+                $introTopics = $dbIntroTopics;
+            } else {
+                $availableTopics = collect($this->introductoryMeetingCatalog())->pluck('topic');
+                $introTopics = collect($this->introductoryMeetingCatalog())->map(fn($t, $i) => (object)[
+                    'id' => null,
+                    'label' => $t['label'],
+                    'topic' => $t['topic'],
+                    'grammar_rules' => '',
+                    'order' => $i + 1,
+                ]);
+            }
+        } elseif ($level === 'complexity') {
+            $availableTopics = collect($this->complexityMeetingCatalog())->pluck('topic');
+            $introTopics = collect($this->complexityMeetingCatalog())->map(fn($t, $i) => (object)[
+                'id' => null,
+                'label' => 'Meeting ' . ($i + 1),
+                'topic' => $t['topic'],
+                'grammar_rules' => '',
+                'order' => $i + 1,
+            ]);
+        } elseif ($level === 'proficiency') {
+            $availableTopics = collect($this->buildProficiencyTrackMeetings())->pluck('topic');
+            $introTopics = collect($this->buildProficiencyTrackMeetings())->map(fn($t, $i) => (object)[
+                'id' => null,
+                'label' => 'Meeting ' . ($i + 1),
+                'topic' => $t['topic'],
+                'grammar_rules' => '',
+                'order' => $i + 1,
+            ]);
+        } else {
+            // For 'all' level, merge introductory (from DB if exists, else catalog), complexity, and proficiency
+            $dbIntroTopics = \App\Models\GrammarIntroTopic::orderBy('order')->get();
+            $introAvailable = $dbIntroTopics->isNotEmpty() ? $dbIntroTopics->pluck('topic') : collect($this->introductoryMeetingCatalog())->pluck('topic');
+            $complexityAvailable = collect($this->complexityMeetingCatalog())->pluck('topic');
+            $proficiencyAvailable = collect($this->buildProficiencyTrackMeetings())->pluck('topic');
+            
+            $availableTopics = $introAvailable->merge($complexityAvailable)->merge($proficiencyAvailable)->unique()->values();
+            
+            $introTopics = collect();
+        }
+        
+        return view('assignments.grammar-writing-practice-level', compact('title', 'desc', 'level', 'topics', 'availableTopics', 'introTopics'));
+    }
+
+    // ============================================================
+    // Admin CRUD for Grammar Intro Topics
+    // ============================================================
+
+    public function grammarWritingIntroTopics()
+    {
+        $this->requireGrammarWritingAdminOrTeacher();
+        $topics = \App\Models\GrammarIntroTopic::orderBy('order')->get();
+
+        // Seed from hardcoded catalog if empty
+        if ($topics->isEmpty()) {
+            foreach ($this->introductoryMeetingCatalog() as $index => $item) {
+                \App\Models\GrammarIntroTopic::create([
+                    'label' => $item['label'],
+                    'topic' => $item['topic'],
+                    'grammar_rules' => '',
+                    'order' => $index + 1,
+                ]);
+            }
+            $topics = \App\Models\GrammarIntroTopic::orderBy('order')->get();
+        }
+
+        return response()->json($topics);
+    }
+
+    public function grammarWritingIntroTopicStore(Request $request)
+    {
+        $this->requireGrammarWritingAdminOrTeacher();
+        $request->validate([
+            'label' => 'required|string|max:20',
+            'topic' => 'required|string|max:255',
+            'grammar_rules' => 'nullable|string',
+        ]);
+
+        $maxOrder = \App\Models\GrammarIntroTopic::max('order') ?? 0;
+
+        $topic = \App\Models\GrammarIntroTopic::create([
+            'label' => $request->label,
+            'topic' => $request->topic,
+            'grammar_rules' => $request->grammar_rules ?? '',
+            'order' => $maxOrder + 1,
+        ]);
+
+        return response()->json(['success' => true, 'topic' => $topic]);
+    }
+
+    public function grammarWritingIntroTopicUpdate(Request $request, \App\Models\GrammarIntroTopic $topic)
+    {
+        $this->requireGrammarWritingAdminOrTeacher();
+        $request->validate([
+            'label' => 'required|string|max:20',
+            'topic' => 'required|string|max:255',
+            'grammar_rules' => 'nullable|string',
+        ]);
+
+        $topic->update([
+            'label' => $request->label,
+            'topic' => $request->topic,
+            'grammar_rules' => $request->grammar_rules ?? '',
+        ]);
+
+        return response()->json(['success' => true, 'topic' => $topic]);
+    }
+
+    public function grammarWritingIntroTopicDestroy(\App\Models\GrammarIntroTopic $topic)
+    {
+        $this->requireGrammarWritingAdminOrTeacher();
+        $topic->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function grammarWritingIntroTopicReorder(Request $request)
+    {
+        $this->requireGrammarWritingAdminOrTeacher();
+        $request->validate([
+            'order' => 'required|array',
+            'order.*.id' => 'required|exists:grammar_intro_topics,id',
+            'order.*.order' => 'required|integer',
+        ]);
+
+        foreach ($request->order as $item) {
+            \App\Models\GrammarIntroTopic::where('id', $item['id'])->update(['order' => $item['order']]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function grammarWritingTrack(string $track, BuildGrammarWritingIndexData $buildGrammarWritingIndexData)
     {
         $trackData = $this->grammarWritingTracks()[$track] ?? null;
 
         abort_if($trackData === null, 404);
 
-        return view('assignments.grammar-writing-track', [
-            'track' => $track,
-            'trackData' => $trackData,
-        ]);
+        $user = Auth::user();
+        $isAdminOrTeacher = $user && ($user->isAdmin() || $user->isTeacher());
+
+        // Students may only access the track they are enrolled in.
+        if (!$isAdminOrTeacher && $user?->isStudent()) {
+            $enrolledSlugs = $this->resolveGrammarEnrolledSlugs($user);
+            if (!in_array($trackData['program_slug'], $enrolledSlugs, true)) {
+                return redirect()->route('assignments.grammar-writing.classes')
+                    ->with('error', 'Anda tidak memiliki akses ke track ini. Silakan daftar program yang sesuai.');
+            }
+        }
+
+        $indexData = $buildGrammarWritingIndexData->handle(
+            $user,
+            $trackData['program_slug']
+        );
+
+        return view('assignments.grammar-writing-track', array_merge(
+            $indexData,
+            [
+                'track' => $track,
+                'trackData' => $trackData,
+            ]
+        ));
     }
 
     public function grammarWritingIntroductoryMeeting(int $meeting)
     {
+        $user = Auth::user();
+        $isAdminOrTeacher = $user && ($user->isAdmin() || $user->isTeacher());
+
+        if (!$isAdminOrTeacher && $user?->isStudent()) {
+            $enrolledSlugs = $this->resolveGrammarEnrolledSlugs($user);
+            if (!in_array('introductory-grammar-for-writing', $enrolledSlugs, true)) {
+                return redirect()->route('assignments.grammar-writing.classes')
+                    ->with('error', 'Anda tidak memiliki akses ke kelas Introductory Grammar for Writing.');
+            }
+        }
+
         $introductoryMeetings = $this->introductoryMeetingCatalog();
         $meetingData = $introductoryMeetings[$meeting - 1] ?? null;
 
@@ -95,6 +606,7 @@ class GrammarWritingAdminController extends Controller
             'trackTitle' => 'Introductory Grammar for Writing',
             'questions' => $resolvedMeetingContent['questions'],
             'questionHelpers' => $this->introductoryMeetingQuestionHelpers($meeting),
+            'cheatSheet' => $this->introductoryMeetingCheatSheet($meeting),
             'questionEditorData' => $resolvedMeetingContent['editorData'],
             'submitted' => false,
             'score' => null,
@@ -182,6 +694,7 @@ class GrammarWritingAdminController extends Controller
             'trackTitle' => 'Introductory Grammar for Writing',
             'questions' => $questions,
             'questionHelpers' => $questionHelpers,
+            'cheatSheet' => $this->introductoryMeetingCheatSheet($meeting),
             'questionEditorData' => $resolvedMeetingContent['editorData'],
             'submitted' => true,
             'score' => $finalScore,
@@ -210,6 +723,17 @@ class GrammarWritingAdminController extends Controller
         GrammarWritingDataRepository $grammarWritingDataRepository,
     )
     {
+        $user = Auth::user();
+        $isAdminOrTeacher = $user && ($user->isAdmin() || $user->isTeacher());
+
+        if (!$isAdminOrTeacher && $user?->isStudent()) {
+            $enrolledSlugs = $this->resolveGrammarEnrolledSlugs($user);
+            if (!in_array('complexity-grammar-for-writing', $enrolledSlugs, true)) {
+                return redirect()->route('assignments.grammar-writing.classes')
+                    ->with('error', 'Anda tidak memiliki akses ke kelas Complexity Grammar for Writing.');
+            }
+        }
+
         if ($meeting === 1) {
             return view('assignments.grammar-writing.meeting2', array_merge(
                 $buildGrammarWritingMeeting2ViewData->handle(
@@ -426,20 +950,203 @@ class GrammarWritingAdminController extends Controller
 
     public function grammarWritingProficiencyMeeting(int $meeting)
     {
+        $user = Auth::user();
+        $isAdminOrTeacher = $user && ($user->isAdmin() || $user->isTeacher());
+
+        if (!$isAdminOrTeacher && $user?->isStudent()) {
+            $enrolledSlugs = $this->resolveGrammarEnrolledSlugs($user);
+            if (!in_array('proficiency-grammar-for-writing', $enrolledSlugs, true)) {
+                return redirect()->route('assignments.grammar-writing.classes')
+                    ->with('error', 'Anda tidak memiliki akses ke kelas Proficiency Grammar for Writing.');
+            }
+        }
+
         $meetings = $this->buildProficiencyTrackMeetings();
         $meetingData = $meetings[$meeting - 1] ?? null;
 
         abort_if($meetingData === null, 404);
 
+        $resolvedMeetingContent = $this->resolveProficiencyMeetingContent($meeting);
+        $resolvedParagraphContent = $this->resolveProficiencyMeetingParagraph($meeting);
+
         return view('assignments.grammar-writing-proficiency-meeting', [
+            'meetingNumber' => $meeting,
+            'meetingLabel' => 'Meeting ' . $meeting,
+            'topic' => $meetingData['topic'],
             'meetingData' => $meetingData,
             'trackTitle' => 'Proficiency Grammar for Writing',
+            'questions' => $resolvedMeetingContent['questions'],
+            'questionHelpers' => [],
+            'questionEditorData' => $resolvedMeetingContent['editorData'],
+            'submitted' => false,
+            'score' => null,
+            'results' => [],
+            'userAnswers' => [],
+            'paragraphData' => $resolvedParagraphContent['paragraphData'],
+            'paragraphEditorData' => $resolvedParagraphContent['editorData'],
+            'userParagraphAnswer' => '',
+            'paragraphResult' => null,
         ]);
+    }
+
+    public function grammarWritingProficiencyMeetingSubmit(Request $request, int $meeting)
+    {
+        $meetings = $this->buildProficiencyTrackMeetings();
+        $meetingData = $meetings[$meeting - 1] ?? null;
+
+        abort_if($meetingData === null, 404);
+
+        $resolvedMeetingContent = $this->resolveProficiencyMeetingContent($meeting);
+        $questions = $resolvedMeetingContent['questions'];
+        $answerKeys = $resolvedMeetingContent['answerKeys'];
+        $userAnswers = (array) $request->input('answers', []);
+
+        $resolvedParagraphContent = $this->resolveProficiencyMeetingParagraph($meeting);
+        $paragraphData = $resolvedParagraphContent['paragraphData'];
+        $userParagraphAnswer = trim((string) $request->input('paragraph_answer', ''));
+
+        $results = [];
+        $totalScore = 0;
+        $gradedQuestionCount = 0;
+
+        foreach ($questions as $index => $questionText) {
+            $questionNumber = $index + 1;
+            $userAnswer = trim((string) ($userAnswers[$questionNumber] ?? ''));
+            $correctAnswer = trim((string) ($answerKeys[$questionNumber] ?? ''));
+
+            $questionScore = 0;
+            $formattedAnswer = '';
+
+            if ($correctAnswer !== '') {
+                [$questionScore, $formattedAnswer, $correctAnswer] = $this->evaluateIntroductorySentenceAnswer($userAnswer, $correctAnswer);
+                $totalScore += $questionScore;
+                $gradedQuestionCount++;
+            }
+
+            $results[$questionNumber] = [
+                'user_answer' => $userAnswer,
+                'formatted_answer' => $formattedAnswer,
+                'score' => $questionScore,
+                'correct_answer' => $correctAnswer,
+            ];
+        }
+
+        $paragraphResult = null;
+        $maxRawScore = $gradedQuestionCount * 10;
+
+        if ($paragraphData !== null && !empty($paragraphData['en'])) {
+            $paragraphResult = $this->evaluateIntroductoryParagraphAnswer($userParagraphAnswer, (string) $paragraphData['en']);
+            $totalScore += $paragraphResult['score'];
+            $maxRawScore += $paragraphResult['max_score'];
+        }
+
+        $finalScore = $maxRawScore > 0 ? round(($totalScore / $maxRawScore) * 100, 1) : 0;
+
+        return view('assignments.grammar-writing-proficiency-meeting', [
+            'meetingNumber' => $meeting,
+            'meetingLabel' => 'Meeting ' . $meeting,
+            'topic' => $meetingData['topic'],
+            'meetingData' => $meetingData,
+            'trackTitle' => 'Proficiency Grammar for Writing',
+            'questions' => $questions,
+            'questionHelpers' => [],
+            'questionEditorData' => $resolvedMeetingContent['editorData'],
+            'submitted' => true,
+            'score' => $finalScore,
+            'results' => $results,
+            'userAnswers' => $userAnswers,
+            'paragraphData' => $paragraphData,
+            'paragraphEditorData' => $resolvedParagraphContent['editorData'],
+            'userParagraphAnswer' => $userParagraphAnswer,
+            'paragraphResult' => $paragraphResult,
+        ]);
+    }
+
+    public function grammarWritingProficiencyMeetingReset(int $meeting)
+    {
+        return redirect()->route('assignments.grammar-writing.proficiency.meeting', ['meeting' => $meeting]);
+    }
+
+    private function resolveProficiencyMeetingContent(int $meeting): array
+    {
+        $fallbackQuestions = $this->proficiencyMeetingQuestions($meeting);
+        $fallbackAnswerKeys = $this->proficiencyMeetingAnswerKeys($meeting);
+        $questionRecords = collect($this->proficiencyMeetingQuestionRecords($meeting))->keyBy('question_number');
+
+        $questions = [];
+        $answerKeys = [];
+        $editorData = [];
+
+        foreach ($fallbackQuestions as $index => $fallbackQuestionText) {
+            $questionNumber = $index + 1;
+            $record = $questionRecords->get($questionNumber);
+
+            $resolvedQuestionText = $record?->question_text ?? $fallbackQuestionText;
+            $resolvedCorrectAnswer = (string) ($record?->correct_answer ?? ($fallbackAnswerKeys[$questionNumber] ?? ''));
+
+            $questions[] = $resolvedQuestionText;
+            $answerKeys[$questionNumber] = $resolvedCorrectAnswer;
+            $editorData[$questionNumber] = [
+                'db_id' => $record?->id,
+                'question_text' => $resolvedQuestionText,
+                'correct_answer' => $resolvedCorrectAnswer,
+            ];
+        }
+
+        return [
+            'questions' => $questions,
+            'answerKeys' => $answerKeys,
+            'editorData' => $editorData,
+        ];
+    }
+
+    private function proficiencyMeetingQuestionRecords(int $meeting): array
+    {
+        return GrammarQuestion::where('meeting_number', $meeting)
+            ->where('section', 'proficiency_' . $meeting)
+            ->orderBy('question_number')
+            ->get()
+            ->all();
+    }
+
+    private function resolveProficiencyMeetingParagraph(int $meeting): array
+    {
+        $fallbackParagraphs = $this->proficiencyMeetingParagraphs($meeting);
+        $paragraphData = empty($fallbackParagraphs) ? null : $fallbackParagraphs;
+        
+        $record = GrammarQuestion::where('meeting_number', $meeting)
+            ->where('section', 'proficiency_paragraph_' . $meeting)
+            ->first();
+
+        $editorData = [
+            'db_id' => null,
+            'question_text' => '',
+            'correct_answer' => '',
+        ];
+
+        if ($record) {
+            if ($paragraphData === null) {
+                $paragraphData = ['id' => '', 'en' => '', 'vocab' => []];
+            }
+            $paragraphData['id'] = $record->question_text;
+            $paragraphData['en'] = $record->correct_answer;
+            $editorData['db_id'] = $record->id;
+            $editorData['question_text'] = $record->question_text;
+            $editorData['correct_answer'] = $record->correct_answer;
+        } elseif ($paragraphData !== null) {
+            $editorData['question_text'] = $paragraphData['id'] ?? '';
+            $editorData['correct_answer'] = $paragraphData['en'] ?? '';
+        }
+
+        return [
+            'paragraphData' => $paragraphData,
+            'editorData' => $editorData,
+        ];
     }
 
     public function grammarWriting(BuildGrammarWritingIndexData $buildGrammarWritingIndexData)
     {
-        return view('assignments.grammar-writing', $buildGrammarWritingIndexData->handle(Auth::user()));
+        return $this->grammarWritingTrack('fast-track', $buildGrammarWritingIndexData);
     }
 
     public function updatePeriod(UpdateGrammarWritingPeriodRequest $request, ManageGrammarWritingMeetings $manageGrammarWritingMeetings)
@@ -464,6 +1171,45 @@ class GrammarWritingAdminController extends Controller
         return back()
             ->with('success', $result['message'])
             ->with('success_state', $result['success_state']);
+    }
+    public function bulkStoreIntroductoryQuestions(Request $request)
+    {
+        abort_unless(Auth::user()->isAdmin(), 403);
+
+        $request->validate([
+            'meeting_number' => 'required|integer',
+            'questions_text' => 'required|string',
+        ]);
+
+        $meeting = (int) $request->input('meeting_number');
+        $section = $this->introductoryMeetingSection($meeting);
+        
+        $lines = array_filter(array_map('trim', explode("\n", str_replace("\r", "", $request->input('questions_text')))));
+        
+        $questionNumber = 1;
+        foreach ($lines as $line) {
+            if (empty($line)) continue;
+
+            $record = GrammarQuestion::where('meeting_number', $meeting)
+                ->where('section', $section)
+                ->where('question_number', $questionNumber)
+                ->first();
+
+            if ($record) {
+                $record->update(['question_text' => $line]);
+            } else {
+                GrammarQuestion::create([
+                    'meeting_number' => $meeting,
+                    'question_number' => $questionNumber,
+                    'section' => $section,
+                    'question_text' => $line,
+                    'correct_answer' => '',
+                ]);
+            }
+            $questionNumber++;
+        }
+
+        return back()->with('success', 'Soal berhasil diupdate secara massal.');
     }
 
     public function storeGrammarQuestion(StoreGrammarQuestionRequest $request, ManageGrammarWritingContent $manageGrammarWritingContent)
@@ -511,16 +1257,27 @@ class GrammarWritingAdminController extends Controller
     private function grammarWritingTracks(): array
     {
         return [
+            'fast-track' => [
+                'title' => 'Fast Track Grammar for Writing',
+                'program_slug' => 'fast-track-grammar-for-writing',
+                'description' => 'Program intensif 10 pertemuan grammar.',
+                'summary' => '10 meetings mencakup dasar hingga lanjutan.',
+                'accent' => 'blue',
+                'gradient' => 'from-blue-400 to-blue-600',
+                'meetings' => $this->buildFastTrackMeetings(),
+            ],
             'introductory' => [
                 'title' => 'Introductory Grammar for Writing',
+                'program_slug' => 'introductory-grammar-for-writing',
                 'description' => 'Kelas dasar tata bahasa Inggris untuk penulisan akademik.',
-                'summary' => '20 meetings bertahap dari fondasi sampai review dan examination untuk memperkuat grammar writing.',
+                'summary' => '10 focused meetings dari struktur dasar hingga persiapan examination.',
                 'accent' => 'orange',
                 'gradient' => 'from-orange-400 to-orange-600',
                 'meetings' => $this->buildIntroductoryTrackMeetings(),
             ],
             'complexity' => [
                 'title' => 'Complexity Grammar for Writing',
+                'program_slug' => 'complexity-grammar-for-writing',
                 'description' => 'Penguasaan struktur kalimat kompleks untuk penulisan lanjutan.',
                 'summary' => '10 meetings untuk koordinasi, subordinasi, dan struktur kalimat yang lebih kompleks.',
                 'accent' => 'green',
@@ -529,6 +1286,7 @@ class GrammarWritingAdminController extends Controller
             ],
             'proficiency' => [
                 'title' => 'Proficiency Grammar for Writing',
+                'program_slug' => 'proficiency-grammar-for-writing',
                 'description' => 'Tingkat mahir tata bahasa untuk penulisan akademik dan profesional.',
                 'summary' => '10 meetings roadmap lanjutan untuk akurasi, gaya akademik, dan revisi tingkat mahir.',
                 'accent' => 'purple',
@@ -538,16 +1296,48 @@ class GrammarWritingAdminController extends Controller
         ];
     }
 
+    private function buildFastTrackMeetings(): array
+    {
+        $meetings = [];
+        
+        $topics = [
+            1 => 'Silang - silang tenses',
+            2 => 'Latihan penerapan tenses',
+            3 => 'Modal',
+            4 => 'Negative sentence',
+            5 => 'To Infinitive & Gerund',
+            6 => 'Comparative, superlative, positive degree & Parallel Structures',
+            7 => 'Adverbial Clause',
+            8 => 'Adjective Clause - RPS / RPP',
+            9 => 'Adjective Clause RPP, RA',
+            10 => 'Noun Clause',
+        ];
+        
+        for ($i = 1; $i <= 10; $i++) {
+            $meetings[] = [
+                'title' => 'Meeting ' . $i,
+                'source_meeting_number' => $i,
+                'topic' => $topics[$i],
+                'description' => 'Latihan terarah untuk topik ' . strtolower($topics[$i]) . '.',
+                'route_name' => 'assignments.grammar-writing.meeting' . $i,
+                'route_parameters' => [],
+                'available' => \Illuminate\Support\Facades\Route::has('assignments.grammar-writing.meeting' . $i),
+            ];
+        }
+
+        return $meetings;
+    }
+
     private function buildIntroductoryTrackMeetings(): array
     {
-        $introductoryMeetings = $this->introductoryMeetingCatalog();
+        $introductoryMeetings = array_slice($this->introductoryMeetingCatalog(), 0, 10);
         $meetings = [];
 
         foreach ($introductoryMeetings as $index => $introductoryMeeting) {
             $meetingNumber = $index + 1;
 
             $meetings[] = [
-                'title' => 'Meeting ' . $introductoryMeeting['label'],
+                'title' => 'Meeting ' . $meetingNumber,
                 'source_meeting_number' => $meetingNumber,
                 'topic' => $introductoryMeeting['topic'],
                 'description' => 'Latihan terarah untuk topik ' . strtolower($introductoryMeeting['topic']) . '.',
@@ -560,7 +1350,7 @@ class GrammarWritingAdminController extends Controller
         return $meetings;
     }
 
-    private function introductoryMeetingCatalog(): array
+    public function introductoryMeetingCatalog(): array
     {
         return [
             ['label' => '1a', 'topic' => 'Simple Present Verbal'],
@@ -584,6 +1374,21 @@ class GrammarWritingAdminController extends Controller
             ['label' => '10a', 'topic' => 'Examination'],
             ['label' => '10b', 'topic' => 'Final Review and Reflection'],
         ];
+    }
+
+    private function introductoryMeetingCheatSheet(int $meeting): ?array
+    {
+        if ($meeting === 3) {
+            return [
+                'Simple Present Nominal' => [
+                    'I + <span class="font-bold">am</span>',
+                    'You/ We/ They/ Benda Jamak + <span class="font-bold">are</span>',
+                    'He/ She/ It/ Benda Tunggal + <span class="font-bold">is</span>'
+                ]
+            ];
+        }
+        
+        return null;
     }
 
     private function introductoryMeetingQuestions(int $meeting): array
@@ -748,26 +1553,26 @@ class GrammarWritingAdminController extends Controller
                 'Skema asuransi tersebut tidak menjamin biaya pengobatan untuk penyakit bawaan.',
             ],
             9 => [
-                'Perusahaan tidak mengekspor produk tekstil ke pasar Eropa tahun ini.',
-                'Tim peneliti tidak menemukan kaitan antara kedua variabel tersebut dalam studi kemarin.',
-                'Jurnal ilmiah tersebut tidak diterbitkan secara bulanan oleh universitas.',
-                'Suasana di ruang pertemuan tidak tegang meskipun ada perbedaan pendapat pagi tadi.',
-                'Fasilitas laboratorium tidak memadai untuk melakukan eksperimen skala besar.',
-                'Dokumen kontrak tidak ditandatangani oleh kedua belah pihak pada pertemuan minggu lalu.',
-                'Penulis tidak menggunakan istilah teknis yang sulit dipahami dalam esainya.',
-                'Dia tidak menghadiri seminar internasional yang diadakan di Jakarta bulan lalu.',
-                'Sampel air tidak diuji di luar kota karena laboratorium lokal sudah cukup baik.',
-                'Anggaran riset tahun lalu tidak cukup untuk mencakup semua biaya operasional.',
-                'Kebijakan baru ini tidak menguntungkan bagi pemilik usaha kecil dan menengah.',
-                'Inovasi tersebut tidak dipublikasikan secara luas saat pertama kali ditemukan.',
-                'Data pribadi pengguna tidak disebarkan kepada pihak ketiga tanpa izin resmi.',
-                'Para saksi tidak memberikan keterangan yang jelas saat proses investigasi berlangsung.',
-                'Argumen utama dalam pidato tersebut tidak relevan dengan isu lingkungan saat ini.',
-                'Hasil evaluasi semester lalu tidak buruk, namun masih perlu ditingkatkan.',
-                'Para manajer tidak menyetujui anggaran tambahan untuk promosi digital.',
-                'Masalah teknis pada server tidak diperbaiki hingga teknisi senior datang sore itu.',
-                'Pemerintah tidak menaikkan tarif pajak pada periode anggaran sebelumnya.',
-                'Metode penelitian ini tidak rumit bagi mahasiswa tingkat akhir.',
+                'Peneliti itu mempublikasikan jurnal ilmiahnya setiap tahun.',
+                'Mereka tidak menghadiri konferensi internasional di Tokyo bulan lalu.',
+                'Apakah pemerintah menyediakan dana yang cukup untuk penelitian ini?',
+                'Laboratorium ini dilengkapi dengan peralatan medis yang sangat canggih.',
+                'Cuaca di daerah pegunungan itu sangat dingin kemarin pagi.',
+                'Mahasiswa tidak menyerahkan tugas akhirnya tepat waktu minggu lalu.',
+                'Apakah buku-buku referensi tersebut tersedia di perpustakaan kampus?',
+                'Tim teknis menyelesaikan perbaikan server utama dua hari yang lalu.',
+                'Proyek infrastruktur ini sangat penting bagi pertumbuhan ekonomi negara.',
+                'Laporan keuangan perusahaan tidak diaudit oleh pihak eksternal tahun lalu.',
+                'Mengapa harga bahan pokok selalu meningkat setiap tahun?',
+                'Seminar nasional itu diadakan di gedung utama universitas kemarin.',
+                'Keputusan manajer tidak memuaskan banyak karyawan di departemen tersebut.',
+                'Sistem keamanan baru ini lebih efisien daripada sistem yang lama.',
+                'Apakah dia (laki-laki) menyetujui proposal anggaran yang diajukan minggu lalu?',
+                'Banyak spesies hewan kehilangan habitat aslinya karena penebangan hutan liar.',
+                'Para peserta pelatihan sangat antusias selama sesi diskusi kemarin sore.',
+                'Kebijakan baru tersebut tidak diimplementasikan secara menyeluruh oleh semua cabang.',
+                'Ilmuwan sering kali membutuhkan waktu bertahun-tahun untuk menemukan vaksin baru.',
+                'Kapan CEO mengumumkan rencana ekspansi bisnis perusahaan?',
             ],
             10 => [
                 'Dia (perempuan) mempublikasikan artikel ilmiah nya di jurnal internasional bulan lalu.',
@@ -1522,26 +2327,26 @@ class GrammarWritingAdminController extends Controller
                 20 => 'The insurance scheme does not cover treatment costs for congenital diseases.',
             ],
             9 => [
-                1 => 'The company does not export textile products to the European market this year.',
-                2 => 'The research team did not find a correlation between the two variables in yesterday\'s study.',
-                3 => 'The scientific journal is not published monthly by the university.',
-                4 => 'The atmosphere in the meeting room was not tense even though there were differences of opinion this morning.',
-                5 => 'The laboratory facilities were not adequate to conduct large-scale experiments.',
-                6 => 'The contract document was not signed by both parties at last week\'s meeting.',
-                7 => 'The author did not use technical terms that were difficult to understand in the essay.',
-                8 => 'He did not attend the international seminar held in Jakarta last month.',
-                9 => 'The water sample was not tested outside the city because the local laboratory was already good enough.',
-                10 => 'Last year\'s research budget was not sufficient to cover all operational costs.',
-                11 => 'This new policy is not beneficial for small and medium business owners.',
-                12 => 'The innovation was not widely published when it was first discovered.',
-                13 => 'Users\' personal data is not shared with third parties without official permission.',
-                14 => 'The witnesses did not provide clear statements during the investigation process.',
-                15 => 'The main argument in the speech was not relevant to current environmental issues.',
-                16 => 'The evaluation results from last semester were not bad, but they still need improvement.',
-                17 => 'The managers did not approve the additional budget for digital promotion.',
-                18 => 'The technical issue on the server was not fixed until the senior technician arrived that afternoon.',
-                19 => 'The government did not increase tax rates in the previous budget period.',
-                20 => 'This research method is not complicated for final-year students.',
+                1 => 'The researcher publishes his scientific journal every year.',
+                2 => 'They did not attend the international conference in Tokyo last month.',
+                3 => 'Does the government provide enough funding for this research?',
+                4 => 'This laboratory is equipped with very advanced medical equipment.',
+                5 => 'The weather in the mountainous area was very cold yesterday morning.',
+                6 => 'The students did not submit their final assignments on time last week.',
+                7 => 'Are those reference books available in the campus library?',
+                8 => 'The technical team completed the main server repair two days ago.',
+                9 => 'This infrastructure project is very important for the country\'s economic growth.',
+                10 => 'The company\'s financial report was not audited by an external party last year.',
+                11 => 'Why do basic commodity prices always increase every year?',
+                12 => 'The national seminar was held in the main university building yesterday.',
+                13 => 'The manager\'s decision did not satisfy many employees in the department.',
+                14 => 'This new security system is more efficient than the old system.',
+                15 => 'Did he approve the budget proposal submitted last week?',
+                16 => 'Many animal species lose their natural habitats due to illegal logging.',
+                17 => 'The training participants were very enthusiastic during the discussion session yesterday afternoon.',
+                18 => 'The new policy was not implemented thoroughly by all branches.',
+                19 => 'Scientists often need years to discover a new vaccine.',
+                20 => 'When did the CEO announce the company\'s business expansion plan?',
             ],
             10 => [
                 1 => 'She published her scientific article in an international journal last month.',
@@ -1824,10 +2629,11 @@ class GrammarWritingAdminController extends Controller
 
         foreach ($complexityMeetings as $index => $complexityMeeting) {
             $displayNumber = $index + 1;
+            $sourceMeetingNumber = $displayNumber + 10;
 
             $meetings[] = [
                 'title' => 'Meeting ' . $displayNumber,
-                'source_meeting_number' => $displayNumber,
+                'source_meeting_number' => $sourceMeetingNumber,
                 'topic' => $complexityMeeting['topic'],
                 'description' => 'Latihan terarah untuk topik ' . strtolower($complexityMeeting['topic']) . '.',
                 'route_name' => 'assignments.grammar-writing.complexity.meeting',
@@ -1839,7 +2645,7 @@ class GrammarWritingAdminController extends Controller
         return $meetings;
     }
 
-    private function complexityMeetingCatalog(): array
+    public function complexityMeetingCatalog(): array
     {
         return [
             ['topic' => 'Silang - silang tenses'],
@@ -1879,19 +2685,19 @@ class GrammarWritingAdminController extends Controller
         return $meetings;
     }
 
-    private function buildProficiencyTrackMeetings(): array
+    public function buildProficiencyTrackMeetings(): array
     {
         $topics = [
             'Suffixes',
             'Reducing',
-            'Abridgement and omitting',
-            'Negative Inversion',
+            'Abridgement',
+            'Omitting',
+            'Inversion',
+            'Appositives',
+            'Adjective & Adverb',
             'Fronting',
-            'Cleft sentences',
-            'Emphatic structures',
-            'Nominalization',
-            'Conditional sentences',
-            'Examination',
+            'Clef Sentence',
+            'Conditional Sentences',
         ];
 
         $meetings = [];
@@ -1901,7 +2707,7 @@ class GrammarWritingAdminController extends Controller
                 'title' => 'Meeting ' . ($index + 1),
                 'source_meeting_number' => $index + 1,
                 'topic' => $topic,
-                'description' => 'Roadmap proficiency untuk mengasah ' . strtolower($topic) . '.',
+                'description' => 'Roadmap proficiency untuk mengasah materi ' . strtolower($topic) . '.',
                 'route_name' => 'assignments.grammar-writing.proficiency.meeting',
                 'route_parameters' => ['meeting' => $index + 1],
                 'available' => true,
@@ -1915,16 +2721,16 @@ class GrammarWritingAdminController extends Controller
     private function proficiencyFocusPoints(int $meeting): array
     {
         return match ($meeting) {
-            1 => ['Melembutkan klaim akademik', 'Memilih modal dan adverb yang tepat', 'Merevisi kalimat agar lebih hati-hati'],
-            2 => ['Mengubah verb menjadi noun phrase', 'Meningkatkan academic tone', 'Mengurangi gaya percakapan'],
-            3 => ['Menyusun inversion untuk emphasis', 'Menjaga grammar tetap akurat', 'Memakai pola inversion secara natural'],
-            4 => ['Menyejajarkan ide dalam daftar dan argumen', 'Mencegah parallelism error', 'Merapikan struktur kalimat panjang'],
-            5 => ['Menyambungkan kalimat dengan referensi yang jelas', 'Menjaga cohesion antar paragraf', 'Menghindari pengulangan noun yang kaku'],
-            6 => ['Memilih tanda baca untuk efek makna', 'Menggunakan colon, semicolon, dash', 'Mengedit run-on sentence'],
-            7 => ['Memotong kata yang tidak perlu', 'Menghapus redundancy', 'Mempertajam pesan utama'],
-            8 => ['Menyesuaikan register formal dan semi-formal', 'Memilih diction sesuai audience', 'Menghindari campuran tone'],
-            9 => ['Membangun concession yang kuat', 'Menulis counter-argument yang fair', 'Menutup argumen dengan stance jelas'],
-            10 => ['Proofreading grammar tingkat lanjut', 'Mengecek clarity dan precision', 'Mengedit final draft secara mandiri'],
+            1 => ['Memahami penggunaan akhiran kata (Suffixes)', 'Mengidentifikasi jenis kata berdasarkan suffix'],
+            2 => ['Meringkas klausa (Reducing clause)', 'Menggunakan participle untuk reducing'],
+            3 => ['Penyederhanaan kalimat kompleks (Abridgement)', 'Mencegah pemborosan kata'],
+            4 => ['Menghilangkan kata yang tidak perlu (Omitting)', 'Meningkatkan efisiensi kalimat'],
+            5 => ['Menyusun kalimat pembalikan (Inversion)', 'Menggunakan inversion untuk penekanan (emphasis)'],
+            6 => ['Menggunakan Appositives untuk memberi informasi tambahan', 'Memahami posisi koma pada appositives'],
+            7 => ['Membedakan penggunaan adjective dan adverb', 'Menempatkan modifier dengan tepat'],
+            8 => ['Menempatkan elemen di awal kalimat (Fronting)', 'Memberi variasi struktur kalimat'],
+            9 => ['Membuat kalimat terbelah (Cleft Sentence) untuk penekanan', 'Menggunakan pola It is... that/who'],
+            10 => ['Membedakan berbagai tipe pengandaian (Conditional sentences)', 'Menguasai mixed conditionals'],
             default => [],
         };
     }
@@ -1954,4 +2760,85 @@ class GrammarWritingAdminController extends Controller
             20 => 'Writing Structure 3',
         ];
     }
+
+    public function grammarWritingIntroductoryMeetingPromo(\Illuminate\Http\Request $request, int $meeting)
+    {
+        $testConfig = \Illuminate\Support\Facades\DB::table('meetings')
+            ->where('program_id', 4) // Grammar
+            ->where('meeting_number', $meeting)
+            ->first();
+
+        if (!$testConfig) {
+            return redirect()->route('index');
+        }
+
+        if (!$testConfig->is_free_tier || 
+            ($testConfig->promo_start && \Carbon\Carbon::parse($testConfig->promo_start)->isFuture()) || 
+            ($testConfig->promo_deadline && \Carbon\Carbon::parse($testConfig->promo_deadline)->isPast())) {
+            return view('promo.expired');
+        }
+
+        $response = $this->grammarWritingIntroductoryMeeting($meeting);
+        
+        if ($response instanceof \Illuminate\View\View) {
+            $data = $response->getData();
+            $data['testId'] = $testConfig->id;
+            return view('promo.grammar', $data);
+        }
+        
+        return $response;
+    }
+
+    public function grammarWritingIntroductoryMeetingSubmitPromo(\Illuminate\Http\Request $request, int $meeting)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'whatsapp_number' => 'nullable|string|max:20',
+        ]);
+
+        $testConfig = \Illuminate\Support\Facades\DB::table('meetings')
+            ->where('program_id', 4)
+            ->where('meeting_number', $meeting)
+            ->first();
+
+        if (!$testConfig) {
+            return redirect()->route('index');
+        }
+
+        $response = $this->grammarWritingIntroductoryMeetingSubmit($request, $meeting);
+
+        if ($response instanceof \Illuminate\View\View) {
+            $data = $response->getData();
+            $score = $data['score'] ?? 0;
+            $results = $data['results'] ?? [];
+            $paragraphResult = $data['paragraphResult'] ?? null;
+            
+            $aiFeedback = [
+                'overall_band_score' => $score,
+                'overall_comment' => "Your grammar score is " . $score . " / 100.",
+                'results' => $results,
+                'paragraphResult' => $paragraphResult
+            ];
+
+            $leadId = \Illuminate\Support\Facades\DB::table('free_test_submissions')->insertGetId([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'whatsapp_number' => $validated['whatsapp_number'] ?? null,
+                'test_type' => 'grammar',
+                'estimated_band_score' => $score,
+                'ai_raw_json_feedback' => json_encode($aiFeedback),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            event(new \App\Events\PromoTestCompleted($leadId, $validated['whatsapp_number'] ?? null, $aiFeedback));
+
+            $data['testId'] = $testConfig->id;
+            return view('promo.grammar', $data);
+        }
+
+        return $response;
+    }
+
 }

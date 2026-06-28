@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Target Bahasa') }} - Payment Detail</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
@@ -93,7 +95,7 @@
                 @if($payment->payment_channel === 'bank_transfer')
                     @php
                         $instruction = $payment->meta['instructions'] ?? [];
-                        $proofPath = $payment->meta['transfer_proof_path'] ?? null;
+                        $proofPath = $payment->proof_file ?? ($payment->meta['transfer_proof_path'] ?? null);
                     @endphp
                     <section class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
                         <h2 class="text-lg font-semibold text-slate-800">Instruksi Transfer</h2>
@@ -119,7 +121,7 @@
                             </div>
                         @endif
 
-                        @if($payment->status === 'pending')
+                        @if(in_array($payment->status, ['pending', 'waiting_verification']))
                             <form method="POST" action="{{ route('student.payments.upload-proof', $payment) }}" enctype="multipart/form-data" class="space-y-3">
                                 @csrf
                                 <div>
@@ -130,9 +132,18 @@
                                     <label for="notes" class="block text-sm font-medium text-slate-700 mb-1">Catatan (Opsional)</label>
                                     <textarea id="notes" name="notes" rows="2" class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500" placeholder="Contoh: transfer via m-banking"></textarea>
                                 </div>
-                                <button type="submit" class="inline-flex items-center rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 transition">
+                                <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 transition w-full md:w-auto">
                                     Kirim Bukti Transfer
                                 </button>
+                                
+                                @php
+                                    $waNumber = setting('support_phone') ?: '6281234567890';
+                                    $waMessage = urlencode("Halo Admin Target Bahasa, saya ingin mengirimkan bukti pembayaran untuk Invoice: {$payment->invoice_number}.");
+                                @endphp
+                                <a href="https://wa.me/{{ $waNumber }}?text={{ $waMessage }}" target="_blank" class="inline-flex items-center justify-center rounded-xl bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 transition w-full md:w-auto md:ml-3 mt-3 md:mt-0">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824zm-3.423-14.416c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm.082 21.157c-1.551 0-3.053-.412-4.38-1.196l-4.945 1.306 1.325-4.815c-.86-1.378-1.314-2.973-1.314-4.636 0-4.869 3.96-8.829 8.829-8.829 4.869 0 8.829 3.96 8.829 8.829s-3.96 8.829-8.829 8.829z"/></svg>
+                                    Kirim Bukti via WhatsApp
+                                </a>
                             </form>
                         @endif
                     </section>

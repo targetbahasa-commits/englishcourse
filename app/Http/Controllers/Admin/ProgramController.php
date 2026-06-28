@@ -23,8 +23,9 @@ class ProgramController extends Controller
     public function index()
     {
         $programs = $this->managePrograms->listAll();
+        $satuanPrograms = \App\Models\Program::where('program_type', 'satuan')->get();
 
-        return view('admin.programs.index', compact('programs'));
+        return view('admin.programs.index', compact('programs', 'satuanPrograms'));
     }
 
     /**

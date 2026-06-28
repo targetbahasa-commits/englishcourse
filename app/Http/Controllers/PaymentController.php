@@ -33,6 +33,7 @@ class PaymentController extends Controller
             (int) $request->session()->get('registration_prefill_program_id', 0),
             (string) $request->session()->get('registration_prefill_payment_channel', 'bank_transfer')
         );
+        $viewData['prefillClassType'] = $request->session()->get('registration_prefill_class_type', 'regular');
 
         return view('payments.student.index', $viewData);
     }
@@ -42,12 +43,14 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'program_id' => ['required', 'integer', 'exists:programs,id'],
             'payment_channel' => ['required', 'in:bank_transfer,cash'],
+            'class_type' => ['nullable', 'string', 'in:regular,semi_private,private'],
         ]);
 
         $result = $this->initiatePayment->handle(
             $request->user(),
             $validated['program_id'],
-            $validated['payment_channel']
+            $validated['payment_channel'],
+            $validated['class_type'] ?? 'regular'
         );
 
         if ($result['status'] === 'already_enrolled') {
@@ -87,7 +90,7 @@ class PaymentController extends Controller
             'notes' => ['nullable', 'string', 'max:500'],
         ]);
 
-        if ($payment->status !== 'pending') {
+        if (!in_array($payment->status, ['pending', 'waiting_verification'])) {
             return back()->with('error', 'Pembayaran ini sudah diproses dan tidak bisa diubah.');
         }
 
@@ -97,22 +100,34 @@ class PaymentController extends Controller
 
         $path = $validated['proof_file']->store('payment-proofs/' . $payment->user_id, 'public');
 
-        $meta = $payment->meta ?? [];
-        $meta['transfer_proof_path'] = $path;
-        $meta['proof_uploaded_at'] = now()->toDateTimeString();
-
         $notes = trim((string) ($validated['notes'] ?? ''));
 
         $payment->update([
-            'meta' => $meta,
+            'proof_file' => $path,
+            'status' => 'waiting_verification',
             'notes' => $notes !== '' ? $notes : $payment->notes,
         ]);
 
         try {
-            Mail::to('targetbahasa@gmail.com')->send(new PaymentProofUploadedMail($payment));
+            $notificationEmails = setting('notification_emails');
+            if (!empty($notificationEmails)) {
+                $emails = array_filter(array_map('trim', explode(',', $notificationEmails)));
+                if (count($emails) > 0) {
+                    Mail::to($emails)->send(new PaymentProofUploadedMail($payment));
+                }
+            }
             
-            $waMessage = "Bukti transfer baru diunggah oleh " . ($payment->user->name ?? 'Student') . " untuk Invoice {$payment->invoice_number}. Silakan cek dashboard admin.";
-            app(\App\Domain\Notification\Contracts\WhatsAppGateway::class)->sendMessage('6282228273410', $waMessage);
+            $notificationWhatsapps = setting('notification_whatsapps');
+            if (!empty($notificationWhatsapps)) {
+                $whatsapps = array_filter(array_map('trim', explode(',', $notificationWhatsapps)));
+                if (count($whatsapps) > 0) {
+                    $waMessage = "Bukti transfer baru diunggah oleh " . ($payment->user->name ?? 'Student') . " untuk Invoice {$payment->invoice_number}. Silakan cek dashboard admin.";
+                    $waGateway = app(\App\Domain\Notification\Contracts\WhatsAppGateway::class);
+                    foreach ($whatsapps as $waNumber) {
+                        $waGateway->sendMessage($waNumber, $waMessage);
+                    }
+                }
+            }
         } catch (\Exception $e) {
             Log::error('Failed to send payment proof notifications: ' . $e->getMessage());
         }
@@ -133,18 +148,6 @@ class PaymentController extends Controller
             ->selectRaw('COALESCE(SUM(CASE WHEN paid_amount IS NOT NULL THEN (paid_amount - ' . $netAmountExpr . ') ELSE 0 END), 0) as total_variance_amount')
             ->selectRaw('COALESCE(SUM(CASE WHEN paid_amount IS NOT NULL AND paid_amount < ' . $netAmountExpr . ' THEN 1 ELSE 0 END), 0) as underpaid_count')
             ->first();
-
-        $paymentQueue = $this->adminPaymentQuery->build($filters)
-            ->orderByDesc('created_at')
-            ->paginate(15)
-            ->withQueryString();
-
-        // Build a map of registration leads keyed by "user_id_program_id"
-        $queueUserIds = $paymentQueue->pluck('user_id')->unique()->filter();
-        $leadMap = \App\Models\RegistrationLead::whereIn('converted_user_id', $queueUserIds)
-            ->whereNotNull('converted_user_id')
-            ->get()
-            ->keyBy(fn($l) => $l->converted_user_id . '_' . $l->program_id);
 
         $recentPaidPayments = Payment::query()
             ->with(['user', 'program'])
@@ -183,10 +186,8 @@ class PaymentController extends Controller
             : 0.0;
 
         return view('payments.admin.index', [
-            'paymentQueue' => $paymentQueue,
             'recentPaidPayments' => $recentPaidPayments,
             'filters' => $filters,
-            'leadMap' => $leadMap,
             'summaryStats' => [
                 'total_invoices' => $totalInvoices,
                 'total_net_amount' => $totalNetAmount,
@@ -198,6 +199,45 @@ class PaymentController extends Controller
             ],
             'trendStats' => $trendStats,
             'trendAlert' => $trendAlert,
+            'activeClassPeriods' => $activeClassPeriods,
+        ]);
+    }
+
+    public function adminQueue(Request $request): View
+    {
+        $filters = $this->adminPaymentQuery->getFilters($request);
+        $activeClassPeriods = \App\Models\ClassPeriod::whereIn('status', ['active', 'upcoming'])->get();
+
+        $paymentQueue = $this->adminPaymentQuery->build($filters)
+            ->orderByDesc('created_at')
+            ->paginate(15)
+            ->withQueryString();
+
+        // Build a map of registration leads keyed by "user_id_program_id"
+        $queueUserIds = $paymentQueue->pluck('user_id')->unique()->filter();
+        $leadMap = \App\Models\RegistrationLead::whereIn('converted_user_id', $queueUserIds)
+            ->whereNotNull('converted_user_id')
+            ->get()
+            ->keyBy(fn($l) => $l->converted_user_id . '_' . $l->program_id);
+
+        // Count payments with uploaded proof pending admin review
+        $proofPendingCount = \App\Models\Payment::whereIn('status', ['pending', 'waiting_verification'])
+            ->where(function ($q) {
+                $q->whereNotNull('proof_file')
+                  ->orWhereNotNull('meta->transfer_proof_path');
+            })
+            ->count();
+
+        $oldProofCount = \App\Models\Payment::whereNotNull('proof_file')
+            ->where('created_at', '<', now()->subDays(30))
+            ->count();
+
+        return view('payments.admin.queue', [
+            'paymentQueue' => $paymentQueue,
+            'filters' => $filters,
+            'leadMap' => $leadMap,
+            'proofPendingCount' => $proofPendingCount,
+            'oldProofCount' => $oldProofCount,
             'activeClassPeriods' => $activeClassPeriods,
         ]);
     }
@@ -353,5 +393,20 @@ class PaymentController extends Controller
         abort_if($payment->user_id !== $userId, 403, 'Unauthorized access.');
     }
 
+    public function proofsIndex(Request $request): View
+    {
+        $query = Payment::with(['user', 'program'])
+            ->whereNotNull('proof_file')
+            ->orderBy('created_at', 'desc');
 
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        $payments = $query->paginate(20);
+
+        return view('payments.admin.proofs', [
+            'payments' => $payments,
+        ]);
+    }
 }

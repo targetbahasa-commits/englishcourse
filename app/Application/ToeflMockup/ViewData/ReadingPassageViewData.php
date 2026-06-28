@@ -26,10 +26,14 @@ class ReadingPassageViewData
         $startQuestion = $questions[0]['question_number'] ?? 1;
         $endQuestion = $questions[count($questions) - 1]['question_number'] ?? 10;
 
+        $formattedContent = collect(explode("\n\n", trim((string) $passage->content)))
+            ->map(fn($p) => '<p class="mockup-passage-paragraph">' . trim($p) . '</p>')
+            ->implode('');
+
         return new self(
             passageNumber: (int) $passage->passage_number,
             sectionTitle: "Questions {$startQuestion}-{$endQuestion}",
-            content: (string) $passage->content,
+            content: $formattedContent,
             lineMarkers: ['Line', '(5)', '(10)', '(15)', '(20)', '(25)', '(30)'],
             questions: $questions,
         );

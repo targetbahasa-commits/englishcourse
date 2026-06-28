@@ -47,7 +47,11 @@
                 </div>
                 
                 <a href="{{ route('assignments.ielts-academic.speaking.practice-index.part', ['part' => 1]) }}" class="block w-full py-3 bg-orange-600 text-white text-center rounded-xl font-bold hover:bg-orange-700 transition shadow-sm hover:shadow active:scale-95">
-                    Start Practice
+                    @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                        Kerjakan Ulang ↺
+                    @else
+                        Start Practice
+                    @endif
                 </a>
             </div>
 
@@ -68,7 +72,11 @@
                 </div>
                 
                 <a href="{{ route('assignments.ielts-academic.speaking.practice-index.part', ['part' => 2]) }}" class="block w-full py-3 bg-pink-600 text-white text-center rounded-xl font-bold hover:bg-pink-700 transition shadow-sm hover:shadow active:scale-95">
-                    Start Practice
+                    @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                        Kerjakan Ulang ↺
+                    @else
+                        Start Practice
+                    @endif
                 </a>
             </div>
 
@@ -89,7 +97,11 @@
                 </div>
                 
                 <a href="{{ route('assignments.ielts-academic.speaking.practice-index.part', ['part' => 3]) }}" class="block w-full py-3 bg-purple-600 text-white text-center rounded-xl font-bold hover:bg-purple-700 transition shadow-sm hover:shadow active:scale-95">
-                    Start Practice
+                    @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                        Kerjakan Ulang ↺
+                    @else
+                        Start Practice
+                    @endif
                 </a>
             </div>
         </div>

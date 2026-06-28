@@ -16,7 +16,14 @@
 @endsection
 
 @section('content')
-<div class="flex flex-col bg-gray-50 min-h-screen md:ml-0 lg:fixed lg:inset-y-0 lg:left-64 lg:right-0 lg:overflow-hidden" 
+<style>
+    @media (min-width: 1024px) {
+        .dynamic-sidebar-left {
+            left: var(--admin-sidebar-offset, var(--teacher-sidebar-offset, var(--student-sidebar-offset, var(--guest-sidebar-offset, 16rem)))) !important;
+        }
+    }
+</style>
+<div class="flex flex-col bg-gray-50 min-h-screen md:ml-0 lg:fixed lg:inset-y-0 lg:right-0 lg:overflow-hidden transition-all duration-200 dynamic-sidebar-left" 
      @resize.window="isLargeScreen = window.innerWidth >= 1024"
      @toggle-collocations.window="isCollocationsOpen = !isCollocationsOpen; if(isCollocationsOpen) isIdiomsOpen = false"
      @toggle-idioms.window="isIdiomsOpen = !isIdiomsOpen; if(isIdiomsOpen) isCollocationsOpen = false"
@@ -180,7 +187,12 @@
                 });
                 
                 if (!response.ok) {
-                    throw new Error('Evaluation failed. Server returned ' + response.status);
+                    let errMessage = 'Evaluation failed. Server returned ' + response.status;
+                    try {
+                        const errData = await response.json();
+                        if (errData.error) errMessage = errData.error;
+                    } catch (err) {}
+                    throw new Error(errMessage);
                 }
                 
                 const data = await response.json();
@@ -226,11 +238,18 @@
                     if (data.feedback) {
                         this.result = { 
                             ...this.result, 
-                            feedback: { ...(this.result.feedback || {}), ...data.feedback } 
+                            feedback: { ...(this.result.feedback || {}), ...data.feedback },
+                            grammar_improvements: data.feedback.grammar_improvements || this.result.grammar_improvements,
+                            cohesive_devices_used: data.feedback.cohesive_devices_used || this.result.cohesive_devices_used
                         };
                     }
                 } else {
-                    throw new Error('Feedback request failed with status ' + response.status);
+                    let errMessage = 'Feedback request failed with status ' + response.status;
+                    try {
+                        const errData = await response.json();
+                        if (errData.error) errMessage = errData.error;
+                    } catch (err) {}
+                    throw new Error(errMessage);
                 }
             } catch (e) {
                 console.error('Feedback stage failed:', e);
@@ -704,7 +723,6 @@
         </div>
         </div>
 
-
         <!-- Draggable Divider -->
         <div class="hidden lg:flex w-1 hover:bg-blue-500 cursor-col-resize items-center justify-center transition-colors group z-10 hover:w-2 -ml-1 -mr-1"
              @mousedown.prevent="startResize($event)">
@@ -853,7 +871,7 @@
                             <h3 class="font-bold text-blue-700">Penulisan Esai</h3>
                             <div class="flex items-center gap-2">
                                 <span class="text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-full shadow-sm" 
-                                      x-text="(essay ? essay.trim().split(/\s+/).filter(w => w.length > 0).length : 0) + ' Words'">
+                                      x-text="(essay ? essay.trim().split(/\s+/).filter(w => /[A-Za-z]/.test(w)).length : 0) + ' Words'">
                                 </span>
                             </div>
                         </div>
@@ -873,6 +891,7 @@
 
             </div>
         </div>
+    </div>
     <!-- Result UI continues here inside the main scope -->
     
     <!-- RESULT MODE (FULL PAGE) -->
@@ -884,31 +903,31 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </button>
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Your Evaluation Results</h2>
+                    <h2 class="text-2xl font-bold text-red-600">Your Evaluation Results</h2>
                     <div class="flex items-center gap-2 mt-1">
                         <span class="text-gray-500 text-sm">Overall Band Score:</span>
-                        <span class="px-3 py-0.5 bg-{{ $task == 1 ? 'teal' : 'orange' }}-100 text-{{ $task == 1 ? 'teal' : 'orange' }}-700 font-bold rounded-full text-lg" x-text="result?.scores?.overall_band"></span>
+                        <span class="px-3 py-0.5 bg-red-100 text-red-700 font-bold rounded-full text-lg" x-text="result?.scores?.overall_band"></span>
                     </div>
                 </div>
             </div>
 
             <!-- Score Summary Cards -->
-            <div v-if="result" class="flex gap-4">
+            <div x-show="result" class="flex gap-4">
                  <div class="flex flex-col items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm min-w-[100px]">
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Task</span>
-                    <span class="text-xl font-bold text-gray-800" x-text="result?.scores?.task_achievement"></span>
+                    <span class="text-xl font-bold text-red-700" x-text="result?.scores?.task_achievement"></span>
                 </div>
                  <div class="flex flex-col items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm min-w-[100px]">
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Coherence</span>
-                    <span class="text-xl font-bold text-gray-800" x-text="result?.scores?.coherence_cohesion"></span>
+                    <span class="text-xl font-bold text-red-700" x-text="result?.scores?.coherence_cohesion"></span>
                 </div>
                  <div class="flex flex-col items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm min-w-[100px]">
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Lexical</span>
-                    <span class="text-xl font-bold text-gray-800" x-text="result?.scores?.lexical_resource"></span>
+                    <span class="text-xl font-bold text-red-700" x-text="result?.scores?.lexical_resource"></span>
                 </div>
                  <div class="flex flex-col items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm min-w-[100px]">
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Grammar</span>
-                    <span class="text-xl font-bold text-gray-800" x-text="result?.scores?.grammatical_range"></span>
+                    <span class="text-xl font-bold text-red-700" x-text="result?.scores?.grammatical_range"></span>
                 </div>
             </div>
         </div>
@@ -1001,10 +1020,10 @@
 
                             <div class="mt-6 pt-6 border-t border-gray-100">
                                 <!-- Action Button -->
-                                <div x-show="!result?.task_response_improvements && !taskResponseLoading">
+                                <div x-show="!taskResponseLoading">
                                     <button @click="getTaskResponse()" class="w-full py-3 bg-green-50 text-green-700 font-bold rounded-lg border border-green-100 hover:bg-green-100 transition-colors flex items-center justify-center gap-2">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                        Analyze & Upgrade Task Response (Band 7-9)
+                                        <span x-text="result?.task_response_improvements ? 'Re-Analyze & Upgrade Task Response (Band 7-9)' : 'Analyze & Upgrade Task Response (Band 7-9)'"></span>
                                     </button>
                                 </div>
 
@@ -1015,8 +1034,9 @@
                                 </div>
 
                                 <!-- Error State -->
-                                <div x-show="taskResponseError" class="py-2 text-center text-red-500 text-sm">
+                                <div x-show="taskResponseError" class="py-2 text-center text-red-500 text-sm space-y-1">
                                     <span x-text="taskResponseError"></span>
+                                    <p class="text-xs mt-2 text-red-600">💡 <strong>Coba ulang jika gagal memuat</strong></p>
                                 </div>
 
                                 <!-- Results -->
@@ -1026,7 +1046,7 @@
                                          Upgrade Task Response (Band 7-9)
                                     </h6>
                                     <div class="space-y-3">
-                                        <template x-for="item in result?.task_response_improvements" :key="item.text">
+                                        <template x-for="item in result?.task_response_improvements || []" :key="item.text">
                                             <div class="bg-green-50 p-3 rounded-lg border border-green-100">
                                                 <div class="mb-2">
                                                     <span class="text-xs font-semibold text-green-800 bg-green-200 px-2 py-0.5 rounded">IDE / MASALAH ASLI</span>
@@ -1059,10 +1079,10 @@
 
                             <div class="mt-6 pt-6 border-t border-gray-100">
                                 <!-- Action Button -->
-                                <div x-show="!result?.coherence_improvements && !coherenceLoading">
+                                <div x-show="!coherenceLoading">
                                     <button @click="getCoherence()" class="w-full py-3 bg-blue-50 text-blue-700 font-bold rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors flex items-center justify-center gap-2">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-                                        Analyze & Upgrade Coherence (Band 7-9)
+                                        <span x-text="result?.coherence_improvements ? 'Re-Analyze & Upgrade Coherence (Band 7-9)' : 'Analyze & Upgrade Coherence (Band 7-9)'"></span>
                                     </button>
                                 </div>
 
@@ -1073,8 +1093,9 @@
                                 </div>
 
                                 <!-- Error State -->
-                                <div x-show="coherenceError" class="py-2 text-center text-red-500 text-sm">
+                                <div x-show="coherenceError" class="py-2 text-center text-red-500 text-sm space-y-1">
                                     <span x-text="coherenceError"></span>
+                                    <p class="text-xs mt-2 text-red-600">💡 <strong>Coba ulang jika gagal memuat</strong></p>
                                 </div>
 
                                 <!-- Results -->
@@ -1084,7 +1105,7 @@
                                          Upgrade Coherence (Band 7-9)
                                     </h6>
                                     <div class="space-y-3">
-                                        <template x-for="item in result?.coherence_improvements" :key="item.text">
+                                        <template x-for="item in result?.coherence_improvements || []" :key="item.text">
                                             <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
                                                 <div class="flex flex-wrap items-center gap-2 mb-1">
                                                     <span class="text-gray-400 line-through text-sm" x-text="item.text"></span>
@@ -1114,10 +1135,10 @@
                             
                             <div class="mt-6 pt-6 border-t border-gray-100">
                                 <!-- Action Button -->
-                                <div x-show="!result?.lexical_improvements && !vocabLoading">
+                                <div x-show="!vocabLoading" class="mb-4">
                                     <button @click="getVocabulary()" class="w-full py-3 bg-purple-50 text-purple-700 font-bold rounded-lg border border-purple-100 hover:bg-purple-100 transition-colors flex items-center justify-center gap-2">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-                                        Analyze & Upgrade Vocabulary (Band 7-9)
+                                        <span x-text="result?.lexical_improvements ? 'Re-Analyze & Upgrade Vocabulary (Band 7-9)' : 'Analyze & Upgrade Vocabulary (Band 7-9)'"></span>
                                     </button>
                                 </div>
 
@@ -1128,8 +1149,9 @@
                                 </div>
 
                                 <!-- Error State -->
-                                <div x-show="vocabError" class="py-2 text-center text-red-500 text-sm">
+                                <div x-show="vocabError" class="py-2 text-center text-red-500 text-sm space-y-1">
                                     <span x-text="vocabError"></span>
+                                    <p class="text-xs mt-2 text-red-600">💡 <strong>Coba ulang jika gagal memuat</strong></p>
                                 </div>
 
                                 <!-- Results -->
@@ -1139,7 +1161,7 @@
                                          Upgrade Vocabulary (Band 7-9)
                                     </h6>
                                     <div class="space-y-3">
-                                        <template x-for="item in result?.lexical_improvements" :key="item.text">
+                                        <template x-for="item in result?.lexical_improvements || []" :key="item.text">
                                             <div class="bg-purple-50 p-3 rounded-lg border border-purple-100">
                                                 <div class="flex flex-wrap items-center gap-2 mb-1">
                                                     <span class="text-gray-400 line-through text-sm" x-text="item.text"></span>
@@ -1161,7 +1183,7 @@
                                         </button>
 
                                         <div x-show="showTopicVocab" class="mt-4 space-y-3" x-transition>
-                                            <template x-for="vocab in result?.topic_vocabularies" :key="vocab.term">
+                                            <template x-for="vocab in result?.topic_vocabularies || []" :key="vocab.term">
                                                 <div class="bg-white p-3 rounded-lg border border-purple-100 shadow-sm">
                                                     <div class="flex items-center gap-2">
                                                         <span class="font-bold text-purple-800 text-sm" x-text="vocab.term"></span>
@@ -1195,10 +1217,11 @@
 
                             <div class="mt-6 pt-6 border-t border-gray-100">
                                 <!-- Action Button -->
-                                <div x-show="!result?.grammar_improvements && !grammarLoading">
+                                <!-- Action Button -->
+                                <div x-show="!grammarLoading" class="mb-4">
                                     <button @click="getGrammar()" class="w-full py-3 bg-purple-50 text-purple-700 font-bold rounded-lg border border-purple-100 hover:bg-purple-100 transition-colors flex items-center justify-center gap-2">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-                                        Analyze & Upgrade Grammar (Band 7-9)
+                                        <span x-text="result?.grammar_improvements ? 'Re-Analyze & Upgrade Grammar (Band 7-9)' : 'Analyze & Upgrade Grammar (Band 7-9)'"></span>
                                     </button>
                                 </div>
 
@@ -1209,18 +1232,41 @@
                                 </div>
 
                                 <!-- Error State -->
-                                <div x-show="grammarError" class="py-2 text-center text-red-500 text-sm">
+                                <div x-show="grammarError" class="py-2 text-center text-red-500 text-sm space-y-1">
                                     <span x-text="grammarError"></span>
+                                    <p class="text-xs mt-2 text-red-600">💡 <strong>Coba ulang jika gagal memuat</strong></p>
                                 </div>
 
                                 <!-- Results -->
                                 <div x-show="result?.grammar_improvements?.length > 0" class="space-y-4">
-                                    <h6 class="font-bold text-purple-700 text-sm flex items-center gap-2">
+                                    <!-- Grammar Errors List Section -->
+                                    <div class="bg-red-50 rounded-xl border border-red-100 p-4">
+                                        <h6 class="font-bold text-red-700 text-sm flex items-center gap-2 mb-3">
+                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                             Kesalahan Grammar yang Ditemukan
+                                        </h6>
+                                        <div class="space-y-2">
+                                            <template x-for="(item, index) in result?.grammar_improvements || []" :key="item.text">
+                                                <div class="bg-white p-3 rounded-lg border border-red-200 flex items-start gap-3 hover:shadow-sm transition-shadow">
+                                                    <div class="flex-shrink-0 mt-0.5">
+                                                        <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full" x-text="index + 1"></span>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-red-700 text-sm italic line-clamp-2" x-text="item.text"></p>
+                                                        <p class="text-xs text-gray-500 mt-1">⚠️ Grammar issue: <span x-text="item.explanation?.split('(')[0]?.trim() || 'Structure needs improvement'"></span></p>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Upgrade Grammar Section -->
+                                    <h6 class="font-bold text-purple-700 text-sm flex items-center gap-2 mt-6">
                                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                          Upgrade Grammar (Band 7-9)
                                     </h6>
                                     <div class="space-y-3">
-                                        <template x-for="item in result?.grammar_improvements" :key="item.text">
+                                        <template x-for="item in result?.grammar_improvements || []" :key="item.text">
                                             <div class="bg-purple-50 p-3 rounded-lg border border-purple-100">
                                                 <div class="mb-2">
                                                     <span class="text-xs font-semibold text-purple-800 bg-purple-200 px-2 py-0.5 rounded">KALIMAT ASLI</span>
@@ -1252,7 +1298,7 @@
                                     </button>
 
                                     <div x-show="showTopicGrammar" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="mt-4 grid grid-cols-1 gap-3">
-                                        <template x-for="item in result?.topic_grammar" :key="item.type">
+                                        <template x-for="item in result?.topic_grammar || []" :key="item.type">
                                             <div class="bg-white p-4 rounded-xl border border-purple-100 shadow-sm hover:border-purple-300 transition-colors">
                                                 <div class="flex items-center justify-between mb-2">
                                                     <span class="text-xs font-bold text-white bg-purple-600 px-2 py-1 rounded-md tracking-wide" x-text="item.type"></span>
@@ -1363,5 +1409,4 @@
         }
     };
 </script>
-</div>
 @endsection

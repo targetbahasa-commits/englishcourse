@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Notifications\Notifiable;
 
 class RegistrationLead extends Model
 {
+    use Notifiable;
+
     protected $fillable = [
         'full_name', 'whatsapp', 'email', 'city', 'age', 'profession', 'profession_other',
         'program_id', 'class_period_id', 'converted_user_id', 'program_interest', 'mode', 'schedule_preference', 'preferred_time',
@@ -38,6 +41,25 @@ class RegistrationLead extends Model
     {
         return $this->belongsTo(User::class, 'converted_user_id');
     }
+
+    /**
+     * Email logs sent to this lead's email address or related to this lead.
+     */
+    public function emailLogs(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(EmailLog::class, 'related_id')
+                    ->where('related_type', 'registration_lead');
+    }
+
+    /**
+     * Payments made by the converted student.
+     */
+    public function payments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Payment::class, 'user_id', 'converted_user_id');
+    }
+
+
 
     public function getStatusColorAttribute(): string
     {

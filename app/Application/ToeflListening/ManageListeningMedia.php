@@ -6,7 +6,7 @@ use App\Application\ToeflListeningPractice\ToeflListeningSourceAudioOptions;
 use App\Application\ToeflMockup\MockupMediaStorage;
 use App\Application\ToeflMockup\SrtTranscriptParser;
 use App\Domain\ToeflListening\Repositories\ToeflListeningRepository;
-use Symfony\Component\Process\Process;
+use App\Services\WhisperTranscriptionService;
 
 class ManageListeningMedia
 {
@@ -15,6 +15,7 @@ class ManageListeningMedia
         private readonly MockupMediaStorage $mediaStorage,
         private readonly SrtTranscriptParser $srtTranscriptParser,
         private readonly ToeflListeningRepository $repository,
+        private readonly WhisperTranscriptionService $whisper,
     ) {
     }
 
@@ -79,44 +80,27 @@ class ManageListeningMedia
 
         $this->repository->updateAudioByMeetingAndSet($number, $set, $audioPath);
 
-        if ($audioFile) {
-            try {
-                $fullAudioPath = public_path($audioPath);
-                $generatedSrtPath = $publicPath . '/' . pathinfo($filename, PATHINFO_FILENAME) . '.srt';
+        // ── Auto-transcribe + translate (runs for both Upload and Choose Audio) ─
+        try {
+            $fullAudioPath = public_path($audioPath);
 
-                $process = new Process([
-                    'whisper',
-                    $fullAudioPath,
-                    '--model', 'base',
-                    '--language', 'en',
-                    '--output_format', 'srt',
-                    '--output_dir', $publicPath,
-                    '--fp16', 'false',
-                ]);
+            $transcription = $this->whisper->transcribeAndTranslate($fullAudioPath, $publicPath);
 
-                $process->setTimeout(600);
-                $process->run();
-
-                if ($process->isSuccessful() && file_exists($generatedSrtPath)) {
-                    $srtContent = file_get_contents($generatedSrtPath);
-                    $this->storeToeflListeningTranscriptFile($number, $set, 'en', $srtContent);
-
-                    if ($generatedSrtPath !== $this->getToeflListeningTranscriptPublicPath($number, $set, 'en')) {
-                        @unlink($generatedSrtPath);
-                    }
-
-                    $this->repository->updateSingleTranscript($number, $set, 'en', $this->parseSrtContentForStorage($srtContent));
-
-                    return 'Audio uploaded and transcribed successfully!';
-                }
-
-                return 'Audio uploaded successfully! Transcription failed, but audio is ready.';
-            } catch (\Exception $e) {
-                return 'Audio uploaded successfully! Transcription error: ' . $e->getMessage();
+            if ($transcription['srt_en']) {
+                $this->storeToeflListeningTranscriptFile($number, $set, 'en', $transcription['srt_en']);
+                $this->repository->updateSingleTranscript($number, $set, 'en', $this->parseSrtContentForStorage($transcription['srt_en']));
             }
-        }
 
-        return 'Audio selected from folder successfully!';
+            if ($transcription['id']) {
+                $this->repository->updateSingleTranscript($number, $set, 'id', $transcription['id']);
+            }
+
+            return $transcription['message']
+                ?: ($audioFile ? 'Audio berhasil diupload.' : 'Audio dari folder berhasil dipilih.') . ' Transkripsi ' . ($transcription['success'] ? 'selesai.' : 'gagal.');
+        } catch (\Exception $e) {
+            $baseMsg = $audioFile ? 'Audio berhasil diupload!' : 'Audio berhasil dipilih dari folder!';
+            return $baseMsg . ' Error transkripsi: ' . $e->getMessage();
+        }
     }
 
     private function getToeflListeningSetDirectory(int $number, int $set): string

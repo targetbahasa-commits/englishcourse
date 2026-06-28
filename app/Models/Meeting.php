@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Meeting extends Model
 {
-    protected $fillable = ['program_id', 'meeting_number', 'title', 'is_locked'];
+    protected $fillable = ['program_id', 'meeting_number', 'title', 'is_locked', 'is_free_tier', 'promo_start', 'promo_deadline'];
 
     protected $casts = [
         'is_locked' => 'boolean',

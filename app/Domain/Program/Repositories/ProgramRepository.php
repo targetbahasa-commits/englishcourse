@@ -4,7 +4,7 @@ namespace App\Domain\Program\Repositories;
 
 interface ProgramRepository
 {
-    public function create(array $data): void;
+    public function create(array $data): mixed;
 
     public function listWithCounts(): array;
 

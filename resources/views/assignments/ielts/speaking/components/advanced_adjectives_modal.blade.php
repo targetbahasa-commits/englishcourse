@@ -25,12 +25,22 @@
     hasMoved: false,
     
     init() {
-        // Fallback if window variable is not ready or failed
-        if (!this.items || this.items.length === 0) {
-            console.warn('Items empty, retrying from window...');
-            this.items = window.advancedAdjectivesData || [];
+        // Self-initialize from server data to avoid race conditions
+        if (typeof window.advancedAdjectivesData !== 'undefined' && Array.isArray(window.advancedAdjectivesData)) {
+             if (window.advancedAdjectivesData.length > 0 && Array.isArray(window.advancedAdjectivesData[0])) {
+                 // It's grouped by question, show first group (matching practice.blade.php init logic)
+                 this.items = window.advancedAdjectivesData[0];
+             } else {
+                 this.items = window.advancedAdjectivesData;
+             }
+             console.log('Advanced Adjectives Modal Initialized with:', this.items.length, 'items');
         }
-        console.log('Alpine initialized. Items count:', this.items.length);
+
+        // Listen for updates from the main practice component
+        window.addEventListener('update-advanced-adjectives', (e) => {
+            console.log('Advanced Adjectives Updated:', e.detail);
+            this.items = e.detail || [];
+        });
     },
 
     

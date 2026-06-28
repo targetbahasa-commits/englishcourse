@@ -4,25 +4,19 @@ namespace App\Application\IeltsSpeaking;
 
 class GetIeltsSpeakingTopics
 {
-    public function __construct(
-        private readonly BuildIeltsSpeakingPart1Topics $buildIeltsSpeakingPart1Topics,
-        private readonly BuildIeltsSpeakingPart2Topics $buildIeltsSpeakingPart2Topics
-    ) {
-    }
-
     public function part1(): array
     {
-        return $this->buildIeltsSpeakingPart1Topics->handle();
+        return \App\Models\IeltsSpeakingTopic::where('part', 1)->orderBy('id')->get()->toArray();
     }
 
     public function part1Practice(): array
     {
-        return $this->buildIeltsSpeakingPart1Topics->handle(false);
+        return $this->part1();
     }
 
     public function part2(): array
     {
-        return $this->buildIeltsSpeakingPart2Topics->handle();
+        return \App\Models\IeltsSpeakingTopic::where('part', 2)->orderBy('id')->get()->toArray();
     }
 
     public function part3(): array

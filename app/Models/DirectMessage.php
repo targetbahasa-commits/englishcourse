@@ -12,6 +12,7 @@ class DirectMessage extends Model
     protected $fillable = [
         'sender_id',
         'receiver_id',
+        'class_period_id',
         'subject',
         'content',
         'read_at',
@@ -29,5 +30,10 @@ class DirectMessage extends Model
     public function receiver()
     {
         return $this->belongsTo(User::class, 'receiver_id');
+    }
+
+    public function classPeriod()
+    {
+        return $this->belongsTo(ClassPeriod::class, 'class_period_id');
     }
 }

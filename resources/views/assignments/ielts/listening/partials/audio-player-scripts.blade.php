@@ -25,6 +25,16 @@
             return `${mins}:${secs.toString().padStart(2, '0')}`;
         }
 
+        let isAutoscrollEnabled = true;
+        const autoscrollCheckbox = document.getElementById('autoscrollCheckbox');
+        if (autoscrollCheckbox) {
+            isAutoscrollEnabled = autoscrollCheckbox.checked;
+        }
+
+        window.toggleAutoscroll = function(enabled) {
+            isAutoscrollEnabled = enabled;
+        };
+
         // Toggle play/pause
         window.togglePlayPause = function() {
             if (audio.paused) {
@@ -106,14 +116,76 @@
             }
         });
 
-        // Update progress bar and time display
-        audio.addEventListener('timeupdate', () => {
-            if (audio.duration && !isDragging) {
-                const percentage = (audio.currentTime / audio.duration) * 100;
-                progressBar.style.width = percentage + '%';
-                progressHandle.style.left = percentage + '%';
-                currentTimeDisplay.textContent = formatTime(audio.currentTime);
+        // ── Autoscroll Core ─────────────────────────────────────────────
+        function highlightAndScroll(currentTime, instant) {
+            const allLines = document.querySelectorAll('.transcript-line');
+            let enActive = null;
+            let idActive = null;
+
+            allLines.forEach(line => {
+                const start = parseFloat(line.getAttribute('data-start'));
+                const end   = parseFloat(line.getAttribute('data-end'));
+
+                if (currentTime >= start && currentTime <= end) {
+                    line.style.backgroundColor = '#eef2ff';
+                    line.style.borderLeft      = '4px solid #6366f1';
+                    line.style.paddingLeft     = '0.5rem';
+                    line.dataset.active        = 'true';
+
+                    const enContainer = document.getElementById('transcriptScrollEn');
+                    const idContainer = document.getElementById('transcriptScrollId');
+                    if (enContainer && enContainer.contains(line)) enActive = line;
+                    if (idContainer && idContainer.contains(line)) idActive = line;
+                } else {
+                    line.dataset.active        = 'false';
+                    line.style.backgroundColor = '';
+                    line.style.borderLeft      = '';
+                    line.style.paddingLeft     = '';
+                }
+            });
+
+            if (isAutoscrollEnabled) {
+                const behavior = instant ? 'instant' : 'smooth';
+
+                function scrollLineIntoContainer(line, containerId) {
+                    const container = document.getElementById(containerId);
+                    if (!container || !container.contains(line)) return;
+                    const containerRect = container.getBoundingClientRect();
+                    const lineRect     = line.getBoundingClientRect();
+                    const target = container.scrollTop
+                        + (lineRect.top  - containerRect.top)
+                        - (containerRect.height / 2)
+                        + (lineRect.height / 2);
+                    container.scrollTo({ top: target, behavior });
+                }
+
+                if (enActive) scrollLineIntoContainer(enActive, 'transcriptScrollEn');
+                if (idActive) scrollLineIntoContainer(idActive, 'transcriptScrollId');
             }
+        }
+
+        // ── Throttle timeupdate (run at most every 250ms) ────────────────
+        let lastHighlightTime = -1;
+        audio.addEventListener('timeupdate', () => {
+            currentTimeDisplay.textContent = formatTime(audio.currentTime);
+
+            if (isFinite(audio.duration) && audio.duration > 0 && !isDragging) {
+                const pct = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width  = pct + '%';
+                progressHandle.style.left = pct + '%';
+            }
+
+            const now = audio.currentTime;
+            if (Math.abs(now - lastHighlightTime) >= 0.25) {
+                lastHighlightTime = now;
+                highlightAndScroll(now, false);
+            }
+        });
+
+        // ── On seek: jump instantly so transcript catches up ─────────────
+        audio.addEventListener('seeked', () => {
+            lastHighlightTime = -1;
+            highlightAndScroll(audio.currentTime, true);
         });
 
         // Set duration when metadata is loaded

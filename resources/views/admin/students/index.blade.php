@@ -304,13 +304,31 @@
 
                             <!-- Program -->
                             <td class="px-5 py-4 whitespace-nowrap">
-                                @if($student->program)
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
-                                        {{ $student->program->name }}
-                                    </span>
-                                @else
-                                    <span class="text-sm text-gray-400 italic">—</span>
-                                @endif
+                                <div class="flex flex-col gap-1">
+                                    @php
+                                        $allPrograms = [];
+                                        if ($student->program) {
+                                            $allPrograms[$student->program->id] = $student->program->name;
+                                        }
+                                        if ($student->enrollments) {
+                                            foreach ($student->enrollments as $enrollment) {
+                                                if ($enrollment->program && in_array($enrollment->status, ['active', 'completed'])) {
+                                                    $allPrograms[$enrollment->program->id] = $enrollment->program->name;
+                                                }
+                                            }
+                                        }
+                                    @endphp
+
+                                    @if(count($allPrograms) > 0)
+                                        @foreach($allPrograms as $progId => $progName)
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 w-max">
+                                                {{ $progName }}
+                                            </span>
+                                        @endforeach
+                                    @else
+                                        <span class="text-sm text-gray-400 italic">—</span>
+                                    @endif
+                                </div>
                             </td>
 
                             <!-- Teacher -->
@@ -331,15 +349,10 @@
 
                             <!-- Status -->
                             <td class="px-5 py-4 whitespace-nowrap text-center">
-                                @if($student->status === 'active')
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> Inactive
-                                    </span>
-                                @endif
+                                <button class="flex mx-auto items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium {{ $student->status == 'active' ? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100' : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100' }} transition-colors" data-user-id="{{ $student->id }}" onclick="toggleStatus(this)">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $student->status == 'active' ? 'bg-green-500' : 'bg-gray-400' }}"></span>
+                                    <span class="status-text">{{ ucfirst($student->status) }}</span>
+                                </button>
                             </td>
 
                             <!-- Actions -->
@@ -363,7 +376,7 @@
                                         <button @click="openDropdown = !openDropdown" @click.away="openDropdown = false" class="p-1.5 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors" title="More Actions">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                                         </button>
-                                        <div x-show="openDropdown" style="display: none;" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 z-10 divide-y divide-gray-100">
+                                        <div x-show="openDropdown" style="display: none;" class="absolute right-0 w-48 bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 z-[100] divide-y divide-gray-100 {{ $loop->remaining < 2 ? 'bottom-full mb-2' : 'top-full mt-2' }}">
                                             <div class="py-1">
                                                 <a href="{{ route('students.show', $student) }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-indigo-600">
                                                     <svg class="mr-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
@@ -504,4 +517,32 @@
     </div>
 
 </div>
+
+<script>
+    function toggleStatus(btn) {
+        const userId = btn.dataset.userId;
+        const currentSpan = btn.querySelector('.w-1\\.5');
+        const textSpan = btn.querySelector('.status-text');
+        
+        fetch(`/admin/users/${userId}/toggle-status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'active') {
+                btn.className = 'flex mx-auto items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-colors';
+                currentSpan.className = 'w-1.5 h-1.5 rounded-full bg-green-500';
+                textSpan.innerText = 'Active';
+            } else {
+                btn.className = 'flex mx-auto items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 transition-colors';
+                currentSpan.className = 'w-1.5 h-1.5 rounded-full bg-gray-400';
+                textSpan.innerText = 'Inactive';
+            }
+        });
+    }
+</script>
 @endsection

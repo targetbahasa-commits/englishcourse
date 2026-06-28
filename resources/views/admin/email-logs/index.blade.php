@@ -18,6 +18,7 @@
                     <tr>
                         <th class="px-6 py-4 font-semibold">Date Sent</th>
                         <th class="px-6 py-4 font-semibold">Recipient</th>
+                        <th class="px-6 py-4 font-semibold">Related Context</th>
                         <th class="px-6 py-4 font-semibold">Subject</th>
                         <th class="px-6 py-4 font-semibold">Status</th>
                         <th class="px-6 py-4 font-semibold text-right">Actions</th>
@@ -31,6 +32,24 @@
                             </td>
                             <td class="px-6 py-4 text-gray-600">
                                 {{ $log->to_email }}
+                                @if($log->user)
+                                    <div class="mt-1 text-xs text-blue-600">
+                                        <a href="{{ route('students.show', $log->user) }}" class="hover:underline">Student: {{ $log->user->name }}</a>
+                                    </div>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-700">
+                                @if($log->related_type === 'registration_lead' && $log->registrationLead)
+                                    <a href="{{ route('admin.registration-leads.show', $log->registrationLead) }}" class="inline-flex items-center gap-1 text-xs text-indigo-600 hover:underline bg-indigo-50 px-2 py-1 rounded">
+                                        📋 Lead #{{ $log->registrationLead->id }}
+                                    </a>
+                                @elseif($log->related_type === 'payment' && $log->payment)
+                                    <a href="{{ route('admin.payments.index', ['q' => $log->payment->invoice_number]) }}" class="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline bg-blue-50 px-2 py-1 rounded">
+                                        💳 {{ $log->payment->invoice_number }}
+                                    </a>
+                                @else
+                                    <span class="text-xs text-gray-400">System</span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 text-gray-900">
                                 {{ Str::limit($log->subject, 50) }}

@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>IELTS Listening Mock Up - {{ config('app.name', 'Target Bahasa') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
@@ -45,7 +47,7 @@
                 </div>
             </div>
 
-            <div x-data="{ step: 1 }">
+            <div x-data="{ step: 1 }" x-init="$watch('step', value => $dispatch('part-changed', value))">
                 <!-- Part 1 -->
 <div x-show="step === 1">
 
@@ -646,81 +648,10 @@
     </div>
 
     {{-- Audio Player Partial --}}
-    @include('assignments.ielts.listening.partials.audio-player', ['set' => 'Mock Up ' . ($testId ?? 1), 'section' => $material ?? null])
+    @include('assignments.ielts.listening.partials.audio-player', ['set' => 'Mock Up ' . ($testId ?? 1)
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const audio = document.getElementById('mainAudio');
-            const playIcon = document.getElementById('playIcon');
-            const pauseIcon = document.getElementById('pauseIcon');
-            const progressBar = document.getElementById('progressBar');
-            const progressHandle = document.getElementById('progressHandle');
-            const progressContainer = document.getElementById('progressContainer');
-            const currentTimeDisplay = document.getElementById('currentTime');
-            const durationDisplay = document.getElementById('duration');
-
-            if (!audio || !progressContainer) return;
-
-            let isDragging = false;
-
-            function formatTime(seconds) {
-                if (isNaN(seconds)) return '0:00';
-                const mins = Math.floor(seconds / 60);
-                const secs = Math.floor(seconds % 60);
-                return `${mins}:${secs.toString().padStart(2, '0')}`;
-            }
-
-            window.togglePlayPause = function() {
-                if (audio.paused) {
-                    audio.play();
-                    playIcon.classList.add('hidden');
-                    pauseIcon.classList.remove('hidden');
-                } else {
-                    audio.pause();
-                    playIcon.classList.remove('hidden');
-                    pauseIcon.classList.add('hidden');
-                }
-            };
-
-            window.skipAudio = function(seconds) {
-                if (audio && audio.duration) {
-                    audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + seconds));
-                }
-            };
-
-            function seekAudio(event) {
-                if (!audio.duration) return;
-                const rect = progressContainer.getBoundingClientRect();
-                const clientX = event.clientX || (event.touches ? event.touches[0].clientX : 0);
-                const percentage = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-                audio.currentTime = percentage * audio.duration;
-            }
-
-            progressContainer.addEventListener('mousedown', (e) => { isDragging = true; seekAudio(e); e.preventDefault(); });
-            document.addEventListener('mousemove', (e) => { if (isDragging) seekAudio(e); });
-            document.addEventListener('mouseup', () => { isDragging = false; });
-            
-            progressContainer.addEventListener('touchstart', (e) => { isDragging = true; seekAudio(e.touches[0]); e.preventDefault(); });
-            document.addEventListener('touchmove', (e) => { if (isDragging) seekAudio(e.touches[0]); });
-            document.addEventListener('touchend', () => { isDragging = false; });
-
-            audio.addEventListener('timeupdate', () => {
-                if (audio.duration && !isDragging) {
-                    const percentage = (audio.currentTime / audio.duration) * 100;
-                    progressBar.style.width = percentage + '%';
-                    progressHandle.style.left = percentage + '%';
-                    currentTimeDisplay.textContent = formatTime(audio.currentTime);
-                }
-            });
-
-            audio.addEventListener('loadedmetadata', () => { durationDisplay.textContent = formatTime(audio.duration); });
-            audio.addEventListener('ended', () => { playIcon.classList.remove('hidden'); pauseIcon.classList.add('hidden'); });
-            
-            window.toggleTranscriptDrawer = function() {
-                const transcriptDrawer = document.getElementById('transcriptDrawer');
-                if (transcriptDrawer) transcriptDrawer.classList.toggle('hidden');
-            };
-        });
+<script>
+        document.addEventListener('DOMContentLoaded', function() {        });
     </script>
     <style>
         main { padding-bottom: 250px !important; }

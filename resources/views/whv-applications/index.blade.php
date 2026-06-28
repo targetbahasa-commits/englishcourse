@@ -83,9 +83,11 @@
                     </div>
 
                     <div class="mt-10 flex flex-col gap-4 sm:flex-row">
-                        <a href="#alur-pendaftaran" data-whv-cta="hero_start_application" class="group inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-8 py-4 text-sm font-bold text-white shadow-xl shadow-slate-900/20 transition hover:bg-slate-800 hover:-translate-y-1">
+                        <button onclick="openInquiryModal()" data-whv-cta="hero_consult_expert" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-8 py-4 text-sm font-bold text-white shadow-xl shadow-slate-900/20 transition hover:bg-slate-800 hover:-translate-y-1">
+                            Consult with Expert
+                        </button>
+                        <a href="#alur-pendaftaran" data-whv-cta="hero_start_application" class="group inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-8 py-4 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:-translate-y-1">
                             <span data-whv-copy-key="hero_primary">Start Application</span>
-                            <svg class="h-4 w-4 text-slate-400 transition group-hover:translate-x-1 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                         </a>
                         <a href="{{ route('guest.free-tests') }}" data-whv-cta="hero_check_eligibility" data-whv-preserve-attribution="true" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50/90 px-8 py-4 text-sm font-bold text-emerald-700 shadow-sm transition hover:bg-emerald-100 hover:border-emerald-300">
                             <span data-whv-copy-key="hero_secondary">Check Eligibility</span>
@@ -370,7 +372,7 @@
             </div>
 
             <div class="mt-5 grid gap-4 xl:grid-cols-2">
-                <article class="rounded-[1.6rem] border border-blue-100 bg-gradient-to-b from-blue-50/70 to-white p-4 transition-all duration-300 hover:shadow-md hover:shadow-blue-500/10 sm:p-5">
+                <article class="rounded-[1.6rem] border border-blue-100 bg-white/95 p-4 transition-all duration-300 hover:shadow-md hover:shadow-blue-500/10 sm:p-5" style="background-image: linear-gradient(180deg, rgba(239,246,255,0.82), rgba(255,255,255,0.96)), url('{{ $whvContextBackground }}'); background-size: cover; background-position: center;">
                     <p class="text-xs font-bold uppercase tracking-[0.14em] text-blue-700/90">Kanal Informasi Resmi (Wajib Pantau)</p>
                     <p class="mt-1.5 text-sm leading-6 text-slate-600">Karena istilah War muncul karena kuota sering habis dalam hitungan menit, pantau kanal resmi berikut agar tidak tertinggal.</p>
 
@@ -749,12 +751,12 @@
         </section>
 
         <!-- CTA Footer -->
-           <section data-whv-section="final_cta" class="mt-8 rounded-[2.5rem] p-8 text-center shadow-2xl shadow-cyan-900/20 ring-1 ring-cyan-200/30 sm:p-12 relative overflow-hidden" style="background-image: url('{{ asset('images/whv/footerwhv.jpg') }}'); background-size: cover; background-position: center; background-color: #f8fafc;">
-               <div class="absolute inset-0 bg-white/30"></div>
+           <section data-whv-section="final_cta" class="mt-8 rounded-[2.5rem] p-8 text-center text-white shadow-2xl shadow-cyan-900/20 ring-1 ring-cyan-200/30 sm:p-12 relative overflow-hidden" style="background-image: url('{{ asset('images/whv/footerwhv.jpg') }}'); background-size: cover; background-position: center; background-color: #1f2937;">
+               <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950 to-slate-950"></div>
              <div class="relative">
-            <p class="text-xs font-bold uppercase tracking-[0.2em] text-blue-700" style="text-shadow: 0 2px 8px rgba(255,255,255,0.9);">Ready to Start?</p>
-                <h2 class="mt-3 text-3xl font-black text-[#0B1F3A]" style="text-shadow: 0 2px 12px rgba(255,255,255,0.9);">Ready to Start Your WHV Journey?</h2>
-                <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#0B1F3A] font-medium" style="text-shadow: 0 2px 8px rgba(255,255,255,0.9);">Mulai dari tes bahasa Inggris, rapikan dokumen, lalu masuk ke jalur aplikasi resmi dengan persiapan yang matang.</p>
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-amber-200" style="text-shadow: 0 2px 8px rgba(0,0,0,0.8);">Ready to Start?</p>
+                <h2 class="mt-3 text-3xl font-black" style="text-shadow: 0 3px 12px rgba(0,0,0,0.9);">Ready to Start Your WHV Journey?</h2>
+                <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white" style="text-shadow: 0 2px 8px rgba(0,0,0,0.9);">Mulai dari tes bahasa Inggris, rapikan dokumen, lalu masuk ke jalur aplikasi resmi dengan persiapan yang matang.</p>
 
                 <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
                     <a href="{{ route('guest.free-tests') }}" data-whv-cta="footer_free_test" data-whv-preserve-attribution="true" class="inline-flex min-w-[200px] items-center justify-center rounded-2xl bg-amber-400 px-8 py-4 text-sm font-black text-slate-900 shadow-lg shadow-amber-400/40 transition hover:bg-amber-500 hover:-translate-y-1">
@@ -764,7 +766,7 @@
                         <span data-whv-copy-key="footer_register">Register Now</span>
                     </a>
                     @if($featuredApplication->url)
-                        <a href="{{ $featuredApplication->url }}" data-whv-cta="footer_official_website" target="_blank" rel="noopener noreferrer" class="inline-flex min-w-[200px] items-center justify-center rounded-2xl border border-emerald-300 bg-emerald-400 px-8 py-4 text-sm font-black text-slate-900 shadow-lg shadow-emerald-400/40 transition hover:bg-emerald-500 hover:-translate-y-1">
+                        <a href="{{ $featuredApplication->url }}" data-whv-cta="footer_official_website" target="_blank" rel="noopener noreferrer" class="inline-flex min-w-[200px] items-center justify-center rounded-2xl border border-white/50 bg-slate-900/90 px-8 py-4 text-sm font-black text-white shadow-lg shadow-slate-900/40 transition hover:bg-slate-900 hover:-translate-y-1" style="text-shadow: 0 1px 4px rgba(0,0,0,0.8);">
                             Official Website
                         </a>
                     @endif
@@ -815,7 +817,124 @@
         </div>
     </div>
 @endif
+
+<!-- Quick Inquiry Modal -->
+<div id="inquiryModal" class="fixed inset-0 z-[100] hidden items-center justify-center overflow-y-auto overflow-x-hidden bg-black/50 backdrop-blur-sm p-4 sm:p-0">
+    <div class="relative w-full max-w-lg rounded-2xl bg-white shadow-2xl transition-all">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between rounded-t-2xl border-b border-gray-100 px-6 py-4">
+            <h3 class="text-xl font-bold text-gray-900">
+                Consult with an Expert
+            </h3>
+            <button type="button" onclick="closeInquiryModal()" class="ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <!-- Modal body -->
+        <div class="p-6">
+            <p class="text-sm text-gray-600 mb-6">Want to know more about the <span class="font-bold text-teal-600">Working Holiday Visa</span>? Leave your details and our expert will contact you shortly.</p>
+            <form id="inquiryForm" class="space-y-4">
+                <input type="hidden" name="source" value="whv_application">
+                <input type="hidden" name="source_detail" value="{{ $featuredApplication->country ?? 'Australia' }} WHV">
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
+                    <input type="text" name="full_name" required class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm px-4 py-2.5">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number <span class="text-red-500">*</span></label>
+                    <input type="text" name="whatsapp" required class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm px-4 py-2.5" placeholder="e.g. 081234567890">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <input type="email" name="email" class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm px-4 py-2.5" placeholder="Optional">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Questions / Notes</label>
+                    <textarea name="notes" rows="3" class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm px-4 py-2.5" placeholder="What would you like to know?"></textarea>
+                </div>
+
+                <div id="inquiryAlert" class="hidden p-4 mb-4 text-sm rounded-xl"></div>
+
+                <div class="pt-4 flex justify-end gap-3 border-t border-gray-100">
+                    <button type="button" onclick="closeInquiryModal()" class="rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors">Cancel</button>
+                    <button type="submit" id="inquirySubmitBtn" class="inline-flex items-center justify-center rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors">
+                        Submit Inquiry
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
+
+@push('scripts')
+<script>
+    // Inquiry Modal Logic
+    const inquiryModal = document.getElementById('inquiryModal');
+    const inquiryForm = document.getElementById('inquiryForm');
+    const inquirySubmitBtn = document.getElementById('inquirySubmitBtn');
+    const inquiryAlert = document.getElementById('inquiryAlert');
+
+    function openInquiryModal() {
+        inquiryModal.classList.remove('hidden');
+        inquiryModal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeInquiryModal() {
+        inquiryModal.classList.add('hidden');
+        inquiryModal.classList.remove('flex');
+        document.body.style.overflow = '';
+        inquiryForm.reset();
+        inquiryAlert.classList.add('hidden');
+    }
+
+    inquiryForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(inquiryForm);
+        const data = Object.fromEntries(formData.entries());
+        
+        inquirySubmitBtn.disabled = true;
+        inquirySubmitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Submitting...';
+        
+        fetch('{{ route("public.inquiry.store") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(res => {
+            inquiryAlert.classList.remove('hidden', 'bg-red-50', 'text-red-800');
+            inquiryAlert.classList.add('bg-green-50', 'text-green-800');
+            inquiryAlert.innerHTML = res.message || 'Success! We will contact you soon.';
+            inquirySubmitBtn.innerHTML = 'Submitted';
+            
+            setTimeout(() => {
+                closeInquiryModal();
+                inquirySubmitBtn.disabled = false;
+                inquirySubmitBtn.innerHTML = 'Submit Inquiry';
+            }, 2500);
+        })
+        .catch(err => {
+            console.error(err);
+            inquiryAlert.classList.remove('hidden', 'bg-green-50', 'text-green-800');
+            inquiryAlert.classList.add('bg-red-50', 'text-red-800');
+            inquiryAlert.innerHTML = 'Something went wrong. Please check your inputs and try again.';
+            inquirySubmitBtn.disabled = false;
+            inquirySubmitBtn.innerHTML = 'Submit Inquiry';
+        });
+    });
+</script>
 
 @push('scripts')
 <script>

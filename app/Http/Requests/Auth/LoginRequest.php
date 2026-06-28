@@ -27,7 +27,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // 'cf-turnstile-response' => ['required', new \App\Rules\Turnstile()],
+            'cf-turnstile-response' => ['required', new \App\Rules\Turnstile()],
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
         ];
@@ -47,6 +47,16 @@ class LoginRequest extends FormRequest
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
+            ]);
+        }
+
+        if (Auth::user()->status === 'inactive') {
+            Auth::logout();
+            $this->session()->invalidate();
+            $this->session()->regenerateToken();
+
+            throw ValidationException::withMessages([
+                'email' => 'Your account has been deactivated. Please contact the administrator.',
             ]);
         }
 

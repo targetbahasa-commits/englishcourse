@@ -54,9 +54,20 @@ class EloquentFreeTestRepository implements FreeTestRepository
         $certificates = collect();
         foreach ($testTypes as $type) {
             $cert = $this->firstOrCreateCertificate($type, [
+                'program_id'       => null,
                 'background_image' => null,
                 'description'      => 'Certificate for ' . ucwords(str_replace('_', ' ', $type)),
                 'text_color'       => '#000000',
+                'template_config' => [
+                    'eyebrow' => 'Certificate of Achievement',
+                    'title' => 'Certificate of Completion',
+                    'subtitle' => 'Free Test Practice Result',
+                    'score_label' => 'Final Score',
+                    'body' => 'This certificate is awarded to the candidate for successfully completing the free test.',
+                    'footer_left_label' => 'Date',
+                    'footer_right_label' => 'Authorized Signature',
+                    'signature_name' => 'Target Bahasa',
+                ],
                 'is_active'        => true,
             ]);
             $certificates->push($cert);
@@ -67,7 +78,7 @@ class EloquentFreeTestRepository implements FreeTestRepository
     public function firstOrCreateCertificate(string $testType, array $defaults): mixed
     {
         return FreeTestCertificate::firstOrCreate(
-            ['test_type' => $testType],
+            ['test_type' => $testType, 'program_id' => null],
             $defaults
         );
     }
@@ -81,4 +92,6 @@ class EloquentFreeTestRepository implements FreeTestRepository
     {
         $certificate->update($data);
     }
+
+
 }

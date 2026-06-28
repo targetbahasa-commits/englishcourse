@@ -205,7 +205,58 @@ class EloquentAdminRepository implements AdminRepository
             ->all();
     }
 
-            public function getProgramPerformance(int $threshold): array
+    public function getActiveTeachers(int $threshold): array
+    {
+        $teachers = [];
+
+        $rememberLatestActivity = function (iterable $rows, callable $timestampResolver, callable $programResolver) use (&$teachers): void {
+            foreach ($rows as $row) {
+                $timestamp = $timestampResolver($row);
+                if (!$timestamp) continue;
+                
+                $current = $teachers[$row->id] ?? null;
+                if (!$current || $timestamp > $current->last_activity) {
+                    $teachers[$row->id] = (object) [
+                        'id'            => $row->id,
+                        'name'          => $row->name,
+                        'role'          => $row->role,
+                        'program_name'  => $programResolver($row),
+                        'last_activity' => $timestamp,
+                    ];
+                }
+            }
+        };
+
+        $rememberLatestActivity(
+            DB::table('sessions')
+                ->join('users', 'sessions.user_id', '=', 'users.id')
+                ->leftJoin('programs', 'users.program_id', '=', 'programs.id')
+                ->whereNotNull('sessions.user_id')
+                ->where('sessions.last_activity', '>=', $threshold)
+                ->where('users.role', 'teacher')
+                ->select(
+                    'users.id',
+                    'users.name',
+                    'users.role',
+                    'programs.name as assigned_program_name',
+                    'sessions.payload as session_payload',
+                    'sessions.last_activity as activity_at'
+                )
+                ->get(),
+            fn (object $row): ?int => is_numeric($row->activity_at ?? null) ? (int) $row->activity_at : null,
+            fn (object $row): string => $this->inferProgramFromSessionPayload(
+                $row->session_payload ?? null,
+                $row->assigned_program_name ?: 'Teacher Dashboard'
+            )
+        );
+
+        return collect($teachers)
+            ->sortByDesc('last_activity')
+            ->values()
+            ->all();
+    }
+
+    public function getProgramPerformance(int $threshold): array
     {
         return Program::withCount([
             'users as students_count' => function ($q) {

@@ -11,9 +11,9 @@ class CreateRegistrationLead
     ) {
     }
 
-    public function execute(array $data): void
+    public function execute(array $data): mixed
     {
-        $this->repository->createRegistrationLead($data);
+        return $this->repository->createRegistrationLead($data);
     }
 
     public function validateClassPeriod(array $data): ?array

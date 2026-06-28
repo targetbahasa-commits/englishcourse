@@ -50,4 +50,9 @@ class ManageAttendance
             $this->repository->saveAttendance($classMeetingId, (int) $userId, $data, $recorderId);
         }
     }
+
+    public function updateMeeting(int $classMeetingId, array $meetingData): mixed
+    {
+        return $this->repository->updateClassMeeting($classMeetingId, $meetingData);
+    }
 }

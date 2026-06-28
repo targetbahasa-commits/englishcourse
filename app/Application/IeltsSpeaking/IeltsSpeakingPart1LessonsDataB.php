@@ -243,9 +243,9 @@ class IeltsSpeakingPart1LessonsDataB
                     'slug' => 'part-1-common',
                     'title' => 'Part 1: Common Topics',
                     'questions' => [
-                        "1. Topik: Work & Ambition\n- Do you find your job challenging?",
-                        "2. Topik: Free Time\n- How do you relax after a long day?",
-                        "3. Topik: Habits\n- Are you a morning person?"
+                        "1. Topic: Work & Ambition\n- Do you find your job challenging?",
+                        "2. Topic: Free Time\n- How do you relax after a long day?",
+                        "3. Topic: Habits\n- Are you a morning person?"
                     ],
                     'idioms' => [
                         [
@@ -507,9 +507,9 @@ class IeltsSpeakingPart1LessonsDataB
                     'slug' => 'part-3-discussion',
                     'title' => 'Part 3: Discussion',
                     'questions' => [
-                        "1. Topik: Success & Society\n- What factors contribute to a person's success?",
-                        "2. Topik: Technology in Education\n- How has technology changed the way we learn?",
-                        "3. Topik: Global Issues\n- Is it important for people to be aware of global news?"
+                        "1. Topic: Success & Society\n- What factors contribute to a person's success?",
+                        "2. Topic: Technology in Education\n- How has technology changed the way we learn?",
+                        "3. Topic: Global Issues\n- Is it important for people to be aware of global news?"
                     ],
                     'idioms' => [
                         [
@@ -527,7 +527,7 @@ class IeltsSpeakingPart1LessonsDataB
                         [
                             'phrase' => 'hot topic',
                             'meaning' => 'a subject that many people are discussing',
-                            'meaning_id' => 'topik hangat',
+                            'meaning_id' => 'Topic hangat',
                             'example' => 'Climate change is a hot topic these days.'
                         ],
                         [
@@ -651,9 +651,9 @@ class IeltsSpeakingPart1LessonsDataB
                     'slug' => 'part-1-common',
                     'title' => 'Part 1: Common Topics',
                     'questions' => [
-                        "1. Topik: Your Neighborhood\n- Is your neighborhood a quiet place to live?",
-                        "2. Topik: Perfumes & Scents\n- Do you like wearing perfume?",
-                        "3. Topik: Concentration\n- Is it difficult for you to stay focused?"
+                        "1. Topic: Your Neighborhood\n- Is your neighborhood a quiet place to live?",
+                        "2. Topic: Perfumes & Scents\n- Do you like wearing perfume?",
+                        "3. Topic: Concentration\n- Is it difficult for you to stay focused?"
                     ],
                     'idioms' => [
                         // Neighborhood/Senses
@@ -982,9 +982,9 @@ class IeltsSpeakingPart1LessonsDataB
                     'slug' => 'part-3-discussion',
                     'title' => 'Part 3: Discussion',
                     'questions' => [
-                        "1. Topik: Modern Technology\n- Do you think technology has made our lives more complicated?",
-                        "2. Topik: Success\n- What qualities are necessary for a person to be successful?",
-                        "3. Topik: Cities\n- What are the problems of living in a \"megacity\"?"
+                        "1. Topic: Modern Technology\n- Do you think technology has made our lives more complicated?",
+                        "2. Topic: Success\n- What qualities are necessary for a person to be successful?",
+                        "3. Topic: Cities\n- What are the problems of living in a \"megacity\"?"
                     ],
                     'idioms' => [
                         ['phrase' => 'silver bullet', 'meaning' => 'a simple solution to a complicated problem', 'meaning_id' => 'solusi jitu', 'example' => 'There is no silver bullet for climate change.'],
@@ -1157,9 +1157,9 @@ class IeltsSpeakingPart1LessonsDataB
                     'slug' => 'part-1-daily-habits',
                     'title' => 'Part 1: Daily Habits & Preferences',
                     'questions' => [
-                        "1. Topik: Daily Routine\n- How do you usually start your morning?",
-                        "2. Topik: Learning English\n- How much has your English improved recently?",
-                        "3. Topik: Shopping\n- Do you frequently buy things online?"
+                        "1. Topic: Daily Routine\n- How do you usually start your morning?",
+                        "2. Topic: Learning English\n- How much has your English improved recently?",
+                        "3. Topic: Shopping\n- Do you frequently buy things online?"
                     ],
                     'idioms' => [
                         ['phrase' => 'Creature of habit', 'meaning' => 'Someone who likes to do the same things at the same time every day', 'example' => 'I am a creature of habit; I always have coffee at 7 AM.'],
@@ -1271,9 +1271,9 @@ class IeltsSpeakingPart1LessonsDataB
                     'slug' => 'part-3-general-trends',
                     'title' => 'Part 3: Discussion (General Trends)',
                     'questions' => [
-                        "1. Topik: Technology & Society\n- How drastically has technology changed our communication?",
-                        "2. Topik: Work-Life Balance\n- Is it adequately easy for people to find a balance between work and life today?",
-                        "3. Topik: The Environment\n- Are people sufficiently aware of environmental issues?"
+                        "1. Topic: Technology & Society\n- How drastically has technology changed our communication?",
+                        "2. Topic: Work-Life Balance\n- Is it adequately easy for people to find a balance between work and life today?",
+                        "3. Topic: The Environment\n- Are people sufficiently aware of environmental issues?"
                     ],
                     'idioms' => [
                         ['phrase' => 'Move with the times', 'meaning' => 'To change and become modern', 'example' => 'Companies must move with the times.'],
@@ -1342,10 +1342,10 @@ class IeltsSpeakingPart1LessonsDataB
                     'slug' => 'part-1-daily-life',
                     'title' => 'Part 1: City Life & Infrastructure',
                     'questions' => [
-                        "1. Topik: Transport Systems\n- How has the transportation system in your city changed recently?",
-                        "2. Topik: Public Spaces\n- Do you think the government should invest more in public parks?",
-                        "3. Topik: Building Styles\n- What kind of architecture is most common in your hometown?",
-                        "4. Topik: Environmental Policy\n- How does your city handle waste management?"
+                        "1. Topic: Transport Systems\n- How has the transportation system in your city changed recently?",
+                        "2. Topic: Public Spaces\n- Do you think the government should invest more in public parks?",
+                        "3. Topic: Building Styles\n- What kind of architecture is most common in your hometown?",
+                        "4. Topic: Environmental Policy\n- How does your city handle waste management?"
                     ],
                     'idioms' => [
                         ['phrase' => 'bumper to bumper', 'meaning' => 'traffic that is so heavy that cars are touching', 'example' => 'The traffic was bumper to bumper.'],
@@ -1593,9 +1593,9 @@ class IeltsSpeakingPart1LessonsDataB
                     'slug' => 'part-3-social-issues',
                     'title' => 'Part 3: Discussion (Social Issues & Trends)',
                     'questions' => [
-                        "1. Topik: Education & Career\n- How can schools better prepare students for the workplace?",
-                        "2. Topik: Government & Environment\n- What should the government do to protect the environment?",
-                        "3. Topik: Success\n- Does luck play a part in achieving success?"
+                        "1. Topic: Education & Career\n- How can schools better prepare students for the workplace?",
+                        "2. Topic: Government & Environment\n- What should the government do to protect the environment?",
+                        "3. Topic: Success\n- Does luck play a part in achieving success?"
                     ],
                     'idioms' => [
                         ['phrase' => 'uphill battle', 'meaning' => 'a difficult struggle', 'example' => 'It is an uphill battle.'],

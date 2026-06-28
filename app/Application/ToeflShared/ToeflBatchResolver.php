@@ -25,20 +25,32 @@ class ToeflBatchResolver
         return $program;
     }
 
-    public function resolveSelectedClassPeriodForProgram($program)
+    public function resolveSelectedClassPeriodForProgram($program, $user = null)
     {
-        if (!$program || empty($program->period)) {
+        if (!$program) {
             return null;
         }
 
-        return $program->classPeriods->firstWhere('name', $program->period);
+        if ($user && $user->isStudent()) {
+            $enrollment = $user->enrollments()->where('program_id', $program->id)->whereHas('classPeriod')->first();
+            if ($enrollment) {
+                return $enrollment->classPeriod->load('classMeetings');
+            }
+        }
+
+        if ($program->active_class_period_id) {
+            $period = $program->classPeriods->firstWhere('id', $program->active_class_period_id);
+            return $period ? $period->load('classMeetings') : null;
+        }
+
+        return null;
     }
 
     public function resolveToeflSelectedClassPeriod($user)
     {
         $batchProgram = $this->resolveBatchProgramForToefl($user);
 
-        return $this->resolveSelectedClassPeriodForProgram($batchProgram);
+        return $this->resolveSelectedClassPeriodForProgram($batchProgram, $user);
     }
 
     public function resolveToeflLockedState($batchLockMap, int $meetingNumber, bool $globalLocked, bool $useBatchRules = false): bool

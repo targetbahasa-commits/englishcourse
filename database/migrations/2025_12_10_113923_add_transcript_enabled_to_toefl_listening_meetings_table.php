@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('toefl_listening_meetings', function (Blueprint $table) {
-            $table->boolean('transcript_enabled')->default(false)->after('is_locked');
+            $table->boolean('transcript_enabled')->default(false);
         });
     }
 

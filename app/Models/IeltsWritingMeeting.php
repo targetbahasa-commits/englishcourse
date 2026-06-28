@@ -20,6 +20,10 @@ class IeltsWritingMeeting extends Model
         'idioms',
         'collocations',
         'is_locked',
+        'is_free_tier',
+        'test_type',
+        'graph_data_json',
+        'system_prompt_override',
     ];
 
 
@@ -27,6 +31,8 @@ class IeltsWritingMeeting extends Model
         'idioms' => 'array',
         'collocations' => 'array',
         'is_locked' => 'boolean',
+        'is_free_tier' => 'boolean',
+        'graph_data_json' => 'array',
     ];
 
     public function questions()

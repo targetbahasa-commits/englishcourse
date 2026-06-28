@@ -28,6 +28,10 @@ class DashboardController extends Controller
             return redirect()->route('guest.free-tests');
         }
 
+        if ($user->isTestTaker()) {
+            return redirect()->route('online-test.index');
+        }
+
         $data = $this->buildStudentDashboard->execute($user);
 
         return view('dashboard', $data);

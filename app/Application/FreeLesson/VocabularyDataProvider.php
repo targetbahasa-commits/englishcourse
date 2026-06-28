@@ -374,7 +374,7 @@ class VocabularyDataProvider
         }
 
         // For other A1 IDs, load from JSON
-        $jsonPath = storage_path('app/a1_vocabulary.json');
+        $jsonPath = storage_path('app/vocabularies/a1_vocabulary.json');
         if (file_exists($jsonPath)) {
             $json = json_decode(file_get_contents($jsonPath), true);
             if (isset($json[$id])) {

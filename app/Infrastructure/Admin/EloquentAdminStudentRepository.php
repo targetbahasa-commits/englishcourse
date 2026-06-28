@@ -4,16 +4,22 @@ namespace App\Infrastructure\Admin;
 
 use App\Domain\Admin\Repositories\AdminStudentRepository;
 use App\Models\FreeTestResult;
+use App\Models\GrammarQuestion;
 use App\Models\MeetingScore;
 use App\Models\Program;
+use App\Models\ToeflListeningQuestion;
+use App\Models\ToeflListeningScore;
+use App\Models\ToeflMockupResult;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class EloquentAdminStudentRepository implements AdminStudentRepository
 {
     public function listStudents(array $filters, int $perPage): mixed
     {
-        $query = User::where('role', 'student')->with(['program', 'teacher']);
+        $query = User::where('role', 'student')->with(['program', 'teacher', 'enrollments.program']);
 
         if (!empty($filters['search'])) {
             $query->where(function ($q) use ($filters) {
@@ -71,6 +77,11 @@ class EloquentAdminStudentRepository implements AdminStudentRepository
         return User::where('role', 'teacher')->where('status', 'active')->get()->all();
     }
 
+    public function getTeacherOrFail(int $teacherId): mixed
+    {
+        return User::findOrFail($teacherId);
+    }
+
     public function getProgramOptions(): array
     {
         return Program::orderBy('name')->get()->all();
@@ -89,7 +100,7 @@ class EloquentAdminStudentRepository implements AdminStudentRepository
 
     public function getRecentActivity(int $userId): mixed
     {
-        return MeetingScore::where('user_id', $userId)
+        return MeetingScore::where('is_reported', true)->where('user_id', $userId)
             ->with('program')
             ->orderByDesc('submitted_at')
             ->limit(10)
@@ -99,12 +110,12 @@ class EloquentAdminStudentRepository implements AdminStudentRepository
     public function getProgressStats(int $userId): array
     {
         $totalAssignments = 20;
-        $completedAssignments = MeetingScore::where('user_id', $userId)->count();
+        $completedAssignments = MeetingScore::where('is_reported', true)->where('user_id', $userId)->count();
         $progressPercentage = $totalAssignments > 0
             ? min(100, round(($completedAssignments / $totalAssignments) * 100))
             : 0;
 
-        $averageScore = MeetingScore::where('user_id', $userId)->avg('score') ?? 0;
+        $averageScore = MeetingScore::where('is_reported', true)->where('user_id', $userId)->avg('score') ?? 0;
 
         return compact('totalAssignments', 'completedAssignments', 'progressPercentage', 'averageScore');
     }
@@ -167,5 +178,54 @@ class EloquentAdminStudentRepository implements AdminStudentRepository
         }
 
         return $updated;
+    }
+
+    public function getLatestSessionForStudent(int $userId): mixed
+    {
+        return DB::table('sessions')
+            ->where('user_id', $userId)
+            ->orderByDesc('last_activity')
+            ->first();
+    }
+
+    public function getLatestReportedListeningScore(int $userId): mixed
+    {
+        return ToeflListeningScore::query()
+            ->where('is_reported', true)
+            ->where('user_id', $userId)
+            ->orderByDesc('submitted_at')
+            ->first();
+    }
+
+    public function findToeflListeningQuestion(int $questionId): mixed
+    {
+        return ToeflListeningQuestion::query()->find($questionId);
+    }
+
+    public function getLatestReportedMockupResult(int $userId): mixed
+    {
+        return ToeflMockupResult::query()
+            ->where('is_reported', true)
+            ->where('user_id', $userId)
+            ->orderByDesc('completed_at')
+            ->orderByDesc('created_at')
+            ->first();
+    }
+
+    public function getGrammarQuestionsForMeeting(int $meetingNumber, bool $hasSectionColumn): mixed
+    {
+        $query = GrammarQuestion::query()
+            ->where('meeting_number', $meetingNumber)
+            ->orderBy('question_number');
+
+        if ($hasSectionColumn) {
+            $query->where('section', 'sentences');
+        } else {
+            $query->where('question_number', '!=', 999);
+        }
+
+        return $query->get(['question_number', 'question_text'])
+            ->unique(static fn ($question) => (int) $question->question_number)
+            ->values();
     }
 }

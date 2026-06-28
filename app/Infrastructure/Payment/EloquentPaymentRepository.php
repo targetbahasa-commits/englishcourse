@@ -37,10 +37,18 @@ class EloquentPaymentRepository implements PaymentRepository
                         });
                 });
             })
-            ->when($status !== 'all', fn ($q) => $q->where('status', $status))
+            ->when($status !== 'all', function ($q) use ($status) {
+                if ($status === 'pending') {
+                    $q->whereIn('status', ['pending', 'waiting_verification']);
+                } else {
+                    $q->where('status', $status);
+                }
+            })
             ->when($channel !== 'all', fn ($q) => $q->where('payment_channel', $channel))
-            ->when($proof === 'yes', fn ($q) => $q->whereNotNull('meta->transfer_proof_path'))
-            ->when($proof === 'no', fn ($q) => $q->whereNull('meta->transfer_proof_path'))
+            ->when($proof === 'yes', fn ($q) => $q->where(function ($sq) {
+                $sq->whereNotNull('proof_file')->orWhereNotNull('meta->transfer_proof_path');
+            }))
+            ->when($proof === 'no', fn ($q) => $q->whereNull('proof_file')->whereNull('meta->transfer_proof_path'))
             ->when($settlement === 'underpaid', fn ($q) => $q->whereNotNull('paid_amount')
                 ->whereRaw('paid_amount < CASE WHEN (amount - discount_amount) < 0 THEN 0 ELSE (amount - discount_amount) END'))
             ->when($settlement === 'exact', fn ($q) => $q->whereNotNull('paid_amount')

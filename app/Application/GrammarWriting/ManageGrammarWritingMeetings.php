@@ -10,22 +10,24 @@ class ManageGrammarWritingMeetings
         private readonly GrammarWritingRepository $repository
     ) {}
 
-    public function updateBatchPeriod(int $programId, string $period): array
+    public function updateBatchPeriod(int $programId, int $classPeriodId): array
     {
         $program = $this->repository->findProgramByIdWithClassPeriods($programId);
 
-        if ($program->classPeriods->isNotEmpty() && !$program->classPeriods->pluck('name')->contains($period)) {
+        if ($program->classPeriods->isNotEmpty() && !$program->classPeriods->pluck('id')->contains($classPeriodId)) {
             return [
                 'ok' => false,
                 'message' => 'Selected batch is invalid for this program.',
             ];
         }
 
-        $program->update(['period' => $period]);
+        $period = $program->classPeriods->firstWhere('id', $classPeriodId);
+
+        $program->update(['active_class_period_id' => $classPeriodId]);
 
         return [
             'ok' => true,
-            'message' => 'Active batch set to ' . $period . '.',
+            'message' => 'Active batch set to ' . ($period ? $period->name : 'Unknown') . '.',
         ];
     }
 

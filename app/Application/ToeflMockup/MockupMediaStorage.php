@@ -40,14 +40,14 @@ class MockupMediaStorage
         return $directory . '/' . $filename;
     }
 
-    public function storeUploadedFileWithExtension(string $directory, UploadedFile $file, string $filenamePrefix = 'audio'): string
+    public function storeUploadedFileWithExtension(string $directory, UploadedFile $file, string $filenamePrefix = 'audio', bool $appendTime = true): string
     {
         if (!$file->isValid()) {
             throw new RuntimeException('Uploaded file is invalid.');
         }
 
         $publicPath = $this->ensurePublicDirectoryExists($directory);
-        $filename = $filenamePrefix . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $filename = $filenamePrefix . ($appendTime ? '_' . time() : '') . '.' . $file->getClientOriginalExtension();
         $file->move($publicPath, $filename);
 
         return $directory . '/' . $filename;

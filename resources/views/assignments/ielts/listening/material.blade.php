@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Target Bahasa') }} - IELTS Listening Practice</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -96,12 +98,16 @@
                 
                 <!-- Button -->
                 <div class="flex items-center justify-between mt-auto">
-                    <span class="text-purple-600 font-semibold group-hover:text-purple-700 flex items-center gap-2">
-                        Start Practice
-                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                        </svg>
-                    </span>
+                    @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                        <span class="bg-amber-500 text-white font-bold py-2 px-4 rounded-xl">Kerjakan Ulang ↺</span>
+                    @else
+                        <span class="text-purple-600 font-semibold group-hover:text-purple-700 flex items-center gap-2">
+                            Start Practice
+                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </span>
+                    @endif
                 </div>
             </div>
         </a>
@@ -147,12 +153,16 @@
                 
                 <!-- Button -->
                 <div class="flex items-center justify-between mt-auto">
-                    <span class="text-purple-600 font-semibold group-hover:text-purple-700 flex items-center gap-2">
-                        Start Practice
-                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                        </svg>
-                    </span>
+                    @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                        <span class="bg-amber-500 text-white font-bold py-2 px-4 rounded-xl">Kerjakan Ulang ↺</span>
+                    @else
+                        <span class="text-purple-600 font-semibold group-hover:text-purple-700 flex items-center gap-2">
+                            Start Practice
+                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </span>
+                    @endif
                 </div>
             </div>
         </a>
@@ -198,12 +208,16 @@
                 
                 <!-- Button -->
                 <div class="flex items-center justify-between mt-auto">
-                    <span class="text-blue-600 font-semibold group-hover:text-blue-700 flex items-center gap-2">
-                        Start Practice
-                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                        </svg>
-                    </span>
+                    @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                        <span class="bg-amber-500 text-white font-bold py-2 px-4 rounded-xl">Kerjakan Ulang ↺</span>
+                    @else
+                        <span class="text-blue-600 font-semibold group-hover:text-blue-700 flex items-center gap-2">
+                            Start Practice
+                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </span>
+                    @endif
                 </div>
             </div>
         </a>
@@ -244,12 +258,16 @@
                 </div>
 
                 <div class="flex items-center justify-between mt-auto">
-                    <span class="text-amber-600 font-semibold group-hover:text-amber-700 flex items-center gap-2">
-                        Start Practice
-                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                        </svg>
-                    </span>
+                    @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                        <span class="bg-amber-500 text-white font-bold py-2 px-4 rounded-xl">Kerjakan Ulang ↺</span>
+                    @else
+                        <span class="text-amber-600 font-semibold group-hover:text-amber-700 flex items-center gap-2">
+                            Start Practice
+                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </span>
+                    @endif
                 </div>
             </div>
         </a>
@@ -286,12 +304,16 @@
                 </div>
 
                 <div class="flex items-center justify-between mt-auto">
-                    <span class="text-teal-600 font-semibold group-hover:text-teal-700 flex items-center gap-2">
-                        Start Practice
-                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                        </svg>
-                    </span>
+                    @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                        <span class="bg-amber-500 text-white font-bold py-2 px-4 rounded-xl">Kerjakan Ulang ↺</span>
+                    @else
+                        <span class="text-teal-600 font-semibold group-hover:text-teal-700 flex items-center gap-2">
+                            Start Practice
+                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </span>
+                    @endif
                 </div>
             </div>
         </a>
@@ -328,12 +350,16 @@
                 </div>
 
                 <div class="flex items-center justify-between mt-auto">
-                    <span class="text-indigo-600 font-semibold group-hover:text-indigo-700 flex items-center gap-2">
-                        Start Practice
-                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                        </svg>
-                    </span>
+                    @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                        <span class="bg-amber-500 text-white font-bold py-2 px-4 rounded-xl">Kerjakan Ulang ↺</span>
+                    @else
+                        <span class="text-indigo-600 font-semibold group-hover:text-indigo-700 flex items-center gap-2">
+                            Start Practice
+                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </span>
+                    @endif
                 </div>
             </div>
         </a>
@@ -370,12 +396,16 @@
                 </div>
 
                 <div class="flex items-center justify-between mt-auto">
-                    <span class="text-rose-600 font-semibold group-hover:text-rose-700 flex items-center gap-2">
-                        Start Practice
-                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                        </svg>
-                    </span>
+                    @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                        <span class="bg-amber-500 text-white font-bold py-2 px-4 rounded-xl">Kerjakan Ulang ↺</span>
+                    @else
+                        <span class="text-rose-600 font-semibold group-hover:text-rose-700 flex items-center gap-2">
+                            Start Practice
+                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </span>
+                    @endif
                 </div>
             </div>
         </a>
@@ -412,12 +442,16 @@
                 </div>
 
                 <div class="flex items-center justify-between mt-auto">
-                    <span class="text-emerald-600 font-semibold group-hover:text-emerald-700 flex items-center gap-2">
-                        Start Practice
-                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                        </svg>
-                    </span>
+                    @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                        <span class="bg-amber-500 text-white font-bold py-2 px-4 rounded-xl">Kerjakan Ulang ↺</span>
+                    @else
+                        <span class="text-emerald-600 font-semibold group-hover:text-emerald-700 flex items-center gap-2">
+                            Start Practice
+                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </span>
+                    @endif
                 </div>
             </div>
         </a>
@@ -454,12 +488,16 @@
                 </div>
 
                 <div class="flex items-center justify-between mt-auto">
-                    <span class="text-amber-600 font-semibold group-hover:text-amber-700 flex items-center gap-2">
-                        Start Practice
-                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                        </svg>
-                    </span>
+                    @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                        <span class="bg-amber-500 text-white font-bold py-2 px-4 rounded-xl">Kerjakan Ulang ↺</span>
+                    @else
+                        <span class="text-amber-600 font-semibold group-hover:text-amber-700 flex items-center gap-2">
+                            Start Practice
+                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </span>
+                    @endif
                 </div>
             </div>
         </a>
@@ -798,7 +836,7 @@
         </div>
         
         <!-- Fixed Top Audio Player -->
-        <div class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-indigo-100 shadow-md px-4 py-3 transform transition-all duration-300" :class="sidebarOpen ? 'md:left-72' : 'left-0'" x-data="{ playing: false, time: '0:00', duration: '0:00', audio: null, progress: 0 }">
+        <div style="display: none !important" class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-indigo-100 shadow-md px-4 py-3 transform transition-all duration-300" :class="sidebarOpen ? 'md:left-72' : 'left-0'" x-data="{ playing: false, time: '0:00', duration: '0:00', audio: null, progress: 0 }">
             <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-4">
                 <!-- Icon & Title -->
                 <div class="flex items-center gap-4 w-full md:w-auto">
@@ -822,19 +860,19 @@
 
                     <!-- Play/Pause -->
                     <button type="button" id="playPauseBtn" onclick="togglePlayPause()" class="w-10 h-10 bg-indigo-600 hover:bg-indigo-700 rounded-xl flex items-center justify-center text-white transition-colors shadow-lg hover:shadow-indigo-200 transform hover:scale-105 active:scale-95">
-                        <svg id="playIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                        <svg id="pauseIcon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+                        <svg id="oldPlayIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        <svg id="oldPauseIcon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
                     </button>
 
                     <!-- Progress -->
                     <div class="flex-1 flex flex-col min-w-[200px] max-w-lg">
                         <div class="flex justify-between text-[10px] text-indigo-600 font-bold mb-1">
-                            <span id="currentTime">0:00</span>
-                            <span id="duration">0:00</span>
+                            <span id="oldCurrentTime">0:00</span>
+                            <span id="oldDuration">0:00</span>
                         </div>
-                        <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="progressContainer">
-                            <div id="progressBar" class="absolute h-full bg-indigo-600 rounded-full" style="width: 0%"></div>
-                            <div id="progressHandle" class="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
+                        <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="oldProgressContainer">
+                            <div id="oldProgressBar" class="absolute h-full bg-indigo-600 rounded-full" style="width: 0%"></div>
+                            <div id="oldProgressHandle" class="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
                         </div>
                     </div>
 
@@ -883,7 +921,7 @@
                     @endif
                 </div>
 
-                <audio id="mainAudio" class="hidden">
+                <audio id="oldMainAudio" class="hidden">
                     @if(isset($material) && $material->audio_file)
                         <source src="{{ asset($material->audio_file) }}" type="audio/mpeg">
                     @else
@@ -894,7 +932,7 @@
         </div>
         
         {{-- Transcript Drawer (Collapsible) --}}
-        <div id="transcriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
+        <div id="oldTranscriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
             <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                 {{-- English Column --}}
                 <div class="flex flex-col h-full bg-slate-50">
@@ -1194,7 +1232,7 @@
     </div>
     
     <!-- Fixed Top Audio Player -->
-    <div class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-indigo-100 shadow-md px-4 py-3 transform transition-all duration-300" :class="sidebarOpen ? 'md:left-72' : 'left-0'" x-data="{ playing: false, time: '0:00', duration: '0:00', audio: null, progress: 0 }">
+    <div style="display: none !important" class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-indigo-100 shadow-md px-4 py-3 transform transition-all duration-300" :class="sidebarOpen ? 'md:left-72' : 'left-0'" x-data="{ playing: false, time: '0:00', duration: '0:00', audio: null, progress: 0 }">
         <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-4">
             <!-- Icon & Title -->
             <div class="flex items-center gap-4 w-full md:w-auto">
@@ -1218,19 +1256,19 @@
 
                 <!-- Play/Pause -->
                 <button type="button" id="playPauseBtn" onclick="togglePlayPause()" class="w-10 h-10 bg-indigo-600 hover:bg-indigo-700 rounded-xl flex items-center justify-center text-white transition-colors shadow-lg hover:shadow-indigo-200 transform hover:scale-105 active:scale-95">
-                    <svg id="playIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                    <svg id="pauseIcon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+                    <svg id="oldPlayIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="oldPauseIcon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
                 </button>
 
                 <!-- Progress -->
                 <div class="flex-1 flex flex-col min-w-[200px] max-w-lg">
                     <div class="flex justify-between text-[10px] text-indigo-600 font-bold mb-1">
-                        <span id="currentTime">0:00</span>
-                        <span id="duration">0:00</span>
+                        <span id="oldCurrentTime">0:00</span>
+                        <span id="oldDuration">0:00</span>
                     </div>
-                    <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="progressContainer">
-                        <div id="progressBar" class="absolute h-full bg-indigo-600 rounded-full" style="width: 0%"></div>
-                        <div id="progressHandle" class="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
+                    <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="oldProgressContainer">
+                        <div id="oldProgressBar" class="absolute h-full bg-indigo-600 rounded-full" style="width: 0%"></div>
+                        <div id="oldProgressHandle" class="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
                     </div>
                 </div>
 
@@ -1263,7 +1301,7 @@
                 @endif
             </div>
 
-            <audio id="mainAudio" class="hidden">
+            <audio id="oldMainAudio" class="hidden">
                 @if(isset($material) && $material->audio_file)
                     <source src="{{ asset($material->audio_file) }}" type="audio/mpeg">
                 @else
@@ -1274,7 +1312,7 @@
     </div>
     
         {{-- Transcript Drawer (Collapsible) --}}
-        <div id="transcriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
+        <div id="oldTranscriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
             <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                 {{-- English Column --}}
                 <div class="flex flex-col h-full bg-slate-50">
@@ -1560,7 +1598,7 @@
         </div>
         
         <!-- Fixed Top Audio Player -->
-        <div class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-indigo-100 shadow-md px-4 py-3 transform transition-all duration-300" :class="sidebarOpen ? 'md:left-72' : 'left-0'" x-data="{ playing: false, time: '0:00', duration: '0:00', audio: null, progress: 0 }">
+        <div style="display: none !important" class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-indigo-100 shadow-md px-4 py-3 transform transition-all duration-300" :class="sidebarOpen ? 'md:left-72' : 'left-0'" x-data="{ playing: false, time: '0:00', duration: '0:00', audio: null, progress: 0 }">
             <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-4">
                 <!-- Icon & Title -->
                 <div class="flex items-center gap-4 w-full md:w-auto">
@@ -1584,19 +1622,19 @@
 
                     <!-- Play/Pause -->
                     <button type="button" id="playPauseBtn" onclick="togglePlayPause()" class="w-10 h-10 bg-indigo-600 hover:bg-indigo-700 rounded-xl flex items-center justify-center text-white transition-colors shadow-lg hover:shadow-indigo-200 transform hover:scale-105 active:scale-95">
-                        <svg id="playIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                        <svg id="pauseIcon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+                        <svg id="oldPlayIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        <svg id="oldPauseIcon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
                     </button>
 
                     <!-- Progress -->
                     <div class="flex-1 flex flex-col min-w-[200px] max-w-lg">
                         <div class="flex justify-between text-[10px] text-indigo-600 font-bold mb-1">
-                            <span id="currentTime">0:00</span>
-                            <span id="duration">0:00</span>
+                            <span id="oldCurrentTime">0:00</span>
+                            <span id="oldDuration">0:00</span>
                         </div>
-                        <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="progressContainer">
-                            <div id="progressBar" class="absolute h-full bg-indigo-600 rounded-full" style="width: 0%"></div>
-                            <div id="progressHandle" class="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
+                        <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="oldProgressContainer">
+                            <div id="oldProgressBar" class="absolute h-full bg-indigo-600 rounded-full" style="width: 0%"></div>
+                            <div id="oldProgressHandle" class="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
                         </div>
                     </div>
 
@@ -1629,7 +1667,7 @@
                     @endif
                 </div>
 
-                <audio id="mainAudio" class="hidden">
+                <audio id="oldMainAudio" class="hidden">
                     @if(isset($material) && $material->audio_file)
                         <source src="{{ asset($material->audio_file) }}" type="audio/mpeg">
                     @else
@@ -1640,7 +1678,7 @@
         </div>
         
         {{-- Transcript Drawer (Collapsible) --}}
-        <div id="transcriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
+        <div id="oldTranscriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
             <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                 {{-- English Column --}}
                 <div class="flex flex-col h-full bg-slate-50">
@@ -3162,7 +3200,7 @@
 
     @if(request()->has('practice'))
     <!-- Audio Player -->
-    <div class="fixed top-0 left-0 right-0 md:left-64 z-40 bg-white shadow-lg">
+    <div style="display: none !important" class="fixed top-0 left-0 right-0 md:left-64 z-40 bg-white shadow-lg">
         <div class="max-w-7xl mx-auto">
             <div class="flex flex-wrap lg:flex-nowrap items-center gap-2 md:gap-4 p-2 md:p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-b-2 border-indigo-200">
                 <div class="flex items-center gap-2 md:gap-3">
@@ -3208,23 +3246,23 @@
 
                     <button type="button" id="playPauseBtn" onclick="togglePlayPause()"
                             class="p-1.5 md:p-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex-shrink-0">
-                        <svg id="playIcon" class="w-5 h-5 md:w-6 md:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <svg id="oldPlayIcon" class="w-5 h-5 md:w-6 md:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z"/>
                         </svg>
-                        <svg id="pauseIcon" class="w-5 h-5 md:w-6 md:h-6 text-white hidden" fill="currentColor" viewBox="0 0 24 24">
+                        <svg id="oldPauseIcon" class="w-5 h-5 md:w-6 md:h-6 text-white hidden" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
                         </svg>
                     </button>
 
                     <div class="flex-1 flex flex-col gap-1">
                         <div class="flex justify-between text-xs text-indigo-700 font-medium">
-                            <span id="currentTime">0:00</span>
-                            <span id="duration">0:00</span>
+                            <span id="oldCurrentTime">0:00</span>
+                            <span id="oldDuration">0:00</span>
                         </div>
 
-                        <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="progressContainer">
-                            <div id="progressBar" class="absolute h-full bg-indigo-600 rounded-full transition-all" style="width: 0%"></div>
-                            <div id="progressHandle" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
+                        <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="oldProgressContainer">
+                            <div id="oldProgressBar" class="absolute h-full bg-indigo-600 rounded-full transition-all" style="width: 0%"></div>
+                            <div id="oldProgressHandle" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
                         </div>
                     </div>
 
@@ -3243,7 +3281,7 @@
                         <span class="text-xs font-bold text-black hidden sm:inline">Terjemah</span>
                     </button>
 
-                    <audio id="mainAudio" class="hidden" preload="auto">
+                    <audio id="oldMainAudio" class="hidden" preload="auto">
                         <source src="{{ isset($material) && $material->audio_file ? asset($material->audio_file) : '' }}" type="audio/mpeg">
                     </audio>
                 </div>
@@ -3282,7 +3320,7 @@
         </div>
     </div>
 
-    <div id="transcriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mt-20 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
+    <div id="oldTranscriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mt-20 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
         <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
             <div class="flex flex-col h-full bg-slate-50">
                 <div class="flex-none px-4 py-2 bg-slate-100 border-b border-slate-200 font-semibold text-slate-700">English Script</div>
@@ -3716,7 +3754,7 @@
 
     @if(request()->has('practice'))
     <!-- Fixed Top Audio Player -->
-    <div class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-indigo-200 shadow-md px-4 py-3 transform transition-all duration-300" :class="sidebarOpen ? 'md:left-72' : 'left-0'">
+    <div style="display: none !important" class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-indigo-200 shadow-md px-4 py-3 transform transition-all duration-300" :class="sidebarOpen ? 'md:left-72' : 'left-0'">
         <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-4">
             <div class="flex items-center gap-4 w-full md:w-auto">
                 <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-md flex-shrink-0">
@@ -3731,18 +3769,18 @@
                 </button>
 
                 <button type="button" id="playPauseBtn" onclick="togglePlayPause()" class="w-10 h-10 bg-indigo-600 hover:bg-indigo-700 rounded-xl flex items-center justify-center text-white transition-colors shadow-lg hover:shadow-indigo-200 transform hover:scale-105 active:scale-95">
-                    <svg id="playIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                    <svg id="pauseIcon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+                    <svg id="oldPlayIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="oldPauseIcon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
                 </button>
 
                 <div class="flex-1 flex flex-col min-w-[200px] max-w-lg">
                     <div class="flex justify-between text-[10px] text-indigo-600 font-bold mb-1">
-                        <span id="currentTime">0:00</span>
-                        <span id="duration">0:00</span>
+                        <span id="oldCurrentTime">0:00</span>
+                        <span id="oldDuration">0:00</span>
                     </div>
-                    <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="progressContainer">
-                        <div id="progressBar" class="absolute h-full bg-indigo-600 rounded-full" style="width: 0%"></div>
-                        <div id="progressHandle" class="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
+                    <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="oldProgressContainer">
+                        <div id="oldProgressBar" class="absolute h-full bg-indigo-600 rounded-full" style="width: 0%"></div>
+                        <div id="oldProgressHandle" class="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
                     </div>
                 </div>
 
@@ -3781,7 +3819,7 @@
                 @endif
             </div>
 
-            <audio id="mainAudio" class="hidden">
+            <audio id="oldMainAudio" class="hidden">
                 @if(isset($material) && $material->audio_file)
                     <source src="{{ asset($material->audio_file) }}" type="audio/mpeg">
                 @else
@@ -3791,7 +3829,7 @@
         </div>
     </div>
 
-    <div id="transcriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mt-20 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
+    <div id="oldTranscriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mt-20 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
         <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
             <div class="flex flex-col h-full bg-slate-50">
                 <div class="flex-none px-4 py-2 bg-slate-100 border-b border-slate-200 font-semibold text-slate-700">English Script</div>
@@ -3834,7 +3872,11 @@
                 <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors">Glass Recycling Process</h3>
                 <p class="text-gray-600 text-sm leading-relaxed mb-6">Flow-chart completion questions 1-10.</p>
                 <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>10 Questions</span><span>~12 mins</span></div>
-                <span class="text-amber-600 font-semibold group-hover:text-amber-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+                @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                    <span class="bg-amber-500 text-white font-bold py-2 px-4 rounded-xl">Kerjakan Ulang ↺</span>
+                @else
+                    <span class="text-amber-600 font-semibold group-hover:text-amber-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+                @endif
             </div>
         </a>
 
@@ -3849,7 +3891,11 @@
                 <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-cyan-600 transition-colors">Can Recycling Process</h3>
                 <p class="text-gray-600 text-sm leading-relaxed mb-6">Flow-chart completion questions 11-20.</p>
                 <div class="flex items-center gap-4 text-sm text-gray-500 mb-6"><span>10 Questions</span><span>~12 mins</span></div>
-                <span class="text-cyan-600 font-semibold group-hover:text-cyan-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+                @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                    <span class="bg-amber-500 text-white font-bold py-2 px-4 rounded-xl">Kerjakan Ulang ↺</span>
+                @else
+                    <span class="text-cyan-600 font-semibold group-hover:text-cyan-700 flex items-center gap-2">Start Practice <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>
+                @endif
             </div>
         </a>
 
@@ -5380,164 +5426,13 @@ Start translating here..."></textarea>
     @endif
 </div>
 </div>
+@if(request()->has('practice'))
+    @include('assignments.ielts.listening.partials.audio-player-material-practice', ['material' => $material ?? null, 'practice' => request()->get('practice')])
+@endif
 </body>
 </html>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const audio = document.getElementById('mainAudio');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const playIcon = document.getElementById('playIcon');
-        const pauseIcon = document.getElementById('pauseIcon');
-        const progressBar = document.getElementById('progressBar');
-        const progressHandle = document.getElementById('progressHandle');
-        const progressContainer = document.getElementById('progressContainer');
-        const currentTimeDisplay = document.getElementById('currentTime');
-        const durationDisplay = document.getElementById('duration');
 
-        if (!audio || !progressContainer) {
-            console.warn('Audio player elements not found');
-            return;
-        }
-
-        let isDragging = false;
-
-        // Format time in MM:SS
-        function formatTime(seconds) {
-            if (isNaN(seconds)) return '0:00';
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        }
-
-        // Toggle play/pause
-        window.togglePlayPause = function() {
-            if (audio.paused) {
-                audio.play();
-                playIcon.classList.add('hidden');
-                pauseIcon.classList.remove('hidden');
-            } else {
-                audio.pause();
-                playIcon.classList.remove('hidden');
-                pauseIcon.classList.add('hidden');
-            }
-        };
-
-        // Skip audio by seconds
-        window.skipAudio = function(seconds) {
-            if (audio && audio.duration) {
-                const newTime = Math.max(0, Math.min(audio.duration, audio.currentTime + seconds));
-                audio.currentTime = newTime;
-            }
-        };
-
-        // Seek to position when clicking or dragging progress bar
-        function seekAudio(event) {
-            if (!audio.duration) return;
-            
-            const rect = progressContainer.getBoundingClientRect();
-            const clientX = event.clientX || (event.touches ? event.touches[0].clientX : 0);
-            const clickX = clientX - rect.left;
-            const width = rect.width;
-            
-            if (width === 0) return;
-
-            let percentage = clickX / width;
-            percentage = Math.max(0, Math.min(1, percentage));
-            
-            const newTime = percentage * audio.duration;
-            audio.currentTime = newTime;
-        }
-
-        // Mouse down on progress bar
-        progressContainer.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            seekAudio(e);
-            e.preventDefault();
-        });
-
-        // Mouse move - drag to seek
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                seekAudio(e);
-            }
-        });
-
-        // Mouse up - stop dragging
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-            }
-        });
-
-        // Touch support for mobile
-        progressContainer.addEventListener('touchstart', (e) => {
-            isDragging = true;
-            const touch = e.touches[0];
-            seekAudio(touch);
-            e.preventDefault();
-        });
-
-        document.addEventListener('touchmove', (e) => {
-            if (isDragging) {
-                const touch = e.touches[0];
-                seekAudio(touch);
-            }
-        });
-
-        document.addEventListener('touchend', () => {
-            if (isDragging) {
-                isDragging = false;
-            }
-        });
-
-        // Update progress bar and time display
-        audio.addEventListener('timeupdate', () => {
-            if (audio.duration && !isDragging) {
-                const percentage = (audio.currentTime / audio.duration) * 100;
-                progressBar.style.width = percentage + '%';
-                progressHandle.style.left = percentage + '%';
-                currentTimeDisplay.textContent = formatTime(audio.currentTime);
-            }
-        });
-
-        // Set duration when metadata is loaded
-        audio.addEventListener('loadedmetadata', () => {
-            durationDisplay.textContent = formatTime(audio.duration);
-        });
-
-        // Reset play button when audio ends
-        audio.addEventListener('ended', () => {
-            playIcon.classList.remove('hidden');
-            pauseIcon.classList.add('hidden');
-        });
-        
-        // Toggle transcript drawer
-        window.toggleTranscriptDrawer = function() {
-            const transcriptDrawer = document.getElementById('transcriptDrawer');
-            if (transcriptDrawer) {
-                if (transcriptDrawer.classList.contains('hidden')) {
-                    transcriptDrawer.classList.remove('hidden');
-                    transcriptDrawer.classList.add('flex');
-                } else {
-                    transcriptDrawer.classList.add('hidden');
-                    transcriptDrawer.classList.remove('flex');
-                }
-            }
-        };
-
-        window.toggleAnswerKey = function() {
-            document.body.classList.toggle('reveal-key');
-            const btn = document.getElementById('toggleKeyBtn');
-            if (btn) {
-                const active = document.body.classList.contains('reveal-key');
-                btn.classList.toggle('bg-yellow-300', active);
-                btn.classList.toggle('border-yellow-400', active);
-                btn.classList.toggle('text-yellow-900', active);
-            }
-        };
-    });
-</script>
 <style>
     .custom-scrollbar::-webkit-scrollbar {
         width: 6px;

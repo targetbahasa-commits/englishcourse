@@ -34,15 +34,38 @@ class BuildStudentPaymentIndexData
 
         $programPricingPreview = [];
         foreach ($programs as $program) {
-            $baseAmount   = max(0, (int) ($program->price ?? 0));
-            $discount     = $this->discountResolver->resolve($user, $program, $baseAmount);
+            $classTypes = ['regular', 'semi_private', 'private'];
+            $programPricingPreview[(string) $program->id] = [];
+            
+            foreach ($classTypes as $type) {
+                $basePrice = $program->price ?? 0;
+                
+                if ($type === 'private') {
+                    $basePrice = $program->price_private ?? $basePrice;
+                } elseif ($type === 'semi_private') {
+                    $basePrice = $program->price_semi_private ?? $basePrice;
+                }
 
-            $programPricingPreview[(string) $program->id] = [
-                'base_amount'    => $baseAmount,
-                'discount_amount'=> $discount->amount,
-                'net_amount'     => max(0, $baseAmount - $discount->amount),
-                'discount_label' => $discount->label,
-            ];
+                if (in_array($user->learning_mode, ['offline', 'both'])) {
+                    if ($type === 'private' && !is_null($program->price_private_offline)) {
+                        $basePrice = $program->price_private_offline;
+                    } elseif ($type === 'semi_private' && !is_null($program->price_semi_private_offline)) {
+                        $basePrice = $program->price_semi_private_offline;
+                    } elseif (!is_null($program->price_offline)) {
+                        $basePrice = $program->price_offline;
+                    }
+                }
+                
+                $baseAmount   = max(0, (int) $basePrice);
+                $discount     = $this->discountResolver->resolve($user, $program, $baseAmount);
+
+                $programPricingPreview[(string) $program->id][$type] = [
+                    'base_amount'    => $baseAmount,
+                    'discount_amount'=> $discount->amount,
+                    'net_amount'     => max(0, $baseAmount - $discount->amount),
+                    'discount_label' => $discount->label,
+                ];
+            }
         }
 
         $activeEnrollmentProgramIds = Enrollment::query()

@@ -20,6 +20,7 @@ class ManageUsers
         return [
             'teachers' => $this->repository->getTeacherOptions(),
             'programs' => $this->repository->getProgramOptions(),
+            'camps'    => \App\Models\Camp::with('rooms')->get(),
         ];
     }
 

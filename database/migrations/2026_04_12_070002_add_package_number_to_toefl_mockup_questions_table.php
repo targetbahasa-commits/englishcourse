@@ -11,10 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('toefl_mockup_questions', function (Blueprint $table) {
-            $table->integer('package_number')->default(1)->after('part');
-            $table->index(['section', 'package_number', 'question_number']);
-        });
+        if (!Schema::hasColumn('toefl_mockup_questions', 'package_number')) {
+            Schema::table('toefl_mockup_questions', function (Blueprint $table) {
+                $table->integer('package_number')->default(1);
+            });
+        }
+
+        try {
+            Schema::table('toefl_mockup_questions', function (Blueprint $table) {
+                $table->index(['section', 'package_number', 'question_number'], 'tmq_sec_pkg_qnum_idx');
+            });
+        } catch (\Exception $e) {
+            // Index may already exist, skip
+        }
     }
 
     /**

@@ -149,11 +149,17 @@
                         <p class="text-sm text-gray-500 mt-1">Visit the official recruitment page for full details and application instructions.</p>
                     </div>
                     @auth
+                        <button onclick="openInquiryModal()" class="inline-flex items-center justify-center px-8 py-4 border border-indigo-200 text-base font-bold rounded-xl text-indigo-700 bg-white hover:bg-indigo-50 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-auto w-full transition-all hover:-translate-y-0.5 mr-0 sm:mr-3 mb-3 sm:mb-0">
+                            Consult with Expert
+                        </button>
                         <a href="{{ $jobVacancy->url }}" target="_blank" class="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-auto w-full transition-all hover:-translate-y-0.5">
                             Apply Now
                             <svg class="ml-2 -mr-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                         </a>
                     @else
+                        <button onclick="openInquiryModal()" class="inline-flex items-center justify-center px-8 py-4 border border-indigo-200 text-base font-bold rounded-xl text-indigo-700 bg-white hover:bg-indigo-50 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-auto w-full transition-all hover:-translate-y-0.5 mr-0 sm:mr-3 mb-3 sm:mb-0">
+                            Consult with Expert
+                        </button>
                         <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-8 py-4 border border-indigo-200 text-base font-bold rounded-xl text-indigo-700 bg-white hover:bg-indigo-50 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-auto w-full transition-all hover:-translate-y-0.5">
                             Login to Apply
                             <svg class="ml-2 -mr-1 w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
@@ -163,5 +169,122 @@
             @endif
         </div>
     </div>
+
+    <!-- Quick Inquiry Modal -->
+    <div id="inquiryModal" class="fixed inset-0 z-[100] hidden items-center justify-center overflow-y-auto overflow-x-hidden bg-black/50 backdrop-blur-sm p-4 sm:p-0">
+        <div class="relative w-full max-w-lg rounded-2xl bg-white shadow-2xl transition-all">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between rounded-t-2xl border-b border-gray-100 px-6 py-4">
+                <h3 class="text-xl font-bold text-gray-900">
+                    Consult with an Expert
+                </h3>
+                <button type="button" onclick="closeInquiryModal()" class="ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-6">
+                <p class="text-sm text-gray-600 mb-6">Want to know more about <span class="font-bold text-indigo-600">{{ $jobVacancy->title }}</span>? Leave your details and our expert will contact you shortly.</p>
+                <form id="inquiryForm" class="space-y-4">
+                    <input type="hidden" name="source" value="job_vacancy">
+                    <input type="hidden" name="source_detail" value="{{ $jobVacancy->title }} at {{ $jobVacancy->company }}">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
+                        <input type="text" name="full_name" required class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-4 py-2.5">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number <span class="text-red-500">*</span></label>
+                        <input type="text" name="whatsapp" required class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-4 py-2.5" placeholder="e.g. 081234567890">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                        <input type="email" name="email" class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-4 py-2.5" placeholder="Optional">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Questions / Notes</label>
+                        <textarea name="notes" rows="3" class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-4 py-2.5" placeholder="What would you like to know?"></textarea>
+                    </div>
+
+                    <div id="inquiryAlert" class="hidden p-4 mb-4 text-sm rounded-xl"></div>
+
+                    <div class="pt-4 flex justify-end gap-3 border-t border-gray-100">
+                        <button type="button" onclick="closeInquiryModal()" class="rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors">Cancel</button>
+                        <button type="submit" id="inquirySubmitBtn" class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors">
+                            Submit Inquiry
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    const inquiryModal = document.getElementById('inquiryModal');
+    const inquiryForm = document.getElementById('inquiryForm');
+    const inquirySubmitBtn = document.getElementById('inquirySubmitBtn');
+    const inquiryAlert = document.getElementById('inquiryAlert');
+
+    function openInquiryModal() {
+        inquiryModal.classList.remove('hidden');
+        inquiryModal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeInquiryModal() {
+        inquiryModal.classList.add('hidden');
+        inquiryModal.classList.remove('flex');
+        document.body.style.overflow = '';
+        inquiryForm.reset();
+        inquiryAlert.classList.add('hidden');
+    }
+
+    inquiryForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(inquiryForm);
+        const data = Object.fromEntries(formData.entries());
+        
+        inquirySubmitBtn.disabled = true;
+        inquirySubmitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Submitting...';
+        
+        fetch('{{ route("public.inquiry.store") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(res => {
+            inquiryAlert.classList.remove('hidden', 'bg-red-50', 'text-red-800');
+            inquiryAlert.classList.add('bg-green-50', 'text-green-800');
+            inquiryAlert.innerHTML = res.message || 'Success! We will contact you soon.';
+            inquirySubmitBtn.innerHTML = 'Submitted';
+            
+            setTimeout(() => {
+                closeInquiryModal();
+                inquirySubmitBtn.disabled = false;
+                inquirySubmitBtn.innerHTML = 'Submit Inquiry';
+            }, 2500);
+        })
+        .catch(err => {
+            console.error(err);
+            inquiryAlert.classList.remove('hidden', 'bg-green-50', 'text-green-800');
+            inquiryAlert.classList.add('bg-red-50', 'text-red-800');
+            inquiryAlert.innerHTML = 'Something went wrong. Please check your inputs and try again.';
+            inquirySubmitBtn.disabled = false;
+            inquirySubmitBtn.innerHTML = 'Submit Inquiry';
+        });
+    });
+</script>
+@endpush

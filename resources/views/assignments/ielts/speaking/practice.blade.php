@@ -32,18 +32,12 @@
 
 <div class="container mx-auto px-4 py-8" 
      x-data="speakingPractice({{ json_encode($topic['questions'] ?? []) }}, {{ json_encode($topic['audio_urls'] ?? []) }}, {{ json_encode($idioms ?? []) }}, {{ json_encode($collocations ?? []) }}, '{{ request('topic') }}', '{{ request('subtopic') }}', {{ json_encode($advanced_verbs ?? []) }}, {{ json_encode($advanced_adverbs ?? []) }}, {{ json_encode($advanced_adjectives ?? []) }})"
+     x-init="init()"
      x-cloak>
     
     <!-- Header with Back Button -->
     <div class="mb-8">
-        @if(isset($topic['parent_title']))
-        <a href="{{ route('assignments.ielts-academic.speaking.practice', ['topic' => request()->query('topic')]) }}" class="inline-flex items-center text-gray-600 hover:text-orange-500 transition-colors mb-4">
-        @else
-        <a href="{{ route('assignments.ielts-academic.speaking.index', ['part' => $topic['part'] ?? 1]) }}" class="inline-flex items-center text-gray-600 hover:text-orange-500 transition-colors mb-4">
-        @endif
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            Back to Selection
-        </a>
+
         
         <!-- Insecure Context Warning -->
         <template x-if="!isSecureContext">
@@ -70,15 +64,36 @@
             </div>
         </template>
 
-        <div class="flex items-center gap-4">
-            <div class="p-3 {{ $theme['bg'] }} rounded-xl {{ $theme['text'] }}">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $topic['icon'] }}"></path>
-                </svg>
+        <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="p-3 {{ $theme['bg'] }} rounded-xl {{ $theme['text'] }}">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $topic['icon'] }}"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">{{ $topic['title'] }}</h1>
+                    <p class="text-gray-500">Speaking Part {{ $topic['part'] ?? 1 }} Practice</p>
+                </div>
             </div>
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">{{ $topic['title'] }}</h1>
-                <p class="text-gray-500">Speaking Part {{ $topic['part'] ?? 1 }} Practice</p>
+
+            <div class="flex items-center gap-3">
+            @if((Auth::user()->isAdmin() || Auth::user()->isTeacher()) && isset($topic['id']))
+                <button type="button" @click="showEditModal = true; editingQuestions = questions.join('\n');" class="px-4 py-2 bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 font-semibold shadow-sm transition">
+                    Edit Soal
+                </button>
+            @endif
+
+                <!-- Back Button -->
+                @if(isset($topic['parent_title']))
+                <a href="{{ route('assignments.ielts-academic.speaking.practice', ['topic' => request()->query('topic')]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
+                @else
+                <a href="{{ route('assignments.ielts-academic.speaking.index', ['part' => $topic['part'] ?? 1]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
+                @endif
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back to Selection
+                </a>
+
             </div>
         </div>
     </div>
@@ -86,7 +101,56 @@
     <!-- Main Practice Card -->
     <div class="max-w-4xl mx-auto">
         <div class="bg-white rounded-3xl shadow-xl overflow-hidden min-h-[500px] flex flex-col relative">
-            
+
+            <!-- Begin Screen Overlay (inside card, covers only the card - required by Chrome autoplay policy) -->
+            <div x-show="showBeginScreen"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-white rounded-3xl">
+                <div class="flex flex-col items-center gap-6 p-8 text-center max-w-sm">
+                    <!-- Speaker icon -->
+                    <div class="w-24 h-24 rounded-full bg-orange-100 flex items-center justify-center shadow-lg">
+                        <svg class="w-12 h-12 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Ready to practice?</h3>
+                        <p class="text-gray-500 text-sm mb-4">The examiner will read the question aloud.<br>Make sure your speaker volume is on.</p>
+
+                        <!-- Voice Selection -->
+                        <div class="w-full text-left mb-2">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Examiner Voice</label>
+                            <select x-model="examinerVoice" class="w-full border-gray-300 rounded-xl shadow-sm focus:border-orange-500 focus:ring-orange-500 bg-gray-50 text-gray-700 py-2.5">
+                                <optgroup label="Female Voices">
+                                    <option value="af_heart">American Female (Heart)</option>
+                                    <option value="af_nova">American Female (Nova)</option>
+                                    <option value="af_sky">American Female (Sky)</option>
+                                    <option value="bf_emma">British Female (Emma)</option>
+                                </optgroup>
+                                <optgroup label="Male Voices">
+                                    <option value="am_echo">American Male (Echo)</option>
+                                    <option value="am_michael">American Male (Michael)</option>
+                                    <option value="bm_george">British Male (George)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+                    <button @click="beginPractice()"
+                            class="w-full py-4 px-8 bg-orange-500 hover:bg-orange-600 text-white text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all flex items-center justify-center gap-3">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Begin
+                    </button>
+                </div>
+            </div>
+
             <!-- Progress Bar -->
             <div class="h-2 bg-gray-100">
                 <div class="h-full bg-orange-500 transition-all duration-300"
@@ -115,7 +179,6 @@
                 <div class="mb-12 relative inline-block {{ (in_array(request('topic'), ['lesson-3', 'lesson-4']) || str_contains(request('subtopic', ''), 'part-2')) ? 'text-left' : 'text-center' }}">
                     <!-- Countdown Overlay -->
                     <div x-show="ttsCountdown > 0" 
-
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 scale-50"
                          x-transition:enter-end="opacity-100 scale-100"
@@ -126,8 +189,17 @@
                         <span class="text-6xl font-black text-orange-500 animate-pulse" x-text="ttsCountdown"></span>
                     </div>
 
+                    <template x-if="isPracticeTest && !showQuestionText && ttsCountdown === 0">
+                        <button @click="showQuestionText = true" 
+                                class="px-6 py-3 border-2 border-dashed border-gray-300 text-gray-500 rounded-xl hover:border-orange-500 hover:text-orange-500 transition-colors font-medium text-sm flex items-center justify-center gap-2 mx-auto shadow-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            Show Question Text
+                        </button>
+                    </template>
+
                     <h2 class="text-xl md:text-2xl font-bold text-gray-800 leading-tight inline whitespace-pre-line" 
                         x-text="currentQuestion"
+                        x-show="!isPracticeTest || showQuestionText"
                         :class="{'opacity-25 blur-sm': ttsCountdown > 0}"
                         x-transition:enter="transition ease-out duration-300"
                         x-transition:enter-start="opacity-0 translate-y-4"
@@ -135,6 +207,7 @@
                     </h2>
                     @if(!(request('topic') == 'lesson-9' && request('subtopic') == 'part-2-challenging-task') && !(request('topic') == 'lesson-8' && request('subtopic') == 'part-2-journey') && !(request('topic') == 'lesson-7' && request('subtopic') == 'part-2-achievement'))
                     <button @click="speakQuestion()" 
+                            x-show="!isPracticeTest || showQuestionText"
                             class="inline-flex items-center justify-center w-10 h-10 ml-3 rounded-full bg-orange-100 text-orange-500 hover:bg-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
                             title="Read question aloud">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -270,7 +343,7 @@
                     
                      <button @click="toggleBoard()" 
                             class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                            :class="showBoard ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'"
+                            :class="isBoardOpen ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'"
                             title="Open Whiteboard">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -318,7 +391,7 @@
                      <!-- Header -->
                      <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 w-full flex items-center justify-between bg-orange-50">
                         <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                             <span class="text-2xl">💡</span> Useful Idioms
+                            Useful Idioms
                         </h2>
                         <button @click="isIdiomsOpen = false" class="text-gray-400 hover:text-gray-500 focus:outline-none">
                             <span class="sr-only">Close panel</span>
@@ -373,7 +446,7 @@
                      <!-- Header -->
                      <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 w-full flex items-center justify-between bg-teal-50">
                         <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                             <span class="text-2xl">🔗</span> Useful Collocations
+                             Useful Collocations
                         </h2>
                         <button @click="isCollocationsOpen = false" class="text-gray-400 hover:text-gray-500 focus:outline-none">
                             <span class="sr-only">Close panel</span>
@@ -520,7 +593,7 @@
 
     <!-- Floating Grammar Button (Lesson 2 Only) -->
     @if(request('topic') == 'lesson-2')
-    <div class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[60]">
+    <div class="fixed bottom-28 left-1/2 transform -translate-x-1/2 z-[60]">
         <button @click="isGrammarOpen = !isGrammarOpen" 
                 class="flex items-center gap-2 px-6 py-3 rounded-full font-bold shadow-2xl transition-all transform hover:scale-105"
                 :class="isGrammarOpen ? 'bg-blue-600 text-white ring-4 ring-blue-300' : 'bg-white text-blue-600 hover:bg-blue-50'"
@@ -531,15 +604,13 @@
                 </svg>
             </div>
             <span>Nominal & Passive</span>
-            
-
         </button>
     </div>
     @endif
 
     <!-- Floating Modal Button (Lesson 5 Only) -->
     @if(request('topic') == 'lesson-5')
-    <div class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[60]">
+    <div class="fixed bottom-28 left-1/2 transform -translate-x-1/2 z-[60]">
         <button @click="isGrammarOpen = !isGrammarOpen" 
                 class="flex items-center gap-2 px-6 py-3 rounded-full font-bold shadow-2xl transition-all transform hover:scale-105"
                 :class="isGrammarOpen ? 'bg-yellow-500 text-white ring-4 ring-yellow-300' : 'bg-white text-yellow-600 hover:bg-yellow-50'"
@@ -841,7 +912,7 @@
                  </div>
             </div>
         </div>
-    
+    </div>
 
 
     <!-- Results Modal -->
@@ -972,13 +1043,164 @@
 
 
 
+
+    <!-- Edit Questions Modal -->
+    @if(isset($topic['id']))
+    <template x-teleport="body">
+        <div x-show="showEditModal" 
+             class="fixed inset-0 z-[9999] overflow-y-auto" 
+             style="display: none;">
+            <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" @click="showEditModal = false"></div>
+
+            <div class="flex min-h-full items-center justify-center p-4 text-center">
+                <div class="relative w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all" @click.stop>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Edit Topic Content</h3>
+                        <button @click="showEditModal = false" class="text-gray-400 hover:text-gray-600">&times;</button>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="flex border-b border-gray-200 mb-4 gap-4 overflow-x-auto">
+                        <button class="pb-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap" :class="editTab === 'questions' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="editTab = 'questions'">Questions</button>
+                        <button class="pb-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap" :class="editTab === 'idioms' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="editTab = 'idioms'">Idioms</button>
+                        <button class="pb-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap" :class="editTab === 'collocations' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="editTab = 'collocations'">Collocations</button>
+                        <button class="pb-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap" :class="editTab === 'adv_verbs' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="editTab = 'adv_verbs'">Adv. Verbs</button>
+                        <button class="pb-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap" :class="editTab === 'adv_adverbs' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="editTab = 'adv_adverbs'">Adv. Adverbs</button>
+                        <button class="pb-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap" :class="editTab === 'adv_adjectives' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'" @click="editTab = 'adv_adjectives'">Adv. Adjectives</button>
+                    </div>
+
+                    <form action="{{ route('admin.ielts.speaking.topics.update-questions', $topic['id']) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        
+                        <div class="max-h-[60vh] overflow-y-auto px-1 pb-4">
+                            <!-- Questions Tab -->
+                            <div x-show="editTab === 'questions'">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Questions (One per line)</label>
+                                <textarea name="questions_raw" x-model="editingQuestions" rows="10" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"></textarea>
+                                <div class="hidden">
+                                    <template x-for="(q, index) in editingQuestions.split('\n').map(q => q.trim()).filter(q => q)" :key="index">
+                                        <input type="hidden" x-bind:name="`questions[${index}]`" x-bind:value="q">
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Generic Vocab Template Component inside Alpine -->
+                            <!-- Idioms Tab -->
+                            <div x-show="editTab === 'idioms'" class="space-y-4">
+                                <template x-for="(item, index) in editIdioms" :key="index">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                        <button type="button" @click="editIdioms.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`idioms[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning</label><input type="text" x-model="item.meaning" x-bind:name="`idioms[${index}][meaning]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div class="col-span-2"><label class="text-xs font-bold">Example</label><input type="text" x-model="item.example" x-bind:name="`idioms[${index}][example]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <button type="button" @click="editIdioms.push({phrase:'', meaning:'', example:''})" class="text-orange-600 text-sm font-bold">+ Add Idiom</button>
+                            </div>
+
+                            <!-- Collocations Tab -->
+                            <div x-show="editTab === 'collocations'" class="space-y-4">
+                                <template x-for="(item, index) in editCollocations" :key="index">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                        <button type="button" @click="editCollocations.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`collocations[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning</label><input type="text" x-model="item.meaning" x-bind:name="`collocations[${index}][meaning]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div class="col-span-2"><label class="text-xs font-bold">Example</label><input type="text" x-model="item.example" x-bind:name="`collocations[${index}][example]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <button type="button" @click="editCollocations.push({phrase:'', meaning:'', example:''})" class="text-orange-600 text-sm font-bold">+ Add Collocation</button>
+                            </div>
+
+                            <!-- Adv Verbs Tab -->
+                            <div x-show="editTab === 'adv_verbs'" class="space-y-4">
+                                <template x-for="(item, index) in editAdvVerbs" :key="index">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                        <button type="button" @click="editAdvVerbs.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`advanced_verbs[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning</label><input type="text" x-model="item.meaning" x-bind:name="`advanced_verbs[${index}][meaning]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Level</label><input type="text" x-model="item.level" x-bind:name="`advanced_verbs[${index}][level]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning ID</label><input type="text" x-model="item.meaning_id" x-bind:name="`advanced_verbs[${index}][meaning_id]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div class="col-span-2"><label class="text-xs font-bold">Example</label><input type="text" x-model="item.example" x-bind:name="`advanced_verbs[${index}][example]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <button type="button" @click="editAdvVerbs.push({phrase:'', meaning:'', level:'', meaning_id:'', example:''})" class="text-orange-600 text-sm font-bold">+ Add Advanced Verb</button>
+                            </div>
+
+                            <!-- Adv Adverbs Tab -->
+                            <div x-show="editTab === 'adv_adverbs'" class="space-y-4">
+                                <template x-for="(item, index) in editAdvAdverbs" :key="index">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                        <button type="button" @click="editAdvAdverbs.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`advanced_adverbs[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning</label><input type="text" x-model="item.meaning" x-bind:name="`advanced_adverbs[${index}][meaning]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Level</label><input type="text" x-model="item.level" x-bind:name="`advanced_adverbs[${index}][level]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning ID</label><input type="text" x-model="item.meaning_id" x-bind:name="`advanced_adverbs[${index}][meaning_id]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div class="col-span-2"><label class="text-xs font-bold">Example</label><input type="text" x-model="item.example" x-bind:name="`advanced_adverbs[${index}][example]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <button type="button" @click="editAdvAdverbs.push({phrase:'', meaning:'', level:'', meaning_id:'', example:''})" class="text-orange-600 text-sm font-bold">+ Add Advanced Adverb</button>
+                            </div>
+
+                            <!-- Adv Adjectives Tab -->
+                            <div x-show="editTab === 'adv_adjectives'" class="space-y-4">
+                                <template x-for="(item, index) in editAdvAdjectives" :key="index">
+                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                        <button type="button" @click="editAdvAdjectives.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`advanced_adjectives[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning</label><input type="text" x-model="item.meaning" x-bind:name="`advanced_adjectives[${index}][meaning]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Level</label><input type="text" x-model="item.level" x-bind:name="`advanced_adjectives[${index}][level]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div><label class="text-xs font-bold">Meaning ID</label><input type="text" x-model="item.meaning_id" x-bind:name="`advanced_adjectives[${index}][meaning_id]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                            <div class="col-span-2"><label class="text-xs font-bold">Example</label><input type="text" x-model="item.example" x-bind:name="`advanced_adjectives[${index}][example]`" class="w-full rounded border-gray-300 text-sm"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <button type="button" @click="editAdvAdjectives.push({phrase:'', meaning:'', level:'', meaning_id:'', example:''})" class="text-orange-600 text-sm font-bold">+ Add Advanced Adjective</button>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
+                            <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors" @click="showEditModal = false">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg shadow-sm transition-colors">
+                                Save All Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </template>
+    @endif
+
 </div>
 <script>
     // Use a global function for ensuring registration order doesn't matter as long as it's defined before Alpine runs or init
     function speakingPractice(initialQuestions, audioUrls = [], initialIdioms = [], initialCollocations = [], topicSlug = '', subtopicSlug = '', initialAdvancedVerbs = [], initialAdvancedAdverbs = [], initialAdvancedAdjectives = []) {
         return {
-            topic: topicSlug,
-            subtopic: subtopicSlug,
+            topic: '{{ request('topic') }}',
+            subtopic: '{{ request('subtopic') }}',
+            isPracticeTest: !'{{ request('topic') }}'.startsWith('lesson-'),
+            showQuestionText: '{{ request('topic') }}'.startsWith('lesson-'),
+            showEditModal: false,
+            editTab: 'questions',
+            editingQuestions: '',
+            editIdioms: JSON.parse(JSON.stringify(initialIdioms || [])),
+            editCollocations: JSON.parse(JSON.stringify(initialCollocations || [])),
+            editAdvVerbs: JSON.parse(JSON.stringify(initialAdvancedVerbs || [])),
+            editAdvAdverbs: JSON.parse(JSON.stringify(initialAdvancedAdverbs || [])),
+            editAdvAdjectives: JSON.parse(JSON.stringify(initialAdvancedAdjectives || [])),
+            isSubmitting: false,
             questions: initialQuestions,
             audioUrls: audioUrls,
             currentAudioUtterance: null,
@@ -1015,7 +1237,10 @@
             source: null,
             animationFrame: null,
             debugLogs: [],
+            examinerVoice: localStorage.getItem('examinerVoice') || 'af_heart',
             ttsCountdown: null,
+            isTTSSpeaking: false,
+            showBeginScreen: true,
             answers: {},
             isGrading: false,
             gradingResults: null,
@@ -1349,13 +1574,39 @@
             },
             
             init() {
-                setTimeout(() => this.startTTSCountdown(), 500);
-                // Dispatch initial event for advanced verbs with a small delay to ensure modal is ready
-                if (this.advancedVerbs.length > 0) {
-                     setTimeout(() => {
-                         window.dispatchEvent(new CustomEvent('update-advanced-verbs', { detail: this.advancedVerbs }));
-                     }, 200);
+                // Save voice preference
+                this.$watch('examinerVoice', value => {
+                    localStorage.setItem('examinerVoice', value);
+                });
+
+                // Show Begin screen - Chrome requires user gesture before audio can play
+                this.showBeginScreen = true;
+                setTimeout(() => {
+                    if (this.advancedVerbs.length > 0) {
+                        window.dispatchEvent(new CustomEvent('update-advanced-verbs', { detail: this.advancedVerbs }));
+                    }
+                    if (this.advancedAdverbs.length > 0) {
+                        window.dispatchEvent(new CustomEvent('update-advanced-adverbs', { detail: this.advancedAdverbs }));
+                    }
+                    if (this.advancedAdjectives.length > 0) {
+                        window.dispatchEvent(new CustomEvent('update-advanced-adjectives', { detail: this.advancedAdjectives }));
+                    }
+                }, 200);
+            },
+
+            beginPractice() {
+                // This click IS a user gesture - unlock audio and start countdown
+                this.showBeginScreen = false;
+                // Unlock audio context within this user gesture
+                if (!this.currentAudioUtterance) {
+                    this.currentAudioUtterance = new Audio();
                 }
+                this.currentAudioUtterance.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+                this.currentAudioUtterance.volume = 0.001;
+                this.currentAudioUtterance.play().catch(() => {});
+                
+                // Small delay then start countdown
+                setTimeout(() => this.startTTSCountdown(), 300);
             },
 
             log(msg) {
@@ -1373,11 +1624,19 @@
                     const blob = this.answers[key];
                     formData.append('audio_blobs[]', blob, 'question_' + key + '.webm');
                     
-                    // Append transcript
+                    // Append transcript (fallback from Web Speech API)
                     if (this.transcripts[key]) {
                         formData.append('transcripts[' + key + ']', this.transcripts[key]);
                     }
+                    
+                    // Append the question text so the server can build dynamic context
+                    const questionText = this.questions[parseInt(key)] || '';
+                    formData.append('questions[' + key + ']', questionText);
                 });
+                
+                // Send part number and topic for context
+                formData.append('part', '{{ $topic['part'] ?? 1 }}');
+                formData.append('topic_title', '{{ $topic['title'] ?? '' }}');
                 
                 const token = document.querySelector('meta[name=\'csrf-token\']').getAttribute('content');
 
@@ -1528,6 +1787,7 @@
                         }
                         if (final) {
                              this.currentTranscript += final + ' ';
+                             this.transcripts[this.currentIndex] = this.currentTranscript.trim();
                              this.log('Transcript chunk: ' + final);
                         }
                     };
@@ -1640,11 +1900,8 @@
                     if (this.recognition) {
                         this.recognition.stop();
                         this.log('Speech recognition stopped');
-                        // Store transcript
-                        if (this.currentTranscript.trim()) {
-                            this.transcripts[this.currentIndex] = this.currentTranscript.trim();
-                        } else {
-                            this.transcripts[this.currentIndex] = "(No speech detected)";
+                        if (this.currentTranscript.trim() === '') {
+                            this.transcripts[this.currentIndex] = "(No answer recorded)";
                         }
                     }
                 }
@@ -1653,14 +1910,11 @@
             resetRecording() {
                 if (this.answers[this.currentIndex]) {
                     this.audioUrl = URL.createObjectURL(this.answers[this.currentIndex]);
-                    this.audioUrl = null;
-                    this.audioChunks = [];
-                    this.transcripts[this.currentIndex] = null;
-                    this.currentTranscript = ''; 
                 } else {
                     this.audioUrl = null;
                     this.audioChunks = [];
                 }
+
                 this.errorMessage = null;
                 this.visualizerBars = new Array(40).fill(5);
             },
@@ -1674,6 +1928,13 @@
                     }, 2000);
 
                     try {
+                        if (this.recognition) {
+                            try { this.recognition.stop(); } catch(e) {}
+                            if (this.currentTranscript.trim() === '') {
+                                this.transcripts[this.currentIndex] = "(No answer recorded)";
+                            }
+                        }
+
                         if (this.mediaRecorder && this.isRecording && this.mediaRecorder.state !== 'inactive') {
                             const originalOnStop = this.mediaRecorder.onstop;
                             
@@ -1709,25 +1970,81 @@
             
             speakQuestion() {
                 this.canRecord = false;
+                this.isTTSSpeaking = true;
                 if (this.currentAudioUtterance) {
                     this.currentAudioUtterance.pause();
                     this.currentAudioUtterance.currentTime = 0;
                 }
                 if ('speechSynthesis' in window) window.speechSynthesis.cancel();
                 
-                const url = this.audioUrls[this.currentIndex];
-                if (url) {
-                    this.currentAudioUtterance = new Audio(url);
+                const text = this.questions[this.currentIndex];
+                if (!text) {
+                    this.canRecord = true;
+                    this.isTTSSpeaking = false;
+                    return;
+                }
+
+                const fallbackToWebSpeech = (reason) => {
+                    console.warn('Kokoro TTS fallback (' + reason + '), using Web Speech API...');
+                    this.isTTSSpeaking = false;
+                    if ('speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = 'en-US';
+                        utterance.rate = 0.9;
+                        utterance.onend = () => { this.canRecord = true; };
+                        utterance.onerror = () => { this.canRecord = true; };
+                        window.speechSynthesis.speak(utterance);
+                        
+                        // Safety timeout in case TTS gets stuck silently
+                        setTimeout(() => {
+                            if (!this.canRecord) {
+                                console.warn('Web Speech API safety timeout triggered');
+                                this.canRecord = true;
+                            }
+                        }, Math.max(text.length * 100, 5000));
+                    } else {
+                        this.canRecord = true;
+                    }
+                };
+
+                try {
+                    const audioUrl = '{{ route('tts.stream') }}?text=' + encodeURIComponent(text) + '&voice=' + encodeURIComponent(this.examinerVoice);
+                    
+                    if (!this.currentAudioUtterance) {
+                        this.currentAudioUtterance = new Audio();
+                    }
+                    this.currentAudioUtterance.src = audioUrl;
+                    this.currentAudioUtterance.volume = 1; // restore volume after silent play
+                    
+                    this.currentAudioUtterance.oncanplay = () => {
+                        this.isTTSSpeaking = true;
+                    };
+                    this.currentAudioUtterance.onplaying = () => {
+                        this.isTTSSpeaking = false;
+                    };
                     this.currentAudioUtterance.onended = () => {
+                        this.isTTSSpeaking = false;
                         this.canRecord = true;
                     };
-                    this.currentAudioUtterance.onerror = () => {
-                        console.error('Audio playback error');
-                        this.canRecord = true;
+                    this.currentAudioUtterance.onerror = (e) => {
+                        console.error('Kokoro Audio error:', e, this.currentAudioUtterance.error);
+                        fallbackToWebSpeech('audio error: ' + (this.currentAudioUtterance.error ? this.currentAudioUtterance.error.code : 'unknown'));
                     };
-                    this.currentAudioUtterance.play();
-                } else {
-                    this.canRecord = true; // Fallback if no audio found
+                    
+                    const playPromise = this.currentAudioUtterance.play();
+                    if (playPromise !== undefined) {
+                        playPromise
+                            .then(() => {
+                                console.log('Kokoro TTS playing...');
+                            })
+                            .catch(error => {
+                                console.error('Kokoro TTS play() rejected:', error.message);
+                                fallbackToWebSpeech('play() rejected: ' + error.message);
+                            });
+                    }
+                } catch (error) {
+                    console.error('Kokoro TTS Error:', error);
+                    fallbackToWebSpeech('exception: ' + error.message);
                 }
             },
             
@@ -1794,6 +2111,9 @@
                     this.updateAssistance();
                     this.resetRecording();
                     this.canRecord = false;
+                    if (this.isPracticeTest) {
+                        this.showQuestionText = false;
+                    }
                     // Small delay to allow UI to update before starting countdown
                     setTimeout(() => this.startTTSCountdown(), 100);
                 } else {
@@ -1814,6 +2134,9 @@
                     this.updateAssistance();
                     this.resetRecording();
                     this.canRecord = false;
+                    if (this.isPracticeTest) {
+                        this.showQuestionText = false;
+                    }
                     setTimeout(() => this.startTTSCountdown(), 100);
                  }
             },
@@ -1829,6 +2152,16 @@
                 if (Array.isArray(this.allAdvancedVerbs[0])) {
                     this.advancedVerbs = this.allAdvancedVerbs[this.currentIndex] || [];
                     window.dispatchEvent(new CustomEvent('update-advanced-verbs', { detail: this.advancedVerbs }));
+                }
+
+                if (Array.isArray(this.allAdvancedAdverbs[0])) {
+                    this.advancedAdverbs = this.allAdvancedAdverbs[this.currentIndex] || [];
+                    window.dispatchEvent(new CustomEvent('update-advanced-adverbs', { detail: this.advancedAdverbs }));
+                }
+
+                if (Array.isArray(this.allAdvancedAdjectives[0])) {
+                    this.advancedAdjectives = this.allAdvancedAdjectives[this.currentIndex] || [];
+                    window.dispatchEvent(new CustomEvent('update-advanced-adjectives', { detail: this.advancedAdjectives }));
                 }
             }
         };

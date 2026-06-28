@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'SchoolHub') }} - Meeting 13</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -421,7 +423,7 @@
 
                <!-- Image Container -->
                <div class="overflow-y-auto p-6" style="max-height: 75vh;">
-                   <img src="{{ asset('images/tenses-chart.png') }}" 
+                   <img src="{{ asset('images/materials/grammar/tenses-chart.png') }}" 
                         alt="Tenses Chart" 
                         class="w-full h-auto rounded-lg shadow-md">
                </div>

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'SchoolHub') }} - Meeting 6</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -38,7 +40,7 @@
                 <li>Cari semua <span class="font-semibold">Verb</span> dalam kalimat.</li>
                 <li>Tentukan mana <span class="font-semibold">Verb Asli</span> (yang menggunakan tenses).</li>
                 <li>Verb lainnya adalah <span class="font-semibold">Verb Palsu</span>.</li>
-                <li>Tentukan apakah Verb Palsu-nya menggunakan <span class="font-semibold">Gerund</span> atau <span class="font-semibold">To Infinitive</span> dengan melihat daftar di tombol <span class="bg-sky-400 text-white px-2 py-0.5 rounded text-xs font-bold">📝 Verb Patterns</span>.</li>
+                <li>Tentukan apakah Verb Palsu-nya menggunakan <span class="font-semibold">Gerund</span> atau <span class="font-semibold">To Infinitive</span> dengan melihat daftar di tombol <span class="bg-sky-400 text-white px-2 py-0.5 rounded text-xs font-bold">Verb Patterns</span>.</li>
             </ol>
         </div>
 
@@ -463,7 +465,7 @@
         <!-- Verb Patterns Button -->
         <button @click="verbPatternsOpen = true"
                 class="bg-sky-400 hover:bg-sky-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2">
-            <span>📝</span> Verb Patterns
+            Verb Patterns
         </button>
 
         <!-- Verb Patterns Modal Backdrop -->
@@ -692,7 +694,7 @@
        <!-- Floating Button -->
        <button @click="openTenses = true"
                class="bg-cyan-400 hover:bg-cyan-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2">
-           <span>💡</span> Tenses
+           Tenses
        </button>
 
        <!-- Modal Backdrop -->
@@ -720,7 +722,7 @@
 
                <!-- Image Container -->
                <div class="overflow-y-auto p-6" style="max-height: 75vh;">
-                   <img src="{{ asset('images/tenses-chart.png') }}" 
+                   <img src="{{ asset('images/materials/grammar/tenses-chart.png') }}" 
                         alt="Tenses Chart" 
                         class="w-full h-auto rounded-lg shadow-md">
                </div>

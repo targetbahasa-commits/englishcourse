@@ -41,6 +41,8 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
+        @include('components.password-rules')
+
         <!-- Referral Code -->
         <div class="mt-4">
             <x-input-label for="referral_code" :value="__('Referral Code (Optional)')" />
@@ -59,3 +61,5 @@
         </div>
     </form>
 </x-guest-layout>
+
+ 

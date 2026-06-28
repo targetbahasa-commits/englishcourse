@@ -27,6 +27,8 @@ class Payment extends Model
         'expired_at',
         'meta',
         'notes',
+        'proof_file',
+        'verified_by',
     ];
 
     protected $casts = [
@@ -54,5 +56,29 @@ class Payment extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Registration lead that led to this payment (via the user's converted_user_id).
+     */
+    public function registrationLead(): \Illuminate\Database\Eloquent\Relations\HasOneThrough
+    {
+        return $this->hasOneThrough(
+            RegistrationLead::class,
+            User::class,
+            'id',            // users.id
+            'converted_user_id', // registration_leads.converted_user_id
+            'user_id',       // payments.user_id
+            'id'             // users.id
+        );
+    }
+
+    /**
+     * Email logs related to this payment.
+     */
+    public function emailLogs(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(EmailLog::class, 'related_id')
+                    ->where('related_type', 'payment');
     }
 }

@@ -84,9 +84,11 @@ class EloquentTeacherRepository implements TeacherRepository
 
     public function getTeachersWithEvaluations(): array
     {
-        return User::whereIn('id', function ($q) {
-            $q->select('teacher_id')->from('teacher_evaluations');
-        })->get()->all();
+        // Include all teachers so the admin filter can choose any teacher, not only those with existing evaluations.
+        return User::where('role', 'teacher')
+            ->orderBy('name')
+            ->get()
+            ->all();
     }
 
     public function getAverageRating(): float
@@ -109,5 +111,49 @@ class EloquentTeacherRepository implements TeacherRepository
             ->orderByDesc('total_reviews')
             ->take($limit)
             ->get()->all();
+    }
+
+    public function getTeacherForEvaluation(int $teacherId): mixed
+    {
+        return User::findOrFail($teacherId);
+    }
+
+    public function saveTeacherEvaluation(int $studentId, int $teacherId, int $rating, ?string $comment = null): void
+    {
+        TeacherEvaluation::create([
+            'student_id' => $studentId,
+            'teacher_id' => $teacherId,
+            'rating' => $rating,
+            'comment' => $comment,
+        ]);
+    }
+
+    public function countTeachers(): int
+    {
+        return User::where('role', 'teacher')->count();
+    }
+
+    public function getTeacherRecentEvaluations(int $teacherId, int $limit = 5): array
+    {
+        return TeacherEvaluation::with('student')
+            ->where('teacher_id', $teacherId)
+            ->orderByDesc('created_at')
+            ->limit($limit)
+            ->get()
+            ->all();
+    }
+
+    public function getTeacherAverageRating(int $teacherId): float
+    {
+        return (float) (TeacherEvaluation::where('teacher_id', $teacherId)->avg('rating') ?? 0);
+    }
+
+    public function getUpcomingClassesForTeacher(int $teacherId): array
+    {
+        return ClassPeriod::where('teacher_id', $teacherId)
+            ->whereIn('status', ['active', 'upcoming'])
+            ->withCount('users as students_count')
+            ->get()
+            ->all();
     }
 }

@@ -99,7 +99,26 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-gray-100">
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Program</p>
-                    <p class="font-semibold text-gray-900">{{ $student->program ? $student->program->name : 'No Program' }}</p>
+                    <p class="font-semibold text-gray-900">
+                        @php
+                            $allPrograms = [];
+                            if ($student->program) {
+                                $allPrograms[$student->program->id] = $student->program->name;
+                            }
+                            if ($student->enrollments) {
+                                foreach ($student->enrollments as $enrollment) {
+                                    if ($enrollment->program && in_array($enrollment->status, ['active', 'completed'])) {
+                                        $allPrograms[$enrollment->program->id] = $enrollment->program->name;
+                                    }
+                                }
+                            }
+                        @endphp
+                        @if(count($allPrograms) > 0)
+                            {{ implode(', ', $allPrograms) }}
+                        @else
+                            No Program
+                        @endif
+                    </p>
                 </div>
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Learning Mode</p>
@@ -122,6 +141,19 @@
                             <span class="bg-gray-100 px-2 py-0.5 rounded text-sm tracking-wider font-mono">{{ $student->referral_code }}</span>
                         @else
                             -
+                        @endif
+                    </p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Camp Location</p>
+                    <p class="font-semibold text-gray-900">
+                        @if($student->camp)
+                            {{ $student->camp->nama_camp }}
+                            @if($student->campRoom)
+                                <span class="text-xs text-gray-500 block">Room: {{ $student->campRoom->nama_kamar }}</span>
+                            @endif
+                        @else
+                            <span class="text-gray-400">Tidak tinggal di camp</span>
                         @endif
                     </p>
                 </div>

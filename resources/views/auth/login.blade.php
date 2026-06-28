@@ -6,6 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Target Bahasa') }} - Free Test Registration</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -56,6 +58,10 @@
             <div class="absolute -bottom-8 left-20 w-40 h-40 bg-purple-500 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-blob animation-delay-4000"></div>
 
             <!-- Content overlay -->
+            @php
+                $tb_auth_register_guest_title = \App\Models\Setting::where('key', 'auth_register_guest_title')->value('value') ?? "FREE TOEFL<br>\n<span class=\"text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-indigo-100\">PREDICTION TEST</span>";
+                $tb_auth_register_guest_subtitle = \App\Models\Setting::where('key', 'auth_register_guest_subtitle')->value('value') ?? 'Test your English level in 30 minutes.';
+            @endphp
             <div class="relative z-10 flex flex-col justify-center items-center w-full h-full p-12 text-white text-left max-w-lg mx-auto">
                 <!-- App Logo/Icon -->
                 <div class="w-16 h-16 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center mb-10 shadow-xl transform hover:scale-105 transition-transform duration-500 cursor-default self-start">
@@ -64,12 +70,11 @@
                 
                 <p class="text-blue-200 font-bold tracking-widest uppercase text-sm mb-3">Target Bahasa</p>
                 <h1 class="text-5xl md:text-6xl font-extrabold mb-6 tracking-tight drop-shadow-md leading-tight">
-                    FREE TOEFL<br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-indigo-100">PREDICTION TEST</span>
+                    {!! $tb_auth_register_guest_title !!}
                 </h1>
                 
                 <p class="text-blue-50 text-xl font-medium leading-relaxed drop-shadow-sm mb-6 border-l-4 border-blue-400 pl-4 py-1">
-                    Test your English level in 30 minutes.
+                    {{ $tb_auth_register_guest_subtitle }}
                 </p>
 
                 <!-- Benefit Bullet Points -->
@@ -214,6 +219,10 @@
                             I agree to receive my score, study recommendations, and learning tips by email.
                         </label>
                     </div>
+
+                    <x-turnstile />
+                    <x-input-error :messages="$errors->get('cf-turnstile-response')"
+                        class="mt-2 text-sm text-red-500 text-center" />
 
                     <!-- Submit Button -->
                     <button type="submit" class="w-full relative py-4 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-lg rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 focus:outline-none focus:ring-4 focus:ring-blue-500/20 active:scale-[0.98] transition-all duration-300 group overflow-hidden mt-8">

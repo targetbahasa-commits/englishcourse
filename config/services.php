@@ -36,7 +36,7 @@ return [
     ],
 
     'whatsapp' => [
-        'gateway' => env('WHATSAPP_GATEWAY', 'fonnte'), // 'fonnte' or 'wablas'
+        'gateway' => env('WHATSAPP_GATEWAY', 'fonnte'), // 'fonnte', 'wablas', or 'waha'
         'fonnte' => [
             'token' => env('FONNTE_TOKEN'),
         ],
@@ -44,11 +44,24 @@ return [
             'domain' => env('WABLAS_DOMAIN'),
             'token' => env('WABLAS_TOKEN'),
         ],
+        'waha' => [
+            'url' => env('WAHA_API_URL', 'http://localhost:3000'),
+            'session' => env('WAHA_SESSION', 'default'),
+            'api_key' => env('WAHA_API_KEY', ''),
+        ],
     ],
 
     'turnstile' => [
         'key' => env('TURNSTILE_SITE_KEY'),
         'secret' => env('TURNSTILE_SECRET_KEY'),
+    ],
+
+    'groq' => [
+        'key' => env('GROQ_API_KEY'),
+    ],
+
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
     ],
 
 ];

@@ -22,12 +22,14 @@ class UserUpdateRequest extends FormRequest
             'email' => ['required', 'email', Rule::unique('users')->ignore($userId)],
             'phone_number' => 'nullable|string|max:20',
             'password' => 'nullable|string|min:6|confirmed',
-            'role' => 'required|in:admin,teacher,student,guest',
+            'role' => 'required|in:admin,teacher,student,guest,test-taker,intern',
             'status' => 'required|in:active,inactive',
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'teacher_id' => 'nullable|exists:users,id',
             'program_id' => 'nullable|exists:programs,id',
             'learning_mode' => 'required|in:online,offline,both',
+            'camp_id' => 'nullable|exists:camps,id',
+            'camp_room_id' => 'nullable|exists:camp_rooms,id',
             'bio' => 'nullable|string',
         ];
     }

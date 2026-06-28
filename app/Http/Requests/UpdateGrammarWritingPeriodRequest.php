@@ -14,12 +14,12 @@ class UpdateGrammarWritingPeriodRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'period' => 'required|string|max:255',
+            'class_period_id' => 'required|integer|exists:class_periods,id',
         ];
     }
 
-    public function period(): string
+    public function classPeriodId(): int
     {
-        return $this->string('period')->toString();
+        return $this->integer('class_period_id');
     }
 }

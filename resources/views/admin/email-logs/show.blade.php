@@ -20,9 +20,32 @@
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="p-6 md:p-8 border-b border-gray-100 space-y-4">
             <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-8 text-sm">
-                <div class="flex items-center gap-2">
-                    <span class="text-gray-500 font-medium w-16">To:</span>
-                    <span class="text-gray-900 font-semibold">{{ $emailLog->to_email }}</span>
+                <div class="flex flex-col gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-500 font-medium w-16">To:</span>
+                        <span class="text-gray-900 font-semibold">{{ $emailLog->to_email }}</span>
+                    </div>
+                    @if($emailLog->user)
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-gray-500 font-medium w-16">Student:</span>
+                            <a href="{{ route('students.show', $emailLog->user) }}" class="text-blue-600 hover:underline font-medium">{{ $emailLog->user->name }}</a>
+                        </div>
+                    @endif
+                    @if($emailLog->related_type === 'registration_lead' && $emailLog->registrationLead)
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-gray-500 font-medium w-16">Related:</span>
+                            <a href="{{ route('admin.registration-leads.show', $emailLog->registrationLead) }}" class="inline-flex items-center gap-1 text-xs text-indigo-600 hover:underline bg-indigo-50 px-2 py-1 rounded">
+                                📋 Registration Lead #{{ $emailLog->registrationLead->id }}
+                            </a>
+                        </div>
+                    @elseif($emailLog->related_type === 'payment' && $emailLog->payment)
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-gray-500 font-medium w-16">Related:</span>
+                            <a href="{{ route('admin.payments.index', ['q' => $emailLog->payment->invoice_number]) }}" class="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline bg-blue-50 px-2 py-1 rounded">
+                                💳 Payment {{ $emailLog->payment->invoice_number }}
+                            </a>
+                        </div>
+                    @endif
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="text-gray-500 font-medium w-16">Date:</span>

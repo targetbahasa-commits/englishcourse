@@ -11,6 +11,7 @@ function dictionaryData() {
     return {
         open: false,
         query: '',
+        dictResult: null,
         results: {
             translation: '',
             examples: [],
@@ -20,8 +21,8 @@ function dictionaryData() {
         },
         loading: false,
         error: null,
-        x: window.innerWidth / 2 + 10,
-        y: window.innerHeight - 85,
+        x: window.innerWidth - 260,
+        y: window.innerHeight - 145,
         dragging: false,
         offset: { x: 0, y: 0 },
         hasMoved: false,
@@ -63,7 +64,7 @@ function dictionaryData() {
             if(!this.query.trim()) return;
             this.loading = true;
             this.error = null;
-            this.result = null;
+            this.dictResult = null;
             this.results.debug = ''; 
             
             const q = this.query.trim();
@@ -155,8 +156,18 @@ function dictionaryData() {
 
                     // 2. Try Direct Connection
                     try {
-                         let activeModel = 'local-model'; // Could auto-detect here but implies another fetch
-                         // Skipping explicit model list fetch for speed mostly, or we could fire formatting
+                         let activeModel = 'local-model';
+                         let modelNameDisplay = 'Local AI';
+                         try {
+                             const modelsRes = await fetch('http://localhost:1234/v1/models').then(r=>r.ok?r.json():null).catch(()=>null);
+                             if (modelsRes && modelsRes.data && modelsRes.data.length > 0) {
+                                 const m = modelsRes.data.find(m => !m.id.toLowerCase().includes('embed'));
+                                 if (m) {
+                                     activeModel = m.id;
+                                     modelNameDisplay = m.id.split('/').pop();
+                                 }
+                             }
+                         } catch(e) {}
                          
                          const sysPrompt = "You are a professional dictionary. Detect language and translate. Return ONLY strict JSON. No chatter. No poems. Max 5 words.";
                          const userPrompt = `Analyze the word "${q}".\n1. Detect if it is Indonesian or English.\n2. Translate it to the OTHER language.\n3. Return JSON: { "detected_source": "id" or "en", "translation": "translated_word" }\n\nExample:\nInput: "house"\nOutput: { "detected_source": "en", "translation": "rumah" }\n\nInput: "${q}"\nOutput:`;
@@ -183,7 +194,6 @@ function dictionaryData() {
                              
                              if (parsed && parsed.translation) {
                                   // Hallucination Check: Reject overly long translations (Poem/Explanation filter)
-                                  // Hallucination Check: Reject overly long translations (Poem/Explanation filter)
                                   if (parsed.translation.length > 60 && q.length < 20) {
                                       console.warn('AI Hallucination Rejected (Too Long):', parsed.translation);
                                       return null; 
@@ -195,8 +205,11 @@ function dictionaryData() {
                                       return null;
                                   }
 
+                                  const cT = parsed.translation.toLowerCase().trim();
+                                  const cQ = q.toLowerCase().trim();
+
                                   if (cT !== cQ && !((cT.length > 5 && cT.includes(cQ)))) {
-                                      return { type: 'ai', text: parsed.translation, source: 'Llama 3 (Direct)', detected: parsed.detected_source };
+                                      return { type: 'ai', text: parsed.translation, source: modelNameDisplay, detected: parsed.detected_source };
                                   }
                              }
                          }
@@ -321,13 +334,20 @@ function dictionaryData() {
                 let examples = [];
                 let synonyms = [];
                 let pos = [];
+                let academic_words = [];
 
                 if (cleanEnglish && cleanEnglish.split(/\s+/).length === 1) {
+                     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                      // Run these in parallel for speed too!
-                     const dictPromise = fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${cleanEnglish}`).then(r => r.ok ? r.json() : null).catch(()=>null);
-                     const musePromise = fetch(`https://api.datamuse.com/words?rel_syn=${cleanEnglish}&max=10`).then(r => r.ok ? r.json() : null).catch(()=>null);
-                     
-                     const [dictData, museData] = await Promise.all([dictPromise, musePromise]);
+                     const [dictData, museData, aRes] = await Promise.all([
+                        fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${cleanEnglish}`).then(r => r.ok ? r.json() : null).catch(()=>null),
+                        fetch(`https://api.datamuse.com/words?rel_syn=${cleanEnglish}&max=10`).then(r => r.ok ? r.json() : null).catch(()=>null),
+                        fetch('/api/ollama/academic-words', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                            body: JSON.stringify({ word: cleanEnglish })
+                        }).then(r=>r.ok?r.json():null).catch(()=>null)
+                     ]);
                      
                      if (Array.isArray(dictData)) {
                         dictData.forEach(entry => {
@@ -346,14 +366,18 @@ function dictionaryData() {
                      if (Array.isArray(museData)) {
                         synonyms = museData.map(i => i.word);
                      }
+                     if (aRes && aRes.academic_words) {
+                        academic_words = aRes.academic_words;
+                     }
                 }
 
-                this.result = {
+                this.dictResult = {
                     source: finalSource,
                     original: q,
                     translation: translation,
                     examples: [...new Set(examples)].slice(0, 3),
                     synonyms: synonyms,
+                    academic_words: academic_words,
                     pos: [...new Set(pos)]
                 };
                 
@@ -432,7 +456,7 @@ function dictionaryData() {
             @touchstart="startDrag"
             @click="handleClick"
             class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2 cursor-move select-none touch-none">
-        <span>📘</span> Dictionary
+        Dictionary
     </button>
 
     <!-- Modal Backdrop -->
@@ -487,7 +511,7 @@ function dictionaryData() {
                 </div>
 
                 <!-- Result State -->
-                <div x-show="result && !loading" class="space-y-6">
+                <div x-show="dictResult && !loading" class="space-y-6">
                     
                     <!-- 1. TRANSLATION -->
                     <div class="bg-white p-6 rounded-xl border border-blue-200 shadow-sm">
@@ -496,10 +520,10 @@ function dictionaryData() {
                         <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
                             <!-- Source -->
                             <div class="text-center flex-1">
-                                <p class="text-xs text-gray-500 uppercase font-bold mb-1" x-text="result?.source === 'en' ? 'English' : 'Indonesia'"></p>
+                                <p class="text-xs text-gray-500 uppercase font-bold mb-1" x-text="dictResult?.source === 'en' ? 'English' : 'Indonesia'"></p>
                                 <div class="flex items-center justify-center gap-2">
-                                    <span class="text-xl text-gray-900" x-text="result?.original"></span>
-                                    <button @click="playAudio(result.original, result?.source == 'en' ? 'en-US' : 'id-ID')" class="text-gray-300 hover:text-blue-500">
+                                    <span class="text-xl text-gray-900" x-text="dictResult?.original"></span>
+                                    <button @click="playAudio(dictResult?.original, dictResult?.source == 'en' ? 'en-US' : 'id-ID')" class="text-gray-300 hover:text-blue-500">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
                                     </button>
                                 </div>
@@ -512,10 +536,10 @@ function dictionaryData() {
 
                             <!-- Target -->
                             <div class="text-center flex-1">
-                                <p class="text-xs text-gray-500 uppercase font-bold mb-1" x-text="result?.source === 'en' ? 'Indonesia' : 'English'"></p>
+                                <p class="text-xs text-gray-500 uppercase font-bold mb-1" x-text="dictResult?.source === 'en' ? 'Indonesia' : 'English'"></p>
                                 <div class="flex items-center justify-center gap-2">
-                                    <span class="text-2xl font-bold text-blue-700" x-text="result?.translation"></span>
-                                    <button @click="playAudio(result.translation, result?.source == 'en' ? 'id-ID' : 'en-US')" class="text-blue-300 hover:text-blue-600">
+                                    <span class="text-2xl font-bold text-blue-700" x-text="dictResult?.translation"></span>
+                                    <button @click="playAudio(dictResult?.translation, dictResult?.source == 'en' ? 'id-ID' : 'en-US')" class="text-blue-300 hover:text-blue-600">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
                                     </button>
                                 </div>
@@ -524,10 +548,10 @@ function dictionaryData() {
                     </div>
 
                     <!-- 2. EXAMPLES -->
-                    <div x-show="result?.examples?.length > 0">
+                    <div x-show="dictResult?.examples?.length > 0">
                         <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-3">2. Examples (Contoh Kalimat)</h4>
                         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                            <template x-for="(example, idx) in result?.examples" :key="idx">
+                            <template x-for="(example, idx) in dictResult?.examples" :key="idx">
                                 <div class="px-4 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50">
                                     <p class="text-gray-800 text-sm italic" x-text="`&quot;${example}&quot;`"></p>
                                 </div>
@@ -536,10 +560,10 @@ function dictionaryData() {
                     </div>
 
                     <!-- 3. SYNONYMS -->
-                    <div x-show="result?.synonyms?.length > 0">
+                    <div x-show="dictResult?.synonyms?.length > 0" class="mb-4">
                         <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-3">3. Synonyms (Sinonim)</h4>
                         <div class="flex flex-wrap gap-2">
-                            <template x-for="syn in result?.synonyms">
+                            <template x-for="syn in dictResult?.synonyms">
                                 <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-purple-100 hover:text-purple-700 transition-colors cursor-pointer border border-transparent hover:border-purple-200" 
                                       @click="query = syn; search()" 
                                       x-text="syn"></span>
@@ -547,10 +571,24 @@ function dictionaryData() {
                         </div>
                     </div>
 
+                    <!-- 4. ACADEMIC WORDS -->
+                    <div x-show="dictResult?.academic_words?.length > 0">
+                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-3">4. Academic Words</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="aw in dictResult?.academic_words">
+                                <span class="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-lg text-sm hover:bg-blue-100 transition-colors cursor-pointer" 
+                                      @click="query = aw.word; search()">
+                                    <span x-text="aw.word" class="font-medium"></span>
+                                    <span x-text="`(${aw.cefr})`" class="text-xs opacity-75 ml-1"></span>
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+
                 </div>
                 
                 <!-- Initial State -->
-                <div x-show="!result && !loading && !error" class="text-center py-10 text-gray-400">
+                <div x-show="!dictResult && !loading && !error" class="text-center py-10 text-gray-400">
                     <span class="text-4xl block mb-2">🔎</span>
                     <p>Enter a word to translate and learn.</p>
                 </div>

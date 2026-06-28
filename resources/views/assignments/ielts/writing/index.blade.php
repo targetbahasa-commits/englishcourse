@@ -51,7 +51,7 @@
 
         <div class="flex flex-wrap items-center gap-3">
             <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-red-50 text-red-700 font-semibold border border-red-100 text-xs">
-                Active Batch: {{ $selectedClassPeriod->name ?? ($batchProgram->period ?? 'Not selected') }}
+                Active Batch: {{ $selectedClassPeriod->name ?? 'No Batch Active' }}
             </span>
 
             @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
@@ -59,14 +59,14 @@
                     @csrf
                     <input type="hidden" name="program_id" value="{{ $batchProgram?->id }}">
                     <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                    <select name="period" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-red-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
+                    <select name="class_period_id" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-red-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
                         @if(!$batchProgram)
                             <option value="" selected>No program found</option>
                         @elseif($batchProgram->classPeriods->isEmpty())
-                            <option value="{{ $batchProgram->period }}" selected>{{ $batchProgram->period ?: 'No batch available' }}</option>
+                            <option value="" disabled selected>No batch available</option>
                         @else
                             @foreach($batchProgram->classPeriods->sortByDesc('start_date') as $classPeriod)
-                                <option value="{{ $classPeriod->name }}" {{ $batchProgram->period === $classPeriod->name ? 'selected' : '' }}>
+                                <option value="{{ $classPeriod->id }}" {{ $batchProgram->active_class_period_id === $classPeriod->id ? 'selected' : '' }}>
                                     {{ $classPeriod->name }}
                                 </option>
                             @endforeach
@@ -79,10 +79,20 @@
             @else
                 <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
                     <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                    <span class="text-sm text-gray-800 px-2 py-1 bg-gray-50 rounded-lg">
-                        {{ $selectedClassPeriod->name ?? ($batchProgram->period ?? 'Not selected') }}
-                    </span>
+                    <div class="bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium text-gray-800 min-w-[220px]">
+                        {{ $selectedClassPeriod->name ?? 'No Batch Active' }}
+                    </div>
                 </div>
+            @endif
+
+            @php
+                $calendarClassPeriodId = $selectedClassPeriod->id ?? Auth::user()->class_period_id ?? optional($batchProgram->classPeriods->first())->id ?? '';
+                $calendarBatchName = addslashes($batchProgram->name ?? 'Assignments');
+            @endphp
+            @if($calendarClassPeriodId)
+                <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 text-sm text-gray-600">
+                    Lihat Kalender
+                </button>
             @endif
         </div>
     </div>
@@ -115,7 +125,11 @@
                     <p class="text-sm text-gray-400">Describe visual information (graphs, charts, tables) in roughly 150 words.</p>
                     
                     <div class="mt-8 flex items-center text-teal-600 font-bold group-hover:translate-x-2 transition-transform">
-                        <span>Start Practice</span>
+                        @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                            <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Kerjakan Ulang ↺</span>
+                        @else
+                            <span>Start Practice</span>
+                        @endif
                         <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                     </div>
                 </div>
@@ -137,12 +151,17 @@
                     <p class="text-sm text-gray-400">Write a formal essay in response to a point of view, argument or problem.</p>
                     
                     <div class="mt-8 flex items-center text-orange-600 font-bold group-hover:translate-x-2 transition-transform">
-                        <span>Start Practice</span>
+                        @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                            <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Kerjakan Ulang ↺</span>
+                        @else
+                            <span>Start Practice</span>
+                        @endif
                         <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                     </div>
                 </div>
             </a>
         </div>
     </div>
+    @include('components.meetings-calendar-modal')
 </div>
 @endsection

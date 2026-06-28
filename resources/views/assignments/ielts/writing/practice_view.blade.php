@@ -320,7 +320,7 @@
                         <span>Count: <span x-text="wordCount" class="font-bold text-gray-800"></span> words</span>
                         <button @click="refreshEssay()" class="text-gray-400 hover:text-red-500 text-xs flex items-center gap-1 transition-colors">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                            Refresh
+                            Reset Essay
                         </button>
                      </span>
                      <span class="text-xs text-indigo-500 font-medium">Write at least {{ $task == 2 ? '250' : '150' }} words.</span>
@@ -412,22 +412,27 @@
                         </div>
                         
                         <!-- Upgrade Results -->
-                        <div x-show="result?.task_response_improvements" class="space-y-4">
-                            <template x-for="(item, idx) in result?.task_response_improvements" :key="idx">
-                                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                                    <div class="flex items-start gap-4">
-                                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-sm">!</div>
-                                        <div class="flex-1">
-                                            <p class="text-red-800 font-medium mb-2 border-l-4 border-red-200 pl-3 italic text-sm" x-text="item.text"></p>
-                                            <div class="flex items-center gap-2 mb-2">
-                                                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                                                <span class="font-bold text-green-700" x-text="item.improved"></span>
-                                            </div>
-                                            <p class="text-gray-500 text-xs" x-text="item.explanation"></p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
+                        <div x-show="result?.task_response_improvements?.length > 0" class="mt-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm border-collapse bg-white">
+                                    <thead class="bg-gray-50 border-b border-gray-200">
+                                        <tr>
+                                            <th class="p-3 font-bold text-gray-700 w-1/3">Kutipan Asli (English) / Masalah</th>
+                                            <th class="p-3 font-bold text-gray-700 w-1/3">Penjelasan</th>
+                                            <th class="p-3 font-bold text-gray-700 w-1/3">Perbaikan (English)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <template x-for="(item, idx) in result?.task_response_improvements || []" :key="idx">
+                                            <tr class="hover:bg-gray-50 transition-colors">
+                                                <td class="p-3 align-top text-red-700" x-text="item.text"></td>
+                                                <td class="p-3 align-top text-gray-600 text-xs leading-relaxed" x-text="item.explanation"></td>
+                                                <td class="p-3 align-top font-medium text-green-700" x-text="item.improved"></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
@@ -437,6 +442,19 @@
                             <strong class="block text-xs uppercase text-indigo-500 font-bold mb-3 tracking-wider">Coherence & Cohesion Detailed Feedback</strong>
                             <p x-show="!result?.feedback" class="text-gray-400 italic animate-pulse">Generating...</p>
                             <p x-text="result?.feedback?.coherence_cohesion" class="text-gray-700 leading-relaxed"></p>
+                        </div>
+                        
+                        <!-- Used Cohesive Devices -->
+                        <div x-show="result?.cohesive_devices_used?.length > 0" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100" style="display: none;">
+                            <strong class="block text-xs uppercase text-blue-500 font-bold mb-4 tracking-wider">Linking Words & Connections Used</strong>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <template x-for="(device, idx) in result?.cohesive_devices_used || []" :key="idx">
+                                    <div class="flex flex-col bg-gray-50 border border-gray-200 rounded-lg p-3 shadow-sm">
+                                        <span class="text-indigo-700 font-bold mb-1" x-text="device.word"></span>
+                                        <span class="text-xs text-gray-600" x-text="device.evaluation"></span>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
 
                          <!-- Upgrade Action -->
@@ -450,17 +468,27 @@
                         </div>
 
                         <!-- Upgrade Results -->
-                        <div x-show="result?.feedback?.coherence_improvements?.length > 0" class="space-y-3">
-                             <template x-for="(item, idx) in result?.feedback?.coherence_improvements" :key="idx">
-                                <div class="bg-white p-3 rounded-lg border border-gray-100 flex items-center justify-between gap-4">
-                                     <div class="flex items-center gap-2">
-                                        <span class="text-red-400 line-through text-sm" x-text="item.text"></span>
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                                        <span class="text-green-600 font-bold text-sm bg-green-50 px-2 py-1 rounded" x-text="item.improved"></span>
-                                    </div>
-                                    <span class="text-xs text-gray-400 italic" x-text="item.explanation"></span>
-                                </div>
-                             </template>
+                        <div x-show="result?.feedback?.coherence_improvements?.length > 0" class="mt-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm border-collapse bg-white">
+                                    <thead class="bg-gray-50 border-b border-gray-200">
+                                        <tr>
+                                            <th class="p-3 font-bold text-gray-700 w-1/3">Kutipan Asli (English) / Masalah</th>
+                                            <th class="p-3 font-bold text-gray-700 w-1/3">Penjelasan</th>
+                                            <th class="p-3 font-bold text-gray-700 w-1/3">Perbaikan (English)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <template x-for="(item, idx) in result?.feedback?.coherence_improvements || []" :key="idx">
+                                            <tr class="hover:bg-gray-50 transition-colors">
+                                                <td class="p-3 align-top text-red-700" x-text="item.text"></td>
+                                                <td class="p-3 align-top text-gray-600 text-xs leading-relaxed" x-text="item.explanation"></td>
+                                                <td class="p-3 align-top font-medium text-green-700" x-text="item.improved"></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
@@ -472,8 +500,21 @@
                             <p x-text="result?.feedback?.lexical_resource" class="text-gray-700 leading-relaxed"></p>
                         </div>
                         
+                        <!-- Good Vocabulary Used -->
+                        <div x-show="result?.good_vocabulary_used?.length > 0" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100" style="display: none;">
+                            <strong class="block text-xs uppercase text-teal-500 font-bold mb-4 tracking-wider">Good Vocabulary & Expressions Used</strong>
+                            <div class="flex flex-wrap gap-2">
+                                <template x-for="(vocab, idx) in result?.good_vocabulary_used || []" :key="idx">
+                                    <div class="bg-teal-50 border border-teal-200 rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
+                                        <span class="font-bold text-teal-800" x-text="vocab.word"></span>
+                                        <span class="text-xs text-teal-600 border-l border-teal-300 pl-2" x-text="vocab.meaning"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                        
                         <!-- Upgrade Action -->
-                        <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-100 flex flex-col items-center justify-center text-center gap-4">
+                        <div x-show="!result?.vocabulary_improvements?.length" class="bg-indigo-50 p-6 rounded-xl border border-indigo-100 flex flex-col items-center justify-center text-center gap-4">
                             <h4 class="font-bold text-indigo-800">Learn Band 9 Vocabulary?</h4>
                              <button @click="upgradeLexical()" :disabled="loading" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition-all transform hover:scale-105 flex items-center gap-2">
                                 <svg x-show="!loading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
@@ -483,18 +524,27 @@
                         </div>
 
                          <!-- Upgrade Results -->
-                         <div x-show="result?.vocabulary_improvements?.length > 0" class="space-y-4">
-                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <template x-for="(item, idx) in result?.vocabulary_improvements" :key="idx">
-                                    <div class="bg-white p-3 rounded-lg border border-gray-100 text-sm">
-                                        <div class="flex justify-between items-center mb-1">
-                                            <span class="text-red-400 line-through" x-text="item.text"></span>
-                                            <span class="text-green-600 font-bold" x-text="item.improved"></span>
-                                        </div>
-                                        <p class="text-xs text-gray-500" x-text="item.explanation"></p>
-                                    </div>
-                                </template>
-                             </div>
+                         <div x-show="result?.vocabulary_improvements?.length > 0" class="mt-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm border-collapse bg-white">
+                                    <thead class="bg-gray-50 border-b border-gray-200">
+                                        <tr>
+                                            <th class="p-3 font-bold text-gray-700 w-1/3">Kutipan Asli (English) / Masalah</th>
+                                            <th class="p-3 font-bold text-gray-700 w-1/3">Penjelasan</th>
+                                            <th class="p-3 font-bold text-gray-700 w-1/3">Perbaikan (English)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <template x-for="(item, idx) in result?.vocabulary_improvements || []" :key="idx">
+                                            <tr class="hover:bg-gray-50 transition-colors">
+                                                <td class="p-3 align-top text-red-700" x-text="item.text"></td>
+                                                <td class="p-3 align-top text-gray-600 text-xs leading-relaxed" x-text="item.explanation"></td>
+                                                <td class="p-3 align-top font-medium text-green-700" x-text="item.improved"></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
                          </div>
                     </div>
 
@@ -507,7 +557,7 @@
                         </div>
 
                          <!-- Upgrade Action -->
-                        <div class="bg-purple-50 p-6 rounded-xl border border-purple-100 flex flex-col items-center justify-center text-center gap-4">
+                        <div x-show="!result?.grammar_improvements?.length" class="bg-purple-50 p-6 rounded-xl border border-purple-100 flex flex-col items-center justify-center text-center gap-4">
                             <h4 class="font-bold text-purple-800">Master Complex Structures?</h4>
                              <button @click="upgradeGrammar()" :disabled="loading" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg shadow-sm transition-all transform hover:scale-105 flex items-center gap-2">
                                 <svg x-show="!loading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
@@ -517,19 +567,27 @@
                         </div>
 
                         <!-- Upgrade Results -->
-                         <div x-show="result?.grammar_improvements?.length > 0" class="space-y-4">
-                             <template x-for="(item, idx) in result?.grammar_improvements" :key="idx">
-                                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                                    <div class="flex items-start gap-3">
-                                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-sm" x-text="idx + 1"></div>
-                                        <div>
-                                            <p class="text-red-800 line-through decoration-red-300 text-sm mb-1" x-text="item.text"></p>
-                                            <p class="text-green-700 font-bold mb-1" x-text="item.improved"></p>
-                                            <p class="text-gray-500 text-xs italic" x-text="item.explanation"></p>
-                                        </div>
-                                    </div>
-                                </div>
-                             </template>
+                         <div x-show="result?.grammar_improvements?.length > 0" class="mt-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm border-collapse bg-white">
+                                    <thead class="bg-gray-50 border-b border-gray-200">
+                                        <tr>
+                                            <th class="p-3 font-bold text-gray-700 w-1/3">Kutipan Asli (English) / Masalah</th>
+                                            <th class="p-3 font-bold text-gray-700 w-1/3">Penjelasan</th>
+                                            <th class="p-3 font-bold text-gray-700 w-1/3">Perbaikan (English)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <template x-for="(item, idx) in result?.grammar_improvements || []" :key="idx">
+                                            <tr class="hover:bg-gray-50 transition-colors">
+                                                <td class="p-3 align-top text-red-700" x-text="item.text"></td>
+                                                <td class="p-3 align-top text-gray-600 text-xs leading-relaxed" x-text="item.explanation"></td>
+                                                <td class="p-3 align-top font-medium text-green-700" x-text="item.improved"></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
                          </div>
                     </div>
 
@@ -2543,6 +2601,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+    const pieLabelsPlugin = {
+        id: 'pieLabelsPlugin',
+        afterDraw: function(chart) {
+            if (chart.config.type !== 'pie') return;
+            const ctx = chart.ctx;
+            chart.data.datasets.forEach((dataset, i) => {
+                const meta = chart.getDatasetMeta(i);
+                meta.data.forEach((element, index) => {
+                    const value = dataset.data[index];
+                    if (value === 0 || value === null || value === undefined) return;
+                    
+                    let total = dataset.data.reduce((acc, curr) => acc + curr, 0);
+                    let percentage = Math.round((value / total) * 100) + '%';
+                    
+                    const position = element.tooltipPosition();
+                    
+                    ctx.save();
+                    ctx.font = 'bold 16px sans-serif';
+                    ctx.fillStyle = 'white';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+                    ctx.shadowBlur = 4;
+                    ctx.shadowOffsetX = 1;
+                    ctx.shadowOffsetY = 1;
+                    
+                    ctx.fillText(percentage, position.x, position.y);
+                    ctx.restore();
+                });
+            });
+        }
+    };
+
     // Logic to render specific charts based on ID existing in DOM
     const lineCanvas = document.getElementById('practiceLineChart');
     if (lineCanvas) {
@@ -2612,6 +2704,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             new Chart(pieCanvas1.getContext('2d'), {
                 type: 'pie',
+                plugins: [pieLabelsPlugin],
                 data: {
                     labels: doublePieConfig.left.labels,
                     datasets: doublePieConfig.left.datasets
@@ -2628,6 +2721,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             new Chart(pieCanvas2.getContext('2d'), {
                 type: 'pie',
+                plugins: [pieLabelsPlugin],
                 data: {
                     labels: doublePieConfig.right.labels,
                     datasets: doublePieConfig.right.datasets
@@ -2653,6 +2747,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         new Chart(pieCanvas.getContext('2d'), {
             type: 'pie',
+            plugins: [pieLabelsPlugin],
             data: {
                 labels: config.labels,
                 datasets: config.datasets
@@ -2739,8 +2834,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 wrapper.appendChild(canvas);
                 mixedContainer.appendChild(wrapper);
 
+                const chartType = config.type || 'bar';
                 new Chart(canvas.getContext('2d'), {
-                    type: config.type || 'bar',
+                    type: chartType,
+                    plugins: chartType === 'pie' ? [pieLabelsPlugin] : [],
                     data: {
                         labels: config.labels,
                         datasets: config.datasets
@@ -2848,12 +2945,23 @@ document.addEventListener('alpine:init', () => {
             scores: {},
             feedback: null,
             correction_html: null,
-            better_version: null
+            better_version: null,
+            grammar_improvements: [],
+            cohesive_devices_used: [],
+            good_vocabulary_used: [],
+            vocabulary_improvements: []
         },
         
         // Computed
         get wordCount() {
-            return this.essay.trim() === '' ? 0 : this.essay.trim().split(/\s+/).length;
+            if (this.essay.trim() === '') {
+                return 0;
+            }
+
+            const tokens = this.essay.trim().split(/\s+/).filter(Boolean);
+
+            // Count only tokens containing letters; pure numbers/punctuation are excluded.
+            return tokens.filter(token => /[A-Za-z]/.test(token)).length;
         },
 
         get hasCategories() {
@@ -2914,8 +3022,11 @@ document.addEventListener('alpine:init', () => {
         },
 
         refreshEssay() {
-            if (confirm('Are you sure you want to clear your answer? This cannot be undone.')) {
+            if (confirm('Reset semua teks essay?')) {
                 this.essay = '';
+                if (window.AutoSave && typeof window.AutoSave.clearSaved === 'function') {
+                    try { window.AutoSave.clearSaved(); } catch (e) { console.warn('AutoSave clearSaved failed', e); }
+                }
             }
         },
 
@@ -2973,7 +3084,7 @@ document.addEventListener('alpine:init', () => {
              this.error = null;
              this.showResults = true;
              // Keep previous results visible while loading new ones?? No, clear them to show spinners.
-             this.result = { scores: {}, feedback: null, correction_html: null, better_version: null }; 
+             this.result = { scores: {}, feedback: null, correction_html: null, better_version: null, grammar_improvements: [], cohesive_devices_used: [], good_vocabulary_used: [], vocabulary_improvements: [] }; 
              
              try {
                 // 1. Evaluate Scores
@@ -3021,6 +3132,18 @@ document.addEventListener('alpine:init', () => {
                 const data = await response.json();
                 if (data.feedback) {
                     this.result.feedback = data.feedback;
+                    if (data.feedback.grammar_improvements) {
+                        this.result.grammar_improvements = data.feedback.grammar_improvements;
+                    }
+                    if (data.feedback.cohesive_devices_used) {
+                        this.result.cohesive_devices_used = data.feedback.cohesive_devices_used;
+                    }
+                    if (data.feedback.good_vocabulary_used) {
+                        this.result.good_vocabulary_used = data.feedback.good_vocabulary_used;
+                    }
+                    if (data.feedback.vocabulary_improvements) {
+                        this.result.vocabulary_improvements = data.feedback.vocabulary_improvements;
+                    }
                     this.loading = false; // Stop loading spinner on submit button once feedback arrives
                 }
              } catch (e) { console.error(e); }

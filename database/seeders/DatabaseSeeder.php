@@ -41,12 +41,42 @@ class DatabaseSeeder extends Seeder
             'role' => 'student',
         ]);
 
-        $program = \App\Models\Program::firstOrCreate(
-            ['slug' => 'grammar-for-writing'],
+        $introductoryProgram = \App\Models\Program::firstOrCreate(
+            ['slug' => 'introductory-grammar-for-writing'],
             [
-                'name' => 'Grammar for Writing',
+                'name' => 'Introductory Grammar for Writing',
                 'period' => 'September 2024',
-                'description' => 'Master the fundamentals of English grammar specifically tailored for academic and professional writing.',
+                'description' => 'Kelas dasar tata bahasa Inggris untuk penulisan akademik.',
+                'color' => 'orange',
+            ]
+        );
+
+        $complexityProgram = \App\Models\Program::firstOrCreate(
+            ['slug' => 'complexity-grammar-for-writing'],
+            [
+                'name' => 'Complexity Grammar for Writing',
+                'period' => 'September 2024',
+                'description' => 'Penguasaan struktur kalimat kompleks untuk penulisan lanjutan.',
+                'color' => 'green',
+            ]
+        );
+
+        $proficiencyProgram = \App\Models\Program::firstOrCreate(
+            ['slug' => 'proficiency-grammar-for-writing'],
+            [
+                'name' => 'Proficiency Grammar for Writing',
+                'period' => 'September 2024',
+                'description' => 'Tingkat mahir tata bahasa untuk penulisan akademik dan profesional.',
+                'color' => 'purple',
+            ]
+        );
+
+        $fastTrackProgram = \App\Models\Program::firstOrCreate(
+            ['slug' => 'fast-track-grammar-for-writing'],
+            [
+                'name' => 'Fast Track Grammar for Writing',
+                'period' => 'September 2024',
+                'description' => 'Kelas tata bahasa Inggris intensif yang akan mempersiapkanmu untuk kelas IELTS.',
                 'color' => 'blue',
             ]
         );
@@ -106,9 +136,39 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        \App\Models\Program::firstOrCreate(
+            ['slug' => 'introductory-speaking'],
+            [
+                'name' => 'Introductory Speaking',
+                'period' => 'September 2024',
+                'description' => 'Kelas dasar berbicara Inggris untuk pemula.',
+                'color' => 'rose',
+            ]
+        );
+
+        \App\Models\Program::firstOrCreate(
+            ['slug' => 'intermediate-speaking'],
+            [
+                'name' => 'Intermediate Speaking',
+                'period' => 'September 2024',
+                'description' => 'Kelas menengah untuk meningkatkan kelancaran berbicara.',
+                'color' => 'amber',
+            ]
+        );
+
+        \App\Models\Program::firstOrCreate(
+            ['slug' => 'advanced-speaking'],
+            [
+                'name' => 'Advanced Speaking',
+                'period' => 'September 2024',
+                'description' => 'Kelas lanjutan untuk penguasaan speaking tingkat mahir.',
+                'color' => 'yellow',
+            ]
+        );
+
         for ($i = 1; $i <= 20; $i++) {
             \App\Models\Meeting::firstOrCreate(
-                ['program_id' => $program->id, 'meeting_number' => $i],
+                ['program_id' => $introductoryProgram->id, 'meeting_number' => $i],
                 [
                     'title' => "Meeting $i",
                     'is_locked' => true,

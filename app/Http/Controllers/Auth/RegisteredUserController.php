@@ -36,14 +36,26 @@ class RegisteredUserController extends Controller
         return view('auth.register-teacher');
     }
 
-    public function createStudent(Request $request): View
+    public function createStudent(Request $request): View|\Illuminate\Http\RedirectResponse
     {
+        if (Auth::check() && !Auth::user()->isAdmin()) {
+            return redirect('/dashboard');
+        }
         return $this->renderStudentRegistrationView($request, false);
     }
 
-    public function createStudentNoPayment(Request $request): View
+    public function createStudentNoPayment(Request $request): View|\Illuminate\Http\RedirectResponse
     {
+        if (Auth::check() && !Auth::user()->isAdmin()) {
+            return redirect('/dashboard');
+        }
         return $this->renderStudentRegistrationView($request, true);
+    }
+
+    public function createTestTaker(Request $request): View
+    {
+        $ref = $request->query('ref');
+        return view('auth.register-test-taker', compact('ref'));
     }
 
     private function renderStudentRegistrationView(Request $request, bool $skipPaymentFlow): View
@@ -69,7 +81,9 @@ class RegisteredUserController extends Controller
 
         $preselectedProgramSlug = $programAliases[$requestedProgram] ?? null;
 
-        return view('auth.register-student', compact('classPeriods', 'ref', 'preselectedProgramSlug', 'skipPaymentFlow'));
+        $programs = \App\Models\Program::where('is_active', true)->withoutMockTests()->orderBy('name')->get();
+
+        return view('auth.register-student', compact('classPeriods', 'ref', 'preselectedProgramSlug', 'skipPaymentFlow', 'programs'));
     }
 
     /**
@@ -80,11 +94,11 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            // 'cf-turnstile-response' => ['required', new \App\Rules\Turnstile()],
+            'cf-turnstile-response' => ['required', new \App\Rules\Turnstile()],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => ['nullable', 'string', 'in:student,teacher,guest'],
+            'password' => ['required', 'confirmed', Rules\Password::min(8)->mixedCase()->numbers()],
+            'role' => ['nullable', 'string', 'in:student,teacher,guest,test-taker'],
             'phone_number' => ['nullable', 'string', 'max:20'],
             'referral_code' => ['nullable', 'string', 'exists:users,referral_code'],
             'utm_source' => ['nullable', 'string', 'max:100'],
@@ -100,6 +114,13 @@ class RegisteredUserController extends Controller
             'program_choice' => ['nullable', 'string'],
             'payment_channel_choice' => ['nullable', 'string', 'in:bank_transfer,cash'],
             'skip_payment_flow' => ['nullable', 'boolean'],
+            'proof_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
+        ], [
+            'password.min' => 'Password minimal :min karakter.',
+            'password.mixed_case' => 'Password harus mengandung huruf kapital dan huruf kecil.',
+            'password.numbers' => 'Password harus mengandung angka.',
+            'proof_file.mimes' => 'Format file bukti transfer harus JPG, PNG, atau PDF.',
+            'proof_file.max' => 'Ukuran file bukti transfer maksimal 4MB.',
         ]);
 
         $attributionData = $this->extractAttributionData($request);
@@ -111,11 +132,16 @@ class RegisteredUserController extends Controller
         if ($role === 'student') {
             $selectedProgramSlug = (string) $request->input('program_choice', '');
             $selectedPaymentChannel = (string) $request->input('payment_channel_choice', '');
+            $selectedClassType = (string) $request->input('class_type', 'regular');
 
             if ($selectedProgramSlug === '') {
                 return back()->withInput()->withErrors([
                     'program_choice' => 'Silakan pilih kelas terlebih dahulu.',
                 ]);
+            }
+
+            if (!in_array($selectedClassType, ['regular', 'semi_private', 'private'])) {
+                $selectedClassType = 'regular';
             }
 
             if (!$skipPaymentFlow && $selectedPaymentChannel === '') {
@@ -180,26 +206,41 @@ class RegisteredUserController extends Controller
             'role' => $role,
             'referral_code' => $newReferralCode,
             'referred_by_id' => $referredBy,
-            // 'program_id' is intentionally left null until admin approves the EnrollmentRequest
+            // 'program_id' is intentionally left null until admin approves the Payment
         ] + $attributionData);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        if ($role === 'student' && $selectedProgramId) {
-            \App\Models\EnrollmentRequest::create([
-                'user_id' => $user->id,
-                'program_id' => $selectedProgramId,
-                'status' => 'pending',
-            ]);
-        }
+
 
         if ($role === 'student' && $selectedProgramId && !$skipPaymentFlow) {
+            $paymentChannel = (string) $request->input('payment_channel_choice', 'bank_transfer');
+
+            try {
+                // Initialize Payment unconditionally so they show up in admin queue immediately
+                $initiatePayment = app(\App\Application\Payment\InitiatePayment::class);
+                $result = $initiatePayment->handle($user, $selectedProgramId, $paymentChannel, $selectedClassType);
+
+                if (in_array($paymentChannel, ['bank_transfer', 'qris']) && $request->hasFile('proof_file') && isset($result['payment'])) {
+                    $payment = $result['payment'];
+                    $path = $request->file('proof_file')->store('payment-proofs/' . $user->id, 'public');
+
+                    $payment->update([
+                        'proof_file' => $path,
+                        'status' => 'waiting_verification',
+                    ]);
+
+                    return redirect()->route('student.payments.show', $payment)
+                        ->with('success', 'Akun berhasil dibuat dan bukti transfer sedang diverifikasi admin.');
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Failed to initiate payment on registration: ' . $e->getMessage());
+            }
+
             return redirect()->route('student.payments.index')
-                ->with('success', 'Akun berhasil dibuat. Lanjutkan ke tahap pembayaran untuk membuat invoice pertamamu.')
-                ->with('registration_prefill_program_id', $selectedProgramId)
-                ->with('registration_prefill_payment_channel', (string) $request->input('payment_channel_choice', 'bank_transfer'));
+                ->with('success', 'Akun berhasil dibuat. Silakan lanjutkan pembayaran untuk invoice pertamamu.');
         }
 
         // After registration, always redirect students to assignments so locking is visible
@@ -211,6 +252,11 @@ class RegisteredUserController extends Controller
         if ($role === 'guest') {
             return redirect()->route('guest.free-tests')
                 ->with('success', 'Akun berhasil dibuat. Selamat datang di Target Bahasa!');
+        }
+
+        // Test-Taker registration: redirect directly to online test portal
+        if ($role === 'test-taker') {
+            return redirect()->route('online-test.index');
         }
 
         return redirect(route('dashboard', absolute: false));

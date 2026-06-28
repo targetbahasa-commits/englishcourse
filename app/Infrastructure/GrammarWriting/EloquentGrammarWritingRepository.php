@@ -124,7 +124,7 @@ class EloquentGrammarWritingRepository implements GrammarWritingRepository
             return [];
         }
 
-        return MeetingScore::where('user_id', $userId)->pluck('score', 'meeting_number')->toArray();
+        return MeetingScore::where('is_reported', true)->where('user_id', $userId)->pluck('score', 'meeting_number')->toArray();
     }
 
     public function findMeetingOrFail(int $id): mixed

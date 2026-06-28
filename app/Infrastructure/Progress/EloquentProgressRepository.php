@@ -17,7 +17,7 @@ class EloquentProgressRepository implements ProgressRepository
 
     public function getMeetingScores(int $userId, int $programId): array
     {
-        return MeetingScore::where('user_id', $userId)
+        return MeetingScore::where('is_reported', true)->where('user_id', $userId)
             ->where('program_id', $programId)
             ->orderBy('meeting_number', 'asc')
             ->get()->all();

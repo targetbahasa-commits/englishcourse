@@ -62,10 +62,10 @@
                 <!-- Reference Image -->
                 <div class="border-t border-gray-100 p-4 bg-gray-50 flex flex-col gap-4">
                     <p class="text-sm font-bold text-gray-700 mb-2">Example Chart:</p>
-                    <img src="{{ asset('images/ielts_writing_task1_lesson9_example_chart.png') }}" class="w-full h-auto rounded shadow-sm" alt="Example Chart: Marriages">
+                    <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson9_example_chart.png') }}" class="w-full h-auto rounded shadow-sm" alt="Example Chart: Marriages">
                     
                     <p class="text-sm font-bold text-gray-700 mt-2 mb-2">Example Overview:</p>
-                    <img src="{{ asset('images/ielts_writing_task1_lesson9_example_text.png') }}" class="w-full h-auto rounded shadow-sm border border-gray-200" alt="Example Overview Text">
+                    <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson9_example_text.png') }}" class="w-full h-auto rounded shadow-sm border border-gray-200" alt="Example Overview Text">
                 </div>
             </div>
         </div>

@@ -43,6 +43,11 @@ class ClassPeriod extends Model
         return $this->hasMany(User::class);
     }
 
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class);
+    }
+
     public function meetings(): BelongsToMany
     {
         return $this->belongsToMany(Meeting::class, 'class_period_meetings')

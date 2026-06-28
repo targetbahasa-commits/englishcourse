@@ -28,9 +28,9 @@
 
         <?php
             // We load the 300 words generated in parts
-            $cat1 = include storage_path('app/toefl_vocab_1.php');
-            $cat2 = include storage_path('app/toefl_vocab_2.php');
-            $cat3 = include storage_path('app/toefl_vocab_3.php');
+            $cat1 = include storage_path('app/vocabularies/toefl_vocab_1.php');
+            $cat2 = include storage_path('app/vocabularies/toefl_vocab_2.php');
+            $cat3 = include storage_path('app/vocabularies/toefl_vocab_3.php');
             
             // Combine all categories into one array
             $vocabularyCategories = array_merge($cat1, $cat2, $cat3);

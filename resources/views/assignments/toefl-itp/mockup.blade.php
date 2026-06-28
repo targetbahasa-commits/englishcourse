@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends((isset($promoMode) && $promoMode) ? 'layouts.blank' : 'layouts.admin')
 
 @section('content')
 <div class="container mx-auto px-4 py-8 pb-32" x-data="{ 
@@ -78,6 +78,40 @@
     timer: null,
     structureCountdown: 1500, // 25 minutes
     structureTimer: null,
+    audioObj: null,
+    playAudioOrStartTimer(index) {
+        if(this.timer) clearInterval(this.timer);
+        if(this.audioObj) {
+            this.audioObj.pause();
+            this.audioObj.currentTime = 0;
+            this.audioObj = null;
+        }
+        if (this.currentView !== 'section1') return;
+        
+        const audioEl = document.getElementById('audio_' + index);
+        if (audioEl && audioEl.getAttribute('src')) {
+            this.countdown = 12;
+            this.audioObj = audioEl;
+            
+            let playPromise = audioEl.play();
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    audioEl.onended = () => {
+                        this.startTimer();
+                    };
+                }).catch(error => {
+                    console.log('Autoplay prevented', error);
+                    this.startTimer();
+                });
+            } else {
+                audioEl.onended = () => {
+                    this.startTimer();
+                };
+            }
+        } else {
+            this.startTimer();
+        }
+    },
     startTimer() {
         if(this.timer) clearInterval(this.timer);
         this.countdown = 12;
@@ -86,6 +120,15 @@
                 this.countdown--;
             } else {
                 clearInterval(this.timer);
+                if (this.currentView === 'section1') {
+                    const pages = document.querySelectorAll('.listening-page-wrapper');
+                    if (this.currentPageIndex < pages.length - 1) {
+                        this.currentPageIndex++;
+                        window.scrollTo(0,0);
+                    } else {
+                        this.submitListeningSection();
+                    }
+                }
             }
         }, 1000);
     },
@@ -116,8 +159,8 @@
         });
     }
 }" x-init="
-    startTimer(); 
-    $watch('currentPageIndex', value => startTimer());
+    playAudioOrStartTimer(currentPageIndex); 
+    $watch('currentPageIndex', value => playAudioOrStartTimer(value));
     $watch('currentView', value => { if(value === 'section2' && currentSection === 'questions') startStructureTimer() });
     $watch('currentSection', value => { if(currentView === 'section2' && value === 'questions') startStructureTimer() });
 ">
@@ -346,6 +389,16 @@
 
 
 
+    @if(session('score_data'))
+        <div class="bg-teal-50 border-l-4 border-teal-500 p-6 rounded-r-lg shadow-md mb-8">
+            <h3 class="text-2xl font-bold text-teal-800 mb-2">Test Completed!</h3>
+            <p class="text-lg text-teal-900">
+                Your Score: <span class="font-bold">{{ session('score_data')['score'] }}%</span> 
+                ({{ session('score_data')['correct_count'] }} out of {{ session('score_data')['total_question'] }} correct)
+            </p>
+        </div>
+    @endif
+
     @if(session('success'))
         <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800">
             {{ session('success') }}
@@ -412,10 +465,12 @@
                 </div>
             </div>
             
+            @if(empty($promoMode))
             <a href="{{ ($isFullMockTest ?? false) ? route('assignments.toefl-itp.mockup') : (($packageMode ?? false) ? route('assignments.toefl-itp.listening.practice') : route('assignments.toefl-itp')) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 {{ ($isFullMockTest ?? false) ? 'Back to Mock Test Selection' : (($packageMode ?? false) ? 'Back to Listening Practice' : 'Back to TOEFL ITP') }}
             </a>
+            @endif
         </div>
     </div>
 
@@ -538,7 +593,17 @@
             @csrf
 
             @foreach($listeningPages as $p)
-                <div x-show="currentPageIndex === {{ $p['index'] }}" style="display: none;" class="w-full flex justify-center">
+                <div x-show="currentPageIndex === {{ $p['index'] }}" style="display: none;" class="w-full flex justify-center listening-page-wrapper">
+                    @php
+                        $audioSrc = '';
+                        if($p['type'] === 'instruction_main') $audioSrc = $listeningDirectionAudio->audio_part_a ?? '';
+                        elseif($p['type'] === 'instruction_b') $audioSrc = $listeningDirectionAudio->audio_part_b ?? '';
+                        elseif($p['type'] === 'instruction_c') $audioSrc = $listeningDirectionAudio->audio_part_c ?? '';
+                        elseif($p['type'] === 'question' && isset($p['data']->audio_file)) $audioSrc = $p['data']->audio_file;
+                    @endphp
+                    @if($audioSrc)
+                        <audio id="audio_{{ $p['index'] }}" src="{{ asset($audioSrc) }}" preload="auto" class="hidden"></audio>
+                    @endif
                     @if($p['type'] === 'instruction_main')
                         <div class="bg-white rounded-2xl shadow-sm overflow-hidden pb-8 font-sans border border-gray-200 flex justify-center w-full">
                             <div style="max-width: 900px; width: 100%; padding: 32px 20px;">
@@ -646,10 +711,6 @@
                                     </p>
                                 </div>
                                 <div style="display: flex; justify-content: center; margin-top: 48px; gap: 16px;">
-                                    <button type="button" @click="currentPageIndex--; window.scrollTo(0,0)" style="padding: 12px 24px; background-color: #fff; border: 2px solid #e5e7eb; color: #374151; font-weight: bold; font-size: 1rem; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
-                                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg>
-                                        Back
-                                    </button>
                                     <button type="button" @click="currentPageIndex++; window.scrollTo(0,0)" style="padding: 12px 28px; background-color: #111; color: white; font-weight: bold; font-size: 1rem; border-radius: 12px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                                         Proceed to Part B Questions
                                         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
@@ -735,10 +796,6 @@
                                     <p style="margin: 0;">Remember, you are <strong style="font-weight: 700;">not</strong> allowed to take notes or write in the test book.</p>
                                 </div>
                                 <div style="display: flex; justify-content: center; margin-top: 48px; gap: 16px;">
-                                    <button type="button" @click="currentPageIndex--; window.scrollTo(0,0)" style="padding: 12px 24px; background-color: #fff; border: 2px solid #e5e7eb; color: #374151; font-weight: bold; font-size: 1rem; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
-                                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg>
-                                        Back
-                                    </button>
                                     <button type="button" @click="currentPageIndex++; window.scrollTo(0,0)" style="padding: 12px 28px; background-color: #111; color: white; font-weight: bold; font-size: 1rem; border-radius: 12px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                                         Proceed to Part C Questions
                                         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
@@ -753,11 +810,6 @@
                         @endphp
                         <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10 max-w-4xl mx-auto border border-gray-200" style="width: 100%;">
                             <div class="mb-6 flex items-center gap-3 border-b border-gray-100 pb-4">
-                                <div class="bg-red-50 p-2.5 rounded-full border border-red-100 flex-shrink-0">
-                                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10v4a3 3 0 003 3h4a1 1 0 001-1v-4a1 1 0 00-1-1H6a1 1 0 01-1-1 7 7 0 1114 0 1 1 0 01-1 1h-4a1 1 0 00-1 1v4a1 1 0 001 1h4a3 3 0 003-3v-4m-5 9"></path>
-                                    </svg>
-                                </div>
                                 <h3 class="text-2xl font-bold text-gray-800" style="margin: 0;">Question {{ $q->question_number }}</h3>
                                 
                                 <div class="ml-4 px-3 py-1 rounded-lg border-2 font-bold select-none transition-colors duration-300"
@@ -803,11 +855,7 @@
                                 @endforeach
                             </div>
                             
-                            <div class="mt-12 pt-6 border-t border-gray-100 flex justify-between items-center">
-                                <button type="button" @click="currentPageIndex--; window.scrollTo(0,0)" class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-bold hover:bg-gray-50 transition flex items-center gap-2 shadow-sm bg-white" style="border-width: 2px;">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                                    Prev
-                                </button>
+                            <div class="mt-12 pt-6 border-t border-gray-100 flex justify-end items-center">
                                 
                                 @if($p['index'] < $totalListeningPages - 1)
                                     <button type="button" @click="currentPageIndex++; window.scrollTo(0,0)" class="px-8 py-3 rounded-xl bg-gray-800 text-white font-bold hover:bg-gray-900 transition shadow-lg flex items-center gap-2">
@@ -815,7 +863,7 @@
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                                     </button>
                                 @else
-                                    <button type="button" @click.prevent="submitListeningSection" class="px-8 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition shadow-lg flex items-center gap-2">
+                                    <button type="button" @click.prevent="submitListeningSection" class="px-8 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition shadow-lg flex items-center gap-2" x-show="countdown <= 0">
                                         Lanjut ke Structure
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                                     </button>
@@ -1031,11 +1079,6 @@
                 <div x-cloak x-show="currentStructureIndex === {{ $idx }} && !showWrittenDir" class="bg-white rounded-2xl shadow-lg p-6 md:p-10 max-w-4xl mx-auto border border-gray-200" style="width: 100%;">
                     
                     <div class="mb-6 flex items-center gap-3 border-b border-gray-100 pb-4">
-                        <div class="bg-teal-50 p-2.5 rounded-full border border-teal-100 flex-shrink-0">
-                            <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                            </svg>
-                        </div>
                         <h3 class="text-2xl font-bold text-gray-800" style="margin: 0;">Question {{ $q->question_number }}</h3>
 
                         <span class="ml-auto text-sm text-gray-600 font-semibold bg-gray-100 px-4 py-1.5 rounded-full border border-gray-200">

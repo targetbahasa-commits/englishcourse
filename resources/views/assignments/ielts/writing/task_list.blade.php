@@ -23,7 +23,7 @@
                 </div>
             </div>
             
-            <a href="{{ route('assignments.ielts-academic.writing.index') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors duration-200">
+            <a href="{{ route('assignments.ielts-academic.writing.index') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back to Selection
             </a>
@@ -122,6 +122,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Prompt / Question</label>
                     <textarea name="prompt" rows="4" required class="w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"></textarea>
                 </div>
+
             </div>
             <div class="mt-6 flex justify-end gap-3">
                 <button type="button" onclick="hideModal('createMeetingModal')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
@@ -181,6 +182,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Prompt / Question</label>
                     <textarea id="edit_prompt" name="prompt" rows="4" required class="w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"></textarea>
                 </div>
+
             </div>
             <div class="mt-6 flex justify-end gap-3">
                 <button type="button" onclick="hideModal('editMeetingModal')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
@@ -212,6 +214,18 @@
     function editMeeting(meeting) {
         document.getElementById('edit_title').value = meeting.title;
         document.getElementById('edit_prompt').value = meeting.prompt;
+        
+        // Setup Promo Settings
+        document.getElementById('edit_is_free_tier').checked = meeting.is_free_tier == 1;
+        document.getElementById('edit_test_type').value = meeting.test_type || '';
+        document.getElementById('edit_system_prompt_override').value = meeting.system_prompt_override || '';
+        if (document.getElementById('edit_graph_data_json')) {
+            let jsonVal = meeting.graph_data_json;
+            if (typeof jsonVal === 'object' && jsonVal !== null) {
+                jsonVal = JSON.stringify(jsonVal, null, 2);
+            }
+            document.getElementById('edit_graph_data_json').value = jsonVal || '';
+        }
         
         let form = document.getElementById('editForm');
         form.action = "/assignments/ielts-academic/writing/" + meeting.id;

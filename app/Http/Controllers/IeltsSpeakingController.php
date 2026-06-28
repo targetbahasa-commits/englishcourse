@@ -237,6 +237,7 @@ class IeltsSpeakingController extends Controller
 
     public function grade(Request $request)
     {
+        set_time_limit(300); // Prevent PHP from timing out during Whisper + API calls
         $request->validate([
             'audio_blobs' => 'required',
         ]);
@@ -254,32 +255,26 @@ class IeltsSpeakingController extends Controller
         }
 
         $submittedTranscripts = $request->input('transcripts', []);
+        $submittedQuestions = $request->input('questions', []);
 
-        $transcriptsData = [
-            [
-                'question' => 'Are you a student or do you have a job?',
-                'answer' => $submittedTranscripts[0] ?? '(No answer recorded)',
-                'audio_url' => $audioUrls[0] ?? null
-            ],
-            [
-                'question' => 'What do you like most about your studies/job?',
-                'answer' => $submittedTranscripts[1] ?? '(No answer recorded)',
-                'audio_url' => $audioUrls[1] ?? null
-            ],
-            [
-                'question' => 'Is there anything you dislike about it?',
-                'answer' => $submittedTranscripts[2] ?? '(No answer recorded)',
-                'audio_url' => $audioUrls[2] ?? null
-            ],
-            [
-                'question' => 'What are your future plans for your career/education?',
-                'answer' => $submittedTranscripts[3] ?? '(No answer recorded)',
-                'audio_url' => $audioUrls[3] ?? null
-            ]
-        ];
+        $transcriptsData = [];
+        
+        foreach ($submittedQuestions as $index => $questionText) {
+            $transcriptsData[] = [
+                'question' => $questionText,
+                'answer' => $submittedTranscripts[$index] ?? '(No answer recorded)',
+                'audio_url' => $audioUrls[$index] ?? null
+            ];
+        }
 
-        $ollama = new OllamaController();
-        $aiResult = $ollama->gradeSpeaking($transcriptsData);
+        $topicSlug = $request->input('topic', 'speaking-practice');
+        
+        $ai = new \App\Http\Controllers\AiController();
+        // Get the part number from the request or default to 1
+        $part = (int) $request->input('part', 1);
+        $topicTitle = $request->input('topic_title', $topicSlug);
+        
+        $aiResult = $ai->gradeSpeaking($transcriptsData, $part, $topicTitle);
 
         if ($aiResult) {
             $result = $aiResult;
@@ -301,11 +296,16 @@ class IeltsSpeakingController extends Controller
             ];
         }
 
-        session(['speaking_evaluation_result' => $result]);
+        session([
+            'speaking_evaluation_result' => $result,
+            'speaking_evaluation_topic_title' => $topicTitle,
+            'speaking_evaluation_topic_slug' => $topicSlug,
+            'speaking_evaluation_part' => $part,
+        ]);
 
         return response()->json([
             'status' => 'success',
-            'redirect_url' => route('assignments.ielts-academic.speaking.evaluation', ['topic' => 'work-or-studies'])
+            'redirect_url' => route('assignments.ielts-academic.speaking.evaluation', ['topic' => $topicSlug])
         ]);
     }
 
@@ -318,8 +318,9 @@ class IeltsSpeakingController extends Controller
         }
 
         $topic = [
-            'title' => 'Work or Studies',
-            'slug' => 'work-or-studies'
+            'title' => session('speaking_evaluation_topic_title', 'Speaking Practice'),
+            'slug' => session('speaking_evaluation_topic_slug', 'speaking-practice'),
+            'part' => session('speaking_evaluation_part', 1),
         ];
 
         return view('assignments.ielts.speaking.evaluation', compact('result', 'topic'));
@@ -406,57 +407,101 @@ class IeltsSpeakingController extends Controller
 
     public function checkGrammar(Request $request)
     {
-        sleep(1);
+        $transcripts = $request->input('transcripts', []);
+
+        $ai = new \App\Http\Controllers\AiController();
+        $errors = $ai->checkGrammar($transcripts);
+
+        if (empty($errors)) {
+            $errors = $this->feedbackService->grammarErrors();
+        }
 
         return response()->json([
             'status' => 'success',
-            'errors' => $this->feedbackService->grammarErrors(),
+            'errors' => $errors,
         ]);
     }
 
     public function upgradeGrammar(Request $request)
     {
-        sleep(1);
-
         $transcripts = $request->input('transcripts', []);
-        $topic = $request->input('topic', 'general');
+
+        $ai = new \App\Http\Controllers\AiController();
+        $upgrades = $ai->upgradeGrammar($transcripts);
+
+        if (empty($upgrades)) {
+            $upgrades = $this->feedbackService->grammarUpgrades($transcripts, 'general');
+        }
 
         return response()->json([
             'status' => 'success',
-            'upgrades' => $this->feedbackService->grammarUpgrades($transcripts, $topic),
+            'upgrades' => $upgrades,
         ]);
     }
 
     public function modelAnswer(Request $request)
     {
-        sleep(1);
-
         $transcripts = $request->input('transcripts', []);
+
+        $ai = new \App\Http\Controllers\AiController();
+        $modelAnswers = $ai->generateModelAnswers($transcripts);
+
+        if (empty($modelAnswers)) {
+            $modelAnswers = $this->feedbackService->modelAnswers($transcripts); // Fallback to mock data if AI fails
+        }
 
         return response()->json([
             'status' => 'success',
-            'model_answers' => $this->feedbackService->modelAnswers($transcripts),
+            'model_answers' => $modelAnswers,
         ]);
     }
 
     public function analyzePronunciation(Request $request)
     {
-        sleep(1);
+        $transcripts = $request->input('transcripts', []);
+
+        $ai = new \App\Http\Controllers\AiController();
+        $analysis = $ai->analyzePronunciation($transcripts);
+
+        if (empty($analysis)) {
+            $analysis = $this->feedbackService->pronunciationAnalysis();
+        }
 
         return response()->json([
             'status' => 'success',
-            'analysis' => $this->feedbackService->pronunciationAnalysis(),
+            'analysis' => $analysis,
         ]);
     }
 
     public function analyzeFluency(Request $request)
     {
-        sleep(2);
+        $transcripts = $request->input('transcripts', []);
+
+        $ai = new \App\Http\Controllers\AiController();
+        $analysis = $ai->analyzeFluency($transcripts);
+
+        if (empty($analysis)) {
+            $analysis = $this->feedbackService->fluencyAnalysis(); // Fallback to mock data
+        }
 
         return response()->json([
             'status' => 'success',
-            'analysis' => $this->feedbackService->fluencyAnalysis(),
+            'analysis' => $analysis,
         ]);
+    }
+
+    private function ensureSpeakingUploadDirectory()
+    {
+        $path = public_path($this->speakingUploadDirectory());
+        if (!file_exists($path)) {
+            mkdir($path, 0755, true);
+        }
+        return $path;
+    }
+
+    private function speakingUploadDirectory()
+    {
+        return 'uploads/ielts_speaking';
     }
 
 }

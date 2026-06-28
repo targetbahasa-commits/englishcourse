@@ -26,7 +26,7 @@
                     <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                     Target Audience
                 </h3>
-                <div class="grid sm:grid-cols-3 gap-4">
+                <div class="grid sm:grid-cols-4 gap-4">
                     <label class="relative flex cursor-pointer rounded-xl border border-gray-200 bg-gray-50/50 p-4 shadow-sm hover:bg-gray-50/80 hover:border-blue-300 focus:outline-none transition has-[:checked]:bg-blue-50 has-[:checked]:border-blue-600 has-[:checked]:ring-1 has-[:checked]:ring-blue-600">
                         <input type="radio" name="target_role" value="all" class="sr-only" checked>
                         <span class="flex flex-1 items-center justify-center">
@@ -55,6 +55,25 @@
                             </span>
                         </span>
                     </label>
+                    <label id="leadTargetOption" class="relative flex cursor-pointer rounded-xl border border-gray-200 bg-gray-50/50 p-4 shadow-sm hover:bg-gray-50/80 hover:border-orange-300 focus:outline-none transition has-[:checked]:bg-orange-50 has-[:checked]:border-orange-500 has-[:checked]:ring-1 has-[:checked]:ring-orange-500">
+                        <input type="radio" name="target_role" value="lead" id="targetLead" class="sr-only">
+                        <span class="flex flex-1 items-center justify-center">
+                            <span class="flex flex-col text-center">
+                                <span class="block text-sm font-semibold text-gray-900 mb-1">Registration Leads</span>
+                                <span class="block text-xs text-orange-600 font-medium">Unconverted inquiries</span>
+                            </span>
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Lead target warning -->
+                <div id="leadWarning" class="hidden mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-start gap-2">
+                    <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <div>
+                        <strong>Note:</strong> For Registration Leads, <strong>In-App Inbox</strong> is not available (leads don't have accounts). 
+                        <strong>Email</strong> will only be sent to leads who have an email address. 
+                        <strong>WhatsApp</strong> will be sent to all leads with a WhatsApp number.
+                    </div>
                 </div>
                 @error('target_role')
                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -152,3 +171,33 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Show/hide lead warning based on target_role selection
+    const radios = document.querySelectorAll('input[name="target_role"]');
+    const leadWarning = document.getElementById('leadWarning');
+    const inboxCheckbox = document.querySelector('input[name="send_via_inbox"]');
+
+    function handleTargetChange() {
+        const selected = document.querySelector('input[name="target_role"]:checked');
+        if (selected && selected.value === 'lead') {
+            leadWarning.classList.remove('hidden');
+            if (inboxCheckbox) {
+                inboxCheckbox.checked = false;
+                inboxCheckbox.disabled = true;
+                inboxCheckbox.closest('label').classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        } else {
+            leadWarning.classList.add('hidden');
+            if (inboxCheckbox) {
+                inboxCheckbox.disabled = false;
+                inboxCheckbox.closest('label').classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+    }
+
+    radios.forEach(r => r.addEventListener('change', handleTargetChange));
+    handleTargetChange(); // run on load
+</script>
+@endpush

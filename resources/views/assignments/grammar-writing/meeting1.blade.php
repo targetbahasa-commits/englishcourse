@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'SchoolHub') }} - Meeting 1</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -281,9 +283,12 @@
                     Cek Jawaban
                 </button>
             @else
-                <a href="{{ route('assignments.grammar-writing.meeting1') }}" class="block w-full py-4 bg-gray-500 text-white rounded-xl font-bold text-lg hover:bg-gray-600 transition-colors shadow-lg text-center">
-                    Coba Lagi
-                </a>
+                <form method="POST" action="{{ route('assignments.grammar-writing.meeting1.reset') }}">
+                    @csrf
+                    <button type="submit" class="block w-full py-4 bg-gray-500 text-white rounded-xl font-bold text-lg hover:bg-gray-600 transition-colors shadow-lg text-center">
+                        Coba Lagi
+                    </button>
+                </form>
             @endif
         </form>
     </div>

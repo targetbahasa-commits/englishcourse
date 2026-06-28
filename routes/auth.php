@@ -12,9 +12,9 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
-    // Generic Routes (Keeping these for fallback or Admin if needed)
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register');
+    Route::get('register', function () {
+        return redirect()->route('registration.show');
+    })->name('register');
 
     Route::post('register', [RegisteredUserController::class, 'store'])
         ->middleware('throttle:auth');
@@ -40,10 +40,8 @@ Route::middleware('guest')->group(function () {
     Route::get('teacher/register', [RegisteredUserController::class, 'createTeacher'])
         ->name('teacher.register');
 
-    // Student Routes
-    Route::get('student/register', [RegisteredUserController::class, 'createStudent'])
-        ->name('student.register');
 
+    // Test-Taker Routes (moved out of guest middleware to allow admins to view the page)
     // POST route for no-payment registration
     Route::post('student/register-no-payment', [RegisteredUserController::class, 'store'])
         ->name('student.register.no-payment.post');
@@ -85,6 +83,10 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
+// Student Routes
+Route::get('student/register', [RegisteredUserController::class, 'createStudent'])
+    ->name('student.register');
+
 // Student register-no-payment: accessible to both guests and logged-in users (guest_quick)
 Route::get('student/register-no-payment', [RegisteredUserController::class, 'createStudentNoPayment'])
     ->name('student.register.no-payment');
@@ -96,3 +98,10 @@ Route::get('student/login', [AuthenticatedSessionController::class, 'createStude
 
 Route::get('teacher/login', [AuthenticatedSessionController::class, 'createTeacher'])
     ->name('teacher.login');
+
+Route::get('test-taker/login', [AuthenticatedSessionController::class, 'createTestTaker'])
+    ->name('test-taker.login');
+
+// Test-Taker register page is accessible to view by admins or others
+Route::get('test-taker/register', [RegisteredUserController::class, 'createTestTaker'])
+    ->name('test-taker.register');

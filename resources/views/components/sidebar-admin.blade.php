@@ -162,8 +162,8 @@
         <div class="flex-1 overflow-y-auto custom-scrollbar pb-6 sidebar-scroll-safe" data-admin-sidebar-scroll>
         <div class="sidebar-header p-6 flex items-center gap-3 justify-between">
             <div class="sidebar-brand flex items-center gap-3">
-            <div class="sidebar-logo w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">TB</div>
-            <span class="sidebar-title text-xl font-bold text-gray-800" x-show="!sidebarCollapsed" x-transition.opacity>Target Bahasa</span>
+            <img src="{{ asset('images/brand/icon.png') }}" class="sidebar-logo w-16 h-16 rounded-lg object-contain" alt="TB">
+            <span class="sidebar-title text-xl font-bold text-[#0fa2ec]" x-show="!sidebarCollapsed" x-transition.opacity>Target Bahasa</span>
             </div>
 
             <button type="button" @click="sidebarCollapsed = !sidebarCollapsed" class="sidebar-desktop-toggle items-center justify-center w-8 h-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" :aria-label="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'" :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">

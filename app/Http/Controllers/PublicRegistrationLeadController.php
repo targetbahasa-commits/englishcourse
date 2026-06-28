@@ -59,4 +59,33 @@ class PublicRegistrationLeadController extends Controller
         return redirect('/student/register?'.$params)
             ->with('success', 'Data kamu sudah tercatat! Silakan buat akun untuk akses kelas.');
     }
+
+    public function ajaxStore(Request $request)
+    {
+        $validated = $request->validate([
+            'full_name'        => 'required|string|max:150',
+            'whatsapp'         => 'required|string|max:20',
+            'email'            => 'nullable|email|max:150',
+            'source'           => 'required|string|max:50',
+            'source_detail'    => 'required|string|max:255',
+            'notes'            => 'nullable|string',
+        ]);
+
+        $this->createRegistrationLead->execute([
+            'full_name'               => $validated['full_name'],
+            'whatsapp'                => $validated['whatsapp'],
+            'email'                   => $validated['email'] ?? null,
+            'source'                  => $validated['source'],
+            'source_detail'           => $validated['source_detail'],
+            'status'                  => 'new',
+            'acquisition_source_page' => $request->path(),
+            'acquisition_last_cta'    => 'quick_inquiry_modal',
+            'notes'                   => $validated['notes'] ?? null,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Thank you! Your inquiry has been submitted. Our team will contact you soon.'
+        ]);
+    }
 }

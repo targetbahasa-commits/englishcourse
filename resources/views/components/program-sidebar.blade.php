@@ -92,8 +92,8 @@
 
             {{-- Brand (hidden when collapsed) --}}
             <div class="flex items-center gap-3" x-show="!sidebarCollapsed" x-transition.opacity>
-                <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-md">TB</div>
-                <span class="sidebar-title text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Target Bahasa</span>
+                <img src="{{ asset('images/brand/icon.png') }}" class="w-16 h-16 rounded-xl object-contain shadow-sm" alt="TB">
+                <span class="sidebar-title text-xl font-bold text-[#0fa2ec]">Target Bahasa</span>
             </div>
 
             {{-- Collapse / Expand toggle --}}

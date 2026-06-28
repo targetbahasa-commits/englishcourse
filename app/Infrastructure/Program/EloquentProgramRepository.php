@@ -9,16 +9,16 @@ use Illuminate\Support\Str;
 
 class EloquentProgramRepository implements ProgramRepository
 {
-    public function create(array $data): void
+    public function create(array $data): mixed
     {
-        Program::create(array_merge($data, [
+        return Program::create(array_merge($data, [
             'slug' => Str::slug($data['name']),
         ]));
     }
 
     public function listWithCounts(): array
     {
-        return Program::with(['classPeriods' => function ($q) {
+        return Program::with(['subprograms', 'classPeriods' => function ($q) {
                 $q->withCount('users')->orderBy('created_at', 'desc');
             }])
             ->withCount([

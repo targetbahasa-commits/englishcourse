@@ -192,7 +192,7 @@
                             <div class="font-semibold text-gray-800">{{ $lead->full_name }}</div>
                             <div class="text-xs text-gray-400">{{ $lead->city }} · {{ $lead->whatsapp }}</div>
                             <div class="mt-1 flex flex-wrap gap-1">
-                                @if($lead->status === 'new' && $lead->created_at->gte(now()->subDay()))
+                                @if($lead->status === 'new' && $lead->created_at && $lead->created_at->gte(now()->subDay()))
                                     <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700">HOT</span>
                                 @endif
                                 @if($lead->converted_at && $lead->converted_at->isToday())
@@ -264,7 +264,7 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 text-xs text-gray-400">
-                            {{ $lead->created_at->format('d M Y') }}
+                            {{ $lead->created_at ? $lead->created_at->format('d M Y') : '-' }}
                         </td>
                         <td class="px-4 py-3">
                             <a href="{{ route('admin.registration-leads.show', $lead) }}"

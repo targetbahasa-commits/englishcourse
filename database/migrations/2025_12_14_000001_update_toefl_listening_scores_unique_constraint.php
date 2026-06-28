@@ -8,14 +8,20 @@ return new class extends Migration
 {
     public function up()
     {
+        try {
+            Schema::table('toefl_listening_scores', function (Blueprint $table) {
+                $table->dropUnique(['user_id', 'meeting_number']);
+            });
+        } catch (\Exception $e) {
+            // Ignore if it doesn't exist
+        }
+
         Schema::table('toefl_listening_scores', function (Blueprint $table) {
-            // Drop the existing unique index if it exists
-            // Verify index name first or try catch, but usually standard name is table_col1_col2_unique
-            $table->dropUnique(['user_id', 'meeting_number']);
+            if (!Schema::hasColumn('toefl_listening_scores', 'set_number')) {
+                $table->integer('set_number')->nullable()->after('meeting_number');
+            }
             
             // Add new unique index including set_number
-            // We use a raw DB statement because Blueprint might not handle nullable unique composites consistently across drivers in older Laravel/SQLite
-            // But standard unique() usually works.
             $table->unique(['user_id', 'meeting_number', 'set_number']);
         });
     }

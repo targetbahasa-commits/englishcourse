@@ -25,12 +25,22 @@
     hasMoved: false,
     
     init() {
-        // Fallback if window variable is not ready or failed
-        if (!this.items || this.items.length === 0) {
-            console.warn('Items empty, retrying from window...');
-            this.items = window.advancedAdverbsData || [];
+        // Self-initialize from server data to avoid race conditions
+        if (typeof window.advancedAdverbsData !== 'undefined' && Array.isArray(window.advancedAdverbsData)) {
+             if (window.advancedAdverbsData.length > 0 && Array.isArray(window.advancedAdverbsData[0])) {
+                 // It's grouped by question, show first group (matching practice.blade.php init logic)
+                 this.items = window.advancedAdverbsData[0];
+             } else {
+                 this.items = window.advancedAdverbsData;
+             }
+             console.log('Advanced Adverbs Modal Initialized with:', this.items.length, 'items');
         }
-        console.log('Alpine initialized (Adverbs). Items count:', this.items.length);
+
+        // Listen for updates from the main practice component
+        window.addEventListener('update-advanced-adverbs', (e) => {
+            console.log('Advanced Adverbs Updated:', e.detail);
+            this.items = e.detail || [];
+        });
     },
 
     

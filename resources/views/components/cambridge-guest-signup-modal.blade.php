@@ -137,6 +137,12 @@
                            placeholder="e.g. 0812-xxxx-xxxx" value="{{ old('phone_number') }}">
                 </div>
 
+                <div style="margin-bottom:0.875rem;">
+                    <!-- Cloudflare Turnstile Widget -->
+                    <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.key') }}" data-theme="light"></div>
+                    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+                </div>
+
                 <button type="submit" class="cg-btn-primary">🎯 Mulai Tes Gratis Sekarang</button>
             </form>
 

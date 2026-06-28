@@ -188,3 +188,5 @@ Alpine.data('readingPracticePage', (answerKey, totalQuestions) => ({
 }));
 
 Alpine.start();
+
+import './password-rules';

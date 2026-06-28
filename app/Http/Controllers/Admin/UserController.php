@@ -33,9 +33,9 @@ class UserController extends Controller
      */
     public function create()
     {
-        ['teachers' => $teachers, 'programs' => $programs] = $this->manageUsers->formOptions();
+        ['teachers' => $teachers, 'programs' => $programs, 'camps' => $camps] = $this->manageUsers->formOptions();
         
-        return view('admin.users.create', compact('teachers', 'programs'));
+        return view('admin.users.create', compact('teachers', 'programs', 'camps'));
     }
 
     /**
@@ -64,9 +64,9 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        ['teachers' => $teachers, 'programs' => $programs] = $this->manageUsers->formOptions();
+        ['teachers' => $teachers, 'programs' => $programs, 'camps' => $camps] = $this->manageUsers->formOptions();
         
-        return view('admin.users.edit', compact('user', 'teachers', 'programs'));
+        return view('admin.users.edit', compact('user', 'teachers', 'programs', 'camps'));
     }
 
     /**
@@ -77,6 +77,12 @@ class UserController extends Controller
         $validated = $request->validated();
 
         $this->manageUsers->update($user, $validated, $request);
+
+        if ($user->role === 'student') {
+            return redirect()->route('students.index')->with('success', 'Student updated successfully.');
+        } elseif ($user->role === 'teacher') {
+            return redirect()->route('teachers.index')->with('success', 'Teacher updated successfully.');
+        }
 
         return redirect()->route('users.index')
             ->with('success', 'User updated successfully.');
@@ -137,6 +143,27 @@ class UserController extends Controller
         $this->manageUsers->bulkAssignProgram($userIds, (int) $request->program_id);
 
         return back()->with('success', count($userIds) . ' users enrolled in the new program successfully.');
+    }
+
+    /**
+     * Bulk update status of selected users.
+     */
+    public function bulkUpdateStatus(Request $request)
+    {
+        $userIds = json_decode($request->user_ids, true);
+        $status = $request->status;
+        
+        if (!is_array($userIds) || empty($userIds)) {
+            return back()->with('error', 'No users selected.');
+        }
+
+        if (!in_array($status, ['active', 'inactive'])) {
+            return back()->with('error', 'Invalid status.');
+        }
+
+        User::whereIn('id', $userIds)->update(['status' => $status]);
+
+        return back()->with('success', count($userIds) . ' users status updated to ' . $status . ' successfully.');
     }
 
     /**

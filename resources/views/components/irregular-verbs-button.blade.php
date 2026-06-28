@@ -212,7 +212,7 @@ class="fixed z-50 select-none touch-none"
             @touchstart="startDrag"
             @click="handleClick"
            class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2 cursor-move">
-       <span>📖</span> Irregular Verbs
+       Irregular Verbs
    </button>
 
    <!-- Modal Backdrop -->

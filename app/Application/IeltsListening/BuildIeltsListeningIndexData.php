@@ -21,7 +21,7 @@ class BuildIeltsListeningIndexData
             'name' => 'IELTS Academic Listening', 'period' => 'All Time', 'is_active' => true, 'price' => 0
         ]);
         $batchProgram = $this->ieltsBatchResolver->resolveBatchProgramForIelts($user);
-        $selectedClassPeriod = $this->batchResolver->resolveSelectedClassPeriodForProgram($batchProgram);
+        $selectedClassPeriod = $this->batchResolver->resolveSelectedClassPeriodForProgram($batchProgram, $user);
 
         $meetings = collect($program->meetings)->sortBy('meeting_number');
 

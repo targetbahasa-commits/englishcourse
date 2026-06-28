@@ -12,26 +12,10 @@ class EvaluateGrammarWritingMeeting2Submission
         array $translationMatrix,
         int $scorePart1,
     ): array {
-        if ($stage === 1) {
-            return $this->evaluateStageOne($input, $tenses);
-        }
-
-        if ($stage === 2) {
-            return $this->evaluateStageTwo($input, $translationSentences, $translationMatrix, $scorePart1);
-        }
-
-        return [
-            'session' => [],
-            'saveScore' => false,
-            'totalScore' => null,
-        ];
-    }
-
-    private function evaluateStageOne(array $input, array $tenses): array
-    {
+        // Evaluate Matrix (Part 1)
         $results = [];
-        $scorePart1 = 0;
-        $totalItems = 0;
+        $part1Score = 0;
+        $totalItemsPart1 = 0;
 
         foreach ($tenses as $tenseName => $formulas) {
             foreach (['verbal', 'nominal', 'passive'] as $type) {
@@ -42,11 +26,11 @@ class EvaluateGrammarWritingMeeting2Submission
                 $normUser = strtolower((string) preg_replace('/\s+/', '', $userAnswer));
                 $normCorrect = strtolower((string) preg_replace('/\s+/', '', $correctAnswer));
 
-                $isCorrect = $normUser === $normCorrect;
+                $isCorrect = $normUser === $normCorrect && $normUser !== '';
                 if ($isCorrect) {
-                    $scorePart1++;
+                    $part1Score++;
                 }
-                $totalItems++;
+                $totalItemsPart1++;
 
                 $results[$tenseName][$type] = [
                     'user_answer' => $userAnswer,
@@ -56,34 +40,22 @@ class EvaluateGrammarWritingMeeting2Submission
             }
         }
 
-        $finalScorePart1 = $totalItems > 0 ? round(($scorePart1 / $totalItems) * 50) : 0;
+        $finalScorePart1 = $totalItemsPart1 > 0 ? round(($part1Score / $totalItemsPart1) * 50) : 0;
 
-        return [
-            'session' => [
-                'meeting2_stage' => 2,
-                'meeting2_results' => $results,
-                'meeting2_score_part1' => $finalScorePart1,
-            ],
-            'saveScore' => false,
-            'totalScore' => null,
-        ];
-    }
-
-    private function evaluateStageTwo(array $input, array $translationSentences, array $translationMatrix, int $scorePart1): array
-    {
+        // Evaluate Translation (Part 2)
         $transResults = ['sentences' => [], 'matrix' => []];
-        $scorePart2 = 0;
-        $totalItems = 0;
+        $part2Score = 0;
+        $totalItemsPart2 = 0;
 
         foreach ($translationSentences as $index => $item) {
             $userAnswer = trim((string) ($input['trans_sent'][$index] ?? ''));
             $correctAnswer = (string) ($item['en'] ?? '');
 
-            $isCorrect = strtolower(rtrim($userAnswer, '.!')) === strtolower(rtrim($correctAnswer, '.!'));
+            $isCorrect = strtolower(rtrim($userAnswer, '.!')) === strtolower(rtrim($correctAnswer, '.!')) && $userAnswer !== '';
             if ($isCorrect) {
-                $scorePart2++;
+                $part2Score++;
             }
-            $totalItems++;
+            $totalItemsPart2++;
 
             $transResults['sentences'][$index] = [
                 'user_answer' => $userAnswer,
@@ -98,11 +70,11 @@ class EvaluateGrammarWritingMeeting2Submission
                 $userAnswer = trim((string) ($input['trans_matrix'][$key] ?? ''));
                 $correctAnswer = (string) ($items[$type]['en'] ?? '');
 
-                $isCorrect = strtolower(rtrim($userAnswer, '.!')) === strtolower(rtrim($correctAnswer, '.!'));
+                $isCorrect = strtolower(rtrim($userAnswer, '.!')) === strtolower(rtrim($correctAnswer, '.!')) && $userAnswer !== '';
                 if ($isCorrect) {
-                    $scorePart2++;
+                    $part2Score++;
                 }
-                $totalItems++;
+                $totalItemsPart2++;
 
                 $transResults['matrix'][$tenseName][$type] = [
                     'user_answer' => $userAnswer,
@@ -112,12 +84,14 @@ class EvaluateGrammarWritingMeeting2Submission
             }
         }
 
-        $finalScorePart2 = $totalItems > 0 ? round(($scorePart2 / $totalItems) * 50) : 0;
-        $totalScore = $scorePart1 + $finalScorePart2;
+        $finalScorePart2 = $totalItemsPart2 > 0 ? round(($part2Score / $totalItemsPart2) * 50) : 0;
+        $totalScore = $finalScorePart1 + $finalScorePart2;
 
         return [
             'session' => [
-                'meeting2_stage' => 3,
+                'meeting2_stage' => 3, // Directly go to result stage
+                'meeting2_results' => $results,
+                'meeting2_score_part1' => $finalScorePart1,
                 'meeting2_trans_results' => $transResults,
                 'meeting2_score_part2' => $finalScorePart2,
                 'meeting2_total_score' => $totalScore,

@@ -13,10 +13,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('grammar_questions', function (Blueprint $table) {
-
-            $table->string('tense')->nullable()->after('section');
-            $table->string('structure')->nullable()->after('tense'); // 'verbal', 'nominal', 'passive' or 'type'
-            $table->text('formula')->nullable()->after('structure');
+            $table->string('tense')->nullable();
+            $table->string('structure')->nullable(); // 'verbal', 'nominal', 'passive' or 'type'
+            $table->text('formula')->nullable();
         });
     }
 

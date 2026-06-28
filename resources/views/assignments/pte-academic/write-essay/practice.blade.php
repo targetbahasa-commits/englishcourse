@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Write Essay - {{ $topic['title'] }} | Target Bahasa</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         .resizable-box {
@@ -307,5 +309,6 @@
             }, 1000);
         }
     </script>
+    @include('assignments.ielts.writing.practice_toolbar', ['meeting' => (object)['task_type' => 2], 'grammarLevel' => 'all'])
 </body>
 </html>

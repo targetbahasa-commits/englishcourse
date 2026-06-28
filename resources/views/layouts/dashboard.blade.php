@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? config('app.name', 'Target Bahasa') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -37,7 +38,7 @@
         @endauth
 
         <!-- Main Content -->
-        <main class="flex-1 md:ml-64 p-4 md:p-8">
+        <main class="flex-1 transition-all duration-200 p-4 md:p-8" style="margin-left: var(--admin-sidebar-offset, var(--teacher-sidebar-offset, var(--student-sidebar-offset, var(--guest-sidebar-offset, 16rem))));">
             <!-- Topbar -->
             <div class="flex justify-between items-center mb-8">
                 <div>
@@ -110,6 +111,8 @@
     <!-- Additional Scripts -->
     @stack('scripts')
     @include('components.student-broadcaster')
+    @include('components.chat-notifier')
+    @include('components.floating-wa-button')
     <!-- Alpine.js for interactivity -->
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </body>

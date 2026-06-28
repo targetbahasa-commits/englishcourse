@@ -6,6 +6,7 @@ use App\Application\Guest\RegisterGuestUser;
 use App\Domain\Guest\Repositories\GuestUserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class CambridgeGuestSignupController extends Controller
 {
@@ -25,7 +26,21 @@ class CambridgeGuestSignupController extends Controller
             'email'        => 'required|email|max:255',
             'phone_number' => 'required|string|max:30',
             'redirect_to'  => 'nullable|string|max:1000',
+            'cf-turnstile-response' => 'required|string',
         ]);
+
+        // Validate Turnstile
+        $turnstileResponse = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+            'secret'   => config('services.turnstile.secret'),
+            'response' => $request->input('cf-turnstile-response'),
+            'remoteip' => $request->ip(),
+        ]);
+
+        if (!$turnstileResponse->json('success')) {
+            return back()
+                ->withInput()
+                ->withErrors(['captcha' => 'Verifikasi keamanan (CAPTCHA) gagal. Silakan coba lagi.']);
+        }
 
         // Determine safe redirect URL (must be an internal path)
         $redirectTo = $this->safeRedirectUrl($request->input('redirect_to'));

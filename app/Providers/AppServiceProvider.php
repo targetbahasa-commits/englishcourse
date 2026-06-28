@@ -33,6 +33,7 @@ use App\Domain\FreeTest\Contracts\FreeTestCertificateStorage;
 use App\Domain\FreeTest\Contracts\FreeTestFollowUpDispatcher;
 use App\Domain\FreeTest\Repositories\FreeTestRepository;
 use App\Domain\Registration\Repositories\RegistrationRepository;
+use App\Domain\Score\Repositories\ScoreRepository;
 use App\Domain\Teacher\Repositories\TeacherRepository;
 use App\Domain\Teacher\Repositories\AttendanceRepository;
 use App\Domain\Guest\Repositories\GuestUserRepository;
@@ -100,6 +101,9 @@ use App\Infrastructure\Admin\EloquentAdminUserRepository;
 use App\Infrastructure\Admin\EloquentAdminStudentRepository;
 use App\Infrastructure\Admin\EloquentAdminReportRepository;
 use Illuminate\Support\ServiceProvider;
+use App\Application\FinalTest\StudentFinalTestAccess;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 use App\Domain\Notification\Contracts\WhatsAppGateway;
 use App\Infrastructure\Shared\LaravelTransactionManager;
 use App\Infrastructure\Notification\WhatsApp\FonnteGateway;
@@ -148,6 +152,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(FreeTestRepository::class, EloquentFreeTestRepository::class);
         $this->app->bind(\App\Domain\FreeLesson\Repositories\FreeLessonProgressRepository::class, \App\Infrastructure\FreeLesson\EloquentFreeLessonProgressRepository::class);
         $this->app->bind(RegistrationRepository::class, EloquentRegistrationRepository::class);
+        $this->app->bind(ScoreRepository::class, \App\Infrastructure\Score\EloquentScoreRepository::class);
         $this->app->bind(TeacherRepository::class, EloquentTeacherRepository::class);
         $this->app->bind(AttendanceRepository::class, EloquentAttendanceRepository::class);
         $this->app->bind(GuestUserRepository::class, EloquentGuestUserRepository::class);
@@ -171,6 +176,8 @@ class AppServiceProvider extends ServiceProvider
             $gateway = config('services.whatsapp.gateway');
             if ($gateway === 'wablas') {
                 return new WablasGateway();
+            } elseif ($gateway === 'waha') {
+                return new \App\Infrastructure\Notification\WhatsApp\WahaGateway();
             }
             return new FonnteGateway(); // Default
         });
@@ -207,6 +214,14 @@ class AppServiceProvider extends ServiceProvider
             return $this->app->environment('production')
                         ? $rule->uncompromised()
                         : $rule;
+        });
+
+        View::composer('components.sidebar-student', function ($view) {
+            $user = Auth::user();
+            $canAccessFinalTest = $user?->isStudent()
+                && app(StudentFinalTestAccess::class)->canAccessMenu($user);
+
+            $view->with('canAccessFinalTest', $canAccessFinalTest);
         });
     }
 }

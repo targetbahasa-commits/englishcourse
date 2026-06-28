@@ -242,7 +242,7 @@
 
                         <!-- Card Body -->
                         <div class="p-6 flex flex-col flex-1">
-                            <ul class="space-y-2 mb-6 flex-1">
+                            <ul class="space-y-2 mb-4 flex-1">
                                 @foreach($types as $typeLabel)
                                     <li class="flex items-center gap-2 text-sm text-gray-600">
                                         <span class="flex-none w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-bold text-gray-500">✎</span>
@@ -250,6 +250,29 @@
                                     </li>
                                 @endforeach
                             </ul>
+
+                            @if(auth()->check() && strtolower(auth()->user()->role) === 'admin')
+                                @php
+                                    $hasQuestions = view()->exists('assignments.ielts.listening.questions.part' . $set . '.test' . $i);
+                                    $hasAnswerKey = view()->exists('assignments.ielts.listening.answers.part' . $set . '.test' . $i);
+                                    $hasAudio = file_exists(public_path('assets/audio/ielts/listening/practice/part' . $set . '/test' . $i . '.mp3'));
+                                    $hasSrt = file_exists(public_path('assets/audio/ielts/listening/practice/part' . $set . '/test' . $i . '.srt'));
+                                @endphp
+                                <div class="flex flex-wrap gap-1.5 mb-5 mt-auto">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold {{ $hasQuestions ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}" title="Soal">
+                                        {{ $hasQuestions ? '✓' : '✕' }} Soal
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold {{ $hasAnswerKey ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}" title="Kunci Jawaban">
+                                        {{ $hasAnswerKey ? '✓' : '✕' }} Kunci
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold {{ $hasAudio ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}" title="Audio">
+                                        {{ $hasAudio ? '✓' : '✕' }} Audio
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold {{ $hasSrt ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}" title="SRT (Subtitle)">
+                                        {{ $hasSrt ? '✓' : '✕' }} SRT
+                                    </span>
+                                </div>
+                            @endif
 
                             <a href="{{ route('assignments.ielts-academic.listening.practice-index.test', ['set' => $set, 'test' => $i]) }}"
                                style="background-color: {{ $btnColor }}"

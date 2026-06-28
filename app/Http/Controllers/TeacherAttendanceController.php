@@ -26,8 +26,28 @@ class TeacherAttendanceController extends Controller
 
     public function getMeetings(ClassPeriod $classPeriod)
     {
-        $meetings = $this->manageAttendance->getMeetings($classPeriod->id);
-        return response()->json($meetings);
+        $meetings = $this->manageAttendance->getMeetings($classPeriod->id) ?? [];
+
+        $user = Auth::user();
+        $canEdit = false;
+        if ($user) {
+            $canEdit = $user->isAdmin() || ($user->isTeacher() && $classPeriod->teacher_id === $user->id);
+        }
+
+        $payload = array_map(function ($m) use ($canEdit) {
+            return [
+                'id' => $m->id ?? null,
+                'meeting_number' => $m->meeting_number ?? null,
+                'topic' => $m->topic ?? null,
+                'meeting_date' => isset($m->meeting_date) ? (string) $m->meeting_date : null,
+                'start_time' => isset($m->start_time) ? (string) $m->start_time : null,
+                'end_time' => isset($m->end_time) ? (string) $m->end_time : null,
+                'class_period_id' => $m->class_period_id ?? null,
+                'can_edit' => $canEdit,
+            ];
+        }, $meetings ?: []);
+
+        return response()->json($payload);
     }
 
     public function getAttendance(ClassMeeting $classMeeting)
@@ -52,5 +72,35 @@ class TeacherAttendanceController extends Controller
         );
 
         return response()->json(['success' => true, 'message' => 'Attendance saved successfully']);
+    }
+
+    public function updateMeeting(ClassMeeting $classMeeting, Request $request)
+    {
+        $validated = $request->validate([
+            'meeting_date' => 'required|date',
+        ]);
+
+        $user = Auth::user();
+        $isAuthorized = $user && ($user->isAdmin() || ($user->isTeacher() && $classMeeting->classPeriod && $classMeeting->classPeriod->teacher_id === $user->id));
+
+        if (! $isAuthorized) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $meeting = $this->manageAttendance->updateMeeting($classMeeting->id, $validated);
+
+        return response()->json([
+            'success' => true,
+            'meeting' => [
+                'id' => $meeting->id,
+                'meeting_number' => $meeting->meeting_number,
+                'topic' => $meeting->topic,
+                'meeting_date' => (string) $meeting->meeting_date,
+                'start_time' => isset($meeting->start_time) ? (string) $meeting->start_time : null,
+                'end_time' => isset($meeting->end_time) ? (string) $meeting->end_time : null,
+                'class_period_id' => $meeting->class_period_id,
+                'can_edit' => true,
+            ]
+        ]);
     }
 }

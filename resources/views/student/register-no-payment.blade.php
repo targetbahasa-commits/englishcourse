@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Buat Akun Student – Target Bahasa</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -16,13 +18,20 @@
     <div class="w-full max-w-lg">
 
         {{-- Header --}}
+        @php
+            $tb_auth_register_student_title = \App\Models\Setting::where('key', 'auth_register_student_title')->value('value') ?? 'Buat Akun Student';
+            $tb_auth_register_student_subtitle = \App\Models\Setting::where('key', 'auth_register_student_subtitle')->value('value') ?? 'Daftarkan dirimu untuk mengakses kelas tanpa melalui tahap pembayaran.';
+            
+            $tb_auth_register_step2_title_skip_payment = \App\Models\Setting::where('key', 'auth_register_step2_title_skip_payment')->value('value') ?? 'Pilih Kelas & Selesaikan';
+            $tb_auth_register_step2_subtitle_skip_payment = \App\Models\Setting::where('key', 'auth_register_step2_subtitle_skip_payment')->value('value') ?? 'Pilih program utama yang ingin kamu ikuti, lalu langsung buat akun.';
+        @endphp
         <div class="text-center mb-8">
             <a href="{{ url('/') }}" class="inline-flex items-center gap-2 mb-6">
                 <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-700 font-bold text-sm shadow">TB</div>
                 <span class="text-xl font-bold text-white">Target Bahasa</span>
             </a>
-            <h1 class="text-3xl font-extrabold text-white mb-2">Buat Akun Student</h1>
-            <p class="text-indigo-200 text-sm">Daftarkan dirimu untuk mengakses kelas tanpa melalui tahap pembayaran.</p>
+            <h1 class="text-3xl font-extrabold text-white mb-2">{{ $tb_auth_register_student_title }}</h1>
+            <p class="text-indigo-200 text-sm">{{ $tb_auth_register_student_subtitle }}</p>
         </div>
 
         {{-- Form Card --}}
@@ -34,8 +43,8 @@
 
             {{-- Program Selection Header --}}
             <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-6">
-                <p class="text-indigo-100 text-xs font-semibold uppercase tracking-wider mb-3">Pilih Kelas &amp; Selesaikan</p>
-                <p class="text-white font-semibold text-sm">Pilih program utama yang ingin kamu ikuti, lalu langsung buat akun.</p>
+                <p class="text-indigo-100 text-xs font-semibold uppercase tracking-wider mb-3">{{ $tb_auth_register_step2_title_skip_payment }}</p>
+                <p class="text-white font-semibold text-sm">{{ $tb_auth_register_step2_subtitle_skip_payment }}</p>
             </div>
 
             <form action="{{ route('student.register.store') }}" method="POST" class="p-8 space-y-5">
@@ -140,6 +149,8 @@
                     </div>
                 </div>
 
+                @include('components.password-rules')
+
                 {{-- Errors --}}
                 @if($errors->any())
                 <div class="bg-red-50 border border-red-100 rounded-xl p-4">
@@ -178,3 +189,5 @@
 
 </body>
 </html>
+
+ 

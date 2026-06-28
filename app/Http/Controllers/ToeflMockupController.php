@@ -10,6 +10,7 @@ use App\Application\ToeflMockup\UpdateMockupTranscript;
 use App\Application\ToeflMockup\UploadMockupDirectionAudio;
 use App\Application\ToeflMockup\UploadMockupListeningAudio;
 use App\Application\ToeflMockup\UploadMockupQuestionAudio;
+use App\Application\ToeflMockup\UploadMockupQuestionSrt;
 use App\Application\ToeflMockup\UploadMockupSrt;
 use App\Http\Controllers\Concerns\HandlesAssignmentAccess;
 use Illuminate\Http\Request;
@@ -30,6 +31,7 @@ class ToeflMockupController extends Controller
         private readonly UploadMockupSrt $uploadMockupSrt,
         private readonly UpdateMockupTranscript $updateMockupTranscript,
         private readonly UploadMockupQuestionAudio $uploadMockupQuestionAudio,
+        private readonly UploadMockupQuestionSrt $uploadMockupQuestionSrt,
     ) {
         $this->registerAssignmentAccessMiddleware();
     }
@@ -59,8 +61,10 @@ class ToeflMockupController extends Controller
     public function submit(Request $request, int $package)
     {
         $answers = $request->input('answers', []);
+        
+        $isReported = !$this->isStudentClassPeriodEnded('toefl-itp');
 
-        $submissionResult = $this->submitMockupTest->handle($package, $answers, Auth::user());
+        $submissionResult = $this->submitMockupTest->handle($package, $answers, Auth::user(), $isReported);
         $responsePayload = $submissionResult->toArray();
         $responsePayload['redirectUrl'] = $submissionResult->resultId
             ? route('assignments.mock-tests.results.show', $submissionResult->resultId)
@@ -249,4 +253,68 @@ class ToeflMockupController extends Controller
         }
     }
 
+    public function uploadQuestionSrt(Request $request, int $package, int $questionId)
+    {
+        $user = Auth::user();
+
+        if (!$user || (!$user->isAdmin() && !$user->isTeacher())) {
+            return redirect()->back()->with('error', 'Unauthorized access.');
+        }
+
+        $request->validate([
+            'srt_file' => 'nullable|file|mimes:txt,srt|max:2048',
+            'srt_content' => 'nullable|string',
+            'language' => 'required|in:en,id',
+        ]);
+
+        if (!$request->hasFile('srt_file') && !$request->filled('srt_content')) {
+            return redirect()->back()->with('error', 'Please provide an SRT file or paste the content.');
+        }
+
+        try {
+            $content = $request->hasFile('srt_file')
+                ? file_get_contents($request->file('srt_file')->getRealPath())
+                : $request->input('srt_content');
+
+            $this->uploadMockupQuestionSrt->handle(
+                $package,
+                $questionId,
+                (string) $request->input('language'),
+                (string) $content
+            );
+
+            return redirect()->back()->with('success', 'SRT transcript for question successfully parsed and saved!');
+        } catch (\Exception $e) {
+            Log::error('uploadToeflItpMockupQuestionSrt Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while processing SRT: ' . $e->getMessage());
+        }
+    }
+
+    public function updateQuestionAnswer(Request $request, int $package, int $questionId)
+    {
+        $user = Auth::user();
+
+        if (!$user || (!$user->isAdmin() && !$user->isTeacher())) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'answer' => 'required|string',
+        ]);
+
+        try {
+            \App\Models\ToeflMockupQuestion::where('package_number', $package)
+                ->where('id', $questionId)
+                ->update(['correct_answer' => $request->input('answer')]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Answer updated successfully',
+                'answer' => $request->input('answer'),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('updateToeflItpMockupQuestionAnswer Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
 }

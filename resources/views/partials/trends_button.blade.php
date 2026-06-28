@@ -60,7 +60,7 @@ class="fixed z-50 select-none touch-none"
             <button @click="open = false" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10 bg-white/50 rounded-full p-1">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <img src="{{ asset('images/trends_vocabulary.png') }}" alt="Trends Vocabulary" class="w-full h-auto block">
+            <img src="{{ asset('images/materials/ielts-writing/trends_vocabulary.png') }}" alt="Trends Vocabulary" class="w-full h-auto block">
         </div>
     </div>
 </div>

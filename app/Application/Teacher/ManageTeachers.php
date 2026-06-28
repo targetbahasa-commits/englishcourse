@@ -32,6 +32,26 @@ class ManageTeachers
         return $this->repository->findTeacher($teacherId);
     }
 
+    public function countTeachers(): int
+    {
+        return $this->repository->countTeachers();
+    }
+
+    public function getTeacherRecentEvaluations(int $teacherId, int $limit = 5): array
+    {
+        return $this->repository->getTeacherRecentEvaluations($teacherId, $limit);
+    }
+
+    public function getTeacherAverageRating(int $teacherId): float
+    {
+        return $this->repository->getTeacherAverageRating($teacherId);
+    }
+
+    public function getUpcomingClasses(int $teacherId): array
+    {
+        return $this->repository->getUpcomingClassesForTeacher($teacherId);
+    }
+
     public function assignStudent(int $teacherId, int $studentId): void
     {
         $this->repository->assignStudentToTeacher($teacherId, $studentId);

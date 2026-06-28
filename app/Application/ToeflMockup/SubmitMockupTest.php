@@ -16,7 +16,7 @@ class SubmitMockupTest
     ) {
     }
 
-    public function handle(int $package, array $answers, mixed $user = null): \App\Application\ToeflMockup\MockupSubmissionResult
+    public function handle(int $package, array $answers, mixed $user = null, bool $isReported = true): \App\Application\ToeflMockup\MockupSubmissionResult
     {
         $questions = $this->mockupPackageRepository->getPackageQuestionsIndexedById($package);
 
@@ -50,6 +50,7 @@ class SubmitMockupTest
         if ($user) {
             $result = $this->mockupResultRepository->create([
                 'user_id' => $user->id,
+                'is_reported' => $isReported,
                 'name' => $user->name,
                 'email' => $user->email,
                 'exam_type' => 'toefl_itp',

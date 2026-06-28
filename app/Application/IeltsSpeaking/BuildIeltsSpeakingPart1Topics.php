@@ -251,24 +251,116 @@ class BuildIeltsSpeakingPart1Topics
             ],
         ];
 
-        $topics = collect($topicTitles)->values()->map(function ($title, $index) use ($colors, $icon, $lexicalBanks) {
+        $questionTemplates = [
+            'education_work' => [
+                'Can you tell me about your work or study life?',
+                'Do you currently work or study?',
+                'What do you enjoy most about your work or study?',
+                'Do you prefer to do your work or study alone or with others?',
+                'How might your work or study change in the future?',
+                'What skills have you learned from your work or study?',
+                'What challenges do you face in your work or study?',
+            ],
+            'home_city' => [
+                'Can you describe the place where you live?',
+                'What do you like most about your local area?',
+                'Is there anything you would like to improve in your neighborhood?',
+                'How easy is it to get around in your city?',
+                'Would you like to live somewhere different in the future?',
+                'What is your favorite spot close to home?',
+                'How has your area changed over the past few years?',
+            ],
+            'food_lifestyle' => [
+                'What kind of %s do you enjoy?',
+                'How often do you do %s in your daily life?',
+                'Has your attitude towards %s changed over time?',
+                'Do you think %s is important for a healthy life?',
+                'How do your friends or family feel about %s?',
+                'What is one memorable experience you had with %s?',
+                'Would you like to spend more time on %s in the future?',
+            ],
+            'technology_media' => [
+                'How often do you use %s?',
+                'What do you usually do with %s?',
+                'Has %s changed the way you spend your free time?',
+                'Do you think %s is more useful now than before?',
+                'Would you recommend %s to others?',
+                'What is a common problem you face with %s?',
+                'How do you learn new things about %s?',
+            ],
+            'travel_transport' => [
+                'Do you enjoy traveling?',
+                'How do you normally travel around your city?',
+                'What was the last trip you took?',
+                'Do you think public transportation is convenient where you live?',
+                'Where would you like to go for a holiday?',
+                'What is one thing you would change about local transport?',
+                'How do you prepare for a long journey?',
+            ],
+            'shopping_money' => [
+                'Do you prefer shopping online or in a store?',
+                'What do you usually buy when you go shopping?',
+                'How do you decide whether something is worth buying?',
+                'Do you often save money for something special?',
+                'What kind of gifts do you like to give?',
+                'Have you ever regretted a purchase?',
+                'How do you manage your budget for shopping?',
+            ],
+            'default' => [
+                'What can you tell me about %s?',
+                'How often do you think about %s?',
+                'What do other people in your country usually say about %s?',
+                'Did you have a different experience with %s when you were younger?',
+                'What would you like to change about %s in the future?',
+                'Why is %s important to you?',
+                'What is one thing you enjoy most about %s?',
+            ],
+        ];
+
+        $topics = collect($topicTitles)->values()->map(function ($title, $index) use ($colors, $icon, $lexicalBanks, $questionTemplates) {
             $normalized = strtolower($title);
 
-            if (str_contains($normalized, 'work') || str_contains($normalized, 'study') || str_contains($normalized, 'school') || str_contains($normalized, 'university') || str_contains($normalized, 'job') || str_contains($normalized, 'leadership') || str_contains($normalized, 'teamwork') || str_contains($normalized, 'communication')) {
+            $hasAny = function($words) use ($normalized) {
+                foreach ($words as $word) {
+                    if (preg_match('/\b' . $word . '\b/i', $normalized)) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            $category = 'default';
+            if ($hasAny(['work', 'study', 'school', 'university', 'job', 'leadership', 'teamwork', 'communication'])) {
                 $bank = $lexicalBanks['education_work'];
-            } elseif (str_contains($normalized, 'home') || str_contains($normalized, 'hometown') || str_contains($normalized, 'neighborhood') || str_contains($normalized, 'family') || str_contains($normalized, 'park') || str_contains($normalized, 'childhood') || str_contains($normalized, 'festival') || str_contains($normalized, 'history') || str_contains($normalized, 'culture') || str_contains($normalized, 'pet')) {
+                $category = 'education_work';
+            } elseif ($hasAny(['home', 'hometown', 'neighborhood', 'family', 'park', 'parks', 'childhood', 'festival', 'festivals', 'history', 'culture', 'pet', 'pets'])) {
                 $bank = $lexicalBanks['home_city'];
-            } elseif (str_contains($normalized, 'food') || str_contains($normalized, 'cook') || str_contains($normalized, 'restaurant') || str_contains($normalized, 'sport') || str_contains($normalized, 'exercise') || str_contains($normalized, 'routine') || str_contains($normalized, 'sleep') || str_contains($normalized, 'health') || str_contains($normalized, 'stress') || str_contains($normalized, 'morning') || str_contains($normalized, 'evening') || str_contains($normalized, 'outdoor')) {
+                $category = 'home_city';
+            } elseif ($hasAny(['food', 'cook', 'cooking', 'restaurant', 'restaurants', 'sport', 'sports', 'exercise', 'routine', 'sleep', 'health', 'stress', 'morning', 'evening', 'outdoor'])) {
                 $bank = $lexicalBanks['food_lifestyle'];
-            } elseif (str_contains($normalized, 'technology') || str_contains($normalized, 'phone') || str_contains($normalized, 'social media') || str_contains($normalized, 'photography') || str_contains($normalized, 'art') || str_contains($normalized, 'music') || str_contains($normalized, 'movie') || str_contains($normalized, 'reading') || str_contains($normalized, 'language') || str_contains($normalized, 'science')) {
+                $category = 'food_lifestyle';
+            } elseif ($hasAny(['technology', 'phone', 'social media', 'photography', 'art', 'music', 'movie', 'movies', 'reading', 'language', 'languages', 'science'])) {
                 $bank = $lexicalBanks['technology_media'];
-            } elseif (str_contains($normalized, 'travel') || str_contains($normalized, 'holiday') || str_contains($normalized, 'weekend') || str_contains($normalized, 'transportation') || str_contains($normalized, 'traffic')) {
+                $category = 'technology_media';
+            } elseif ($hasAny(['travel', 'holiday', 'holidays', 'weekend', 'transportation', 'traffic'])) {
                 $bank = $lexicalBanks['travel_transport'];
-            } elseif (str_contains($normalized, 'shopping') || str_contains($normalized, 'fashion') || str_contains($normalized, 'money') || str_contains($normalized, 'gift') || str_contains($normalized, 'time management')) {
+                $category = 'travel_transport';
+            } elseif ($hasAny(['shopping', 'fashion', 'money', 'gift', 'gifts', 'time management'])) {
                 $bank = $lexicalBanks['shopping_money'];
+                $category = 'shopping_money';
             } else {
                 $bank = $lexicalBanks['default'];
             }
+
+            $templates = $questionTemplates[$category];
+            $rotationStart = $index % count($templates);
+            $rotatedTemplates = array_merge(array_slice($templates, $rotationStart), array_slice($templates, 0, $rotationStart));
+            $questions = array_slice($rotatedTemplates, 0, 5);
+
+            $templateTopic = strtolower($title);
+            $questions = array_map(function ($template) use ($templateTopic) {
+                return strpos($template, '%s') !== false ? sprintf($template, $templateTopic) : $template;
+            }, $questions);
 
             return [
                 'slug' => 'part1-topic-' . ($index + 1),
@@ -276,13 +368,7 @@ class BuildIeltsSpeakingPart1Topics
                 'icon' => $icon,
                 'color' => $colors[$index % count($colors)],
                 'part' => 1,
-                'questions' => [
-                    'What do you like most about ' . strtolower($title) . '?',
-                    'How often do you think about ' . strtolower($title) . '?',
-                    'Was ' . strtolower($title) . ' important in your childhood?',
-                    'Do people in your country value ' . strtolower($title) . '?',
-                    'Do you think your opinion about ' . strtolower($title) . ' will change in the future?'
-                ],
+                'questions' => $questions,
                 'idioms' => $bank['idioms'],
                 'collocations' => $bank['collocations'],
             ];

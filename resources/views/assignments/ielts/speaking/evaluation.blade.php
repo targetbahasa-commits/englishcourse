@@ -1,21 +1,28 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="fixed inset-0 md:pl-64 bg-gray-100 p-6 pt-8 overflow-hidden" x-data="speakingEvaluation()">
+<style>
+    @media (min-width: 768px) {
+        .dynamic-sidebar-padding {
+            padding-left: var(--admin-sidebar-offset, var(--teacher-sidebar-offset, var(--student-sidebar-offset, var(--guest-sidebar-offset, 16rem)))) !important;
+        }
+    }
+</style>
+<div class="fixed inset-0 bg-gray-100 p-6 pt-8 overflow-hidden transition-all duration-200 dynamic-sidebar-padding" x-data="speakingEvaluation()">
     <div class="flex flex-col lg:flex-row gap-6 h-full pl-4 lg:pl-8">
         
         <!-- Left Column: Transcripts & Analysis -->
-        <div class="w-full lg:w-7/12 flex flex-col gap-6 h-full overflow-hidden">
+        <div class="w-full lg:w-4/12 flex flex-col gap-6 h-full overflow-hidden">
             <!-- Header -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 shrink-0">
                 <div class="flex justify-between items-start">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-800">Hasil Latihan Bicara</h1>
-                        <p class="text-gray-500 mt-1">Topik: <span class="font-medium text-gray-700">{{ $topic['title'] ?? 'Unknown Topic' }}</span></p>
+                        <p class="text-gray-500 mt-1">Part {{ $topic['part'] ?? 1 }} — Topic: <span class="font-medium text-gray-700">{{ $topic['title'] ?? 'Unknown Topic' }}</span></p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <a href="{{ route('assignments.ielts-academic.speaking.index') }}?part=1" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors">
-                            Kembali ke Topik
+                        <a href="{{ route('assignments.ielts-academic.speaking.index', ['part' => $topic['part'] ?? 1]) }}" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors">
+                            Back to Topic
                         </a>
                     </div>
                 </div>
@@ -35,7 +42,12 @@
                         @foreach($result['transcripts'] as $index => $item)
                         <div class="group">
                             <h3 class="text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Pertanyaan {{ $loop->iteration }}</h3>
-                            <p class="text-gray-800 font-medium mb-3">{{ $item['question'] }}</p>
+                            @php
+                                $questionHtml = nl2br(e($item['question']));
+                                $questionHtml = preg_replace('/-\s*-\s*/', '• ', $questionHtml);
+                                $questionHtml = preg_replace('/(?<=\n|<br>|^)-\s*/', '• ', $questionHtml);
+                            @endphp
+                            <p class="text-gray-800 font-medium mb-3 leading-relaxed">{!! $questionHtml !!}</p>
                             
                             <div class="relative pl-4 border-l-4 border-indigo-100 group-hover:border-indigo-300 transition-colors">
                                 <div class="bg-gray-50 rounded-lg p-4 text-gray-700 leading-relaxed italic">
@@ -63,7 +75,7 @@
         </div>
 
         <!-- Right Column: Evaluation Scorecard -->
-        <div class="w-full lg:w-5/12 h-full flex flex-col min-h-0">
+        <div class="w-full lg:w-8/12 h-full flex flex-col min-h-0">
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 flex flex-col h-full overflow-hidden">
                 <!-- Overall Score Header -->
                 <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-8 text-white relative overflow-hidden shrink-0">
@@ -80,7 +92,7 @@
                                     <svg class="w-5 h-5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                                 @endfor
                             </div>
-                            <p class="text-sm text-indigo-100">Penilaian Berbasis AI</p>
+                            <p class="text-sm text-indigo-100">Evaluation</p>
                         </div>
                     </div>
                 </div>
@@ -118,6 +130,100 @@
                                 {{ $result['general_feedback'] ?? 'Tidak ada umpan balik.' }}
                             </p>
                         </div>
+
+@php
+    $fc_details = $result['categories']['fluency_coherence']['details'] ?? null;
+    $lr_details = $result['categories']['lexical_resource']['details'] ?? null;
+    $gr_details = $result['categories']['grammatical_range']['details'] ?? null;
+    $pr_details = $result['categories']['pronunciation']['details'] ?? null;
+    $has_details = $fc_details || $lr_details || $gr_details || $pr_details;
+@endphp
+
+@if($has_details)
+<h4 class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3 mt-8">Detail Evaluasi Rubrik</h4>
+<div class="overflow-x-auto mb-8 border border-gray-200 rounded-lg shadow-sm">
+    <table class="min-w-full bg-white text-sm text-left border-collapse">
+        <thead class="bg-gray-100 text-gray-700 uppercase font-bold text-xs border-b border-gray-200">
+            <tr>
+                <th class="py-3 px-4 w-1/4 border-r border-gray-200">Aspects</th>
+                <th class="py-3 px-4 w-1/4 border-r border-gray-200">Does candidate ...</th>
+                <th class="py-3 px-4 w-5/12 border-r border-gray-200">DESCRIPTION</th>
+                <th class="py-3 px-4 w-1/12 text-center">SCORE</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Fluency & Coherence -->
+            @if($fc_details && count($fc_details) > 0)
+                @foreach($fc_details as $index => $detail)
+                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                        @if($index === 0)
+                            <td class="py-3 px-4 font-bold align-bottom uppercase text-gray-800 border-r border-gray-200" rowspan="{{ count($fc_details) }}">FLUENCY AND COHERENCE</td>
+                        @endif
+                        <td class="py-3 px-4 text-gray-700 align-bottom border-r border-gray-200">{{ $detail['question'] }}</td>
+                        <td class="py-3 px-4 text-gray-600 italic border-r border-gray-200">{{ $detail['description'] }}</td>
+                        @if($index === 0)
+                            <td class="py-3 px-4 font-bold text-center text-lg align-bottom" rowspan="{{ count($fc_details) }}">{{ $result['categories']['fluency_coherence']['score'] }}</td>
+                        @endif
+                    </tr>
+                @endforeach
+            @endif
+
+            <!-- Lexical Resource -->
+            @if($lr_details && count($lr_details) > 0)
+                @foreach($lr_details as $index => $detail)
+                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                        @if($index === 0)
+                            <td class="py-3 px-4 font-bold align-bottom uppercase text-gray-800 border-r border-gray-200" rowspan="{{ count($lr_details) }}">LEXICAL RESOURCES</td>
+                        @endif
+                        <td class="py-3 px-4 text-gray-700 align-bottom border-r border-gray-200">{{ $detail['question'] }}</td>
+                        <td class="py-3 px-4 text-gray-600 italic border-r border-gray-200">{{ $detail['description'] }}</td>
+                        @if($index === 0)
+                            <td class="py-3 px-4 font-bold text-center text-lg align-bottom" rowspan="{{ count($lr_details) }}">{{ $result['categories']['lexical_resource']['score'] }}</td>
+                        @endif
+                    </tr>
+                @endforeach
+            @endif
+
+            <!-- Grammatical Range -->
+            @if($gr_details && count($gr_details) > 0)
+                @foreach($gr_details as $index => $detail)
+                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                        @if($index === 0)
+                            <td class="py-3 px-4 font-bold align-bottom uppercase text-gray-800 border-r border-gray-200" rowspan="{{ count($gr_details) }}">GRAMMATICAL RANGE AND ACCURACY</td>
+                        @endif
+                        <td class="py-3 px-4 text-gray-700 align-bottom border-r border-gray-200">{{ $detail['question'] }}</td>
+                        <td class="py-3 px-4 text-gray-600 italic border-r border-gray-200">{{ $detail['description'] }}</td>
+                        @if($index === 0)
+                            <td class="py-3 px-4 font-bold text-center text-lg align-bottom" rowspan="{{ count($gr_details) }}">{{ $result['categories']['grammatical_range']['score'] }}</td>
+                        @endif
+                    </tr>
+                @endforeach
+            @endif
+
+            <!-- Pronunciation -->
+            @if($pr_details && count($pr_details) > 0)
+                @foreach($pr_details as $index => $detail)
+                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                        @if($index === 0)
+                            <td class="py-3 px-4 font-bold align-bottom uppercase text-gray-800 border-r border-gray-200" rowspan="{{ count($pr_details) }}">PRONUNCIATION</td>
+                        @endif
+                        <td class="py-3 px-4 text-gray-700 align-bottom border-r border-gray-200">{{ $detail['question'] }}</td>
+                        <td class="py-3 px-4 text-gray-600 italic border-r border-gray-200">{{ $detail['description'] }}</td>
+                        @if($index === 0)
+                            <td class="py-3 px-4 font-bold text-center text-lg align-bottom" rowspan="{{ count($pr_details) }}">{{ $result['categories']['pronunciation']['score'] }}</td>
+                        @endif
+                    </tr>
+                @endforeach
+            @endif
+            
+            <tr class="bg-gray-100 border-t-2 border-gray-300">
+                <td class="py-3 px-4 font-bold uppercase text-gray-800 border-r border-gray-200" colspan="3">OVERALL COMMENTS AND BANDSCORE</td>
+                <td class="py-3 px-4 font-black text-center text-xl text-gray-900">{{ $result['overall_score'] ?? '0.0' }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+@endif
                         
                         <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Rincian Skor</h4>
                         <div class="space-y-3">

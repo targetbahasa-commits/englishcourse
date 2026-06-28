@@ -154,7 +154,7 @@
              @wheel="if ($event.ctrlKey) { $event.preventDefault(); $event.deltaY < 0 ? zoomIn() : zoomOut(); }">
             <div class="min-h-full flex items-start justify-center p-2">
                 <div class="relative inline-block">
-                    <img src="/images/cheatsheet_contekan.jpg"
+                    <img src="/images/materials/cheatsheets/cheatsheet_contekan.jpg"
                          @load="$nextTick(() => { if (typeof initCanvases === 'function') initCanvases(); })"
                          class="max-w-none h-auto transition-all duration-150"
                          :style="`width: ${Math.round(cheatZoom * 100)}%;`"

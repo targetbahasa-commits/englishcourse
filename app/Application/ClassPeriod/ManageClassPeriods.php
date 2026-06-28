@@ -83,6 +83,11 @@ class ManageClassPeriods
         return $this->repository->getNextBatchNumber($programId);
     }
 
+    public function findOrFail(int $id): mixed
+    {
+        return $this->repository->findOrFail($id);
+    }
+
     public function updateStatus(mixed $classPeriod, string $status): void
     {
         $this->repository->update($classPeriod, ['status' => $status]);

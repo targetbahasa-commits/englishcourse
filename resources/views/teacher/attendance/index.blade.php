@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Attendance Tracking - {{ config('app.name', 'Target Bahasa') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
@@ -82,20 +84,28 @@
                             <!-- Filters -->
                             <div class="relative min-w-[200px]">
                                 <label class="text-xs font-semibold text-gray-500 mb-1 block">My Active Classes</label>
-                                <select x-model="selectedClassId" @change="fetchMeetings" class="w-full bg-gray-50 border-gray-200 text-gray-700 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                <div class="flex items-center gap-2">
+                                <select x-ref="classSelect" x-model="selectedClassId" @change="fetchMeetings" class="w-full bg-gray-50 border-gray-200 text-gray-700 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
                                     <option value="">-- Select Class --</option>
                                     @foreach($classPeriods as $period)
-                                        <option value="{{ $period->id }}">{{ $period->name }}</option>
+                                        <option value="{{ $period->id }}">{{ $period->batch_number ? 'Batch ' . $period->batch_number . ' — ' : '' }}{{ $period->name }}</option>
                                     @endforeach
                                 </select>
+                                <button type="button" title="Lihat Kalender Pertemuan" @click.prevent="if(selectedClassId){ const name = $refs.classSelect.options[$refs.classSelect.selectedIndex].text; window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:selectedClassId,batchName:name}})); }" class="px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-600">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </button>
+                            </div>
                             </div>
                             
                             <div class="relative min-w-[150px]">
                                 <label class="text-xs font-semibold text-gray-500 mb-1 block">Current Meeting</label>
                                 <select x-model="selectedMeetingId" @change="fetchAttendance" :disabled="meetings.length === 0" class="w-full bg-gray-50 border-gray-200 text-gray-700 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm disabled:opacity-50">
                                     <option value="">-- Select Meeting --</option>
+                                    <template x-if="selectedClassId && meetings.length === 0">
+                                        <option value="" disabled>No meetings configured</option>
+                                    </template>
                                     <template x-for="meeting in meetings" :key="meeting.id">
-                                        <option :value="meeting.id" x-text="meeting.topic || 'Meeting ' + meeting.meeting_number"></option>
+                                        <option :value="meeting.id" x-text="'M' + meeting.meeting_number + ': ' + (meeting.topic || 'Meeting ' + meeting.meeting_number) + (meeting.meeting_date ? ' (' + meeting.meeting_date + ')' : '')"></option>
                                     </template>
                                 </select>
                             </div>
@@ -243,7 +253,27 @@
         </main>
     </div>
 
+    {{-- Toast Notification --}}
+    <div x-data="{ toast: { show: false, message: '', type: 'success' } }"
+         @show-toast.window="toast = { show: true, message: $event.detail.message, type: $event.detail.type || 'success' }; setTimeout(() => toast.show = false, 3500)"
+         x-show="toast.show"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-end="opacity-0 translate-y-2"
+         class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-xl text-sm font-semibold pointer-events-none"
+         :class="toast.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'">
+        <svg x-show="toast.type==='success'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        <svg x-show="toast.type==='error'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        <span x-text="toast.message"></span>
+    </div>
+
     <script>
+        function showTeacherToast(message, type = 'success') {
+            window.dispatchEvent(new CustomEvent('show-toast', { detail: { message, type } }));
+        }
+
         document.addEventListener('alpine:init', () => {
             Alpine.data('attendanceTracker', () => ({
                 selectedClassId: '',
@@ -252,9 +282,8 @@
                 students: [],
                 isSaving: false,
 
-                init() {
-                    // Initial calculation
-                },
+                init() {},
+
 
                 async fetchMeetings() {
                     this.selectedMeetingId = '';
@@ -268,7 +297,7 @@
                         this.meetings = await response.json();
                     } catch (error) {
                         console.error('Error fetching meetings:', error);
-                        alert('Failed to load meetings.');
+                        showTeacherToast('Failed to load meetings.', 'error');
                     }
                 },
 
@@ -281,7 +310,7 @@
                         this.students = await response.json();
                     } catch (error) {
                         console.error('Error fetching attendance records:', error);
-                        alert('Failed to load attendance records.');
+                        showTeacherToast('Failed to load attendance records.', 'error');
                     }
                 },
 
@@ -317,13 +346,13 @@
                         const result = await response.json();
                         
                         if (response.ok) {
-                            alert('Attendance save successfully!');
+                            showTeacherToast('Attendance saved successfully!');
                         } else {
                             throw new Error(result.message || 'Failed to save');
                         }
                     } catch (error) {
                         console.error('Error saving attendance:', error);
-                        alert('An error occurred while saving attendance.');
+                        showTeacherToast('An error occurred while saving attendance.', 'error');
                     } finally {
                         this.isSaving = false;
                     }
@@ -350,6 +379,39 @@
             }));
         });
     </script>
+
+    {{-- Meetings Calendar Modal (shared) --}}
+    <div
+        x-data="{
+            isOpen: false,
+            meetings: [],
+            batchName: '',
+            loading: false,
+            edits: {},
+            open(id, name) {
+                this.isOpen = true;
+                this.batchName = name || '';
+                this.meetings = [];
+                this.edits = {};
+                this.loading = true;
+                fetch('/class-periods/' + id + '/meetings')
+                    .then(res => res.json())
+                    .then(data => {
+                        this.meetings = data || [];
+                        // initialize edits default values
+                        (this.meetings || []).forEach(m => {
+                            this.edits[m.id] = m.meeting_date ? m.meeting_date.substring(0,10) : '';
+                        });
+                    })
+                    .catch(err => { console.error(err); this.meetings = []; })
+                    .finally(() => { this.loading = false; });
+            },
+            toggleEdit(id) {
+                this.$nextTick(() => { this.edits[id] = this.edits[id] || ''; });
+                const input = document.querySelector('#meeting-input-' + id);
+                if (input) input.focus();
+            },
+    @include('components.meetings-calendar-modal')
 
     @include('components.student-broadcaster')
 </body>

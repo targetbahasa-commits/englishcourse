@@ -7,7 +7,19 @@ use App\Domain\FreeTest\Repositories\FreeTestRepository;
 
 class ManageFreeTestCertificates
 {
-    private const TEST_TYPES = ['ielts_academic', 'ielts_general', 'toefl_itp', 'pte_academic'];
+    private const TEST_TYPES = [
+        'toefl_itp',
+        'ielts_academic',
+        'ielts_general',
+        'pte_academic',
+        'introductory_grammar_for_writing',
+        'complexity_grammar_for_writing',
+        'proficiency_grammar_for_writing',
+        'fast_track_grammar_for_writing',
+        'introductory_speaking',
+        'intermediate_speaking',
+        'advanced_speaking',
+    ];
 
     public function __construct(
         private readonly FreeTestRepository $repository,
@@ -18,6 +30,8 @@ class ManageFreeTestCertificates
     {
         return $this->repository->allCertificates(self::TEST_TYPES);
     }
+
+
 
     public function findOrFail(int $id): mixed
     {

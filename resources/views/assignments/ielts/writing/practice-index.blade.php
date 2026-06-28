@@ -56,22 +56,22 @@
                     Back to IELTS
                 </a>
             @elseif($taskParam == 2 && !$typeParam)
-                <a href="{{ route('assignments.ielts-academic.writing.practice.index') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors duration-200">
+                <a href="{{ route('assignments.ielts-academic.writing.practice.index') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     Back to Task Selection
                 </a>
             @elseif($taskParam == 2 && $typeParam)
-                <a href="{{ route('assignments.ielts-academic.writing.practice.index', ['task' => 2]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors duration-200">
+                <a href="{{ route('assignments.ielts-academic.writing.practice.index', ['task' => 2]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     Back to Essay Types
                 </a>
             @elseif($taskParam == 1 && !$typeParam)
-                <a href="{{ route('assignments.ielts-academic.writing.practice.index') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors duration-200">
+                <a href="{{ route('assignments.ielts-academic.writing.practice.index') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     Back to Task Selection
                 </a>
             @elseif($taskParam == 1 && $typeParam)
-                <a href="{{ route('assignments.ielts-academic.writing.practice.index') }}?task=1" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors duration-200">
+                <a href="{{ route('assignments.ielts-academic.writing.practice.index') }}?task=1" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     Back to Chart Types
                 </a>
@@ -105,7 +105,11 @@
                     <h3 class="text-4xl font-black text-white mb-3">Task 1</h3>
                     <p class="text-white/80 text-sm leading-relaxed">Charts, graphs, tables, flowcharts &amp; maps — ~150 words</p>
                     <div class="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-white text-teal-700 font-bold text-sm rounded-full group-hover:bg-teal-50 transition-colors">
-                        Start Practice
+                        @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                            <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Kerjakan Ulang ↺</span>
+                        @else
+                            Start Practice
+                        @endif
                         <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                     </div>
                 </div>
@@ -127,12 +131,39 @@
                     <h3 class="text-4xl font-black text-white mb-3">Task 2</h3>
                     <p class="text-white/80 text-sm leading-relaxed">Point of view, argument or problem — ~250 words</p>
                     <div class="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-white text-orange-700 font-bold text-sm rounded-full group-hover:bg-orange-50 transition-colors">
-                        Start Practice
+                        @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                            <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Kerjakan Ulang ↺</span>
+                        @else
+                            Start Practice
+                        @endif
                         <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                     </div>
                 </div>
             </a>
 
+        </div>
+
+        <div class="w-full max-w-2xl mt-6">
+            <a href="{{ route('assignments.ielts-academic.writing.grammar-practice') }}"
+               class="group relative overflow-hidden rounded-3xl shadow-lg border-0 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl block">
+                <div class="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-700"></div>
+                <div class="absolute -bottom-8 -right-8 w-40 h-40 bg-white/10 rounded-full"></div>
+                <div class="absolute -top-4 -left-4 w-24 h-24 bg-white/10 rounded-full"></div>
+                <div class="relative z-10 p-6 flex flex-col items-center text-center">
+                    <div class="w-14 h-14 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-white/70 mb-1">Fundamental Skill</span>
+                    <h3 class="text-3xl font-black text-white mb-2">Practice IELTS Grammar</h3>
+                    <p class="text-white/80 text-sm leading-relaxed">Improve your grammatical range and accuracy for IELTS Writing.</p>
+                    <div class="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-white text-indigo-700 font-bold text-sm rounded-full group-hover:bg-indigo-50 transition-colors">
+                        Start Practice
+                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                    </div>
+                </div>
+            </a>
         </div>
     </div>
     @endif
@@ -229,8 +260,7 @@
                         <h3 class="font-bold text-gray-800 flex-1 group-hover:text-orange-600 transition">{{ $m->title }}</h3>
                     </div>
                     <p class="text-gray-600 text-sm line-clamp-2 mb-4">{{ $m->prompt }}</p>
-                    <div class="pt-4 border-t border-gray-100 flex items-center justify-between">
-                        <span class="text-xs text-gray-500 font-medium">Meeting #{{ $m->meeting_number }}</span>
+                    <div class="pt-4 border-t border-gray-100 flex items-center justify-end">
                         <span class="text-xs font-semibold text-orange-500 group-hover:text-orange-700 transition">Open →</span>
                     </div>
                 </a>
@@ -319,9 +349,12 @@
                         <h3 class="font-bold text-gray-800 flex-1 group-hover:text-teal-600 transition">{{ $item->title }}</h3>
                     </div>
                     <p class="text-gray-600 text-sm line-clamp-2 mb-4">{{ $item->prompt }}</p>
-                    <div class="pt-4 border-t border-gray-100 flex items-center justify-between">
-                        <span class="text-xs text-gray-500 font-medium">Meeting #{{ $item->meeting_number }}</span>
-                        <span class="text-xs font-semibold text-teal-500 group-hover:text-teal-700 transition">Start Practice →</span>
+                    <div class="pt-4 border-t border-gray-100 flex items-center justify-end">
+                        @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                            <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Kerjakan Ulang ↺</span>
+                        @else
+                            <span class="text-xs font-semibold text-teal-500 group-hover:text-teal-700 transition">Start Practice →</span>
+                        @endif
                     </div>
                 </a>
             @empty

@@ -17,9 +17,9 @@ trait HandlesAssignmentAccess
         $this->middleware(function ($request, $next) {
             $user = Auth::user();
 
-            if ($user && in_array($user->active_role, ['guest', 'guest_quick'], true)) {
+            if ($user && in_array($user->active_role, ['guest', 'guest_quick', 'test-taker'], true)) {
                 // Always allow mockup routes through — the controller/view handles access gating
-                if ($request->routeIs('assignments.ielts-academic.mockup.*') || $request->routeIs('assignments.ielts.writing.*')) {
+                if ($request->routeIs('assignments.ielts-academic.mockup.*') || $request->routeIs('assignments.ielts.writing.*') || $request->routeIs('assignments.toefl-itp.*')) {
                     return $next($request);
                 }
 
@@ -29,9 +29,40 @@ trait HandlesAssignmentAccess
 
             $requiredProgramSlug = $this->resolveAssignmentProgramSlugFromRequest($request);
 
+            // Allow public access to top-level program landing pages (e.g. assignments.ielts-academic)
+            // but keep access checks for deeper assignment routes (meetings/materials/practice).
+            $routeName = $request->route()?->getName();
+            if ($routeName && preg_match('/^assignments\.[^.]+$/', $routeName)) {
+                return $next($request);
+            }
+
             if ($user && !$this->userCanAccessAssignmentProgram($user, $requiredProgramSlug)) {
                 return redirect()->route('assignments.index')
                     ->with('error', 'You can only access assignments for your registered program.');
+            }
+
+            if ($user && $user->isStudent() && $requiredProgramSlug === 'ielts-academic' && $routeName && !preg_match('/^assignments\.[^.]+$/', $routeName)) {
+                $rawSlugs = [];
+                if ($user->program && $user->class_period_id) $rawSlugs[] = $user->program->slug;
+                $enrollments = \App\Models\Enrollment::where('user_id', $user->id)->whereIn('status', ['active', 'completed'])->whereNotNull('class_period_id')->with('program')->get();
+                foreach ($enrollments as $enr) { if ($enr->program) $rawSlugs[] = $enr->program->slug; }
+                
+                $hasFullAccess = in_array('ielts-academic-full-package', $rawSlugs) || in_array('ielts-academic', $rawSlugs) || $this->hasTemporaryFullAssignmentAccess($user->email);
+                
+                if (!$hasFullAccess) {
+                    if (str_contains($routeName, '.listening.') && !in_array('ielts-academic-listening', $rawSlugs)) {
+                        return redirect()->route('assignments.ielts-academic')->with('error', 'Anda tidak memiliki akses ke kelas IELTS Listening.');
+                    }
+                    if (str_contains($routeName, '.reading.') && !in_array('ielts-academic-reading', $rawSlugs)) {
+                        return redirect()->route('assignments.ielts-academic')->with('error', 'Anda tidak memiliki akses ke kelas IELTS Reading.');
+                    }
+                    if (str_contains($routeName, '.writing.') && !in_array('ielts-academic-writing', $rawSlugs)) {
+                        return redirect()->route('assignments.ielts-academic')->with('error', 'Anda tidak memiliki akses ke kelas IELTS Writing.');
+                    }
+                    if (str_contains($routeName, '.speaking.') && !in_array('ielts-academic-speaking', $rawSlugs)) {
+                        return redirect()->route('assignments.ielts-academic')->with('error', 'Anda tidak memiliki akses ke kelas IELTS Speaking.');
+                    }
+                }
             }
 
             return $next($request);
@@ -71,12 +102,13 @@ trait HandlesAssignmentAccess
 
         $slugs = [];
 
-        if ($user->program) {
+        if ($user->program && $user->class_period_id) {
             $slugs[] = $this->normalizeAssignmentProgramSlug($user->program->slug);
         }
 
         $enrollments = Enrollment::where('user_id', $user->id)
             ->whereIn('status', ['active', 'completed'])
+            ->whereNotNull('class_period_id')
             ->with('program')
             ->get();
 
@@ -85,8 +117,6 @@ trait HandlesAssignmentAccess
                 $slugs[] = $this->normalizeAssignmentProgramSlug($enrollment->program->slug);
             }
         }
-
-        $slugs = array_merge($slugs, ['ielts-academic', 'ielts-general']);
 
         return array_values(array_unique(array_filter($slugs)));
     }
@@ -97,7 +127,7 @@ trait HandlesAssignmentAccess
             return 'grammar-for-writing';
         }
 
-        if (in_array($slug, ['ielts-academic-listening', 'ielts-academic-reading', 'ielts-academic-full-package'], true)) {
+        if (in_array($slug, ['ielts-academic-listening', 'ielts-academic-reading', 'ielts-academic-writing', 'ielts-academic-speaking', 'ielts-academic-full-package'], true)) {
             return 'ielts-academic';
         }
 

@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Cambridge {{ $edition }} Mock Tests - {{ config('app.name', 'Target Bahasa') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased bg-gray-50">
@@ -33,7 +35,7 @@
                         </div>
                         <div>
                             <div class="flex items-center gap-2 text-sm text-gray-400 mb-1">
-                                <a href="{{ route('assignments.ielts-academic.mockup.cambridge') }}" class="hover:text-purple-600 transition">Cambridge IELTS</a>
+                                <a href="{{ route('mock-test.ielts-academic.cambridge') }}" class="hover:text-purple-600 transition">Cambridge IELTS</a>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                                 <span class="text-gray-600 font-medium">Cambridge {{ $edition }}</span>
                             </div>
@@ -42,12 +44,12 @@
                         </div>
                     </div>
                     @if(Auth::user()->active_role === 'guest_quick')
-                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge') }}?editions=1" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2">
+                    <a href="{{ route('mock-test.ielts-academic.cambridge') }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         Kembali ke Free Tests
                     </a>
                     @else
-                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge') }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2">
+                    <a href="{{ route('mock-test.ielts-academic.cambridge') }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         Back
                     </a>
@@ -58,11 +60,12 @@
             {{-- 4 Test Cards --}}
             @php
                 $isGuestQuick = Auth::user()->active_role === 'guest_quick';
+                $validEditions = range(1, 20);
                 $testLinks = [
-                    1 => in_array($edition, [16, 17, 18, 19, 20]) ? route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => 1]) : '#',
-                    2 => in_array($edition, [16, 17, 18, 19, 20]) ? route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => 2]) : '#',
-                    3 => in_array($edition, [16, 17, 18, 19, 20]) ? route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => 3]) : '#',
-                    4 => in_array($edition, [16, 17, 18, 19, 20]) ? route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => 4]) : '#',
+                    1 => in_array($edition, $validEditions) ? route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => 1]) : '#',
+                    2 => in_array($edition, $validEditions) ? route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => 2]) : '#',
+                    3 => in_array($edition, $validEditions) ? route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => 3]) : '#',
+                    4 => in_array($edition, $validEditions) ? route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => 4]) : '#',
                 ];
             @endphp
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -107,7 +110,7 @@
                                     Buy Full Edition {{ $pkgPrice ? "({$pkgPrice})" : '' }}
                                     <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                                 </a>
-                                @if(in_array($edition, [16,17,18,19,20]))
+                                @if(in_array($edition, $validEditions))
                                 <a href="{{ route('mock-test.register-or-pay') . '?program=' . $testSlug . '-per-part' }}" class="flex items-center justify-center gap-2 w-full text-center bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-2.5 rounded-xl transition text-sm shadow-sm">
                                     Buy Per Test (IDR 50.000)
                                     <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>

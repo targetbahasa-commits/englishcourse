@@ -47,8 +47,8 @@
             {{-- Brand --}}
             <div class="p-6 flex items-center gap-3 justify-between relative">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">TB</div>
-                    <span class="sidebar-title text-xl font-bold text-gray-800">Target Bahasa</span>
+                    <img src="{{ asset('images/brand/icon.png') }}" class="w-16 h-16 rounded-lg object-contain" alt="TB">
+                    <span class="sidebar-title text-xl font-bold text-[#0fa2ec]">Target Bahasa</span>
                 </div>
             </div>
 
@@ -57,37 +57,37 @@
                 <p class="text-xs font-semibold text-gray-400 mb-4 uppercase tracking-wider">Explore</p>
                 <nav class="space-y-1">
                     {{-- Free Lesson --}}
-                    <a href="{{ route('free-lesson') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('free-lesson') ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
+                    <a href="{{ route('free-lesson') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('free-lesson') ? 'bg-blue-50 text-blue-600 ' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                         Free Lesson
                     </a>
 
                     {{-- Guest Free Tests --}}
-                    <a href="{{ route('guest.free-tests') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('guest.free-tests') ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
+                    <a href="{{ route('guest.free-tests') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('guest.free-tests') ? 'bg-blue-50 text-blue-600 ' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
                         Guest Free Tests
                     </a>
 
                     {{-- My English (Guest Progress) --}}
-                    <a href="{{ route('guest.my-english') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('guest.my-english') ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
+                    <a href="{{ route('guest.my-english') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('guest.my-english') ? 'bg-blue-50 text-blue-600 ' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
                         My English
                     </a>
 
                     {{-- Scholarship Search --}}
-                    <a href="{{ route('scholarships.search.index') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('scholarships.search.*') ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
+                    <a href="{{ route('scholarships.search.index') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('scholarships.search.*') ? 'bg-blue-50 text-blue-600 ' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v6"></path></svg>
                         Scholarship Search
                     </a>
 
                     {{-- Overseas Jobs --}}
-                    <a href="{{ route('overseas-jobs.index') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('overseas-jobs.*') ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
+                    <a href="{{ route('overseas-jobs.index') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('overseas-jobs.*') ? 'bg-blue-50 text-blue-600 ' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                         Overseas Jobs
                     </a>
 
                     {{-- Working Holiday Visa Australia --}}
-                    <a href="{{ route('whv-applications.index') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('whv-applications.*') ? 'bg-amber-50 text-amber-600 border-l-4 border-amber-600' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
+                    <a href="{{ route('whv-applications.index') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('whv-applications.*') ? 'bg-amber-50 text-amber-600 ' : 'text-gray-500 hover:bg-gray-50' }} rounded-xl font-medium transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8.97 5.7a1 1 0 01-1.06 0L4 7m16 0a2 2 0 00-2-2H6a2 2 0 00-2 2m16 0v10a2 2 0 01-2 2H6a2 2 0 01-2-2V7m9 10.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z"></path></svg>
                         WHV Australia
                     </a>

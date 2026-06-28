@@ -10,6 +10,7 @@ class ToeflReadingScore extends Model
     use HasFactory;
 
     protected $fillable = [
+        'is_reported',
         'user_id',
         'meeting_number',
         'score',

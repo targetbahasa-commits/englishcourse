@@ -30,6 +30,10 @@ class BuildReadingMeetingViewData
             (bool) $selectedClassPeriod
         );
 
+        if ($user && in_array($user->active_role ?? $user->role, ['guest', 'guest_quick', 'test-taker'], true)) {
+            $isLocked = ! ($meeting && $meeting->is_free_tier);
+        }
+
         $allPassages = $this->repository->getPassagesWithQuestions($meeting->id);
 
         return [

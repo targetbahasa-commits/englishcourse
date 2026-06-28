@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>IELTS Listening Mock Up - {{ config('app.name', 'Target Bahasa') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
@@ -41,7 +43,7 @@
             </div>
         </div>
 
-        <div x-data="{ step: 1 }">
+        <div x-data="{ step: 1 }" x-init="$watch('step', value => $dispatch('part-changed', value))">
 
             {{-- ────────────────── PART 1 ────────────────── --}}
             <div x-show="step === 1">

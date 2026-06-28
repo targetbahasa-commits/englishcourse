@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Listening Part A {{ $start }}-{{ $end }} - {{ config('app.name', 'Target Bahasa') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -41,7 +43,7 @@
                 </div>
             </div>
 
-            @if($questions->isEmpty())
+            @if(empty($questions))
                 <div class="bg-white rounded-2xl border border-gray-200 p-8 text-center text-gray-600">
                     Soal untuk rentang ini belum tersedia.
                 </div>

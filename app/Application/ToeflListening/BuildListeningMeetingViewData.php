@@ -15,7 +15,7 @@ class BuildListeningMeetingViewData
 
     public function handle(int $number, $user, ?int $setNumber = null): array
     {
-        if (($number < 1 || $number > 20) && !in_array($number, [101, 102, 103], true)) {
+        if ($number < 1 && !in_array($number, [101, 102, 103], true)) {
             abort(404);
         }
 
@@ -35,6 +35,25 @@ class BuildListeningMeetingViewData
                 (bool) $selectedClassPeriod,
             )
             : false;
+
+        if ($user && in_array($user->active_role ?? $user->role, ['guest', 'guest_quick', 'test-taker'], true)) {
+            $isLocked = ! ($meeting && $meeting->is_free_tier);
+        }
+
+        if ($number === 21) {
+            // Serve Mockup UI for Meeting 21
+            $mockupViewData = app(\App\Application\ToeflMockup\BuildMockupPackageViewData::class)->handle(1);
+            $mockupViewData['isFullMockTest'] = false;
+            $mockupViewData['packageMode'] = true;
+            $mockupViewData['listeningSubmitRoute'] = route('assignments.toefl-itp.listening.meeting.submit', $number);
+            
+            return [
+                'isLocked' => $isLocked,
+                'meeting' => $meeting,
+                'view' => 'assignments.toefl-itp.mockup',
+                'data' => $mockupViewData,
+            ];
+        }
 
         $questions = $this->repository->getQuestions($number, $setNumber ?: null);
 

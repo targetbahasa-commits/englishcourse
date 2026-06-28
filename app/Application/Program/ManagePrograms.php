@@ -4,6 +4,7 @@ namespace App\Application\Program;
 
 use App\Domain\Program\Contracts\ProgramBrochureStorage;
 use App\Domain\Program\Repositories\ProgramRepository;
+use App\Domain\FreeTest\Repositories\FreeTestRepository;
 use Illuminate\Support\Str;
 
 class ManagePrograms
@@ -44,6 +45,7 @@ class ManagePrograms
     public function __construct(
         private readonly ProgramRepository $repository,
         private readonly ProgramBrochureStorage $brochureStorage,
+        private readonly FreeTestRepository $freeTestRepository,
     ) {}
 
     public function listAll(): mixed
@@ -72,11 +74,23 @@ class ManagePrograms
             $validated['brochure_pdf'] = $this->brochureStorage->storeUploadedFile($request->file('brochure_pdf'));
         }
 
-        $this->repository->create($validated);
+        $subprograms = $validated['subprograms'] ?? [];
+        unset($validated['subprograms']);
+
+        $program = $this->repository->create($validated);
+
+        if ($validated['program_type'] === 'paket') {
+            $program->subprograms()->sync($subprograms);
+        }
+
+        // Auto-create a certificate for the new program
     }
 
     public function update(mixed $program, array $validated, mixed $request): void
     {
+        $subprograms = $validated['subprograms'] ?? [];
+        unset($validated['subprograms']);
+
         if ($validated['name'] !== $program->name) {
             $validated['slug'] = Str::slug($validated['name']);
         }
@@ -102,6 +116,12 @@ class ManagePrograms
         }
 
         $this->repository->update($program, $validated);
+
+        if ($validated['program_type'] === 'paket') {
+            $program->subprograms()->sync($subprograms);
+        } else {
+            $program->subprograms()->sync([]);
+        }
     }
 
     public function updateBrochure(mixed $program, mixed $request): bool

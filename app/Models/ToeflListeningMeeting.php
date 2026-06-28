@@ -12,10 +12,12 @@ class ToeflListeningMeeting extends Model
         'description',
         'is_locked',
         'transcript_enabled',
+        'is_free_tier',
     ];
 
     protected $casts = [
         'is_locked' => 'boolean',
         'transcript_enabled' => 'boolean',
+        'is_free_tier' => 'boolean',
     ];
 }

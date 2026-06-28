@@ -59,7 +59,9 @@
                     <option value="student" {{ request('role') == 'student' ? 'selected' : '' }}>Student</option>
                     <option value="teacher" {{ request('role') == 'teacher' ? 'selected' : '' }}>Teacher</option>
                     <option value="guest" {{ request('role') == 'guest' ? 'selected' : '' }}>Guest</option>
+                    <option value="test-taker" {{ request('role') == 'test-taker' ? 'selected' : '' }}>Test Taker</option>
                     <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                    <option value="intern" {{ request('role') == 'intern' ? 'selected' : '' }}>Intern</option>
                 </select>
             </div>
 
@@ -67,8 +69,12 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Program</label>
                 <select name="program_id" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     <option value="">All Programs</option>
-                    @foreach($programs as $program)
-                        <option value="{{ $program->id }}" {{ request('program_id') == $program->id ? 'selected' : '' }}>{{ $program->name }}</option>
+                    @foreach(collect($programs)->groupBy('category') as $category => $categoryPrograms)
+                        <optgroup label="{{ $category }}">
+                            @foreach($categoryPrograms as $program)
+                                <option value="{{ $program->id }}" {{ request('program_id') == $program->id ? 'selected' : '' }}>{{ $program->name }}</option>
+                            @endforeach
+                        </optgroup>
                     @endforeach
                 </select>
             </div>
@@ -103,7 +109,27 @@
                         <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                         Assign Program
                     </button>
+                    <button @click="$refs.bulkActiveForm.submit(); open = false;" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 w-full text-left">
+                        <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        Set Active
+                    </button>
+                    <button @click="$refs.bulkInactiveForm.submit(); open = false;" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-700 w-full text-left">
+                        <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                        Set Inactive
+                    </button>
                 </div>
+            </div>
+            
+            <form x-ref="bulkActiveForm" action="{{ route('admin.users.bulk_update_status') }}" method="POST" class="hidden">
+                @csrf
+                <input type="hidden" name="user_ids" x-bind:value="JSON.stringify(selectedUsers)">
+                <input type="hidden" name="status" value="active">
+            </form>
+            <form x-ref="bulkInactiveForm" action="{{ route('admin.users.bulk_update_status') }}" method="POST" class="hidden">
+                @csrf
+                <input type="hidden" name="user_ids" x-bind:value="JSON.stringify(selectedUsers)">
+                <input type="hidden" name="status" value="inactive">
+            </form>
             </div>
         </div>
     </div>
@@ -163,6 +189,8 @@
                                 <span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-100 text-blue-700 border border-blue-200">Student</span>
                             @elseif($user->role == 'guest')
                                 <span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-gray-100 text-gray-700 border border-gray-200">Guest</span>
+                            @elseif($user->role == 'test-taker')
+                                <span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-cyan-100 text-cyan-700 border border-cyan-200">Test Taker</span>
                             @endif
                         </td>
                         <td class="px-6 py-4">
@@ -295,8 +323,12 @@
                                     <div class="mt-4">
                                         <select name="program_id" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
                                             <option value="">-- Select Program --</option>
-                                            @foreach($programs as $program)
-                                                <option value="{{ $program->id }}">{{ $program->name }}</option>
+                                            @foreach(collect($programs)->groupBy('category') as $category => $categoryPrograms)
+                                                <optgroup label="{{ $category }}">
+                                                    @foreach($categoryPrograms as $program)
+                                                        <option value="{{ $program->id }}">{{ $program->name }}</option>
+                                                    @endforeach
+                                                </optgroup>
                                             @endforeach
                                         </select>
                                     </div>

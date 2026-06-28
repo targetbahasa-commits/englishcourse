@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Mock Test {{ $testId }} – IELTS Writing | {{ config('app.name', 'Target Bahasa') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         html, body { height: 100%; overflow: hidden; }
@@ -194,15 +196,21 @@
             const counter = document.getElementById(counterId);
             if (!input || !counter) return;
 
+            const countWords = (text) => {
+                const tokens = String(text || '').trim().split(/\s+/).filter(Boolean);
+
+                // Count only tokens containing letters; pure numbers/punctuation are excluded.
+                return tokens.filter((token) => /[A-Za-z]/.test(token)).length;
+            };
+
             input.addEventListener('input', () => {
-                const text = input.value.trim();
-                const words = text ? text.split(/\s+/) : [];
-                counter.textContent = words.length;
+                const wordsCount = countWords(input.value);
+                counter.textContent = wordsCount;
                 
-                if (words.length > 0 && words.length < minWords) {
+                if (wordsCount > 0 && wordsCount < minWords) {
                     counter.classList.add('text-orange-500');
                     counter.classList.remove('text-green-600', 'text-gray-700');
-                } else if (words.length >= minWords) {
+                } else if (wordsCount >= minWords) {
                     counter.classList.add('text-green-600');
                     counter.classList.remove('text-orange-500', 'text-gray-700');
                 } else {

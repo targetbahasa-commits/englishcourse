@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'Target Bahasa') }} - Tutors Login</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -22,9 +24,7 @@
         
         <!-- Header Section -->
         <div class="p-8 pb-0 text-center">
-            <div class="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/30 transform hover:scale-105 transition-transform duration-500">
-                <span class="text-2xl font-black text-white">TB</span>
-            </div>
+            <img src="{{ asset('images/brand/TARGET.png') }}" alt="Target Bahasa" class="max-w-[160px] w-auto object-contain mx-auto mb-6 drop-shadow-xl hover:scale-105 transition-transform duration-500">
             <h1 class="text-3xl sm:text-4xl font-extrabold mb-3 tracking-tight text-gray-900">Tutors Portal</h1>
             <p class="text-gray-600 text-sm sm:text-base mx-auto font-medium leading-relaxed max-w-md">
                 Secure access for tutors. Please log in to your account.
@@ -80,11 +80,11 @@
                 </div>
 
                 <!-- Turnstile -->
-                {{-- <x-turnstile /> --}}
-                {{-- <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2 text-sm text-red-500 text-center" /> --}}
+                <x-turnstile />
+                <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2 text-sm text-red-500 text-center" />
 
                 <!-- Submit Button -->
-                <button type="submit" class="w-full relative py-3.5 mt-2 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/40 focus:outline-none focus:ring-4 focus:ring-indigo-600/20 active:scale-[0.98] transition-all duration-300">
+                <button type="submit" class="w-full relative py-3.5 mt-2 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 focus:outline-none focus:ring-4 focus:ring-blue-600/20 active:scale-[0.98] transition-all duration-300">
                     <span class="relative z-10 flex items-center justify-center gap-2">
                         Sign In to Dashboard
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -94,58 +94,73 @@
         </div>
     </div>
 
-    <!-- Particle Animation Script -->
+    <!-- Background Animation Script -->
     <script>
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
         let width, height;
         let particles = [];
+        
+        // Colors from the registration page
+        const pColors = ['#4f46e5', '#3b82f6', '#8b5cf6', '#0ea5e9'];
 
-        function init() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-            particles = [];
-            for (let i = 0; i < 50; i++) {
-                particles.push(new Particle());
-            }
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
         }
+        window.addEventListener('resize', resize);
+        resize();
 
-        class Particle {
-            constructor() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.size = Math.random() * 4 + 1;
-                this.speedX = Math.random() * 1 - 0.5;
-                this.speedY = Math.random() * 1 - 0.5;
-                this.color = `hsla(${240 + Math.random() * 60}, 100%, 70%, ${Math.random() * 0.3})`;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.x > width) this.x = 0;
-                else if (this.x < 0) this.x = width;
-                if (this.y > height) this.y = 0;
-                else if (this.y < 0) this.y = height;
-            }
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
+        for (let i = 0; i < 40; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                angle: Math.random() * Math.PI * 2,
+                dist: Math.random() * Math.max(width, height),
+                speed: (Math.random() * 0.005) + 0.002,
+                outSpeed: Math.random() * 0.5 + 0.1,
+                size: Math.random() * 2 + 0.5,
+                color: pColors[Math.floor(Math.random() * pColors.length)],
+                life: Math.random() * 100
+            });
         }
 
         function animate() {
-            ctx.clearRect(0, 0, width, height);
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update();
-                particles[i].draw();
-            }
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.fillRect(0, 0, width, height);
+
+            const cx = width / 2;
+            const cy = height / 2;
+
+            particles.forEach(p => {
+                p.dist += p.outSpeed;
+                p.angle += p.speed * (100 / (p.dist + 10));
+
+                p.x = cx + Math.cos(p.angle) * p.dist;
+                p.y = cy + Math.sin(p.angle) * p.dist;
+
+                ctx.beginPath();
+                const dashLen = p.size * 2;
+                const endX = p.x + Math.cos(p.angle + Math.PI / 2) * dashLen;
+                const endY = p.y + Math.sin(p.angle + Math.PI / 2) * dashLen;
+
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(endX, endY);
+                ctx.strokeStyle = p.color;
+                ctx.lineWidth = p.size;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+
+                if (p.dist > Math.max(width, height)) {
+                    p.dist = Math.random() * 10;
+                    p.angle = Math.random() * Math.PI * 2;
+                }
+            });
+
             requestAnimationFrame(animate);
         }
-
-        window.addEventListener('resize', init);
-        init();
         animate();
     </script>
 </body>

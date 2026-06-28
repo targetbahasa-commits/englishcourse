@@ -117,7 +117,7 @@ class EloquentAdminReportRepository implements AdminReportRepository
         $topProgramPercentage = (int) round(($topProgram->active_students / $totalProgramUsers) * 100);
 
         // Top performing students
-        $topPerformingStudents = MeetingScore::query()
+        $topPerformingStudents = MeetingScore::where('is_reported', true)
             ->with(['user.program'])
             ->selectRaw('user_id, MIN(score) as min_score, MAX(score) as max_score, ROUND(AVG(score), 1) as avg_score, COUNT(*) as attempts')
             ->groupBy('user_id')

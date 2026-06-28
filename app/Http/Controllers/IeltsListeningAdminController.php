@@ -68,9 +68,9 @@ class IeltsListeningAdminController extends Controller
         ]);
 
         try {
-            $this->manageIeltsListeningMedia->uploadAudio($meetingId, $set, $request->file('audio_file'));
+            $message = $this->manageIeltsListeningMedia->uploadAudio($meetingId, $set, $request->file('audio_file'));
 
-            return redirect()->back()->with('success', 'Audio uploaded successfully!');
+            return redirect()->back()->with('success', $message ?: 'Audio uploaded successfully!');
         } catch (\RuntimeException $exception) {
             return redirect()->back()->with('error', $exception->getMessage());
         } catch (\Exception $exception) {
@@ -114,9 +114,9 @@ class IeltsListeningAdminController extends Controller
             return back()->with('error', 'No file uploaded.');
         }
 
-        $this->manageIeltsListeningMaterialMedia->uploadAudio($id, $request->file('audio_file'));
+        $message = $this->manageIeltsListeningMaterialMedia->uploadAudio($id, $request->file('audio_file'));
 
-        return back()->with('success', 'Audio uploaded successfully.');
+        return back()->with('success', $message ?: 'Audio uploaded successfully.');
     }
 
     public function uploadMaterialSrt(Request $request, int $id)
@@ -160,5 +160,52 @@ class IeltsListeningAdminController extends Controller
         $this->manageIeltsListeningMaterialMedia->updateAnswerKey($id, $request->string('answer_key')->toString());
 
         return back()->with('success', 'Answer Key uploaded/updated successfully.');
+    }
+
+    public function uploadSectionAnswerKey(Request $request, int $meeting, int $set)
+    {
+        $user = $this->authenticatedUser();
+        if (!$user || (!$user->isAdmin() && !$user->isTeacher())) {
+            return redirect()->back()->with('error', 'Unauthorized access.');
+        }
+
+        $request->validate([
+            'answer_key' => 'required|string',
+        ]);
+
+        $sectionModel = \App\Models\IeltsSection::where('meeting_id', $meeting)
+            ->where('section_number', $set)
+            ->first();
+
+        if (!$sectionModel) {
+            return redirect()->back()->with('error', 'Section not found.');
+        }
+
+        $sectionModel->update(['answer_key' => $request->string('answer_key')->toString()]);
+
+        return back()->with('success', 'Answer Key saved successfully!');
+    }
+
+    public function uploadMaterialPracticeAnswerKey(Request $request, int $id)
+    {
+        $user = $this->authenticatedUser();
+        if (!$user || (!$user->isAdmin() && !$user->isTeacher())) {
+            abort(403);
+        }
+
+        $request->validate([
+            'answer_key' => 'required|string',
+            'practice'   => 'required|integer|min:1|max:20',
+        ]);
+
+        $material = \App\Models\IeltsListeningMaterial::where('material_type_id', $id)->first();
+        if (!$material) {
+            return back()->with('error', 'Material not found.');
+        }
+
+        $column = 'answer_key_practice_' . $request->integer('practice');
+        $material->update([$column => $request->string('answer_key')->toString()]);
+
+        return back()->with('success', 'Answer Key for Practice ' . $request->integer('practice') . ' saved successfully.');
     }
 }

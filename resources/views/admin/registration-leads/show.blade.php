@@ -19,6 +19,36 @@
         </a>
     </div>
 
+    {{-- Inquiry Source Banner (shows for leads from public pages) --}}
+    @php
+        $inquirySources = ['scholarship', 'job_vacancy', 'whv_application', 'quick_inquiry'];
+        $isPublicInquiry = in_array($lead->source, $inquirySources);
+        $sourceIcon = match($lead->source) {
+            'scholarship'    => '🎓',
+            'job_vacancy'    => '💼',
+            'whv_application'=> '🌏',
+            default          => '💬',
+        };
+        $sourceLabel = match($lead->source) {
+            'scholarship'    => 'Scholarship Inquiry',
+            'job_vacancy'    => 'Job Vacancy Inquiry',
+            'whv_application'=> 'WHV Inquiry',
+            default          => ucfirst(str_replace('_', ' ', $lead->source)),
+        };
+    @endphp
+    @if($isPublicInquiry)
+        <div class="mb-5 flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+            <span class="text-2xl leading-none">{{ $sourceIcon }}</span>
+            <div>
+                <p class="text-sm font-bold text-blue-800">{{ $sourceLabel }}</p>
+                @if($lead->source_detail)
+                    <p class="text-xs text-blue-600 mt-0.5">{{ $lead->source_detail }}</p>
+                @endif
+                <p class="text-xs text-blue-500 mt-1">Lead ini berasal dari halaman publik melalui <strong>Quick Inquiry Modal</strong>.</p>
+            </div>
+        </div>
+    @endif
+
     {{-- Flash --}}
     @if(session('success'))
         <div class="mb-6 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">{{ session('success') }}</div>
@@ -98,7 +128,7 @@
                             default       => $lead->profession_other ?: 'Lainnya'
                         },
                         'Sumber Info'    => ucfirst($lead->source) . ($lead->source_detail ? ' (' . $lead->source_detail . ')' : ''),
-                        'Daftar Pada'    => $lead->created_at->format('d M Y, H:i'),
+                        'Daftar Pada'    => $lead->created_at ? $lead->created_at->format('d M Y, H:i') : '-',
                     ] as $label => $value)
                     <div>
                         <p class="text-xs font-medium text-gray-400 mb-0.5">{{ $label }}</p>
@@ -305,7 +335,7 @@
                         <div class="w-2.5 h-2.5 rounded-full bg-blue-500 mt-1.5"></div>
                         <div>
                             <p class="text-sm font-medium text-gray-800">Lead dibuat</p>
-                            <p class="text-xs text-gray-500">{{ $lead->created_at->format('d M Y, H:i') }}</p>
+                            <p class="text-xs text-gray-500">{{ $lead->created_at ? $lead->created_at->format('d M Y, H:i') : '-' }}</p>
                         </div>
                     </div>
                     <div class="flex gap-3">
@@ -371,6 +401,30 @@
                         <p class="text-sm text-gray-400 italic">Belum terdaftar di kelas.</p>
                     @endif
                 </div>
+                
+
+
+                @if($lead->emailLogs && $lead->emailLogs->count() > 0)
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">✉️ Email Outbox ({{ $lead->emailLogs->count() }})</p>
+                    <div class="space-y-2">
+                        @foreach($lead->emailLogs->take(3) as $log)
+                            <div class="bg-gray-50 rounded-lg border border-gray-100 p-2 text-xs">
+                                <p class="font-semibold text-gray-800 truncate">{{ $log->subject }}</p>
+                                <div class="flex items-center justify-between mt-1">
+                                    <span class="text-gray-500">{{ $log->sent_at ? $log->sent_at->format('d M Y, H:i') : 'Pending' }}</span>
+                                    <span class="{{ $log->status === 'sent' ? 'text-green-600' : 'text-red-600' }} font-medium capitalize">{{ $log->status }}</span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    @if($lead->emailLogs->count() > 3)
+                        <a href="{{ route('admin.email-logs.index', ['search' => $lead->email]) }}" class="mt-2 inline-flex items-center gap-1 text-xs text-purple-600 hover:underline">
+                            Lihat Semua Email →
+                        </a>
+                    @endif
+                </div>
+                @endif
                 <div class="mt-4 pt-4 border-t border-gray-100">
                     <a href="{{ route("students.show", $lead->convertedUser) }}" class="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>

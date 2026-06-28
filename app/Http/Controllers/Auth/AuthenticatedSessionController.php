@@ -22,7 +22,7 @@ class AuthenticatedSessionController extends Controller
     public function createTeacher(): View
     {
         // If currently logged in as a guest, log out first so they can authenticate properly
-        if (auth()->check() && in_array(auth()->user()->role, ['guest', 'guest_quick'])) {
+        if (auth()->check() && in_array(auth()->user()->role, ['guest', 'guest_quick', 'test-taker'], true)) {
             auth()->logout();
             request()->session()->invalidate();
             request()->session()->regenerateToken();
@@ -38,12 +38,23 @@ class AuthenticatedSessionController extends Controller
     public function createStudent(): View
     {
         // If currently logged in as a guest, log out first so they can authenticate properly
-        if (auth()->check() && in_array(auth()->user()->role, ['guest', 'guest_quick'])) {
+        if (auth()->check() && in_array(auth()->user()->role, ['guest', 'guest_quick', 'test-taker'], true)) {
             auth()->logout();
             request()->session()->invalidate();
             request()->session()->regenerateToken();
         }
         return view('auth.login-student');
+    }
+
+    public function createTestTaker(): View
+    {
+        // If currently logged in as a guest, log out first so they can authenticate properly
+        if (auth()->check() && in_array(auth()->user()->role, ['guest', 'guest_quick', 'test-taker'], true)) {
+            auth()->logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+        }
+        return view('auth.login-test-taker');
     }
 
     /**
@@ -74,6 +85,11 @@ class AuthenticatedSessionController extends Controller
             // 'intended' URL (e.g. an IELTS test page) override this.
             $request->session()->forget('url.intended');
             return redirect()->route('guest.free-tests');
+        }
+
+        if ($user->isTestTaker()) {
+            $request->session()->forget('url.intended');
+            return redirect()->route('online-test.index');
         }
 
         return redirect()->intended(route('dashboard', absolute: false));

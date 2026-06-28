@@ -86,7 +86,29 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
-                    @forelse($programs as $program)
+                    @php
+                        $groupedPrograms = collect($programs)->groupBy(function($program) {
+                            $name = strtolower($program->name);
+                            if (str_contains($name, 'ielts')) return 'IELTS Programs';
+                            if (str_contains($name, 'toefl')) return 'TOEFL Programs';
+                            if (str_contains($name, 'pte')) return 'PTE Programs';
+                            if (str_contains($name, 'speaking')) return 'Speaking Programs';
+                            if (str_contains($name, 'grammar')) return 'Grammar Programs';
+                            if (str_contains($name, 'pronunciation')) return 'Pronunciation Programs';
+                            if (str_contains($name, 'reading')) return 'Reading Programs';
+                            if (str_contains($name, 'listening')) return 'Listening Programs';
+                            if (str_contains($name, 'writing')) return 'Writing Programs';
+                            if (str_contains($name, 'cambridge')) return 'Cambridge Mock Tests';
+                            return 'Other Programs';
+                        });
+                    @endphp
+                    @forelse($groupedPrograms as $category => $categoryPrograms)
+                        <tr class="bg-gray-100/70 border-b border-gray-200" x-show="!searchQuery">
+                            <td colspan="5" class="px-5 py-3 font-extrabold text-red-600 text-sm uppercase tracking-wider">
+                                {{ $category }}
+                            </td>
+                        </tr>
+                        @foreach($categoryPrograms as $program)
                                         <tr>
                                             <td colspan="5" class="bg-blue-50/30 p-0 border-t-0">
                                                 <div class="px-8 pb-4 pt-2">
@@ -137,8 +159,13 @@
                                     <div class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
                                         {{ $program->name }}
                                         @if($program->price && $program->price > 0)
-                                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200">
-                                                IDR {{ number_format($program->price, 0, ',', '.') }}
+                                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200" title="Online Price">
+                                                Online: IDR {{ number_format($program->price, 0, ',', '.') }}
+                                            </span>
+                                        @endif
+                                        @if($program->price_offline && $program->price_offline > 0)
+                                            <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200" title="Offline / Pare Price">
+                                                Pare: IDR {{ number_format($program->price_offline, 0, ',', '.') }}
                                             </span>
                                         @endif
                                         @if($isMockProgram($program))
@@ -207,6 +234,14 @@
                                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                                 <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                             </svg>
+                                        </button>
+                                        <button type="button"
+                                            x-show="hovered"
+                                            x-transition.opacity.duration.150ms
+                                            @click="$dispatch('open-batch-calendar', { classPeriodId: {{ $batch->id }}, batchName: '{{ addslashes($batch->name) }}' })"
+                                            class="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                            title="View Meetings Calendar">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                         </button>
                                     </div>
                                     @endforeach
@@ -314,6 +349,7 @@
                             </div>
                         </td>
                     </tr>
+                        @endforeach
                     @empty
                     <tr>
                         <td colspan="5" class="p-12 text-center">
@@ -353,6 +389,13 @@
             description: '',
             period: '',
             price: '',
+            price_private: '',
+            price_private_offline: '',
+            price_semi_private: '',
+            price_semi_private_offline: '',
+            program_type: 'paket',
+            subprograms: [],
+            access_key: '',
             is_active: true
         }
     }"
@@ -364,7 +407,15 @@
             form.name = $event.detail.program.name;
             form.description = $event.detail.program.description;
             form.period = $event.detail.program.period;
-            form.price = $event.detail.program.price;
+            form.price = $event.detail.program.price ? $event.detail.program.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+            form.price_offline = $event.detail.program.price_offline ? $event.detail.program.price_offline.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+            form.price_private = $event.detail.program.price_private ? $event.detail.program.price_private.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+            form.price_private_offline = $event.detail.program.price_private_offline ? $event.detail.program.price_private_offline.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+            form.price_semi_private = $event.detail.program.price_semi_private ? $event.detail.program.price_semi_private.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+            form.price_semi_private_offline = $event.detail.program.price_semi_private_offline ? $event.detail.program.price_semi_private_offline.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+            form.program_type = $event.detail.program.program_type || 'paket';
+            form.subprograms = $event.detail.program.subprograms ? $event.detail.program.subprograms.map(p => p.id) : [];
+            form.access_key = $event.detail.program.access_key || '';
             form.is_active = $event.detail.program.is_active == 1;
         } else {
             isEdit = false;
@@ -373,6 +424,14 @@
             form.description = '';
             form.period = '';
             form.price = '';
+            form.price_offline = '';
+            form.price_private = '';
+            form.price_private_offline = '';
+            form.price_semi_private = '';
+            form.price_semi_private_offline = '';
+            form.program_type = 'paket';
+            form.subprograms = [];
+            form.access_key = '';
             form.is_active = true;
         }
     "
@@ -426,13 +485,50 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="period" class="block text-sm font-semibold text-gray-700 mb-1">Duration Tag <span class="text-red-500">*</span></label>
-                            <input type="text" x-model="form.period" name="period" id="period" required class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 3 Months, 20 Meetings">
+                        <div class="grid grid-cols-1 gap-6">
+                            <div>
+                                <label for="period" class="block text-sm font-semibold text-gray-700 mb-1">Duration Tag <span class="text-red-500">*</span></label>
+                                <input type="text" x-model="form.period" name="period" id="period" required class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 3 Months, 20 Meetings">
+                            </div>
+                            <div>
+                                <label for="program_type" class="block text-sm font-semibold text-gray-700 mb-1">Tipe Program <span class="text-red-500">*</span></label>
+                                <select x-model="form.program_type" name="program_type" id="program_type" required class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white">
+                                    <option value="paket">Program Paket (IELTS/TOEFL/PTE)</option>
+                                    <option value="satuan">Program Satuan / Skill Khusus</option>
+                                </select>
+                            </div>
                         </div>
-                        <div>
-                            <label for="price" class="block text-sm font-semibold text-gray-700 mb-1">Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
-                            <input type="number" x-model="form.price" name="price" id="price" min="0" step="1" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 5000000">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                            <div>
+                                <label for="price" class="block text-sm font-semibold text-gray-700 mb-1">Regular Online Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
+                                <input type="text" inputmode="numeric" x-model="form.price" @input="form.price = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price" id="price" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 5.000.000">
+                            </div>
+                            <div>
+                                <label for="price_offline" class="block text-sm font-semibold text-gray-700 mb-1">Regular Offline / Pare Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
+                                <input type="text" inputmode="numeric" x-model="form.price_offline" @input="form.price_offline = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_offline" id="price_offline" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 5.500.000">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 pt-4 border-t border-gray-100">
+                            <div>
+                                <label for="price_semi_private" class="block text-sm font-semibold text-gray-700 mb-1">Semi Private Online Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
+                                <input type="text" inputmode="numeric" x-model="form.price_semi_private" @input="form.price_semi_private = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_semi_private" id="price_semi_private" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 8.000.000">
+                            </div>
+                            <div>
+                                <label for="price_semi_private_offline" class="block text-sm font-semibold text-gray-700 mb-1">Semi Private Offline Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
+                                <input type="text" inputmode="numeric" x-model="form.price_semi_private_offline" @input="form.price_semi_private_offline = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_semi_private_offline" id="price_semi_private_offline" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 8.500.000">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 pt-4 border-t border-gray-100">
+                            <div>
+                                <label for="price_private" class="block text-sm font-semibold text-gray-700 mb-1">Private Online Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
+                                <input type="text" inputmode="numeric" x-model="form.price_private" @input="form.price_private = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_private" id="price_private" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 12.000.000">
+                            </div>
+                            <div>
+                                <label for="price_private_offline" class="block text-sm font-semibold text-gray-700 mb-1">Private Offline Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
+                                <input type="text" inputmode="numeric" x-model="form.price_private_offline" @input="form.price_private_offline = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_private_offline" id="price_private_offline" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 12.500.000">
+                            </div>
                         </div>
                     </div>
 
@@ -440,6 +536,53 @@
                         <label for="access_key" class="block text-sm font-semibold text-gray-700 mb-1">Access Key <span class="text-gray-400 font-normal">(Optional, can be changed anytime)</span></label>
                         <input type="text" x-model="form.access_key" name="access_key" id="access_key" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., secret2026">
                         <span class="text-xs text-gray-400">Leave blank if you don't want to require a key for this program.</span>
+                    </div>
+
+                    <div x-show="form.program_type === 'paket'" class="mt-6 pt-6 border-t border-gray-100">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Program Satuan Penyusun Paket <span class="text-gray-400 font-normal">(Opsional)</span></label>
+                        
+                        @if(isset($satuanPrograms) && $satuanPrograms->count() > 0)
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-60 overflow-y-auto p-1 mb-4">
+                                @foreach($satuanPrograms as $sat)
+                                    <label class="flex items-start p-3 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors" :class="{'bg-blue-50 border-blue-200': form.subprograms.includes({{ $sat->id }})}">
+                                        <div class="flex items-center h-5">
+                                            <input type="checkbox" name="subprograms[]" value="{{ $sat->id }}" x-model="form.subprograms" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <span class="font-medium text-gray-900">{{ $sat->name }}</span>
+                                            <div class="text-gray-500 text-xs mt-0.5">IDR {{ number_format($sat->price ?? 0, 0, ',', '.') }}</div>
+                                        </div>
+                                    </label>
+                                @endforeach
+                            </div>
+                            
+                            <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-600">Total Harga Satuan:</span>
+                                    <span class="font-bold text-gray-900" x-text="
+                                        'IDR ' + form.subprograms.reduce((total, id) => {
+                                            const prog = {{ Js::from($satuanPrograms->mapWithKeys(fn($p) => [$p->id => $p->price ?? 0])) }}[id] || 0;
+                                            return total + prog;
+                                        }, 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+                                    "></span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm mt-2 border-t border-blue-100 pt-2">
+                                    <span class="text-blue-800 font-medium">Diskon (Penghematan):</span>
+                                    <span class="font-bold text-green-600" x-text="
+                                        (() => {
+                                            const totalSatuan = form.subprograms.reduce((total, id) => {
+                                                return total + ({{ Js::from($satuanPrograms->mapWithKeys(fn($p) => [$p->id => $p->price ?? 0])) }}[id] || 0);
+                                            }, 0);
+                                            const hargaPaket = parseInt(form.price.replace(/\./g, '') || 0);
+                                            const diff = totalSatuan - hargaPaket;
+                                            return diff > 0 ? 'IDR ' + diff.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : 'IDR 0';
+                                        })()
+                                    "></span>
+                                </div>
+                            </div>
+                        @else
+                            <p class="text-sm text-gray-500 bg-gray-50 p-4 rounded-xl">Belum ada program satuan yang dibuat.</p>
+                        @endif
                     </div>
 
                     <div>
@@ -628,6 +771,8 @@
         </div>
     </div>
 </div>
+
+@include('components.meetings-calendar-modal')
 
 {{-- Edit Batch Modal --}}
 <div

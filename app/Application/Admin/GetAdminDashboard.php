@@ -24,6 +24,7 @@ class GetAdminDashboard
         $activeAssignments = $this->repository->countMeetings();
 
         $activeStudents = $this->repository->getActiveStudents($threshold);
+        $activeTeachers = $this->repository->getActiveTeachers($threshold);
         $programPerformance = $this->repository->getProgramPerformance($threshold);
         $teacherActivitySummary = $this->repository->getTeacherActivitySummary();
 
@@ -38,6 +39,7 @@ class GetAdminDashboard
             'totalPrograms',
             'activeAssignments',
             'activeStudents',
+            'activeTeachers',
             'programPerformance',
             'teacherActivitySummary',
             'dbStatus',

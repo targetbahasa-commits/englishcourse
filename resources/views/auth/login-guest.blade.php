@@ -6,6 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Target Bahasa') }} - Guest Login</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -58,9 +60,7 @@
             <!-- Content overlay -->
             <div class="relative z-10 flex flex-col justify-center items-center w-full h-full p-12 text-white text-center">
                 <!-- App Logo/Icon -->
-                <div class="w-20 h-20 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center mb-8 shadow-2xl transform hover:scale-105 transition-transform duration-500 cursor-default">
-                    <span class="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-tr from-white to-blue-100">TB</span>
-                </div>
+                <img src="{{ asset('images/brand/TARGET.png') }}" alt="Target Bahasa" class="mb-8 w-[400px] max-w-[80%] max-h-[40vh] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500">
                 
                 <h1 class="text-5xl font-extrabold mb-4 tracking-tight drop-shadow-md">Guest Access</h1>
                 <p class="text-blue-100 text-lg max-w-md mx-auto font-medium leading-relaxed drop-shadow-sm">
@@ -85,11 +85,8 @@
         <!-- Right Side: Login Form -->
         <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 relative">
             <!-- Mobile Logo (visible only on small screens) -->
-            <div class="lg:hidden absolute top-8 left-8 flex items-center gap-2">
-                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-                    <span class="text-lg font-bold text-white">TB</span>
-                </div>
-                <span class="text-xl font-bold text-gray-900 tracking-tight">Target Bahasa</span>
+            <div class="lg:hidden absolute top-8 left-8 flex items-center">
+                <img src="{{ asset('images/brand/TARGET.png') }}" alt="Target Bahasa" class="h-10">
             </div>
 
             <div class="w-full max-w-md mt-16 lg:mt-0">
@@ -135,8 +132,8 @@
                         <label for="remember_me" class="ml-2 text-sm font-medium text-gray-600 cursor-pointer select-none">Remember me for 30 days</label>
                     </div>
 
-                    {{-- <x-turnstile /> --}}
-                    {{-- <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2 text-sm text-red-500 text-center" /> --}}
+                    <x-turnstile />
+                    <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2 text-sm text-red-500 text-center" />
 
                     <!-- Submit Button -->
                     <button type="submit" class="w-full relative py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 focus:outline-none focus:ring-4 focus:ring-blue-600/20 active:scale-[0.98] transition-all duration-300 group overflow-hidden">

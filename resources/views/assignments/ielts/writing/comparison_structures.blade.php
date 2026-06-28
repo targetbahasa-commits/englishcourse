@@ -36,9 +36,9 @@
                     <h2 class="text-lg font-bold text-indigo-900">Reference: Comparisons & Grammar</h2>
                 </div>
                 <div class="p-0 flex flex-col justify-center bg-gray-50">
-                    <img src="{{ asset('images/ielts_writing_task1_lesson6_comparisons.png') }}" class="w-full h-auto shadow-sm" alt="Simple Comparisons">
-                    <img src="{{ asset('images/ielts_writing_task1_lesson6_comparative_adjectives.png') }}" class="w-full h-auto shadow-sm border-t border-gray-100" alt="Comparative Adjectives">
-                    <img src="{{ asset('images/ielts_writing_task1_lesson6_transitions.png') }}" class="w-full h-auto shadow-sm border-t border-gray-100" alt="Transitions & Conjunctions">
+                    <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson6_comparisons.png') }}" class="w-full h-auto shadow-sm" alt="Simple Comparisons">
+                    <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson6_comparative_adjectives.png') }}" class="w-full h-auto shadow-sm border-t border-gray-100" alt="Comparative Adjectives">
+                    <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson6_transitions.png') }}" class="w-full h-auto shadow-sm border-t border-gray-100" alt="Transitions & Conjunctions">
                 </div>
             </div>
         </div>

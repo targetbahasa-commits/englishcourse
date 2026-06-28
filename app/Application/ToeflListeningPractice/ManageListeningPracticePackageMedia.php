@@ -5,6 +5,7 @@ namespace App\Application\ToeflListeningPractice;
 use App\Application\ToeflMockup\MockupMediaStorage;
 use App\Application\ToeflMockup\SrtTranscriptParser;
 use App\Domain\ToeflListeningPractice\Repositories\ListeningPracticeRepository;
+use App\Services\WhisperTranscriptionService;
 use Illuminate\Http\UploadedFile;
 use RuntimeException;
 
@@ -14,6 +15,7 @@ class ManageListeningPracticePackageMedia
         private readonly ListeningPracticeRepository $listeningPracticeRepository,
         private readonly MockupMediaStorage $mediaStorage,
         private readonly SrtTranscriptParser $srtTranscriptParser,
+        private readonly WhisperTranscriptionService $whisper,
     ) {
     }
 
@@ -31,13 +33,34 @@ class ManageListeningPracticePackageMedia
             'audio/toefl/listening/practice/package-' . $package . '/'
         );
 
-        $directory = 'audio/toefl/listening/practice/package-' . $package;
+        $directory  = 'audio/toefl/listening/practice/package-' . $package;
         $publicPath = $this->mediaStorage->ensurePublicDirectoryExists($directory);
-        $audioPath = $this->storeAudio($audioFile, $existingAudioPath, $publicPath, $directory);
+        $audioPath  = $this->storeAudio($audioFile, $existingAudioPath, $publicPath, $directory);
 
         $this->listeningPracticeRepository->updateAllQuestionAudio($audioPath);
 
-        return ['message' => 'Audio updated successfully for listening package.'];
+        // ── Auto-transcribe + translate (runs for both Upload and Choose Audio) ─
+        try {
+            $fullAudioPath = public_path($audioPath);
+            $transcription = $this->whisper->transcribeAndTranslate($fullAudioPath, $publicPath);
+
+            $updates = [];
+            if ($transcription['en']) {
+                $updates['transcript_en'] = $transcription['en'];
+            }
+            if ($transcription['id']) {
+                $updates['transcript_id'] = $transcription['id'];
+            }
+            if (!empty($updates)) {
+                $this->listeningPracticeRepository->updateAllQuestionTranscripts($updates);
+            }
+
+            $baseMsg = $audioFile !== null ? 'Audio berhasil diupload.' : 'Audio dari folder berhasil dipilih.';
+            return ['message' => $transcription['message'] ?: $baseMsg . ' Transkripsi ' . ($transcription['success'] ? 'selesai.' : 'gagal.')];
+        } catch (\Exception $e) {
+            $baseMsg = $audioFile !== null ? 'Audio berhasil diupload.' : 'Audio berhasil dipilih dari folder.';
+            return ['message' => $baseMsg . ' Error transkripsi: ' . $e->getMessage()];
+        }
     }
 
     public function updateTranscript(?string $transcriptEn, ?string $transcriptId): void

@@ -18,7 +18,7 @@ class BuildIeltsWritingIndexData
     public function handle($user, ?string $task): array
     {
         $batchProgram = $this->ieltsBatchResolver->resolveBatchProgramForIelts($user);
-        $selectedClassPeriod = $this->batchResolver->resolveSelectedClassPeriodForProgram($batchProgram);
+        $selectedClassPeriod = $this->batchResolver->resolveSelectedClassPeriodForProgram($batchProgram, $user);
 
         if ($task) {
             $allMeetings = $this->repository->getMeetingsByTaskAndCategory($task, 'lesson');
