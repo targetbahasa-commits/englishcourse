@@ -141,7 +141,7 @@
                                     @endphp
                                     <tr class="border-b border-slate-100 text-slate-700">
                                         <td class="py-3 pr-4 font-medium whitespace-nowrap">{{ $payment->invoice_number }}</td>
-                                        <td class="py-3 pr-4 min-w-[200px]">
+                                        <td class="py-3 pr-4 whitespace-nowrap min-w-[200px]">
                                             <div class="font-medium text-slate-800">{{ $payment->program->name ?? '-' }}</div>
                                             <div class="text-xs text-slate-500 mt-0.5 capitalize">{{ str_replace('_', ' ', $payment->meta['class_type'] ?? 'regular') }}</div>
                                         </td>
