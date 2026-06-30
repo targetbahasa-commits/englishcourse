@@ -3,33 +3,33 @@
         Scholarship Search
     @endslot
 
-<div class="px-4 lg:pl-8 lg:pr-0 py-6 md:py-8 w-full flex flex-col lg:flex-row gap-6">
+<div class="w-full flex flex-col lg:flex-row gap-6">
     
     <!-- Main Content Column -->
     <div class="flex-1 min-w-0">
 
     <!-- Expanded Hero Section -->
-    <div class="bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 rounded-3xl p-8 md:p-12 text-white mb-10 shadow-2xl relative overflow-hidden">
+    <div class="bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 rounded-2xl md:rounded-3xl p-6 md:p-12 text-white mb-8 md:mb-10 shadow-2xl relative overflow-hidden">
         <!-- Abstract Decoration -->
         <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
         <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style="animation-delay: 2s;"></div>
         
         <div class="relative z-10 max-w-3xl">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-blue-200 text-sm font-semibold mb-6 backdrop-blur-md">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-blue-200 text-xs md:text-sm font-semibold mb-4 md:mb-6 backdrop-blur-md">
                 <span>✨</span> AI-Powered Match
             </div>
-            <h1 class="text-3xl md:text-5xl font-black mb-4 leading-tight">
+            <h1 class="text-2xl md:text-5xl font-black mb-3 md:mb-4 leading-tight">
                 Find Scholarships That Match Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">English Level</span> 🎓
             </h1>
-            <p class="text-lg md:text-xl text-blue-100 mb-8 opacity-90 leading-relaxed max-w-2xl">
+            <p class="text-sm md:text-xl text-blue-100 mb-6 md:mb-8 opacity-90 leading-relaxed max-w-2xl">
                 Discover opportunities around the world and see which ones match your IELTS / TOEFL score instantly. Stop guessing, start applying.
             </p>
-            <div class="flex flex-col sm:flex-row gap-4">
-                <a href="#scholarship-grid" class="inline-flex justify-center items-center px-8 py-4 bg-white text-indigo-900 font-bold rounded-xl hover:bg-gray-50 transition-all shadow-lg hover:-translate-y-1">
+            <div class="flex flex-col sm:flex-row gap-3 md:gap-4">
+                <a href="#scholarship-grid" class="inline-flex justify-center items-center px-6 md:px-8 py-3 md:py-4 bg-white text-indigo-900 font-bold rounded-xl hover:bg-gray-50 transition-all shadow-lg hover:-translate-y-1 text-sm md:text-base">
                     Find Scholarships
                 </a>
                 @guest
-                <a href="{{ route('free-test.register.show', ['type' => 'ielts']) }}" class="inline-flex justify-center items-center px-8 py-4 bg-indigo-600 border border-indigo-500 text-white font-bold rounded-xl hover:bg-indigo-500 transition-all shadow-lg hover:-translate-y-1">
+                <a href="{{ route('free-test.register.show', ['type' => 'ielts']) }}" class="inline-flex justify-center items-center px-6 md:px-8 py-3 md:py-4 bg-indigo-600 border border-indigo-500 text-white font-bold rounded-xl hover:bg-indigo-500 transition-all shadow-lg hover:-translate-y-1 text-sm md:text-base">
                     Take Free English Test
                 </a>
                 @endguest
@@ -39,18 +39,18 @@
 
     <!-- Modern Filter Panel -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 mb-8 overflow-hidden">
-        <div class="p-6 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-            <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+        <div class="p-4 md:p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-3">
+            <h2 class="text-base md:text-lg font-bold text-gray-800 flex items-center gap-2">
                 <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
                 Search Scholarships
             </h2>
-            <a href="{{ route('scholarships.search.index') }}" class="text-sm font-semibold text-gray-500 hover:text-red-500 transition-colors flex items-center gap-1">
+            <a href="{{ route('scholarships.search.index') }}" class="text-xs md:text-sm font-semibold text-gray-500 hover:text-red-500 transition-colors flex items-center gap-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 Clear Filters
             </a>
         </div>
         
-        <div class="p-6">
+        <div class="p-4 md:p-6">
             <form action="{{ route('scholarships.search.index') }}" method="GET">
                 <div class="mb-6 relative">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -118,15 +118,15 @@
     </div>
 
     <!-- How Smart Match Works (Replaces old Guest Lead Magnet) -->
-    <div class="mb-10 bg-gradient-to-r from-slate-900 to-indigo-950 rounded-2xl p-6 md:p-8 text-white shadow-xl flex flex-col lg:flex-row gap-8 items-center justify-between relative overflow-hidden group">
+    <div class="mb-8 md:mb-10 bg-gradient-to-r from-slate-900 to-indigo-950 rounded-2xl p-5 md:p-8 text-white shadow-xl flex flex-col lg:flex-row gap-6 md:gap-8 items-center justify-between relative overflow-hidden group">
         <div class="absolute inset-0 bg-black opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
         
         <div class="relative z-10 lg:w-1/3 text-center lg:text-left">
-            <h3 class="text-xl md:text-2xl font-black mb-2 flex flex-col sm:flex-row items-center lg:items-start gap-2 text-indigo-200">
-                <svg class="w-8 h-8 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path></svg>
+            <h3 class="text-lg md:text-2xl font-black mb-2 flex flex-col sm:flex-row items-center lg:items-start gap-2 text-indigo-200">
+                <svg class="w-6 h-6 md:w-8 md:h-8 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path></svg>
                 How Smart Match Works
             </h3>
-            <p class="text-slate-300 text-sm leading-relaxed max-w-sm mx-auto lg:mx-0">Stop reading endless requirements manually. Our system does the heavy lifting for you.</p>
+            <p class="text-slate-300 text-xs md:text-sm leading-relaxed max-w-sm mx-auto lg:mx-0">Stop reading endless requirements manually. Our system does the heavy lifting for you.</p>
         </div>
         
         <div class="relative z-10 lg:w-2/3 flex flex-col sm:flex-row gap-4 w-full">
