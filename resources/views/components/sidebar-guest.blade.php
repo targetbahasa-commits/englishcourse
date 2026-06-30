@@ -39,8 +39,19 @@
         flex-shrink: 0;
     }
 </style>
-<div>
-<aside class="guest-sidebar-shell bg-white shadow-md fixed h-full z-10 hidden md:block transition-all duration-200">
+<div x-data="{ mobileSidebarOpen: false }">
+<button
+    type="button"
+    @click="mobileSidebarOpen = true"
+    class="md:hidden fixed top-4 left-4 z-[9999] inline-flex items-center justify-center w-11 h-11 rounded-xl bg-blue-600 border border-blue-700 shadow-xl text-white"
+    aria-label="Open menu">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+</button>
+
+<div x-show="mobileSidebarOpen" x-transition.opacity class="md:hidden fixed inset-0 bg-black/40 z-40" @click="mobileSidebarOpen = false"></div>
+
+<aside class="guest-sidebar-shell bg-white shadow-md fixed h-full z-50 md:z-10 transform transition-all duration-200 md:translate-x-0"
+    :class="(mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0')">
     <div class="flex flex-col h-full">
         <div class="flex-1 overflow-y-auto pb-4">
 
@@ -50,6 +61,9 @@
                     <img src="{{ asset('images/brand/icon.png') }}" class="w-16 h-16 rounded-lg object-contain" alt="TB">
                     <span class="sidebar-title text-xl font-bold text-[#0fa2ec]">Target Bahasa</span>
                 </div>
+                <button type="button" @click="mobileSidebarOpen = false" class="md:hidden text-gray-500 hover:text-gray-700" aria-label="Close menu">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
 
             {{-- Free Test Section --}}
@@ -140,3 +154,11 @@
     </div>
 </aside>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const mainEl = document.querySelector('main');
+        if (mainEl) {
+            mainEl.classList.add('mobile-sidebar-safe');
+        }
+    });
+</script>
