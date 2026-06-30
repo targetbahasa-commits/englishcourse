@@ -17,7 +17,7 @@
     <!-- Additional Styles -->
     @stack('styles')
 </head>
-<body class="font-sans antialiased bg-[#F3F4FF]">
+<body class="font-sans antialiased bg-[#F3F4FF] overflow-x-hidden">
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         <!-- Sidebar - Automatically selected based on user role -->
@@ -38,7 +38,7 @@
         @endauth
 
         <!-- Main Content -->
-        <main class="flex-1 transition-all duration-200 p-4 md:p-8" style="margin-left: var(--admin-sidebar-offset, var(--teacher-sidebar-offset, var(--student-sidebar-offset, var(--guest-sidebar-offset, 16rem))));">
+        <main class="flex-1 transition-all duration-200 p-4 md:p-8">
             <!-- Topbar -->
             <div class="flex justify-between items-center mb-8">
                 <div>
