@@ -3,7 +3,7 @@
         Scholarship Search
     @endslot
 
-<div class="w-full flex flex-col lg:flex-row gap-6">
+<div class="w-full max-w-full flex flex-col lg:flex-row gap-6 overflow-hidden">
     
     <!-- Main Content Column -->
     <div class="flex-1 min-w-0 overflow-hidden">

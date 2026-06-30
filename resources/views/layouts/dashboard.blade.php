@@ -38,9 +38,9 @@
         @endauth
 
         <!-- Main Content -->
-        <main class="flex-1 transition-all duration-200 p-4 md:p-8">
+        <main class="flex-1 transition-all duration-200 p-4 md:p-8 overflow-x-hidden min-w-0">
             <!-- Topbar -->
-            <div class="flex justify-between items-center mb-8">
+            <div class="flex justify-between items-center mb-8 min-w-0 overflow-hidden gap-2">
                 <div>
                     @if(isset($header))
                         {{ $header }}

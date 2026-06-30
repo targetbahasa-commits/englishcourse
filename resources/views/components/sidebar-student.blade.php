@@ -88,7 +88,7 @@
 
     @media (max-width: 767px) {
         .mobile-sidebar-safe {
-            padding-left: 3.5rem;
+            padding-left: 3rem;
         }
     }
 </style>
