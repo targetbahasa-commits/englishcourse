@@ -4,7 +4,18 @@
         init() {
             setTimeout(() => {
                 this.x = (window.innerWidth - this.$el.offsetWidth) / 2;
+                if (this.y > window.innerHeight - this.$el.offsetHeight - 20) {
+                    this.y = window.innerHeight - this.$el.offsetHeight - 20;
+                }
             }, 100);
+            
+            // Adjust on resize
+            window.addEventListener('resize', () => {
+                this.x = (window.innerWidth - this.$el.offsetWidth) / 2;
+                if (this.y > window.innerHeight - this.$el.offsetHeight - 20) {
+                    this.y = window.innerHeight - this.$el.offsetHeight - 20;
+                }
+            });
         },
         dragging: false,
         offset: { x: 0, y: 0 },
@@ -13,13 +24,22 @@
             if (e.target.closest('button')) return;
             
             this.dragging = true;
-            this.offset.x = e.clientX - this.x;
-            this.offset.y = e.clientY - this.y;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            this.offset.x = clientX - this.x;
+            this.offset.y = clientY - this.y;
             
             const onMouseMove = (e) => {
                 if (!this.dragging) return;
-                this.x = e.clientX - this.offset.x;
-                this.y = e.clientY - this.offset.y;
+                // prevent default scrolling when dragging
+                if (e.type === 'touchmove') e.preventDefault();
+                
+                const currentX = e.touches ? e.touches[0].clientX : e.clientX;
+                const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+                
+                this.x = currentX - this.offset.x;
+                this.y = currentY - this.offset.y;
 
                 // Bounds check
                 if (this.y < 0) this.y = 0;
@@ -32,14 +52,18 @@
                 this.dragging = false;
                 window.removeEventListener('mousemove', onMouseMove);
                 window.removeEventListener('mouseup', onMouseUp);
+                window.removeEventListener('touchmove', onMouseMove);
+                window.removeEventListener('touchend', onMouseUp);
             };
             
             window.addEventListener('mousemove', onMouseMove);
             window.addEventListener('mouseup', onMouseUp);
+            window.addEventListener('touchmove', onMouseMove, { passive: false });
+            window.addEventListener('touchend', onMouseUp);
         }
-    }" :style="`position: fixed; left: ${x}px; top: ${y}px; z-index: 40; margin: 0; transform: none;`"
-    @mousedown="startDrag($event)" x-show="!showResults"
-    class="flex items-center gap-3 bg-white/90 backdrop-blur-sm p-3 rounded-2xl shadow-2xl border border-gray-200 overflow-x-auto max-w-[calc(100vw-2rem)] cursor-move select-none">
+    }" :style="`position: fixed; left: ${x}px; top: ${y}px; z-index: 40; margin: 0; transform: none; touch-action: none;`"
+    @mousedown="startDrag($event)" @touchstart="startDrag($event)" x-show="!showResults"
+    class="flex flex-wrap sm:flex-nowrap justify-center items-center gap-2 sm:gap-3 bg-white/90 backdrop-blur-sm p-3 rounded-2xl shadow-2xl border border-gray-200 w-[calc(100vw-2rem)] sm:w-auto max-w-[calc(100vw-2rem)] cursor-move select-none">
 
     <!-- TENSES (Only for Grammar) -->
     @if(($meeting->task_type ?? 0) == 3)
