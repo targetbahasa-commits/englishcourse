@@ -266,25 +266,25 @@ class="fixed z-50 select-none touch-none"
             </div>
 
            <!-- Table Container -->
-           <div class="overflow-y-auto px-6 pb-6" style="max-height: 60vh;">
-               <table class="w-full text-sm text-left border-collapse">
+           <div class="overflow-y-auto overflow-x-auto px-3 sm:px-6 pb-3 sm:pb-6" style="max-height: 60vh;">
+               <table class="w-full text-xs sm:text-sm text-left border-collapse">
                    <thead class="text-white sticky top-0 z-10">
                        <tr>
-                           <th class="p-3 border border-yellow-600 bg-yellow-500 sticky top-0 z-10 shadow-md">No.</th>
-                           <th class="p-3 border border-yellow-600 bg-yellow-500 sticky top-0 z-10 shadow-md">Base Form (V1)</th>
-                           <th class="p-3 border border-yellow-600 bg-yellow-500 sticky top-0 z-10 shadow-md">Past Simple (V2)</th>
-                           <th class="p-3 border border-yellow-600 bg-yellow-500 sticky top-0 z-10 shadow-md">Past Participle (V3)</th>
-                           <th class="p-3 border border-yellow-600 bg-yellow-500 sticky top-0 z-10 shadow-md">Arti</th>
+                           <th class="hidden sm:table-cell p-2 sm:p-3 border border-yellow-600 bg-yellow-500 sticky top-0 z-10 shadow-md">No.</th>
+                           <th class="p-2 sm:p-3 border border-yellow-600 bg-yellow-500 sticky top-0 z-10 shadow-md">Base (V1)</th>
+                           <th class="p-2 sm:p-3 border border-yellow-600 bg-yellow-500 sticky top-0 z-10 shadow-md">Past (V2)</th>
+                           <th class="p-2 sm:p-3 border border-yellow-600 bg-yellow-500 sticky top-0 z-10 shadow-md">Participle (V3)</th>
+                           <th class="p-2 sm:p-3 border border-yellow-600 bg-yellow-500 sticky top-0 z-10 shadow-md">Arti</th>
                        </tr>
                    </thead>
                     <tbody class="divide-y divide-gray-100">
                         <template x-for="(verb, index) in filteredVerbs" :key="index">
                             <tr class="odd:bg-white even:bg-yellow-50 hover:bg-yellow-100 transition-colors">
-                                <td class="p-3 border border-gray-200 text-center text-gray-500" x-text="index + 1"></td>
-                                <td class="p-3 border border-gray-200 font-medium text-gray-800" x-text="verb[0]"></td>
-                                <td class="p-3 border border-gray-200 text-gray-700" x-text="verb[1]"></td>
-                                <td class="p-3 border border-gray-200 text-gray-700" x-text="verb[2]"></td>
-                                <td class="p-3 border border-gray-200 text-gray-600 italic" x-text="verb[3]"></td>
+                                <td class="hidden sm:table-cell p-2 sm:p-3 border border-gray-200 text-center text-gray-500" x-text="index + 1"></td>
+                                <td class="p-2 sm:p-3 border border-gray-200 font-medium text-gray-800" x-text="verb[0]"></td>
+                                <td class="p-2 sm:p-3 border border-gray-200 text-gray-700" x-text="verb[1]"></td>
+                                <td class="p-2 sm:p-3 border border-gray-200 text-gray-700" x-text="verb[2]"></td>
+                                <td class="p-2 sm:p-3 border border-gray-200 text-gray-600 italic" x-text="verb[3]"></td>
                             </tr>
                         </template>
                         
