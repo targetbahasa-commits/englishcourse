@@ -55,11 +55,20 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                     <!-- Introductory Grammar for Writing -->
+                    @if($accessIntroductory)
                     <a href="{{ route('assignments.grammar-writing.track', 'introductory') }}" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
-                        <div class="h-32 bg-gradient-to-br from-orange-400 to-orange-600 relative overflow-hidden shrink-0">
+                    @else
+                    <div class="group relative flex flex-col bg-white/95 rounded-2xl shadow-lg transition-all duration-300 overflow-hidden border-2 border-gray-200">
+                    @endif
+                        <div class="h-32 bg-gradient-to-br from-orange-400 to-orange-600 relative overflow-hidden shrink-0 {{ !$accessIntroductory ? 'opacity-60' : '' }}">
                             <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                            @if(!$accessIntroductory)
+                                <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-gray-700 shadow-sm">
+                                    🔒 Locked
+                                </div>
+                            @endif
                             <div class="absolute bottom-4 left-6">
-                                <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300">
+                                <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center {{ $accessIntroductory ? 'transform group-hover:rotate-6 transition-transform duration-300' : '' }}">
                                     <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                                     </svg>
@@ -69,22 +78,43 @@
                         <div class="flex flex-col flex-1 px-6 pt-4 pb-4">
                             <h3 class="text-lg font-bold text-gray-800 mb-1">Introductory Grammar for Writing</h3>
                             <p class="text-gray-600 text-sm leading-relaxed flex-1">Kelas dasar tata bahasa Inggris untuk penulisan akademik.</p>
+                            @if($accessIntroductory)
                             <div class="w-full text-center bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg mt-4">
                                 Start Learning
                                 <svg class="w-4 h-4 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                 </svg>
                             </div>
+                            @else
+                            <a href="{{ route('brochure') }}" target="_blank" class="flex items-center justify-center gap-2 w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition-all duration-300 text-sm mt-4">
+                                Lihat Brosur Program
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            </a>
+                            @endif
                         </div>
+                    @if($accessIntroductory)
                     </a>
+                    @else
+                    </div>
+                    @endif
 
                     <!-- Complexity Grammar for Writing -->
+                    @if($accessComplexity)
                     <a href="{{ route('assignments.grammar-writing.track', 'complexity') }}" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1">
-                        <div class="h-32 bg-gradient-to-br from-green-400 to-green-600 relative overflow-hidden shrink-0">
+                    @else
+                    <div class="group relative flex flex-col bg-white/95 rounded-2xl shadow-lg transition-all duration-300 overflow-hidden border-2 border-gray-200">
+                    @endif
+                        <div class="h-32 bg-gradient-to-br from-green-400 to-green-600 relative overflow-hidden shrink-0 {{ !$accessComplexity ? 'opacity-60' : '' }}">
                             <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                            @if($accessComplexity)
                             <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-green-600 shadow-sm">
                                 10 Meetings
                             </div>
+                            @else
+                            <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-gray-700 shadow-sm">
+                                🔒 Locked
+                            </div>
+                            @endif
                             <div class="absolute bottom-4 left-6">
                                 <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center">
                                     <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,19 +126,40 @@
                         <div class="flex flex-col flex-1 px-6 pt-4 pb-4">
                             <h3 class="text-lg font-bold text-gray-800 mb-1">Complexity Grammar for Writing</h3>
                             <p class="text-gray-600 text-sm leading-relaxed flex-1">Penguasaan struktur kalimat kompleks untuk penulisan lanjutan.</p>
+                            @if($accessComplexity)
                             <div class="w-full text-center bg-green-500 text-white font-bold py-3 px-6 rounded-xl text-sm mt-4 group-hover:bg-green-600 transition">
                                 Start Learning
                             </div>
+                            @else
+                            <a href="{{ route('brochure') }}" target="_blank" class="flex items-center justify-center gap-2 w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition-all duration-300 text-sm mt-4">
+                                Lihat Brosur Program
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            </a>
+                            @endif
                         </div>
+                    @if($accessComplexity)
                     </a>
+                    @else
+                    </div>
+                    @endif
 
                     <!-- Proficiency Grammar for Writing -->
+                    @if($accessProficiency)
                     <a href="{{ route('assignments.grammar-writing.track', 'proficiency') }}" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1">
-                        <div class="h-32 bg-gradient-to-br from-purple-400 to-purple-600 relative overflow-hidden shrink-0">
+                    @else
+                    <div class="group relative flex flex-col bg-white/95 rounded-2xl shadow-lg transition-all duration-300 overflow-hidden border-2 border-gray-200">
+                    @endif
+                        <div class="h-32 bg-gradient-to-br from-purple-400 to-purple-600 relative overflow-hidden shrink-0 {{ !$accessProficiency ? 'opacity-60' : '' }}">
                             <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                            @if($accessProficiency)
                             <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-purple-600 shadow-sm">
                                 10 Meetings
                             </div>
+                            @else
+                            <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-gray-700 shadow-sm">
+                                🔒 Locked
+                            </div>
+                            @endif
                             <div class="absolute bottom-4 left-6">
                                 <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center">
                                     <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,19 +171,39 @@
                         <div class="flex flex-col flex-1 px-6 pt-4 pb-4">
                             <h3 class="text-lg font-bold text-gray-800 mb-1">Proficiency Grammar for Writing</h3>
                             <p class="text-gray-600 text-sm leading-relaxed flex-1">Tingkat mahir tata bahasa untuk penulisan akademik dan profesional.</p>
+                            @if($accessProficiency)
                             <div class="w-full text-center bg-purple-500 text-white font-bold py-3 px-6 rounded-xl text-sm mt-4 group-hover:bg-purple-600 transition">
                                 Start Learning
                             </div>
+                            @else
+                            <a href="{{ route('brochure') }}" target="_blank" class="flex items-center justify-center gap-2 w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition-all duration-300 text-sm mt-4">
+                                Lihat Brosur Program
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            </a>
+                            @endif
                         </div>
+                    @if($accessProficiency)
                     </a>
+                    @else
+                    </div>
+                    @endif
 
                     <!-- Fast Track Grammar for Writing -->
                     <div class="md:col-start-2 md:col-span-1">
+                    @if($accessFastTrack)
                     <a href="{{ route('assignments.grammar-writing') }}" class="group relative flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1 w-full">
-                        <div class="h-32 bg-gradient-to-br from-blue-400 to-blue-600 relative overflow-hidden shrink-0">
+                    @else
+                    <div class="group relative flex flex-col bg-white/95 rounded-2xl shadow-lg transition-all duration-300 overflow-hidden border-2 border-gray-200 w-full">
+                    @endif
+                        <div class="h-32 bg-gradient-to-br from-blue-400 to-blue-600 relative overflow-hidden shrink-0 {{ !$accessFastTrack ? 'opacity-60' : '' }}">
                             <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                            @if(!$accessFastTrack)
+                                <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-white/90 text-xs font-semibold text-gray-700 shadow-sm">
+                                    🔒 Locked
+                                </div>
+                            @endif
                             <div class="absolute bottom-4 left-6">
-                                <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300">
+                                <div class="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center {{ $accessFastTrack ? 'transform group-hover:rotate-6 transition-transform duration-300' : '' }}">
                                     <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                     </svg>
@@ -142,14 +213,25 @@
                         <div class="flex flex-col flex-1 px-6 pt-4 pb-4">
                             <h3 class="text-lg font-bold text-gray-800 mb-1">Fast Track Grammar for Writing</h3>
                             <p class="text-gray-600 text-sm leading-relaxed flex-1">Kelas tata bahasa Inggris intensif yang akan mempersiapkanmu untuk kelas IELTS.</p>
+                            @if($accessFastTrack)
                             <div class="w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg mt-4">
                                 Start Learning
                                 <svg class="w-4 h-4 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                 </svg>
                             </div>
+                            @else
+                            <a href="{{ route('brochure') }}" target="_blank" class="flex items-center justify-center gap-2 w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition-all duration-300 text-sm mt-4">
+                                Lihat Brosur Program
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            </a>
+                            @endif
                         </div>
+                    @if($accessFastTrack)
                     </a>
+                    @else
+                    </div>
+                    @endif
                     </div>
 
                 </div>

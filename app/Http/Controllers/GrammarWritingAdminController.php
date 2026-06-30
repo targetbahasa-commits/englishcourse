@@ -99,7 +99,18 @@ class GrammarWritingAdminController extends Controller
 
     public function grammarWritingClasses()
     {
-        return view('assignments.grammar-writing-classes');
+        $user = Auth::user();
+        $enrolledSlugs = $this->resolveGrammarEnrolledSlugs($user instanceof \App\Models\User ? $user : null);
+        $isAdminOrTeacher = $user && ($user->isAdmin() || $user->isTeacher());
+
+        $accessIntroductory = $isAdminOrTeacher || in_array('introductory-grammar-for-writing', $enrolledSlugs);
+        $accessComplexity   = $isAdminOrTeacher || in_array('complexity-grammar-for-writing', $enrolledSlugs);
+        $accessProficiency  = $isAdminOrTeacher || in_array('proficiency-grammar-for-writing', $enrolledSlugs);
+        $accessFastTrack    = $isAdminOrTeacher || in_array('fast-track-grammar-for-writing', $enrolledSlugs);
+
+        return view('assignments.grammar-writing-classes', compact(
+            'accessIntroductory', 'accessComplexity', 'accessProficiency', 'accessFastTrack', 'isAdminOrTeacher'
+        ));
     }
 
     public function grammarWritingPractice()
@@ -170,12 +181,12 @@ class GrammarWritingAdminController extends Controller
 
         $isAdminOrTeacher = $user && ($user->isAdmin() || $user->isTeacher());
 
-        // Fast Track is its own standalone track — it does NOT grant access to the other tracks.
+        // Fast Track is its own standalone track — but it grants access to All Grammar Practice
         // Each track is only accessible if the student is enrolled in that specific program.
         $accessIntroductory = $isAdminOrTeacher || in_array('introductory-grammar-for-writing', $enrolledSlugs);
         $accessComplexity   = $isAdminOrTeacher || in_array('complexity-grammar-for-writing', $enrolledSlugs);
         $accessProficiency  = $isAdminOrTeacher || in_array('proficiency-grammar-for-writing', $enrolledSlugs);
-        $accessAll = $isAdminOrTeacher || ($accessIntroductory && $accessComplexity && $accessProficiency);
+        $accessAll = $isAdminOrTeacher || in_array('fast-track-grammar-for-writing', $enrolledSlugs);
 
         return view('assignments.grammar-writing-practice', compact(
             'topics', 'accessIntroductory', 'accessComplexity', 'accessProficiency', 'accessAll'
@@ -387,13 +398,13 @@ class GrammarWritingAdminController extends Controller
 
         $isAdminOrTeacher = $user && ($user->isAdmin() || $user->isTeacher());
 
-        // Fast Track is its own standalone track — it does NOT grant access to other practice levels.
+        // Fast Track is its own standalone track — but it grants access to All Grammar Practice.
         $access = [
             'introductory' => $isAdminOrTeacher || in_array('introductory-grammar-for-writing', $enrolledSlugs),
             'complexity'   => $isAdminOrTeacher || in_array('complexity-grammar-for-writing', $enrolledSlugs),
             'proficiency'  => $isAdminOrTeacher || in_array('proficiency-grammar-for-writing', $enrolledSlugs),
         ];
-        $access['all'] = $isAdminOrTeacher || ($access['introductory'] && $access['complexity'] && $access['proficiency']);
+        $access['all'] = $isAdminOrTeacher || in_array('fast-track-grammar-for-writing', $enrolledSlugs);
 
         if (!$isAdminOrTeacher && (!isset($access[$level]) || !$access[$level])) {
             return redirect()->route('assignments.grammar-writing.practice')->with('error', 'Anda tidak memiliki akses ke level practice ini. Silakan mendaftar program yang sesuai.');
