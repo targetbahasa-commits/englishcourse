@@ -66,7 +66,7 @@ class RegistrationController extends Controller
             'notes'                => 'nullable|string|max:1000',
             'password'             => 'required|string|min:8|confirmed',
             'referral_code'        => 'nullable|string|max:50',
-            'payment_channel'      => 'nullable|in:bank_transfer,cash',
+            'payment_channel'      => 'nullable|in:bank_transfer,cash,qris',
             'cf-turnstile-response' => ['required', new \App\Rules\Turnstile()],
         ], [
             'program_id.required' => 'Silakan pilih program yang kamu minati.',

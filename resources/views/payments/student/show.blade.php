@@ -75,7 +75,7 @@
                         </div>
                         <div>
                             <p class="text-slate-500">Metode</p>
-                            <p class="font-semibold">{{ $payment->payment_channel === 'bank_transfer' ? 'Transfer Bank' : 'Cash' }}</p>
+                            <p class="font-semibold">{{ $payment->payment_channel === 'bank_transfer' ? 'Transfer Bank' : ($payment->payment_channel === 'qris' ? 'QRIS' : 'Cash') }}</p>
                         </div>
                         <div>
                             <p class="text-slate-500">Status</p>
@@ -92,27 +92,41 @@
                     </div>
                 </section>
 
-                @if($payment->payment_channel === 'bank_transfer')
+                @if(in_array($payment->payment_channel, ['bank_transfer', 'qris']))
                     @php
                         $instruction = $payment->meta['instructions'] ?? [];
                         $proofPath = $payment->proof_file ?? ($payment->meta['transfer_proof_path'] ?? null);
                     @endphp
                     <section class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
-                        <h2 class="text-lg font-semibold text-slate-800">Instruksi Transfer</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                            <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
-                                <p class="text-slate-500">Bank</p>
-                                <p class="font-semibold text-slate-800">{{ $instruction['bank_name'] ?? 'BCA' }}</p>
+                        @if($payment->payment_channel === 'bank_transfer')
+                            <h2 class="text-lg font-semibold text-slate-800">Instruksi Transfer</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-4">
+                                <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
+                                    <p class="text-slate-500">Bank</p>
+                                    <p class="font-semibold text-slate-800">{{ $instruction['bank_name'] ?? 'BCA' }}</p>
+                                </div>
+                                <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
+                                    <p class="text-slate-500">No. Rekening</p>
+                                    <p class="font-semibold text-slate-800">{{ $instruction['account_number'] ?? '1234567890' }}</p>
+                                </div>
+                                <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
+                                    <p class="text-slate-500">Atas Nama</p>
+                                    <p class="font-semibold text-slate-800">{{ $instruction['account_holder'] ?? 'Target Bahasa Course' }}</p>
+                                </div>
                             </div>
-                            <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
-                                <p class="text-slate-500">No. Rekening</p>
-                                <p class="font-semibold text-slate-800">{{ $instruction['account_number'] ?? '1234567890' }}</p>
+                        @else
+                            <h2 class="text-lg font-semibold text-slate-800">Pembayaran QRIS</h2>
+                            <div class="mb-4 text-center">
+                                <p class="text-sm text-slate-600 mb-2">Silakan scan kode QRIS berikut menggunakan aplikasi m-banking atau e-wallet Anda:</p>
+                                <img src="{{ asset('images/qris.jpeg') }}?v=1.1" alt="QRIS Code" class="w-64 max-w-full h-auto mx-auto border border-slate-200 rounded-lg shadow-sm">
+                                <div class="mt-3">
+                                    <a href="{{ asset('images/qris.jpeg') }}?v=1.1" download="qris_target_bahasa.jpeg" class="inline-flex items-center justify-center gap-2 text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-4 py-2 rounded-xl transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                        Download QRIS
+                                    </a>
+                                </div>
                             </div>
-                            <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
-                                <p class="text-slate-500">Atas Nama</p>
-                                <p class="font-semibold text-slate-800">{{ $instruction['account_holder'] ?? 'Target Bahasa Course' }}</p>
-                            </div>
-                        </div>
+                        @endif
 
                         @if($proofPath)
                             <div class="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">

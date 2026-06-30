@@ -42,7 +42,7 @@ class PaymentController extends Controller
     {
         $validated = $request->validate([
             'program_id' => ['required', 'integer', 'exists:programs,id'],
-            'payment_channel' => ['required', 'in:bank_transfer,cash'],
+            'payment_channel' => ['required', 'in:bank_transfer,cash,qris'],
             'class_type' => ['nullable', 'string', 'in:regular,semi_private,private'],
         ]);
 
@@ -149,6 +149,12 @@ class PaymentController extends Controller
             ->selectRaw('COALESCE(SUM(CASE WHEN paid_amount IS NOT NULL AND paid_amount < ' . $netAmountExpr . ' THEN 1 ELSE 0 END), 0) as underpaid_count')
             ->first();
 
+        // Payment queue (required by the view)
+        $paymentQueue = $this->adminPaymentQuery->build($filters)
+            ->orderByDesc('created_at')
+            ->paginate(15)
+            ->withQueryString();
+
         $recentPaidPayments = Payment::query()
             ->with(['user', 'program'])
             ->where('status', 'paid')
@@ -185,9 +191,35 @@ class PaymentController extends Controller
             ? round(($totalPaidAmount / $totalNetAmount) * 100, 2)
             : 0.0;
 
+        // Build leadMap from both queues
+        $allUserIds = $paymentQueue->pluck('user_id')
+            ->merge($recentPaidPayments->pluck('user_id'))
+            ->unique()
+            ->filter();
+        $leadMap = \App\Models\RegistrationLead::whereIn('converted_user_id', $allUserIds)
+            ->whereNotNull('converted_user_id')
+            ->get()
+            ->keyBy(fn($l) => $l->converted_user_id . '_' . $l->program_id);
+
+        // Proof pending counts (shown in sidebar/badges)
+        $proofPendingCount = \App\Models\Payment::whereIn('status', ['pending', 'waiting_verification'])
+            ->where(function ($q) {
+                $q->whereNotNull('proof_file')
+                  ->orWhereNotNull('meta->transfer_proof_path');
+            })
+            ->count();
+
+        $oldProofCount = \App\Models\Payment::whereNotNull('proof_file')
+            ->where('created_at', '<', now()->subDays(30))
+            ->count();
+
         return view('payments.admin.index', [
+            'paymentQueue' => $paymentQueue,
             'recentPaidPayments' => $recentPaidPayments,
+            'leadMap' => $leadMap,
             'filters' => $filters,
+            'proofPendingCount' => $proofPendingCount,
+            'oldProofCount' => $oldProofCount,
             'summaryStats' => [
                 'total_invoices' => $totalInvoices,
                 'total_net_amount' => $totalNetAmount,

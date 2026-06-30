@@ -189,8 +189,17 @@
                                 </div>
                                 <input id="password" type="password" name="password" required
                                     autocomplete="new-password"
-                                    class="w-full pl-11 pr-4 py-3 bg-white/90 backdrop-blur border border-gray-200 text-gray-900 rounded-xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 transition-all duration-300 outline-none placeholder-gray-400 shadow-sm"
+                                    class="w-full pl-11 pr-12 py-3 bg-white/90 backdrop-blur border border-gray-200 text-gray-900 rounded-xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 transition-all duration-300 outline-none placeholder-gray-400 shadow-sm"
                                     placeholder="••••••••">
+                                <button type="button" id="togglePassword" class="absolute right-4 text-gray-400 hover:text-blue-600 focus:outline-none transition-colors" tabindex="-1">
+                                    <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    <svg id="eyeSlashIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                    </svg>
+                                </button>
                             </div>
                             <x-input-error :messages="$errors->get('password')" class="mt-2 text-sm text-red-500" />
                         </div>
@@ -210,8 +219,17 @@
                                 </div>
                                 <input id="password_confirmation" type="password" name="password_confirmation" required
                                     autocomplete="new-password"
-                                    class="w-full pl-11 pr-4 py-3 bg-white/90 backdrop-blur border border-gray-200 text-gray-900 rounded-xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 transition-all duration-300 outline-none placeholder-gray-400 shadow-sm"
+                                    class="w-full pl-11 pr-12 py-3 bg-white/90 backdrop-blur border border-gray-200 text-gray-900 rounded-xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 transition-all duration-300 outline-none placeholder-gray-400 shadow-sm"
                                     placeholder="••••••••">
+                                <button type="button" id="togglePasswordConf" class="absolute right-4 text-gray-400 hover:text-blue-600 focus:outline-none transition-colors" tabindex="-1">
+                                    <svg id="eyeIconConf" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    <svg id="eyeSlashIconConf" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -337,6 +355,10 @@
                                 <div>
                                     <p class="font-semibold">Instruksi Pembayaran</p>
                                     <div id="transfer-instructions-bank" class="hidden">
+                                        <div class="mb-3 pb-3 border-b border-blue-200">
+                                            <span class="text-sm">Total Pembayaran</span>
+                                            <div class="font-bold text-lg text-blue-700" id="total-payment-bank">Rp 0</div>
+                                        </div>
                                         <p class="mt-1">Transfer sejumlah tagihan kelas ke rekening berikut:</p>
                                         <ul class="list-disc ml-5 mt-1 text-blue-900 font-medium">
                                             <li>Bank BCA: <strong>{{ setting('bank_account_number') ?: '1234567890' }}</strong>
@@ -346,8 +368,17 @@
                                             </li>
                                         </ul>
                                     </div>
-                                    <div id="transfer-instructions-qris" class="hidden">
-                                        <p class="mt-1 mb-2">Untuk pembayaran via QRIS, silakan hubungi WhatsApp Admin kami untuk meminta barcode QRIS.</p>
+                                    <div id="transfer-instructions-qris" class="hidden text-center">
+                                        <div class="mb-3 pb-3 border-b border-blue-200">
+                                            <span class="text-sm">Total Pembayaran</span>
+                                            <div class="font-bold text-lg text-blue-700" id="total-payment-qris">Rp 0</div>
+                                        </div>
+                                        <p class="mt-1 mb-2">Silakan scan kode QRIS di bawah ini menggunakan aplikasi e-wallet atau m-banking Anda.</p>
+                                        <img src="{{ asset('images/qris.jpeg') }}?v=1.1" alt="QRIS Code" class="w-48 max-w-full h-auto mx-auto border border-slate-200 rounded-lg shadow-sm">
+                                        <a href="{{ asset('images/qris.jpeg') }}?v=1.1" download="qris_target_bahasa.jpeg" class="inline-flex items-center justify-center gap-2 mt-3 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-lg transition">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                            Download QRIS
+                                        </a>
                                     </div>
                                 </div>
                                 <div class="mt-3">
@@ -541,6 +572,8 @@
 
     <!-- OTP Logic Script -->
     <script>
+        const programsData = @json($programs);
+
         (function () {
             const step1 = document.getElementById('student-step-1');
             const step2 = document.getElementById('student-step-2');
@@ -578,6 +611,7 @@
                 if (classTypeContainer) {
                     classTypeContainer.style.display = anySelected ? 'block' : 'none';
                 }
+                if (typeof updateTotalUI === 'function') updateTotalUI();
             }
 
             if (programInput.value) {
@@ -597,16 +631,87 @@
                         label.classList.remove('border-blue-500', 'bg-blue-50', 'ring-2', 'ring-blue-200');
                     }
                 });
+                if (typeof updateTotalUI === 'function') updateTotalUI();
             }
             classTypeRadios.forEach(radio => {
                 radio.addEventListener('change', updateClassTypeStyling);
             });
             updateClassTypeStyling();
 
+            // Password Peek Feature
+            const togglePassword = document.getElementById('togglePassword');
+            const password = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+            const eyeSlashIcon = document.getElementById('eyeSlashIcon');
+
+            if (togglePassword && password) {
+                togglePassword.addEventListener('click', function (e) {
+                    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                    password.setAttribute('type', type);
+                    
+                    if (type === 'text') {
+                        eyeIcon.classList.add('hidden');
+                        eyeSlashIcon.classList.remove('hidden');
+                    } else {
+                        eyeIcon.classList.remove('hidden');
+                        eyeSlashIcon.classList.add('hidden');
+                    }
+                });
+            }
+
+            const togglePasswordConf = document.getElementById('togglePasswordConf');
+            const passwordConf = document.getElementById('password_confirmation');
+            const eyeIconConf = document.getElementById('eyeIconConf');
+            const eyeSlashIconConf = document.getElementById('eyeSlashIconConf');
+
+            if (togglePasswordConf && passwordConf) {
+                togglePasswordConf.addEventListener('click', function (e) {
+                    const type = passwordConf.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordConf.setAttribute('type', type);
+                    
+                    if (type === 'text') {
+                        eyeIconConf.classList.add('hidden');
+                        eyeSlashIconConf.classList.remove('hidden');
+                    } else {
+                        eyeIconConf.classList.remove('hidden');
+                        eyeSlashIconConf.classList.add('hidden');
+                    }
+                });
+            }
+
+            function calculateTotal() {
+                if (!programInput.value) return 'Rp 0';
+                
+                const program = programsData.find(p => p.slug === programInput.value);
+                if (!program) return 'Rp 0';
+                
+                let basePrice = program.price || 0;
+                const classTypeRadio = document.querySelector('input[name="class_type"]:checked');
+                const classType = classTypeRadio ? classTypeRadio.value : 'regular';
+                
+                if (classType === 'private') {
+                    basePrice = program.price_private || basePrice;
+                } else if (classType === 'semi_private') {
+                    basePrice = program.price_semi_private || basePrice;
+                }
+                
+                return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(basePrice);
+            }
+
+            function updateTotalUI() {
+                const total = calculateTotal();
+                const bankTotal = document.getElementById('total-payment-bank');
+                const qrisTotal = document.getElementById('total-payment-qris');
+                if (bankTotal) bankTotal.textContent = total;
+                if (qrisTotal) qrisTotal.textContent = total;
+            }
+
             function markSelectedPaymentChannel() {
                 if (skipPaymentFlow) {
                     return;
                 }
+
+                updateTotalUI();
 
                 paymentChoiceButtons.forEach((btn) => {
                     const isSelected = btn.getAttribute('data-payment-channel') === paymentChannelInput.value;

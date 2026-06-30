@@ -112,7 +112,7 @@ class RegisteredUserController extends Controller
             'acquisition_variant' => ['nullable', 'string', 'max:50'],
             'acquisition_last_cta' => ['nullable', 'string', 'max:100'],
             'program_choice' => ['nullable', 'string'],
-            'payment_channel_choice' => ['nullable', 'string', 'in:bank_transfer,cash'],
+            'payment_channel_choice' => ['nullable', 'string', 'in:bank_transfer,cash,qris'],
             'skip_payment_flow' => ['nullable', 'boolean'],
             'proof_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
         ], [

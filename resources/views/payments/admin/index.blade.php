@@ -362,7 +362,7 @@
                                                 Selisih: {{ $varianceAmount > 0 ? '+' : '' }}Rp{{ number_format($varianceAmount, 0, ',', '.') }}
                                             </p>
                                         @endif
-                                        <p class="text-xs text-slate-500">{{ $payment->payment_channel === 'bank_transfer' ? 'Transfer Bank' : 'Cash' }}</p>
+                                        <p class="text-xs text-slate-500">{{ $payment->payment_channel === 'bank_transfer' ? 'Transfer Bank' : ($payment->payment_channel === 'qris' ? 'QRIS' : 'Cash') }}</p>
                                     </div>
                                 </div>
 

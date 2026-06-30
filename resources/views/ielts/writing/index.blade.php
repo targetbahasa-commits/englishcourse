@@ -59,9 +59,18 @@
             {{-- Main Sections Grid (Redesigned Cards) --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {{-- 1. Listening IELTS Academic --}}
-                <a href="{{ route('assignments.ielts-academic.listening.index') }}"
+                <div class="relative h-full">
+                    @if(!$hasListening)
+                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                            <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </div>
+                            <span class="font-bold text-gray-600 text-sm px-4 text-center">Registrasi IELTS Listening untuk membuka</span>
+                        </div>
+                    @endif
+                <a href="{{ $hasListening ? route('assignments.ielts-academic.listening.index') : 'javascript:void(0)' }}"
                    @if(!empty($isClassEnded) && Auth::user()->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif
-                   class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
+                   class="block h-full group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
                     <div class="h-32 bg-gradient-to-br from-purple-400 to-purple-600 relative overflow-hidden">
                         <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                         <div class="absolute bottom-4 left-6">
@@ -83,10 +92,20 @@
                         </div>
                     </div>
                 </a>
+                </div>
 
                 <!-- Reading: Pink -->
-                <a href="{{ route('assignments.ielts-academic.reading.index') }}"
-                   @if(!empty($isClassEnded) && Auth::user()->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
+                <div class="relative h-full">
+                    @if(!$hasReading)
+                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                            <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </div>
+                            <span class="font-bold text-gray-600 text-sm px-4 text-center">Registrasi IELTS Reading untuk membuka</span>
+                        </div>
+                    @endif
+                <a href="{{ $hasReading ? route('assignments.ielts-academic.reading.index') : 'javascript:void(0)' }}"
+                   @if(!empty($isClassEnded) && Auth::user()->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif class="block h-full group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
                     <div class="h-32 bg-gradient-to-br from-pink-400 to-pink-600 relative overflow-hidden">
                          <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                         <div class="absolute bottom-4 left-6">
@@ -106,10 +125,20 @@
                         </div>
                     </div>
                 </a>
+                </div>
 
                 <!-- Writing: Rose/Red -->
-                <a href="{{ route('assignments.ielts-academic.writing.index') }}"
-                   @if(!empty($isClassEnded) && Auth::user()->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
+                <div class="relative h-full">
+                    @if(!$hasWriting)
+                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                            <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </div>
+                            <span class="font-bold text-gray-600 text-sm px-4 text-center">Registrasi IELTS Writing untuk membuka</span>
+                        </div>
+                    @endif
+                <a href="{{ $hasWriting ? route('assignments.ielts-academic.writing.index') : 'javascript:void(0)' }}"
+                   @if(!empty($isClassEnded) && Auth::user()->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif class="block h-full group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
                     <div class="h-32 bg-gradient-to-br from-red-400 to-red-600 relative overflow-hidden">
                          <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                         <div class="absolute bottom-4 left-6">
@@ -129,10 +158,20 @@
                         </div>
                     </div>
                 </a>
+                </div>
 
                 <!-- Speaking: Orange -->
-                <a href="{{ route('assignments.ielts-academic.speaking.index') }}"
-                   @if(!empty($isClassEnded) && Auth::user()->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
+                <div class="relative h-full">
+                    @if(!$hasSpeaking)
+                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                            <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </div>
+                            <span class="font-bold text-gray-600 text-sm px-4 text-center">Registrasi IELTS Speaking untuk membuka</span>
+                        </div>
+                    @endif
+                <a href="{{ $hasSpeaking ? route('assignments.ielts-academic.speaking.index') : 'javascript:void(0)' }}"
+                   @if(!empty($isClassEnded) && Auth::user()->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif class="block h-full group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
                     <div class="h-32 bg-gradient-to-br from-orange-400 to-orange-600 relative overflow-hidden">
                          <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                         <div class="absolute bottom-4 left-6">
@@ -152,6 +191,7 @@
                         </div>
                     </div>
                 </a>
+                </div>
             </div>
 
             {{-- Practice Section Divider --}}
@@ -164,8 +204,17 @@
              {{-- Practice Grid --}}
              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Practice Listening: Blue -->
-                <a href="{{ route('assignments.ielts-academic.listening.practice.index') }}"
-                   @if(!empty($isClassEnded) && Auth::user()->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
+                <div class="relative h-full">
+                    @if(!$hasListening)
+                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                            <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </div>
+                            <span class="font-bold text-gray-600 text-sm px-4 text-center">Registrasi IELTS Listening untuk membuka</span>
+                        </div>
+                    @endif
+                <a href="{{ $hasListening ? route('assignments.ielts-academic.listening.practice.index') : 'javascript:void(0)' }}"
+                   @if(!empty($isClassEnded) && Auth::user()->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif class="block h-full group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
                     <div class="h-32 bg-gradient-to-br from-blue-400 to-blue-600 relative overflow-hidden">
                          <span class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white px-3 py-1 rounded-lg text-xs font-bold border border-white/30">PRACTICE</span>
                          <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
@@ -188,10 +237,20 @@
                         </div>
                     </div>
                 </a>
+                </div>
 
                  <!-- Practice Reading: Green -->
-                <a href="{{ route('assignments.ielts-academic.reading.practice-index') }}"
-                   @if(!empty($isClassEnded) && Auth::user()->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
+                <div class="relative h-full">
+                    @if(!$hasReading)
+                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                            <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </div>
+                            <span class="font-bold text-gray-600 text-sm px-4 text-center">Registrasi IELTS Reading untuk membuka</span>
+                        </div>
+                    @endif
+                <a href="{{ $hasReading ? route('assignments.ielts-academic.reading.practice-index') : 'javascript:void(0)' }}"
+                   @if(!empty($isClassEnded) && Auth::user()->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif class="block h-full group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
                     <div class="h-32 bg-gradient-to-br from-green-400 to-green-600 relative overflow-hidden">
                          <span class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white px-3 py-1 rounded-lg text-xs font-bold border border-white/30">PRACTICE</span>
                          <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
@@ -212,10 +271,20 @@
                         </div>
                     </div>
                 </a>
+                </div>
 
                  <!-- Practice Structure: Cyan/Teal -->
-                <a href="{{ route('assignments.ielts-academic.writing.practice.index') }}"
-                   @if(!empty($isClassEnded) && Auth::user()->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
+                <div class="relative h-full">
+                    @if(!$hasWriting)
+                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                            <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </div>
+                            <span class="font-bold text-gray-600 text-sm px-4 text-center">Registrasi IELTS Writing untuk membuka</span>
+                        </div>
+                    @endif
+                <a href="{{ $hasWriting ? route('assignments.ielts-academic.writing.practice.index') : 'javascript:void(0)' }}"
+                   @if(!empty($isClassEnded) && Auth::user()->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif class="block h-full group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
                     <div class="h-32 bg-gradient-to-br from-teal-400 to-teal-600 relative overflow-hidden">
                          <span class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white px-3 py-1 rounded-lg text-xs font-bold border border-white/30">PRACTICE</span>
                          <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
@@ -236,10 +305,20 @@
                         </div>
                     </div>
                 </a>
+                </div>
 
                   <!-- Practice Speaking: Indigo -->
-                <a href="{{ route('assignments.ielts-academic.speaking.practice.index') }}"
-                   @if(!empty($isClassEnded) && Auth::user()->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
+                <div class="relative h-full">
+                    @if(!$hasSpeaking)
+                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                            <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </div>
+                            <span class="font-bold text-gray-600 text-sm px-4 text-center">Registrasi IELTS Speaking untuk membuka</span>
+                        </div>
+                    @endif
+                <a href="{{ $hasSpeaking ? route('assignments.ielts-academic.speaking.practice.index') : 'javascript:void(0)' }}"
+                   @if(!empty($isClassEnded) && Auth::user()->isStudent()) onclick="Object.keys(localStorage).forEach(k => { if(k.startsWith('ielts')) localStorage.removeItem(k); });" @endif class="block h-full group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:scale-105 hover:-translate-y-1">
                     <div class="h-32 bg-gradient-to-br from-indigo-400 to-indigo-600 relative overflow-hidden">
                          <span class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white px-3 py-1 rounded-lg text-xs font-bold border border-white/30">PRACTICE</span>
                          <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
@@ -260,6 +339,7 @@
                         </div>
                     </div>
                 </a>
+                </div>
              </div>
 
              {{-- IELTS Vocabularies Section --}}
@@ -286,6 +366,7 @@
                       x-transition:enter-start="opacity-0 -translate-y-4"
                       x-transition:enter-end="opacity-100 translate-y-0">
 
+                     {{-- Level Tabs --}}
                      {{-- Level Tabs --}}
                      <div class="grid grid-cols-5 gap-3 mb-8">
                          @foreach(['A1' => ['Beginner', 'from-green-400 to-green-500'], 'A2' => ['Elementary', 'from-teal-400 to-teal-500'], 'B1' => ['Intermediate', 'from-blue-400 to-blue-500'], 'B2' => ['Upper Inter.', 'from-indigo-400 to-indigo-500'], 'C1' => ['Advanced', 'from-purple-400 to-purple-500']] as $level => $info)
@@ -323,9 +404,6 @@
 
                      @foreach(['A1', 'A2', 'B1', 'B2', 'C1'] as $level)
                      <div x-cloak x-show="activeTab === '{{ $level }}'"
-                          x-transition:enter="transition ease-out duration-200"
-                          x-transition:enter-start="opacity-0"
-                          x-transition:enter-end="opacity-100"
                           class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 max-h-[500px] overflow-y-auto pr-2" style="scrollbar-width: thin; scrollbar-color: #c7d2fe #f8fafc;">
                          @foreach($allVocabs[$level] as $v)
                          @php $colorClass = $typeColors[$v['type']] ?? 'text-gray-700 bg-gray-100'; @endphp

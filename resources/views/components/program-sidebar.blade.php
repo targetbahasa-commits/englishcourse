@@ -118,14 +118,14 @@
         
         <div class="flex-1 overflow-y-auto custom-scrollbar flex flex-col program-sidebar-scroll-safe">
             @if(Auth::check())
-                @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                @if(optional(Auth::user())->isAdmin() || optional(Auth::user())->isTeacher())
                     <div class="sidebar-menu">
                         @include('components.admin-sidebar')
                     </div>
                     
                     <!-- Account Section -->
                     <div class="sidebar-menu program-sidebar-account-safe mt-auto px-6 py-6 border-t border-gray-100 bg-white flex-shrink-0">
-                        <p class="text-xs font-semibold text-gray-400 mb-4">ACCOUNT - {{ strtoupper(Auth::user()->role) }}</p>
+                        <p class="text-xs font-semibold text-gray-400 mb-4">ACCOUNT - {{ strtoupper(optional(Auth::user())->role) }}</p>
                         <nav class="space-y-1">
                             <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-xl font-medium transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
@@ -140,7 +140,7 @@
                             </form>
                         </nav>
                     </div>
-                @elseif(in_array(Auth::user()->role, ['guest', 'guest_quick']))
+                @elseif(in_array(optional(Auth::user())->role, ['guest', 'guest_quick']))
                     {{-- Guest Menu --}}
                     <div class="sidebar-menu px-6 py-4">
                         <p class="text-xs font-semibold text-gray-400 mb-4 uppercase tracking-wider">Explore</p>

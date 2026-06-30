@@ -349,17 +349,39 @@
             </h2>
             <p class="text-sm text-gray-500 mb-4">Buat password untuk login ke sistem kami setelah pendaftaran kamu dikonfirmasi oleh tim Target Bahasa.</p>
 
-            <div>
+            <div x-data="{ showPass: false }">
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Password <span class="text-red-500">*</span></label>
-                <input type="password" name="password" x-model="form.password" placeholder="Minimal 8 karakter"
-                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                <div class="relative flex items-center">
+                    <input :type="showPass ? 'text' : 'password'" name="password" x-model="form.password" placeholder="Minimal 8 karakter"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 pr-12 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                    <button type="button" @click="showPass = !showPass" class="absolute right-4 text-gray-400 hover:text-blue-600 focus:outline-none transition-colors" tabindex="-1">
+                        <svg x-show="!showPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <svg x-show="showPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </svg>
+                    </button>
+                </div>
                 <div x-show="passwordError" x-transition class="mt-1 text-xs text-red-500" x-text="passwordErrorMsg"></div>
             </div>
 
-            <div>
+            <div x-data="{ showPassConf: false }">
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Konfirmasi Password <span class="text-red-500">*</span></label>
-                <input type="password" name="password_confirmation" x-model="form.password_confirmation" placeholder="Ulangi password di atas"
-                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                <div class="relative flex items-center">
+                    <input :type="showPassConf ? 'text' : 'password'" name="password_confirmation" x-model="form.password_confirmation" placeholder="Ulangi password di atas"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 pr-12 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                    <button type="button" @click="showPassConf = !showPassConf" class="absolute right-4 text-gray-400 hover:text-blue-600 focus:outline-none transition-colors" tabindex="-1">
+                        <svg x-show="!showPassConf" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <svg x-show="showPassConf" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             @include('components.password-rules')
@@ -404,6 +426,40 @@
                         <input type="radio" name="payment_channel" value="bank_transfer" x-model="form.payment_channel" class="accent-blue-600 w-5 h-5">
                     </div>
                     <p class="text-sm text-gray-500">Upload bukti transfer lalu tunggu verifikasi admin.</p>
+                    <div x-show="form.payment_channel === 'bank_transfer'" x-collapse class="mt-3 p-4 bg-white rounded-lg border border-gray-200 shadow-sm" style="display: none;">
+                        <div class="flex justify-between items-center mb-3 pb-3 border-b border-gray-100">
+                            <span class="text-sm text-gray-500">Total Pembayaran</span>
+                            <span class="font-bold text-lg text-blue-700" x-text="calculateTotal()"></span>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-1">Transfer ke rekening berikut:</p>
+                        <p class="font-semibold text-gray-900">{{ setting('bank_name', 'BCA') }}</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="font-bold text-lg text-gray-800 tracking-wider">{{ setting('bank_account_number', '1234567890') }}</span>
+                            <button type="button" @click.prevent="navigator.clipboard.writeText('{{ setting('bank_account_number', '1234567890') }}'); alert('Nomor rekening disalin!')" class="text-blue-600 hover:text-blue-800 p-1" title="Copy Rekening">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-1">a.n. {{ setting('bank_account_holder', 'Target Bahasa Course') }}</p>
+                    </div>
+                </label>
+
+                <label class="flex flex-col gap-1 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-blue-300 transition has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:checked]:ring-2 has-[:checked]:ring-blue-200">
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-gray-900">QRIS</span>
+                        <input type="radio" name="payment_channel" value="qris" x-model="form.payment_channel" class="accent-blue-600 w-5 h-5">
+                    </div>
+                    <p class="text-sm text-gray-500">Scan kode QRIS lalu upload bukti pembayaran.</p>
+                    <div x-show="form.payment_channel === 'qris'" x-collapse class="mt-3 p-4 bg-white rounded-lg border border-gray-200 shadow-sm text-center" style="display: none;">
+                        <div class="flex justify-between items-center mb-3 pb-3 border-b border-gray-100">
+                            <span class="text-sm text-gray-500">Total Pembayaran</span>
+                            <span class="font-bold text-lg text-blue-700" x-text="calculateTotal()"></span>
+                        </div>
+                        <img src="{{ asset('images/qris.jpeg') }}?v=1.1" alt="QRIS Code" class="w-48 max-w-full h-auto mx-auto border border-slate-200 rounded-lg shadow-sm mt-2">
+                        <a href="{{ asset('images/qris.jpeg') }}?v=1.1" download="qris_target_bahasa.jpeg" class="inline-flex items-center justify-center gap-2 mt-3 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-lg transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Download QRIS
+                        </a>
+                    </div>
                 </label>
 
                 <label class="flex flex-col gap-1 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-blue-300 transition has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:checked]:ring-2 has-[:checked]:ring-blue-200">
@@ -466,7 +522,7 @@
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-500">Pembayaran</span>
-                    <span class="font-semibold capitalize text-blue-600" x-text="form.payment_channel === 'bank_transfer' ? 'Transfer Bank' : 'Cash'"></span>
+                    <span class="font-semibold capitalize text-blue-600" x-text="form.payment_channel === 'bank_transfer' ? 'Transfer Bank' : (form.payment_channel === 'qris' ? 'QRIS' : 'Cash')"></span>
                 </div>
                 <div class="flex justify-between" x-show="form.referral_code">
                     <span class="text-gray-500">Kode Referral</span>
@@ -577,6 +633,7 @@
 <script>
 function regForm() {
     const batchOptions = @json($batchOptions);
+    const programsData = @json($programs);
 
     return {
         step: 1,
@@ -657,6 +714,23 @@ function regForm() {
         selectedBatchLabel() {
             const selected = batchOptions.find((item) => String(item.id) === String(this.form.class_period_id));
             return selected ? selected.label : '';
+        },
+        calculateTotal() {
+            if (!this.form.program_id) return 'Rp 0';
+            
+            const program = programsData.find(p => String(p.id) === String(this.form.program_id));
+            if (!program) return 'Rp 0';
+            
+            let basePrice = program.price || 0;
+            const mode = this.form.mode;
+            
+            // Program is regular by default in this form (we don't have classType selection like private/semi_private in form.blade.php explicitly, 
+            // but if they select offline, we should use offline price)
+            if (mode === 'offline') {
+                basePrice = program.price_offline || basePrice;
+            }
+            
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(basePrice);
         },
         onBatchChanged() {
             const selected = batchOptions.find((item) => String(item.id) === String(this.form.class_period_id));

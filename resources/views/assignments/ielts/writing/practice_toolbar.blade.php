@@ -68,10 +68,10 @@
     <!-- TENSES (Only for Grammar) -->
     @if(($meeting->task_type ?? 0) == 3)
         <div x-data="{ openTenses: false }">
-            <button @click="openTenses = true"
-                class="bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-                Tenses
-            </button>
+            <button title="Tenses" @click="openTenses = true"
+                class="bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </button>
             <template x-teleport="body">
                 <div x-show="openTenses" style="display: none;"
                     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-[100]"
@@ -106,10 +106,10 @@
 
         <!-- TENSES CHART (HTML Table) -->
         <div x-data="{ openTensesChart: false }">
-            <button @click="openTensesChart = true"
-                class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-                Tenses Chart
-            </button>
+            <button title="Tenses Chart" @click="openTensesChart = true"
+                class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+        </button>
             <template x-teleport="body">
                 <div x-show="openTensesChart" style="display: none;"
                     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-[100]"
@@ -466,10 +466,10 @@
                     return this.words.filter(item => item.category.toLowerCase().includes(query) || item.words.toLowerCase().includes(query));
                 }
             }">
-            <button @click="open = true"
-                class="bg-teal-500 hover:bg-teal-600 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-                Linking Words
-            </button>
+            <button title="Linking Words" @click="open = true"
+                class="bg-teal-500 hover:bg-teal-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+        </button>
 
             <template x-teleport="body">
                 <div x-show="open" style="display: none;"
@@ -520,10 +520,10 @@
 
     <!-- 6. DICTIONARY (Full Logic) -->
 <div x-data="dictionaryDataToolbar()">
-    <button @click="open = true"
-        class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-        Dictionary
-    </button>
+    <button title="Dictionary" @click="open = true"
+        class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold w-10 h-10 p-0 rounded-full justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+        </button>
     <template x-teleport="body">
         <div x-show="open" style="display: none;"
             class="fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center p-4">
@@ -606,7 +606,6 @@
             </div>
         </div>
     </template>
-</div>
 </div>
 
 <script>
@@ -737,9 +736,9 @@
             return this.verbs.filter(verb => verb.some(v => v.toLowerCase().includes(query)));
         }
     }">
-        <button @click="open = true"
-            class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-            Irregular Verbs
+        <button title="Irregular Verbs" @click="open = true"
+            class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
         </button>
 
         <template x-teleport="body">
@@ -1955,10 +1954,11 @@
 <!-- LESSON EXPLANATION -->
 @if(($meeting->task_type ?? 0) == 3)
     <div>
-        <button @click="$dispatch('open-lesson-explanation')"
-            class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-            Lesson Explanation
+        <button title="Lesson Explanation" @click="$dispatch('open-lesson-explanation')"
+            class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         </button>
     </div>
 @endif
 
+</div>

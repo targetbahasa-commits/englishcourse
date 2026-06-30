@@ -20,7 +20,7 @@ class EloquentRegistrationRepository implements RegistrationRepository
                 $query->where('slug', 'not like', 'cambridge-%')
                       ->where('slug', 'not like', 'toefl-itp-mock-package-%');
             })
-            ->get(['id', 'name', 'color', 'icon', 'program_type', 'description'])
+            ->get(['id', 'name', 'color', 'icon', 'program_type', 'description', 'price', 'price_offline', 'price_private', 'price_private_offline', 'price_semi_private', 'price_semi_private_offline'])
             ->all();
     }
 
