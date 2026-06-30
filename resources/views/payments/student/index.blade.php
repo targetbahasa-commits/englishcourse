@@ -125,13 +125,13 @@
                         <table class="min-w-full text-sm">
                             <thead>
                                 <tr class="text-left text-slate-500 border-b border-slate-200">
-                                    <th class="py-3 pr-4">Invoice</th>
-                                    <th class="py-3 pr-4">Program</th>
-                                    <th class="py-3 pr-4">Total</th>
-                                    <th class="py-3 pr-4">Metode</th>
-                                    <th class="py-3 pr-4">Status</th>
-                                    <th class="py-3 pr-4">Tanggal</th>
-                                    <th class="py-3">Aksi</th>
+                                    <th class="py-3 pr-4 whitespace-nowrap">Invoice</th>
+                                    <th class="py-3 pr-4 whitespace-nowrap min-w-[200px]">Program</th>
+                                    <th class="py-3 pr-4 whitespace-nowrap">Total</th>
+                                    <th class="py-3 pr-4 whitespace-nowrap">Metode</th>
+                                    <th class="py-3 pr-4 whitespace-nowrap">Status</th>
+                                    <th class="py-3 pr-4 whitespace-nowrap">Tanggal</th>
+                                    <th class="py-3 whitespace-nowrap">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -140,19 +140,19 @@
                                         $netAmount = max(0, (int) $payment->amount - (int) $payment->discount_amount);
                                     @endphp
                                     <tr class="border-b border-slate-100 text-slate-700">
-                                        <td class="py-3 pr-4 font-medium">{{ $payment->invoice_number }}</td>
-                                        <td class="py-3 pr-4">
+                                        <td class="py-3 pr-4 font-medium whitespace-nowrap">{{ $payment->invoice_number }}</td>
+                                        <td class="py-3 pr-4 min-w-[200px]">
                                             <div class="font-medium text-slate-800">{{ $payment->program->name ?? '-' }}</div>
                                             <div class="text-xs text-slate-500 mt-0.5 capitalize">{{ str_replace('_', ' ', $payment->meta['class_type'] ?? 'regular') }}</div>
                                         </td>
-                                        <td class="py-3 pr-4">
+                                        <td class="py-3 pr-4 whitespace-nowrap">
                                             <div class="font-semibold">Rp{{ number_format($netAmount, 0, ',', '.') }}</div>
                                             @if((int) $payment->discount_amount > 0)
                                                 <div class="text-xs text-emerald-600">Diskon Rp{{ number_format((int) $payment->discount_amount, 0, ',', '.') }}</div>
                                             @endif
                                         </td>
-                                        <td class="py-3 pr-4">{{ $payment->payment_channel === 'bank_transfer' ? 'Transfer Bank' : 'Cash' }}</td>
-                                        <td class="py-3 pr-4">
+                                        <td class="py-3 pr-4 whitespace-nowrap">{{ $payment->payment_channel === 'bank_transfer' ? 'Transfer Bank' : ($payment->payment_channel === 'qris' ? 'QRIS' : 'Cash') }}</td>
+                                        <td class="py-3 pr-4 whitespace-nowrap">
                                             @if($payment->status === 'paid')
                                                 <span class="inline-flex items-center rounded-full bg-emerald-100 text-emerald-700 px-2.5 py-1 text-xs font-semibold">Paid</span>
                                             @elseif($payment->status === 'failed')
@@ -161,8 +161,8 @@
                                                 <span class="inline-flex items-center rounded-full bg-amber-100 text-amber-700 px-2.5 py-1 text-xs font-semibold">Pending</span>
                                             @endif
                                         </td>
-                                        <td class="py-3 pr-4">{{ optional($payment->created_at)->format('d M Y H:i') }}</td>
-                                        <td class="py-3">
+                                        <td class="py-3 pr-4 whitespace-nowrap">{{ optional($payment->created_at)->format('d M Y H:i') }}</td>
+                                        <td class="py-3 whitespace-nowrap">
                                             <a href="{{ route('student.payments.show', $payment) }}" class="inline-flex items-center rounded-lg bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 text-xs font-semibold transition">
                                                 Detail
                                             </a>
