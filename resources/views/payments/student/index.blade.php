@@ -121,7 +121,57 @@
                 <section class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
                     <h2 class="text-lg font-semibold text-slate-800 mb-4">Riwayat Pembayaran</h2>
 
-                    <div class="overflow-x-auto">
+                    <!-- Mobile View -->
+                    <div class="block md:hidden space-y-4">
+                        @forelse($payments as $payment)
+                            @php
+                                $netAmount = max(0, (int) $payment->amount - (int) $payment->discount_amount);
+                            @endphp
+                            <div class="border border-slate-200 rounded-xl p-4 flex flex-col gap-3">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <div class="text-xs font-mono text-slate-500">{{ $payment->invoice_number }}</div>
+                                        <div class="font-semibold text-slate-800 mt-1">{{ $payment->program->name ?? '-' }}</div>
+                                        <div class="text-xs text-slate-500 capitalize">{{ str_replace('_', ' ', $payment->meta['class_type'] ?? 'regular') }}</div>
+                                    </div>
+                                    <div>
+                                        @if($payment->status === 'paid')
+                                            <span class="inline-flex items-center rounded-full bg-emerald-100 text-emerald-700 px-2.5 py-1 text-xs font-semibold">Paid</span>
+                                        @elseif($payment->status === 'failed')
+                                            <span class="inline-flex items-center rounded-full bg-red-100 text-red-700 px-2.5 py-1 text-xs font-semibold">Failed</span>
+                                        @else
+                                            <span class="inline-flex items-center rounded-full bg-amber-100 text-amber-700 px-2.5 py-1 text-xs font-semibold">Pending</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-2 text-sm mt-1">
+                                    <div>
+                                        <div class="text-slate-500 text-xs">Total</div>
+                                        <div class="font-semibold text-slate-800">Rp{{ number_format($netAmount, 0, ',', '.') }}</div>
+                                        @if((int) $payment->discount_amount > 0)
+                                            <div class="text-xs text-emerald-600">Diskon Rp{{ number_format((int) $payment->discount_amount, 0, ',', '.') }}</div>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <div class="text-slate-500 text-xs">Tanggal</div>
+                                        <div class="font-medium text-slate-800">{{ optional($payment->created_at)->format('d M Y') }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-2 pt-3 border-t border-slate-100 flex justify-end">
+                                    <a href="{{ route('student.payments.show', $payment) }}" class="inline-flex items-center justify-center w-full rounded-lg bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 text-sm font-semibold transition">
+                                        Lihat Detail
+                                    </a>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="py-6 text-center text-slate-500 border border-slate-200 rounded-xl text-sm">Belum ada transaksi pembayaran.</div>
+                        @endforelse
+                    </div>
+
+                    <!-- Desktop View -->
+                    <div class="hidden md:block overflow-x-auto">
                         <table class="min-w-full text-sm">
                             <thead>
                                 <tr class="text-left text-slate-500 border-b border-slate-200">
