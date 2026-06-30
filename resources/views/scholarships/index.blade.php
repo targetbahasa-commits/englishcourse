@@ -3,7 +3,7 @@
         Scholarship Search
     @endslot
 
-<div class="pl-4 xl:pl-8 pr-0 py-8 w-full flex flex-col lg:flex-row gap-4 lg:gap-6">
+<div class="px-4 lg:pl-8 lg:pr-0 py-6 md:py-8 w-full flex flex-col lg:flex-row gap-6">
     
     <!-- Main Content Column -->
     <div class="flex-1 min-w-0">
@@ -18,7 +18,7 @@
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-blue-200 text-sm font-semibold mb-6 backdrop-blur-md">
                 <span>✨</span> AI-Powered Match
             </div>
-            <h1 class="text-4xl md:text-5xl font-black mb-4 leading-tight">
+            <h1 class="text-3xl md:text-5xl font-black mb-4 leading-tight">
                 Find Scholarships That Match Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">English Level</span> 🎓
             </h1>
             <p class="text-lg md:text-xl text-blue-100 mb-8 opacity-90 leading-relaxed max-w-2xl">
@@ -334,7 +334,7 @@
     </div> <!-- Close Main Content Column -->
 
     <!-- Right Sidebar Column -->
-    <div class="w-full lg:w-[420px] xl:w-[460px] shrink-0 space-y-6 mt-8 lg:mt-0 pr-4 xl:pr-8">
+    <div class="w-full lg:w-[420px] xl:w-[460px] shrink-0 space-y-6 mt-8 lg:mt-0 lg:pr-4 xl:pr-8">
         
         @guest
         <!-- Lead Gen: Free English Test -->
