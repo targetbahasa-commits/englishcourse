@@ -123,8 +123,23 @@ trait HandlesAssignmentAccess
 
     protected function normalizeAssignmentProgramSlug(?string $slug): ?string
     {
-        if ($slug === 'grammar-writing') {
+        if (in_array($slug, [
+            'grammar-writing',
+            'introductory-grammar-for-writing',
+            'complexity-grammar-for-writing',
+            'proficiency-grammar-for-writing',
+            'fast-track-grammar-for-writing'
+        ], true)) {
             return 'grammar-for-writing';
+        }
+
+        if (in_array($slug, [
+            'introductory-speaking',
+            'intermediate-speaking',
+            'advanced-speaking',
+            'grammar-for-speaking'
+        ], true)) {
+            return 'speaking';
         }
 
         if (in_array($slug, ['ielts-academic-listening', 'ielts-academic-reading', 'ielts-academic-writing', 'ielts-academic-speaking', 'ielts-academic-full-package'], true)) {
