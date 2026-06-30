@@ -1079,12 +1079,12 @@ Route::middleware(['auth'])->group(function () {
         ->name('assignments.speaking.level');
     Route::get('/assignments/speaking/fast-track', [App\Http\Controllers\SpeakingAdminController::class, 'speaking'])->name('assignments.speaking');
     Route::post('/assignments/meeting/{meeting}/toggle-lock', [App\Http\Controllers\GrammarWritingAdminController::class, 'toggleLock'])->name('assignments.meeting.toggle-lock');
-    Route::get('/assignments/grammar-writing/fast-track/meeting1', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting1'])->name('assignments.grammar-writing.meeting1');
-    Route::post('/assignments/grammar-writing/fast-track/meeting1', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting1Submit'])->name('assignments.grammar-writing.meeting1.submit');
-    Route::post('/assignments/grammar-writing/fast-track/meeting1/reset', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting1Reset'])->name('assignments.grammar-writing.meeting1.reset');
-    Route::get('/assignments/grammar-writing/fast-track/meeting2', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting2'])->name('assignments.grammar-writing.meeting2');
-    Route::post('/assignments/grammar-writing/fast-track/meeting2', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting2Submit'])->name('assignments.grammar-writing.meeting2.submit');
-    Route::post('/assignments/grammar-writing/fast-track/meeting2/reset', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting2Reset'])->name('assignments.grammar-writing.meeting2.reset');
+    Route::get('/assignments/grammar-writing/fast-track/meeting1', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting2'])->name('assignments.grammar-writing.meeting1');
+    Route::post('/assignments/grammar-writing/fast-track/meeting1', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting2Submit'])->name('assignments.grammar-writing.meeting1.submit');
+    Route::post('/assignments/grammar-writing/fast-track/meeting1/reset', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting2Reset'])->name('assignments.grammar-writing.meeting1.reset');
+    Route::get('/assignments/grammar-writing/fast-track/meeting2', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting2Practice'])->name('assignments.grammar-writing.meeting2');
+    Route::post('/assignments/grammar-writing/fast-track/meeting2', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting2PracticeSubmit'])->name('assignments.grammar-writing.meeting2.submit');
+    Route::post('/assignments/grammar-writing/fast-track/meeting2/reset', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting2PracticeReset'])->name('assignments.grammar-writing.meeting2.reset');
     Route::get('/assignments/grammar-writing/fast-track/meeting3', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting3'])->name('assignments.grammar-writing.meeting3');
     Route::post('/assignments/grammar-writing/fast-track/meeting3', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting3Submit'])->name('assignments.grammar-writing.meeting3.submit');
     Route::post('/assignments/grammar-writing/fast-track/meeting{meeting}/draft', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meetingDraft'])->whereNumber('meeting')->name('assignments.grammar-writing.meeting.draft');

@@ -87,6 +87,80 @@ class GrammarWritingSessionController extends Controller
         );
     }
 
+    // ── Meeting 2 Practice (fast-track/meeting2) ──────────────────────────────
+    // Latihan penerapan tenses — same view/data as meeting2 (materi)
+    // but stored under separate session keys so progress is independent.
+
+    public function meeting2Practice(BuildGrammarWritingMeeting2ViewData $buildGrammarWritingMeeting2ViewData)
+    {
+        // Remap session keys so meeting2Practice reads from its own namespace
+        $stageKey  = 'meeting2p_stage';
+        $stage     = session($stageKey, 1);
+
+        return view('assignments.grammar-writing.meeting2', array_merge(
+            $buildGrammarWritingMeeting2ViewData->handle(
+                $this->data->meeting2Tenses,
+                $this->data->meeting2TenseExamples,
+                $this->data->meeting2Vocabularies,
+            ),
+            [
+                // Override session values read by the view so they use the practice namespace
+                'stage'          => $stage,
+                'results'        => session('meeting2p_results'),
+                'transResults'   => session('meeting2p_trans_results'),
+                'scorePart1'     => session('meeting2p_score_part1', 0),
+                'scorePart2'     => session('meeting2p_score_part2', 0),
+                'totalScore'     => session('meeting2p_total_score', 0),
+                'submitted'      => session('meeting2p_submitted', false),
+            ]
+        ));
+    }
+
+    public function meeting2PracticeSubmit(Request $request, EvaluateGrammarWritingMeeting2Submission $evaluateGrammarWritingMeeting2Submission)
+    {
+        $stage = session('meeting2p_stage', 1);
+
+        $evaluation = $evaluateGrammarWritingMeeting2Submission->handle(
+            $stage,
+            $request->all(),
+            $this->data->meeting2Tenses,
+            $this->data->meeting2TranslationSentences,
+            $this->data->meeting2TranslationMatrix,
+            (int) session('meeting2p_score_part1', 0),
+        );
+
+        // Remap session keys to practice namespace
+        if (!empty($evaluation['session'])) {
+            $remapped = [];
+            foreach ($evaluation['session'] as $key => $value) {
+                $remapped[str_replace('meeting2_', 'meeting2p_', $key)] = $value;
+            }
+            session($remapped);
+        }
+
+        if (!empty($evaluation['saveScore'])) {
+            $this->saveMeetingScore(2, $evaluation['totalScore']);
+        }
+
+        return redirect()->route('assignments.grammar-writing.meeting2');
+    }
+
+    public function meeting2PracticeReset()
+    {
+        session()->forget([
+            'meeting2p_stage',
+            'meeting2p_results',
+            'meeting2p_trans_results',
+            'meeting2p_score_part1',
+            'meeting2p_score_part2',
+            'meeting2p_total_score',
+            'meeting2p_submitted',
+        ]);
+
+        return redirect()->route('assignments.grammar-writing.meeting2');
+    }
+
+
     public function meeting5(BuildGrammarWritingMeeting5ViewData $buildGrammarWritingMeeting5ViewData)
     {
         return view('assignments.grammar-writing.meeting5', $buildGrammarWritingMeeting5ViewData->handle());
