@@ -3,15 +3,19 @@
         y: window.innerHeight / 2 - 100,
         init() {
             setTimeout(() => {
-                this.x = window.innerWidth - this.$el.offsetWidth - 15;
-                this.y = (window.innerHeight - this.$el.offsetHeight) / 2;
+                let w = this.$el.offsetWidth > 0 ? this.$el.offsetWidth : 48;
+                let h = this.$el.offsetHeight > 0 ? this.$el.offsetHeight : 300;
+                this.x = window.innerWidth - w - 15;
+                this.y = (window.innerHeight - h) / 2;
                 if (this.y < 15) this.y = 15;
             }, 100);
             
             // Adjust on resize
             window.addEventListener('resize', () => {
-                this.x = window.innerWidth - this.$el.offsetWidth - 15;
-                this.y = (window.innerHeight - this.$el.offsetHeight) / 2;
+                let w = this.$el.offsetWidth > 0 ? this.$el.offsetWidth : 48;
+                let h = this.$el.offsetHeight > 0 ? this.$el.offsetHeight : 300;
+                this.x = window.innerWidth - w - 15;
+                this.y = (window.innerHeight - h) / 2;
                 if (this.y < 15) this.y = 15;
             });
         },
