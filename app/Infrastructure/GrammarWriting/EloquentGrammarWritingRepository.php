@@ -14,17 +14,29 @@ class EloquentGrammarWritingRepository implements GrammarWritingRepository
 {
     public function getQuestionsByMeetingExcludingParagraph(int $meetingNumber): array
     {
-        return GrammarQuestion::where('meeting_number', $meetingNumber)
-            ->where('question_type', '!=', 'paragraph')
-            ->get()->all();
+        $query = GrammarQuestion::where('meeting_number', $meetingNumber);
+        
+        if (\Illuminate\Support\Facades\Schema::hasColumn('grammar_questions', 'question_type')) {
+            $query->where('question_type', '!=', 'paragraph');
+        } else {
+            $query->where('question_number', '!=', 999);
+        }
+        
+        return $query->get()->all();
     }
 
     public function getQuestionsByMeetingWithNullSection(int $meetingNumber): array
     {
-        return GrammarQuestion::where('meeting_number', $meetingNumber)
-            ->whereNull('section')
-            ->where('question_type', '!=', 'paragraph')
-            ->get()->all();
+        $query = GrammarQuestion::where('meeting_number', $meetingNumber)
+            ->whereNull('section');
+            
+        if (\Illuminate\Support\Facades\Schema::hasColumn('grammar_questions', 'question_type')) {
+            $query->where('question_type', '!=', 'paragraph');
+        } else {
+            $query->where('question_number', '!=', 999);
+        }
+        
+        return $query->get()->all();
     }
 
     public function getQuestionsByMeetingAndSection(int $meetingNumber, string $section): array
