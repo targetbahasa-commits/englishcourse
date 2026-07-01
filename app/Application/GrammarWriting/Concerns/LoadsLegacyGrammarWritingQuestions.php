@@ -13,7 +13,7 @@ trait LoadsLegacyGrammarWritingQuestions
         ?string $sectionFilter,
         callable $mapFallbackQuestion
     ): Collection {
-        $questions = collect($this->repository->getLegacyQuestionsByMeeting($meetingNumber, $sectionFilter))
+        $questions = collect($this->repository->getLegacyQuestionsByMeeting($meetingNumber, $hasSectionColumn ? $sectionFilter : null))
             ->filter(function ($question) use ($hasSectionColumn) {
                 return $hasSectionColumn || (int) $question->question_number !== 999;
             })
