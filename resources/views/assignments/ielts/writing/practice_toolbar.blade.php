@@ -76,12 +76,12 @@
         </button>
             <template x-teleport="body">
                 <div x-show="openTenses" style="display: none;"
-                    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-[100]"
+                    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-2 md:p-4 z-[100]"
                     x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
                     x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
                     x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
                     <div @click.outside="openTenses = false"
-                        class="bg-white rounded-xl shadow-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-all"
+                        class="bg-white rounded-xl shadow-2xl p-3 md:p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-all"
                         x-transition:enter="transition ease-out duration-300"
                         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100">
@@ -94,9 +94,9 @@
                                 </svg>
                             </button>
                         </div>
-                        <div class="flex justify-center mb-6">
+                        <div class="flex justify-center mb-6 overflow-x-auto w-full pb-2">
                             <img src="{{ asset('images/materials/grammar/tenses-chart.png') }}" alt="Tenses Chart"
-                                class="max-w-full h-auto rounded shadow-sm border border-gray-200">
+                                class="min-w-[600px] md:min-w-0 md:max-w-full h-auto rounded shadow-sm border border-gray-200">
                         </div>
                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800 text-sm">
                             <p>💡 Gunakan chart ini sebagai panduan untuk menentukan tenses yang tepat</p>
