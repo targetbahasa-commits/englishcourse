@@ -119,12 +119,12 @@
                     x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
                     x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
                     <div @click.outside="openTensesChart = false"
-                        class="bg-white rounded-xl shadow-2xl p-6 max-w-6xl w-full max-h-[90vh] overflow-y-auto transform transition-all"
+                        class="bg-white rounded-xl shadow-2xl p-3 md:p-6 max-w-6xl w-full max-h-[90vh] overflow-y-auto transform transition-all"
                         x-transition:enter="transition ease-out duration-300"
                         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100">
                         <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-2xl font-bold text-gray-800">Tenses Reference Chart</h3>
+                            <h3 class="text-lg md:text-2xl font-bold text-gray-800">Tenses Reference Chart</h3>
                             <button @click="openTensesChart = false" class="text-gray-400 hover:text-gray-600">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -138,10 +138,10 @@
                                 <thead>
                                     <tr class="bg-yellow-50">
                                         <th class="border border-gray-300 p-2 w-12"></th>
-                                        <th class="border border-gray-300 p-3 font-bold text-lg text-left">Simple</th>
-                                        <th class="border border-gray-300 p-3 font-bold text-lg text-left">Continuous</th>
-                                        <th class="border border-gray-300 p-3 font-bold text-lg text-left">Perfect</th>
-                                        <th class="border border-gray-300 p-3 font-bold text-lg text-left">Perfect
+                                        <th class="border border-gray-300 p-3 font-bold text-base md:text-lg text-left">Simple</th>
+                                        <th class="border border-gray-300 p-3 font-bold text-base md:text-lg text-left">Continuous</th>
+                                        <th class="border border-gray-300 p-3 font-bold text-base md:text-lg text-left">Perfect</th>
+                                        <th class="border border-gray-300 p-3 font-bold text-base md:text-lg text-left">Perfect
                                             Continuous</th>
                                     </tr>
                                 </thead>
@@ -150,87 +150,87 @@
                                     <tr>
                                         <th class="border border-gray-300 p-0 bg-[#8cb6e8] text-black w-12 align-middle">
                                             <div style="writing-mode: vertical-rl; transform: rotate(180deg);"
-                                                class="mx-auto text-2xl font-bold tracking-widest py-4">Present</div>
+                                                class="mx-auto text-lg md:text-2xl font-bold tracking-widest py-2 md:py-4">Present</div>
                                         </th>
-                                        <td class="border border-gray-300 bg-[#e4f0fa] p-4 align-top min-w-[250px]">
+                                        <td class="border border-gray-300 bg-[#e4f0fa] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
                                             <div class="space-y-4">
                                                 <div>
                                                     <div
                                                         class="inline-block bg-blue-200 text-blue-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Active)</div>
-                                                    <p class="font-bold mb-1 text-base">S + V1(s/es) + O</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + V1(s/es) + O</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Passive)</div>
-                                                    <p class="font-bold mb-1 text-base">S + is/am/are + V3</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + is/am/are + V3</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Nominal</div>
-                                                    <p class="font-bold mb-1 text-base">S + is/am/are + ANA</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + is/am/are + ANA</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="border border-gray-300 bg-[#e4f0fa] p-4 align-top min-w-[250px]">
+                                        <td class="border border-gray-300 bg-[#e4f0fa] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
                                             <div class="space-y-4">
                                                 <div>
                                                     <div
                                                         class="inline-block bg-blue-200 text-blue-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Active)</div>
-                                                    <p class="font-bold mb-1 text-base">S + is/am/are + V-ing + O</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + is/am/are + V-ing + O</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Passive)</div>
-                                                    <p class="font-bold mb-1 text-base">S + is/am/are + being + V3</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + is/am/are + being + V3</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Nominal</div>
-                                                    <p class="font-bold mb-1 text-base">S + is/am/are + being + ANA</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + is/am/are + being + ANA</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="border border-gray-300 bg-[#e4f0fa] p-4 align-top min-w-[250px]">
+                                        <td class="border border-gray-300 bg-[#e4f0fa] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
                                             <div class="space-y-4">
                                                 <div>
                                                     <div
                                                         class="inline-block bg-blue-200 text-blue-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Active)</div>
-                                                    <p class="font-bold mb-1 text-base">S + has/have + V3 + O</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + has/have + V3 + O</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Passive)</div>
-                                                    <p class="font-bold mb-1 text-base">S + has/have + been + V3</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + has/have + been + V3</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Nominal</div>
-                                                    <p class="font-bold mb-1 text-base">S + has/have + been + ANA</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + has/have + been + ANA</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="border border-gray-300 bg-[#e4f0fa] p-4 align-top min-w-[250px]">
+                                        <td class="border border-gray-300 bg-[#e4f0fa] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
                                             <div class="space-y-4">
                                                 <div>
                                                     <div
                                                         class="inline-block bg-blue-200 text-blue-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Active)</div>
-                                                    <p class="font-bold mb-1 text-base">S + has/have + been + V-ing + O</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + has/have + been + V-ing + O</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Passive)</div>
-                                                    <p class="font-bold mb-1 text-base">S + has/have + been + being + V3</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + has/have + been + being + V3</p>
                                                 </div>
                                                 <div>
                                                     <div
@@ -246,87 +246,87 @@
                                     <tr>
                                         <th class="border border-gray-300 p-0 bg-[#f4b68e] text-black w-12 align-middle">
                                             <div style="writing-mode: vertical-rl; transform: rotate(180deg);"
-                                                class="mx-auto text-2xl font-bold tracking-widest py-4">Past</div>
+                                                class="mx-auto text-lg md:text-2xl font-bold tracking-widest py-2 md:py-4">Past</div>
                                         </th>
-                                        <td class="border border-gray-300 bg-[#fde9df] p-4 align-top min-w-[250px]">
+                                        <td class="border border-gray-300 bg-[#fde9df] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
                                             <div class="space-y-4">
                                                 <div>
                                                     <div
                                                         class="inline-block bg-orange-200 text-orange-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Active)</div>
-                                                    <p class="font-bold mb-1 text-base">S + V2 + O</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + V2 + O</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Passive)</div>
-                                                    <p class="font-bold mb-1 text-base">S + was/were + V3</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + was/were + V3</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Nominal</div>
-                                                    <p class="font-bold mb-1 text-base">S + was/were + ANA</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + was/were + ANA</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="border border-gray-300 bg-[#fde9df] p-4 align-top min-w-[250px]">
+                                        <td class="border border-gray-300 bg-[#fde9df] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
                                             <div class="space-y-4">
                                                 <div>
                                                     <div
                                                         class="inline-block bg-orange-200 text-orange-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Active)</div>
-                                                    <p class="font-bold mb-1 text-base">S + was/were + V-ing + O</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + was/were + V-ing + O</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Passive)</div>
-                                                    <p class="font-bold mb-1 text-base">S + was/were + being + V3</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + was/were + being + V3</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Nominal</div>
-                                                    <p class="font-bold mb-1 text-base">S + was/were + being + ANA</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + was/were + being + ANA</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="border border-gray-300 bg-[#fde9df] p-4 align-top min-w-[250px]">
+                                        <td class="border border-gray-300 bg-[#fde9df] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
                                             <div class="space-y-4">
                                                 <div>
                                                     <div
                                                         class="inline-block bg-orange-200 text-orange-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Active)</div>
-                                                    <p class="font-bold mb-1 text-base">S + had + V3 + O</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + had + V3 + O</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Passive)</div>
-                                                    <p class="font-bold mb-1 text-base">S + had + been + V3</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + had + been + V3</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Nominal</div>
-                                                    <p class="font-bold mb-1 text-base">S + had + been + ANA</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + had + been + ANA</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="border border-gray-300 bg-[#fde9df] p-4 align-top min-w-[250px]">
+                                        <td class="border border-gray-300 bg-[#fde9df] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
                                             <div class="space-y-4">
                                                 <div>
                                                     <div
                                                         class="inline-block bg-orange-200 text-orange-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Active)</div>
-                                                    <p class="font-bold mb-1 text-base">S + had been + V-ing + O</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + had been + V-ing + O</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Passive)</div>
-                                                    <p class="font-bold mb-1 text-base">S + had been + being + V3</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + had been + being + V3</p>
                                                 </div>
                                                 <div>
                                                     <div
@@ -342,43 +342,43 @@
                                     <tr>
                                         <th class="border border-gray-300 p-0 bg-[#eade78] text-black w-12 align-middle">
                                             <div style="writing-mode: vertical-rl; transform: rotate(180deg);"
-                                                class="mx-auto text-2xl font-bold tracking-widest py-4">Future</div>
+                                                class="mx-auto text-lg md:text-2xl font-bold tracking-widest py-2 md:py-4">Future</div>
                                         </th>
-                                        <td class="border border-gray-300 bg-[#faf6d4] p-4 align-top min-w-[250px]">
+                                        <td class="border border-gray-300 bg-[#faf6d4] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
                                             <div class="space-y-4">
                                                 <div>
                                                     <div
                                                         class="inline-block bg-yellow-200 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Active)</div>
-                                                    <p class="font-bold mb-1 text-base">S + will/shall + V1 + O</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + V1 + O</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Passive)</div>
-                                                    <p class="font-bold mb-1 text-base">S + will/shall + be + V3</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + be + V3</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Nominal</div>
-                                                    <p class="font-bold mb-1 text-base">S + will/shall + be + ANA</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + be + ANA</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="border border-gray-300 bg-[#faf6d4] p-4 align-top min-w-[250px]">
+                                        <td class="border border-gray-300 bg-[#faf6d4] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
                                             <div class="space-y-4">
                                                 <div>
                                                     <div
                                                         class="inline-block bg-yellow-200 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Active)</div>
-                                                    <p class="font-bold mb-1 text-base">S + will/shall + be + V-ing + O</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + be + V-ing + O</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Passive)</div>
-                                                    <p class="font-bold mb-1 text-base">S + will/shall + be + being + V3</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + be + being + V3</p>
                                                 </div>
                                                 <div>
                                                     <div
@@ -388,37 +388,37 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="border border-gray-300 bg-[#faf6d4] p-4 align-top min-w-[250px]">
+                                        <td class="border border-gray-300 bg-[#faf6d4] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
                                             <div class="space-y-4">
                                                 <div>
                                                     <div
                                                         class="inline-block bg-yellow-200 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Active)</div>
-                                                    <p class="font-bold mb-1 text-base">S + will/shall + have + V3 + O</p>
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + have + V3 + O</p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-green-200 text-green-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Passive)</div>
-                                                    <p class="font-bold mb-1 text-base">S + will/shall + have + been + V3
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + have + been + V3
                                                     </p>
                                                 </div>
                                                 <div>
                                                     <div
                                                         class="inline-block bg-gray-200 text-gray-800 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Nominal</div>
-                                                    <p class="font-bold mb-1 text-base">S + will/shall + have + been + ANA
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + have + been + ANA
                                                     </p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="border border-gray-300 bg-[#faf6d4] p-4 align-top min-w-[250px]">
+                                        <td class="border border-gray-300 bg-[#faf6d4] p-2 md:p-4 align-top min-w-[150px] md:min-w-[250px]">
                                             <div class="space-y-4">
                                                 <div>
                                                     <div
                                                         class="inline-block bg-yellow-200 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded mb-1">
                                                         Verbal (Active)</div>
-                                                    <p class="font-bold mb-1 text-base">S + will/shall + have + been + V-ing
+                                                    <p class="font-bold mb-1 text-xs md:text-base">S + will/shall + have + been + V-ing
                                                         + O</p>
                                                 </div>
                                                 <div>
@@ -568,7 +568,7 @@
                                     <p class="text-xs text-gray-500 uppercase font-bold"
                                         x-text="dictResult?.source === 'en' ? 'Indonesia' : 'English'"></p>
                                     <div class="flex items-center justify-center gap-2"><span
-                                            class="text-2xl font-bold text-blue-700"
+                                            class="text-lg md:text-2xl font-bold text-blue-700"
                                             x-text="dictResult?.translation"></span><button
                                             @click="playAudio(dictResult?.translation, dictResult?.source == 'en' ? 'id-ID' : 'en-US')"
                                             class="text-blue-300 hover:text-blue-600">🔊</button></div>
