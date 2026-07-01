@@ -63,7 +63,7 @@
         }
     }" :style="`position: fixed; left: ${x}px; top: ${y}px; z-index: 40; margin: 0; transform: none; touch-action: none;`"
     @mousedown="startDrag($event)" @touchstart="startDrag($event)" x-show="!showResults"
-    class="flex flex-wrap sm:flex-nowrap justify-center items-center gap-2 sm:gap-3 bg-white/90 backdrop-blur-sm p-3 rounded-2xl shadow-2xl border border-gray-200 w-[calc(100vw-2rem)] sm:w-auto max-w-[calc(100vw-2rem)] cursor-move select-none">
+    class="flex flex-col items-center gap-2 sm:gap-3 p-1 cursor-move select-none">
 
     <!-- TENSES (Only for Grammar) -->
     @if(($meeting->task_type ?? 0) == 3)
