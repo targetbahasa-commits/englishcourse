@@ -1,20 +1,18 @@
 <div x-data="{
-        x: (window.innerWidth - 400) / 2, 
-        y: window.innerHeight - 100,
+        x: window.innerWidth - 60, 
+        y: window.innerHeight / 2 - 100,
         init() {
             setTimeout(() => {
-                this.x = (window.innerWidth - this.$el.offsetWidth) / 2;
-                if (this.y > window.innerHeight - this.$el.offsetHeight - 20) {
-                    this.y = window.innerHeight - this.$el.offsetHeight - 20;
-                }
+                this.x = window.innerWidth - this.$el.offsetWidth - 15;
+                this.y = (window.innerHeight - this.$el.offsetHeight) / 2;
+                if (this.y < 15) this.y = 15;
             }, 100);
             
             // Adjust on resize
             window.addEventListener('resize', () => {
-                this.x = (window.innerWidth - this.$el.offsetWidth) / 2;
-                if (this.y > window.innerHeight - this.$el.offsetHeight - 20) {
-                    this.y = window.innerHeight - this.$el.offsetHeight - 20;
-                }
+                this.x = window.innerWidth - this.$el.offsetWidth - 15;
+                this.y = (window.innerHeight - this.$el.offsetHeight) / 2;
+                if (this.y < 15) this.y = 15;
             });
         },
         dragging: false,
