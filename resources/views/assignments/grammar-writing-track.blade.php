@@ -48,8 +48,9 @@
                                 </span>
 
                                 @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
-                                    <form action="{{ route('assignments.grammar-writing.period') }}" method="POST" class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
+                                    <form action="{{ route('assignments.batch-period') }}" method="POST" class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
                                         @csrf
+                                        <input type="hidden" name="program_id" value="{{ $program->id }}">
                                         <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
                                         <select name="class_period_id" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 min-w-[220px]">
                                             @if($program->classPeriods->isEmpty())
@@ -109,25 +110,62 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     @foreach($trackData['meetings'] as $meeting)
-                        <div class="bg-white rounded-3xl shadow-sm hover:shadow-lg transition overflow-hidden border border-gray-100">
+                        @php
+                            $dbMeeting = isset($program) ? $program->meetings->firstWhere('meeting_number', $meeting['source_meeting_number']) : null;
+                        @endphp
+                        <div class="bg-white rounded-3xl shadow-sm hover:shadow-lg transition overflow-hidden border border-gray-100 relative">
                             <div class="p-6">
-                                <div class="flex items-center justify-between mb-4 gap-4">
+                                <div class="flex items-start justify-between mb-4 gap-4">
                                     <div>
                                         <p class="text-xs uppercase tracking-[0.2em] text-gray-400 font-semibold">Grammar for Writing</p>
                                         <h2 class="text-xl font-bold text-gray-900 mt-1">{{ $meeting['title'] }}</h2>
                                     </div>
-                                    <span class="px-3 py-1 rounded-full text-xs font-bold {{ $meeting['available'] ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500' }}">
-                                        {{ $meeting['available'] ? 'READY' : 'COMING SOON' }}
-                                    </span>
+                                    
+                                    <div class="flex items-center gap-2">
+                                        @if($dbMeeting)
+                                            <span class="px-3 py-1 rounded-full text-xs font-bold {{ $dbMeeting->is_locked ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600' }}">
+                                                {{ $dbMeeting->is_locked ? 'LOCKED' : 'OPEN' }}
+                                            </span>
+                                            
+                                            @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                                                <form action="{{ route('assignments.meeting.toggle-lock', $dbMeeting->id) }}" method="POST">
+                                                    @csrf
+                                                    @if(isset($selectedClassPeriod))
+                                                        <input type="hidden" name="class_period_id" value="{{ $selectedClassPeriod->id }}">
+                                                    @endif
+                                                    <button type="submit" class="text-gray-400 hover:text-gray-600 transition" title="Toggle Lock">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            @if($dbMeeting->is_locked)
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                                            @else
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+                                                            @endif
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        @else
+                                            <span class="px-3 py-1 rounded-full text-xs font-bold {{ $meeting['available'] ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500' }}">
+                                                {{ $meeting['available'] ? 'READY' : 'COMING SOON' }}
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
 
                                 <p class="text-base font-semibold text-gray-700 mb-2">{{ $meeting['topic'] }}</p>
                                 <p class="text-sm text-gray-500 leading-relaxed min-h-[48px]">{{ $meeting['description'] }}</p>
 
                                 @if($meeting['available'] && $meeting['route_name'])
-                                    <a href="{{ route($meeting['route_name'], $meeting['route_parameters'] ?? []) }}" class="mt-6 inline-flex items-center justify-center w-full rounded-2xl bg-blue-100 px-4 py-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-200">
-                                        Open Meeting
-                                    </a>
+                                    @if(isset($dbMeeting) && $dbMeeting->is_locked)
+                                        <div class="mt-6 inline-flex items-center justify-center w-full rounded-2xl bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-500">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                            Locked
+                                        </div>
+                                    @else
+                                        <a href="{{ route($meeting['route_name'], $meeting['route_parameters'] ?? []) }}" class="mt-6 inline-flex items-center justify-center w-full rounded-2xl bg-blue-100 px-4 py-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-200">
+                                            Open Meeting
+                                        </a>
+                                    @endif
                                 @else
                                     <div class="mt-6 inline-flex items-center justify-center w-full rounded-2xl bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-500">
                                         Coming Soon

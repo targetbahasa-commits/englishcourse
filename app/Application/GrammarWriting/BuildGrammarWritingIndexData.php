@@ -14,6 +14,29 @@ class BuildGrammarWritingIndexData
     {
         $program = $this->repository->findProgramBySlugWithMeetingsAndClassPeriods($programSlug);
 
+        // Auto-seed Fast Track meetings if they don't exist yet (for live server)
+        if ($programSlug === 'fast-track-grammar-for-writing' && $program->meetings->isEmpty()) {
+            $topics = [
+                1 => 'Silang - silang tenses',
+                2 => 'Latihan penerapan tenses',
+                3 => 'Modal',
+                4 => 'Negative sentence',
+                5 => 'To Infinitive & Gerund',
+                6 => 'Comparative, superlative, positive degree & Parallel Structures',
+                7 => 'Adverbial Clause',
+                8 => 'Adjective Clause - RPS / RPP',
+                9 => 'Adjective Clause RPP, RA',
+                10 => 'Noun Clause',
+            ];
+            foreach ($topics as $i => $topic) {
+                \App\Models\Meeting::firstOrCreate(
+                    ['program_id' => $program->id, 'meeting_number' => $i],
+                    ['title' => 'Meeting ' . $i, 'description' => 'Fast Track meeting ' . $i, 'order' => $i, 'is_locked' => false]
+                );
+            }
+            $program->load('meetings'); // Reload meetings after creation
+        }
+
         $selectedClassPeriod = null;
         if ($user && $user->isStudent()) {
             $enrollment = $user->enrollments()->where('program_id', $program->id)->whereHas('classPeriod')->first();

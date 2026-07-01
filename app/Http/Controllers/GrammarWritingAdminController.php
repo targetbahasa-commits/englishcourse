@@ -1165,7 +1165,7 @@ class GrammarWritingAdminController extends Controller
         $this->requireGrammarWritingAdminOrTeacher();
 
         $result = $manageGrammarWritingMeetings->updateActivePeriod(
-            $request->period(),
+            $request->classPeriodId(),
         );
 
         return back()
