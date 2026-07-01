@@ -48,11 +48,16 @@ class EloquentGrammarWritingRepository implements GrammarWritingRepository
 
     public function getParagraphQuestion(int $meetingNumber, bool $useSection = true): mixed
     {
-        $query = GrammarQuestion::where('meeting_number', $meetingNumber)
-            ->where('question_type', 'paragraph');
+        $query = GrammarQuestion::where('meeting_number', $meetingNumber);
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('grammar_questions', 'question_type')) {
+            $query->where('question_type', 'paragraph');
+        }
 
         if ($useSection) {
             $query->where('section', 'paragraph');
+        } else {
+            $query->where('question_number', 999);
         }
 
         return $query->first();
