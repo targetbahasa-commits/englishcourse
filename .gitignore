@@ -28,6 +28,24 @@ yarn-error.log
 *.blade.php.bak2
 /migrate_meeting*.php
 
+# Secrets & environment (jangan pernah commit / deploy ke docroot)
+live.env
+*.env
+!.env.example
+!.env.production.example
+
+# Log & dump database
+*.log
+*.sql
+
+# File debug/utility yang tidak boleh berada di public/ (web-accessible)
+/public/*.php
+!/public/index.php
+/db_import.php
+/db_debug.php
+/drop_constraints.php
+/add_column.php
+
 # Playwright
 /playwright-report
 /test-results
