@@ -64,9 +64,10 @@
             {{-- 100 Topics Grid --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
                 @for ($i = 1; $i <= 350; $i++)
-                <a href="{{ route('assignments.pte-academic.speaking-writing.read-aloud.practice', ['id' => $i]) }}" class="group relative bg-white border border-gray-100 rounded-2xl p-5 hover:border-teal-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
+                <a id="topic-{{ $i }}" data-topic-card="{{ $i }}" href="{{ route('assignments.pte-academic.speaking-writing.read-aloud.practice', ['id' => $i]) }}" class="group relative bg-white border border-gray-100 rounded-2xl p-5 hover:border-teal-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
                     {{-- Decorative background element --}}
                     <div class="absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br from-teal-50 to-teal-100 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500 ease-out"></div>
+                    <x-pte-topic-badge />
                     
                     <div class="relative flex items-center justify-between w-full mb-4">
                         <div class="w-12 h-12 bg-gradient-to-br from-teal-400 to-teal-600 text-white rounded-xl shadow-md flex items-center justify-center font-bold text-lg group-hover:shadow-lg group-hover:from-teal-500 group-hover:to-teal-700 transition-all duration-300">
@@ -91,5 +92,11 @@
         </main>
     </div>
     @include('components.meetings-calendar-modal')
+
+    <script src="{{ asset('js/pte-tracking.js') }}"></script>
+    <script>
+        pteTracking.init('read-aloud');
+    </script>
+
 </body>
 </html>

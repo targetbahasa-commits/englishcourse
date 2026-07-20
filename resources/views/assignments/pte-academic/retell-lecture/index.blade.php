@@ -59,9 +59,10 @@
             {{-- 300 Topics Grid --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
                 @for ($i = 1; $i <= 300; $i++)
-                <a href="{{ route('assignments.pte-academic.speaking-writing.retell-lecture.practice', ['id' => $i]) }}" class="group relative bg-white border border-gray-100 rounded-2xl p-5 hover:border-orange-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
+                <a id="topic-{{ $i }}" data-topic-card="{{ $i }}" href="{{ route('assignments.pte-academic.speaking-writing.retell-lecture.practice', ['id' => $i]) }}" class="group relative bg-white border border-gray-100 rounded-2xl p-5 hover:border-orange-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
                     {{-- Decorative background --}}
                     <div class="absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br from-orange-50 to-orange-100 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500 ease-out"></div>
+                    <x-pte-topic-badge />
 
                     <div class="relative flex items-center justify-between w-full mb-4">
                         <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 text-white rounded-xl shadow-md flex items-center justify-center font-bold text-lg group-hover:shadow-lg group-hover:from-orange-500 group-hover:to-orange-700 transition-all duration-300">
@@ -85,6 +86,12 @@
 
         </main>
     </div>
+
+
+    <script src="{{ asset('js/pte-tracking.js') }}"></script>
+    <script>
+        pteTracking.init('retell-lecture');
+    </script>
 
 </body>
 </html>
