@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Render</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="h-screen w-full flex overflow-hidden">
+    <!-- LEFT PANEL -->
+    <div class="w-[500px] bg-white border-r border-gray-200 h-full flex flex-col shrink-0 overflow-y-auto">
+        <div class="p-8">
+            <h1 class="text-2xl">Left Panel</h1>
+            <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+            <p>Bottom of left panel</p>
+        </div>
+    </div>
+    
+    <!-- RIGHT PANEL -->
+    <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar flex flex-col flex-1">
+        <div class="px-4 py-6 flex-1 flex flex-col w-full relative">
+            <form class="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-gray-200 relative min-h-[400px]">
+                
+                <!-- Toolbar Area -->
+                <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 bg-gray-50/50 rounded-t-2xl shrink-0">
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wide">Your Answer</h3>
+                    </div>
+                </div>
+
+                <!-- Textarea -->
+                <div class="flex-1 relative">
+                    <textarea 
+                        class="absolute inset-0 w-full h-full p-6 resize-none border-none focus:ring-0 focus:outline-none text-gray-800 text-base leading-relaxed bg-transparent"
+                        placeholder="Type your answer here..."
+                    >Many multinational companies do business in different countries. Some people think these companies cause more harm than good to local economies. I partly disagree with this opinion because they have both advantages and disadvantages.
+On the one hand, multinational companies can create some problems for local economies. They are usually very large and have a lot of money, so small local businesses cannot compete with them. As a result, some local shops may lose customers or even close. In addition, many of the profits are sent back to the company's home country instead of staying in the local economy.
+On the other hand, multinational companies also bring many benefits. First, they create new jobs for local people. Many workers can earn a salary and improve their living standards. Second, these companies often introduce new technology and better management. Local employees can learn new skills and gain useful experience. They also pay taxes, which can help the government develop public services.
+In my opinion, multinational companies do not cause more harm than good. Although they may affect local businesses, they also provide employment opportunities and support economic growth. The government should make rules to protect local companies while allowing foreign investment.
+In conclusion, multinational companies have some negative effects on local economies, but they also bring important benefits. Therefore, I partly disagree that they cause more harm than good because their advantages can be greater if they are managed properly.</textarea>
+                </div>
+                
+                <!-- Footer area -->
+                <div class="border-t border-gray-200 px-6 py-4 bg-gray-50/50 rounded-b-2xl flex items-center justify-between shrink-0">
+                    <div class="flex flex-col">
+                        <span class="text-2xl font-bold text-gray-700 font-mono">226</span>
+                        <span class="text-xs text-gray-400 font-medium uppercase tracking-wider">Words</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button class="px-6 py-2.5 bg-blue-500 text-white font-semibold rounded-lg shadow-sm">
+                            <span>Submit & Get Feedback</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

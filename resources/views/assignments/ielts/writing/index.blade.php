@@ -38,14 +38,14 @@
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">IELTS Academic Writing</h1>
-                    <p class="text-gray-600 mt-1">Practice your writing skills for IELTS! ✍️</p>
+                    <h1 class="text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">{{ !empty($isGeneral) ? 'IELTS General Writing' : 'IELTS Academic Writing' }}</h1>
+                    <p class="text-gray-600 mt-1">{{ !empty($isGeneral) ? 'Practice your letter and essay writing skills for IELTS General Training! ✍️' : 'Practice your writing skills for IELTS! ✍️' }}</p>
                 </div>
             </div>
             
-            <a href="{{ route('assignments.ielts-academic') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
+            <a href="{{ !empty($isGeneral) ? route('assignments.ielts-general') : route('assignments.ielts-academic') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Back to IELTS
+                {{ !empty($isGeneral) ? 'Back to IELTS General' : 'Back to IELTS' }}
             </a>
         </div>
 
@@ -86,7 +86,7 @@
             @endif
 
             @php
-                $calendarClassPeriodId = $selectedClassPeriod->id ?? Auth::user()->class_period_id ?? optional($batchProgram->classPeriods->first())->id ?? '';
+                $calendarClassPeriodId = $selectedClassPeriod->id ?? Auth::user()->class_period_id ?? optional(optional($batchProgram)->classPeriods)->first()?->id ?? '';
                 $calendarBatchName = addslashes($batchProgram->name ?? 'Assignments');
             @endphp
             @if($calendarClassPeriodId)
@@ -110,7 +110,7 @@
 
         <div id="ielts-writing-tasks" class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <!-- Task 1 Card -->
-            <a href="{{ route('assignments.ielts-academic.writing.index', ['task' => 1]) }}" class="group relative overflow-hidden bg-white rounded-3xl shadow-lg border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <a href="{{ !empty($isGeneral) ? route('assignments.ielts-general.writing.index', ['task' => 1]) : route('assignments.ielts-academic.writing.index', ['task' => 1]) }}" class="group relative overflow-hidden bg-white rounded-3xl shadow-lg border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-bl-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
                 
                 <div class="relative z-10 flex flex-col h-full items-center text-center">
@@ -121,8 +121,8 @@
                     </div>
                     
                     <h3 class="text-3xl font-bold text-gray-800 mb-3 group-hover:text-teal-600 transition-colors">Task 1</h3>
-                    <p class="text-gray-500 font-medium mb-2">Academic Report</p>
-                    <p class="text-sm text-gray-400">Describe visual information (graphs, charts, tables) in roughly 150 words.</p>
+                    <p class="text-gray-500 font-medium mb-2">{{ !empty($isGeneral) ? 'Letter Writing' : 'Academic Report' }}</p>
+                    <p class="text-sm text-gray-400">{{ !empty($isGeneral) ? 'Write a formal, semi-formal, or informal letter in response to a given everyday situation.' : 'Describe visual information (graphs, charts, tables) in roughly 150 words.' }}</p>
                     
                     <div class="mt-8 flex items-center text-teal-600 font-bold group-hover:translate-x-2 transition-transform">
                         @if(!empty($isClassEnded) && Auth::user()->isStudent())
@@ -136,7 +136,7 @@
             </a>
 
             <!-- Task 2 Card -->
-            <a href="{{ route('assignments.ielts-academic.writing.index', ['task' => 2]) }}" class="group relative overflow-hidden bg-white rounded-3xl shadow-lg border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <a href="{{ !empty($isGeneral) ? route('assignments.ielts-general.writing.index', ['task' => 2]) : route('assignments.ielts-academic.writing.index', ['task' => 2]) }}" class="group relative overflow-hidden bg-white rounded-3xl shadow-lg border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
                 
                 <div class="relative z-10 flex flex-col h-full items-center text-center">

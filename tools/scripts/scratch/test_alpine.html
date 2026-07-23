@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpine Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body>
+    <div x-data="{
+        form: { name: '', email: '', whatsapp_number: '', answer_text: '' },
+        isSubmitting: false
+    }">
+        <button type="submit" :disabled="isSubmitting || form.answer_text.length === 0 || !form.name || !form.email || !form.whatsapp_number">
+            Submit
+        </button>
+        <span x-text="form.name"></span>
+    </div>
+</body>
+</html>

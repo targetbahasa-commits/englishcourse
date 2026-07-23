@@ -67,6 +67,7 @@
             <!-- Right Side: Admin Actions -->
             <div class="flex items-center gap-3 shrink-0">
                 @if(Auth::check() && Auth::user()->role === 'admin')
+
                     <button @click="openEditModal()" class="text-gray-400 hover:text-blue-600 transition-colors p-2 rounded-lg hover:bg-blue-50" title="Edit Topic">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                     </button>
@@ -280,7 +281,7 @@
         </div>
 
         <!-- Right Column: Writing Area & Results -->
-        <div class="min-w-0 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-full flex flex-col">
+        <div id="writing-panel" class="min-w-0 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-full flex flex-col">
             
             <!-- WRITING MODE HEADER -->
             <div x-show="!showResults" class="bg-indigo-50 px-6 py-4 border-b border-indigo-100 flex-none flex justify-between items-center">

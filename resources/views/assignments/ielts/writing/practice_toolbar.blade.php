@@ -1,23 +1,66 @@
+<style>
+@keyframes glow-spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); opacity: 0; }
+    2% { opacity: 1; }
+    8% { opacity: 1; }
+    10% { transform: translate(-50%, -50%) rotate(360deg); opacity: 0; }
+    100% { transform: translate(-50%, -50%) rotate(360deg); opacity: 0; }
+}
+.btn-glow-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.btn-glow-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 250%;
+    height: 250%;
+    background: conic-gradient(from 0deg, red, orange, yellow, green, cyan, blue, violet, red);
+    animation: glow-spin 20s linear infinite;
+    z-index: 0;
+}
+.btn-glow-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+}
+</style>
 <div x-data="{
-        x: window.innerWidth - 60, 
-        y: window.innerHeight / 2 - 100,
+        x: -1, 
+        y: -1,
+        dragged: false,
+        isMobile() { return window.innerWidth < 768; },
+        updatePosition() {
+            if (this.dragged) return;
+            let w = this.$el.offsetWidth > 0 ? this.$el.offsetWidth : 48;
+            if (this.isMobile()) {
+                this.x = window.innerWidth - w - 15;
+            } else {
+                let mainEl = document.querySelector('main');
+                if (mainEl) {
+                    let rect = mainEl.getBoundingClientRect();
+                    this.x = rect.left + (rect.width - w) / 2;
+                } else {
+                    this.x = (window.innerWidth - w) / 2;
+                }
+            }
+            // y=-1 means use CSS bottom:20px
+            this.y = -1;
+        },
         init() {
-            setTimeout(() => {
-                let w = this.$el.offsetWidth > 0 ? this.$el.offsetWidth : 48;
-                let h = this.$el.offsetHeight > 0 ? this.$el.offsetHeight : 300;
-                this.x = window.innerWidth - w - 15;
-                this.y = (window.innerHeight - h) / 2;
-                if (this.y < 15) this.y = 15;
-            }, 100);
-            
-            // Adjust on resize
-            window.addEventListener('resize', () => {
-                let w = this.$el.offsetWidth > 0 ? this.$el.offsetWidth : 48;
-                let h = this.$el.offsetHeight > 0 ? this.$el.offsetHeight : 300;
-                this.x = window.innerWidth - w - 15;
-                this.y = (window.innerHeight - h) / 2;
-                if (this.y < 15) this.y = 15;
-            });
+            // Run multiple times to catch correct toolbar width after render
+            setTimeout(() => this.updatePosition(), 50);
+            setTimeout(() => this.updatePosition(), 200);
+            setTimeout(() => this.updatePosition(), 500);
+            window.addEventListener('resize', () => this.updatePosition());
         },
         dragging: false,
         offset: { x: 0, y: 0 },
@@ -26,8 +69,14 @@
             if (e.target.closest('button')) return;
             
             this.dragging = true;
+            this.dragged = true;
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            // If dragged first time, calculate current position from bottom
+            if (this.y === -1) {
+                this.y = window.innerHeight - this.$el.offsetHeight - 20;
+            }
             
             this.offset.x = clientX - this.x;
             this.offset.y = clientY - this.y;
@@ -62,17 +111,33 @@
             window.addEventListener('mouseup', onMouseUp);
             window.addEventListener('touchmove', onMouseMove, { passive: false });
             window.addEventListener('touchend', onMouseUp);
+        },
+        getMainCenter() {
+            let mainEl = document.querySelector('main');
+            if (mainEl) {
+                let rect = mainEl.getBoundingClientRect();
+                return (rect.left + rect.width / 2) + 'px';
+            }
+            return '50%';
         }
-    }" :style="`position: fixed; left: ${x}px; top: ${y}px; z-index: 40; margin: 0; transform: none; touch-action: none;`"
-    @mousedown="startDrag($event)" @touchstart="startDrag($event)" x-show="!showResults"
-    class="flex flex-col items-center gap-2 sm:gap-3 p-1 cursor-move select-none">
+    }" :style="y === -1 
+        ? `position: fixed; left: ${x >= 0 ? x + 'px' : getMainCenter()}; bottom: 20px; transform: ${x >= 0 ? 'none' : 'translateX(-50%)'}; z-index: 40; margin: 0; touch-action: none;`
+        : `position: fixed; left: ${x}px; top: ${y}px; z-index: 40; margin: 0; transform: none; touch-action: none;`"
+    @mousedown="startDrag($event)" @touchstart="startDrag($event)" x-show="typeof showResults !== 'undefined' ? !showResults : true"
+    class="flex flex-col md:flex-row items-center justify-center gap-2 sm:gap-3 cursor-move select-none p-1 md:bg-white/90 md:backdrop-blur-sm md:p-3 md:rounded-2xl md:shadow-2xl md:border md:border-gray-200">
+    <!-- Drag Handle -->
+    <div class="cursor-move p-2 text-gray-400 hover:text-gray-600 flex items-center justify-center opacity-50 hover:opacity-100" title="Drag to move">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"></path></svg>
+    </div>
+
 
     <!-- TENSES (Only for Grammar) -->
     @if(($meeting->task_type ?? 0) == 3)
         <div x-data="{ openTenses: false }">
             <button title="Tenses" @click="openTenses = true"
-                class="bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                class="bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="hidden md:inline text-sm font-medium">Tenses</span>
         </button>
             <template x-teleport="body">
                 <div x-show="openTenses" style="display: none;"
@@ -109,8 +174,9 @@
         <!-- TENSES CHART (HTML Table) -->
         <div x-data="{ openTensesChart: false }">
             <button title="Tenses Chart" @click="openTensesChart = true"
-                class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <span class="hidden md:inline text-sm font-medium">Tenses Chart</span>
         </button>
             <template x-teleport="body">
                 <div x-show="openTensesChart" style="display: none;"
@@ -469,8 +535,9 @@
                 }
             }">
             <button title="Linking Words" @click="open = true"
-                class="bg-teal-500 hover:bg-teal-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                class="bg-teal-500 hover:bg-teal-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+            <span class="hidden md:inline text-sm font-medium">Linking Words</span>
         </button>
 
             <template x-teleport="body">
@@ -523,8 +590,9 @@
     <!-- 6. DICTIONARY (Full Logic) -->
 <div x-data="dictionaryDataToolbar()">
     <button title="Dictionary" @click="open = true"
-        class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold w-10 h-10 p-0 rounded-full justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+        class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            <span class="hidden md:inline text-sm font-medium">Dictionary</span>
         </button>
     <template x-teleport="body">
         <div x-show="open" style="display: none;"
@@ -739,8 +807,9 @@
         }
     }">
         <button title="Irregular Verbs" @click="open = true"
-            class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+            class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+            <span class="hidden md:inline text-sm font-medium">Irregular Verbs</span>
         </button>
 
         <template x-teleport="body">
@@ -791,8 +860,9 @@
     @if(($meeting->task_type ?? 0) == 1)
         <div x-data="{ open: false }">
             <button @click="open = true"
-                class="bg-gray-700 hover:bg-gray-800 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-                Describing Trends
+                class="bg-gray-700 hover:bg-gray-800 text-white font-bold shadow-sm transform transition hover:scale-105 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
+                <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                <span class="hidden md:inline text-sm font-medium">Describing Trends</span>
             </button>
 
             <template x-teleport="body">
@@ -1107,8 +1177,9 @@
     @if(($meeting->task_type ?? 0) == 1)
             <div x-data="{ open: false }">
                 <button @click="open = true"
-                    class="bg-pink-600 hover:bg-pink-700 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-                    Making Comparisons
+                    class="bg-pink-600 hover:bg-pink-700 text-white font-bold shadow-sm transform transition hover:scale-105 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
+                    <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>
+                    <span class="hidden md:inline text-sm font-medium">Making Comparisons</span>
                 </button>
 
                 <template x-teleport="body">
@@ -1343,8 +1414,9 @@
 @if(($meeting->task_type ?? 0) == 1)
     <div x-data="{ open: false }">
         <button @click="open = true"
-            class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-            Direction & Maps
+            class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-sm transform transition hover:scale-105 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
+            <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+            <span class="hidden md:inline text-sm font-medium">Direction & Maps</span>
         </button>
 
         <template x-teleport="body">
@@ -1575,8 +1647,9 @@
 @if(($meeting->task_type ?? 0) == 1)
     <div x-data="{ open: false }">
         <button @click="open = true"
-            class="bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-            Describing Process
+            class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold shadow-sm transform transition hover:scale-105 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
+            <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            <span class="hidden md:inline text-sm font-medium">Describing Process</span>
         </button>
 
         <template x-teleport="body">
@@ -1691,19 +1764,21 @@
 <!-- 3. COLLOCATIONS -->
 @if(($meeting->task_type ?? 0) == 2)
     <button @click="$dispatch('toggle-collocations')"
-        class="bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-        Collocations
+        class="bg-teal-600 hover:bg-teal-700 text-white font-bold shadow-sm transform transition hover:scale-105 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
+        <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+        <span class="hidden md:inline text-sm font-medium">Collocations</span>
     </button>
 
     <!-- 4. IDIOMS -->
     <button @click="$dispatch('toggle-idioms')"
-        class="bg-orange-600 hover:bg-orange-700 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-        Idioms
+        class="bg-orange-600 hover:bg-orange-700 text-white font-bold shadow-sm transform transition hover:scale-105 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
+        <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+        <span class="hidden md:inline text-sm font-medium">Idioms</span>
     </button>
 
     <!-- 5. IDEAS (NEW) -->
     <div id="ideas-component"
-        data-prompt="{{ strip_tags($meeting->prompt ?? ($meeting->questions?->first()?->question_text ?? '')) }}" x-data="{
+        data-prompt="{{ strip_tags($meeting->prompt ?? (isset($meeting->questions) ? ($meeting->questions->first()->question_text ?? '') : '')) }}" x-data="{
                         open: false,
                         htmlContent: null,
                         loading: false,
@@ -1745,8 +1820,11 @@
                         }
                     }">
         <button @click="open = true; fetchIdeas()"
-            class="bg-pink-500 hover:bg-pink-600 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-            Ideas
+            class="btn-glow-wrapper rounded-full md:rounded-lg shadow-sm transform transition hover:scale-105">
+            <span class="btn-glow-content bg-pink-500 hover:bg-pink-600 text-white font-bold flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-md md:gap-2">
+                <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <span class="hidden md:inline text-sm font-medium">Ideas</span>
+            </span>
         </button>
 
         <template x-teleport="body">
@@ -1854,7 +1932,104 @@
         </template>
     </div>
 
-    <!-- 6. COLLOCATION DICTIONARY -->
+    <!-- 6. MAGIC SENTENCE -->
+    <div x-data="{
+        msOpen: false,
+        msText: '',
+        msResult: '',
+        msLoading: false,
+        msError: null,
+        async translateSentence() {
+            if (!this.msText.trim()) return;
+            this.msLoading = true;
+            this.msError = null;
+            this.msResult = '';
+            try {
+                const response = await fetch('/api/ollama/translate-sentence', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']')?.getAttribute('content')
+                    },
+                    body: JSON.stringify({ text: this.msText.trim() })
+                });
+                if (!response.ok) throw new Error('Translation failed.');
+                const data = await response.json();
+                if (data.translation) {
+                    this.msResult = data.translation;
+                } else {
+                    this.msError = 'Unexpected response from AI.';
+                }
+            } catch (e) {
+                this.msError = e.message;
+            } finally {
+                this.msLoading = false;
+            }
+        },
+        copyResult() {
+            navigator.clipboard.writeText(this.msResult);
+            const btn = this.$refs.copyBtn;
+            if (btn) {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<span class=\'text-green-500 font-bold text-xs\'>Copied!</span>';
+                setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
+            }
+        }
+    }">
+        <button title="Magic Sentence" @click="msOpen = true"
+            class="btn-glow-wrapper rounded-full md:rounded-lg shadow-sm transform transition hover:scale-105">
+            <span class="btn-glow-content bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-md md:gap-2">
+                <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                <span class="hidden md:inline text-sm font-medium">Magic Sentence</span>
+            </span>
+        </button>
+        <template x-teleport="body">
+            <div x-show="msOpen" style="display: none;"
+                class="fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center p-4">
+                <div @click.outside="msOpen = false"
+                    class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden">
+                    <div class="p-4 bg-blue-50 border-b border-blue-100 flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-xl font-bold text-blue-900">Magic Sentence</h3>
+                            <span class="bg-blue-200 text-blue-800 text-xs px-2 py-0.5 rounded-full font-semibold">IELTS Style</span>
+                        </div>
+                        <button @click="msOpen = false" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg></button>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-sm text-gray-600 mb-4">Ketik kalimat dalam Bahasa Indonesia dan AI akan mengubahnya menjadi kalimat Bahasa Inggris bergaya IELTS yang lebih formal dan *sophisticated*.</p>
+                        <textarea x-model="msText" @keydown.enter.ctrl.prevent="translateSentence()" @keydown.enter.meta.prevent="translateSentence()"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] mb-4"
+                            placeholder="Ketik kalimat Indonesia di sini... (Ctrl+Enter untuk translate)"></textarea>
+                        
+                        <div class="flex justify-end mb-6">
+                            <button @click="translateSentence()" :disabled="msLoading"
+                                class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-2 px-6 rounded-lg shadow flex items-center gap-2">
+                                <span x-show="!msLoading">Translate</span>
+                                <span x-show="msLoading">Loading...</span>
+                            </button>
+                        </div>
+
+                        <div x-show="msError" class="p-4 bg-red-50 text-red-600 border border-red-200 rounded-lg mb-4" x-text="msError"></div>
+
+                        <div x-show="msResult" class="bg-gray-50 border border-gray-200 rounded-lg p-4 relative">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">IELTS Version</h4>
+                            <p class="text-gray-800 text-lg mr-8" x-text="msResult"></p>
+                            <button x-ref="copyBtn" @click="copyResult()" title="Copy to clipboard" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- 7. COLLOCATION DICTIONARY -->
     <div x-data="{
                         open: false,
                         query: '',
@@ -1893,8 +2068,9 @@
                         }
                     }">
         <button @click="open = true"
-            class="bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-            Collocation Dictionary
+            class="bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-sm transform transition hover:scale-105 flex items-center justify-center whitespace-nowrap w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2">
+            <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            <span class="hidden md:inline text-sm font-medium">Collocation Dictionary</span>
         </button>
 
         <template x-teleport="body">
@@ -1957,8 +2133,9 @@
 @if(($meeting->task_type ?? 0) == 3)
     <div>
         <button title="Lesson Explanation" @click="$dispatch('open-lesson-explanation')"
-            class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold w-10 h-10 p-0 rounded-full md:w-auto md:h-auto md:py-2 md:px-4 md:rounded-lg md:gap-2 justify-center shadow-sm transform transition hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-5 h-5 block md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="hidden md:inline text-sm font-medium">Lesson Explanation</span>
         </button>
     </div>
 @endif

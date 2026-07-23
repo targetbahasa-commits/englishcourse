@@ -1,0 +1,107 @@
+[
+    {
+        "id": 0,
+        "text": "The primary cause of this phenomenon is still under investigation by researchers.",
+        "voice": "am_michael",
+        "filename": "lfib_topic_0.mp3",
+        "folder": "listening-fill-blanks"
+    },
+    {
+        "id": 1,
+        "text": "Please ensure you have completed all mandatory modules before the final exam.",
+        "voice": "af_sky",
+        "filename": "lfib_topic_1.mp3",
+        "folder": "listening-fill-blanks"
+    },
+    {
+        "id": 2,
+        "text": "The primary cause of this phenomenon is still under investigation by researchers.",
+        "voice": "af_heart",
+        "filename": "lfib_topic_2.mp3",
+        "folder": "listening-fill-blanks"
+    },
+    {
+        "id": 3,
+        "text": "Please ensure you have completed all mandatory modules before the final exam.",
+        "voice": "af_sky",
+        "filename": "lfib_topic_3.mp3",
+        "folder": "listening-fill-blanks"
+    },
+    {
+        "id": 4,
+        "text": "The primary cause of this phenomenon is still under investigation by researchers.",
+        "voice": "am_fenrir",
+        "filename": "lfib_topic_4.mp3",
+        "folder": "listening-fill-blanks"
+    },
+    {
+        "id": 5,
+        "text": "Please ensure you have completed all mandatory modules before the final exam.",
+        "voice": "am_michael",
+        "filename": "lfib_topic_5.mp3",
+        "folder": "listening-fill-blanks"
+    },
+    {
+        "id": 6,
+        "text": "The primary cause of this phenomenon is still under investigation by researchers.",
+        "voice": "am_michael",
+        "filename": "lfib_topic_6.mp3",
+        "folder": "listening-fill-blanks"
+    },
+    {
+        "id": 7,
+        "text": "Please ensure you have completed all mandatory modules before the final exam.",
+        "voice": "am_fenrir",
+        "filename": "lfib_topic_7.mp3",
+        "folder": "listening-fill-blanks"
+    },
+    {
+        "id": 8,
+        "text": "The primary cause of this phenomenon is still under investigation by researchers.",
+        "voice": "af_bella",
+        "filename": "lfib_topic_8.mp3",
+        "folder": "listening-fill-blanks"
+    },
+    {
+        "id": 9,
+        "text": "Please ensure you have completed all mandatory modules before the final exam.",
+        "voice": "am_fenrir",
+        "filename": "lfib_topic_9.mp3",
+        "folder": "listening-fill-blanks"
+    },
+    {
+        "id": 10,
+        "text": "The primary cause of this phenomenon is still under investigation by researchers.",
+        "voice": "am_michael",
+        "filename": "lfib_topic_10.mp3",
+        "folder": "listening-fill-blanks"
+    },
+    {
+        "id": 11,
+        "text": "Please ensure you have completed all mandatory modules before the final exam.",
+        "voice": "af_sky",
+        "filename": "lfib_topic_11.mp3",
+        "folder": "listening-fill-blanks"
+    },
+    {
+        "id": 12,
+        "text": "The primary cause of this phenomenon is still under investigation by researchers.",
+        "voice": "af_sky",
+        "filename": "lfib_topic_12.mp3",
+        "folder": "listening-fill-blanks"
+    },
+    {
+        "id": 13,
+        "text": "Please ensure you have completed all mandatory modules before the final exam.",
+        "voice": "am_michael",
+        "filename": "lfib_topic_13.mp3",
+        "folder": "listening-fill-blanks"
+    },
+    {
+        "id": 14,
+        "text": "The primary cause of this phenomenon is still under investigation by researchers.",
+        "voice": "af_sky",
+        "filename": "lfib_topic_14.mp3",
+        "folder": "listening-fill-blanks"
+    }
+]

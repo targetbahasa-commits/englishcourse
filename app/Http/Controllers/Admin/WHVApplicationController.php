@@ -65,7 +65,7 @@ class WHVApplicationController extends Controller
             ->whereIn('role', $trackedRoles)
             ->where('created_at', '>=', now()->subDays($campaignWindowDays))
             ->where('acquisition_source_page', 'whv_applications')
-            ->groupBy(DB::raw($variantExpr))
+            ->groupBy('variant_label')
             ->orderByDesc('total')
             ->get();
 
@@ -73,7 +73,7 @@ class WHVApplicationController extends Controller
             ->whereIn('role', $trackedRoles)
             ->where('created_at', '>=', now()->subDays($campaignWindowDays))
             ->whereRaw("COALESCE(utm_campaign, '') <> '' OR COALESCE(acquisition_source_page, '') <> ''")
-            ->groupBy(DB::raw($campaignLabelExpr), DB::raw($sourcePageExpr))
+            ->groupBy('campaign_label', 'source_page')
             ->orderByDesc('total_signups')
             ->limit(6)
             ->get();
@@ -90,7 +90,7 @@ class WHVApplicationController extends Controller
         $leadCampaignPerformance = RegistrationLead::selectRaw("{$leadCampaignExpr} as campaign_label, {$leadSourceExpr} as source_page, COUNT(*) as total_leads, SUM(CASE WHEN status = 'converted' THEN 1 ELSE 0 END) as converted_leads, ROUND((SUM(CASE WHEN status = 'converted' THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0)) * 100, 1) as cvr_percent")
             ->where('created_at', '>=', now()->subDays($campaignWindowDays))
             ->whereRaw("COALESCE(utm_campaign, '') <> '' OR COALESCE(acquisition_source_page, '') <> ''")
-            ->groupBy(DB::raw($leadCampaignExpr), DB::raw($leadSourceExpr))
+            ->groupBy('campaign_label', 'source_page')
             ->orderByDesc('cvr_percent')
             ->orderByDesc('total_leads')
             ->limit(6)

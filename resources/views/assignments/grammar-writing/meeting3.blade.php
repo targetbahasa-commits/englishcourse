@@ -23,11 +23,19 @@
 <body class="font-sans antialiased bg-[#F3F4FF] p-8">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
-    <div x-data class="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+    <div x-data="{ showAddQuestion: false }" class="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
         <div class="flex justify-between items-center mb-8">
-            <a href="{{ route('assignments.grammar-writing') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium">
-                &laquo; Kembali
-            </a>
+            <a href="{{ route('assignments.grammar-writing') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+    <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+    </svg>
+    Back
+</a>
+            @if(auth()->check() && auth()->user()->isAdmin())
+                <button @click="showAddQuestion = !showAddQuestion" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                    <span x-text="showAddQuestion ? 'Close Add Question' : 'Add Question'"></span>
+                </button>
+            @endif
         </div>
 
         <h1 class="text-3xl font-bold text-center text-blue-600 mb-8">Latihan Tenses & Translation (Pertemuan 3)</h1>
@@ -63,7 +71,7 @@
             @csrf
             <div class="space-y-6">
                 @if(auth()->check() && auth()->user()->isAdmin())
-                    <div class="mb-8 p-6 bg-white border border-blue-200 rounded-xl shadow-sm">
+                    <div x-show="showAddQuestion" style="display: none;" class="mb-8 p-6 bg-white border border-blue-200 rounded-xl shadow-sm">
                         <h3 class="text-lg font-bold text-gray-800 mb-4">Admin: Add New Question</h3>
                         <form action="{{ route('admin.grammar.question.store') }}" method="POST">
                             @csrf
@@ -93,7 +101,7 @@
                 @endif
 
                 @foreach($questions as $data)
-                    <div class="bg-gray-50 p-6 rounded-xl border-l-4 border-blue-500 shadow-sm relative group">
+                    <div class="bg-gray-50 p-6 rounded-xl shadow-sm relative group">
                          @if(auth()->check() && auth()->user()->isAdmin())
                             <div class="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button type="button" 
@@ -461,7 +469,7 @@
         debounceDelay: 500, // milliseconds
         userId: null,
         draftSyncTimer: null,
-        draftEndpoint: '/assignments/grammar-writing/meeting3/draft',
+        draftEndpoint: '{{ route('assignments.grammar-writing.meeting.draft', ['meeting' => 3]) }}',
 
         /**
          * Initialize auto-save for a specific meeting
@@ -495,6 +503,25 @@
             // Restore saved data on page load
             console.log('Attempting to restore answers...');
             this.restoreAnswers();
+
+            // ── Sync to server immediately on page load ──────────────────
+            // This ensures the admin live preview shows answers even if the
+            // student hasn't typed anything new since their last session.
+            const form = document.getElementById('meeting3-main-form');
+            setTimeout(() => {
+                console.log('[AutoSave] Initial server sync on page load...');
+                this.syncDraftToServer(form);
+            }, 600);
+
+            // ── Periodic sync every 15 s ─────────────────────────────────
+            // Keeps admin live preview up-to-date even without keystrokes.
+            this.periodicSyncTimer = setInterval(() => {
+                const f = document.getElementById('meeting3-main-form');
+                if (f && !this.isSubmitted) {
+                    console.log('[AutoSave] Periodic 15s server sync...');
+                    this.syncDraftToServer(f);
+                }
+            }, 15000);
 
             // Set up auto-save listeners
             console.log('Setting up auto-save listeners...');
@@ -726,7 +753,7 @@
             if (!indicator) {
                 indicator = document.createElement('div');
                 indicator.id = 'auto-save-indicator';
-                indicator.className = 'fixed bottom-4 left-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+                indicator.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
                 indicator.style.transition = 'opacity 0.3s';
                 indicator.innerHTML = '✓ Tersimpan otomatis';
                 document.body.appendChild(indicator);
@@ -774,5 +801,6 @@
     </script>
 
 
+    <x-live-drawing />
 </body>
 </html>

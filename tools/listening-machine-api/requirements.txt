@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+kokoro>=0.9.4
+pydub
+soundfile
+numpy
+python-multipart
+gradio_client

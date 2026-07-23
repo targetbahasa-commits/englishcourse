@@ -5,188 +5,193 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Re-tell Lecture Practice - {{ $topic['title'] }} | Target Bahasa</title>
     <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="font-sans antialiased bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+<body class="font-sans antialiased bg-gray-50 flex flex-col min-h-screen">
     @include('components.impersonation-banner')
+
     <div class="flex min-h-screen">
         {{-- Sidebar --}}
-        @if(Auth::check())
-            @php($sidebarRole = strtolower(Auth::user()->active_role ?? 'student'))
-            @if($sidebarRole === 'admin')
-                @include('components.sidebar-admin')
-            @elseif($sidebarRole === 'teacher')
-                @include('components.sidebar-teacher')
-            @elseif(in_array($sidebarRole, ['guest', 'guest_quick']))
-                @include('components.sidebar-guest')
-            @else
-                @include('components.sidebar-student')
-            @endif
-        @else
+        @php
+            if(Auth::check()) {
+                $sidebarRole = strtolower(Auth::user()->active_role ?? 'student');
+            } else {
+                $sidebarRole = 'guest';
+            }
+        @endphp
+        @if($sidebarRole === 'admin')
+            @include('components.sidebar-admin')
+        @elseif($sidebarRole === 'teacher')
+            @include('components.sidebar-teacher')
+        @elseif(in_array($sidebarRole, ['guest', 'guest_quick']))
             @include('components.sidebar-guest')
+        @else
+            @include('components.sidebar-student')
         @endif
 
-        {{-- Main Content --}}
-        <main class="flex-1 md:ml-64 p-4 md:p-8">
-            <div class="container mx-auto">
+        {{-- Main Content Wrapper --}}
+        <div class="flex-1 md:ml-64 flex flex-col min-h-screen">
 
-                <!-- Header with Back Button -->
-                <div class="mb-8">
-                    <a href="{{ route('assignments.pte-academic.speaking-writing.retell-lecture.index') }}" class="inline-flex items-center text-gray-600 hover:text-orange-500 transition-colors mb-4">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                        Back to Selection
+            {{-- Top Navigation Bar --}}
+            <nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('assignments.pte-academic.speaking-writing.retell-lecture.index') }}#topic-{{ $topicId }}" class="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     </a>
-
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 flex items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-lg shadow-orange-500/30">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-                            </svg>
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold" style="background-color: #e0f2fe; color: #0284c7;">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
                         </div>
                         <div>
-                            <h1 class="text-3xl font-bold text-gray-800">Re-tell Lecture</h1>
-                            <p class="text-gray-500">PTE Academic Practice - {{ $topic['title'] }}</p>
+                            <h1 class="text-lg font-bold text-gray-800 leading-tight">Re-tell Lecture</h1>
+                            <p class="text-xs text-gray-500">PTE Academic Practice - Topic #{{ str_pad($topicId, 3, '0', STR_PAD_LEFT) }}</p>
                         </div>
                     </div>
                 </div>
+            </nav>
 
-                <!-- Main Practice Card -->
-                <div class="max-w-4xl mx-auto">
-                    <div class="bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col relative">
+            {{-- Main Test Area --}}
+            <main class="flex-1 flex flex-col max-w-5xl w-full mx-auto p-4 md:p-8">
+                
+                {{-- Top Light Blue Header Banner --}}
+                <div class="font-bold text-lg px-6 py-3.5 rounded-xl mb-4 shadow-sm" style="background-color: #00b4d8; color: #ffffff;">
+                    Sample Question {{ $topicId }}: {{ $topic['title'] }}
+                </div>
 
-                        <div class="p-8 md:p-12 flex-1 flex flex-col items-center text-center">
+                {{-- Status / Timer --}}
+                <div class="mb-4">
+                    <p class="text-base font-bold text-gray-800">
+                        Beginning in <span style="color: #00b4d8; font-weight: 800;" id="countdownText">2 sec</span>
+                    </p>
+                </div>
 
-                            <!-- Instruction Box -->
-                            <div class="w-full border border-gray-300 rounded-xl p-5 mb-8 text-left text-gray-700 text-base leading-relaxed">
-                                You will hear a lecture. After listening to it, in <strong>10 seconds</strong>, please tell what you have just heard from the lecture in your own words. You will have <strong>40 seconds</strong> to give your response.
-                            </div>
+                {{-- Prompt Audio Box (Reference Style) --}}
+                <div class="rounded-xl p-5 mb-6 flex flex-col md:flex-row items-center gap-4 shadow-sm" style="background-color: #ffffff; border: 1px solid #00b4d8;">
+                    <button id="playBtn" onclick="toggleAudio()" class="w-10 h-10 rounded-full flex items-center justify-center text-white shadow shrink-0 cursor-pointer transition-transform hover:scale-105" style="background-color: #f97316;">
+                        <svg id="playIcon" class="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                        <svg id="pauseIcon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>
+                    </button>
+                    <span id="audioCurrentTime" class="text-xs font-mono font-bold text-gray-500 shrink-0">00:00</span>
+                    
+                    <div class="flex-1 w-full h-2.5 bg-gray-200 rounded-full overflow-hidden relative">
+                        <div id="audioProgressBar" class="h-full rounded-full transition-all duration-300" style="background-color: #00b4d8; width: 0%;"></div>
+                    </div>
 
-                            <!-- Status Line -->
-                            <div id="statusLine" class="text-base font-semibold mb-6" style="color:#ea580c;">
-                                Play the audio to listen to the related recording.
-                            </div>
+                    <span id="audioTotalTime" class="text-xs font-mono font-bold text-gray-500 shrink-0">01:18</span>
 
-                            <!-- Audio Player -->
-                            <div class="w-full max-w-lg mx-auto bg-white rounded-3xl p-6 mb-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100 flex flex-col items-center gap-5">
-                                <!-- Play Button -->
-                                <button id="playBtn" onclick="toggleAudio()"
-                                    class="w-20 h-20 flex-shrink-0 flex items-center justify-center rounded-full bg-gradient-to-tr from-orange-400 to-orange-500 text-white shadow-xl shadow-orange-500/30 transition-all duration-300 hover:scale-105 hover:shadow-orange-500/50 relative">
-                                    <div id="pingRing" class="hidden absolute inset-0 rounded-full border-2 border-orange-400 animate-ping opacity-75"></div>
-                                    <svg id="playIcon" class="w-10 h-10 ml-1 relative z-10" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
-                                    <svg id="pauseIcon" class="hidden w-10 h-10 relative z-10" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>
-                                </button>
+                    {{-- Speed Control Pill --}}
+                    <div class="relative" x-data="{ openSpeed: false }">
+                        <button @click="openSpeed = !openSpeed" class="px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 border shrink-0 bg-white cursor-pointer" style="border-color: #00b4d8; color: #00b4d8;">
+                            <span>1.0</span>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                    </div>
 
-                                <!-- Audio Progress -->
-                                <div class="w-full px-4">
-                                    <div class="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden relative mb-3">
-                                        <div id="audioProgressBar" class="absolute top-0 left-0 h-full bg-orange-400 transition-all duration-300" style="width:0%"></div>
-                                    </div>
-                                    <div class="flex justify-center font-bold text-gray-400 text-sm font-mono tracking-wider">
-                                        <span id="audioCurrentTime">00:00</span>
-                                        <span class="mx-1">/</span>
-                                        <span id="audioTotalTime">00:00</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Prep Countdown (hidden initially) -->
-                            <div id="prepBox" class="hidden w-full max-w-lg text-center mb-6">
-                                <p class="text-gray-500 text-sm mb-2">Prepare to speak in...</p>
-                                <div id="prepCountdown" class="text-5xl font-bold text-orange-500">10</div>
-                                <p class="text-gray-400 text-xs mt-2">Recall what you heard and prepare your response</p>
-                            </div>
-
-                            <!-- Recording Controls -->
-                            <div id="recordingBox" class="hidden w-full max-w-lg bg-orange-50 rounded-2xl p-5 border border-orange-100 shadow-sm mb-6">
-                                <div class="flex items-center gap-4">
-                                    <div id="micCircle"
-                                        style="width:48px;height:48px;border-radius:50%;background:#f97316;color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                                        </svg>
-                                    </div>
-                                    <div id="recCurrentTime" style="font-family:monospace;font-size:14px;font-weight:600;color:#374151;width:48px;text-align:center;">00:00</div>
-                                    <div style="flex:1;height:12px;background:#fed7aa;border-radius:9999px;overflow:hidden;">
-                                        <div id="recProgressBar" style="width:0%;height:100%;background:#f97316;border-radius:9999px;transition:width 0.5s linear;"></div>
-                                    </div>
-                                    <div style="font-family:monospace;font-size:14px;font-weight:600;color:#374151;width:48px;text-align:center;">00:40</div>
-                                </div>
-                            </div>
-
-                            <!-- Play Answer (after recording) -->
-                            <div id="playAnswerBox" class="hidden w-full max-w-lg text-center mb-6">
-                                <button id="playAnswerBtn" onclick="playAnswer()"
-                                    style="background:#f97316;color:white;font-weight:700;padding:12px 28px;border-radius:9999px;border:none;cursor:pointer;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
-                                    ▶ Play My Answer
-                                </button>
-                            </div>
-
-                            <!-- Action Buttons -->
-                            <div class="flex justify-center items-center gap-4 mt-2">
-                                <button id="startBtn" onclick="startSession()"
-                                    style="background:#f97316;color:white;font-weight:700;padding:12px 28px;border-radius:9999px;border:none;cursor:pointer;box-shadow:0 4px 6px rgba(0,0,0,0.1);transition:background 0.2s;">
-                                    Practice with AI Scoring
-                                </button>
-                                <button id="restartBtn" onclick="restartSession()"
-                                    style="display:none;background:white;color:#374151;font-weight:700;padding:12px 28px;border-radius:9999px;border:1px solid #d1d5db;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-                                    Restart
-                                </button>
-                            </div>
-
-                        </div>
-
-                        <!-- Navigation Footer -->
-                        <div class="px-8 md:px-12 py-6 border-t border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <a href="{{ route('assignments.pte-academic.speaking-writing.retell-lecture.practice', ['id' => max(1, $topicId - 1)]) }}"
-                               class="px-8 py-3 rounded-xl bg-white border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition-all hover:shadow flex items-center gap-2 {{ $topicId <= 1 ? 'pointer-events-none opacity-40' : '' }}">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                                Previous
-                            </a>
-                            <span class="text-gray-400 text-sm font-medium">{{ $topicId }} / 300</span>
-                            <a href="{{ route('assignments.pte-academic.speaking-writing.retell-lecture.practice', ['id' => min(300, $topicId + 1)]) }}"
-                               class="px-8 py-3 rounded-xl bg-gray-900 text-white font-medium hover:bg-gray-800 transition-all hover:shadow-lg flex items-center gap-2 {{ $topicId >= 300 ? 'pointer-events-none opacity-40' : '' }}">
-                                Next Question
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                            </a>
-                        </div>
-
+                    {{-- Volume Indicator --}}
+                    <div class="flex items-center gap-2 shrink-0">
+                        <svg class="w-5 h-5" style="color: #00b4d8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 012.828 2.828"></path></svg>
+                        <div class="w-16 h-1.5 rounded-full" style="background-color: #00b4d8;"></div>
                     </div>
                 </div>
 
-            </div>
-        </main>
+                {{-- Recording Controls Area (Student Response) --}}
+                <div class="border border-amber-100/80 rounded-xl p-6 md:p-8 mb-6 shadow-sm flex flex-col items-center justify-center relative" style="background-color: #fffcf8;">
+                    <p id="statusLine" class="text-gray-800 font-bold text-base mb-6 text-center">Click to Start</p>
+                    
+                    <div class="w-full max-w-3xl flex items-center gap-4">
+                        <button id="micBtn" onclick="toggleRecording()" 
+                                class="w-10 h-10 rounded-full flex items-center justify-center text-white shadow transition-all shrink-0 cursor-pointer"
+                                style="background-color: #e87a5d;">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                        </button>
+                        <span id="recCurrentTime" class="text-xs font-mono font-bold text-gray-500 shrink-0">00:00</span>
+                        <div class="flex-1 h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div id="recProgressBar" class="h-full rounded-full transition-all duration-300" style="background-color: #00b4d8; width: 0%;"></div>
+                        </div>
+                        <span class="text-xs font-mono font-bold text-gray-500 shrink-0">00:40</span>
+                    </div>
+                </div>
+
+                {{-- Action Pill Buttons --}}
+                <div class="flex flex-wrap items-center gap-3 mb-6">
+                    <button id="startBtn" onclick="startSession()" class="px-6 py-2.5 font-bold rounded-full shadow transition-all cursor-pointer hover:opacity-90" style="background-color: #00b4d8; color: #ffffff;">
+                        Practice with AI Scoring
+                    </button>
+                    <button id="restartBtn" onclick="restartSession()" class="px-6 py-2.5 font-medium rounded-full shadow-sm transition-all cursor-pointer hover:bg-gray-50" style="background-color: #ffffff; color: #374151; border: 1px solid #d1d5db;">
+                        Restart
+                    </button>
+                    @if(Auth::check() && Auth::user()->isAdmin())
+                    <button onclick="PTEScorePopup.show({ skill: 'Speaking', score: 79, max: 90, breakdown: { 'Content': 83, 'Pronunciation': 77, 'Oral_Fluency': 78 }, feedback: 'Good comprehension of the lecture topic. Strong key point summary.' })" class="px-5 py-2.5 font-bold rounded-full shadow transition-all flex items-center gap-2 cursor-pointer hover:opacity-90" style="background-color: #f59e0b; color: #ffffff;" title="Khusus Admin: Preview Hasil Evaluasi AI">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        Preview Evaluasi
+                    </button>
+                    @endif
+                </div>
+
+                {{-- Transcript Accordion --}}
+                <div class="mt-4 mb-8" x-data="{ showAnswer: false }">
+                    <button @click="showAnswer = !showAnswer" class="text-xs font-bold px-4 py-2 rounded-full border transition-all flex items-center gap-1.5" style="background-color: #e0f2fe; color: #0284c7; border-color: #bae6fd;">
+                        <svg class="w-4 h-4 transition-transform duration-300" :class="showAnswer ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                        <span x-text="showAnswer ? 'Hide Transcript' : 'Show Transcript'">Show Transcript</span>
+                    </button>
+                    
+                    <div x-show="showAnswer" x-cloak class="mt-3 bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                        <p class="text-gray-800 text-base leading-relaxed font-sans">{{ $topic['content'] ?? 'Audio transcript for this lecture topic will be available soon.' }}</p>
+                    </div>
+                </div>
+            </main>
+
+            {{-- Bottom Action Bar & Helpers --}}
+            <footer class="bg-white border-t border-gray-200 p-4 sticky bottom-0 z-10">
+                <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('assignments.pte-academic.speaking-writing.retell-lecture.practice', ['id' => max(1, $topicId - 1)]) }}" class="px-6 py-2.5 font-medium rounded-lg shadow-sm transition-colors {{ $topicId <= 1 ? 'opacity-40 pointer-events-none' : '' }}" style="background-color: #00b4d8; color: #ffffff;">
+                            Previous
+                        </a>
+                        <a href="{{ route('assignments.pte-academic.speaking-writing.retell-lecture.practice', ['id' => min(300, $topicId + 1)]) }}" class="px-6 py-2.5 font-medium rounded-lg shadow-sm transition-colors {{ $topicId >= 300 ? 'opacity-40 pointer-events-none' : '' }}" style="background-color: #00b4d8; color: #ffffff;">
+                            Next
+                        </a>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <div class="relative flex-1 sm:w-48">
+                            <input type="text" placeholder="Question ..." class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm">
+                            <button class="absolute right-0 top-0 bottom-0 px-3 font-medium text-white rounded-r-lg transition-colors flex items-center justify-center" style="background-color: #00b4d8;">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
     </div>
 
     <!-- Audio elements -->
     <audio id="lectureAudio" src="{{ asset('storage/audio/pte/retell-lecture/' . $topicId . '.wav') }}"></audio>
     <audio id="answerAudio"></audio>
 
+    @include('components.pte-score-popup')
+
     <script>
-        // ── DOM refs ──
-        var lectureAudio    = document.getElementById('lectureAudio');
-        var answerAudio     = document.getElementById('answerAudio');
-        var playBtn         = document.getElementById('playBtn');
-        var playIcon        = document.getElementById('playIcon');
-        var pauseIcon       = document.getElementById('pauseIcon');
-        var pingRing        = document.getElementById('pingRing');
+        var lectureAudio     = document.getElementById('lectureAudio');
+        var answerAudio      = document.getElementById('answerAudio');
+        var playBtn          = document.getElementById('playBtn');
+        var playIcon         = document.getElementById('playIcon');
+        var pauseIcon        = document.getElementById('pauseIcon');
         var audioProgressBar = document.getElementById('audioProgressBar');
         var audioCurrentTime = document.getElementById('audioCurrentTime');
         var audioTotalTime   = document.getElementById('audioTotalTime');
-        var statusLine      = document.getElementById('statusLine');
-        var prepBox         = document.getElementById('prepBox');
-        var prepCountdown   = document.getElementById('prepCountdown');
-        var recordingBox    = document.getElementById('recordingBox');
-        var micCircle       = document.getElementById('micCircle');
-        var recCurrentTime  = document.getElementById('recCurrentTime');
-        var recProgressBar  = document.getElementById('recProgressBar');
-        var playAnswerBox   = document.getElementById('playAnswerBox');
-        var playAnswerBtn   = document.getElementById('playAnswerBtn');
-        var startBtn        = document.getElementById('startBtn');
-        var restartBtn      = document.getElementById('restartBtn');
+        var statusLine       = document.getElementById('statusLine');
+        var micBtn           = document.getElementById('micBtn');
+        var recCurrentTime   = document.getElementById('recCurrentTime');
+        var recProgressBar   = document.getElementById('recProgressBar');
+        var startBtn         = document.getElementById('startBtn');
+        var restartBtn       = document.getElementById('restartBtn');
 
-        // ── State ──
-        var state = 'idle'; // idle, playing, prep, recording, finished
+        var state = 'idle';
         var prepTimer = null;
         var recTimer  = null;
         var recElapsed = 0;
@@ -195,9 +200,7 @@
         var mediaRecorder = null;
         var audioChunks   = [];
         var answerUrl     = null;
-        var autoStarted   = false;
 
-        // ── Audio listeners ──
         lectureAudio.addEventListener('loadedmetadata', function () {
             audioTotalTime.textContent = fmt(Math.floor(lectureAudio.duration));
         });
@@ -209,9 +212,7 @@
         });
         lectureAudio.addEventListener('ended', function () {
             setPlayingUI(false);
-            if (state === 'playing') {
-                startPrep();
-            }
+            if (state === 'playing') startPrep();
         });
 
         function fmt(s) {
@@ -222,18 +223,16 @@
 
         function setStatus(txt, color) {
             statusLine.textContent = txt;
-            statusLine.style.color = color || '#ea580c';
+            statusLine.style.color = color || '#00b4d8';
         }
 
         function setPlayingUI(playing) {
             if (playing) {
                 playIcon.classList.add('hidden');
                 pauseIcon.classList.remove('hidden');
-                pingRing.classList.remove('hidden');
             } else {
                 playIcon.classList.remove('hidden');
                 pauseIcon.classList.add('hidden');
-                pingRing.classList.add('hidden');
             }
         }
 
@@ -243,13 +242,11 @@
                     lectureAudio.play();
                     state = 'playing';
                     setPlayingUI(true);
-                    setStatus('Listening to lecture... Take notes mentally.', '#ea580c');
-                    startBtn.style.display = 'none';
-                    restartBtn.style.display = 'inline-flex';
+                    setStatus('Listening to lecture...', '#00b4d8');
                 } else {
                     lectureAudio.pause();
                     setPlayingUI(false);
-                    setStatus('Paused. Click play to continue.', '#9ca3af');
+                    setStatus('Paused. Click play to continue.', '#64748b');
                 }
             }
         }
@@ -259,9 +256,7 @@
             lectureAudio.play();
             state = 'playing';
             setPlayingUI(true);
-            setStatus('Listening to lecture... Take notes mentally.', '#ea580c');
-            startBtn.style.display = 'none';
-            restartBtn.style.display = 'inline-flex';
+            setStatus('Listening to lecture...', '#00b4d8');
         }
 
         function startPrep() {
@@ -269,13 +264,11 @@
             lectureAudio.pause();
             setPlayingUI(false);
             prepLeft = 10;
-            prepBox.classList.remove('hidden');
-            prepCountdown.textContent = prepLeft;
-            setStatus('Prepare your response...', '#ea580c');
+            setStatus('Beginning in ' + prepLeft + ' sec', '#00b4d8');
 
             prepTimer = setInterval(function () {
                 prepLeft--;
-                prepCountdown.textContent = prepLeft;
+                setStatus('Beginning in ' + prepLeft + ' sec', '#00b4d8');
                 if (prepLeft <= 0) {
                     clearInterval(prepTimer);
                     startRecording();
@@ -284,13 +277,10 @@
         }
 
         function startRecording() {
-            prepBox.classList.add('hidden');
-            recordingBox.classList.remove('hidden');
             state = 'recording';
             recElapsed = 0;
-            setStatus('Recording your response...', '#ef4444');
-            micCircle.style.background = '#ef4444';
-            micCircle.style.boxShadow  = '0 0 0 6px rgba(239,68,68,0.25)';
+            setStatus('Recording in progress...', '#ef4444');
+            micBtn.style.background = '#ef4444';
 
             navigator.mediaDevices.getUserMedia({ audio: true })
                 .then(function (stream) {
@@ -304,7 +294,6 @@
                         answerUrl = URL.createObjectURL(blob);
                         answerAudio.src = answerUrl;
                         stream.getTracks().forEach(function (t) { t.stop(); });
-                        finishRecording();
                     };
                     mediaRecorder.start();
 
@@ -313,40 +302,33 @@
                         recCurrentTime.textContent = fmt(recElapsed);
                         recProgressBar.style.width = ((recElapsed / recTotal) * 100) + '%';
                         if (recElapsed >= recTotal) {
-                            clearInterval(recTimer);
-                            if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+                            stopRecording();
                         }
                     }, 1000);
                 })
                 .catch(function () {
-                    alert('Microphone access is required. Please allow microphone access and try again.');
-                    restartSession();
+                    alert('Akses mikrofon diperlukan. Harizkan akses mikrofon.');
                 });
         }
 
-        function finishRecording() {
-            state = 'finished';
-            recordingBox.classList.add('hidden');
-            playAnswerBox.classList.remove('hidden');
-            micCircle.style.background = '#9ca3af';
-            micCircle.style.boxShadow  = 'none';
-            setStatus('Recording complete! Listen to your response below.', '#16a34a');
-        }
-
-        function playAnswer() {
-            if (!answerUrl) return;
-            if (answerAudio.paused) {
-                answerAudio.play();
-                playAnswerBtn.textContent = '⏸ Pause';
+        function toggleRecording() {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                startRecording();
             } else {
-                answerAudio.pause();
-                playAnswerBtn.textContent = '▶ Play My Answer';
+                stopRecording();
             }
         }
 
-        answerAudio.onended = function () {
-            playAnswerBtn.textContent = '▶ Play My Answer';
-        };
+        function stopRecording() {
+            clearInterval(recTimer);
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+            state = 'finished';
+            micBtn.style.background = '#00b4d8';
+            setStatus('Recording complete.', '#00b4d8');
+            if (window.PTETracker) {
+                PTETracker.saveResult({ score: 1, maxScore: 1, durationSeconds: recElapsed });
+            }
+        }
 
         function restartSession() {
             clearInterval(prepTimer);
@@ -364,18 +346,12 @@
             audioCurrentTime.textContent = '00:00';
             recCurrentTime.textContent   = '00:00';
             recProgressBar.style.width   = '0%';
-            micCircle.style.background   = '#f97316';
-            micCircle.style.boxShadow    = 'none';
+            micBtn.style.background   = '#e87a5d';
 
-            prepBox.classList.add('hidden');
-            recordingBox.classList.add('hidden');
-            playAnswerBox.classList.add('hidden');
             setPlayingUI(false);
-            setStatus('Play the audio to listen to the related recording.', '#ea580c');
-            startBtn.style.display    = 'inline-flex';
-            restartBtn.style.display  = 'none';
+            setStatus('Click to Start', '#00b4d8');
         }
     </script>
-    @include('assignments.ielts.writing.practice_toolbar', ['meeting' => (object)['task_type' => 1], 'grammarLevel' => 'all'])
+    @include('components.pte-practice-tracker', ['module' => 'retell-lecture', 'topicId' => $topicId])
 </body>
 </html>

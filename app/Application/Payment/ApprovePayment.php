@@ -83,7 +83,11 @@ class ApprovePayment
                 $payment->update(['enrollment_id' => $enrollment->id]);
 
                 if ($payment->user) {
-                    $payment->user->update(['program_id' => $payment->program_id]);
+                    $userData = ['program_id' => $payment->program_id];
+                    if ($classPeriodId !== null) {
+                        $userData['class_period_id'] = $classPeriodId;
+                    }
+                    $payment->user->update($userData);
                 }
             }
         });

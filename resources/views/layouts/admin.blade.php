@@ -18,11 +18,12 @@
     @stack('styles')
 </head>
 <body class="font-sans antialiased bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    @include('components.flash-messages')
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         <!-- Sidebar -->
         @auth
-            @php($sidebarRole = strtolower(Auth::user()->active_role ?? 'student'))
+            <?php $sidebarRole = strtolower(Auth::user()->active_role ?? 'student'); ?>
 
             @if($sidebarRole === 'admin')
                 @include('components.sidebar-admin')

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { background: #333; padding: 50px; }
+  .desktop-animated-border {
+      position: relative;
+      padding: 2px;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      z-index: 1;
+      width: 800px;
+      height: 60px;
+      margin: auto;
+  }
+  .desktop-animated-border::before {
+      content: '';
+      position: absolute;
+      width: 200vw;
+      height: 200vw;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: -1;
+      /* Biru cerah */
+      background: conic-gradient(transparent 70%, #00bfff 85%, #00ffff 100%);
+      animation: rotate-border-transform 75s linear infinite;
+  }
+  .desktop-animated-border-inner {
+      background-color: #f3f4f6;
+      border-radius: calc(0.75rem - 2px);
+      height: 100%;
+      width: 100%;
+  }
+  @keyframes rotate-border-transform {
+      0% { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
+      20% { transform: translate(-50%, -50%) rotate(1080deg); opacity: 1; }
+      20.01% { transform: translate(-50%, -50%) rotate(1080deg); opacity: 0; }
+      99.99% { transform: translate(-50%, -50%) rotate(1080deg); opacity: 0; }
+      100% { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
+  }
+</style>
+</head>
+<body>
+  <div class="desktop-animated-border">
+    <div class="desktop-animated-border-inner">
+       Toolbar content
+    </div>
+  </div>
+</body>
+</html>

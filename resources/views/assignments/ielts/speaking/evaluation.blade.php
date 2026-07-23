@@ -127,7 +127,7 @@
                         <h3 class="text-lg font-bold text-gray-800 mb-4">Ringkasan Penguji</h3>
                         <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 mb-6">
                             <p class="text-gray-700 leading-relaxed">
-                                {{ $result['general_feedback'] ?? 'Tidak ada umpan balik.' }}
+                                {!! $result['general_feedback'] ?? 'Tidak ada umpan balik.' !!}
                             </p>
                         </div>
 
@@ -306,7 +306,7 @@
                                                 <svg x-show="item.status === 'negative'" class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                                 <h5 class="font-bold text-gray-800 text-sm" x-text="item.point"></h5>
                                             </div>
-                                            <p class="text-xs text-gray-700 leading-relaxed" x-text="item.description"></p>
+                                            <div class="text-xs text-gray-700 leading-relaxed" x-html="item.description"></div>
                                         </div>
                                     </template>
                                 </div>
@@ -554,7 +554,7 @@
                                                     :style="'width: ' + cat.score + '%'"></div>
                                             </div>
 
-                                            <p class="text-xs text-gray-600 leading-relaxed" x-text="cat.feedback"></p>
+                                            <div class="text-xs text-gray-600 leading-relaxed" x-html="cat.feedback"></div>
                                         </div>
                                     </template>
                                 </div>

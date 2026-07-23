@@ -208,9 +208,9 @@ class EloquentRegistrationRepository implements RegistrationRepository
             $rawPhone = '62' . substr($rawPhone, 1);
         }
 
-        $referralCode = 'TB-' . strtoupper(Str::random(6));
+        $referralCode = strtoupper(Str::random(6));
         while (User::where('referral_code', $referralCode)->exists()) {
-            $referralCode = 'TB-' . strtoupper(Str::random(6));
+            $referralCode = strtoupper(Str::random(6));
         }
 
         $tempPassword = null;

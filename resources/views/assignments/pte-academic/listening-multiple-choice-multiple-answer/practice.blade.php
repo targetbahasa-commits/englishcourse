@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Listening: Multiple Choice, Multiple Answer - {{ $topic['title'] }} | Target Bahasa</title>
     <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    @php
+        $audioFile = 'kokoro-tts/listening-mcma/lmcma_topic_' . ($topicId - 1) . '.mp3';
+        $audioPath = public_path('storage/' . $audioFile);
+        $audioSrc = asset('storage/' . $audioFile) . '?v=' . (file_exists($audioPath) ? filemtime($audioPath) : '1');
+        $correctLetters = [];
+        foreach ($topic['options'] as $optIdx => $optText) {
+            if (in_array($optText, $topic['correct_answers'])) {
+                $correctLetters[] = chr(65 + $optIdx);
+            }
+        }
+    @endphp
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -209,7 +222,9 @@
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         @if(Auth::check())
-            @php($sidebarRole = strtolower(Auth::user()->active_role ?? 'student'))
+            @php
+                $sidebarRole = strtolower(Auth::user()->active_role ?? 'student');
+            @endphp
             @if($sidebarRole === 'admin')
                 @include('components.sidebar-admin')
             @elseif($sidebarRole === 'teacher')
@@ -228,7 +243,7 @@
 
                 <!-- Header -->
                 <div class="mb-8">
-                    <a href="{{ route('assignments.pte-academic.listening.listening-multiple-choice-multiple-answer.index') }}" class="inline-flex items-center text-gray-600 hover:text-purple-500 transition-colors mb-4">
+                    <a href="{{ route('assignments.pte-academic.listening.listening-multiple-choice-multiple-answer.index') }}#topic-{{ $topicId }}" class="inline-flex items-center text-gray-600 hover:text-purple-500 transition-colors mb-4">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         Back to Selection
                     </a>
@@ -240,6 +255,8 @@
                         </div>
                         <div>
                             <h1 class="text-3xl font-bold text-gray-800">Listening: Multiple Choice, Multiple Answer</h1>
+                            <span id="pteAttemptBadge" class="hidden text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700"></span>
+                            <span id="pteAvgScoreBadge" class="hidden text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700"></span>
                             <p class="text-gray-500">PTE Academic Practice - {{ $topic['title'] }}</p>
                         </div>
                     </div>
@@ -263,20 +280,21 @@
 
                         <!-- Audio Player Area -->
                         <div class="px-8 pb-6">
+                            <audio id="dictationAudio" preload="auto" src="{{ $audioSrc }}"></audio>
                             <div class="audio-player-box shadow-sm">
                                 <button class="play-btn" id="playBtn">
                                     <svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M4 4l12 6-12 6z"></path>
                                     </svg>
                                 </button>
-                                
+
                                 <div class="progress-container">
                                     <span class="time-text" id="currentTime">00:00</span>
                                     <div class="progress-bar-bg">
                                         <div class="progress-bar-fill" id="progressBar"></div>
                                         <div class="progress-handle" id="progressHandle"></div>
                                     </div>
-                                    <span class="time-text">01:30</span>
+                                    <span class="time-text" id="totalTime">00:00</span>
                                 </div>
 
                                 <div class="controls-right">
@@ -310,47 +328,21 @@
                         <!-- Question Area -->
                         <div class="px-8 pb-4">
                             <div class="border border-gray-200 rounded-xl p-4 bg-white shadow-sm text-center">
-                                <p class="text-gray-800 font-bold">Which of the following points are made in the audio?</p>
+                                <p class="text-gray-800 font-bold">{{ $topic['question'] }}</p>
                                 <p class="text-gray-500 text-sm mt-1">Select all that apply.</p>
                             </div>
                         </div>
 
                         <!-- Options Area -->
                         <div class="px-8 pb-8 space-y-3" id="optionsContainer">
-                            <!-- Option A -->
-                            <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
-                                <input type="checkbox" class="custom-checkbox" value="A">
-                                <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">A</div>
-                                <span class="text-gray-700 text-sm font-medium">Urbanization is a relatively recent phenomenon in human history.</span>
-                            </label>
-
-                            <!-- Option B -->
-                            <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
-                                <input type="checkbox" class="custom-checkbox" value="B">
-                                <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">B</div>
-                                <span class="text-gray-700 text-sm font-medium">Over half of the global population currently resides in rural areas.</span>
-                            </label>
-
-                            <!-- Option C -->
-                            <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
-                                <input type="checkbox" class="custom-checkbox" value="C">
-                                <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">C</div>
-                                <span class="text-gray-700 text-sm font-medium">Cities offer better access to education and healthcare.</span>
-                            </label>
-
-                            <!-- Option D -->
-                            <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
-                                <input type="checkbox" class="custom-checkbox" value="D">
-                                <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">D</div>
-                                <span class="text-gray-700 text-sm font-medium">Rapid urban growth rarely causes infrastructural strain.</span>
-                            </label>
-                            
-                            <!-- Option E -->
-                            <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
-                                <input type="checkbox" class="custom-checkbox" value="E">
-                                <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">E</div>
-                                <span class="text-gray-700 text-sm font-medium">Sustainable city planning is crucial for the future.</span>
-                            </label>
+                            @foreach($topic['options'] as $index => $optionText)
+                                @php $letter = chr(65 + $index); @endphp
+                                <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
+                                    <input type="checkbox" class="custom-checkbox" value="{{ $letter }}">
+                                    <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">{{ $letter }}</div>
+                                    <span class="text-gray-700 text-sm font-medium">{{ $optionText }}</span>
+                                </label>
+                            @endforeach
                         </div>
 
                         <!-- Action Buttons -->
@@ -413,8 +405,7 @@
     </div>
 
     <script>
-        // Set correct answers (example for this mockup: A, C, E)
-        const correctAnswers = ['A', 'C', 'E'];
+        const correctAnswers = @json($correctLetters);
 
         // Row highlighting logic
         const checkboxes = document.querySelectorAll('.custom-checkbox');
@@ -455,10 +446,7 @@
             btn.classList.add('active');
             document.getElementById('speedDropdown').classList.add('hidden');
             document.getElementById('speedChevron').style.transform = '';
-            if (isAudioPlaying) {
-                clearInterval(audioPlayInterval);
-                audioPlayInterval = setInterval(audioTick, 1000 / currentSpeed);
-            }
+            dictationAudio.playbackRate = currentSpeed;
         }
 
         document.addEventListener('click', function(e) {
@@ -471,29 +459,48 @@
 
         // Audio and Timer Logic
         let prepTimerInterval;
-        let audioPlayInterval;
         let prepTime = 5;
-        let audioDuration = 90; // 1:30
-        let audioCurrentTime = 0;
-        
+
+        const dictationAudio = document.getElementById('dictationAudio');
         const prepTimerEl = document.getElementById('prepTimer');
         const playBtn = document.getElementById('playBtn');
         const currentTimeEl = document.getElementById('currentTime');
+        const totalTimeEl = document.getElementById('totalTime');
         const progressBar = document.getElementById('progressBar');
         const progressHandle = document.getElementById('progressHandle');
         const startTimerBtn = document.getElementById('startTimerBtn');
 
+        const PLAY_ICON_SVG = '<svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4l12 6-12 6z"></path></svg>';
+        const PAUSE_ICON_SVG = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>';
+
         function fmtTime(s) {
+            s = Math.floor(s || 0);
             let m = Math.floor(s / 60);
             let sec = s % 60;
             return (m < 10 ? '0'+m : m) + ':' + (sec < 10 ? '0'+sec : sec);
         }
 
+        dictationAudio.addEventListener('loadedmetadata', () => {
+            totalTimeEl.textContent = fmtTime(dictationAudio.duration);
+        });
+
+        dictationAudio.addEventListener('timeupdate', () => {
+            currentTimeEl.textContent = fmtTime(dictationAudio.currentTime);
+            let perc = dictationAudio.duration ? (dictationAudio.currentTime / dictationAudio.duration) * 100 : 0;
+            progressBar.style.width = perc + '%';
+            progressHandle.style.left = perc + '%';
+        });
+
+        dictationAudio.addEventListener('ended', () => {
+            playBtn.innerHTML = PLAY_ICON_SVG;
+            document.getElementById('prepTimer').parentElement.innerHTML = 'Status: <span class="teal-text">Audio Completed</span>';
+        });
+
         function startPrepTimer() {
             startTimerBtn.style.display = 'none';
             prepTime = 5;
             prepTimerEl.parentElement.innerHTML = 'Beginning in <span class="teal-text" id="prepTimer">5 sec</span>';
-            
+
             clearInterval(prepTimerInterval);
             prepTimerInterval = setInterval(() => {
                 prepTime--;
@@ -505,27 +512,12 @@
             }, 1000);
         }
 
-        function audioTick() {
-            audioCurrentTime++;
-            currentTimeEl.textContent = fmtTime(audioCurrentTime);
-            let perc = (audioCurrentTime / audioDuration) * 100;
-            progressBar.style.width = perc + '%';
-            progressHandle.style.left = perc + '%';
-            if(audioCurrentTime >= audioDuration) {
-                clearInterval(audioPlayInterval);
-                isAudioPlaying = false;
-                playBtn.innerHTML = '<svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4l12 6-12 6z"></path></svg>';
-                document.getElementById('prepTimer').parentElement.innerHTML = 'Status: <span class="teal-text">Audio Completed</span>';
-            }
-        }
-
         function startAudio() {
             document.getElementById('prepTimer').parentElement.innerHTML = 'Status: <span class="teal-text">Playing Audio</span>';
-            playBtn.innerHTML = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>';
-            audioCurrentTime = 0;
-            isAudioPlaying = true;
-            clearInterval(audioPlayInterval);
-            audioPlayInterval = setInterval(audioTick, 1000 / currentSpeed);
+            playBtn.innerHTML = PAUSE_ICON_SVG;
+            dictationAudio.currentTime = 0;
+            dictationAudio.playbackRate = currentSpeed;
+            dictationAudio.play().catch(err => console.error(err));
         }
 
         // Auto start
@@ -536,8 +528,8 @@
         // Scoring Logic
         function checkAnswers() {
             clearInterval(prepTimerInterval);
-            clearInterval(audioPlayInterval);
-            
+            dictationAudio.pause();
+
             let score = 0;
             let anySelected = false;
 
@@ -604,19 +596,35 @@
                 scoreDisplay.className = "font-bold text-amber-700 mt-2 text-lg";
             }
             
+            
+            var formData = new FormData();
+            formData.append('module', 'listening-multiple-choice-multiple-answer');
+            formData.append('topic_id', '{{ $topicId }}');
+            formData.append('score', score);
+            formData.append('max_score', correctAnswers.length);
+
+            fetch('/pte/practice/save-score', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+                body: formData
+            }).then(res => res.json()).then(data => {
+                if (data.success) PTEScorePopup.show({ skill: 'Listening', score: data.scores.overall_score, max: 90 });
+            }).catch(err => console.error(err));
+        
             document.getElementById('answerBtn').style.opacity = '0.5';
             document.getElementById('answerBtn').style.pointerEvents = 'none';
         }
 
         function restartPractice() {
             clearInterval(prepTimerInterval);
-            clearInterval(audioPlayInterval);
-            
+            dictationAudio.pause();
+            dictationAudio.currentTime = 0;
+
             currentTimeEl.textContent = "00:00";
             progressBar.style.width = '0%';
             progressHandle.style.left = '0%';
-            playBtn.innerHTML = '<svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4l12 6-12 6z"></path></svg>';
-            
+            playBtn.innerHTML = PLAY_ICON_SVG;
+
             document.getElementById('resultBox').classList.add('hidden');
             document.getElementById('answerBtn').style.opacity = '1';
             document.getElementById('answerBtn').style.pointerEvents = 'auto';
@@ -632,6 +640,7 @@
             startPrepTimer();
         }
     </script>
-    @include('assignments.ielts.writing.practice_toolbar', ['meeting' => (object)['task_type' => 1], 'grammarLevel' => 'all'])
+    @include('components.pte-score-popup')
+    @include('components.pte-practice-tracker', ['module' => 'listening-multiple-choice-multiple-answer', 'topicId' => $topicId])
 </body>
 </html>

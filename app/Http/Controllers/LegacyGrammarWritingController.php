@@ -226,6 +226,13 @@ class LegacyGrammarWritingController extends Controller
         ]);
 
         // Persist immediately so admin snapshot polling can read latest draft data.
+        // We also use Cache to prevent session race conditions caused by concurrent live-drawing polling.
+        $userId = auth()->id() ?? 0;
+        if ($userId) {
+            \Illuminate\Support\Facades\Cache::put('user_' . $userId . '_meeting' . $meeting . '_user_answers', $userAnswers, now()->addHours(24));
+            \Illuminate\Support\Facades\Cache::put('user_' . $userId . '_meeting' . $meeting . '_user_paragraph_answer', $userParagraphAnswer, now()->addHours(24));
+        }
+
         session()->save();
 
         return response()->json([

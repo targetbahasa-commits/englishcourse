@@ -193,7 +193,19 @@
             </a>
         </nav>
     </div>
-    
+
+    {{-- Marketing & Outreach --}}
+    <div class="sidebar-menu px-6 py-4">
+        <p class="text-xs font-semibold text-gray-400 mb-4 uppercase tracking-wider">Marketing & Outreach</p>
+        <nav class="space-y-1">
+            {{-- School English Camp --}}
+            <a href="{{ route('school-program') }}" class="flex items-center gap-3 px-4 py-3 {{ request()->routeIs('school-program') ? 'bg-amber-50 text-amber-700' : 'text-gray-500 hover:bg-amber-50 hover:text-amber-700' }} rounded-xl font-medium transition">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                <span class="flex-1 min-w-0 truncate">School English Camp</span>
+            </a>
+        </nav>
+    </div>
+
     <div class="sidebar-menu mt-auto px-6 py-6 border-t border-gray-100 bg-white flex-shrink-0">
         <p class="text-xs font-semibold text-gray-400 mb-4">AKUN - STUDENT</p>
         <nav class="space-y-1">

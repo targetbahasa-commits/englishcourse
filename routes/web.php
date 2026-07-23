@@ -14,6 +14,10 @@ Route::post('/guest/register', [App\Http\Controllers\GuestController::class, 're
 // Public Quick Inquiry API (used by modals on Scholarships, Jobs, WHV)
 Route::post('/public-inquiry', [App\Http\Controllers\PublicRegistrationLeadController::class, 'ajaxStore'])->name('public.inquiry.store');
 
+// School English Camp - Marketing Page (public)
+Route::get('/school-program', [App\Http\Controllers\SchoolProgramController::class, 'index'])->name('school-program');
+Route::post('/school-program', [App\Http\Controllers\SchoolProgramController::class, 'inquiryStore'])->name('school-program.inquiry');
+
 // Free AI Test Promo Routes
 Route::prefix('promo/test')->name('promo.test.')->group(function () {
     Route::get('/', [App\Http\Controllers\PromoTestController::class, 'index'])->name('index');
@@ -37,8 +41,8 @@ Route::prefix('promo/test')->name('promo.test.')->group(function () {
 
     Route::get('/{type}/{id}', [App\Http\Controllers\PromoTestController::class, 'show'])->name('show');
     Route::post('/{type}/{id}/submit', [App\Http\Controllers\PromoTestController::class, 'submit'])->name('submit');
-    Route::get('/{type}/{id}/result/{submission_id}', [App\Http\Controllers\PromoTestController::class, 'result'])->name('result');
-    Route::post('/{type}/{id}/result/{submission_id}/send-wa', [App\Http\Controllers\PromoTestController::class, 'sendWaResult'])->name('send-wa-result');
+    Route::get('/{type}/{id}/ielts-academic-evaluation/{submission_id}', [App\Http\Controllers\PromoTestController::class, 'result'])->name('result');
+    Route::post('/{type}/{id}/ielts-academic-evaluation/{submission_id}/send-wa', [App\Http\Controllers\PromoTestController::class, 'sendWaResult'])->name('send-wa-result');
     Route::post('/{type}/{id}/update-admin', [App\Http\Controllers\PromoTestController::class, 'updateAdmin'])->name('update.admin');
     Route::get('/echomimic-avatar', [App\Http\Controllers\PromoTestController::class, 'getEchomimicAvatar'])->name('echomimic-avatar');
 });
@@ -388,6 +392,21 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/online-tests/toefl-score', [App\Http\Controllers\Admin\OnlineTestController::class, 'updateToeflScore'])->name('online-tests.toefl-score.update');
         Route::get('/online-tests/reference/availability', [App\Http\Controllers\Admin\OnlineTestController::class, 'referenceAvailability'])->name('online-tests.reference.availability');
         Route::post('/online-tests/reference/suggestion', [App\Http\Controllers\Admin\OnlineTestController::class, 'referenceSuggestion'])->name('online-tests.reference.suggestion');
+        
+        // Offline Tests
+        Route::get('/offline-tests', [App\Http\Controllers\Admin\OfflineTestController::class, 'index'])->name('offline-tests.index');
+        Route::get('/offline-tests/create', [App\Http\Controllers\Admin\OfflineTestController::class, 'create'])->name('offline-tests.create');
+        Route::post('/offline-tests', [App\Http\Controllers\Admin\OfflineTestController::class, 'store'])->name('offline-tests.store');
+        Route::post('/offline-tests/import', [App\Http\Controllers\Admin\OfflineTestController::class, 'import'])->name('offline-tests.import');
+        Route::post('/offline-tests/{id}/resend', [App\Http\Controllers\Admin\OfflineTestController::class, 'resendCertificate'])->name('offline-tests.resend');
+        Route::delete('/offline-tests/{id}', [App\Http\Controllers\Admin\OfflineTestController::class, 'destroy'])->name('offline-tests.destroy');
+
+        // Offline Test Certificates
+        Route::get('/offline-test-certificates', [App\Http\Controllers\Admin\OfflineTestCertificateController::class, 'index'])->name('offline-test-certificates.index');
+        Route::post('/offline-test-certificates', [App\Http\Controllers\Admin\OfflineTestCertificateController::class, 'update'])->name('offline-test-certificates.update');
+        Route::get('/offline-test-certificates/preview', [App\Http\Controllers\Admin\OfflineTestCertificateController::class, 'preview'])->name('offline-test-certificates.preview');
+        Route::post('/offline-test-certificates/upload-background', [App\Http\Controllers\Admin\OfflineTestCertificateController::class, 'uploadBackground'])->name('offline-test-certificates.upload-background');
+
         Route::get('/online-test-results', [App\Http\Controllers\Admin\OnlineTestResultController::class, 'index'])->name('online-test-results.index');
         Route::get('/online-test-results/{id}', [App\Http\Controllers\Admin\OnlineTestResultController::class, 'show'])->whereNumber('id')->name('online-test-results.show');
         Route::patch('/online-test-results/{id}/status', [App\Http\Controllers\Admin\OnlineTestResultController::class, 'updateStatus'])->whereNumber('id')->name('online-test-results.update-status');
@@ -417,15 +436,15 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/assignments', [App\Http\Controllers\AssignmentController::class, 'index'])
         ->name('assignments.index')
-        ->middleware('check.assignment.program.access');
+        ;
     Route::get('/assignments/final-test', function () {
         return redirect()->route('final-test');
     })->name('assignments.final-test')
-        ->middleware('check.assignment.program.access');
+        ;
 
     Route::get('/final-test', [App\Http\Controllers\AssignmentController::class, 'finalTestIndex'])
         ->name('final-test')
-        ->middleware('check.assignment.program.access');
+        ;
 
     // Admin manage final test (shows editor UI for admins)
     Route::get('/admin/manage-final-test', [App\Http\Controllers\AssignmentController::class, 'finalTestIndex'])
@@ -439,24 +458,27 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/final-test/results/{result}', [App\Http\Controllers\AssignmentController::class, 'showFinalTestResult'])
         ->whereNumber('result')
         ->name('final-test.results.show')
-        ->middleware('check.assignment.program.access');
+        ;
 
     Route::get('/final-test/results/{result}/certificate', [App\Http\Controllers\AssignmentController::class, 'downloadFinalTestCertificate'])
         ->whereNumber('result')
         ->name('final-test.certificate.download')
-        ->middleware('check.assignment.program.access');
+        ;
+
+    Route::get('/offline-test/results/{id}/certificate', [App\Http\Controllers\AssignmentController::class, 'downloadOfflineTestCertificate'])
+        ->name('offline-test.certificate.download');
 
     Route::post('/final-test/{program}/{variant?}/complete', [App\Http\Controllers\AssignmentController::class, 'completeFinalTest'])
         ->where('program', 'grammar-for-writing|toefl-itp|ielts-academic|pte-academic|ielts-general|speaking')
         ->where('variant', 'introductory|complexity|proficiency|fast-track|intermediate|advanced')
         ->name('final-test.complete')
-        ->middleware('check.assignment.program.access');
+        ;
 
     Route::get('/final-test/{program}/{variant?}', [App\Http\Controllers\AssignmentController::class, 'finalTestProgram'])
         ->where('program', 'grammar-for-writing|toefl-itp|ielts-academic|pte-academic|ielts-general|speaking')
         ->where('variant', 'introductory|complexity|proficiency|fast-track|intermediate|advanced')
         ->name('final-test.show')
-        ->middleware('check.assignment.program.access');
+        ;
 
     // Meetings: allow authenticated users (students/teachers/admins) to fetch meetings for a class period
     Route::get('/class-periods/{classPeriod}/meetings', [App\Http\Controllers\TeacherAttendanceController::class, 'getMeetings'])
@@ -478,7 +500,7 @@ Route::middleware(['auth'])->group(function () {
     })->where('program', 'grammar-for-writing|toefl-itp|ielts-academic|pte-academic|ielts-general|speaking')
         ->where('variant', 'introductory|complexity|proficiency|fast-track|intermediate|advanced')
         ->name('assignments.final-test.show')
-        ->middleware('check.assignment.program.access');
+        ;
 
     // Cleanup Route (Temporary) - Outside this block in next step or just accessed via browser tool logged in?
     // Actually, I'll just remove it from here and put it at the top of the file in a separate replace call if needed, 
@@ -487,18 +509,18 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('/ielts/academic', [App\Http\Controllers\AssignmentController::class, 'ieltsAcademic'])
         ->name('assignments.ielts-academic')
-        ->middleware('check.assignment.program.access');
+        ;
     Route::get('/assignments/pte-academic', [App\Http\Controllers\AssignmentController::class, 'pteAcademic'])
         ->name('assignments.pte-academic')
-        ->middleware('check.assignment.program.access');
+        ;
 
     Route::get('/assignments/pte-academic/speaking-writing', function () {
         return view('assignments.pte-academic.speaking-writing');
-    })->name('assignments.pte-academic.speaking-writing.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.speaking-writing.index');
 
     Route::get('/assignments/pte-academic/speaking-writing/personal-introduction', function () {
         return view('assignments.pte-academic.personal-introduction.practice');
-    })->name('assignments.pte-academic.speaking-writing.personal-introduction.practice')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.speaking-writing.personal-introduction.practice');
 
     Route::get('/assignments/pte-academic/speaking-writing/read-aloud', function () {
         $topics = [];
@@ -513,14 +535,14 @@ Route::middleware(['auth'])->group(function () {
         }
 
         return view('assignments.pte-academic.read-aloud.index', compact('topics'));
-    })->name('assignments.pte-academic.speaking-writing.read-aloud.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.speaking-writing.read-aloud.index');
 
     Route::get('/assignments/pte-academic/speaking-writing/read-aloud/{id}', function ($id) {
         $hardcoded = config('pte_read_aloud', []);
         $topic = isset($hardcoded[$id]) ? $hardcoded[$id] : ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT), 'content' => 'Content for topic ' . $id . ' will be added soon.'];
 
         return view('assignments.pte-academic.read-aloud.practice', ['topicId' => $id, 'topic' => $topic]);
-    })->name('assignments.pte-academic.speaking-writing.read-aloud.practice')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.speaking-writing.read-aloud.practice');
 
     Route::get('/assignments/pte-academic/speaking-writing/repeat-sentence', function () {
         $topics = [];
@@ -535,36 +557,30 @@ Route::middleware(['auth'])->group(function () {
         }
 
         return view('assignments.pte-academic.repeat-sentence.index', compact('topics'));
-    })->name('assignments.pte-academic.speaking-writing.repeat-sentence.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.speaking-writing.repeat-sentence.index');
 
     Route::get('/assignments/pte-academic/speaking-writing/repeat-sentence/{id}', function ($id) {
         $hardcoded = config('pte_repeat_sentence', []);
         $topic = isset($hardcoded[$id]) ? $hardcoded[$id] : ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT), 'content' => 'Please repeat this sentence carefully and clearly for topic number ' . $id . '.'];
 
         return view('assignments.pte-academic.repeat-sentence.practice', ['topicId' => $id, 'topic' => $topic]);
-    })->name('assignments.pte-academic.speaking-writing.repeat-sentence.practice')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.speaking-writing.repeat-sentence.practice');
 
     Route::get('/assignments/pte-academic/speaking-writing/describe-image', function () {
-        $topics = [];
         $hardcoded = config('pte_describe_image', []);
-
-        for ($i = 1; $i <= 50; $i++) {
-            if (isset($hardcoded[$i])) {
-                $topics[$i] = $hardcoded[$i];
-            } else {
-                $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT), 'content' => 'Please describe the image shown below for topic number ' . $i . '.'];
-            }
+        $topics = [];
+        foreach ($hardcoded as $i => $data) {
+            $topics[$i] = $data;
         }
-
         return view('assignments.pte-academic.describe-image.index', compact('topics'));
-    })->name('assignments.pte-academic.speaking-writing.describe-image.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.speaking-writing.describe-image.index');
 
     Route::get('/assignments/pte-academic/speaking-writing/describe-image/{id}', function ($id) {
         $hardcoded = config('pte_describe_image', []);
         $topic = isset($hardcoded[$id]) ? $hardcoded[$id] : ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT), 'content' => 'Please describe the image shown below for topic number ' . $id . '.'];
-
-        return view('assignments.pte-academic.describe-image.practice', ['topicId' => $id, 'topic' => $topic]);
-    })->name('assignments.pte-academic.speaking-writing.describe-image.practice')->middleware('check.assignment.program.access');
+        $totalTopics = count($hardcoded) ?: 300;
+        return view('assignments.pte-academic.describe-image.practice', ['topicId' => $id, 'topic' => $topic, 'totalTopics' => $totalTopics]);
+    })->name('assignments.pte-academic.speaking-writing.describe-image.practice');
 
     Route::get('/assignments/pte-academic/speaking-writing/retell-lecture', function () {
         $topics = [];
@@ -572,12 +588,54 @@ Route::middleware(['auth'])->group(function () {
             $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
         }
         return view('assignments.pte-academic.retell-lecture.index', compact('topics'));
-    })->name('assignments.pte-academic.speaking-writing.retell-lecture.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.speaking-writing.retell-lecture.index');
 
     Route::get('/assignments/pte-academic/speaking-writing/retell-lecture/{id}', function ($id) {
         $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
         return view('assignments.pte-academic.retell-lecture.practice', ['topicId' => $id, 'topic' => $topic]);
-    })->name('assignments.pte-academic.speaking-writing.retell-lecture.practice')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.speaking-writing.retell-lecture.practice');
+
+    Route::get('/assignments/pte-academic/speaking-writing/summarize-group-discussion', function () {
+        $topics = [];
+        for ($i = 1; $i <= 100; $i++) {
+            $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
+        }
+        return view('assignments.pte-academic.summarize-group-discussion.index', compact('topics'));
+    })->name('assignments.pte-academic.speaking-writing.summarize-group-discussion.index');
+
+    Route::get('/assignments/pte-academic/speaking-writing/summarize-group-discussion/{id}', function ($id) {
+        $sgd_topics = config('pte_summarize_group_discussion') ?? [];
+        $data = $sgd_topics[$id - 1] ?? null;
+        $topic = [
+            'title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT),
+            'transcript' => $data['transcript'] ?? null,
+            'sample_answer' => $data['sample_answer'] ?? null,
+        ];
+        return view('assignments.pte-academic.summarize-group-discussion.practice', ['topicId' => $id, 'topic' => $topic]);
+    })->name('assignments.pte-academic.speaking-writing.summarize-group-discussion.practice');
+
+    Route::get('/assignments/pte-academic/speaking-writing/respond-to-a-situation', function () {
+        $topics = config('pte_respond_to_a_situation') ?? [];
+        if (empty($topics)) {
+            for ($i = 1; $i <= 100; $i++) {
+                $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
+            }
+        }
+        return view('assignments.pte-academic.respond-to-a-situation.index', compact('topics'));
+    })->name('assignments.pte-academic.speaking-writing.respond-to-a-situation.index');
+
+    Route::get('/assignments/pte-academic/speaking-writing/respond-to-a-situation/{id}', function ($id) {
+        $rs_topics = config('pte_respond_to_a_situation') ?? [];
+        $data = $rs_topics[$id] ?? ($rs_topics[$id - 1] ?? null);
+        $topic = [
+            'title' => $data['title'] ?? ('Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)),
+            'prompt' => $data['prompt'] ?? null,
+            'transcript' => $data['transcript'] ?? null,
+            'sample_answer' => $data['sample_answer'] ?? null,
+        ];
+        $totalTopics = count($rs_topics) ?: 100;
+        return view('assignments.pte-academic.respond-to-a-situation.practice', ['topicId' => $id, 'topic' => $topic, 'totalTopics' => $totalTopics]);
+    })->name('assignments.pte-academic.speaking-writing.respond-to-a-situation.practice');
 
     Route::get('/assignments/pte-academic/speaking-writing/answer-short-question', function () {
         $topics = [];
@@ -585,25 +643,32 @@ Route::middleware(['auth'])->group(function () {
             $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
         }
         return view('assignments.pte-academic.answer-short-question.index', compact('topics'));
-    })->name('assignments.pte-academic.speaking-writing.answer-short-question.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.speaking-writing.answer-short-question.index');
 
     Route::get('/assignments/pte-academic/speaking-writing/answer-short-question/{id}', function ($id) {
         $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
         return view('assignments.pte-academic.answer-short-question.practice', ['topicId' => $id, 'topic' => $topic]);
-    })->name('assignments.pte-academic.speaking-writing.answer-short-question.practice')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.speaking-writing.answer-short-question.practice');
 
     Route::get('/assignments/pte-academic/speaking-writing/summarize-written-text', function () {
+        $swt_topics = config('pte_summarize_written_text') ?? [];
         $topics = [];
         for ($i = 1; $i <= 300; $i++) {
-            $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
+            $topics[$i] = ['title' => $swt_topics[$i]['title'] ?? ('Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT))];
         }
         return view('assignments.pte-academic.summarize-written-text.index', compact('topics'));
-    })->name('assignments.pte-academic.speaking-writing.summarize-written-text.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.speaking-writing.summarize-written-text.index');
 
     Route::get('/assignments/pte-academic/speaking-writing/summarize-written-text/{id}', function ($id) {
-        $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
+        $swt_topics = config('pte_summarize_written_text') ?? [];
+        $data = $swt_topics[$id] ?? null;
+        $topic = [
+            'title' => $data['title'] ?? ('Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)),
+            'passage' => $data['passage'] ?? null,
+            'sample_answer' => $data['sample_answer'] ?? null,
+        ];
         return view('assignments.pte-academic.summarize-written-text.practice', ['topicId' => $id, 'topic' => $topic]);
-    })->name('assignments.pte-academic.speaking-writing.summarize-written-text.practice')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.speaking-writing.summarize-written-text.practice');
 
     Route::get('/assignments/pte-academic/speaking-writing/write-essay', function () {
         $topics = [];
@@ -611,16 +676,21 @@ Route::middleware(['auth'])->group(function () {
             $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
         }
         return view('assignments.pte-academic.write-essay.index', compact('topics'));
-    })->name('assignments.pte-academic.speaking-writing.write-essay.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.speaking-writing.write-essay.index');
 
     Route::get('/assignments/pte-academic/speaking-writing/write-essay/{id}', function ($id) {
-        $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
+        $prompts = config('pte_essay_topics') ?? [];
+        $prompt = $prompts[$id - 1] ?? 'Do you agree that technology has had a more positive than negative impact on the quality of education? Discuss both views and give your own opinion. Write 200–300 words.';
+        $topic = [
+            'title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT),
+            'prompt' => $prompt
+        ];
         return view('assignments.pte-academic.write-essay.practice', ['topicId' => $id, 'topic' => $topic]);
-    })->name('assignments.pte-academic.speaking-writing.write-essay.practice')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.speaking-writing.write-essay.practice');
 
     Route::get('/assignments/pte-academic/reading', function () {
         return view('assignments.pte-academic.reading');
-    })->name('assignments.pte-academic.reading.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.reading.index');
 
     Route::get('/assignments/pte-academic/reading/reading-writing-fill-blanks', function () {
         $topics = [];
@@ -628,12 +698,17 @@ Route::middleware(['auth'])->group(function () {
             $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
         }
         return view('assignments.pte-academic.reading-writing-fill-blanks.index', compact('topics'));
-    })->name('assignments.pte-academic.reading.reading-writing-fill-blanks.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.reading.reading-writing-fill-blanks.index');
 
     Route::get('/assignments/pte-academic/reading/reading-writing-fill-blanks/{id}', function ($id) {
-        $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
+        $passages = config('pte_rw_fib_topics') ?? [];
+        $passage = $passages[$id - 1] ?? 'Placeholder passage...';
+        $topic = [
+            'title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT),
+            'passage' => $passage
+        ];
         return view('assignments.pte-academic.reading-writing-fill-blanks.practice', ['topicId' => $id, 'topic' => $topic]);
-    })->name('assignments.pte-academic.reading.reading-writing-fill-blanks.practice')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.reading.reading-writing-fill-blanks.practice');
 
     Route::get('/assignments/pte-academic/reading/multiple-choice-multiple-answer', function () {
         $topics = [];
@@ -641,12 +716,25 @@ Route::middleware(['auth'])->group(function () {
             $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
         }
         return view('assignments.pte-academic.multiple-choice-multiple-answer.index', compact('topics'));
-    })->name('assignments.pte-academic.reading.multiple-choice-multiple-answer.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.reading.multiple-choice-multiple-answer.index');
 
     Route::get('/assignments/pte-academic/reading/multiple-choice-multiple-answer/{id}', function ($id) {
-        $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
+        $mcma_topics = config('pte_reading_mcma_topics') ?? [];
+        $data = $mcma_topics[$id - 1] ?? [
+            'passage' => 'Placeholder passage...',
+            'question' => 'Placeholder question?',
+            'options' => ['Option A', 'Option B', 'Option C', 'Option D', 'Option E'],
+            'answers' => ['A']
+        ];
+        $topic = [
+            'title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT),
+            'passage' => $data['passage'],
+            'question' => $data['question'],
+            'options' => $data['options'],
+            'answers' => $data['answers']
+        ];
         return view('assignments.pte-academic.multiple-choice-multiple-answer.practice', ['topicId' => $id, 'topic' => $topic]);
-    })->name('assignments.pte-academic.reading.multiple-choice-multiple-answer.practice')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.reading.multiple-choice-multiple-answer.practice');
 
     Route::get('/assignments/pte-academic/reading/reorder-paragraphs', function () {
         $topics = [];
@@ -654,10 +742,24 @@ Route::middleware(['auth'])->group(function () {
             $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
         }
         return view('assignments.pte-academic.reorder-paragraphs.index', compact('topics'));
-    })->name('assignments.pte-academic.reading.reorder-paragraphs.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.reading.reorder-paragraphs.index');
 
     Route::get('/assignments/pte-academic/reading/reorder-paragraphs/{id}', function ($id) {
-        $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
+        $reorder_topics = config('pte_reading_reorder_paragraphs_topics') ?? [];
+        $data = $reorder_topics[$id - 1] ?? [
+            'paragraphs' => [
+                'Globalization has increased the popularity of international cuisines.',
+                'This curiosity has led to a rise in ethnic restaurants and food festivals.',
+                'Yet, this trend also challenges traditional food industries to innovate and adapt to changing consumer preferences.',
+                'People are now more adventurous in their food choices, exploring dishes from different cultures.'
+            ],
+            'correctOrder' => ['A', 'D', 'B', 'C']
+        ];
+        $topic = [
+            'title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT),
+            'paragraphs' => $data['paragraphs'],
+            'correctOrder' => $data['correctOrder']
+        ];
         return view('assignments.pte-academic.reorder-paragraphs.practice', ['topicId' => $id, 'topic' => $topic]);
     })->name('assignments.pte-academic.reading.reorder-paragraphs.practice')->middleware('check.assignment.program.access');
 
@@ -667,10 +769,26 @@ Route::middleware(['auth'])->group(function () {
             $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
         }
         return view('assignments.pte-academic.reading-fill-blanks.index', compact('topics'));
-    })->name('assignments.pte-academic.reading.reading-fill-blanks.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.reading.reading-fill-blanks.index');
 
     Route::get('/assignments/pte-academic/reading/reading-fill-blanks/{id}', function ($id) {
-        $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
+        $fib_topics = config('pte_reading_fill_blanks_topics') ?? [];
+        $data = $fib_topics[$id - 1] ?? [
+            'passage' => 'Coding languages, <div class="blank-space dropzone" data-id="blank1"></div> to modern technology, emerged from the convergence of mathematical logic and electronic engineering. Initially <div class="blank-space dropzone" data-id="blank2"></div> for specific tasks, they evolved to create complex systems and applications. Python, known for its simplicity and readability, has become widely used in <div class="blank-space dropzone" data-id="blank3"></div> fields from web development to data science. Moreover, it is constantly evolving and improving, as new features and enhancements are <div class="blank-space dropzone" data-id="blank4"></div> into the language and its library every year.',
+            'words' => ['diverse', 'reverse', 'incorporated', 'integral', 'frugal', 'mixed', 'developed'],
+            'correctAnswers' => [
+                'blank1' => 'integral',
+                'blank2' => 'developed',
+                'blank3' => 'diverse',
+                'blank4' => 'incorporated'
+            ]
+        ];
+        $topic = [
+            'title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT),
+            'passage' => $data['passage'],
+            'words' => $data['words'],
+            'correctAnswers' => $data['correctAnswers']
+        ];
         return view('assignments.pte-academic.reading-fill-blanks.practice', ['topicId' => $id, 'topic' => $topic]);
     })->name('assignments.pte-academic.reading.reading-fill-blanks.practice')->middleware('check.assignment.program.access');
 
@@ -680,16 +798,29 @@ Route::middleware(['auth'])->group(function () {
             $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
         }
         return view('assignments.pte-academic.multiple-choice-single-answer.index', compact('topics'));
-    })->name('assignments.pte-academic.reading.multiple-choice-single-answer.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.reading.multiple-choice-single-answer.index');
 
     Route::get('/assignments/pte-academic/reading/multiple-choice-single-answer/{id}', function ($id) {
-        $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
+        $mcsa_topics = config('pte_reading_mcsa_topics') ?? [];
+        $data = $mcsa_topics[$id - 1] ?? [
+            'passage' => 'B-15 broke off from the Ross Ice Shelf in Antarctica. It was the largest iceberg ever documented, with a surface area of more than 4,200 square miles - more than twice the size of the state of Delaware. After it started breaking up, the largest of its pieces, B-15a, drifted along the coast of Antarctica, lingered on a shallow seamount, and collided with an ice tongue, before running aground and breaking again. Late in 2007, the largest remaining chunk floated out into the South Pacific where, in the warmer water, it began to disintegrate.',
+            'question' => 'Where did the largest piece off from B-15 eventually go?',
+            'options' => ['Chile', 'South Pacific', 'Seafloor', 'Antarctica'],
+            'correctAnswer' => 'B'
+        ];
+        $topic = [
+            'title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT),
+            'passage' => $data['passage'],
+            'question' => $data['question'],
+            'options' => $data['options'],
+            'correctAnswer' => $data['correctAnswer']
+        ];
         return view('assignments.pte-academic.multiple-choice-single-answer.practice', ['topicId' => $id, 'topic' => $topic]);
     })->name('assignments.pte-academic.reading.multiple-choice-single-answer.practice')->middleware('check.assignment.program.access');
 
     Route::get('/assignments/pte-academic/listening', function () {
         return view('assignments.pte-academic.listening');
-    })->name('assignments.pte-academic.listening.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.listening.index');
 
     Route::get('/assignments/pte-academic/listening/summarize-spoken-text', function () {
         $topics = [];
@@ -697,133 +828,201 @@ Route::middleware(['auth'])->group(function () {
             $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
         }
         return view('assignments.pte-academic.summarize-spoken-text.index', compact('topics'));
-    })->name('assignments.pte-academic.listening.summarize-spoken-text.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.listening.summarize-spoken-text.index');
 
     Route::get('/assignments/pte-academic/listening/summarize-spoken-text/{id}', function ($id) {
-        $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
+        $sst_topics = config('pte_listening_sst_topics');
+        $data = $sst_topics[$id - 1] ?? [];
+        
+        $topic = [
+            'title'    => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT),
+            'transcript' => $data['transcript'] ?? 'Fallback transcript.',
+            'voice'    => $data['voice'] ?? 'af_heart',
+            'filename' => 'topic_' . str_pad($id, 3, '0', STR_PAD_LEFT) . '.mp3',
+            'folder'   => 'kokoro-tts/listening-summarize-spoken-text',
+        ];
         return view('assignments.pte-academic.summarize-spoken-text.practice', ['topicId' => $id, 'topic' => $topic]);
     })->name('assignments.pte-academic.listening.summarize-spoken-text.practice')->middleware('check.assignment.program.access');
 
     Route::get('/assignments/pte-academic/listening/listening-multiple-choice-multiple-answer', function () {
         $topics = [];
-        for ($i = 1; $i <= 300; $i++) {
+        $mcma_topics = config('pte_listening_mcma') ?? [];
+        for ($i = 1; $i <= count($mcma_topics); $i++) {
             $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
         }
         return view('assignments.pte-academic.listening-multiple-choice-multiple-answer.index', compact('topics'));
-    })->name('assignments.pte-academic.listening.listening-multiple-choice-multiple-answer.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.listening.listening-multiple-choice-multiple-answer.index');
 
     Route::get('/assignments/pte-academic/listening/listening-multiple-choice-multiple-answer/{id}', function ($id) {
-        $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
+        $mcma_topics = config('pte_listening_mcma') ?? [];
+        $topic = $mcma_topics[$id - 1] ?? null;
+        if (!$topic) {
+            abort(404);
+        }
+        $topic['title'] = 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT);
         return view('assignments.pte-academic.listening-multiple-choice-multiple-answer.practice', ['topicId' => $id, 'topic' => $topic]);
-    })->name('assignments.pte-academic.listening.listening-multiple-choice-multiple-answer.practice')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.listening.listening-multiple-choice-multiple-answer.practice');
 
     Route::get('/assignments/pte-academic/listening/listening-fill-blanks', function () {
         $topics = [];
-        for ($i = 1; $i <= 300; $i++) {
+        $fib_topics = config('pte_listening_fib') ?? [];
+        for ($i = 1; $i <= count($fib_topics); $i++) {
             $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
         }
         return view('assignments.pte-academic.listening-fill-blanks.index', compact('topics'));
-    })->name('assignments.pte-academic.listening.listening-fill-blanks.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.listening.listening-fill-blanks.index');
 
     Route::get('/assignments/pte-academic/listening/listening-fill-blanks/{id}', function ($id) {
-        $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
+        $fib_topics = config('pte_listening_fib') ?? [];
+        $topic = $fib_topics[$id - 1] ?? null;
+        if (!$topic) {
+            abort(404);
+        }
+        $topic['title'] = 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT);
         return view('assignments.pte-academic.listening-fill-blanks.practice', ['topicId' => $id, 'topic' => $topic]);
-    })->name('assignments.pte-academic.listening.listening-fill-blanks.practice')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.listening.listening-fill-blanks.practice');
 
     Route::get('/assignments/pte-academic/listening/listening-highlight-correct-summary', function () {
         $topics = [];
-        for ($i = 1; $i <= 300; $i++) {
+        $hcs_topics = config('pte_highlight_correct_summary') ?? [];
+        for ($i = 1; $i <= count($hcs_topics); $i++) {
             $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
         }
         return view('assignments.pte-academic.listening-highlight-correct-summary.index', compact('topics'));
-    })->name('assignments.pte-academic.listening.listening-highlight-correct-summary.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.listening.listening-highlight-correct-summary.index');
 
     Route::get('/assignments/pte-academic/listening/listening-highlight-correct-summary/{id}', function ($id) {
-        $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
+        $hcs_topics = config('pte_highlight_correct_summary') ?? [];
+        $topic = $hcs_topics[$id - 1] ?? null;
+        if (!$topic) {
+            abort(404);
+        }
+        $topic['title'] = 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT);
         return view('assignments.pte-academic.listening-highlight-correct-summary.practice', ['topicId' => $id, 'topic' => $topic]);
-    })->name('assignments.pte-academic.listening.listening-highlight-correct-summary.practice')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.listening.listening-highlight-correct-summary.practice');
 
     Route::get('/assignments/pte-academic/listening/listening-multiple-choice-single-answer', function () {
         $topics = [];
-        for ($i = 1; $i <= 300; $i++) {
+        $mcsa_topics = config('pte_listening_mcsa') ?? [];
+        for ($i = 1; $i <= count($mcsa_topics); $i++) {
             $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
         }
         return view('assignments.pte-academic.listening-multiple-choice-single-answer.index', compact('topics'));
-    })->name('assignments.pte-academic.listening.listening-multiple-choice-single-answer.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.listening.listening-multiple-choice-single-answer.index');
 
     Route::get('/assignments/pte-academic/listening/listening-multiple-choice-single-answer/{id}', function ($id) {
-        $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
+        $mcsa_topics = config('pte_listening_mcsa') ?? [];
+        $topic = $mcsa_topics[$id - 1] ?? null;
+        if (!$topic) {
+            abort(404);
+        }
+        $topic['title'] = 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT);
         return view('assignments.pte-academic.listening-multiple-choice-single-answer.practice', ['topicId' => $id, 'topic' => $topic]);
-    })->name('assignments.pte-academic.listening.listening-multiple-choice-single-answer.practice')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.listening.listening-multiple-choice-single-answer.practice');
 
     Route::get('/assignments/pte-academic/listening/listening-select-missing-word', function () {
         $topics = [];
-        for ($i = 1; $i <= 300; $i++) {
+        $smw_topics = config('pte_select_missing_word') ?? [];
+        for ($i = 1; $i <= count($smw_topics); $i++) {
             $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
         }
         return view('assignments.pte-academic.listening-select-missing-word.index', compact('topics'));
-    })->name('assignments.pte-academic.listening.listening-select-missing-word.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.listening.listening-select-missing-word.index');
 
     Route::get('/assignments/pte-academic/listening/listening-select-missing-word/{id}', function ($id) {
-        $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
+        $smw_topics = config('pte_select_missing_word') ?? [];
+        $topic = $smw_topics[$id - 1] ?? null;
+        if (!$topic) {
+            abort(404);
+        }
+        $topic['title'] = 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT);
         return view('assignments.pte-academic.listening-select-missing-word.practice', ['topicId' => $id, 'topic' => $topic]);
-    })->name('assignments.pte-academic.listening.listening-select-missing-word.practice')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.listening.listening-select-missing-word.practice');
 
     Route::get('/assignments/pte-academic/listening/listening-highlight-incorrect-words', function () {
         $topics = [];
-        for ($i = 1; $i <= 300; $i++) {
+        $hiw_topics = config('pte_highlight_incorrect_words') ?? [];
+        for ($i = 1; $i <= count($hiw_topics); $i++) {
             $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
         }
         return view('assignments.pte-academic.listening-highlight-incorrect-words.index', compact('topics'));
-    })->name('assignments.pte-academic.listening.listening-highlight-incorrect-words.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.listening.listening-highlight-incorrect-words.index');
 
     Route::get('/assignments/pte-academic/listening/listening-highlight-incorrect-words/{id}', function ($id) {
-        $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
+        $hiw_topics = config('pte_highlight_incorrect_words') ?? [];
+        $topic = $hiw_topics[$id - 1] ?? null;
+        if (!$topic) {
+            abort(404);
+        }
+        $topic['title'] = 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT);
         return view('assignments.pte-academic.listening-highlight-incorrect-words.practice', ['topicId' => $id, 'topic' => $topic]);
-    })->name('assignments.pte-academic.listening.listening-highlight-incorrect-words.practice')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.listening.listening-highlight-incorrect-words.practice');
 
     Route::get('/assignments/pte-academic/listening/listening-write-from-dictation', function () {
         $topics = [];
-        for ($i = 1; $i <= 300; $i++) {
+        $wfd_topics = config('pte_write_from_dictation') ?? [];
+        for ($i = 1; $i <= count($wfd_topics); $i++) {
             $topics[$i] = ['title' => 'Topic ' . str_pad($i, 3, '0', STR_PAD_LEFT)];
         }
         return view('assignments.pte-academic.listening-write-from-dictation.index', compact('topics'));
-    })->name('assignments.pte-academic.listening.listening-write-from-dictation.index')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.listening.listening-write-from-dictation.index');
 
     Route::get('/assignments/pte-academic/listening/listening-write-from-dictation/{id}', function ($id) {
-        $topic = ['title' => 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT)];
+        $wfd_topics = config('pte_write_from_dictation') ?? [];
+        $topic = $wfd_topics[$id - 1] ?? null;
+        if (!$topic) {
+            abort(404);
+        }
+        $topic['title'] = 'Topic ' . str_pad($id, 3, '0', STR_PAD_LEFT);
         return view('assignments.pte-academic.listening-write-from-dictation.practice', ['topicId' => $id, 'topic' => $topic]);
-    })->name('assignments.pte-academic.listening.listening-write-from-dictation.practice')->middleware('check.assignment.program.access');
+    })->name('assignments.pte-academic.listening.listening-write-from-dictation.practice');
+
+    // PTE Practice Results API
+    Route::post('/pte/practice/submit', [App\Http\Controllers\PtePracticeController::class, 'submit'])
+        ->name('pte.practice.submit');
+    Route::post('/pte/practice/bookmark', [App\Http\Controllers\PtePracticeController::class, 'bookmark'])
+        ->name('pte.practice.bookmark');
+    Route::get('/pte/practice/stats/{module}', [App\Http\Controllers\PtePracticeController::class, 'moduleStats'])
+        ->name('pte.practice.stats.module');
+    Route::get('/pte/practice/stats/{module}/{topic_id}', [App\Http\Controllers\PtePracticeController::class, 'topicStats'])
+        ->name('pte.practice.stats.topic');
+    Route::post('/pte/practice/evaluate-speaking', [App\Http\Controllers\PtePracticeController::class, 'evaluateSpeaking'])
+        ->name('pte.practice.evaluate.speaking');
+    Route::post('/pte/practice/evaluate-writing', [App\Http\Controllers\PtePracticeController::class, 'evaluateWriting'])
+        ->name('pte.practice.evaluate.writing');
+    Route::post('/pte/practice/save-score', [App\Http\Controllers\PtePracticeController::class, 'saveScore'])
+        ->name('pte.practice.save-score');
 
     Route::get('/assignments/ielts-general', [App\Http\Controllers\AssignmentController::class, 'ieltsGeneral'])
         ->name('assignments.ielts-general')
-        ->middleware('check.assignment.program.access');
+        ;
 
     // IELTS Academic Listening Routes
     Route::get('/assignments/ielts-academic/listening', [App\Http\Controllers\IeltsListeningController::class, 'index'])
         ->name('assignments.ielts-academic.listening.index')
-        ->middleware('check.assignment.program.access');
+        ;
     Route::get('/assignments/ielts-academic/listening/material/{id}', [App\Http\Controllers\IeltsListeningController::class, 'material'])
         ->name('assignments.ielts-academic.listening.material')
-        ->middleware('check.assignment.program.access');
+        ;
     Route::post('/assignments/ielts-academic/listening/material/{id}/upload-audio', [App\Http\Controllers\IeltsListeningAdminController::class, 'uploadMaterialAudio'])
         ->name('assignments.ielts-academic.listening.material.upload-audio')
-        ->middleware('check.assignment.program.access');
+        ;
     Route::post('/assignments/ielts-academic/listening/material/{id}/upload-srt', [App\Http\Controllers\IeltsListeningAdminController::class, 'uploadMaterialSrt'])
         ->name('assignments.ielts-academic.listening.material.upload-srt')
-        ->middleware('check.assignment.program.access');
+        ;
     Route::post('/assignments/ielts-academic/listening/material/{id}/upload-answer-key', [App\Http\Controllers\IeltsListeningAdminController::class, 'uploadMaterialAnswerKey'])
         ->name('assignments.ielts-academic.listening.material.upload-answer-key')
-        ->middleware('check.assignment.program.access');
+        ;
     Route::get('/assignments/ielts-academic/listening/practice-index', [App\Http\Controllers\IeltsListeningController::class, 'practiceIndex'])
         ->name('assignments.ielts-academic.listening.practice.index')
-        ->middleware('check.assignment.program.access');
+        ;
     Route::get('/assignments/ielts-academic/listening/practice-index/part{set}', [App\Http\Controllers\IeltsListeningController::class, 'practiceIndexPart'])
         ->name('assignments.ielts-academic.listening.practice-index.part')
-        ->middleware('check.assignment.program.access');
+        ;
     Route::get('/assignments/ielts-academic/speaking/practice-index', [App\Http\Controllers\IeltsSpeakingController::class, 'practiceIndex'])->name('assignments.ielts-academic.speaking.practice.index');
     Route::get('/assignments/ielts-academic/speaking/practice-index/part{part}', [App\Http\Controllers\IeltsSpeakingController::class, 'practiceIndexPart'])->name('assignments.ielts-academic.speaking.practice-index.part');
     Route::get('/assignments/ielts-academic/writing/practice-index', [App\Http\Controllers\IeltsWritingController::class, 'practiceIndex'])->name('assignments.ielts-academic.writing.practice.index');
+
     Route::get('/assignments/ielts-academic/writing/practice-index/grammar-practice', [App\Http\Controllers\IeltsWritingController::class, 'grammarPractice'])->name('assignments.ielts-academic.writing.grammar-practice');
     Route::get('/assignments/ielts-academic/listening/warm-up/{type}', [App\Http\Controllers\IeltsListeningController::class, 'warmUp'])->name('assignments.ielts-academic.listening.warmup');
     
@@ -891,7 +1090,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/assignments/ielts-academic/writing/grammar', [App\Http\Controllers\IeltsWritingController::class, 'grammar'])->name('assignments.ielts.writing.grammar');
     Route::post('/assignments/ielts-academic/writing/improve', [App\Http\Controllers\IeltsWritingController::class, 'improve'])->name('assignments.ielts.writing.improve');
     Route::get('/assignments/ielts-academic/writing', [App\Http\Controllers\IeltsWritingController::class, 'index'])->name('assignments.ielts-academic.writing.index');
+    Route::get('/assignments/ielts-general/writing', [App\Http\Controllers\IeltsWritingController::class, 'generalIndex'])->name('assignments.ielts-general.writing.index');
+    Route::get('/assignments/ielts-general/reading', [App\Http\Controllers\IeltsReadingController::class, 'generalIndex'])->name('assignments.ielts-general.reading.index');
     Route::get('/assignments/ielts-academic/writing/{task}/meeting/{id}', [App\Http\Controllers\IeltsWritingController::class, 'showMeeting'])->name('assignments.ielts-academic.writing.meeting');
+    Route::get('/assignments/ielts-general/writing/{task}/meeting/{id}', [App\Http\Controllers\IeltsWritingController::class, 'showMeeting'])->name('assignments.ielts-general.writing.meeting');
     Route::post('/assignments/ielts-academic/writing', [App\Http\Controllers\IeltsWritingAdminController::class, 'storeMeeting'])->name('assignments.ielts.writing.store');
     Route::put('/assignments/ielts-academic/writing/{id}', [App\Http\Controllers\IeltsWritingAdminController::class, 'updateMeeting'])->name('assignments.ielts.writing.update');
     Route::delete('/assignments/ielts-academic/writing/{id}', [App\Http\Controllers\IeltsWritingAdminController::class, 'destroyMeeting'])->name('assignments.ielts.writing.destroy');
@@ -912,6 +1114,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/assignments/ielts-academic/speaking/tts-stream', [App\Http\Controllers\OnlineTestController::class, 'streamKokoroSpeech'])->name('assignments.ielts-academic.speaking.tts-stream');
     Route::get('/assignments/ielts-academic/speaking/practice', [App\Http\Controllers\IeltsSpeakingController::class, 'practice'])->name('assignments.ielts-academic.speaking.practice');
     Route::post('/assignments/ielts-academic/speaking/practice/grade', [App\Http\Controllers\IeltsSpeakingController::class, 'grade'])->name('assignments.ielts-academic.speaking.practice.grade');
+
     Route::get('/assignments/ielts-academic/speaking/practice/evaluation', [App\Http\Controllers\IeltsSpeakingController::class, 'evaluation'])->name('assignments.ielts-academic.speaking.evaluation');
     Route::post('/assignments/ielts-academic/speaking/practice/upgrade-lexical', [App\Http\Controllers\IeltsSpeakingController::class, 'upgradeLexical'])->name('assignments.ielts-academic.speaking.upgrade-lexical');
     Route::post('/assignments/ielts-academic/speaking/practice/collocations', [App\Http\Controllers\IeltsSpeakingController::class, 'suggestCollocations'])->name('assignments.ielts-academic.speaking.collocations');
@@ -1420,6 +1623,27 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/registration-leads/{registrationLead}/convert', [App\Http\Controllers\Admin\RegistrationLeadController::class, 'convertToStudent'])->name('admin.registration-leads.convert')->middleware('role:admin');
     Route::delete('/admin/registration-leads/{registrationLead}', [App\Http\Controllers\Admin\RegistrationLeadController::class, 'destroy'])->name('admin.registration-leads.destroy')->middleware('role:admin');
 
+    // Admin School Camp Management
+    Route::get('/admin/school-camp', [App\Http\Controllers\Admin\SchoolCampController::class, 'index'])->name('admin.school-camp.index')->middleware('role:admin');
+
+    // E-Commerce — Shop Products
+    Route::middleware('role:admin')->prefix('admin/shop')->name('admin.shop.')->group(function () {
+        // Dashboard / Report
+        Route::get('dashboard',                 [App\Http\Controllers\Admin\ShopDashboardController::class, 'index'])->name('dashboard');
+
+        // Products
+        Route::get('products',                  [App\Http\Controllers\Admin\ShopProductController::class, 'index'])->name('products.index');
+        Route::get('products/create',           [App\Http\Controllers\Admin\ShopProductController::class, 'create'])->name('products.create');
+        Route::post('products',                 [App\Http\Controllers\Admin\ShopProductController::class, 'store'])->name('products.store');
+        Route::get('products/{product}/edit',   [App\Http\Controllers\Admin\ShopProductController::class, 'edit'])->name('products.edit');
+        Route::put('products/{product}',        [App\Http\Controllers\Admin\ShopProductController::class, 'update'])->name('products.update');
+        Route::patch('products/{product}/toggle-active', [App\Http\Controllers\Admin\ShopProductController::class, 'toggleActive'])->name('products.toggle-active');
+        Route::delete('products/{product}',     [App\Http\Controllers\Admin\ShopProductController::class, 'destroy'])->name('products.destroy');
+
+        // Orders
+        Route::resource('orders', App\Http\Controllers\Admin\ShopOrderController::class)->except(['show']);
+    });
+
     // Email Logs
     Route::get('/admin/email-logs', [App\Http\Controllers\Admin\EmailLogController::class, 'index'])->name('admin.email-logs.index')->middleware('role:admin');
     Route::get('/admin/email-logs/{emailLog}', [App\Http\Controllers\Admin\EmailLogController::class, 'show'])->name('admin.email-logs.show')->middleware('role:admin');
@@ -1485,3 +1709,8 @@ Route::middleware(['auth', config('jetstream.auth_session'), 'verified', 'role:a
         Route::post('/{id}/stats',          [App\Http\Controllers\SocialMediaManagementController::class, 'updateStats'])->name('stats');
     });
 });
+
+// API routes for Live Drawing sync fallback
+Route::post('/api/live-drawing/sync', [App\Http\Controllers\LiveDrawingController::class, 'sync'])->name('api.live-drawing.sync')->middleware('auth');
+Route::get('/api/live-drawing/fetch/{targetUserId}', [App\Http\Controllers\LiveDrawingController::class, 'fetch'])->name('api.live-drawing.fetch')->middleware('auth');
+

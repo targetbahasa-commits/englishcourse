@@ -24,6 +24,7 @@ FILES_TO_UPLOAD = [
     'app/Http/Controllers/Controller.php',
     'app/Http/Controllers/PublicRegistrationLeadController.php',
     'app/Http/Controllers/Admin/ToeflMockupResultController.php',
+    'app/Http/Controllers/Admin/WHVApplicationController.php',
 
     # Models
     'app/Models/IeltsSpeakingTopic.php',
@@ -61,7 +62,9 @@ FILES_TO_UPLOAD = [
 
     # Views - Admin
     'resources/views/admin/dashboard.blade.php',
+    'resources/views/admin/partials/campaign-pulse-header.blade.php',
     'resources/views/admin/partials/export-activity-panel.blade.php',
+    'resources/views/admin/partials/lead-campaign-conversion-panel.blade.php',
     'resources/views/admin/programs/index.blade.php',
     'resources/views/admin/whv-applications/index.blade.php',
     'resources/views/admin/toefl-mockup-results/index.blade.php',

@@ -197,6 +197,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if ($this->app->environment('production') || str_ends_with(base_path(), 'public_html')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         \Illuminate\Support\Facades\Event::listen(
             \Illuminate\Mail\Events\MessageSent::class,
             \App\Listeners\LogSentEmail::class

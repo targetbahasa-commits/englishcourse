@@ -1,0 +1,107 @@
+[
+    {
+        "id": 0,
+        "text": "Due to the upcoming holiday, the university campus will be closed on Monday and will reopen on Tuesday at 8 AM.",
+        "voice": "af_sky",
+        "filename": "lmcsa_topic_0.mp3",
+        "folder": "listening-multiple-choice-single-answer"
+    },
+    {
+        "id": 1,
+        "text": "The keynote speaker for the conference had to cancel due to illness, so Dr. Smith will present instead.",
+        "voice": "af_heart",
+        "filename": "lmcsa_topic_1.mp3",
+        "folder": "listening-multiple-choice-single-answer"
+    },
+    {
+        "id": 2,
+        "text": "Due to the upcoming holiday, the university campus will be closed on Monday and will reopen on Tuesday at 8 AM.",
+        "voice": "af_bella",
+        "filename": "lmcsa_topic_2.mp3",
+        "folder": "listening-multiple-choice-single-answer"
+    },
+    {
+        "id": 3,
+        "text": "The keynote speaker for the conference had to cancel due to illness, so Dr. Smith will present instead.",
+        "voice": "am_michael",
+        "filename": "lmcsa_topic_3.mp3",
+        "folder": "listening-multiple-choice-single-answer"
+    },
+    {
+        "id": 4,
+        "text": "Due to the upcoming holiday, the university campus will be closed on Monday and will reopen on Tuesday at 8 AM.",
+        "voice": "am_fenrir",
+        "filename": "lmcsa_topic_4.mp3",
+        "folder": "listening-multiple-choice-single-answer"
+    },
+    {
+        "id": 5,
+        "text": "The keynote speaker for the conference had to cancel due to illness, so Dr. Smith will present instead.",
+        "voice": "af_heart",
+        "filename": "lmcsa_topic_5.mp3",
+        "folder": "listening-multiple-choice-single-answer"
+    },
+    {
+        "id": 6,
+        "text": "Due to the upcoming holiday, the university campus will be closed on Monday and will reopen on Tuesday at 8 AM.",
+        "voice": "af_sky",
+        "filename": "lmcsa_topic_6.mp3",
+        "folder": "listening-multiple-choice-single-answer"
+    },
+    {
+        "id": 7,
+        "text": "The keynote speaker for the conference had to cancel due to illness, so Dr. Smith will present instead.",
+        "voice": "af_sky",
+        "filename": "lmcsa_topic_7.mp3",
+        "folder": "listening-multiple-choice-single-answer"
+    },
+    {
+        "id": 8,
+        "text": "Due to the upcoming holiday, the university campus will be closed on Monday and will reopen on Tuesday at 8 AM.",
+        "voice": "am_michael",
+        "filename": "lmcsa_topic_8.mp3",
+        "folder": "listening-multiple-choice-single-answer"
+    },
+    {
+        "id": 9,
+        "text": "The keynote speaker for the conference had to cancel due to illness, so Dr. Smith will present instead.",
+        "voice": "am_fenrir",
+        "filename": "lmcsa_topic_9.mp3",
+        "folder": "listening-multiple-choice-single-answer"
+    },
+    {
+        "id": 10,
+        "text": "Due to the upcoming holiday, the university campus will be closed on Monday and will reopen on Tuesday at 8 AM.",
+        "voice": "am_fenrir",
+        "filename": "lmcsa_topic_10.mp3",
+        "folder": "listening-multiple-choice-single-answer"
+    },
+    {
+        "id": 11,
+        "text": "The keynote speaker for the conference had to cancel due to illness, so Dr. Smith will present instead.",
+        "voice": "af_bella",
+        "filename": "lmcsa_topic_11.mp3",
+        "folder": "listening-multiple-choice-single-answer"
+    },
+    {
+        "id": 12,
+        "text": "Due to the upcoming holiday, the university campus will be closed on Monday and will reopen on Tuesday at 8 AM.",
+        "voice": "am_michael",
+        "filename": "lmcsa_topic_12.mp3",
+        "folder": "listening-multiple-choice-single-answer"
+    },
+    {
+        "id": 13,
+        "text": "The keynote speaker for the conference had to cancel due to illness, so Dr. Smith will present instead.",
+        "voice": "am_michael",
+        "filename": "lmcsa_topic_13.mp3",
+        "folder": "listening-multiple-choice-single-answer"
+    },
+    {
+        "id": 14,
+        "text": "Due to the upcoming holiday, the university campus will be closed on Monday and will reopen on Tuesday at 8 AM.",
+        "voice": "am_michael",
+        "filename": "lmcsa_topic_14.mp3",
+        "folder": "listening-multiple-choice-single-answer"
+    }
+]

@@ -1,0 +1,92 @@
+import os, json, re, time
+import requests
+from dotenv import load_dotenv
+
+load_dotenv("live.env")
+
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+
+def get_transcripts():
+    with open("config/pte_listening_fib.php", "r", encoding="utf-8") as f:
+        content = f.read()
+    transcripts = []
+    matches = re.finditer(r"'transcript'\s*=>\s*'(.*?(?<!\\))'", content, re.DOTALL)
+    for m in matches:
+        t = m.group(1).replace("\\'", "'")
+        transcripts.append(t)
+    return transcripts
+
+def fetch_mcsa(idx, transcript):
+    prompt = f"""You are generating a PTE Academic 'Multiple Choice Single Answer' question.
+Given the following transcript, generate a single multiple-choice question about the transcript.
+Provide 4 short options (1-4 words each usually). 
+One must be the CORRECT answer to the question.
+Three must be INCORRECT answers (distractors) that are plausible but wrong based on the transcript.
+
+Transcript: "{transcript}"
+
+Return ONLY a valid JSON object in this exact format (no markdown blocks, no other text):
+{{
+  "question": "The question text",
+  "options": [
+    "Option 1",
+    "Option 2",
+    "Option 3",
+    "Option 4"
+  ],
+  "correct_answer": "The exact string of the correct option"
+}}"""
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={GEMINI_API_KEY}"
+    headers = {"Content-Type": "application/json"}
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "temperature": 0.5,
+            "responseMimeType": "application/json"
+        }
+    }
+        
+    for attempt in range(3):
+        try:
+            resp = requests.post(url, headers=headers, json=payload, timeout=20)
+            if resp.status_code == 200:
+                data = resp.json()
+                content = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                try:
+                    parsed = json.loads(content)
+                    return parsed
+                except Exception as e:
+                    pass
+            elif resp.status_code == 429:
+                time.sleep(5)
+            else:
+                time.sleep(2)
+        except Exception as e:
+            time.sleep(2)
+    return None
+
+def main():
+    transcripts = get_transcripts()
+    
+    mcsa_results = [None] * len(transcripts)
+    if os.path.exists("mcsa_ai_results.json"):
+        with open("mcsa_ai_results.json", "r") as f:
+            saved = json.load(f)
+            if len(saved) == len(transcripts):
+                mcsa_results = saved
+
+    for i in range(10): # ONLY FIRST 10
+        t = transcripts[i]
+        if mcsa_results[i] is None or mcsa_results[i].get("options", [])[0] == "Error" or "Failed" in mcsa_results[i].get("options", [])[0]:
+            time.sleep(4.1) # 15 RPM max -> 4 seconds per request
+            res = fetch_mcsa(i, t)
+            if res:
+                mcsa_results[i] = res
+                with open("mcsa_ai_results.json", "w") as f:
+                    json.dump(mcsa_results, f)
+                print(f"MCSA {i+1}/10 generated (Gemini)", flush=True)
+            else:
+                print(f"Failed MCSA {i+1}", flush=True)
+
+if __name__ == "__main__":
+    main()

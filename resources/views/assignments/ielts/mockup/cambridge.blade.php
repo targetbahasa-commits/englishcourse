@@ -39,15 +39,12 @@
                         </div>
                     </div>
                     @if(Auth::user()->active_role === 'guest_quick')
-                    <a href="{{ request()->routeIs('mock-test.ielts-academic.cambridge') ? route('mock-test.ielts-academic') : (request()->has('editions') ? route('assignments.ielts-academic.mockup.cambridge') : route('guest.free-tests')) }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                            {{ 'Kembali ke Pilihan' }}
-                    </a>
-                    @else
-                    <a href="{{ request()->routeIs('mock-test.ielts-academic.cambridge') ? route('mock-test.ielts-academic') : (request()->routeIs('mock-test.ielts-academic') ? route('mock-test') : route('assignments.ielts-academic')) }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                        Back
-                    </a>
+                    <a href="{{ request()->routeIs('mock-test.ielts-academic.cambridge') ? route('mock-test.ielts-academic') : (request()->has('editions') ? route('assignments.ielts-academic.mockup.cambridge') : route('guest.free-tests')) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+    <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+    </svg>
+    Back
+</a>
                     @endif
                 </div>
             </div>

@@ -228,4 +228,14 @@ class EloquentAdminStudentRepository implements AdminStudentRepository
             ->unique(static fn ($question) => (int) $question->question_number)
             ->values();
     }
+
+    public function getAllAssignmentScores(int $userId): mixed
+    {
+        return MeetingScore::where('user_id', $userId)
+            ->where('is_reported', true)
+            ->with('program')
+            ->orderBy('program_id')
+            ->orderBy('meeting_number')
+            ->get();
+    }
 }

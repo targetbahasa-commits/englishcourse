@@ -105,6 +105,13 @@ class IeltsSpeakingController extends Controller
         $slug = $request->query('topic');
         $subtopicSlug = $request->query('subtopic');
 
+        $isMockResult = false;
+        if ($slug && str_ends_with($slug, '/result')) {
+            $isMockResult = true;
+            $slug = str_replace('/result', '', $slug);
+            $request->query->set('topic', $slug);
+        }
+
         if (false) {
         } else {
             if (str_contains(strtolower($slug), 'lesson')) {
@@ -228,6 +235,33 @@ class IeltsSpeakingController extends Controller
 
         $this->attachAudioUrls($topic);
 
+        if ($isMockResult) {
+            $topicId = $topic['id'] ?? 0;
+            $partNum = $topic['part'] ?? 1;
+            
+            $mockFilePart = storage_path('app/mock_eval_' . $topicId . '_part_' . $partNum . '.json');
+            $mockFileDefault = storage_path('app/mock_eval_' . $topicId . '.json');
+            
+            if (file_exists($mockFilePart)) {
+                $aiFeedback = json_decode(file_get_contents($mockFilePart), true);
+            } elseif (file_exists($mockFileDefault)) {
+                $aiFeedback = json_decode(file_get_contents($mockFileDefault), true);
+            } else {
+                // Fallback to submission 17 if no mock file exists
+                $submission = \Illuminate\Support\Facades\DB::table('free_test_submissions')->where('id', 17)->first();
+                $aiFeedback = $submission ? json_decode($submission->ai_raw_json_feedback, true) : [];
+            }
+            
+            $type = 'speaking';
+            $id = $topic['id'] ?? 0;
+            $submission_id = 9999;
+            $submission = null;
+            $q = is_string($topic['questions']) ? json_decode($topic['questions'], true) : $topic['questions'];
+            $prompt = is_array($q) ? implode(' ', $q) : ($topic['questions'] ?? '');
+            
+            return view('promo.result', compact('type', 'id', 'submission_id', 'submission', 'aiFeedback', 'prompt'));
+        }
+
         if (isset($topic['part']) && $topic['part'] == 2) {
             return view('assignments.ielts.speaking.part2_practice', compact('topic', 'idioms', 'collocations', 'advanced_adjectives', 'advanced_adverbs', 'advanced_verbs'));
         }
@@ -268,12 +302,48 @@ class IeltsSpeakingController extends Controller
         }
 
         $topicSlug = $request->input('topic', 'speaking-practice');
-        
-        $ai = new \App\Http\Controllers\AiController();
-        // Get the part number from the request or default to 1
         $part = (int) $request->input('part', 1);
         $topicTitle = $request->input('topic_title', $topicSlug);
+
+        // Check if any valid audio was submitted
+        $hasAudio = count(array_filter($audioUrls)) > 0;
+
+        $hasSpeech = false;
+        foreach ($submittedTranscripts as $t) {
+            if (trim($t) !== '' && trim($t) !== '(No answer recorded)') {
+                $hasSpeech = true;
+                break;
+            }
+        }
+
+        if (!$hasAudio || !$hasSpeech) {
+            $result = [
+                'overall_score' => 0.0,
+                'categories' => [
+                    'fluency_coherence' => ['score' => 0.0, 'feedback' => 'Anda tidak memberikan jawaban atau rekaman audio kosong.'],
+                    'lexical_resource' => ['score' => 0.0, 'feedback' => 'Anda tidak memberikan jawaban atau rekaman audio kosong.'],
+                    'grammatical_range' => ['score' => 0.0, 'feedback' => 'Anda tidak memberikan jawaban atau rekaman audio kosong.'],
+                    'pronunciation' => ['score' => 0.0, 'feedback' => 'Anda tidak memberikan jawaban atau rekaman audio kosong.']
+                ],
+                'general_feedback' => 'Tidak ada audio atau jawaban yang terekam. Anda mendapatkan nilai 0 karena tidak ada jawaban yang dapat dievaluasi.',
+                'transcripts' => $transcriptsData
+            ];
+
+            session([
+                'speaking_evaluation_result' => $result,
+                'speaking_evaluation_topic_title' => $topicTitle,
+                'speaking_evaluation_topic_slug' => $topicSlug,
+                'speaking_evaluation_part' => $part,
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'redirect_url' => route('assignments.ielts-academic.speaking.evaluation', ['topic' => $topicSlug])
+            ]);
+        }
+
         
+        $ai = new \App\Http\Controllers\AiController();
         $aiResult = $ai->gradeSpeaking($transcriptsData, $part, $topicTitle);
 
         if ($aiResult) {
@@ -307,6 +377,92 @@ class IeltsSpeakingController extends Controller
             'status' => 'success',
             'redirect_url' => route('assignments.ielts-academic.speaking.evaluation', ['topic' => $topicSlug])
         ]);
+    }
+
+    
+    public function evaluationPreview(Request $request, $part, $id)
+    {
+        $bandScore = 0.0;
+        
+        $mockDetail = [
+            [
+                'question' => 'Do you currently work or study?',
+                'description' => 'Tidak ada jawaban yang terekam.', 
+                'kutipan' => '-', 
+                'perbaikan' => '-'
+            ]
+        ];
+        
+        $dummyResult = [
+            'overall_score' => $bandScore,
+            'categories' => [
+                'fluency_coherence' => [
+                    'score' => $bandScore,
+                    'feedback' => 'Anda tidak memberikan jawaban atau rekaman audio kosong.',
+                    'details' => $mockDetail
+                ],
+                'lexical_resource' => [
+                    'score' => $bandScore,
+                    'feedback' => 'Anda tidak memberikan jawaban atau rekaman audio kosong.',
+                    'details' => $mockDetail
+                ],
+                'grammatical_range' => [
+                    'score' => $bandScore,
+                    'feedback' => 'Anda tidak memberikan jawaban atau rekaman audio kosong.',
+                    'details' => $mockDetail
+                ],
+                'pronunciation' => [
+                    'score' => $bandScore,
+                    'feedback' => 'Anda tidak memberikan jawaban atau rekaman audio kosong.',
+                    'details' => $mockDetail
+                ]
+            ],
+            'general_feedback' => 'Ini adalah submission offline (tanpa rekaman suara asli). Karena tidak ada suara yang direkam, maka Band Score yang diberikan adalah 0. Tambahkan ?b=online di URL untuk melihat simulasi evaluasi AI.',
+            'transcripts' => [
+                [
+                    'question' => 'Do you currently work or study?',
+                    'answer' => '(No answer recorded)',
+                    'audio_url' => ''
+                ]
+            ]
+        ];
+
+        $topic = [
+            'title' => 'Speaking Practice (Admin Preview)',
+            'slug' => 'speaking-practice-preview',
+            'part' => $part,
+            'id' => $id,
+        ];
+
+        if ($request->query('b') === 'online') {
+            $transcriptsData = [
+                [
+                    'question' => 'Do you currently work or study?',
+                    'answer' => 'I am currently a student at a university in Jakarta. I am studying computer science and I really enjoy programming. It has been a passion of mine since high school.',
+                    'audio_url' => ''
+                ],
+                [
+                    'question' => 'Why did you choose that subject?',
+                    'answer' => 'I chose it because I have always been fascinated by computers. The ability to create software that can solve real-world problems is very exciting to me, and there are many career opportunities.',
+                    'audio_url' => ''
+                ]
+            ];
+            
+            $ai = new \App\Http\Controllers\AiController();
+            $aiResult = $ai->gradeSpeaking($transcriptsData, $part, $topic['title']);
+            
+            if ($aiResult) {
+                $result = $aiResult;
+                $result['transcripts'] = $transcriptsData;
+            } else {
+                $result = $dummyResult;
+                $result['general_feedback'] = 'AI Evaluation failed. Displaying offline dummy data instead.';
+            }
+        } else {
+            $result = $dummyResult;
+        }
+
+        return view('assignments.ielts.speaking.evaluation', compact('result', 'topic'));
     }
 
     public function evaluation(Request $request)

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Reading & Writing: Fill in the Blanks - {{ $topic['title'] }} | Target Bahasa</title>
     <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -65,7 +66,9 @@
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         @if(Auth::check())
-            @php($sidebarRole = strtolower(Auth::user()->active_role ?? 'student'))
+            @php
+                $sidebarRole = strtolower(Auth::user()->active_role ?? 'student');
+            @endphp
             @if($sidebarRole === 'admin')
                 @include('components.sidebar-admin')
             @elseif($sidebarRole === 'teacher')
@@ -84,7 +87,7 @@
 
                 <!-- Header -->
                 <div class="mb-8">
-                    <a href="{{ route('assignments.pte-academic.reading.reading-writing-fill-blanks.index') }}" class="inline-flex items-center text-gray-600 hover:text-blue-500 transition-colors mb-4">
+                    <a href="{{ route('assignments.pte-academic.reading.reading-writing-fill-blanks.index') }}#topic-{{ $topicId }}" class="inline-flex items-center text-gray-600 hover:text-blue-500 transition-colors mb-4">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         Back to Selection
                     </a>
@@ -123,46 +126,7 @@
                         <div class="px-8 pb-8">
                             <div class="border border-teal-400 rounded-xl p-8 bg-white shadow-sm" style="border-color: #00c5b5;">
                                 <p class="text-gray-800 text-lg leading-[2.5] font-medium" id="readingPassage">
-                                    At the height of summer the Antarctic, tourist ships move gently around the coast. Even 30 years ago such sights would have been unthinkable, but today people are willing to pay large sums of money to see the last real wilderness in the world. In the Arctic, careless human exploitation 
-                                    <select class="pte-select" data-answer="has damaged">
-                                        <option value="" disabled selected>Select Answer</option>
-                                        <option value="have damaged">have damaged</option>
-                                        <option value="has damaged">has damaged</option>
-                                        <option value="damaging">damaging</option>
-                                        <option value="damage">damage</option>
-                                    </select> 
-                                    the fragile ecosystem. Today concerned governments are trying to find ways to develop the region 
-                                    <select class="pte-select" data-answer="in the future">
-                                        <option value="" disabled selected>Select Answer</option>
-                                        <option value="in the future">in the future</option>
-                                        <option value="ever before">ever before</option>
-                                        <option value="in the past">in the past</option>
-                                        <option value="on one side">on one side</option>
-                                    </select> 
-                                    special natural environment. 
-                                    <select class="pte-select" data-answer="Although">
-                                        <option value="" disabled selected>Select Answer</option>
-                                        <option value="Because">Because</option>
-                                        <option value="Since">Since</option>
-                                        <option value="Although">Although</option>
-                                        <option value="When">When</option>
-                                    </select> 
-                                    the Antarctic is less accessible than the Arctic, it is still largely undamaged by humans, although the ozone layer above the Antarctic 
-                                    <select class="pte-select" data-answer="has thinned">
-                                        <option value="" disabled selected>Select Answer</option>
-                                        <option value="has thinned">has thinned</option>
-                                        <option value="thinning">thinning</option>
-                                        <option value="thinned">thinned</option>
-                                        <option value="have thinned">have thinned</option>
-                                    </select>. 
-                                    Many people believe that one way to preserve the area is to make the whole region into a world park, with every form of exploitation internationally 
-                                    <select class="pte-select" data-answer="banned">
-                                        <option value="" disabled selected>Select Answer</option>
-                                        <option value="banning">banning</option>
-                                        <option value="banned">banned</option>
-                                        <option value="ban">ban</option>
-                                        <option value="to ban">to ban</option>
-                                    </select>.
+                                    {!! $topic['passage'] !!}
                                 </p>
                             </div>
                         </div>
@@ -306,7 +270,12 @@
                 resultMessage.textContent = "You got " + correctCount + " out of " + totalCount + " correct in " + fmtTimer(secondsElapsed) + ". Review the incorrect answers marked in red.";
                 resultMessage.className = "text-amber-700 font-medium text-sm mt-1";
             }
-            
+
+            PTEScorePopup.show({ skill: 'Reading', score: correctCount, max: totalCount });
+            if (window.PTETracker) {
+                PTETracker.saveResult({ score: correctCount, maxScore: totalCount, durationSeconds: secondsElapsed });
+            }
+
             document.getElementById('answerBtn').style.opacity = '0.5';
             document.getElementById('answerBtn').style.pointerEvents = 'none';
         }
@@ -328,6 +297,7 @@
             startTimer();
         }
     </script>
-    @include('assignments.ielts.writing.practice_toolbar', ['meeting' => (object)['task_type' => 1], 'grammarLevel' => 'all'])
+    @include('components.pte-score-popup')
+    @include('components.pte-practice-tracker', ['module' => 'reading-writing-fill-blanks', 'topicId' => $topicId])
 </body>
 </html>

@@ -157,12 +157,16 @@
                                         <h4 class="font-bold text-blue-900">Template Summarize Group Discussion</h4>
                                     </div>
                                     <div class="p-4 text-blue-800 leading-relaxed text-sm sm:text-base space-y-2">
-                                        <p>The group discussed the topic of <span class="text-amber-600 font-bold">[Title]</span>.</p>
-                                        <p>One participant mentioned that <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
-                                        <p>Another speaker added that <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
-                                        <p>Furthermore, it was pointed out that <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
-                                        <p>In addition, the discussion highlighted that <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
-                                        <p>To summarize, the group agreed that <span class="text-amber-600 font-bold">[ ___ ]</span> is an important aspect of <span class="text-amber-600 font-bold">[Title]</span>.</p>
+                                        <p>The main topic of the discussion was <span class="text-amber-600 font-bold">[Title]</span>.</p>
+                                        <p>Initially, the first speaker talked about <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
+                                        <p>He also addressed <span class="text-amber-600 font-bold">[ ___ ]</span> and explained <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
+                                        <p>Furthermore, the second speaker mentioned <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
+                                        <p>Moreover, he also shared ideas about <span class="text-amber-600 font-bold">[ ___ ]</span>, giving additional details about <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
+                                        <p>Next, the third speaker contributed by discussing <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
+                                        <p>Additionally, he elaborated on <span class="text-amber-600 font-bold">[ ___ ]</span>, for instance <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
+                                        <p>After that, the focus was shifted to <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
+                                        <p>Towards the end, another important point mentioned was <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
+                                        <p>To conclude, the discussion highlighted important aspects such as <span class="text-amber-600 font-bold">[ ___ ]</span> and <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
                                     </div>
                                 </div>
                             </div>

@@ -103,10 +103,20 @@ class RegistrationController extends Controller
         $user = \App\Models\User::where('email', $email)->first();
 
         if (!$user) {
-            $newReferralCode = 'TB-' . strtoupper(\Illuminate\Support\Str::random(6));
+            $newReferralCode = strtoupper(\Illuminate\Support\Str::random(6));
             while (\App\Models\User::where('referral_code', $newReferralCode)->exists()) {
-                $newReferralCode = 'TB-' . strtoupper(\Illuminate\Support\Str::random(6));
+                $newReferralCode = strtoupper(\Illuminate\Support\Str::random(6));
             }
+
+            $bioParts = [];
+            if (!empty($data['learning_goal'])) $bioParts[] = "Tujuan: " . $data['learning_goal'];
+            if (!empty($data['target_score'])) $bioParts[] = "Target Skor: " . $data['target_score'];
+            if (!empty($data['has_previous_course']) && $data['has_previous_course']) $bioParts[] = "Kursus Sebelumnya: " . ($data['previous_course_name'] ?? 'Ya');
+            if (!empty($data['schedule_preference'])) $bioParts[] = "Jadwal: " . $data['schedule_preference'];
+            if (!empty($data['preferred_time'])) $bioParts[] = "Waktu: " . $data['preferred_time'];
+            if (!empty($data['best_contact_time'])) $bioParts[] = "Waktu Dihubungi: " . $data['best_contact_time'];
+            if (!empty($data['notes'])) $bioParts[] = "Catatan: " . $data['notes'];
+            $bioStr = implode("\n", $bioParts);
 
             $user = \App\Models\User::create([
                 'name'            => $data['full_name'],
@@ -120,6 +130,7 @@ class RegistrationController extends Controller
                 'learning_mode'   => ($data['mode'] ?? 'flexible') === 'flexible' ? 'both' : ($data['mode'] ?? 'online'),
                 'referral_code'   => $newReferralCode,
                 'referred_by_id'  => $referrer ? $referrer->id : null,
+                'bio'             => $bioStr,
             ]);
         }
 

@@ -5,125 +5,312 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>PTE Academic - Read Aloud Practice | {{ config('app.name', 'Target Bahasa') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="font-sans antialiased bg-gray-50 flex flex-col min-h-screen">
+<body class="font-sans antialiased bg-gray-50">
+    @include('components.impersonation-banner')
 
-    {{-- Top Navigation Bar --}}
-    <nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-        <div class="flex items-center gap-4">
-            <a href="{{ route('assignments.pte-academic.speaking-writing.read-aloud.index') }}" class="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            </a>
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-teal-100 text-teal-600 rounded-lg flex items-center justify-center font-bold">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+    <div class="flex min-h-screen">
+        {{-- Sidebar --}}
+        @php
+            if(Auth::check()) {
+                $sidebarRole = strtolower(Auth::user()->active_role ?? 'student');
+            } else {
+                $sidebarRole = 'guest';
+            }
+        @endphp
+        @if($sidebarRole === 'admin')
+            @include('components.sidebar-admin')
+        @elseif($sidebarRole === 'teacher')
+            @include('components.sidebar-teacher')
+        @elseif(in_array($sidebarRole, ['guest', 'guest_quick']))
+            @include('components.sidebar-guest')
+        @else
+            @include('components.sidebar-student')
+        @endif
+
+        {{-- Main Content Wrapper --}}
+        <div class="flex-1 md:ml-64 flex flex-col min-h-screen">
+
+            {{-- Top Navigation Bar --}}
+            <nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('assignments.pte-academic.speaking-writing.read-aloud.index') }}#topic-{{ $topicId }}" class="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    </a>
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold" style="background-color: #e0f2fe; color: #0284c7;">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        </div>
+                        <div>
+                            <h1 class="text-lg font-bold text-gray-800 leading-tight">Read Aloud</h1>
+                            <p class="text-xs text-gray-500">Speaking & Writing</p>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-lg font-bold text-gray-800 leading-tight">Read Aloud</h1>
-                    <p class="text-xs text-gray-500">Speaking & Writing</p>
+                <div class="flex items-center gap-3">
+                    <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg text-sm text-gray-600">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Look at the text below. In 40 seconds, you must read this text aloud as naturally and clearly as possible.
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="flex items-center gap-3">
-            <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg text-sm text-gray-600">
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Look at the text below. In 40 seconds, you must read this text aloud as naturally and clearly as possible.
-            </div>
-        </div>
-    </nav>
+            </nav>
 
-    {{-- Main Test Area --}}
-    <main class="flex-1 flex flex-col max-w-5xl w-full mx-auto p-4 md:p-8" x-data="{ state: 'prepare', timer: 16, isRecording: false }">
-        
-        {{-- Question Header --}}
-        <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-3">
-                <h2 class="text-xl font-semibold text-gray-800">#{{ str_pad($topicId, 3, '0', STR_PAD_LEFT) }} {{ $topic['title'] }}</h2>
-            </div>
-            <div class="flex items-center gap-4">
-                <button class="text-gray-400 hover:text-teal-500 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
-                </button>
-                <div class="px-4 py-1.5 bg-teal-500 text-white text-sm font-semibold rounded-full shadow-sm">
-                    Tested (59)
+            {{-- Main Test Area --}}
+            <main class="flex-1 flex flex-col max-w-5xl w-full mx-auto p-4 md:p-8">
+
+                {{-- Top Light Blue Header Banner --}}
+                <div class="font-bold text-lg px-6 py-3.5 rounded-xl mb-4 shadow-sm" style="background-color: #00b4d8; color: #ffffff;">
+                    Sample Question {{ $topicId }}: {{ $topic['title'] }}
                 </div>
-            </div>
-        </div>
 
-        {{-- Timer --}}
-        <div class="mb-4">
-            <p class="text-lg font-medium text-red-500 flex items-center gap-2">
-                <span x-text="state === 'prepare' ? 'Prepare:' : 'Recording:'">Prepare:</span>
-                <span class="font-mono" x-text="`00:${timer.toString().padStart(2, '0')}`">00:40</span>
-            </p>
-        </div>
+                {{-- Status Line --}}
+                <div class="mb-4">
+                    <p id="statusLine" class="text-base font-bold" style="color: #00b4d8;">Click to Start</p>
+                </div>
 
-        {{-- Reading Text Container --}}
-        <div class="bg-white border-2 border-dashed border-gray-300 rounded-2xl p-6 md:p-10 mb-6 relative">
-            <p class="text-lg md:text-xl text-gray-700 leading-relaxed font-serif text-justify">
-                {{ $topic['content'] }}
-            </p>
-            <div class="absolute bottom-4 right-4">
-                <button class="w-10 h-10 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center hover:bg-teal-100 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 012.828 2.828"></path></svg>
-                </button>
-            </div>
-        </div>
+                {{-- Reading Text Container --}}
+                <div class="bg-white border border-gray-200 rounded-xl p-6 md:p-8 mb-6 shadow-sm">
+                    <p class="text-base md:text-lg text-gray-800 leading-relaxed font-sans font-normal">
+                        {{ $topic['content'] }}
+                    </p>
+                </div>
 
-        {{-- Recording Controls Area --}}
-        <div class="bg-gray-100 rounded-2xl p-8 flex flex-col items-center justify-center relative shadow-inner">
-            <p class="text-gray-600 font-medium mb-4" x-text="isRecording ? 'Recording in progress...' : 'Click to Start'">Click to Start</p>
-            
-            <button @click="isRecording = !isRecording" 
-                    :class="isRecording ? 'bg-red-500 hover:bg-red-600 animate-pulse' : 'bg-gray-300 hover:bg-gray-400 text-gray-600'" 
-                    class="w-16 h-16 rounded-full flex items-center justify-center text-white transition-colors shadow-md">
-                <svg x-show="!isRecording" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
-                <svg x-show="isRecording" class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" style="display: none;"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>
-            </button>
+                {{-- Recording Controls Area --}}
+                <div class="border border-amber-100/80 rounded-xl p-6 md:p-8 mb-6 shadow-sm flex flex-col items-center justify-center relative" style="background-color: #fffcf8;">
+                    <div class="w-full max-w-3xl flex items-center gap-4">
+                        <button id="micBtn" onclick="toggleRecording()"
+                                class="w-10 h-10 rounded-full flex items-center justify-center shadow transition-all shrink-0 cursor-pointer"
+                                style="background-color: #e87a5d; color: #ffffff;">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                        </button>
+                        <span id="currentTime" class="text-xs font-mono font-bold text-gray-500 shrink-0">00:00</span>
+                        <div class="flex-1 h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div id="progressBar" class="h-full rounded-full transition-all duration-300" style="background-color: #00b4d8; width: 0%;"></div>
+                        </div>
+                        <span class="text-xs font-mono font-bold text-gray-500 shrink-0">00:40</span>
+                    </div>
+                </div>
 
-            <div class="absolute bottom-4 right-6 flex items-center gap-2 text-xs text-gray-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Use a headset with inline microphone to get accurate AI scores
-            </div>
-        </div>
-    </main>
-
-    {{-- Bottom Action Bar --}}
-    <footer class="bg-white border-t border-gray-200 p-4 sticky bottom-0 z-10">
-        <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <button disabled class="px-6 py-2.5 bg-gray-100 text-gray-400 font-medium rounded-lg cursor-not-allowed">
-                    Submit
-                </button>
-                <button class="px-6 py-2.5 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg shadow-sm transition-colors">
-                    Re-do
-                </button>
-                <button class="px-4 py-2.5 bg-white border-2 border-teal-500 text-teal-600 hover:bg-teal-50 font-medium rounded-lg transition-colors flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    Dict Mode
-                </button>
-            </div>
-            
-            <div class="flex items-center gap-3 w-full sm:w-auto">
-                <div class="relative flex-1 sm:w-48">
-                    <input type="text" placeholder="Question ..." class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500 text-sm">
-                    <button class="absolute right-0 top-0 bottom-0 px-3 bg-teal-500 hover:bg-teal-600 text-white rounded-r-lg transition-colors flex items-center justify-center">
-                        Search
+                {{-- Action Pill Buttons --}}
+                <div class="flex flex-wrap items-center gap-3 mb-8">
+                    <button id="startBtn" onclick="startSession()" class="px-6 py-2.5 font-bold rounded-full shadow transition-all cursor-pointer hover:opacity-90" style="background-color: #00b4d8; color: #ffffff;">
+                        Practice with AI Scoring
                     </button>
+                    <button id="playBtn" onclick="playAnswer()" style="display:none; background-color: #00b4d8; color: #ffffff;" class="px-6 py-2.5 font-bold rounded-full shadow transition-all cursor-pointer hover:opacity-90 items-center gap-2">
+                        ▶ Play Answer
+                    </button>
+                    <button id="restartBtn" onclick="restartSession()" style="display:none;" class="px-6 py-2.5 font-medium rounded-full shadow-sm transition-all cursor-pointer hover:bg-gray-50" style="background-color: #ffffff; color: #374151; border: 1px solid #d1d5db;">
+                        Restart
+                    </button>
+                    @if(Auth::check() && Auth::user()->isAdmin())
+                    <button onclick="PTEScorePopup.show({ skill: 'Speaking', score: 78, max: 90, breakdown: { 'Content': 82, 'Pronunciation': 75, 'Oral_Fluency': 78 }, feedback: 'Pace was good. Minor hesitation on academic vocabulary.' })" class="px-5 py-2.5 font-bold rounded-full shadow transition-all flex items-center gap-2 cursor-pointer hover:opacity-90" style="background-color: #f59e0b; color: #ffffff;" title="Khusus Admin: Preview Hasil Evaluasi AI">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        Preview Evaluasi
+                    </button>
+                    @endif
                 </div>
-                <button class="px-6 py-2.5 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg shadow-sm transition-colors">
-                    Previous
-                </button>
-                <button class="px-6 py-2.5 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg shadow-sm transition-colors">
-                    Next
-                </button>
-            </div>
-        </div>
-    </footer>
+            </main>
 
-    @include('assignments.ielts.writing.practice_toolbar', ['meeting' => (object)['task_type' => 1], 'grammarLevel' => 'all'])
+            {{-- Bottom Action Bar & Helpers --}}
+            <footer class="bg-white border-t border-gray-200 p-4 sticky bottom-0 z-10">
+                <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('assignments.pte-academic.speaking-writing.read-aloud.practice', ['id' => max(1, $topicId - 1)]) }}" class="px-6 py-2.5 font-medium rounded-lg shadow-sm transition-colors {{ $topicId <= 1 ? 'opacity-40 pointer-events-none' : '' }}" style="background-color: #00b4d8; color: #ffffff;">
+                            Previous
+                        </a>
+                        <a href="{{ route('assignments.pte-academic.speaking-writing.read-aloud.practice', ['id' => min(300, $topicId + 1)]) }}" class="px-6 py-2.5 font-medium rounded-lg shadow-sm transition-colors {{ $topicId >= 300 ? 'opacity-40 pointer-events-none' : '' }}" style="background-color: #00b4d8; color: #ffffff;">
+                            Next
+                        </a>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <div class="relative flex-1 sm:w-48">
+                            <input type="text" placeholder="Question ..." class="w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm">
+                            <button class="absolute right-0 top-0 bottom-0 px-3 font-medium text-white rounded-r-lg transition-colors flex items-center justify-center" style="background-color: #00b4d8;">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <audio id="playbackAudio"></audio>
+    @include('components.pte-score-popup')
+
+    <script>
+        var state = 'idle';
+        var prepTimer = null;
+        var recordTimer = null;
+        var recordTimeElapsed = 0;
+        var recordTimeTotal = 40;
+        var prepTimeLeft = 35;
+        var prepTimeTotal = 35;
+        var mediaRecorder = null;
+        var audioChunks = [];
+        var audioUrl = null;
+
+        var playbackAudio = document.getElementById('playbackAudio');
+        var statusLine    = document.getElementById('statusLine');
+        var micBtn        = document.getElementById('micBtn');
+        var progressBar   = document.getElementById('progressBar');
+        var currentTime   = document.getElementById('currentTime');
+        var startBtn      = document.getElementById('startBtn');
+        var playBtn       = document.getElementById('playBtn');
+        var restartBtn    = document.getElementById('restartBtn');
+
+        function fmt(s) {
+            var m = Math.floor(s / 60);
+            var sec = s % 60;
+            return (m < 10 ? '0'+m : m) + ':' + (sec < 10 ? '0'+sec : sec);
+        }
+
+        function setStatus(txt, color) {
+            statusLine.textContent = txt;
+            statusLine.style.color = color || '#00b4d8';
+        }
+
+        function startSession() {
+            clearAllTimers();
+            audioChunks = [];
+            audioUrl = null;
+            recordTimeElapsed = 0;
+            prepTimeLeft = prepTimeTotal;
+            currentTime.textContent = '00:00';
+            progressBar.style.width = '0%';
+            progressBar.style.background = '#00b4d8';
+
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(function(stream) {
+                    setupMediaRecorder(stream);
+                    state = 'preparing';
+                    startBtn.style.display = 'none';
+                    playBtn.style.display = 'none';
+                    restartBtn.style.display = 'inline-flex';
+                    micBtn.style.background = '#00b4d8';
+                    setStatus('Beginning in ' + prepTimeLeft + ' sec', '#00b4d8');
+
+                    prepTimer = setInterval(function() {
+                        prepTimeLeft--;
+                        setStatus('Beginning in ' + prepTimeLeft + ' sec', '#00b4d8');
+                        if (prepTimeLeft <= 0) {
+                            clearInterval(prepTimer);
+                            startRecording();
+                        }
+                    }, 1000);
+                })
+                .catch(function(err) {
+                    alert('Microphone access is required. Please allow microphone access and try again.');
+                });
+        }
+
+        function setupMediaRecorder(stream) {
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            mediaRecorder.ondataavailable = function(e) {
+                if (e.data.size > 0) audioChunks.push(e.data);
+            };
+            mediaRecorder.onstop = function() {
+                var blob = new Blob(audioChunks, { type: 'audio/webm' });
+                audioUrl = URL.createObjectURL(blob);
+                playbackAudio.src = audioUrl;
+                stream.getTracks().forEach(function(t) { t.stop(); });
+                playBtn.style.display = 'inline-flex';
+            };
+        }
+
+        function startRecording() {
+            if (!mediaRecorder) return;
+            state = 'recording';
+            mediaRecorder.start();
+            recordTimeElapsed = 0;
+            micBtn.style.background = '#ef4444';
+            micBtn.style.boxShadow = '0 0 0 6px rgba(239,68,68,0.25)';
+            progressBar.style.background = '#ef4444';
+            setStatus('Recording... Read the text aloud.', '#ef4444');
+
+            recordTimer = setInterval(function() {
+                recordTimeElapsed++;
+                currentTime.textContent = fmt(recordTimeElapsed);
+                progressBar.style.width = ((recordTimeElapsed / recordTimeTotal) * 100) + '%';
+                if (recordTimeElapsed >= recordTimeTotal) {
+                    stopRecording();
+                }
+            }, 1000);
+        }
+
+        function stopRecording() {
+            clearInterval(recordTimer);
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            state = 'finished';
+            micBtn.style.background = '#00b4d8';
+            micBtn.style.boxShadow = 'none';
+            progressBar.style.width = '100%';
+            progressBar.style.background = '#00b4d8';
+            setStatus('Recording complete. Listen to your answer below.', '#00b4d8');
+            if (window.PTETracker) {
+                PTETracker.saveResult({ score: 1, maxScore: 1, durationSeconds: recordTimeElapsed });
+            }
+        }
+
+        function toggleRecording() {
+            if (state === 'idle') {
+                startSession();
+            } else if (state === 'preparing') {
+                clearInterval(prepTimer);
+                startRecording();
+            } else if (state === 'recording') {
+                stopRecording();
+            }
+        }
+
+        function playAnswer() {
+            if (!audioUrl) return;
+            if (playbackAudio.paused) {
+                playbackAudio.play();
+                playBtn.textContent = '⏸ Pause';
+            } else {
+                playbackAudio.pause();
+                playBtn.textContent = '▶ Play Answer';
+            }
+        }
+
+        playbackAudio.onended = function() {
+            playBtn.textContent = '▶ Play Answer';
+        };
+
+        function restartSession() {
+            clearAllTimers();
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+            if (!playbackAudio.paused) playbackAudio.pause();
+
+            state = 'idle';
+            audioUrl = null;
+            audioChunks = [];
+            recordTimeElapsed = 0;
+            prepTimeLeft = prepTimeTotal;
+            currentTime.textContent = '00:00';
+            progressBar.style.width = '0%';
+            progressBar.style.background = '#00b4d8';
+            micBtn.style.background = '#e87a5d';
+            micBtn.style.boxShadow = 'none';
+            setStatus('Click to Start', '#00b4d8');
+            startBtn.style.display = 'inline-flex';
+            playBtn.style.display = 'none';
+            restartBtn.style.display = 'none';
+        }
+
+        function clearAllTimers() {
+            clearInterval(prepTimer);
+            clearInterval(recordTimer);
+        }
+    </script>
+    @include('components.pte-practice-tracker', ['module' => 'read-aloud', 'topicId' => $topicId])
 </body>
 </html>

@@ -1,0 +1,3602 @@
+[
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The process of continental drift was first proposed by Alfred Wegener in the early twentieth century. He observed that the continents seemed to fit together like a jigsaw puzzle.",
+        "question": "Who is credited with proposing the theory of continental drift?",
+        "options": [
+            "Charles Darwin",
+            "Alfred Wegener",
+            "Galileo Galilei",
+            "Isaac Newton"
+        ],
+        "correct_answer": "Alfred Wegener",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed our understanding of astronomy. Over four thousand exoplanets have been identified, ranging from small rocky worlds to large gas giants.",
+        "question": "What has been the impact of discovering exoplanets on the field of astronomy?",
+        "options": [
+            "It has decreased our understanding",
+            "It has had no effect",
+            "It has transformed our understanding",
+            "It has slowed down research"
+        ],
+        "correct_answer": "It has transformed our understanding",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering insights into planetary formation and potential habitability.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Literature"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has revolutionized the field of astronomy. Dark matter is an invisible form of matter that does not emit light, making it difficult to detect.",
+        "question": "What is the main characteristic of dark matter?",
+        "options": [
+            "It is a visible form of matter",
+            "It emits a significant amount of light",
+            "It is an invisible form of matter",
+            "It has a high density"
+        ],
+        "correct_answer": "It is an invisible form of matter",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering new insights into planetary formation and the search for life beyond Earth.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Milky Way"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy. Thousands of planets have been identified orbiting stars other than the Sun.",
+        "question": "What significant development has occurred in the field of astronomy?",
+        "options": [
+            "Identification of black holes",
+            "Discovery of exoplanets",
+            "Development of space telescopes",
+            "Exploration of Mars"
+        ],
+        "correct_answer": "Discovery of exoplanets",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy. Over 4,000 exoplanets have been identified, with many more expected to exist.",
+        "question": "What has been the outcome of the discovery of exoplanets in astronomy?",
+        "options": [
+            "It has reduced the number of known planets",
+            "It has transformed the field of astronomy",
+            "It has stopped the search for new planets",
+            "It has had no impact on astronomy"
+        ],
+        "correct_answer": "It has transformed the field of astronomy",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing diverse planetary systems beyond our own. Astronomers utilize advanced telescopes to detect exoplanets.",
+        "question": "What has advanced telescopes been used for?",
+        "options": [
+            "To study the sun",
+            "To detect exoplanets",
+            "To analyze black holes",
+            "To monitor Earth's climate"
+        ],
+        "correct_answer": "To detect exoplanets",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The process of continental drift is a fundamental concept in geology. It explains how continents move across the Earth's surface over time.",
+        "question": "What concept does the process of continental drift explain in geology?",
+        "options": [
+            "The formation of mountains",
+            "The movement of continents across the Earth's surface",
+            "The creation of oceanic crust",
+            "The process of plate tectonics"
+        ],
+        "correct_answer": "The movement of continents across the Earth's surface",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "Galileo Galilei, an Italian astronomer, observed the night sky and discovered four moons orbiting Jupiter. His observations provided evidence for the Copernican heliocentric model, challenging the geocentric view of the universe.",
+        "question": "What model of the universe did Galileo's observations support?",
+        "options": [
+            "The geocentric model",
+            "The heliocentric model",
+            "The elliptical model",
+            "The spherical model"
+        ],
+        "correct_answer": "The heliocentric model",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed our understanding of the universe, revealing numerous planets with conditions similar to those of Earth.",
+        "question": "What has led to a greater understanding of the universe?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Milky Way"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The process of continental drift is a fundamental concept in geology, describing the movement of the Earth's lithosphere.",
+        "question": "What geological concept is being described in the passage?",
+        "options": [
+            "Plate Tectonics",
+            "Continental Drift",
+            "Glacial Movement",
+            "Weathering Process"
+        ],
+        "correct_answer": "Continental Drift",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. These exoplanets vary greatly in size and composition.",
+        "question": "What has led to the discovery of thousands of planets beyond our solar system?",
+        "options": [
+            "The invention of the telescope",
+            "The discovery of black holes",
+            "The exploration of Mars",
+            "The discovery of exoplanets"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, providing new insights into planetary formation and evolution. Over 4,000 exoplanets have been discovered so far, with many more expected to be found.",
+        "question": "What has been the outcome of the discovery of exoplanets in the field of astronomy?",
+        "options": [
+            "A significant decrease in the number of astronomers",
+            "A major breakthrough in the understanding of black holes",
+            "A new understanding of planetary formation and evolution",
+            "A reduction in the funding for space exploration"
+        ],
+        "correct_answer": "A new understanding of planetary formation and evolution",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering new insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What has had a major impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Higgs boson"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of celestial bodies beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter, typically dominated by a central supermassive black hole.",
+        "question": "What is typically found at the center of a galaxy?",
+        "options": [
+            "A black hole with minimal mass",
+            "A central supermassive black hole",
+            "A massive star with high luminosity",
+            "A white dwarf with low density"
+        ],
+        "correct_answer": "A central supermassive black hole",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. Astronomers use various methods to detect these exoplanets, including the transit method.",
+        "question": "What method do astronomers use to detect exoplanets, as mentioned in the passage?",
+        "options": [
+            "The telescope method",
+            "The transit method",
+            "The radar method",
+            "The spectroscopy method"
+        ],
+        "correct_answer": "The transit method",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering new insights into planetary formation and the search for life beyond Earth.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The development of space telescopes",
+            "The exploration of Mars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Higgs boson"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has revolutionized the field of astronomy, as it reveals that ordinary matter makes up only a small fraction of the universe's mass-energy density.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of dark matter",
+            "The discovery of new planets",
+            "The discovery of new stars"
+        ],
+        "correct_answer": "The discovery of dark matter",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants, where sunlight is converted into energy. This energy is then used to power various cellular activities.",
+        "question": "Where does the process of photosynthesis primarily occur?",
+        "options": [
+            "In animals",
+            "In plants",
+            "In fungi",
+            "In bacteria"
+        ],
+        "correct_answer": "In plants",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The process of continental drift is a key concept in geology, describing the movement of Earth's continents over millions of years.",
+        "question": "What geological concept describes the movement of Earth's continents?",
+        "options": [
+            "Plate Tectonics",
+            "Continental Drift",
+            "Glaciation",
+            "Weathering"
+        ],
+        "correct_answer": "Continental Drift",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The process of continental drift was first proposed by Alfred Wegener. He suggested that the continents had moved over time and were once joined together in a single supercontinent, Pangaea.",
+        "question": "Who is credited with proposing the theory of continental drift?",
+        "options": [
+            "Charles Darwin",
+            "Alfred Wegener",
+            "Galileo Galilei",
+            "Isaac Newton"
+        ],
+        "correct_answer": "Alfred Wegener",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study planetary formation and potential habitability. Astronomers utilize a range of methods, including the transit technique, to identify exoplanets.",
+        "question": "What method do astronomers use to identify exoplanets?",
+        "options": [
+            "The telescope method",
+            "The transit technique",
+            "The radar method",
+            "The spectroscopy method"
+        ],
+        "correct_answer": "The transit technique",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study planetary formation and potential habitability beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants and some microorganisms. It involves the conversion of light energy into chemical energy.",
+        "question": "What is the primary function of photosynthesis in organisms?",
+        "options": [
+            "To convert chemical energy into light energy",
+            "To convert light energy into chemical energy",
+            "To release oxygen into the atmosphere",
+            "To absorb water from the soil"
+        ],
+        "correct_answer": "To convert light energy into chemical energy",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed our understanding of the universe, revealing thousands of planets beyond our solar system.",
+        "question": "What has led to a greater understanding of the universe?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Milky Way"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. Astronomers use various methods to detect these exoplanets, including the transit method.",
+        "question": "What method do astronomers use to detect exoplanets, according to the transcript?",
+        "options": [
+            "The Reflective Method",
+            "The Transit Method",
+            "The Radiation Method",
+            "The Gravitational Method"
+        ],
+        "correct_answer": "The Transit Method",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing diverse planetary systems beyond our own. Astronomers utilize telescopes and space missions to detect exoplanets, often employing the transit method.",
+        "question": "What method do astronomers use to detect exoplanets?",
+        "options": [
+            "The Spectroscopic Method",
+            "The Transit Method",
+            "The Radar Method",
+            "The Gravitational Method"
+        ],
+        "correct_answer": "The Transit Method",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed our understanding of the universe, revealing numerous planets with conditions similar to those of Earth.",
+        "question": "What has led to a greater understanding of the universe?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Milky Way"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The asteroid belt is a region of space where many small rocky objects orbit the Sun. Astronomers believe that these objects are the remains of a planet that never formed.",
+        "question": "What are the objects in the asteroid belt believed to be?",
+        "options": [
+            "Pieces of a comet",
+            "Remains of a planet",
+            "Parts of a star",
+            "Fragments of a moon"
+        ],
+        "correct_answer": "Remains of a planet",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The field of astronomy has led to numerous groundbreaking discoveries, including exoplanets and dark matter. Recent studies have shed light on the formation of galaxies.",
+        "question": "What area of study has led to the discovery of exoplanets and dark matter?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, providing new insights into planetary formation and the search for life beyond Earth.",
+        "question": "What has transformed the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Higgs boson"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted the field of astronomy, as it has helped to explain the observed rotation curves of galaxies. Dark matter is thought to make up approximately 27% of the universe's mass-energy density.",
+        "question": "What percentage of the universe's mass-energy density is dark matter thought to make up?",
+        "options": [
+            "10%",
+            "20%",
+            "27%",
+            "30%"
+        ],
+        "correct_answer": "27%",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering new insights into planetary formation. Astronomers now believe that planets are common in the universe.",
+        "question": "What has the discovery of exoplanets done to the field of astronomy?",
+        "options": [
+            "Limited the understanding of planetary formation",
+            "Had no impact on the field",
+            " Revolutionized the field of astronomy",
+            "Stopped the search for new planets"
+        ],
+        "correct_answer": "Revolutionized the field of astronomy",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing thousands of planets beyond our solar system. Many of these exoplanets are believed to be located in the habitable zones of their respective stars.",
+        "question": "What has led to the discovery of thousands of planets beyond our solar system?",
+        "options": [
+            "The development of space telescopes",
+            "The discovery of exoplanets",
+            "Advances in radio astronomy",
+            "The invention of the telescope"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted astronomy, as it suggests that visible matter constitutes only a small fraction of the universe.",
+        "question": "What proportion of the universe is made up of visible matter according to the discovery of dark matter?",
+        "options": [
+            "A large fraction",
+            "A small fraction",
+            "An equal fraction",
+            "The entirety"
+        ],
+        "correct_answer": "A small fraction",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. These exoplanets vary greatly in size and composition.",
+        "question": "What has led to the discovery of thousands of planets beyond our solar system?",
+        "options": [
+            "The invention of the telescope",
+            "The discovery of exoplanets",
+            "The exploration of our solar system",
+            "The development of space stations"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants, where energy from sunlight is converted into chemical energy. This energy is then stored in glucose molecules, which are vital for plant growth and development.",
+        "question": "What is the primary function of photosynthesis in plants?",
+        "options": [
+            "To release oxygen into the atmosphere",
+            "To convert energy from sunlight into chemical energy",
+            "To absorb water from the soil",
+            "To produce flowers and seeds"
+        ],
+        "correct_answer": "To convert energy from sunlight into chemical energy",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has been the impact of discovering exoplanets on astronomy?",
+        "options": [
+            "It has reduced the number of known planets",
+            "It has transformed the field of astronomy",
+            "It has slowed down space exploration",
+            "It has made Earth the only known planet"
+        ],
+        "correct_answer": "It has transformed the field of astronomy",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The emergence of galaxies is a complex process, involving the gravitational collapse of gas and dust. This process triggers the formation of stars, which in turn, influences the overall structure of the galaxy.",
+        "question": "What is the primary trigger for the formation of stars in the context of galaxy emergence?",
+        "options": [
+            "The expansion of the universe",
+            "The gravitational collapse of gas and dust",
+            "The collision of galaxies",
+            "The emission of light from existing stars"
+        ],
+        "correct_answer": "The gravitational collapse of gas and dust",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants and some bacteria, where energy from sunlight is converted into chemical energy in the form of organic compounds, such as glucose.",
+        "question": "What is the primary source of energy for the process of photosynthesis?",
+        "options": [
+            "Chemical compounds",
+            "Sunlight",
+            "Water",
+            "Glucose"
+        ],
+        "correct_answer": "Sunlight",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering new insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What has had a major impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of new stars",
+            "The discovery of new galaxies"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the universe's age"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The concept of plate tectonics revolutionized geology by explaining how continents move and change over time.",
+        "question": "What concept changed the understanding of continents' movement in geology?",
+        "options": [
+            "Glacier formation",
+            "Plate tectonics",
+            "Weathering process",
+            "Sedimentary deposition"
+        ],
+        "correct_answer": "Plate tectonics",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing diverse planetary systems beyond our own. Astronomers utilize advanced telescopes to detect exoplanets, often by measuring the dimming of a star's light as a planet passes in front of it.",
+        "question": "How do astronomers typically detect exoplanets?",
+        "options": [
+            "By observing the color of the star",
+            "By measuring the dimming of a star's light",
+            "By tracking the movement of asteroids",
+            "By analyzing the sound waves from space"
+        ],
+        "correct_answer": "By measuring the dimming of a star's light",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing thousands of planets beyond our solar system. Astronomers use various methods to detect these planets, including the transit method.",
+        "question": "What method do astronomers use to detect exoplanets, according to the transcript?",
+        "options": [
+            "The gravitational method",
+            "The transit method",
+            "The radiation method",
+            "The reflection method"
+        ],
+        "correct_answer": "The transit method",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants, where energy from sunlight is converted into chemical energy. This energy is then stored in glucose molecules, which are vital for plant growth and development.",
+        "question": "What is the primary purpose of photosynthesis in plants?",
+        "options": [
+            "To release carbon dioxide",
+            "To produce chemical energy",
+            "To absorb water",
+            "To release oxygen"
+        ],
+        "correct_answer": "To produce chemical energy",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter.",
+        "question": "What are galaxies composed of?",
+        "options": [
+            "Stars and planets",
+            "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+            "Gas, dust, and dark energy",
+            "Black holes and neutron stars"
+        ],
+        "correct_answer": "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, enabling scientists to study planetary formation and potential habitability beyond our solar system.",
+        "question": "What has led to significant advancements in the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The development of space telescopes",
+            "The exploration of Mars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study planets outside our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has been discovered beyond our solar system?",
+        "options": [
+            "Thousands of stars",
+            "Thousands of galaxies",
+            "Thousands of planets",
+            "Thousands of black holes"
+        ],
+        "correct_answer": "Thousands of planets",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has been the impact of discovering exoplanets on astronomy?",
+        "options": [
+            "It has reduced the number of known planets",
+            "It has had no significant effect on the field",
+            "It has transformed the field of astronomy",
+            "It has only led to the discovery of new stars"
+        ],
+        "correct_answer": "It has transformed the field of astronomy",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing diverse planetary systems beyond our own. Astronomers use various methods to detect these exoplanets.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study planetary formation and potential habitability. Astronomers utilize spectrographic analysis to determine the atmospheric composition of these distant worlds.",
+        "question": "What method do astronomers use to determine the atmospheric composition of exoplanets?",
+        "options": [
+            "Telescope observation",
+            "Spectrographic analysis",
+            "Space missions",
+            "Radio wave detection"
+        ],
+        "correct_answer": "Spectrographic analysis",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed astronomy, revealing thousands of planets beyond our solar system. Astronomers use indirect methods to detect these planets.",
+        "question": "What has led to the discovery of thousands of planets beyond our solar system?",
+        "options": [
+            "The invention of the telescope",
+            "The discovery of exoplanets",
+            "Advances in space exploration",
+            "The development of astronomy as a field"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The process of plate tectonics is crucial in geology, as it explains how the Earth's crust is divided into large plates that move.",
+        "question": "What does the process of plate tectonics explain in geology?",
+        "options": [
+            "How the Earth's atmosphere is formed",
+            "How the Earth's crust is divided into large plates that move",
+            "How the Earth's oceans are created",
+            "How the Earth's mountains are destroyed"
+        ],
+        "correct_answer": "How the Earth's crust is divided into large plates that move",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has significantly expanded our understanding of the universe. Astronomers have identified thousands of planets outside our solar system.",
+        "question": "What has expanded our understanding of the universe?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of new stars",
+            "The discovery of new galaxies"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing diverse planetary systems beyond our own. Astronomers utilize advanced telescopes to detect exoplanets, often by observing the slight dimming of a star's light as a planet passes in front of it.",
+        "question": "What method do astronomers use to detect exoplanets?",
+        "options": [
+            "Analyzing starlight composition",
+            "Observing the slight dimming of a star's light",
+            "Measuring planetary gravitational forces",
+            "Tracking asteroid movements"
+        ],
+        "correct_answer": "Observing the slight dimming of a star's light",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The process of continental drift was first proposed by Alfred Wegener, a German geologist. He suggested that the continents had moved over time and were once joined together in a single supercontinent, Pangaea.",
+        "question": "Who is credited with proposing the theory of continental drift?",
+        "options": [
+            "Charles Darwin",
+            "Alfred Wegener",
+            "Galileo Galilei",
+            "Isaac Newton"
+        ],
+        "correct_answer": "Alfred Wegener",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants and some bacteria, converting light energy into chemical energy. This energy is then stored in glucose molecules, which are vital for growth and development.",
+        "question": "What is the primary function of photosynthesis in plants?",
+        "options": [
+            "To release carbon dioxide",
+            "To absorb water and nutrients",
+            "To convert light energy into chemical energy",
+            "To produce oxygen and heat"
+        ],
+        "correct_answer": "To convert light energy into chemical energy",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing thousands of planets beyond our solar system. Astronomers use indirect methods to detect these planets, such as measuring the dimming of a star's light as a planet passes in front of it.",
+        "question": "What method do astronomers use to detect exoplanets?",
+        "options": [
+            "Direct observation with telescopes",
+            "Measuring the dimming of a star's light",
+            "Analyzing the star's chemical composition",
+            "Tracking the planet's orbital pattern"
+        ],
+        "correct_answer": "Measuring the dimming of a star's light",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, enabling scientists to study planetary formation and potential habitability. Astronomers utilize telescopes and space missions to detect exoplanets.",
+        "question": "What has enabled scientists to study planetary formation and habitability?",
+        "options": [
+            "The invention of the microscope",
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The development of satellite communications"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, offering new insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What has led to new insights into planetary formation and the potential for life beyond Earth?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Higgs boson"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter. They are typically dominated by a central supermassive black hole.",
+        "question": "What is typically found at the centre of a galaxy?",
+        "options": [
+            "A neutron star",
+            "A white dwarf",
+            "A central supermassive black hole",
+            "A red giant"
+        ],
+        "correct_answer": "A central supermassive black hole",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing diverse planetary systems beyond our own. Astronomers utilize a range of methods to detect these distant worlds.",
+        "question": "What has led to a greater understanding of planetary systems beyond our own?",
+        "options": [
+            "The development of space telescopes",
+            "The discovery of exoplanets",
+            "The exploration of Mars",
+            "The invention of the radio telescope"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy. Astronomers can now study the formation of planetary systems beyond our own.",
+        "question": "What has had a major impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of the Milky Way",
+            "The discovery of the Andromeda Galaxy"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, enabling scientists to study planetary formation and evolution beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Geology",
+            "Astronomy",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing a diverse range of planetary systems beyond our own. Most exoplanets are gas giants, similar to Jupiter and Saturn.",
+        "question": "What type of planets are most exoplanets similar to?",
+        "options": [
+            "Mercury and Mars",
+            "Jupiter and Saturn",
+            "Earth and Venus",
+            "Uranus and Neptune"
+        ],
+        "correct_answer": "Jupiter and Saturn",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The field of geology encompasses the study of the Earth's physical structure, composition, and processes. Geologists examine the Earth's crust, mantle, and core to understand its formation and evolution.",
+        "question": "What is the primary focus of the field of geology?",
+        "options": [
+            "The study of the Earth's atmosphere",
+            "The study of the Earth's physical structure, composition, and processes",
+            "The study of the Earth's oceans and seas",
+            "The study of the Earth's weather patterns"
+        ],
+        "correct_answer": "The study of the Earth's physical structure, composition, and processes",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The earliest fossils of modern humans, dating back to around 300,000 years ago, were discovered in Africa. These findings have significantly contributed to our understanding of human evolution.",
+        "question": "Where were the earliest fossils of modern humans discovered?",
+        "options": [
+            "Asia",
+            "Africa",
+            "Europe",
+            "Australia"
+        ],
+        "correct_answer": "Africa",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has revolutionized the field of astronomy, as it has helped explain the observed gravitational effects on galaxies. Dark matter is an invisible form of matter that does not emit or reflect light.",
+        "question": "What is dark matter in the context of astronomy?",
+        "options": [
+            "A type of celestial body",
+            "An invisible form of matter",
+            "A type of black hole",
+            "A type of asteroid"
+        ],
+        "correct_answer": "An invisible form of matter",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, enabling scientists to study planetary formation and potential habitability beyond our solar system.",
+        "question": "What has the discovery of exoplanets allowed scientists to study?",
+        "options": [
+            "The formation of black holes",
+            "The habitability of our solar system",
+            "Planetary formation and potential habitability beyond our solar system",
+            "The composition of asteroids"
+        ],
+        "correct_answer": "Planetary formation and potential habitability beyond our solar system",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing thousands of planets beyond our solar system. These findings have significant implications for the search for life beyond Earth.",
+        "question": "What has been the impact of discovering exoplanets on the field of astronomy?",
+        "options": [
+            "It has reduced the number of planets in our solar system",
+            "It has transformed the field and revealed thousands of new planets",
+            "It has led to the discovery of new stars",
+            "It has slowed down space exploration"
+        ],
+        "correct_answer": "It has transformed the field and revealed thousands of new planets",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants and some bacteria, where light energy is converted into chemical energy. This energy is then stored in the form of glucose.",
+        "question": "Where does the process of photosynthesis primarily occur in organisms?",
+        "options": [
+            "In the roots",
+            "In the stems and leaves",
+            "In the flowers",
+            "In the soil"
+        ],
+        "correct_answer": "In the stems and leaves",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study planetary formation and potential habitability. Astronomers utilize advanced telescopes to detect exoplanets.",
+        "question": "What has enabled scientists to study planetary formation and potential habitability?",
+        "options": [
+            "The invention of the microscope",
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The development of space suits"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing numerous planets with conditions similar to those of Earth.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Geology",
+            "Biology",
+            "Astronomy",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, providing new insights into planetary formation and evolution.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Higgs boson"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing diverse planetary systems beyond our own. Astronomers utilise transit methods to detect exoplanets.",
+        "question": "How do astronomers detect exoplanets?",
+        "options": [
+            "By observing the colour of the stars",
+            "By utilising transit methods",
+            "By studying the moons of the planets",
+            "By analysing the brightness of black holes"
+        ],
+        "correct_answer": "By utilising transit methods",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy. Over 4,000 exoplanets have been identified, with many more expected to exist.",
+        "question": "What has been the outcome of the discovery of exoplanets in astronomy?",
+        "options": [
+            "A significant reduction in the number of astronomers",
+            "A major shift in the understanding of the universe",
+            "The closure of several space research facilities",
+            "A decrease in the number of identified exoplanets"
+        ],
+        "correct_answer": "A major shift in the understanding of the universe",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. These exoplanets vary greatly in size and composition.",
+        "question": "What has led to the discovery of thousands of planets beyond our solar system?",
+        "options": [
+            "The development of space telescopes",
+            "The discovery of exoplanets",
+            "The invention of the microscope",
+            "The exploration of Mars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has led to a major breakthrough in astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The invention of the telescope",
+            "The discovery of exoplanets",
+            "The exploration of Mars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted the field of astronomy. It is now understood that dark matter makes up approximately 27% of the universe's total mass-energy density.",
+        "question": "What percentage of the universe's total mass-energy density is made up of dark matter?",
+        "options": [
+            "25%",
+            "27%",
+            "30%",
+            "35%"
+        ],
+        "correct_answer": "27%",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, enabling scientists to study planetary formation and potential habitability. Astronomers utilize advanced telescopes to detect exoplanets and analyze their atmospheres.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing thousands of planets beyond our solar system. Astronomers use a variety of methods to detect these exoplanets.",
+        "question": "What has led to the discovery of thousands of planets beyond our solar system?",
+        "options": [
+            "The development of space telescopes",
+            "The discovery of black holes",
+            "The invention of the microscope",
+            "The discovery of exoplanets"
+        ],
+        "correct_answer": "The development of space telescopes",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted astronomy, as it accounts for approximately 27% of the universe's mass-energy density.",
+        "question": "What percentage of the universe's mass-energy density is attributed to dark matter?",
+        "options": [
+            "10%",
+            "20%",
+            "27%",
+            "30%"
+        ],
+        "correct_answer": "27%",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The process of continental drift is a fundamental concept in geology. It suggests that the continents have moved over time and are still moving.",
+        "question": "What concept is being discussed in the passage?",
+        "options": [
+            "Plate tectonics",
+            "Continental drift",
+            "Glacial formation",
+            "Oceanic currents"
+        ],
+        "correct_answer": "Continental drift",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants, where energy from sunlight is converted into chemical energy. This process is crucial for the survival of nearly all living organisms.",
+        "question": "Where does the process of photosynthesis primarily take place?",
+        "options": [
+            "In animals",
+            "In plants",
+            "In fungi",
+            "In bacteria"
+        ],
+        "correct_answer": "In plants",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering new insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What has had a major impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the universe's age"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed astronomy, revealing thousands of planets beyond our solar system. Astronomers use indirect methods to detect these planets, such as measuring the star's slight wobble caused by the planet's gravitational pull.",
+        "question": "What method do astronomers use to detect exoplanets?",
+        "options": [
+            "Direct observation",
+            "Measuring the star's temperature",
+            "Measuring the star's slight wobble",
+            "Analyzing the planet's atmosphere"
+        ],
+        "correct_answer": "Measuring the star's slight wobble",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing diverse planetary systems beyond our own. Astronomers utilize transit methods to detect exoplanets by measuring the decrease in a star's brightness as a planet passes in front.",
+        "question": "What method do astronomers use to detect exoplanets?",
+        "options": [
+            "Spectroscopic method",
+            "Transit method",
+            "Gravitational method",
+            "Radiometric method"
+        ],
+        "correct_answer": "Transit method",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed our understanding of the universe, revealing countless worlds beyond our own solar system.",
+        "question": "What has led to a greater understanding of the universe?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Higgs boson"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing diverse planetary systems beyond our own. Astronomers utilize transit methods and radial velocity measurements to detect these distant worlds.",
+        "question": "What methods do astronomers use to detect exoplanets?",
+        "options": [
+            "Telescope observations and spacecraft images",
+            "Transit methods and radial velocity measurements",
+            "Gravitational waves and gamma-ray bursts",
+            "Spectroscopy and cosmic microwave background radiation"
+        ],
+        "correct_answer": "Transit methods and radial velocity measurements",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, providing new insights into planetary formation and the search for life beyond Earth.",
+        "question": "What has had a major impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Higgs boson"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, offering insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the universe's age"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing thousands of planets beyond our solar system. Astronomers use a range of methods to detect these distant worlds, including the transit method, which involves measuring the decrease in brightness as a planet passes in front of its host star.",
+        "question": "What method do astronomers use to detect exoplanets by measuring the decrease in brightness?",
+        "options": [
+            "The Spectrographic Method",
+            "The Transit Method",
+            "The Reflective Method",
+            "The Radiation Method"
+        ],
+        "correct_answer": "The Transit Method",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants, where sunlight is converted into energy. This energy is then stored in the form of glucose, which is used by the plant to fuel its metabolic processes.",
+        "question": "What is the primary function of photosynthesis in plants?",
+        "options": [
+            "To release oxygen into the atmosphere",
+            "To convert sunlight into energy",
+            "To absorb water from the soil",
+            "To produce flowers and seeds"
+        ],
+        "correct_answer": "To convert sunlight into energy",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The process of continental drift has significantly shaped Earth's geology over millions of years.",
+        "question": "What geological process is mentioned in the passage?",
+        "options": [
+            "Plate Tectonics",
+            "Continental Drift",
+            "Glacial Movement",
+            "Weathering Erosion"
+        ],
+        "correct_answer": "Continental Drift",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing diverse planetary systems beyond our own. Astronomers utilize transit methods to detect exoplanets.",
+        "question": "What method do astronomers use to detect exoplanets?",
+        "options": [
+            "Spectrographic method",
+            "Telescope method",
+            "Transit method",
+            "Gravitational method"
+        ],
+        "correct_answer": "Transit method",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted astronomy, as it accounts for approximately 27% of the universe's mass-energy density.",
+        "question": "What percentage of the universe's mass-energy density is attributed to dark matter?",
+        "options": [
+            "20%",
+            "25%",
+            "27%",
+            "30%"
+        ],
+        "correct_answer": "27%",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing thousands of planets beyond our solar system. Astronomers use a variety of methods to detect these distant worlds.",
+        "question": "What has led to the discovery of thousands of planets beyond our solar system?",
+        "options": [
+            "The development of space telescopes",
+            "The discovery of black holes",
+            "The use of a variety of detection methods by astronomers",
+            "The exploration of Mars"
+        ],
+        "correct_answer": "The use of a variety of detection methods by astronomers",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study planetary formation and potential habitability. Astronomers utilize advanced telescopes and detection methods to identify these distant worlds.",
+        "question": "What has enabled scientists to study planetary formation and potential habitability?",
+        "options": [
+            "The development of space exploration",
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The invention of the microscope"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants, enabling them to convert light energy into chemical energy. This complex process involves the conversion of carbon dioxide and water into glucose and oxygen.",
+        "question": "What is the primary function of photosynthesis in plants?",
+        "options": [
+            "To convert chemical energy into light energy",
+            "To convert light energy into chemical energy",
+            "To produce carbon dioxide and water",
+            "To release oxygen and glucose"
+        ],
+        "correct_answer": "To convert light energy into chemical energy",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering new insights into planetary formation and the possibility of life beyond Earth.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Milky Way"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy. Over 4,000 exoplanets have been detected so far, and many of these planets are believed to be located in the habitable zones of their respective stars.",
+        "question": "What has been the impact of discovering exoplanets on the field of astronomy?",
+        "options": [
+            "It has slowed down the progress of astronomy",
+            "It has had no significant impact on astronomy",
+            "It has revolutionized the field of astronomy",
+            "It has made astronomy less relevant"
+        ],
+        "correct_answer": "It has revolutionized the field of astronomy",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "Scientists have discovered that certain species of birds have adapted to migrate at night, navigating by the position of the stars. This innate ability is thought to have evolved over time, allowing the birds to travel long distances with greater accuracy.",
+        "question": "According to the transcript, what do certain species of birds use to navigate during their nocturnal migrations?",
+        "options": [
+            "The Earth's magnetic field",
+            "The position of the stars",
+            "The scent of food sources",
+            "Visual cues from landmarks"
+        ],
+        "correct_answer": "The position of the stars",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants, converting light energy into chemical energy. This energy is stored in glucose molecules, which are then used to fuel the plant's metabolic processes.",
+        "question": "What is the primary function of photosynthesis in plants?",
+        "options": [
+            "To release oxygen into the atmosphere",
+            "To convert light energy into chemical energy",
+            "To absorb water from the soil",
+            "To produce flowers and seeds"
+        ],
+        "correct_answer": "To convert light energy into chemical energy",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted astronomy, as it accounts for approximately twenty-seven percent of the universe's mass-energy density.",
+        "question": "What percentage of the universe's mass-energy density is accounted for by dark matter?",
+        "options": [
+            "Twenty percent",
+            "Twenty-seven percent",
+            "Thirty percent",
+            "Forty percent"
+        ],
+        "correct_answer": "Twenty-seven percent",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of celestial bodies orbiting nearby stars.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, offering insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What has transformed the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Higgs boson"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing diverse planetary systems. Astronomers utilize transit method to detect exoplanets.",
+        "question": "What method do astronomers use to detect exoplanets?",
+        "options": [
+            "Spectroscopy",
+            "Telescope",
+            "Transit method",
+            "Gravitational lensing"
+        ],
+        "correct_answer": "Transit method",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The process of continental drift is a key concept in geology, describing the movement of the Earth's continents over time.",
+        "question": "What field of study is primarily concerned with the concept of continental drift?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Geology",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. Astronomers utilize a range of methods to detect these distant worlds.",
+        "question": "What has led to the identification of thousands of planets outside our solar system?",
+        "options": [
+            "Advancements in telescope technology",
+            "The discovery of exoplanets",
+            "A range of methods used by astronomers",
+            "The exploration of our solar system"
+        ],
+        "correct_answer": "A range of methods used by astronomers",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy. Over 4,000 exoplanets have been identified, ranging from small rocky worlds to large gas giants.",
+        "question": "What has been the outcome of the discovery of exoplanets in astronomy?",
+        "options": [
+            "A significant reduction in the number of galaxies",
+            "The identification of over 4,000 exoplanets",
+            "A decrease in the study of black holes",
+            "The discovery of only one large gas giant"
+        ],
+        "correct_answer": "The identification of over 4,000 exoplanets",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted astronomy, as it accounts for approximately 27% of the universe's mass-energy density.",
+        "question": "What percentage of the universe's mass-energy density is attributed to dark matter?",
+        "options": [
+            "20%",
+            "25%",
+            "27%",
+            "30%"
+        ],
+        "correct_answer": "27%",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "According to research, the Earth's crust is broken into several large plates that float on the semi-fluid asthenosphere below, causing earthquakes and volcanic activity.",
+        "question": "What is the layer of the Earth that the tectonic plates float on?",
+        "options": [
+            "Lithosphere",
+            "Asthenosphere",
+            "Mesosphere",
+            "Hydrosphere"
+        ],
+        "correct_answer": "Asthenosphere",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Higgs boson"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy. Over 4,000 exoplanets have been discovered so far, and many of these are believed to be located in the habitable zones of their respective stars.",
+        "question": "What has been the impact of discovering exoplanets on the field of astronomy?",
+        "options": [
+            "It has led to a decline in the field",
+            "It has had no significant impact",
+            "It has revolutionized the field",
+            "It has slowed down space exploration"
+        ],
+        "correct_answer": "It has revolutionized the field",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants, where energy from sunlight is converted into chemical energy. Chlorophyll plays a crucial role in this process.",
+        "question": "What is essential for the process of photosynthesis in plants?",
+        "options": [
+            "Water",
+            "Chlorophyll",
+            "Oxygen",
+            "Nitrogen"
+        ],
+        "correct_answer": "Chlorophyll",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter.",
+        "question": "What are galaxies composed of?",
+        "options": [
+            "Stars and planets",
+            "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+            "Black holes and nebulae",
+            "Comets and asteroids"
+        ],
+        "correct_answer": "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. These exoplanets vary greatly in size and composition.",
+        "question": "What has led to the discovery of thousands of planets beyond our solar system?",
+        "options": [
+            "The development of space telescopes",
+            "The discovery of exoplanets",
+            "The invention of the telescope",
+            "The exploration of our solar system"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of celestial bodies beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Literature"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing diverse planetary systems beyond our own. Astronomers now recognize that planets are common in the universe.",
+        "question": "What has changed the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of new stars",
+            "The discovery of new galaxies"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study planetary formation and potential habitability beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing diverse planetary systems beyond our own. Astronomers now believe that many stars have planetary companions.",
+        "question": "What has transformed the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of new galaxies",
+            "The discovery of new stars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy. Over 4,000 exoplanets have been identified, challenging our understanding of planetary formation.",
+        "question": "What has been the impact of exoplanet discovery on astronomy?",
+        "options": [
+            "It has slowed down the field of astronomy",
+            "It has transformed the field of astronomy",
+            "It has had no impact on astronomy",
+            "It has only identified 100 exoplanets"
+        ],
+        "correct_answer": "It has transformed the field of astronomy",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants and certain bacteria, converting light energy into chemical energy.",
+        "question": "What is the primary function of photosynthesis in plants?",
+        "options": [
+            "To release carbon dioxide",
+            "To convert light energy into chemical energy",
+            "To absorb water from the soil",
+            "To produce heat"
+        ],
+        "correct_answer": "To convert light energy into chemical energy",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The process of continental drift was first proposed by Alfred Wegener, a German geophysicist. He observed that the continents seemed to fit together like a jigsaw puzzle.",
+        "question": "Who is credited with proposing the theory of continental drift?",
+        "options": [
+            "Charles Darwin",
+            "Alfred Wegener",
+            "Galileo Galilei",
+            "Isaac Newton"
+        ],
+        "correct_answer": "Alfred Wegener",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, offering insights into planetary formation. Astronomers can now study diverse planetary systems, shedding light on the universe's complexities.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing diverse planetary systems. Astronomers analyze starlight passing through exoplanet atmospheres to identify chemical compositions.",
+        "question": "What method do astronomers use to determine the chemical makeup of exoplanet atmospheres?",
+        "options": [
+            "Analyzing moon phases",
+            "Studying black holes",
+            "Examining starlight passing through atmospheres",
+            "Tracking asteroid movements"
+        ],
+        "correct_answer": "Examining starlight passing through atmospheres",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study the formation and evolution of planetary systems beyond our own.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter.",
+        "question": "What are galaxies composed of?",
+        "options": [
+            "Stars and planets",
+            "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+            "Nebulae and black holes",
+            "Comets and asteroids"
+        ],
+        "correct_answer": "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. These exoplanets vary greatly in size and composition.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of new stars",
+            "The discovery of new galaxies"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing diverse planetary systems beyond our own. Astronomers utilize various methods to detect these exoplanets, including the transit and radial velocity techniques.",
+        "question": "What methods do astronomers use to detect exoplanets?",
+        "options": [
+            "The transit and spectroscopy techniques",
+            "The radial velocity and transit techniques",
+            "The telescope and satellite methods",
+            "The spacecraft and lander approaches"
+        ],
+        "correct_answer": "The radial velocity and transit techniques",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study planetary formation and potential habitability. Astronomers utilize advanced telescopes to detect exoplanets.",
+        "question": "What has enabled scientists to study planetary formation and potential habitability?",
+        "options": [
+            "The invention of the microscope",
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The development of space suits"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering new insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of asteroids",
+            "The discovery of comets"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing diverse planetary systems beyond our own. Astronomers utilize transit methods to detect exoplanets.",
+        "question": "What method do astronomers use to detect exoplanets?",
+        "options": [
+            "Telescope observation",
+            "Space exploration",
+            "Transit methods",
+            "Satellite imaging"
+        ],
+        "correct_answer": "Transit methods",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy. Over 4,000 exoplanets have been discovered so far, and many of these planets are believed to be located in the habitable zones of their respective stars.",
+        "question": "What has been the impact of discovering exoplanets on the field of astronomy?",
+        "options": [
+            "It has slowed down the progress of astronomy",
+            "It has revolutionized the field of astronomy",
+            "It has made astronomy less relevant",
+            "It has not had any significant impact"
+        ],
+        "correct_answer": "It has revolutionized the field of astronomy",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has revolutionized the field of astronomy, as it reveals that approximately 27% of the universe is composed of this mysterious substance.",
+        "question": "What percentage of the universe is composed of dark matter?",
+        "options": [
+            "20%",
+            "25%",
+            "27%",
+            "30%"
+        ],
+        "correct_answer": "27%",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study planetary formation and evolution outside our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Geology",
+            "Biology",
+            "Astronomy",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter.",
+        "question": "What are galaxies composed of?",
+        "options": [
+            "Stars and planets",
+            "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+            "Gas, dust, and dark energy",
+            "Black holes and neutron stars"
+        ],
+        "correct_answer": "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has led to the discovery of thousands of planets beyond our solar system?",
+        "options": [
+            "The invention of the telescope",
+            "The discovery of exoplanets",
+            "The development of space exploration",
+            "Advances in astronomical technology"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has led to the revelation of thousands of planets beyond our solar system?",
+        "options": [
+            "The discovery of black holes",
+            "The invention of the telescope",
+            "The discovery of exoplanets",
+            "The exploration of Mars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The field of astronomy has made significant advancements in recent years, particularly with the discovery of exoplanets. Astronomers have identified thousands of planets outside our solar system, expanding our understanding of the universe.",
+        "question": "What major development has occurred in the field of astronomy?",
+        "options": [
+            "Discovery of black holes",
+            "Identification of exoplanets",
+            "Explanation of the big bang theory",
+            "Discovery of new galaxies"
+        ],
+        "correct_answer": "Identification of exoplanets",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted the field of astronomy, as it has led to a greater understanding of the universe's composition and evolution.",
+        "question": "What has been the main impact of the discovery of dark matter on the field of astronomy?",
+        "options": [
+            "It has reduced our understanding of the universe's composition",
+            "It has led to a greater understanding of the universe's composition and evolution",
+            "It has made the study of astronomy less relevant",
+            "It has only affected the study of black holes"
+        ],
+        "correct_answer": "It has led to a greater understanding of the universe's composition and evolution",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter.",
+        "question": "What are galaxies primarily composed of?",
+        "options": [
+            "Stars and planets",
+            "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+            "Black holes and dark energy",
+            "Nebulae and asteroids"
+        ],
+        "correct_answer": "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing thousands of planets beyond our solar system. These findings have significant implications for the search for life beyond Earth.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing diverse planetary systems beyond our own. Astronomers utilize various methods to detect these distant worlds, including the transit technique.",
+        "question": "What method do astronomers use to detect exoplanets, according to the transcript?",
+        "options": [
+            "The gravitational lensing technique",
+            "The transit technique",
+            "The radio wave detection method",
+            "The gamma ray observation method"
+        ],
+        "correct_answer": "The transit technique",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering new insights into planetary formation and the possibility of life beyond Earth.",
+        "question": "What has the discovery of exoplanets impacted?",
+        "options": [
+            "The field of biology",
+            "The field of astronomy",
+            "The field of geology",
+            "The field of psychology"
+        ],
+        "correct_answer": "The field of astronomy",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. These planets vary greatly in size and composition.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of galaxies",
+            "The discovery of stars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. Many of these exoplanets are believed to be located in the habitable zones of their respective stars.",
+        "question": "What has led to the revelation of thousands of planets beyond our solar system?",
+        "options": [
+            "The discovery of black holes",
+            "The invention of the telescope",
+            "The discovery of exoplanets",
+            "The exploration of Mars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study planetary formation and evolution beyond our solar system.",
+        "question": "What has enabled scientists to study planetary formation and evolution beyond our solar system?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The development of space telescopes",
+            "The exploration of Mars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study planetary formation and potential habitability. Astronomers utilize a range of methods to detect these distant worlds.",
+        "question": "What has enabled scientists to study planetary formation and potential habitability?",
+        "options": [
+            "The invention of the telescope",
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The development of space stations"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, providing new insights into planetary formation and the search for life beyond Earth.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing thousands of planets beyond our solar system. Astronomers use indirect methods to detect these planets, such as measuring the star's dimming as a planet passes in front of it.",
+        "question": "What method do astronomers use to detect exoplanets?",
+        "options": [
+            "Direct observation with a telescope",
+            "Measuring the star's dimming as a planet passes in front of it",
+            "Analyzing the color of the star",
+            "Studying the moons of the exoplanet"
+        ],
+        "correct_answer": "Measuring the star's dimming as a planet passes in front of it",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants, where energy from sunlight is converted into chemical energy. This energy is stored in glucose, which is a type of sugar.",
+        "question": "Where does the process of converting sunlight into chemical energy primarily occur?",
+        "options": [
+            "In animals",
+            "In plants",
+            "In fungi",
+            "In bacteria"
+        ],
+        "correct_answer": "In plants",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering new insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Literature"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, offering new insights into planetary formation and the possibility of life beyond Earth.",
+        "question": "What has transformed the field of astronomy according to the speaker?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Milky Way"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of celestial bodies beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, enabling scientists to study planetary formation and potential habitability. Astronomers utilize advanced telescopes to detect exoplanets and analyze their atmospheres.",
+        "question": "What has enabled scientists to study planetary formation and potential habitability?",
+        "options": [
+            "The invention of the microscope",
+            "The discovery of black holes",
+            "The development of advanced telescopes",
+            "The exploration of Mars"
+        ],
+        "correct_answer": "The development of advanced telescopes",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "According to recent studies, the process of continental drift is primarily driven by plate tectonics. This concept, introduced by Alfred Wegener, revolutionized the field of geology.",
+        "question": "What is the primary driver of the process of continental drift?",
+        "options": [
+            "Weather patterns",
+            "Plate tectonics",
+            "Glacial movement",
+            "Ocean currents"
+        ],
+        "correct_answer": "Plate tectonics",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing thousands of planets beyond our solar system. These findings have significant implications for our understanding of planetary formation.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing thousands of planets beyond our solar system. These exoplanets vary greatly in size and composition.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted astronomy, as it suggests that a large portion of the universe's mass is not visible.",
+        "question": "What has been the impact of the discovery of dark matter on the field of astronomy?",
+        "options": [
+            "It has made the universe appear smaller",
+            "It has led to a greater understanding of black holes",
+            "It has suggested that a large portion of the universe's mass is not visible",
+            "It has reduced the importance of galaxy formation"
+        ],
+        "correct_answer": "It has suggested that a large portion of the universe's mass is not visible",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted astronomy, as it reveals a large portion of the universe's mass-energy budget.",
+        "question": "What field of study is impacted by the discovery of dark matter?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The process of continental drift was first proposed by Alfred Wegener.",
+        "question": "Who is credited with the theory of continental drift?",
+        "options": [
+            "Charles Darwin",
+            "Alfred Wegener",
+            "Galileo Galilei",
+            "Isaac Newton"
+        ],
+        "correct_answer": "Alfred Wegener",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has led to the revelation of thousands of planets beyond our solar system?",
+        "options": [
+            "The development of space telescopes",
+            "The discovery of black holes",
+            "The invention of the microscope",
+            "The discovery of exoplanets"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants, algae, and some bacteria, where energy from sunlight is converted into chemical energy in the form of glucose.",
+        "question": "Where does the process of photosynthesis primarily occur?",
+        "options": [
+            "In animals",
+            "In plants, algae, and some bacteria",
+            "In fungi",
+            "In protozoa"
+        ],
+        "correct_answer": "In plants, algae, and some bacteria",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter.",
+        "question": "What are galaxies primarily composed of?",
+        "options": [
+            "Stars and planets",
+            "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+            "Gas, dust, and dark matter",
+            "Planets and dark matter"
+        ],
+        "correct_answer": "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted astronomy, as it accounts for approximately 27% of the universe's mass-energy density.",
+        "question": "What percentage of the universe's mass-energy density is attributed to dark matter?",
+        "options": [
+            "20%",
+            "25%",
+            "27%",
+            "30%"
+        ],
+        "correct_answer": "27%",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, enabling scientists to study planetary formation and evolution beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering insights into planetary formation and the possibility of life beyond Earth.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Milky Way"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted astronomy, as it suggests that galaxies are held together by invisible forces.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of dark matter",
+            "The discovery of new planets",
+            "The discovery of new stars"
+        ],
+        "correct_answer": "The discovery of dark matter",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed our understanding of the universe, revealing diverse planetary systems beyond our own.",
+        "question": "What has the discovery of exoplanets changed?",
+        "options": [
+            "Our understanding of stars",
+            "Our understanding of the universe",
+            "Our understanding of black holes",
+            "Our understanding of galaxies"
+        ],
+        "correct_answer": "Our understanding of the universe",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The human brain processes visual information in the occipital lobe, which is located at the rear of the skull. This lobe interprets light and colour, enabling us to perceive our surroundings.",
+        "question": "Where is the part of the brain that interprets visual information located?",
+        "options": [
+            "At the front of the skull",
+            "At the rear of the skull",
+            "On the sides of the skull",
+            "On the top of the skull"
+        ],
+        "correct_answer": "At the rear of the skull",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has revolutionized the field of astronomy, as it accounts for approximately twenty-seven percent of the universe's mass-energy density.",
+        "question": "What percentage of the universe's mass-energy density is accounted for by dark matter?",
+        "options": [
+            "Twenty percent",
+            "Twenty-seven percent",
+            "Thirty percent",
+            "Forty percent"
+        ],
+        "correct_answer": "Twenty-seven percent",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has revolutionized the field of astronomy, as it has helped to explain the observed rotation curves of galaxies.",
+        "question": "What has the discovery of dark matter helped to explain in the field of astronomy?",
+        "options": [
+            "The formation of black holes",
+            "The rotation curves of galaxies",
+            "The life cycle of stars",
+            "The expansion of the universe"
+        ],
+        "correct_answer": "The rotation curves of galaxies",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy. Recently, scientists have found thousands of exoplanets, some of which are believed to be located in the habitable zones of their respective stars.",
+        "question": "What has led to significant advancements in the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Milky Way"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed our understanding of the universe, revealing numerous planets similar in size to Earth. Astronomers believe some of these planets may have conditions suitable for life.",
+        "question": "What has changed our understanding of the universe?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of new stars",
+            "The discovery of new galaxies"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants and some bacteria, where light energy is converted into chemical energy. This energy is stored in glucose molecules, which are then used to fuel the organism's metabolic activities.",
+        "question": "What is the primary function of photosynthesis in organisms?",
+        "options": [
+            "To release energy from glucose",
+            "To convert light energy into chemical energy",
+            "To synthesize proteins",
+            "To break down organic molecules"
+        ],
+        "correct_answer": "To convert light energy into chemical energy",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter.",
+        "question": "What are galaxies composed of?",
+        "options": [
+            "Stars and planets",
+            "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+            "Nebulae and black holes",
+            "Comets and asteroids"
+        ],
+        "correct_answer": "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has led to the revelation of thousands of planets beyond our solar system?",
+        "options": [
+            "The invention of the telescope",
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The development of space stations"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has revolutionized the field of astronomy. It is now widely accepted that dark matter makes up approximately 27% of the universe.",
+        "question": "What percentage of the universe is made up of dark matter?",
+        "options": [
+            "25%",
+            "27%",
+            "30%",
+            "32%"
+        ],
+        "correct_answer": "27%",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, offering insights into planetary formation and potential habitability.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Higgs boson"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of galaxies",
+            "The discovery of stars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study planetary formation and potential habitability. Astronomers utilize a range of methods to detect exoplanets, including the transit method.",
+        "question": "What method do astronomers use to detect exoplanets as mentioned in the passage?",
+        "options": [
+            "The Spectroscopic Method",
+            "The Transit Method",
+            "The Gravitational Method",
+            "The Radio Method"
+        ],
+        "correct_answer": "The Transit Method",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted our understanding of astronomy. Dark matter is an invisible form of matter that does not emit light.",
+        "question": "What is dark matter in the context of astronomy?",
+        "options": [
+            "A type of star",
+            "An invisible form of matter",
+            "A black hole",
+            "A planet"
+        ],
+        "correct_answer": "An invisible form of matter",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing diverse planetary systems. Astronomers utilize spectroscopy to analyze starlight filtered through exoplanet atmospheres.",
+        "question": "What method do astronomers use to study exoplanet atmospheres?",
+        "options": [
+            "Telescope observation",
+            "Spectroscopy",
+            "Space missions",
+            "Radio astronomy"
+        ],
+        "correct_answer": "Spectroscopy",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has been discovered beyond our solar system?",
+        "options": [
+            "Thousands of stars",
+            "Thousands of planets",
+            "Thousands of galaxies",
+            "Thousands of black holes"
+        ],
+        "correct_answer": "Thousands of planets",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. Many of these planets are believed to be located in the habitable zones of their respective stars.",
+        "question": "What has led to the revelation of thousands of planets beyond our solar system?",
+        "options": [
+            "The development of space stations",
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The exploration of Mars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The process of plate tectonics is crucial in geology as it explains the movement of the Earth's crust. This movement is responsible for the creation of mountain ranges and volcanoes.",
+        "question": "What geological process is responsible for the creation of mountain ranges and volcanoes?",
+        "options": [
+            "Weathering and erosion",
+            "Plate tectonics",
+            "Glaciation",
+            "Deposition"
+        ],
+        "correct_answer": "Plate tectonics",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted astronomy, as it reveals that galaxies rotate at a consistent speed. ",
+        "question": "What has been revealed about galaxies due to the discovery of dark matter?",
+        "options": [
+            "They rotate at varying speeds",
+            "They rotate at a consistent speed",
+            "They are made up mostly of dark energy",
+            "They are unaffected by dark matter"
+        ],
+        "correct_answer": "They rotate at a consistent speed",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, enabling scientists to study planets outside our solar system. Astronomers utilize advanced telescopes to detect exoplanets.",
+        "question": "What has enabled scientists to study planets outside our solar system?",
+        "options": [
+            "The development of spacecraft",
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The invention of the microscope"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The process of continental drift was first proposed by Alfred Wegener, a German geologist. He suggested that the continents had moved over time and were once joined together in a single supercontinent, Pangaea.",
+        "question": "Who is credited with proposing the theory of continental drift?",
+        "options": [
+            "Charles Darwin",
+            "Alfred Wegener",
+            "Galileo Galilei",
+            "Isaac Newton"
+        ],
+        "correct_answer": "Alfred Wegener",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter. They are typically dominated by a central supermassive black hole.",
+        "question": "What is typically found at the center of a galaxy?",
+        "options": [
+            "A neutron star",
+            "A white dwarf",
+            "A central supermassive black hole",
+            "A brown dwarf"
+        ],
+        "correct_answer": "A central supermassive black hole",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed our understanding of astronomy, revealing numerous planets with conditions similar to those of Earth.",
+        "question": "What has led to a greater understanding of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of new stars",
+            "The discovery of new galaxies"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter.",
+        "question": "What are galaxies composed of?",
+        "options": [
+            "Only stars and stellar remnants",
+            "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+            "Interstellar gas, dust, and dark matter",
+            "Only dark matter"
+        ],
+        "correct_answer": "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, enabling scientists to study planetary formation and potential habitability. Astronomers utilize advanced telescopes to detect exoplanets and analyze their atmospheres.",
+        "question": "What has enabled scientists to study planetary formation and potential habitability?",
+        "options": [
+            "The discovery of black holes",
+            "The development of space stations",
+            "The discovery of exoplanets",
+            "The invention of spacecraft"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing thousands of celestial bodies beyond our solar system.",
+        "question": "What significant impact has the discovery of exoplanets had on astronomy?",
+        "options": [
+            "It has reduced the number of celestial bodies in our universe",
+            "It has transformed the field of astronomy",
+            "It has made Earth the center of the universe",
+            "It has led to the discovery of only a few new planets"
+        ],
+        "correct_answer": "It has transformed the field of astronomy",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of celestial bodies beyond our solar system. These findings have significant implications for our understanding of planetary formation and the potential for life elsewhere in the universe.",
+        "question": "What has been the impact of discovering exoplanets on the field of astronomy?",
+        "options": [
+            "It has limited our understanding of the solar system",
+            "It has revealed thousands of celestial bodies beyond our solar system",
+            "It has confirmed the existence of only one other planet",
+            "It has led to a decline in the study of astronomy"
+        ],
+        "correct_answer": "It has revealed thousands of celestial bodies beyond our solar system",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study planetary formation and potential habitability. Astronomers utilize a range of methods to detect these distant worlds.",
+        "question": "What has enabled scientists to study planetary formation and potential habitability?",
+        "options": [
+            "The invention of the telescope",
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The development of space stations"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "Galaxies are massive systems consisting of stars, stellar remnants, and interstellar gas. They are held together by gravity, with the majority of their mass being dark matter.",
+        "question": "What is stated to be holding galaxies together?",
+        "options": [
+            "Dark energy",
+            "Gravity",
+            "Interstellar gas",
+            "Dark matter"
+        ],
+        "correct_answer": "Gravity",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants, converting light energy into chemical energy. This complex process involves the conversion of carbon dioxide and water into glucose and oxygen.",
+        "question": "What is the primary function of photosynthesis in plants?",
+        "options": [
+            "To convert glucose into oxygen",
+            "To produce chemical energy from light energy",
+            "To break down water into carbon dioxide",
+            "To release carbon dioxide into the atmosphere"
+        ],
+        "correct_answer": "To produce chemical energy from light energy",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The process of continental drift was first proposed by Alfred Wegener, who observed that the continents seemed to fit together like a jigsaw puzzle. He suggested that the continents had once been joined together in a single supercontinent, which he called Pangaea.",
+        "question": "What was the name of the supercontinent proposed by Alfred Wegener?",
+        "options": [
+            "Panthalassa",
+            "Pangaea",
+            "Gondwana",
+            "Rodinia"
+        ],
+        "correct_answer": "Pangaea",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering new insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What has the discovery of exoplanets impacted?",
+        "options": [
+            "The field of biology",
+            "The field of astronomy",
+            "The field of geology",
+            "The field of psychology"
+        ],
+        "correct_answer": "The field of astronomy",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The process of continental drift is a fundamental concept in geology. It describes the movement of Earth's continents relative to each other.",
+        "question": "What does the concept of continental drift describe?",
+        "options": [
+            "The movement of Earth's oceans",
+            "The formation of mountain ranges",
+            "The movement of Earth's continents relative to each other",
+            "The creation of earthquakes"
+        ],
+        "correct_answer": "The movement of Earth's continents relative to each other",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study planetary formation and potential habitability beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Milky Way"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted the field of astronomy, as it accounts for approximately twenty-seven percent of the universe's total mass-energy density.",
+        "question": "What percentage of the universe's mass-energy density is attributed to dark matter?",
+        "options": [
+            "Twenty percent",
+            "Twenty-seven percent",
+            "Thirty percent",
+            "Forty percent"
+        ],
+        "correct_answer": "Twenty-seven percent",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering new insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the universe's age"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy. Over 4,000 exoplanets have been identified, with many more expected to exist. These planets vary greatly in size and composition, ranging from small rocky worlds to massive gas giants.",
+        "question": "What has been the outcome of the discovery of exoplanets in astronomy?",
+        "options": [
+            "A significant decrease in the number of identified planets",
+            "A minor impact on our understanding of the universe",
+            "The identification of over 4,000 exoplanets",
+            "The conclusion that Earth is the only habitable planet"
+        ],
+        "correct_answer": "The identification of over 4,000 exoplanets",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter.",
+        "question": "What are galaxies primarily composed of?",
+        "options": [
+            "Stars and planets",
+            "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+            "Nebulae and black holes",
+            "Comets and asteroids"
+        ],
+        "correct_answer": "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing thousands of planets beyond our solar system. Astronomers use indirect methods to detect these planets, such as monitoring the dimming of a star's light as a planet passes in front of it.",
+        "question": "What method do astronomers use to detect exoplanets?",
+        "options": [
+            "Direct observation with a telescope",
+            "Monitoring the dimming of a star's light",
+            "Measuring the planet's gravitational pull",
+            "Analyzing the star's chemical composition"
+        ],
+        "correct_answer": "Monitoring the dimming of a star's light",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter, typically dominated by a central supermassive black hole.",
+        "question": "What is typically at the center of a galaxy?",
+        "options": [
+            "A neutron star",
+            "A white dwarf",
+            "A central supermassive black hole",
+            "A brown dwarf"
+        ],
+        "correct_answer": "A central supermassive black hole",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The process of continental drift is a key concept in geology, describing the movement of the Earth's crust over time.",
+        "question": "What geological concept describes the movement of the Earth's crust?",
+        "options": [
+            "Plate tectonics",
+            "Continental drift",
+            "Glaciation",
+            "Weathering"
+        ],
+        "correct_answer": "Continental drift",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, offering new insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Higgs boson"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering new insights into planetary formation and evolution. Astronomers can now study the atmospheres of these distant worlds, gaining a deeper understanding of their potential for supporting life.",
+        "question": "What has the discovery of exoplanets enabled astronomers to do?",
+        "options": [
+            "Study the sun's corona",
+            "Analyze the atmospheres of distant planets",
+            "Explore the moons of Jupiter",
+            "Investigate black holes"
+        ],
+        "correct_answer": "Analyze the atmospheres of distant planets",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. These exoplanets vary greatly in size and composition.",
+        "question": "What has led to the discovery of thousands of planets beyond our solar system?",
+        "options": [
+            "The development of space stations",
+            "The discovery of exoplanets",
+            "Advances in telescope technology",
+            "The exploration of Mars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The process of continental drift is a fundamental concept in geology. It refers to the movement of Earth's continents relative to each other.",
+        "question": "What does the concept of continental drift pertain to?",
+        "options": [
+            "The movement of Earth's oceans",
+            "The formation of mountain ranges",
+            "The movement of Earth's continents relative to each other",
+            "The study of Earth's atmosphere"
+        ],
+        "correct_answer": "The movement of Earth's continents relative to each other",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. Many of these exoplanets are believed to be located in the habitable zones of their respective stars.",
+        "question": "What has led to the discovery of thousands of planets beyond our solar system?",
+        "options": [
+            "The development of space telescopes",
+            "The discovery of exoplanets",
+            "Advances in radio astronomy",
+            "The invention of the telescope"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing diverse planetary systems beyond our own. Astronomers utilize telescopes and space missions to identify exoplanets.",
+        "question": "What has led to a greater understanding of planetary systems beyond our own?",
+        "options": [
+            "Advances in biology",
+            "The discovery of exoplanets",
+            "Developments in geology",
+            "Improvements in psychology"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering new insights into planetary formation. Astronomers can now study the atmospheres of these distant worlds.",
+        "question": "What has led to new insights into planetary formation?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of asteroids"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The field of astronomy has led to numerous groundbreaking discoveries, including exoplanets and dark matter. Telescopes play a vital role in these findings.",
+        "question": "What tool is crucial for discoveries in astronomy?",
+        "options": [
+            "Microscopes",
+            "Telescopes",
+            "Thermometers",
+            "Spectrometers"
+        ],
+        "correct_answer": "Telescopes",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing thousands of planets beyond our solar system. Astronomers use indirect methods to detect these planets.",
+        "question": "What has led to the revelation of thousands of planets beyond our solar system?",
+        "options": [
+            "The development of space telescopes",
+            "The discovery of black holes",
+            "The invention of the microscope",
+            "The discovery of exoplanets"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The process of continental drift was first proposed by Alfred Wegener in the early 20th century. He observed that the continents seemed to fit together like a jigsaw puzzle and proposed that they were once joined together in a single supercontinent, Pangaea.",
+        "question": "Who is credited with proposing the theory of continental drift?",
+        "options": [
+            "Charles Darwin",
+            "Alfred Wegener",
+            "Galileo Galilei",
+            "Isaac Newton"
+        ],
+        "correct_answer": "Alfred Wegener",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter.",
+        "question": "What are galaxies composed of?",
+        "options": [
+            "Stars and planets",
+            "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+            "Black holes and asteroids",
+            "Comets and meteorites"
+        ],
+        "correct_answer": "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has been discovered beyond our solar system?",
+        "options": [
+            "Thousands of stars",
+            "Thousands of galaxies",
+            "Thousands of planets",
+            "Thousands of moons"
+        ],
+        "correct_answer": "Thousands of planets",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy. Many exoplanets have been found to be similar in size to Earth.",
+        "question": "What has had a major impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Milky Way"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has led to the revelation of numerous planets outside our solar system?",
+        "options": [
+            "The invention of the telescope",
+            "The discovery of exoplanets",
+            "The development of space stations",
+            "The exploration of Mars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted astronomy, as it accounts for approximately 27% of the universe's mass-energy density.",
+        "question": "What percentage of the universe's mass-energy density is attributed to dark matter?",
+        "options": [
+            "20%",
+            "25%",
+            "27%",
+            "30%"
+        ],
+        "correct_answer": "27%",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. ",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Literature"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing diverse planetary systems beyond our own. Astronomers utilize a range of methods, including the transit technique, to identify these distant worlds.",
+        "question": "What method do astronomers use to identify exoplanets?",
+        "options": [
+            "The Reflective Method",
+            "The Transit Technique",
+            "The Gravitational Method",
+            "The Ecliptic Method"
+        ],
+        "correct_answer": "The Transit Technique",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter.",
+        "question": "What are galaxies composed of?",
+        "options": [
+            "Stars and planets",
+            "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+            "Gas, dust, and dark matter",
+            "Stellar remnants and dark matter"
+        ],
+        "correct_answer": "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter.",
+        "question": "What are galaxies composed of?",
+        "options": [
+            "Only stars and gas",
+            "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+            "Only dark matter and dust",
+            "Only stellar remnants and interstellar gas"
+        ],
+        "correct_answer": "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing numerous planets beyond our solar system. Astronomers utilize advanced telescopes to detect exoplanets, often by observing the decrease in a star's brightness as a planet passes in front of it.",
+        "question": "What method do astronomers use to detect exoplanets?",
+        "options": [
+            "By observing the increase in a star's brightness",
+            "By observing the decrease in a star's brightness",
+            "By observing the color of a star",
+            "By observing the shape of a star"
+        ],
+        "correct_answer": "By observing the decrease in a star's brightness",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, with thousands identified. Many are believed to be located in the habitable zones of their respective stars.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Higgs boson"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing thousands of planets beyond our solar system. Most of these exoplanets are gas giants, similar to Jupiter.",
+        "question": "What has been discovered beyond our solar system?",
+        "options": [
+            "Thousands of stars",
+            "Thousands of black holes",
+            "Thousands of planets",
+            "Thousands of galaxies"
+        ],
+        "correct_answer": "Thousands of planets",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of new stars",
+            "The discovery of new galaxies"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, enabling scientists to study planetary formation and potential habitability beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted astronomy, as it accounts for approximately twenty-seven percent of the universe's mass-energy density.",
+        "question": "What percentage of the universe's mass-energy density is accounted for by dark matter?",
+        "options": [
+            "Twenty percent",
+            "Twenty-seven percent",
+            "Thirty percent",
+            "Forty percent"
+        ],
+        "correct_answer": "Twenty-seven percent",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing diverse planetary systems beyond our own. Astronomers now recognize that planets can orbit a wide range of star types.",
+        "question": "What has transformed the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of neutron stars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has been the impact of discovering exoplanets on astronomy?",
+        "options": [
+            "It has reduced the number of known planets",
+            "It has had no significant impact on the field",
+            "It has transformed the field of astronomy",
+            "It has slowed down space exploration"
+        ],
+        "correct_answer": "It has transformed the field of astronomy",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. Astronomers use a variety of methods to detect these exoplanets, including the transit method.",
+        "question": "What method do astronomers use to detect exoplanets, as mentioned in the passage?",
+        "options": [
+            "The telescope method",
+            "The transit method",
+            "The radar method",
+            "The spectroscopic method"
+        ],
+        "correct_answer": "The transit method",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter.",
+        "question": "What are galaxies composed of?",
+        "options": [
+            "Only stars and interstellar gas",
+            "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+            "Just dark matter and dust",
+            "Only stellar remnants and dust"
+        ],
+        "correct_answer": "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study the formation of planetary systems beyond our own. This has significant implications for understanding the potential for life elsewhere in the universe.",
+        "question": "What has been the main impact of discovering exoplanets on the field of astronomy?",
+        "options": [
+            "It has limited the study of planetary systems",
+            "It has enabled scientists to study the formation of planetary systems beyond our own",
+            "It has reduced the potential for life elsewhere in the universe",
+            "It has slowed down the progress of astronomical research"
+        ],
+        "correct_answer": "It has enabled scientists to study the formation of planetary systems beyond our own",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "According to recent findings in astronomy, dark matter constitutes approximately 27% of the universe's total mass-energy density.",
+        "question": "What percentage of the universe's mass-energy density is made up of dark matter?",
+        "options": [
+            "25%",
+            "27%",
+            "30%",
+            "35%"
+        ],
+        "correct_answer": "27%",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of galaxies",
+            "The discovery of stars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted our understanding of astronomy, as it suggests that a large portion of the universe is composed of invisible matter.",
+        "question": "What is the main topic being discussed in the transcript?",
+        "options": [
+            "History of the universe",
+            "Impact of dark matter on astronomy",
+            "Types of visible matter",
+            "Formation of black holes"
+        ],
+        "correct_answer": "Impact of dark matter on astronomy",
+        "voice": "en-US-EricNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants and certain bacteria, converting light energy into chemical energy. This energy is then stored in glucose molecules, which are vital for growth and development.",
+        "question": "What is the primary function of photosynthesis in plants?",
+        "options": [
+            "To release excess energy",
+            "To convert light energy into chemical energy",
+            "To break down glucose molecules",
+            "To absorb water and nutrients"
+        ],
+        "correct_answer": "To convert light energy into chemical energy",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, enabling scientists to study planetary formation and potential habitability. Astronomers utilize advanced telescopes and spectrographic analysis to identify exoplanets and their properties.",
+        "question": "What method do astronomers use to study exoplanets?",
+        "options": [
+            "Radiocarbon dating",
+            "Advanced telescopes and spectrographic analysis",
+            "Seismic surveys",
+            "Genetic sequencing"
+        ],
+        "correct_answer": "Advanced telescopes and spectrographic analysis",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering new insights into planetary formation and the possibility of life beyond Earth.",
+        "question": "What has had a major impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Milky Way"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has led to the discovery of thousands of planets beyond our solar system?",
+        "options": [
+            "The development of space stations",
+            "The discovery of black holes",
+            "The invention of telescopes",
+            "The discovery of exoplanets"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study the formation and evolution of planetary systems beyond our own.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing thousands of planets beyond our solar system. These findings have significant implications for our understanding of planetary formation and the potential for life elsewhere.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The process of photosynthesis occurs in plants and some bacteria, where energy from sunlight is converted into chemical energy in the form of organic compounds, such as glucose.",
+        "question": "Where does the process of photosynthesis primarily occur?",
+        "options": [
+            "In animals",
+            "In plants and some bacteria",
+            "In all living organisms",
+            "In fungi"
+        ],
+        "correct_answer": "In plants and some bacteria",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed our understanding of the universe, revealing diverse planetary systems beyond our own. Astronomers utilize a range of methods to detect these distant worlds.",
+        "question": "What has led to a greater understanding of the universe?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of dark energy"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing numerous planets orbiting nearby stars. Astronomers utilize transit methods to detect exoplanets.",
+        "question": "What method do astronomers use to detect exoplanets?",
+        "options": [
+            "Spectroscopic methods",
+            "Telescope observations",
+            "Transit methods",
+            "Gravitational lensing"
+        ],
+        "correct_answer": "Transit methods",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. Astronomers use various methods to detect these planets, including the transit method.",
+        "question": "What method do astronomers use to detect exoplanets, as mentioned in the transcript?",
+        "options": [
+            "The telescope method",
+            "The spectroscopic method",
+            "The transit method",
+            "The radar method"
+        ],
+        "correct_answer": "The transit method",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering new insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the universe's age"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, offering insights into planetary formation and the potential for life beyond Earth.",
+        "question": "What field of study has the discovery of exoplanets significantly impacted?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed our understanding of the universe. Astronomers are now able to study the formation of planetary systems beyond our own.",
+        "question": "What has transformed our understanding of the universe?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of neutron stars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, providing new insights into planetary formation and the possibility of life beyond Earth.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Milky Way"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, enabling scientists to study planetary formation and evolution beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, revealing diverse planetary systems beyond our own.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The invention of the telescope",
+            "The discovery of exoplanets",
+            "The exploration of Mars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, revealing thousands of planets beyond our solar system. Astronomers use various methods to detect these distant worlds, including the transit method, which involves measuring the decrease in brightness as a planet passes in front of its host star.",
+        "question": "What method do astronomers use to detect exoplanets by measuring the decrease in brightness?",
+        "options": [
+            "The Spectrographic Method",
+            "The Transit Method",
+            "The Reflective Method",
+            "The Gravitational Method"
+        ],
+        "correct_answer": "The Transit Method",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has had a major impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Milky Way"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The process of continental drift is a fundamental concept in geology. It suggests that the Earth's continents have moved over time and are still moving.",
+        "question": "What concept in geology suggests that the Earth's continents have moved over time?",
+        "options": [
+            "Plate Tectonics",
+            "Continental Drift",
+            "Glaciation",
+            "Weathering"
+        ],
+        "correct_answer": "Continental Drift",
+        "voice": "en-GB-RyanNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed our understanding of the universe. Astronomers can now study planetary systems beyond our own.",
+        "question": "What has changed our understanding of the universe?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of new stars",
+            "The discovery of new galaxies"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The process of continental drift was first proposed by Alfred Wegener in the early 20th century. He observed that the continents seemed to fit together like a jigsaw puzzle.",
+        "question": "Who is credited with proposing the process of continental drift?",
+        "options": [
+            "Charles Darwin",
+            "Alfred Wegener",
+            "Galileo Galilei",
+            "Isaac Newton"
+        ],
+        "correct_answer": "Alfred Wegener",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized astronomy, enabling scientists to study planetary formation and evolution beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy. Over 4,000 exoplanets have been identified, ranging from small rocky worlds to large gas giants.",
+        "question": "What has been identified in the field of astronomy?",
+        "options": [
+            "Over 1,000 black holes",
+            "Over 4,000 exoplanets",
+            "Over 3,000 asteroids",
+            "Over 2,000 comets"
+        ],
+        "correct_answer": "Over 4,000 exoplanets",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has expanded our understanding of planetary formation. Astronomers believe that these planets formed in a similar manner to those in our solar system.",
+        "question": "How do astronomers think exoplanets were formed?",
+        "options": [
+            "Through a process unique to their star system",
+            "In a similar manner to those in our solar system",
+            "From the remnants of a supernova explosion",
+            "Through the gravitational collapse of a nebula alone"
+        ],
+        "correct_answer": "In a similar manner to those in our solar system",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed the field of astronomy, providing new insights into planetary formation and the possibility of life beyond Earth.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Higgs boson"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "Galaxies are massive, gravitationally bound systems consisting of stars, stellar remnants, interstellar gas, dust, and dark matter.",
+        "question": "What are galaxies composed of?",
+        "options": [
+            "Stars and planets",
+            "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+            "Gas, dust, and dark energy",
+            "Interstellar gas and dust only"
+        ],
+        "correct_answer": "Stars, stellar remnants, interstellar gas, dust, and dark matter",
+        "voice": "en-US-ChristopherNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has significantly impacted the field of astronomy, as it accounts for approximately twenty-seven percent of the universe's total mass-energy density.",
+        "question": "What percentage of the universe's mass-energy density is attributed to dark matter?",
+        "options": [
+            "Twenty percent",
+            "Twenty-seven percent",
+            "Thirty percent",
+            "Forty percent"
+        ],
+        "correct_answer": "Twenty-seven percent",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system. Astronomers use indirect methods to detect these planets, such as measuring the decrease in brightness as a planet passes in front of its host star.",
+        "question": "What method do astronomers use to detect exoplanets?",
+        "options": [
+            "Measuring the planet's direct light",
+            "Measuring the increase in brightness of the host star",
+            "Measuring the decrease in brightness as a planet passes in front of its host star",
+            "Measuring the planet's gravitational pull on nearby stars"
+        ],
+        "correct_answer": "Measuring the decrease in brightness as a planet passes in front of its host star",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study planetary formation and potential habitability. Over four thousand exoplanets have been identified, ranging from small rocky worlds to large gas giants.",
+        "question": "What has enabled scientists to study planetary formation and potential habitability?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The development of space telescopes",
+            "The exploration of Mars"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-GB-LibbyNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has expanded our understanding of planetary formation. Astronomers believe that these planets form from disks of gas and dust surrounding newly formed stars.",
+        "question": "What is believed to be the origin of exoplanets?",
+        "options": [
+            "Collision of stars",
+            "Disks of gas and dust surrounding newly formed stars",
+            "Supernova explosions",
+            "Black holes"
+        ],
+        "correct_answer": "Disks of gas and dust surrounding newly formed stars",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What significant impact has the discovery of exoplanets had on astronomy?",
+        "options": [
+            "It has reduced the number of known planets",
+            "It has revealed thousands of planets beyond our solar system",
+            "It has slowed down space exploration",
+            "It has made telescopes obsolete"
+        ],
+        "correct_answer": "It has revealed thousands of planets beyond our solar system",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of dark matter has revolutionized the field of astronomy, as it reveals that a significant portion of the universe's mass is not visible.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of dark matter",
+            "The discovery of new planets",
+            "The discovery of new stars"
+        ],
+        "correct_answer": "The discovery of dark matter",
+        "voice": "en-GB-SoniaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, revealing thousands of planets beyond our solar system.",
+        "question": "What has had a significant impact on the field of astronomy?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the moon"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-AU-WilliamNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has revolutionized the field of astronomy, enabling scientists to study planetary formation and evolution beyond our solar system.",
+        "question": "What field of study has been impacted by the discovery of exoplanets?",
+        "options": [
+            "Biology",
+            "Astronomy",
+            "Geology",
+            "Psychology"
+        ],
+        "correct_answer": "Astronomy",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has expanded our understanding of planetary formation. Astronomers believe that these planets formed in a similar manner to those in our solar system.",
+        "question": "How do astronomers think exoplanets were formed?",
+        "options": [
+            "Through a process unique to their star system",
+            "In a similar manner to those in our solar system",
+            "From the remnants of a supernova",
+            "Through the collision of two stars"
+        ],
+        "correct_answer": "In a similar manner to those in our solar system",
+        "voice": "en-AU-NatashaNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has significantly expanded our understanding of the universe. Astronomers have identified thousands of planets outside our solar system, ranging from small rocky worlds to massive gas giants.",
+        "question": "What has led to a greater understanding of the universe?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of the Milky Way"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-MichelleNeural"
+    },
+    {
+        "transcript": "The discovery of exoplanets has transformed our understanding of the universe. Astronomers can now study these distant worlds to gain insights into planetary formation and evolution.",
+        "question": "What has transformed our understanding of the universe?",
+        "options": [
+            "The discovery of black holes",
+            "The discovery of exoplanets",
+            "The discovery of dark matter",
+            "The discovery of galaxies"
+        ],
+        "correct_answer": "The discovery of exoplanets",
+        "voice": "en-US-MichelleNeural"
+    }
+]

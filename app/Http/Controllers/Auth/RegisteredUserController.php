@@ -193,9 +193,9 @@ class RegisteredUserController extends Controller
         }
 
         // Generate a unique referral code for the new user
-        $newReferralCode = 'TB-' . strtoupper(Str::random(6));
+        $newReferralCode = strtoupper(Str::random(6));
         while (User::where('referral_code', $newReferralCode)->exists()) {
-            $newReferralCode = 'TB-' . strtoupper(Str::random(6));
+            $newReferralCode = strtoupper(Str::random(6));
         }
 
         $user = User::create([

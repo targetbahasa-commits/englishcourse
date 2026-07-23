@@ -20,7 +20,7 @@ class ManageReferral
     public function generateUniqueCode(): string
     {
         do {
-            $code = 'TB-' . strtoupper(Str::random(6));
+            $code = strtoupper(Str::random(6));
         } while ($this->repository->referralCodeExists($code));
 
         return $code;

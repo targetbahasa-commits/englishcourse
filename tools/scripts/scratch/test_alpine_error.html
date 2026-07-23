@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body>
+    <div x-data="{
+        form: { name: '', email: '', whatsapp_number: '', answer_text: '' },
+        isSubmitting: false,
+        get wordCount() { return 0; }
+    }">
+        <div class="border-t border-gray-200 px-6 py-4 bg-gray-50/50 rounded-b-2xl flex items-center justify-between shrink-0">
+            <div class="flex flex-col">
+                <span class="text-2xl font-bold text-gray-700 font-mono" x-text="wordCount">0</span>
+                <span class="text-xs text-gray-400 font-medium uppercase tracking-wider">Words</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button type="submit" :disabled="isSubmitting || form.answer_text.length === 0 || !form.name || !form.email || !form.whatsapp_number" class="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-sm">
+                    Submit
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

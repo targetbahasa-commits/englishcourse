@@ -689,7 +689,7 @@
             if (!indicator) {
                 indicator = document.createElement('div');
                 indicator.id = 'autosave-indicator';
-                indicator.className = 'fixed bottom-4 left-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium transition-opacity duration-300';
+                indicator.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium transition-opacity duration-300';
                 document.body.appendChild(indicator);
             }
             

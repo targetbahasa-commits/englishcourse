@@ -735,7 +735,7 @@
         </div>
 
         <!-- Right Column: Writing Area -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0 min-w-0 lg:h-full overflow-hidden" :style="panelStyle('right')">
+        <div id="writing-panel" class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0 min-w-0 lg:h-full overflow-hidden" :style="panelStyle('right')">
             <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                 <div>
                     <h2 class="font-bold text-gray-700">Your Response</h2>

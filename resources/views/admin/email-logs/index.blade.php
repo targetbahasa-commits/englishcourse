@@ -8,6 +8,10 @@
     <div class="mb-8">
         <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Email Outbox Logs</h1>
         <p class="mt-1 text-sm text-gray-500">History of all emails sent by the system.</p>
+        <div class="mt-2 inline-flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            <span class="text-xs font-medium text-gray-700">Sender: <span class="font-bold">{{ config('mail.from.address') }}</span> ({{ config('mail.from.name') }})</span>
+        </div>
     </div>
 
     <!-- Table Section -->

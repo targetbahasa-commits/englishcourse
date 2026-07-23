@@ -79,15 +79,28 @@
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <div class="flex items-center justify-between mb-3">
             <p class="text-xs uppercase tracking-wide text-gray-500">Live Student View (Same Layout)</p>
-            @if($activityUrl)
-                <a id="open-live-view" href="{{ $activityUrl }}" target="_blank" rel="noopener" class="text-xs font-semibold text-blue-600 hover:text-blue-700">Open Full Page</a>
-            @endif
+            <div class="flex items-center gap-2">
+                <button id="btn-toggle-coret" onclick="toggleCoret()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors border border-indigo-700 shadow-sm" title="Toggle Coret-Coret Mode">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                    Mode Coret-Coret
+                </button>
+                <button onclick="
+                let frame = document.getElementById('student-live-frame');
+                let url = new URL(frame.src);
+                url.searchParams.set('live_preview_tick', Date.now());
+                frame.src = url.toString();
+                refreshSnapshot();
+            " class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 hover:text-gray-900 rounded-lg transition-colors border border-gray-200 shadow-sm" title="Reload iframe and fetch latest data">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                Refresh
+            </button>
+            </div>
         </div>
 
         @if($activityUrl)
             <iframe
                 id="student-live-frame"
-                src="{{ $activityUrl }}"
+                src="{{ $activityUrl }}{{ str_contains($activityUrl, '?') ? '&' : '?' }}live_preview_for={{ $student->id }}"
                 class="w-full h-[760px] rounded-xl border border-gray-200 bg-white"
                 loading="lazy"
                 referrerpolicy="no-referrer-when-downgrade"
@@ -263,15 +276,59 @@
 
                 const liveFrame = document.getElementById('student-live-frame');
                 if (liveFrame) {
-                    iframeRefreshTick++;
+                    const currentBaseUrl = liveFrame.src.split('?')[0];
+                    const newBaseUrl = data.activity_url.split('?')[0];
                     const separator = data.activity_url.includes('?') ? '&' : '?';
-                    liveFrame.src = `${data.activity_url}${separator}live_preview_tick=${iframeRefreshTick}`;
+                    
+                    // Only reload iframe if the base URL actually changed (e.g. student moved to a new page)
+                    if (currentBaseUrl !== newBaseUrl || liveFrame.src === '') {
+                        liveFrame.src = `${data.activity_url}${separator}live_preview_tick=${Date.now()}&live_preview_for={{ $student->id }}`;
+                    }
                 }
             }
 
             // Update snapshot data
             if (data.snapshot) {
                 const snapshot = data.snapshot;
+                
+                // Inject answers into iframe
+                const liveFrame = document.getElementById('student-live-frame');
+                if (liveFrame && liveFrame.contentWindow && snapshot.live_items) {
+                    try {
+                        const iframeDoc = liveFrame.contentDocument || liveFrame.contentWindow.document;
+                        if (iframeDoc) {
+                            snapshot.live_items.forEach(item => {
+                                if (item.question_number) {
+                                    const tenseInput = iframeDoc.querySelector(`input[name="userAnswers[${item.question_number}][tense]"]`);
+                                    if (tenseInput && item.tense_answer) {
+                                        tenseInput.value = item.tense_answer;
+                                    }
+                                    const transInput = iframeDoc.querySelector(`input[name="userAnswers[${item.question_number}][trans]"]`);
+                                    if (transInput && item.translation_answer) {
+                                        transInput.value = item.translation_answer;
+                                    }
+                                    const answerInput = iframeDoc.querySelector(`input[name="userAnswers[${item.question_number}]"]`);
+                                    if (answerInput && item.answer) {
+                                        answerInput.value = item.answer;
+                                    }
+                                    const radioInput = iframeDoc.querySelector(`input[name="userAnswers[${item.question_number}]"][value="${item.answer}"]`);
+                                    if (radioInput) {
+                                        radioInput.checked = true;
+                                    }
+                                }
+                            });
+                            
+                            if (snapshot.paragraph_answer) {
+                                const paragraphInput = iframeDoc.querySelector(`textarea[name="userParagraphAnswer"]`);
+                                if (paragraphInput) {
+                                    paragraphInput.value = snapshot.paragraph_answer;
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.log("Could not inject answers into iframe", e);
+                    }
+                }
                 
                 if (snapshot.source) {
                     document.getElementById('snapshot-source').textContent = snapshot.source;
@@ -322,5 +379,34 @@
 
     // Start auto-refresh when page loads
     document.addEventListener('DOMContentLoaded', initAutoRefresh);
+
+    // Mode Coret-Coret Toggler
+    let coretActive = false;
+    function toggleCoret() {
+        let frame = document.getElementById('student-live-frame');
+        if (!frame) return;
+        
+        // Send message to iframe
+        if (frame.contentWindow) {
+            frame.contentWindow.postMessage({ type: 'TOGGLE_CORET' }, '*');
+        }
+
+        // Toggle state locally
+        coretActive = !coretActive;
+        let btn = document.getElementById('btn-toggle-coret');
+        
+        // Update button UI
+        if (coretActive) {
+            btn.classList.replace('bg-indigo-600', 'bg-rose-500');
+            btn.classList.replace('hover:bg-indigo-700', 'hover:bg-rose-600');
+            btn.classList.replace('border-indigo-700', 'border-rose-600');
+            btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg> Tutup Coret-Coret`;
+        } else {
+            btn.classList.replace('bg-rose-500', 'bg-indigo-600');
+            btn.classList.replace('hover:bg-rose-600', 'hover:bg-indigo-700');
+            btn.classList.replace('border-rose-600', 'border-indigo-700');
+            btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg> Mode Coret-Coret`;
+        }
+    }
 </script>
 @endsection

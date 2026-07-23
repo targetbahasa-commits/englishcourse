@@ -37,4 +37,6 @@ interface AdminStudentRepository
     public function getLatestReportedMockupResult(int $userId): mixed;
 
     public function getGrammarQuestionsForMeeting(int $meetingNumber, bool $hasSectionColumn): mixed;
+
+    public function getAllAssignmentScores(int $userId): mixed;
 }

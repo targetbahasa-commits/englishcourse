@@ -38,7 +38,7 @@
         <p class="text-gray-500 text-sm mb-4 line-clamp-2 h-10">{{ $meeting->prompt }}</p>
         
         @if(!$meeting->is_locked)
-            <a href="{{ route('assignments.ielts-academic.writing.meeting', ['task' => $task, 'id' => $meeting->id]) }}" class="flex items-center text-{{ $task == 1 ? 'teal' : 'orange' }}-600 text-sm font-semibold mt-auto">
+            <a href="{{ !empty($isGeneral) ? route('assignments.ielts-general.writing.meeting', ['task' => $task, 'id' => $meeting->id]) : route('assignments.ielts-academic.writing.meeting', ['task' => $task, 'id' => $meeting->id]) }}" class="flex items-center text-{{ $task == 1 ? 'teal' : 'orange' }}-600 text-sm font-semibold mt-auto">
                 <span>Start {{ $type }}</span>
                 <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             </a>

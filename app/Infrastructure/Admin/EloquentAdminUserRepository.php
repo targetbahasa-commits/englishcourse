@@ -62,7 +62,22 @@ class EloquentAdminUserRepository implements AdminUserRepository
             $data['password'] = Hash::make($data['password']);
         }
 
+        $oldProgramId = $user->program_id;
+
         $user->update($data);
+
+        // Jika program_id berubah, tutup akses (dropped) dari program lama
+        if (array_key_exists('program_id', $data) && $data['program_id'] != $oldProgramId) {
+            if ($oldProgramId) {
+                \App\Models\Enrollment::where('user_id', $user->id)
+                    ->where('program_id', $oldProgramId)
+                    ->update(['status' => 'dropped']);
+                
+                \App\Models\ProgramAccess::where('user_id', $user->id)
+                    ->where('program_id', $oldProgramId)
+                    ->delete();
+            }
+        }
     }
 
     public function delete(mixed $user): void
@@ -83,6 +98,19 @@ class EloquentAdminUserRepository implements AdminUserRepository
 
     public function bulkAssignProgram(array $userIds, int $programId): void
     {
+        $users = User::whereIn('id', $userIds)->get();
+        foreach ($users as $user) {
+            if ($user->program_id && $user->program_id != $programId) {
+                \App\Models\Enrollment::where('user_id', $user->id)
+                    ->where('program_id', $user->program_id)
+                    ->update(['status' => 'dropped']);
+                
+                \App\Models\ProgramAccess::where('user_id', $user->id)
+                    ->where('program_id', $user->program_id)
+                    ->delete();
+            }
+        }
+
         User::whereIn('id', $userIds)->where('role', 'guest')->update([
             'program_id' => $programId,
             'role'       => 'student',

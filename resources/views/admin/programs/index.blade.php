@@ -158,22 +158,12 @@
                                 <div>
                                     <div class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
                                         {{ $program->name }}
-                                        @if($program->price && $program->price > 0)
-                                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200" title="Online Price">
-                                                Online: IDR {{ number_format($program->price, 0, ',', '.') }}
-                                            </span>
-                                        @endif
-                                        @if($program->price_offline && $program->price_offline > 0)
-                                            <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200" title="Offline / Pare Price">
-                                                Pare: IDR {{ number_format($program->price_offline, 0, ',', '.') }}
-                                            </span>
-                                        @endif
+                                        @php $activeDiscountCount = $program->discounts()->where('is_active', true)->count(); @endphp
                                         @if($isMockProgram($program))
                                             <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-pink-50 text-pink-700 border border-pink-200">
                                                 🎯 Mock Test
                                             </span>
                                         @endif
-                                        @php $activeDiscountCount = $program->discounts()->where('is_active', true)->count(); @endphp
                                         @if($activeDiscountCount > 0)
                                             <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
                                                 🏷️ {{ $activeDiscountCount }} diskon aktif
@@ -182,6 +172,38 @@
                                         @if($program->brochure_image || $program->brochure_pdf)
                                             <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
                                                 📄 Brosur
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                        @if($program->price && $program->price > 0)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-green-50 text-green-700 border border-green-200" title="Reguler Online Price">
+                                                Reguler Online: IDR {{ number_format($program->price, 0, ',', '.') }}
+                                            </span>
+                                        @endif
+                                        @if($program->price_offline && $program->price_offline > 0)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-teal-50 text-teal-700 border border-teal-200" title="Reguler Pare Price">
+                                                Reguler Pare: IDR {{ number_format($program->price_offline, 0, ',', '.') }}
+                                            </span>
+                                        @endif
+                                        @if($program->price_semi_private && $program->price_semi_private > 0)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200" title="Semi Private Online Price">
+                                                Semi Online: IDR {{ number_format($program->price_semi_private, 0, ',', '.') }}
+                                            </span>
+                                        @endif
+                                        @if($program->price_semi_private_offline && $program->price_semi_private_offline > 0)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-cyan-50 text-cyan-700 border border-cyan-200" title="Semi Private Pare Price">
+                                                Semi Pare: IDR {{ number_format($program->price_semi_private_offline, 0, ',', '.') }}
+                                            </span>
+                                        @endif
+                                        @if($program->price_private && $program->price_private > 0)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-violet-50 text-violet-700 border border-violet-200" title="Private Online Price">
+                                                Private Online: IDR {{ number_format($program->price_private, 0, ',', '.') }}
+                                            </span>
+                                        @endif
+                                        @if($program->price_private_offline && $program->price_private_offline > 0)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-200" title="Private Pare Price">
+                                                Private Pare: IDR {{ number_format($program->price_private_offline, 0, ',', '.') }}
                                             </span>
                                         @endif
                                     </div>

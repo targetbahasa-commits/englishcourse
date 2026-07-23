@@ -617,6 +617,36 @@ class AssignmentController extends Controller
         return view('assignments.final-test.result', compact('result', 'certificateAvailable'));
     }
 
+    public function downloadOfflineTestCertificate($id)
+    {
+        $result = \App\Models\OfflineTestResult::findOrFail($id);
+
+        $user = Auth::user();
+        if ($result->user_id !== $user->id && $result->email !== $user->email && !$user->isAdmin()) {
+            abort(403, 'Unauthorized');
+        }
+
+        $certificate = \App\Models\OfflineTestCertificate::where('test_type', $result->test_type)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$certificate) {
+            abort(404, 'Certificate not found.');
+        }
+
+        $testName = str($result->test_type)->replace('_', ' ')->title();
+        $date = optional($result->created_at)->format('d F Y') ?? now()->format('d F Y');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.offline-tests.certificates.pdf', [
+            'result' => $result,
+            'certificate' => $certificate,
+            'testName' => $testName,
+            'date' => $date,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download("Certificate_{$testName}_{$result->name}.pdf");
+    }
+
     public function downloadFinalTestCertificate(FinalTestResult $result)
     {
         $this->authorizeFinalTestResultAccess($result);
@@ -650,7 +680,33 @@ class AssignmentController extends Controller
         if (!$this->userCanAccessAssignmentProgram($user, 'ielts-general')) {
             return redirect()->route('assignments.index')->with('error', 'You can only access assignments for your registered program.');
         }
-        return view('assignments.ielts-general');
+
+        $rawSlugs = [];
+        if ($user && $user->isStudent()) {
+            if ($user->program) {
+                $rawSlugs[] = $user->program->slug;
+            }
+            $enrollments = \App\Models\Enrollment::where('user_id', $user->id)
+                ->whereIn('status', ['active', 'completed'])
+                ->with('program')
+                ->get();
+            foreach ($enrollments as $enrollment) {
+                if ($enrollment->program) {
+                    $rawSlugs[] = $enrollment->program->slug;
+                }
+            }
+        }
+
+        $hasFullAccess = $user && ($user->isAdmin() || $user->isTeacher() || in_array('ielts-general-full-package', $rawSlugs) || in_array('ielts-general', $rawSlugs) || in_array('ielts-academic', $rawSlugs) || in_array('ielts-academic-full-package', $rawSlugs));
+        
+        $hasListening = $hasFullAccess || in_array('ielts-general-listening', $rawSlugs) || in_array('ielts-academic-listening', $rawSlugs);
+        $hasReading = $hasFullAccess || in_array('ielts-general-reading', $rawSlugs);
+        $hasWriting = $hasFullAccess || in_array('ielts-general-writing', $rawSlugs);
+        $hasSpeaking = $hasFullAccess || in_array('ielts-general-speaking', $rawSlugs) || in_array('ielts-academic-speaking', $rawSlugs);
+
+        $isClassEnded = $user?->isStudent() ? $this->isStudentClassPeriodEnded('ielts-general-full-package') : false;
+
+        return view('assignments.ielts-general', compact('hasListening', 'hasReading', 'hasWriting', 'hasSpeaking', 'hasFullAccess', 'isClassEnded'));
     }
 
     protected function resolveAssignmentProgramSlugFromRequest(Request $request): ?string
@@ -1066,28 +1122,33 @@ class AssignmentController extends Controller
             ]))));
         }
 
-        // Only allow the program assigned to the user (from registration)
+        // Always allow the program assigned to the user (from registration or primary assignment)
         $allowedProgramSlugs = [];
         if ($user->program && $user->program->slug) {
             $allowedProgramSlugs[] = $this->normalizeAssignmentProgramSlug($user->program->slug);
         }
 
-        // If user registered via no-payment, do NOT allow any other program via enrollment
-        // Only allow enrollment-based access if user does NOT have program_id set
-        if (empty($allowedProgramSlugs)) {
-            $enrollmentProgramSlugs = Enrollment::query()
-                ->where('user_id', $user->id)
-                ->whereIn('status', ['active', 'completed'])
-                ->with('program:id,slug')
-                ->get()
-                ->pluck('program.slug')
-                ->filter()
-                ->map(fn ($slug) => $this->normalizeAssignmentProgramSlug($slug))
-                ->all();
-            $allowedProgramSlugs = array_values(array_unique(array_filter($enrollmentProgramSlugs)));
-        }
+        // Also allow any program the user is enrolled in (via purchases or admin assignment)
+        $enrollmentProgramSlugs = \App\Models\Enrollment::query()
+            ->where('user_id', $user->id)
+            ->whereIn('status', ['active', 'completed'])
+            ->with('program:id,slug')
+            ->get()
+            ->pluck('program.slug')
+            ->filter()
+            ->map(fn ($slug) => $this->normalizeAssignmentProgramSlug($slug))
+            ->all();
 
-        $allowedProgramSlugs = array_merge($allowedProgramSlugs, ['ielts-academic', 'ielts-general']);
+        // Include manual program accesses
+        $accessProgramSlugs = $user->programAccesses()
+            ->with('program:id,slug')
+            ->get()
+            ->pluck('program.slug')
+            ->filter()
+            ->map(fn ($slug) => $this->normalizeAssignmentProgramSlug($slug))
+            ->all();
+
+        $allowedProgramSlugs = array_merge($allowedProgramSlugs, $enrollmentProgramSlugs, $accessProgramSlugs, ['ielts-academic']);
 
         return array_values(array_unique(array_filter($allowedProgramSlugs)));
     }
@@ -3708,47 +3769,73 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     private function queryAI($prompt, $jsonMode = false, $timeout = 300, $maxTokens = 4096)
     {
-        $ports = [
-            1234,  // LM Studio (Preferred by User)
-            11434  // Ollama
+        $payload = [
+            'model' => 'llama-3.3-70b-versatile',
+            'messages' => [
+                ['role' => 'system', 'content' => $jsonMode ? 'Output ONLY valid JSON.' : 'You are a helpful assistant.'],
+                ['role' => 'user', 'content' => $prompt]
+            ],
+            'temperature' => 0.3,
+            'max_tokens' => $maxTokens
         ];
 
-        foreach ($ports as $port) {
-            try {
-                $url = "http://127.0.0.1:{$port}/v1/chat/completions";
-                
-                // LM Studio requires 'local-model' or exact match. Ollama requires exact installed model name.
-                $modelName = ($port === 1234) ? 'local-model' : 'llama3';
-
-                // Construct Payload (OpenAI Compatible)
-                $payload = [
-                    'model' => $modelName, 
-                    'messages' => [
-                        ['role' => 'system', 'content' => $jsonMode ? 'Output ONLY valid JSON.' : 'You are a helpful assistant.'],
-                        ['role' => 'user', 'content' => $prompt]
-                    ],
-                    'max_tokens' => $maxTokens, // Ensure full response
-                    'temperature' => 0.3,
-                    'stream' => false
-                ];
-
-                $response = \Illuminate\Support\Facades\Http::timeout($timeout)->post($url, $payload);
-
-                if ($response->successful()) {
-                    $data = $response->json();
-                    if (isset($data['choices'][0]['message']['content'])) {
-                        return [
-                            'content' => $data['choices'][0]['message']['content'],
-                            'source' => ($port === 1234 ? 'LM Studio' : 'Ollama')
-                        ];
-                    }
-                }
-            } catch (\Exception $e) {
-                continue; // Try next port
-            }
+        if ($jsonMode) {
+            $payload['response_format'] = ['type' => 'json_object'];
         }
 
-        throw new \Exception('No Local AI reachable on ports 1234 or 11434');
+        try {
+            $result = \App\Services\GroqKeyManager::callWithFallback('writing', $payload, $timeout);
+            return [
+                'content' => $result['body']['choices'][0]['message']['content'],
+                'source' => 'Groq API (' . $result['key_used'] . ')'
+            ];
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning("Groq failed in AssignmentController: " . $e->getMessage() . ". Falling back to Gemini.");
+            
+            // Fallback to Gemini
+            $geminiKey = env('GEMINI_API_KEY');
+            if (!$geminiKey) {
+                throw new \Exception('AI Evaluation failed: Groq exhausted and Gemini API Key is missing.');
+            }
+            
+            $geminiPayload = [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => ($jsonMode ? "Output ONLY valid JSON. " : "") . $prompt]
+                        ]
+                    ]
+                ],
+                'generationConfig' => [
+                    'temperature' => 0.3,
+                    'maxOutputTokens' => $maxTokens,
+                ]
+            ];
+            
+            if ($jsonMode) {
+                $geminiPayload['generationConfig']['responseMimeType'] = 'application/json';
+            }
+            
+            try {
+                $client = new \GuzzleHttp\Client();
+                $geminiResponse = $client->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$geminiKey}", [
+                    'headers' => ['Content-Type' => 'application/json'],
+                    'json' => $geminiPayload,
+                    'timeout' => $timeout
+                ]);
+                
+                $geminiBody = json_decode($geminiResponse->getBody()->getContents(), true);
+                if (isset($geminiBody['candidates'][0]['content']['parts'][0]['text'])) {
+                    return [
+                        'content' => $geminiBody['candidates'][0]['content']['parts'][0]['text'],
+                        'source' => 'Gemini API [key ' . \App\Services\GroqKeyManager::maskKey($geminiKey) . ']'
+                    ];
+                }
+                throw new \Exception('Unexpected Gemini response structure');
+            } catch (\Exception $geminiE) {
+                throw new \Exception('All AI services failed (Groq and Gemini). Last error: ' . $geminiE->getMessage());
+            }
+        }
     }
 
     public function evaluateIeltsWriting(Request $request)

@@ -1,0 +1,1 @@
+<?php $log = file_get_contents("/home/u822472458/domains/targetbahasa.com/public_html/storage/logs/laravel.log"); $pos = strrpos($log, "local.ERROR"); if ($pos !== false) { echo substr($log, $pos, 800); } else { echo "No errors found"; }

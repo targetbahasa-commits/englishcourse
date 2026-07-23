@@ -1,0 +1,107 @@
+[
+    {
+        "id": 0,
+        "text": "The library is located on the north side of the campus.",
+        "voice": "af_sky",
+        "filename": "wfd_topic_0.mp3",
+        "folder": "listening-write-from-dictation"
+    },
+    {
+        "id": 1,
+        "text": "Please submit your assignment before the deadline.",
+        "voice": "am_fenrir",
+        "filename": "wfd_topic_1.mp3",
+        "folder": "listening-write-from-dictation"
+    },
+    {
+        "id": 2,
+        "text": "Students must attend all lectures and tutorials.",
+        "voice": "af_bella",
+        "filename": "wfd_topic_2.mp3",
+        "folder": "listening-write-from-dictation"
+    },
+    {
+        "id": 3,
+        "text": "The library is located on the north side of the campus.",
+        "voice": "am_michael",
+        "filename": "wfd_topic_3.mp3",
+        "folder": "listening-write-from-dictation"
+    },
+    {
+        "id": 4,
+        "text": "Please submit your assignment before the deadline.",
+        "voice": "af_bella",
+        "filename": "wfd_topic_4.mp3",
+        "folder": "listening-write-from-dictation"
+    },
+    {
+        "id": 5,
+        "text": "Students must attend all lectures and tutorials.",
+        "voice": "af_bella",
+        "filename": "wfd_topic_5.mp3",
+        "folder": "listening-write-from-dictation"
+    },
+    {
+        "id": 6,
+        "text": "The library is located on the north side of the campus.",
+        "voice": "am_michael",
+        "filename": "wfd_topic_6.mp3",
+        "folder": "listening-write-from-dictation"
+    },
+    {
+        "id": 7,
+        "text": "Please submit your assignment before the deadline.",
+        "voice": "af_sky",
+        "filename": "wfd_topic_7.mp3",
+        "folder": "listening-write-from-dictation"
+    },
+    {
+        "id": 8,
+        "text": "Students must attend all lectures and tutorials.",
+        "voice": "af_heart",
+        "filename": "wfd_topic_8.mp3",
+        "folder": "listening-write-from-dictation"
+    },
+    {
+        "id": 9,
+        "text": "The library is located on the north side of the campus.",
+        "voice": "am_fenrir",
+        "filename": "wfd_topic_9.mp3",
+        "folder": "listening-write-from-dictation"
+    },
+    {
+        "id": 10,
+        "text": "Please submit your assignment before the deadline.",
+        "voice": "af_bella",
+        "filename": "wfd_topic_10.mp3",
+        "folder": "listening-write-from-dictation"
+    },
+    {
+        "id": 11,
+        "text": "Students must attend all lectures and tutorials.",
+        "voice": "am_fenrir",
+        "filename": "wfd_topic_11.mp3",
+        "folder": "listening-write-from-dictation"
+    },
+    {
+        "id": 12,
+        "text": "The library is located on the north side of the campus.",
+        "voice": "am_michael",
+        "filename": "wfd_topic_12.mp3",
+        "folder": "listening-write-from-dictation"
+    },
+    {
+        "id": 13,
+        "text": "Please submit your assignment before the deadline.",
+        "voice": "am_michael",
+        "filename": "wfd_topic_13.mp3",
+        "folder": "listening-write-from-dictation"
+    },
+    {
+        "id": 14,
+        "text": "Students must attend all lectures and tutorials.",
+        "voice": "af_sky",
+        "filename": "wfd_topic_14.mp3",
+        "folder": "listening-write-from-dictation"
+    }
+]

@@ -34,6 +34,10 @@ class BuildGrammarWritingMeeting4ViewData
             ]
             : $fallbackParagraph;
 
+        $userId = auth()->id();
+        $cachedUserAnswers = \Illuminate\Support\Facades\Cache::get('user_' . $userId . '_meeting4_user_answers');
+        $cachedParagraphAnswer = \Illuminate\Support\Facades\Cache::get('user_' . $userId . '_meeting4_user_paragraph_answer');
+
         return [
             'questions' => $questions,
             'fullParagraphId' => $paragraphData['id'],
@@ -44,8 +48,8 @@ class BuildGrammarWritingMeeting4ViewData
             'results' => session('meeting4_results', []),
             'paragraphResult' => session('meeting4_paragraph_result', []),
             'finalScore' => session('meeting4_final_score', 0),
-            'userAnswers' => session('meeting4_user_answers', []),
-            'userParagraphAnswer' => session('meeting4_user_paragraph_answer', ''),
+            'userAnswers' => $cachedUserAnswers !== null ? $cachedUserAnswers : session('meeting4_user_answers', []),
+            'userParagraphAnswer' => $cachedParagraphAnswer !== null ? $cachedParagraphAnswer : session('meeting4_user_paragraph_answer', ''),
         ];
     }
 

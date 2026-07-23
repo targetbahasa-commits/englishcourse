@@ -31,4 +31,6 @@ interface DashboardRepository
     public function pluckScores(int $userId): array;
 
     public function findProgramBySlug(string $slug): mixed;
+
+    public function getPteScores(int $userId): array;
 }

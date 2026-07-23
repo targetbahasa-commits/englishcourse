@@ -34,55 +34,59 @@
     <!-- Top Stats Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <!-- Total Students -->
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div class="flex justify-between items-start mb-3">
-                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                </div>
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative overflow-hidden group hover:shadow-md transition-shadow flex items-center gap-4">
+            <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             </div>
-            <p class="text-xs font-medium text-gray-500 mb-1">Total Students</p>
-            <h3 class="text-2xl font-bold text-gray-900">{{ $metrics['total_students'] }}</h3>
+            <div>
+                <p class="text-xs font-semibold text-gray-500 mb-0.5">Total Students</p>
+                <h3 class="text-xl font-bold text-gray-900">{{ $metrics['total_students'] }}</h3>
+            </div>
         </div>
 
         <!-- Active -->
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 group hover:shadow-md transition-shadow">
-            <div class="flex justify-between items-start mb-3">
-                <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 group hover:shadow-md transition-shadow flex items-center gap-4">
+            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
-            <p class="text-xs font-medium text-gray-500 mb-1">Active Accounts</p>
-            <h3 class="text-2xl font-bold text-gray-900">{{ $metrics['active_students'] }}</h3>
+            <div>
+                <p class="text-xs font-semibold text-gray-500 mb-0.5">Active Accounts</p>
+                <h3 class="text-xl font-bold text-gray-900">{{ $metrics['active_students'] }}</h3>
+            </div>
         </div>
 
         <!-- Missing WA -->
         <a href="{{ route('students.index', array_merge(request()->query(), ['missing' => 'whatsapp'])) }}"
-           class="bg-white rounded-2xl border {{ $metrics['missing_wa'] > 0 ? 'border-amber-200' : 'border-gray-100' }} shadow-sm p-5 group hover:shadow-md transition-shadow block">
-            <div class="flex justify-between items-start mb-3">
-                <div class="p-2 {{ $metrics['missing_wa'] > 0 ? 'bg-amber-50 text-amber-600' : 'bg-gray-50 text-gray-400' }} rounded-lg">
+           class="bg-white rounded-xl border {{ $metrics['missing_wa'] > 0 ? 'border-amber-200' : 'border-gray-100' }} shadow-sm p-4 group hover:shadow-md transition-shadow flex items-center justify-between gap-2">
+            <div class="flex items-center gap-4">
+                <div class="p-3 {{ $metrics['missing_wa'] > 0 ? 'bg-amber-50 text-amber-600' : 'bg-gray-50 text-gray-400' }} rounded-xl shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                 </div>
-                @if($metrics['missing_wa'] > 0)
-                    <span class="text-xs font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full">Click to filter</span>
-                @endif
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 mb-0.5">No WhatsApp</p>
+                    <h3 class="text-xl font-bold {{ $metrics['missing_wa'] > 0 ? 'text-amber-600' : 'text-gray-900' }}">{{ $metrics['missing_wa'] }}</h3>
+                </div>
             </div>
-            <p class="text-xs font-medium text-gray-500 mb-1">Missing WhatsApp</p>
-            <h3 class="text-2xl font-bold {{ $metrics['missing_wa'] > 0 ? 'text-amber-600' : 'text-gray-900' }}">{{ $metrics['missing_wa'] }}</h3>
+            @if($metrics['missing_wa'] > 0)
+                <span class="text-[9px] font-bold uppercase tracking-wide text-amber-500 bg-amber-50 px-2 py-1 rounded hidden md:block">Filter</span>
+            @endif
         </a>
 
         <!-- Missing Referral -->
         <a href="{{ route('students.index', array_merge(request()->query(), ['missing' => 'referral'])) }}"
-           class="bg-white rounded-2xl border {{ $metrics['missing_referral'] > 0 ? 'border-red-200' : 'border-gray-100' }} shadow-sm p-5 group hover:shadow-md transition-shadow block">
-            <div class="flex justify-between items-start mb-3">
-                <div class="p-2 {{ $metrics['missing_referral'] > 0 ? 'bg-red-50 text-red-500' : 'bg-gray-50 text-gray-400' }} rounded-lg">
+           class="bg-white rounded-xl border {{ $metrics['missing_referral'] > 0 ? 'border-red-200' : 'border-gray-100' }} shadow-sm p-4 group hover:shadow-md transition-shadow flex items-center justify-between gap-2">
+            <div class="flex items-center gap-4">
+                <div class="p-3 {{ $metrics['missing_referral'] > 0 ? 'bg-red-50 text-red-500' : 'bg-gray-50 text-gray-400' }} rounded-xl shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
                 </div>
-                @if($metrics['missing_referral'] > 0)
-                    <span class="text-xs font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">Click to filter</span>
-                @endif
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 mb-0.5">No Referral</p>
+                    <h3 class="text-xl font-bold {{ $metrics['missing_referral'] > 0 ? 'text-red-600' : 'text-gray-900' }}">{{ $metrics['missing_referral'] }}</h3>
+                </div>
             </div>
-            <p class="text-xs font-medium text-gray-500 mb-1">No Referral Code</p>
-            <h3 class="text-2xl font-bold {{ $metrics['missing_referral'] > 0 ? 'text-red-600' : 'text-gray-900' }}">{{ $metrics['missing_referral'] }}</h3>
+            @if($metrics['missing_referral'] > 0)
+                <span class="text-[9px] font-bold uppercase tracking-wide text-red-500 bg-red-50 px-2 py-1 rounded hidden md:block">Filter</span>
+            @endif
         </a>
     </div>
 
@@ -153,6 +157,14 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </a>
                         @endif
+                        
+                        <div class="w-px h-8 bg-gray-200 mx-2 hidden md:block"></div>
+                        
+                        <button type="submit" form="bulkGenerateForm" onclick="return confirm('Auto-generate referral codes for all students without one?')"
+                            class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium rounded-xl text-xs flex items-center gap-2 transition whitespace-nowrap hidden md:flex">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+                            Auto-Generate Referral Codes
+                        </button>
                     </div>
                 </div>
                 
@@ -212,14 +224,6 @@
                     </div>
                 </div>
 
-                <!-- Bulk Actions -->
-                <div class="mt-5 pt-4 border-t border-gray-100 flex justify-end">
-                    <button type="submit" form="bulkGenerateForm" onclick="return confirm('Auto-generate referral codes for all students without one?')"
-                        class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium rounded-xl text-xs flex items-center gap-2 transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
-                        Auto-Generate Referral Codes
-                    </button>
-                </div>
             </form>
             
             <form id="bulkGenerateForm" action="{{ route('admin.students.bulk_generate_referral') }}" method="POST" class="hidden">
@@ -243,13 +247,13 @@
             <table class="min-w-full divide-y divide-gray-100">
                 <thead class="bg-gray-50/80">
                     <tr>
-                        <th class="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Student</th>
-                        <th class="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">WhatsApp</th>
-                        <th class="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Referral Code</th>
-                        <th class="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Program</th>
-                        <th class="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Teacher</th>
-                        <th class="px-5 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-5 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Student</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">WhatsApp</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Referral Code</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Program</th>
+                        <th class="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Teacher</th>
+                        <th class="px-4 py-3 text-center text-[11px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-4 py-3 text-right text-[11px] font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-50">
@@ -260,7 +264,7 @@
                         @endphp
                         <tr class="hover:bg-gray-50/50 transition-colors {{ ($missingWa || $missingRef) ? 'border-l-2 border-l-amber-300' : '' }}">
                             <!-- Name -->
-                            <td class="px-5 py-4 whitespace-nowrap">
+                            <td class="px-4 py-3 whitespace-nowrap">
                                 <div class="flex items-center gap-3">
                                     <div class="h-9 w-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm border border-blue-200 shrink-0">
                                         {{ strtoupper(substr($student->name, 0, 1)) }}
@@ -273,7 +277,7 @@
                             </td>
 
                             <!-- WhatsApp -->
-                            <td class="px-5 py-4 whitespace-nowrap">
+                            <td class="px-4 py-3 whitespace-nowrap">
                                 @if($missingWa)
                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-amber-50 text-amber-600 border border-amber-200">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -289,7 +293,7 @@
                             </td>
 
                             <!-- Referral Code -->
-                            <td class="px-5 py-4 whitespace-nowrap">
+                            <td class="px-4 py-3 whitespace-nowrap">
                                 @if($missingRef)
                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-red-50 text-red-500 border border-red-200">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -303,7 +307,7 @@
                             </td>
 
                             <!-- Program -->
-                            <td class="px-5 py-4 whitespace-nowrap">
+                            <td class="px-4 py-3 whitespace-nowrap">
                                 <div class="flex flex-col gap-1">
                                     @php
                                         $allPrograms = [];
@@ -332,7 +336,7 @@
                             </td>
 
                             <!-- Teacher -->
-                            <td class="px-5 py-4 whitespace-nowrap">
+                            <td class="px-4 py-3 whitespace-nowrap">
                                 @if($student->teacher)
                                     <div class="flex items-center gap-2">
                                         <div class="h-6 w-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 text-[10px] font-bold">
@@ -348,7 +352,7 @@
                             </td>
 
                             <!-- Status -->
-                            <td class="px-5 py-4 whitespace-nowrap text-center">
+                            <td class="px-4 py-3 whitespace-nowrap text-center">
                                 <button class="flex mx-auto items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium {{ $student->status == 'active' ? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100' : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100' }} transition-colors" data-user-id="{{ $student->id }}" onclick="toggleStatus(this)">
                                     <span class="w-1.5 h-1.5 rounded-full {{ $student->status == 'active' ? 'bg-green-500' : 'bg-gray-400' }}"></span>
                                     <span class="status-text">{{ ucfirst($student->status) }}</span>
@@ -356,7 +360,7 @@
                             </td>
 
                             <!-- Actions -->
-                            <td class="px-5 py-4 whitespace-nowrap text-right">
+                            <td class="px-4 py-3 whitespace-nowrap text-right">
                                 <div class="flex items-center justify-end gap-1 text-gray-400" x-data="{ openDropdown: false }">
                                     <!-- Quick Edit Contact -->
                                     <button type="button"

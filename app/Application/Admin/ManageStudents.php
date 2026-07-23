@@ -3,6 +3,7 @@
 namespace App\Application\Admin;
 
 use App\Domain\Admin\Repositories\AdminStudentRepository;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
@@ -26,12 +27,13 @@ class ManageStudents
     {
         $student->load(['program', 'teacher', 'classPeriod.classMeetings', 'classes', 'enrollments.program']);
 
-        $recentActivity  = $this->repository->getRecentActivity($student->id);
-        $progressStats   = $this->repository->getProgressStats($student->id);
-        $latestTest      = $this->repository->getLatestTest($student->id);
+        $recentActivity      = $this->repository->getRecentActivity($student->id);
+        $progressStats       = $this->repository->getProgressStats($student->id);
+        $latestTest          = $this->repository->getLatestTest($student->id);
+        $allAssignmentScores = $this->repository->getAllAssignmentScores($student->id);
 
         return array_merge(
-            compact('student', 'recentActivity', 'latestTest'),
+            compact('student', 'recentActivity', 'latestTest', 'allAssignmentScores'),
             $progressStats
         );
     }
@@ -43,22 +45,34 @@ class ManageStudents
 
     public function getCurrentAssignmentJsonData(mixed $student): array
     {
-        return $this->generateCurrentAssignmentData($student);
+        $data = $this->generateCurrentAssignmentData($student);
+
+        // The frontend JS expects snake_case keys
+        return [
+            'activity_url' => $data['activityUrl'],
+            'program_name' => $data['programName'],
+            'last_activity_human' => $data['lastActivityAt']
+                ? $data['lastActivityAt']->diffForHumans()
+                : null,
+            'snapshot' => $data['snapshot'],
+        ];
     }
 
     private function generateCurrentAssignmentData(mixed $student): array
     {
-        $sessionRow = $this->repository->getLatestSessionForStudent($student->id);
+        $sessionRow  = $this->repository->getLatestSessionForStudent($student->id);
         $sessionData = $this->decodeSessionPayload($sessionRow->payload ?? null);
-        $activityUrl = $this->resolveActivityUrl($sessionData);
+        $activityUrl = $this->resolveActivityUrl($sessionData, (int) $student->id);
         $programName = $this->mapUrlToProgramName($activityUrl);
-        $lastActivityAt = isset($sessionRow->last_activity) ? now()->setTimestamp((int) $sessionRow->last_activity) : null;
+        $lastActivityAt = isset($sessionRow->last_activity)
+            ? now()->setTimestamp((int) $sessionRow->last_activity)
+            : null;
 
         return [
-            'activityUrl' => $activityUrl,
-            'programName' => $programName,
-            'lastActivityAt' => $lastActivityAt,
-            'snapshot' => $this->resolveCurrentWorkSnapshot($student->id, $activityUrl, $sessionData),
+            'activityUrl'   => $activityUrl,
+            'programName'   => $programName,
+            'lastActivityAt'=> $lastActivityAt,
+            'snapshot'      => $this->resolveCurrentWorkSnapshot($student->id, $activityUrl, $sessionData),
         ];
     }
 
@@ -78,8 +92,35 @@ class ManageStudents
         return is_array($data) ? $data : [];
     }
 
-    private function resolveActivityUrl(array $sessionData): ?string
+    /**
+     * Cache key for persisting the last known-good activity URL per student.
+     * TTL: 2 hours — long enough to survive an entire class session.
+     */
+    private const LAST_VALID_URL_CACHE_TTL = 7200;
+
+    /**
+     * Resolve the student's current activity URL from their session data.
+     *
+     * Problem: background polling requests (e.g. /api/live-drawing/fetch)
+     * constantly overwrite `_previous.url` in the student's Laravel session,
+     * so the raw API endpoint URL would appear as their "current page" in the
+     * admin live preview — showing raw JSON in the iframe instead of the page.
+     *
+     * Solution (two-layer):
+     *  1. Filter: skip any URL whose path starts with an internal API prefix.
+     *  2. Cache fallback: whenever a VALID URL is found, persist it in the
+     *     Laravel Cache. When the session only contains API/polling URLs,
+     *     return the last cached valid URL instead of null.
+     *
+     * This means the admin preview keeps showing the correct assignment page
+     * even while the student's browser is actively polling in the background.
+     *
+     * @param  array $sessionData  Decoded session payload for the student.
+     * @param  int   $studentId    Used as part of the cache key.
+     */
+    private function resolveActivityUrl(array $sessionData, int $studentId): ?string
     {
+        // ── Step 1: Extract raw URL from session ──────────────────────────
         $url = null;
 
         if (isset($sessionData['_previous']) && is_array($sessionData['_previous'])) {
@@ -90,11 +131,63 @@ class ManageStudents
             $url = $sessionData['url.intended'];
         }
 
-        if (!is_string($url) || trim($url) === '') {
-            return null;
+        // ── Step 2: Filter out internal API / background-poll URLs ────────
+        // These are XHR requests that Laravel still saves in _previous.url.
+        // They must never surface as the student's "current page".
+        //
+        // Patterns to reject:
+        //   /api/live-drawing/fetch/{id}?last_time=...
+        //   /api/live-draft/...
+        //   /broadcasting/auth
+        //   /api/*  (all internal JSON endpoints)
+        //   /admin/students/*/current-assignment-json  (admin polling endpoint)
+        $ignoredPrefixes = [
+            '/api/',
+            '/broadcasting/',
+        ];
+        $ignoredContains = [
+            '/current-assignment-json',
+        ];
+
+        if (is_string($url) && trim($url) !== '') {
+            $path = (string) parse_url($url, PHP_URL_PATH);
+            $isIgnored = false;
+
+            foreach ($ignoredPrefixes as $prefix) {
+                if (str_starts_with($path, $prefix)) {
+                    $isIgnored = true;
+                    break;
+                }
+            }
+
+            if (!$isIgnored) {
+                foreach ($ignoredContains as $needle) {
+                    if (str_contains($path, $needle)) {
+                        $isIgnored = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!$isIgnored) {
+                // ── Step 3a: Valid URL found — normalize and cache it ─────
+                $normalized = $this->normalizeActivityUrlToCurrentHost($url);
+
+                if ($normalized !== null) {
+                    Cache::put(
+                        'student_last_valid_activity_url_' . $studentId,
+                        $normalized,
+                        self::LAST_VALID_URL_CACHE_TTL
+                    );
+                    return $normalized;
+                }
+            }
         }
 
-        return $this->normalizeActivityUrlToCurrentHost($url);
+        // ── Step 3b: No valid URL in session — fall back to cached URL ────
+        // This happens when background polling has overwritten _previous.url.
+        // The cached URL was saved the last time the student visited a real page.
+        return Cache::get('student_last_valid_activity_url_' . $studentId);
     }
 
     private function normalizeActivityUrlToCurrentHost(string $url): ?string
@@ -139,7 +232,12 @@ class ManageStudents
         $path = strtolower((string) parse_url($url, PHP_URL_PATH));
 
         return match (true) {
+            str_contains($path, '/assignments/grammar-writing/fast-track') => 'Grammar for Writing Fast Track',
+            str_contains($path, '/assignments/grammar-writing/introductory') => 'Grammar for Writing Introductory',
+            str_contains($path, '/assignments/grammar-writing/complexity') => 'Grammar for Writing Complexity',
+            str_contains($path, '/assignments/grammar-writing/proficiency') => 'Grammar for Writing Proficiency',
             str_starts_with($path, '/assignments/grammar-writing/meeting') => 'Grammar for Writing',
+            str_contains($path, '/assignments/grammar-writing/') && str_contains($path, '/meeting') => 'Grammar for Writing',
             str_starts_with($path, '/assignments/toefl-itp') => 'TOEFL ITP',
             str_starts_with($path, '/assignments/pte-academic') => 'PTE Academic',
             str_starts_with($path, '/assignments/ielts-general') => 'IELTS General',
@@ -165,7 +263,7 @@ class ManageStudents
 
         $path = strtolower((string) parse_url((string) $activityUrl, PHP_URL_PATH));
 
-        $grammarSnapshot = $this->resolveGrammarMeetingSnapshot($path, $sessionData);
+        $grammarSnapshot = $this->resolveGrammarMeetingSnapshot($userId, $path, $sessionData);
         if ($grammarSnapshot !== null) {
             return array_merge($snapshot, $grammarSnapshot);
         }
@@ -222,9 +320,9 @@ class ManageStudents
         return $snapshot;
     }
 
-    private function resolveGrammarMeetingSnapshot(string $path, array $sessionData): ?array
+    private function resolveGrammarMeetingSnapshot(int $userId, string $path, array $sessionData): ?array
     {
-        if (!preg_match('#/assignments/grammar-writing/meeting(\d+)#', $path, $matches)) {
+        if (!preg_match('#/assignments/grammar-writing/(?:[^/]+/)?meeting(\d+)#', $path, $matches)) {
             return null;
         }
 
@@ -236,12 +334,19 @@ class ManageStudents
         $answersKey = 'meeting' . $meetingNumber . '_user_answers';
         $paragraphKey = 'meeting' . $meetingNumber . '_user_paragraph_answer';
 
-        $rawAnswers = isset($sessionData[$answersKey]) && is_array($sessionData[$answersKey])
-            ? $sessionData[$answersKey]
-            : [];
-        $paragraphAnswer = isset($sessionData[$paragraphKey])
-            ? trim((string) $sessionData[$paragraphKey])
-            : '';
+        $rawAnswers = \Illuminate\Support\Facades\Cache::get('user_' . $userId . '_' . $answersKey);
+        if ($rawAnswers === null) {
+            $rawAnswers = isset($sessionData[$answersKey]) && is_array($sessionData[$answersKey])
+                ? $sessionData[$answersKey]
+                : [];
+        }
+
+        $paragraphAnswer = \Illuminate\Support\Facades\Cache::get('user_' . $userId . '_' . $paragraphKey);
+        if ($paragraphAnswer === null) {
+            $paragraphAnswer = isset($sessionData[$paragraphKey])
+                ? trim((string) $sessionData[$paragraphKey])
+                : '';
+        }
 
         return $this->buildGrammarMeetingSnapshot($meetingNumber, $rawAnswers, $paragraphAnswer);
     }

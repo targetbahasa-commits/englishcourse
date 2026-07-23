@@ -72,7 +72,9 @@
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         @if(Auth::check())
-            @php($sidebarRole = strtolower(Auth::user()->active_role ?? 'student'))
+            @php
+                $sidebarRole = strtolower(Auth::user()->active_role ?? 'student');
+            @endphp
             @if($sidebarRole === 'admin')
                 @include('components.sidebar-admin')
             @elseif($sidebarRole === 'teacher')
@@ -91,7 +93,7 @@
 
                 <!-- Header -->
                 <div class="mb-8">
-                    <a href="{{ route('assignments.pte-academic.reading.multiple-choice-multiple-answer.index') }}" class="inline-flex items-center text-gray-600 hover:text-blue-500 transition-colors mb-4">
+                    <a href="{{ route('assignments.pte-academic.reading.multiple-choice-multiple-answer.index') }}#topic-{{ $topicId }}" class="inline-flex items-center text-gray-600 hover:text-blue-500 transition-colors mb-4">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         Back to Selection
                     </a>
@@ -130,10 +132,7 @@
                         <div class="px-8 pb-4">
                             <div class="border border-teal-400 rounded-xl p-8 bg-white shadow-sm" style="border-color: #00c5b5;">
                                 <div class="text-gray-800 text-sm leading-[1.8] font-medium space-y-4">
-                                    <p>There's bad news for parents who frequently plop their kids in front of the TV to give themselves a break: It might actually end up leaving moms and dads more stressed.</p>
-                                    <p>Why? Because the more television that kids watch, the more they're exposed to advertising messages. The more advertising they see, the more likely they are to insist on purchasing items when they go with their parents to the store -- and perhaps make a fuss if told "no." All that, researchers say, may contribute to parents' overall stress levels, well beyond a single shopping trip.</p>
-                                    <p>The findings come from a University of Arizona-led study, published in the International Journal of Advertising, that explores the potential effects of children's television watching habits on their parents' stress levels.</p>
-                                    <p>"The more advertising children see, the more they ask for things and the more conflict is generated," said lead study author Matthew Lapierre, an assistant professor in the UArizona Department of Communication in the College of Social and Behavioral Sciences. "What we haven't looked at before is what the potential effect is on parents. We know kids ask for things, we know it leads to conflict, but we wanted to ask the next question: Could this be contributing to parents' overall stress?" The study suggests that it could. There are a few things parents can do, perhaps the most obvious of which is limiting screen time.</p>
+                                    <p>{{ $topic['passage'] }}</p>
                                 </div>
                             </div>
                         </div>
@@ -141,46 +140,20 @@
                         <!-- Question Area -->
                         <div class="px-8 pb-4">
                             <div class="border border-gray-200 rounded-xl p-4 bg-white shadow-sm text-center">
-                                <p class="text-gray-700 font-medium">What can we infer from the passage?</p>
+                                <p class="text-gray-700 font-medium">{{ $topic['question'] }}</p>
                             </div>
                         </div>
 
                         <!-- Options Area -->
                         <div class="px-8 pb-8 space-y-3" id="optionsContainer">
-                            <!-- Option A -->
-                            <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
-                                <input type="checkbox" class="custom-checkbox" value="A">
-                                <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">A</div>
-                                <span class="text-gray-700 text-sm font-medium">Children's habit of watching TV has a potential impact on parents' stress level.</span>
-                            </label>
-
-                            <!-- Option B -->
-                            <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
-                                <input type="checkbox" class="custom-checkbox" value="B">
-                                <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">B</div>
-                                <span class="text-gray-700 text-sm font-medium">When watching one television ad, children purchase one thing from it.</span>
-                            </label>
-
-                            <!-- Option C -->
-                            <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
-                                <input type="checkbox" class="custom-checkbox" value="C">
-                                <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">C</div>
-                                <span class="text-gray-700 text-sm font-medium">For parents, putting their children in front of the TV tends to make themselves happy.</span>
-                            </label>
-
-                            <!-- Option D -->
-                            <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
-                                <input type="checkbox" class="custom-checkbox" value="D">
-                                <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">D</div>
-                                <span class="text-gray-700 text-sm font-medium">Parents can reduce their stress by limiting their children to watch TV.</span>
-                            </label>
-
-                            <!-- Option E -->
-                            <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
-                                <input type="checkbox" class="custom-checkbox" value="E">
-                                <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">E</div>
-                                <span class="text-gray-700 text-sm font-medium">Children will ask for more things when they watch more ads, which can lead to more conflict.</span>
-                            </label>
+                            @foreach($topic['options'] as $index => $optionText)
+                                @php $letter = chr(65 + $index); @endphp
+                                <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
+                                    <input type="checkbox" class="custom-checkbox" value="{{ $letter }}">
+                                    <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">{{ $letter }}</div>
+                                    <span class="text-gray-700 text-sm font-medium">{{ $optionText }}</span>
+                                </label>
+                            @endforeach
                         </div>
 
                         <!-- Action Buttons (matches reference) -->
@@ -242,8 +215,7 @@
     </div>
 
     <script>
-        // Set correct answers (example for this mockup: A, D, E)
-        const correctAnswers = ['A', 'D', 'E'];
+        const correctAnswers = @json($topic['answers']);
 
         // Row highlighting logic
         const checkboxes = document.querySelectorAll('.custom-checkbox');
@@ -322,6 +294,10 @@
 
             resultBox.classList.remove('hidden');
 
+            // PTE Multiple Answer scoring: +1 for correct, -1 for incorrect, min 0.
+            let pteScore = Math.max(0, correctSelectedCount - incorrectSelectedCount);
+            let pteMax = correctAnswers.length;
+
             if (selectedCount === 0) {
                 resultTitle.textContent = "No Answers Selected";
                 resultIconBox.className = "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-amber-500";
@@ -338,14 +314,15 @@
                 resultTitle.textContent = "Results Checked";
                 resultIconBox.className = "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-amber-500";
                 resultIcon.innerHTML = "<path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'></path>";
-                
-                // PTE Multiple Answer scoring: +1 for correct, -1 for incorrect, min 0.
-                let pteScore = Math.max(0, correctSelectedCount - incorrectSelectedCount);
-                
-                resultMessage.textContent = "You selected " + correctSelectedCount + " correct and " + incorrectSelectedCount + " incorrect options. (PTE Score: " + pteScore + "/" + correctAnswers.length + "). Review the highlights above.";
+                resultMessage.textContent = "You selected " + correctSelectedCount + " correct and " + incorrectSelectedCount + " incorrect options. (PTE Score: " + pteScore + "/" + pteMax + "). Review the highlights above.";
                 resultMessage.className = "text-amber-700 font-medium text-sm mt-1";
             }
-            
+
+            PTEScorePopup.show({ skill: 'Reading', score: pteScore, max: pteMax });
+            if (window.PTETracker) {
+                PTETracker.saveResult({ score: pteScore, maxScore: pteMax, durationSeconds: secondsElapsed });
+            }
+
             document.getElementById('answerBtn').style.opacity = '0.5';
             document.getElementById('answerBtn').style.pointerEvents = 'none';
         }
@@ -368,6 +345,7 @@
             startTimer();
         }
     </script>
-    @include('assignments.ielts.writing.practice_toolbar', ['meeting' => (object)['task_type' => 1], 'grammarLevel' => 'all'])
+    @include('components.pte-score-popup')
+    @include('components.pte-practice-tracker', ['module' => 'multiple-choice-multiple-answer', 'topicId' => $topicId])
 </body>
 </html>

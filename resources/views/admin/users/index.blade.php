@@ -130,7 +130,6 @@
                 <input type="hidden" name="user_ids" x-bind:value="JSON.stringify(selectedUsers)">
                 <input type="hidden" name="status" value="inactive">
             </form>
-            </div>
         </div>
     </div>
 

@@ -241,6 +241,52 @@
 
         </div>
 
+        @if(isset($pteScores) && ($pteScores['reading'] !== null || $pteScores['listening'] !== null || $pteScores['speaking_writing'] !== null))
+        <!-- PTE Academic Performance -->
+        <div class="mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">PTE Academic Performance</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Reading -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between group hover:border-indigo-200 transition-colors">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Reading</p>
+                        <h3 class="text-3xl font-black {{ $pteScores['reading'] !== null ? 'text-indigo-600' : 'text-gray-300' }}">
+                            {{ $pteScores['reading'] ?? '--' }} <span class="text-sm text-gray-400 font-medium">/ 90</span>
+                        </h3>
+                    </div>
+                    <div class="w-16 h-16 rounded-full bg-indigo-50 border-4 border-indigo-100 flex items-center justify-center text-indigo-500 group-hover:scale-105 transition-transform">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    </div>
+                </div>
+                <!-- Listening -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between group hover:border-emerald-200 transition-colors">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Listening</p>
+                        <h3 class="text-3xl font-black {{ $pteScores['listening'] !== null ? 'text-emerald-600' : 'text-gray-300' }}">
+                            {{ $pteScores['listening'] ?? '--' }} <span class="text-sm text-gray-400 font-medium">/ 90</span>
+                        </h3>
+                    </div>
+                    <div class="w-16 h-16 rounded-full bg-emerald-50 border-4 border-emerald-100 flex items-center justify-center text-emerald-500 group-hover:scale-105 transition-transform">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M12 18.5V5.5m0 0L7.5 9H4v6h3.5l4.5 3.5v-13z"></path></svg>
+                    </div>
+                </div>
+                <!-- Speaking & Writing -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between group hover:border-purple-200 transition-colors">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Speaking & Writing</p>
+                        <h3 class="text-3xl font-black {{ $pteScores['speaking_writing'] !== null ? 'text-purple-600' : 'text-gray-300' }}">
+                            {{ $pteScores['speaking_writing'] ?? '--' }} <span class="text-sm text-gray-400 font-medium">/ 90</span>
+                        </h3>
+                    </div>
+                    <div class="w-16 h-16 rounded-full bg-purple-50 border-4 border-purple-100 flex items-center justify-center text-purple-500 group-hover:scale-105 transition-transform">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
+
         <!-- Charts & Upcoming Classes -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <!-- Progress Chart -->
@@ -427,6 +473,34 @@
                             </div>
                         </div>
                     </div>
+
+                    @if(isset($offlineTestResults) && count($offlineTestResults) > 0)
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-bold text-gray-800">Offline Test Certificates</h3>
+                        </div>
+                        <div class="space-y-3">
+                            @foreach($offlineTestResults as $result)
+                                <div class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm flex justify-between items-center hover:shadow-md transition">
+                                    <div>
+                                        <p class="font-bold text-gray-800 text-sm">{{ str($result->test_type)->replace('_', ' ')->title() }}</p>
+                                        <p class="text-xs text-gray-500">{{ $result->created_at->format('d M Y') }} • Score: <span class="font-bold text-indigo-600">{{ $result->score + 0 }}</span></p>
+                                    </div>
+                                    <div class="text-right">
+                                        @if(\App\Models\OfflineTestCertificate::where('test_type', $result->test_type)->where('is_active', true)->exists())
+                                            <a href="{{ route('offline-test.certificate.download', $result->id) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-lg hover:bg-indigo-100 transition">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                                PDF
+                                            </a>
+                                        @else
+                                            <span class="text-[10px] text-gray-400 font-medium italic bg-gray-50 px-2 py-1 rounded">Processing</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
         @endif

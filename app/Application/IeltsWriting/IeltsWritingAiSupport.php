@@ -31,70 +31,52 @@ class IeltsWritingAiSupport
             $payload['response_format'] = ['type' => 'json_object'];
         }
 
-        // Routing Logic: SambaNova FIRST for everything
-        $sambaModel = 'Meta-Llama-3.3-70B-Instruct';
-        if ($taskType === 1 && $category === 'task_achievement') {
-            $sambaModel = 'DeepSeek-V3.1'; // Using latest available
-        }
-        $payload['model'] = $sambaModel;
-        
-        $sambaKeys = \App\Services\AiProviderKeyManager::getKeys('sambanova');
-        $sambaSuccess = false;
-        
-        foreach ($sambaKeys as $sambaIndex => $sambaKey) {
-            try {
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $sambaKey,
-                ])->timeout($timeout)->post("https://api.sambanova.ai/v1/chat/completions", $payload);
+        // Fallback Chain: SambaNova -> Gemini -> OpenRouter
+        $providers = ['sambanova', 'gemini', 'openrouter'];
 
-                if ($response->successful() && isset($response->json()['choices'][0]['message']['content'])) {
-                    return [
-                        'content' => $response->json()['choices'][0]['message']['content'],
-                        'source' => 'SambaNova (' . $sambaModel . ') [key ' . \App\Services\GroqKeyManager::maskKey($sambaKey) . ']'
-                    ];
-                }
-                \Log::warning("SambaNova key #{$sambaIndex} failed, attempting next...", ['status' => $response->status()]);
-            } catch (\Exception $e) {
-                \Log::warning("SambaNova key #{$sambaIndex} exception, attempting next...", ['error' => $e->getMessage()]);
+        foreach ($providers as $provider) {
+            $keys = \App\Services\AiProviderKeyManager::getKeys($provider);
+            if (empty($keys)) {
+                continue;
             }
-        }
-        \Log::warning("All SambaNova keys failed, attempting fallback...");
 
-        try {
-            // TRY GROQ SECOND (with sequential fallback across all writing keys)
-            $payload['model'] = 'llama-3.3-70b-versatile';
-            $result = GroqKeyManager::callWithFallback('writing', $payload, $timeout);
-            return [
-                'content' => $result['body']['choices'][0]['message']['content'],
-                'source'  => 'Groq (Llama 3.3) [key ' . $result['key_used'] . ']',
-            ];
-        } catch (\Exception $e) {
-            \Log::warning("Groq (all writing keys) failed, attempting Gemini API...", ['error' => $e->getMessage()]);
-        }
+            foreach ($keys as $index => $key) {
+                try {
+                    $response = null;
+                    if ($provider === 'sambanova') {
+                        $response = Http::withHeaders([
+                            'Authorization' => 'Bearer ' . $key,
+                        ])->timeout($timeout)->post("https://api.sambanova.ai/v1/chat/completions", $payload);
+                    } elseif ($provider === 'gemini') {
+                        $geminiPayload = $payload;
+                        $geminiPayload['model'] = 'gemini-2.5-flash';
+                        $response = Http::withHeaders([
+                            'Authorization' => 'Bearer ' . $key,
+                        ])->timeout($timeout)->post("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", $geminiPayload);
+                    } elseif ($provider === 'openrouter') {
+                        $orPayload = $payload;
+                        $orPayload['model'] = 'meta-llama/llama-3.3-70b-instruct:free';
+                        $response = Http::withHeaders([
+                            'Authorization' => 'Bearer ' . $key,
+                            'HTTP-Referer' => 'https://targetbahasa.com',
+                            'X-Title' => 'Target Bahasa Course'
+                        ])->timeout($timeout)->post("https://openrouter.ai/api/v1/chat/completions", $orPayload);
+                    }
 
-        // FALLBACK TO GEMINI
-        $payload['model'] = 'gemini-2.5-flash';
-        $geminiKeys = \App\Services\AiProviderKeyManager::getKeys('gemini');
-        
-        foreach ($geminiKeys as $geminiIndex => $geminiKey) {
-            try {
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $geminiKey,
-                ])->timeout($timeout)->post("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", $payload);
-
-                if ($response->successful() && isset($response->json()['choices'][0]['message']['content'])) {
-                    return [
-                        'content' => $response->json()['choices'][0]['message']['content'],
-                        'source' => 'Gemini API [key ' . \App\Services\GroqKeyManager::maskKey($geminiKey) . ']'
-                    ];
+                    if ($response && $response->successful() && isset($response->json()['choices'][0]['message']['content'])) {
+                        return [
+                            'content' => $response->json()['choices'][0]['message']['content'],
+                            'source' => ucfirst($provider) . ' [key ' . \App\Services\GroqKeyManager::maskKey($key) . ']'
+                        ];
+                    }
+                    \Log::warning("Writing AI: {$provider} key #{$index} failed.", ['status' => $response ? $response->status() : 'No response']);
+                } catch (\Exception $e) {
+                    \Log::warning("Writing AI: {$provider} key #{$index} exception.", ['error' => $e->getMessage()]);
                 }
-                \Log::error("Gemini fallback key #{$geminiIndex} failed", ['status' => $response->status()]);
-            } catch (\Exception $e) {
-                \Log::error("Gemini exception during fallback key #{$geminiIndex}: " . $e->getMessage());
             }
         }
 
-        throw new \Exception('All AI services failed (Groq and Gemini)');
+        throw new \Exception('All AI services failed (SambaNova, Gemini, and OpenRouter)');
     }
 
     public function runJsonPrompt(

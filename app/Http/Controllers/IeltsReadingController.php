@@ -32,6 +32,15 @@ class IeltsReadingController extends Controller
         return view('assignments.ielts.reading.index', $data);
     }
 
+    public function generalIndex()
+    {
+        $data = $this->buildIeltsReadingIndexData->handle(Auth::user());
+        $data['isClassEnded'] = $this->isStudentClassPeriodEnded('ielts-general-full-package');
+        $data['isGeneral'] = true;
+
+        return view('assignments.ielts.reading.index', $data);
+    }
+
     public function practiceIndex()
     {
         $answerKeyMaterialIds = IeltsReadingPassage::query()

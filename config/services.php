@@ -64,4 +64,9 @@ return [
         'key' => env('GEMINI_API_KEY'),
     ],
 
+    'contact' => [
+        'wa'    => env('CONTACT_WA', '6285706615607'),
+        'email' => env('CONTACT_EMAIL', 'targetbahasa@gmail.com'),
+    ],
+
 ];

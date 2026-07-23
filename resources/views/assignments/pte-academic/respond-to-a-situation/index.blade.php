@@ -158,12 +158,13 @@
                                         <h4 class="font-bold text-blue-900">Template Respond to a Situation</h4>
                                     </div>
                                     <div class="p-4 text-blue-800 leading-relaxed text-sm sm:text-base space-y-2">
-                                        <p>The group discussed the topic of <span class="text-amber-600 font-bold">[Title]</span>.</p>
-                                        <p>One participant mentioned that <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
-                                        <p>Another speaker added that <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
-                                        <p>Furthermore, it was pointed out that <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
-                                        <p>In addition, the discussion highlighted that <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
-                                        <p>To summarize, the group agreed that <span class="text-amber-600 font-bold">[ ___ ]</span> is an important aspect of <span class="text-amber-600 font-bold">[Title]</span>.</p>
+                                        <p class="text-sm text-red-600 mb-2 italic">Catatan: Pastikan kata "You" diganti menjadi "I", karena kita merespon situasi kita sendiri.</p>
+                                        <p>Hi [Mr/Mrs], thank you for raising this concern / providing this opportunity.</p>
+                                        <p>I see that <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
+                                        <p>But the issue in question is that <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
+                                        <p>According to me the best solution to this is <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
+                                        <p>Alternatively, we could consider <span class="text-amber-600 font-bold">[ ___ ]</span>.</p>
+                                        <p>Please advise what your thoughts are. I will be happy to proceed accordingly.</p>
                                     </div>
                                 </div>
                             </div>

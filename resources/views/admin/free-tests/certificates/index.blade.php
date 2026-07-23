@@ -195,6 +195,11 @@
             <h1 class="text-2xl md:text-3xl text-slate-800 font-bold">Certificates 🎓</h1>
             <p class="text-sm text-slate-500 mt-1">Kelola template sertifikat untuk setiap jenis Free Test dan Program.</p>
         </div>
+        <div x-data>
+            <button type="button" @click="$dispatch('open-review-modal')" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-sm font-semibold transition">
+                Preview Review Modal
+            </button>
+        </div>
     </div>
 
     @if(session('success'))
@@ -537,6 +542,60 @@
         @endforeach
 </div>
 
-</div>
-@endsection
+    </div>
 
+    <!-- Review Modal Preview -->
+    <div x-data="{ showReviewModal: false }" @open-review-modal.window="showReviewModal = true" x-show="showReviewModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <!-- Background overlay -->
+        <div x-show="showReviewModal" 
+             x-transition:enter="ease-out duration-300" 
+             x-transition:enter-start="opacity-0" 
+             x-transition:enter-end="opacity-100" 
+             x-transition:leave="ease-in duration-200" 
+             x-transition:leave-start="opacity-100" 
+             x-transition:leave-end="opacity-0" 
+             class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" 
+             aria-hidden="true"></div>
+
+        <!-- Modal panel -->
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div x-show="showReviewModal" 
+                     @click.away="showReviewModal = false"
+                     x-transition:enter="ease-out duration-300" 
+                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                     x-transition:leave="ease-in duration-200" 
+                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
+                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                     class="relative transform overflow-hidden rounded-2xl bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                    
+                    <div>
+                        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-yellow-50">
+                            <svg class="h-8 w-8 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                        </div>
+                        <div class="mt-4 text-center sm:mt-5">
+                            <h3 class="text-xl font-bold leading-6 text-slate-900" id="modal-title">Berikan Review Google Maps</h3>
+                            <div class="mt-3">
+                                <p class="text-sm text-slate-500">
+                                    Selamat! Anda telah menyelesaikan Final Test. Sebelum mendownload sertifikat, luangkan waktu sebentar untuk memberikan <strong class="text-slate-700">review bintang 5</strong> di Google Maps kami.<br><br>Sertifikat Anda akan otomatis dapat di-download setelah mengklik tombol di bawah ini.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 sm:mt-8 sm:flex sm:flex-col sm:gap-3">
+                        <button type="button" @click="showReviewModal = false; alert('Ini hanya preview. Saat diklik, siswa akan diarahkan ke Google Maps.');"
+                           class="inline-flex w-full justify-center rounded-xl bg-blue-600 px-3 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                            ⭐ Berikan Ulasan Bintang 5 di Google
+                        </button>
+                        <button type="button" @click="showReviewModal = false" class="mt-3 inline-flex w-full justify-center rounded-xl bg-white px-3 py-3.5 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 sm:mt-0">
+                            Nanti saja
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection

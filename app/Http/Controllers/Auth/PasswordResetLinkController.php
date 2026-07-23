@@ -32,9 +32,21 @@ class PasswordResetLinkController extends Controller
         // We will send the password reset link to this user. Once we have attempted
         // to send the link, we will examine the response then see the message we
         // need to show to the user. Finally, we'll send out a proper response.
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        try {
+            $status = Password::sendResetLink(
+                $request->only('email')
+            );
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Password reset email failed', [
+                'email' => $request->email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => 'Gagal mengirim email. Silakan coba lagi atau hubungi admin.']);
+        }
 
         return $status == Password::RESET_LINK_SENT
                     ? back()->with('status', __($status))

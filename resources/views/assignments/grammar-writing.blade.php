@@ -129,8 +129,9 @@
                 @endphp
                 <div class="flex items-center gap-3">
                     @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
-                        <form action="{{ route('assignments.grammar-writing.period') }}" method="POST" class="js-submit-guard flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
+                        <form action="{{ route('assignments.batch-period') }}" method="POST" class="js-submit-guard flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
                             @csrf
+                            <input type="hidden" name="program_id" value="{{ $program->id }}">
                             <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
                             <select name="class_period_id" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 min-w-[220px]">
                                 @if($program->classPeriods->isEmpty())
@@ -162,10 +163,12 @@
                         </button>
                     @endif
 
-                    <a href="{{ route('assignments.grammar-writing.classes') }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                        Back
-                    </a>
+                    <a href="{{ route('assignments.grammar-writing.classes') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+    <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+    </svg>
+    Back
+</a>
                 </div>
             </div>
 

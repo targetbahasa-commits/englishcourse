@@ -35,69 +35,88 @@
 
     <!-- Performance Monitoring Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-center">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-center gap-4 mb-3">
+                <div class="p-3 bg-blue-50 text-blue-600 rounded-xl shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                 </div>
-                <span class="text-sm font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">+12%</span>
+                <div class="flex-1 flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-500 mb-0.5">Avg Grade Completion</p>
+                        <h3 class="text-xl font-bold text-gray-900">{{ $metrics['grading_progress'] }}%</h3>
+                    </div>
+                    <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full shrink-0">+12%</span>
+                </div>
             </div>
-            <div class="text-gray-500 text-sm font-medium">Avg Grade Completion</div>
-            <div class="text-3xl font-bold text-gray-900 mt-1">{{ $metrics['grading_progress'] }}%</div>
-            <div class="w-full bg-gray-100 rounded-full h-1.5 mt-4">
+            <div class="w-full bg-gray-100 rounded-full h-1.5">
                 <div class="bg-blue-600 h-1.5 rounded-full" style="width: {{ $metrics['grading_progress'] }}%"></div>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-center">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-center gap-4 mb-3">
+                <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
-                <span class="text-sm font-semibold text-gray-500">This Month</span>
+                <div class="flex-1 flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-500 mb-0.5">Attendance Rate</p>
+                        <h3 class="text-xl font-bold text-gray-900">{{ $metrics['attendance_rate'] }}%</h3>
+                    </div>
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider shrink-0">This Month</span>
+                </div>
             </div>
-            <div class="text-gray-500 text-sm font-medium">Teacher Attendance Rate</div>
-            <div class="text-3xl font-bold text-gray-900 mt-1">{{ $metrics['attendance_rate'] }}%</div>
-            <div class="w-full bg-gray-100 rounded-full h-1.5 mt-4">
+            <div class="w-full bg-gray-100 rounded-full h-1.5">
                 <div class="bg-indigo-600 h-1.5 rounded-full" style="width: {{ $metrics['attendance_rate'] }}%"></div>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-center">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-center gap-4">
+                <div class="p-3 bg-orange-50 text-orange-600 rounded-xl shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                 </div>
-                <span class="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-1 rounded">Active Banks</span>
+                <div class="flex-1 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-500 mb-0.5">Material Uploads</p>
+                        <h3 class="text-xl font-bold text-gray-900">{{ $metrics['material_uploads'] }} <span class="text-sm font-normal text-gray-500">files</span></h3>
+                    </div>
+                    <span class="text-[9px] font-bold uppercase tracking-wider text-orange-600 bg-orange-50 px-2 py-1 rounded shrink-0">Active Banks</span>
+                </div>
             </div>
-            <div class="text-gray-500 text-sm font-medium">Total Material Uploads</div>
-            <div class="text-3xl font-bold text-gray-900 mt-1">{{ $metrics['material_uploads'] }} <span class="text-sm font-normal text-gray-500">files</span></div>
         </div>
     </div>
 
     <!-- Filters Toolbar -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8 flex flex-wrap gap-4 items-end justify-between">
-        <form action="{{ route('teachers.index') }}" method="GET" class="flex flex-wrap gap-4 items-end flex-1">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+        <form action="{{ route('teachers.index') }}" method="GET" class="flex flex-wrap gap-4 items-end">
             <div class="w-full md:w-64">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Search Teacher</label>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Search Teacher</label>
                 <div class="relative">
-                    <svg class="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Name or email..." class="pl-10 w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                    <svg class="w-4 h-4 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Name or email..." class="pl-9 w-full rounded-xl border-gray-200 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-sm py-2">
                 </div>
             </div>
 
             <div class="w-full md:w-48">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
-                <select name="status" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Account Status</label>
+                <select name="status" class="w-full rounded-xl border-gray-200 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-sm py-2">
                     <option value="">All Status</option>
                     <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
                     <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                 </select>
             </div>
 
-            <button type="submit" class="px-5 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors">
-                Apply Filters
-            </button>
+            <div class="flex items-center gap-2">
+                <button type="submit" class="px-5 py-2 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition-colors text-sm shadow-md shadow-slate-200">
+                    Apply Filters
+                </button>
+                @if(request()->hasAny(['search', 'status']))
+                    <a href="{{ route('teachers.index') }}" class="p-2 bg-red-50 border border-red-100 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-600 transition text-center" title="Reset">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </a>
+                @endif
+            </div>
         </form>
     </div>
 
@@ -105,48 +124,48 @@
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left">
-                <thead class="text-xs text-gray-500 uppercase bg-gray-50/50 border-b border-gray-100">
+                <thead class="text-[11px] text-gray-500 uppercase tracking-wider bg-gray-50/50 border-b border-gray-100">
                     <tr>
-                        <th scope="col" class="px-6 py-4 font-semibold">Teacher Name</th>
-                        <th scope="col" class="px-6 py-4 font-semibold">Specialization Badge</th>
-                        <th scope="col" class="px-6 py-4 font-semibold text-center">Mode</th>
-                        <th scope="col" class="px-6 py-4 font-semibold text-center">Workload</th>
-                        <th scope="col" class="px-6 py-4 font-semibold text-center">Batches/Class Periods</th>
-                        <th scope="col" class="px-6 py-4 font-semibold text-center">Rating</th>
-                        <th scope="col" class="px-6 py-4 font-semibold">Status</th>
-                        <th scope="col" class="px-6 py-4 text-right font-semibold">Actions</th>
+                        <th scope="col" class="px-4 py-3 font-bold">Teacher Name</th>
+                        <th scope="col" class="px-4 py-3 font-bold">Specialization Badge</th>
+                        <th scope="col" class="px-4 py-3 font-bold text-center">Mode</th>
+                        <th scope="col" class="px-4 py-3 font-bold text-center">Workload</th>
+                        <th scope="col" class="px-4 py-3 font-bold text-center">Batches/Class Periods</th>
+                        <th scope="col" class="px-4 py-3 font-bold text-center">Rating</th>
+                        <th scope="col" class="px-4 py-3 font-bold">Status</th>
+                        <th scope="col" class="px-4 py-3 text-right font-bold">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($teachers as $teacher)
                     <tr class="hover:bg-gray-50/50 transition-colors">
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-3">
                             <div class="flex items-center gap-3">
                                 @if($teacher->profile_photo)
-                                    <img src="{{ asset($teacher->profile_photo) }}" alt="" class="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm">
+                                    <img src="{{ asset($teacher->profile_photo) }}" alt="" class="w-9 h-9 rounded-full object-cover border border-gray-200 shadow-sm shrink-0">
                                 @else
-                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700 flex items-center justify-center font-bold text-lg border border-emerald-200">
+                                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700 flex items-center justify-center font-bold border border-emerald-200 shrink-0">
                                         {{ strtoupper(substr($teacher->name, 0, 1)) }}
                                     </div>
                                 @endif
                                 <div>
-                                    <div class="font-bold text-gray-900">
+                                    <div class="font-bold text-gray-900 leading-snug">
                                         <a href="{{ route('teachers.show', $teacher) }}" class="hover:text-emerald-600 transition-colors">{{ $teacher->name }}</a>
                                     </div>
-                                    <div class="text-xs text-gray-500">{{ $teacher->email }}</div>
+                                    <div class="text-[11px] text-gray-500">{{ $teacher->email }}</div>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-3">
                             @if($teacher->bio)
-                                <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-200 shadow-sm">
+                                <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-md bg-blue-50 text-blue-700 border border-blue-200 shadow-sm">
                                     {{ Str::limit($teacher->bio, 30) }}
                                 </span>
                             @else
-                                <span class="text-xs text-gray-400 italic">No Specialization</span>
+                                <span class="text-[11px] text-gray-400 italic">No Specialization</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 text-center">
+                        <td class="px-4 py-3 text-center">
                             @if($teacher->learning_mode === 'online')
                                 <span class="px-2 py-1 text-xs font-medium rounded-md bg-blue-100 text-blue-800">Online</span>
                             @elseif($teacher->learning_mode === 'offline')
@@ -155,25 +174,25 @@
                                 <span class="px-2 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-800">Both</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 text-center">
-                            <div class="flex flex-col items-center gap-1">
-                                <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200" title="Active Classes">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        <td class="px-4 py-3 text-center">
+                            <div class="flex flex-wrap items-center justify-center gap-1.5">
+                                <div class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap" title="Active Classes">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                                     {{ $teacher->classes_count }} Classes
                                 </div>
-                                <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-semibold {{ $teacher->students_count > 15 ? 'bg-orange-50 text-orange-700 border border-orange-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200' }}" title="Private Students">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                <div class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider {{ $teacher->students_count > 15 ? 'bg-orange-50 text-orange-700 border border-orange-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200' }} whitespace-nowrap" title="Private Students">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                                     {{ $teacher->students_count }} Private
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-center">
+                        <td class="px-4 py-3 text-center">
                             <div class="flex items-center justify-center gap-1 text-amber-500">
                                 <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
                                 <span class="font-semibold text-gray-700">4.8</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-3">
                             @if($teacher->status == 'active')
                                 <button class="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-colors shrink-0 w-max" data-user-id="{{ $teacher->id }}" onclick="toggleStatus(this)">
                                     <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
@@ -186,7 +205,7 @@
                                 </button>
                             @endif
                         </td>
-                        <td class="px-6 py-4 text-center">
+                        <td class="px-4 py-3 text-center">
                             @php
                                 $batches = $teacher->classes()->orderByDesc('start_date')->get();
                             @endphp
@@ -203,7 +222,7 @@
                                 <span class="text-xs text-gray-400 italic">No Class Period</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 text-right">
+                        <td class="px-4 py-3 text-right">
                             <div class="flex items-center justify-end gap-1 text-gray-400">
                                 
                                 <button type="button" @click="selectedTeacherId = {{ $teacher->id }}; selectedTeacherName = '{{ addslashes($teacher->name) }}'; showAssignModal = true" class="p-1.5 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors border border-transparent hover:border-emerald-100" title="Assign Private Student">

@@ -1,0 +1,107 @@
+[
+    {
+        "id": 0,
+        "text": "In conclusion, the experiment was a complete [beep].",
+        "voice": "am_fenrir",
+        "filename": "smw_topic_0.mp3",
+        "folder": "listening-select-missing-word"
+    },
+    {
+        "id": 1,
+        "text": "If you need further assistance, please don't hesitate to contact our [beep].",
+        "voice": "am_michael",
+        "filename": "smw_topic_1.mp3",
+        "folder": "listening-select-missing-word"
+    },
+    {
+        "id": 2,
+        "text": "In conclusion, the experiment was a complete [beep].",
+        "voice": "af_bella",
+        "filename": "smw_topic_2.mp3",
+        "folder": "listening-select-missing-word"
+    },
+    {
+        "id": 3,
+        "text": "If you need further assistance, please don't hesitate to contact our [beep].",
+        "voice": "am_fenrir",
+        "filename": "smw_topic_3.mp3",
+        "folder": "listening-select-missing-word"
+    },
+    {
+        "id": 4,
+        "text": "In conclusion, the experiment was a complete [beep].",
+        "voice": "af_sky",
+        "filename": "smw_topic_4.mp3",
+        "folder": "listening-select-missing-word"
+    },
+    {
+        "id": 5,
+        "text": "If you need further assistance, please don't hesitate to contact our [beep].",
+        "voice": "af_bella",
+        "filename": "smw_topic_5.mp3",
+        "folder": "listening-select-missing-word"
+    },
+    {
+        "id": 6,
+        "text": "In conclusion, the experiment was a complete [beep].",
+        "voice": "am_michael",
+        "filename": "smw_topic_6.mp3",
+        "folder": "listening-select-missing-word"
+    },
+    {
+        "id": 7,
+        "text": "If you need further assistance, please don't hesitate to contact our [beep].",
+        "voice": "af_bella",
+        "filename": "smw_topic_7.mp3",
+        "folder": "listening-select-missing-word"
+    },
+    {
+        "id": 8,
+        "text": "In conclusion, the experiment was a complete [beep].",
+        "voice": "af_sky",
+        "filename": "smw_topic_8.mp3",
+        "folder": "listening-select-missing-word"
+    },
+    {
+        "id": 9,
+        "text": "If you need further assistance, please don't hesitate to contact our [beep].",
+        "voice": "af_bella",
+        "filename": "smw_topic_9.mp3",
+        "folder": "listening-select-missing-word"
+    },
+    {
+        "id": 10,
+        "text": "In conclusion, the experiment was a complete [beep].",
+        "voice": "af_heart",
+        "filename": "smw_topic_10.mp3",
+        "folder": "listening-select-missing-word"
+    },
+    {
+        "id": 11,
+        "text": "If you need further assistance, please don't hesitate to contact our [beep].",
+        "voice": "am_michael",
+        "filename": "smw_topic_11.mp3",
+        "folder": "listening-select-missing-word"
+    },
+    {
+        "id": 12,
+        "text": "In conclusion, the experiment was a complete [beep].",
+        "voice": "af_heart",
+        "filename": "smw_topic_12.mp3",
+        "folder": "listening-select-missing-word"
+    },
+    {
+        "id": 13,
+        "text": "If you need further assistance, please don't hesitate to contact our [beep].",
+        "voice": "af_sky",
+        "filename": "smw_topic_13.mp3",
+        "folder": "listening-select-missing-word"
+    },
+    {
+        "id": 14,
+        "text": "In conclusion, the experiment was a complete [beep].",
+        "voice": "af_bella",
+        "filename": "smw_topic_14.mp3",
+        "folder": "listening-select-missing-word"
+    }
+]

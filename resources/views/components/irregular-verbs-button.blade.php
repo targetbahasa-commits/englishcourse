@@ -1,11 +1,6 @@
 <div x-data="{
     open: false,
     searchQuery: '',
-    x: window.innerWidth - 260,
-    y: window.innerHeight - 85,
-    dragging: false,
-    offset: { x: 0, y: 0 },
-    hasMoved: false,
     verbs: [
         ['arise', 'arose', 'arisen', 'timbul'],
         ['awake', 'awoke', 'awoken', 'bangun'],
@@ -166,52 +161,12 @@
             verb[2].toLowerCase().includes(query) || // V3
             verb[3].toLowerCase().includes(query)    // Indonesian
         );
-    },
-    init() {
-        // Ensure it stays on screen on resize (optional simple check)
-        window.addEventListener('resize', () => {
-            this.x = Math.min(this.x, window.innerWidth - 60);
-            this.y = Math.min(this.y, window.innerHeight - 60);
-        });
-    },
-    startDrag(e) {
-        this.dragging = true;
-        this.hasMoved = false;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        this.offset.x = clientX - this.x;
-        this.offset.y = clientY - this.y;
-    },
-    doDrag(e) {
-        if (this.dragging) {
-            this.hasMoved = true;
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            this.x = clientX - this.offset.x;
-            this.y = clientY - this.offset.y;
-        }
-    },
-    stopDrag() {
-        this.dragging = false;
-    },
-    handleClick() {
-        if (!this.hasMoved) {
-            this.open = true;
-            this.searchQuery = ''; // Reset search when opening
-        }
     }
 }"
-@mousemove.window="doDrag"
-@touchmove.window="doDrag"
-@mouseup.window="stopDrag"
-@touchend.window="stopDrag"
-class="fixed z-50 select-none touch-none"
-:style="`left: ${x}px; top: ${y}px;`">
+class="fixed right-8 z-50" style="bottom: 2rem;">
    <!-- Floating Button -->
-   <button @mousedown="startDrag"
-            @touchstart="startDrag"
-            @click="handleClick"
-           class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2 cursor-move">
+   <button @click="open = true"
+           class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2">
        Irregular Verbs
    </button>
 

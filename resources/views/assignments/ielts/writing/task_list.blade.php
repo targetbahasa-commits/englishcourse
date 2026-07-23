@@ -18,12 +18,12 @@
                     @endif
                 </div>
                 <div>
-                    <h1 class="text-4xl font-bold text-gray-800">IELTS Writing Task {{ $task }}</h1>
-                    <p class="text-gray-600 mt-1">{{ $task == 1 ? 'Describe Visual Information' : 'Essay Writing' }}</p>
+                    <h1 class="text-4xl font-bold text-gray-800">IELTS Writing Task {{ $task }}{{ !empty($isGeneral) ? ' (General)' : '' }}</h1>
+                    <p class="text-gray-600 mt-1">{{ $task == 1 ? (!empty($isGeneral) ? 'Letter Writing' : 'Describe Visual Information') : 'Essay Writing' }}</p>
                 </div>
             </div>
             
-            <a href="{{ route('assignments.ielts-academic.writing.index') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
+            <a href="{{ !empty($isGeneral) ? route('assignments.ielts-general.writing.index') : route('assignments.ielts-academic.writing.index') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back to Selection
             </a>
@@ -93,7 +93,7 @@
             @endif
 
             @foreach($lessons as $meeting)
-                @include('assignments.ielts.writing.partials.meeting_card', ['meeting' => $meeting, 'task' => $task, 'type' => 'Lesson'])
+                @include('assignments.ielts.writing.partials.meeting_card', ['meeting' => $meeting, 'task' => $task, 'type' => 'Lesson', 'isGeneral' => $isGeneral ?? false])
             @endforeach
         </div>
     </div>

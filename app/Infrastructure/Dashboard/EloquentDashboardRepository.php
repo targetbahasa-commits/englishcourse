@@ -109,4 +109,47 @@ class EloquentDashboardRepository implements DashboardRepository
     {
         return Program::where('slug', $slug)->first();
     }
+
+    public function getPteScores(int $userId): array
+    {
+        $results = \App\Models\PtePracticeResult::where('user_id', $userId)->get();
+
+        $readingModules = ['mcsa', 'mcma', 'reorder', 'rfib', 'rwfib'];
+        $listeningModules = ['summarize-spoken-text', 'listening-multiple-choice-multiple-answer', 'listening-fill-blanks', 'listening-highlight-correct-summary', 'listening-multiple-choice-single-answer', 'listening-select-missing-word', 'listening-highlight-incorrect-words', 'listening-write-from-dictation'];
+        $speakingWritingModules = ['read-aloud', 'repeat-sentence', 'describe-image', 'retell-lecture', 'answer-short-question', 'summarize-written-text', 'write-essay'];
+
+        $readingScores = [];
+        $listeningScores = [];
+        $speakingWritingScores = [];
+
+        foreach ($results as $result) {
+            $score = 0;
+            if ($result->max_score == 90) {
+                // Already scaled
+                $score = $result->score;
+            } else {
+                // Compute raw percentage and scale
+                $ratio = max(0, min(1, $result->score / max(1, $result->max_score)));
+                $score = round(10 + $ratio * 80);
+            }
+
+            if (in_array($result->module, $readingModules)) {
+                $readingScores[] = $score;
+            } elseif (in_array($result->module, $listeningModules)) {
+                $listeningScores[] = $score;
+            } elseif (in_array($result->module, $speakingWritingModules)) {
+                $speakingWritingScores[] = $score;
+            }
+        }
+
+        $avgReading = count($readingScores) ? round(array_sum($readingScores) / count($readingScores)) : null;
+        $avgListening = count($listeningScores) ? round(array_sum($listeningScores) / count($listeningScores)) : null;
+        $avgSpeakingWriting = count($speakingWritingScores) ? round(array_sum($speakingWritingScores) / count($speakingWritingScores)) : null;
+
+        return [
+            'reading' => $avgReading,
+            'listening' => $avgListening,
+            'speaking_writing' => $avgSpeakingWriting,
+        ];
+    }
 }

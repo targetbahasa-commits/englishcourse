@@ -74,7 +74,9 @@
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         @if(Auth::check())
-            @php($sidebarRole = strtolower(Auth::user()->active_role ?? 'student'))
+            @php
+                $sidebarRole = strtolower(Auth::user()->active_role ?? 'student');
+            @endphp
             @if($sidebarRole === 'admin')
                 @include('components.sidebar-admin')
             @elseif($sidebarRole === 'teacher')
@@ -93,7 +95,7 @@
 
                 <!-- Header -->
                 <div class="mb-8">
-                    <a href="{{ route('assignments.pte-academic.reading.multiple-choice-single-answer.index') }}" class="inline-flex items-center text-gray-600 hover:text-blue-500 transition-colors mb-4">
+                    <a href="{{ route('assignments.pte-academic.reading.multiple-choice-single-answer.index') }}#topic-{{ $topicId }}" class="inline-flex items-center text-gray-600 hover:text-blue-500 transition-colors mb-4">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         Back to Selection
                     </a>
@@ -132,7 +134,7 @@
                         <div class="px-8 pb-4">
                             <div class="border border-teal-200 rounded-xl p-8 bg-white shadow-sm" style="border-color: #00c5b5;">
                                 <div class="text-gray-800 text-sm leading-[1.8] font-medium space-y-4">
-                                    <p>B-15 broke off from the Ross Ice Shelf in Antarctica. It was the largest iceberg ever documented, with a surface area of more than 4,200 square miles - more than twice the size of the state of Delaware. After it started breaking up, the largest of its pieces, B-15a, drifted along the coast of Antarctica, lingered on a shallow seamount, and collided with an ice tongue, before running aground and breaking again. Late in 2007, the largest remaining chunk floated out into the South Pacific where, in the warmer water, it began to disintegrate. For the whole of the next year, the ocean was noisier than usual. All the way up past the equator, 4,350 miles or so away from where B-15a broke apart, hydrophones that scientists from the National Oceanic and Atmospheric Administration (NOAA) had suspended underwater were picking up strange signals. Another set of hydrophones, this one in the Juan Fernández Islands, off the coast of Chile, picked up the noise, too, even louder. When the scientists used the two sets of data to determine the source of the noise, they found the most likely culprits: B-15a and C-19a, another giant iceberg. Twenty years ago, not so long before B-15 broke off from Antarctica, "we didn't even know that icebergs made noise," says Haru Matsumoto, an ocean engineer at NOAA who has studied these sounds. But in the past few years, scientists have started to learn to distinguish the eerie, haunting sounds of iceberg life - ice cracking, icebergs grinding against each other, an iceberg grounding on the seafloor - and measure the extent to which those sounds contribute to the noise of the ocean. While they're just now learning to listen, the sounds of ice could help them understand the behavior and breakup of icebergs and ice shelves as the poles warm up.</p>
+                                    <p>{{ $topic['passage'] }}</p>
                                 </div>
                             </div>
                         </div>
@@ -140,39 +142,20 @@
                         <!-- Question Area -->
                         <div class="px-8 pb-4">
                             <div class="border border-gray-200 rounded-xl p-4 bg-white shadow-sm text-center">
-                                <p class="text-gray-700 font-medium">Where did the largest piece off from B-15 eventually go?</p>
+                                <p class="text-gray-700 font-medium">{{ $topic['question'] }}</p>
                             </div>
                         </div>
 
                         <!-- Options Area -->
                         <div class="px-8 pb-8 space-y-3" id="optionsContainer">
-                            <!-- Option A -->
-                            <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
-                                <input type="radio" name="single_choice" class="custom-radio" value="A">
-                                <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">A</div>
-                                <span class="text-gray-700 text-sm font-medium">Chile</span>
-                            </label>
-
-                            <!-- Option B -->
-                            <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
-                                <input type="radio" name="single_choice" class="custom-radio" value="B">
-                                <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">B</div>
-                                <span class="text-gray-700 text-sm font-medium">South Pacific</span>
-                            </label>
-
-                            <!-- Option C -->
-                            <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
-                                <input type="radio" name="single_choice" class="custom-radio" value="C">
-                                <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">C</div>
-                                <span class="text-gray-700 text-sm font-medium">Seafloor</span>
-                            </label>
-
-                            <!-- Option D -->
-                            <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
-                                <input type="radio" name="single_choice" class="custom-radio" value="D">
-                                <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">D</div>
-                                <span class="text-gray-700 text-sm font-medium">Antarctica</span>
-                            </label>
+                            @foreach($topic['options'] as $index => $optionText)
+                                @php $letter = chr(65 + $index); @endphp
+                                <label class="option-row flex items-center gap-4 border border-teal-200 rounded-xl p-3 bg-white">
+                                    <input type="radio" name="single_choice" class="custom-radio" value="{{ $letter }}">
+                                    <div class="w-10 h-10 flex items-center justify-center font-bold text-white text-lg flex-shrink-0" style="background:#00c5b5;">{{ $letter }}</div>
+                                    <span class="text-gray-700 text-sm font-medium">{{ $optionText }}</span>
+                                </label>
+                            @endforeach
                         </div>
 
                         <!-- Action Buttons -->
@@ -235,7 +218,7 @@
 
     <script>
         // Set correct answer (example for this mockup: B - South Pacific)
-        const correctAnswer = 'B';
+        const correctAnswer = @json($topic['correctAnswer']);
 
         // Row highlighting logic for radios
         const radios = document.querySelectorAll('.custom-radio');
@@ -334,7 +317,15 @@
                 resultMessage.textContent = "Your answer was incorrect. The correct answer was " + correctAnswer + ".";
                 resultMessage.className = "text-red-700 font-medium text-sm mt-1";
             }
-            
+
+            let pteScore = (selectedValue === correctAnswer) ? 1 : 0;
+            let pteMax = 1;
+
+            PTEScorePopup.show({ skill: 'Reading', score: pteScore, max: pteMax });
+            if (window.PTETracker) {
+                PTETracker.saveResult({ score: pteScore, maxScore: pteMax, durationSeconds: secondsElapsed });
+            }
+
             document.getElementById('answerBtn').style.opacity = '0.5';
             document.getElementById('answerBtn').style.pointerEvents = 'none';
         }
@@ -357,6 +348,7 @@
             startTimer();
         }
     </script>
-    @include('assignments.ielts.writing.practice_toolbar', ['meeting' => (object)['task_type' => 1], 'grammarLevel' => 'all'])
+    @include('components.pte-score-popup')
+    @include('components.pte-practice-tracker', ['module' => 'multiple-choice-single-answer', 'topicId' => $topicId])
 </body>
 </html>

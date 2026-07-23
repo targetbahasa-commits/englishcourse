@@ -5,6 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Listening: Highlight Incorrect Words - {{ $topic['title'] }} | Target Bahasa</title>
     <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    @php
+        $audioFile = 'kokoro-tts/highlight-incorrect-words/hiw_topic_' . ($topicId - 1) . '.mp3';
+        $audioPath = public_path('storage/' . $audioFile);
+        $audioSrc = asset('storage/' . $audioFile) . '?v=' . (file_exists($audioPath) ? filemtime($audioPath) : '1');
+
+        $transcriptWords = explode(' ', $topic['transcript']);
+        $textWords = explode(' ', $topic['text']);
+        $targetIndices = [];
+        foreach ($textWords as $wi => $w) {
+            if (!isset($transcriptWords[$wi]) || $transcriptWords[$wi] !== $w) {
+                $targetIndices[] = $wi;
+            }
+        }
+    @endphp
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -196,7 +212,9 @@
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         @if(Auth::check())
-            @php($sidebarRole = strtolower(Auth::user()->active_role ?? 'student'))
+            @php
+                $sidebarRole = strtolower(Auth::user()->active_role ?? 'student');
+            @endphp
             @if($sidebarRole === 'admin')
                 @include('components.sidebar-admin')
             @elseif($sidebarRole === 'teacher')
@@ -215,7 +233,7 @@
 
                 <!-- Header -->
                 <div class="mb-8">
-                    <a href="{{ route('assignments.pte-academic.listening.listening-highlight-incorrect-words.index') }}" class="inline-flex items-center text-gray-600 hover:text-purple-500 transition-colors mb-4">
+                    <a href="{{ route('assignments.pte-academic.listening.listening-highlight-incorrect-words.index') }}#topic-{{ $topicId }}" class="inline-flex items-center text-gray-600 hover:text-purple-500 transition-colors mb-4">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         Back to Selection
                     </a>
@@ -227,6 +245,8 @@
                         </div>
                         <div>
                             <h1 class="text-3xl font-bold text-gray-800">Listening: Highlight Incorrect Words</h1>
+                            <span id="pteAttemptBadge" class="hidden text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700"></span>
+                            <span id="pteAvgScoreBadge" class="hidden text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700"></span>
                             <p class="text-gray-500">PTE Academic Practice - {{ $topic['title'] }}</p>
                         </div>
                     </div>
@@ -250,20 +270,21 @@
 
                         <!-- Audio Player Area -->
                         <div class="px-8 pb-6">
+                            <audio id="dictationAudio" preload="auto" src="{{ $audioSrc }}"></audio>
                             <div class="audio-player-box shadow-sm">
                                 <button class="play-btn" id="playBtn">
                                     <svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M4 4l12 6-12 6z"></path>
                                     </svg>
                                 </button>
-                                
+
                                 <div class="progress-container">
                                     <span class="time-text" id="currentTime">00:00</span>
                                     <div class="progress-bar-bg">
                                         <div class="progress-bar-fill" id="progressBar"></div>
                                         <div class="progress-handle" id="progressHandle"></div>
                                     </div>
-                                    <span class="time-text">00:54</span>
+                                    <span class="time-text" id="totalTime">00:00</span>
                                 </div>
 
                                 <div class="controls-right">
@@ -372,11 +393,10 @@
     </div>
 
     <script>
-        const rawText = "Try to get a baby to smile? It can seem close to impossible - and then suddenly there it is that elusive, teasingly joyous grin. Well, it turns out those smiles aren't spontaneous - they're strategic. Researchers have found that when babies smile, it's for a reason. They want whoever they're interacting with - typically a parent - to smile back. And they time it just so, a smile here and a smile there. The researchers call it shaded timing. The study is in the journal PLoS ONE. The researchers enlisted real mothers and infants and quantified their interactions, which fell into four categories. One: babies wanted to maximize the amount of time smiling at their mothers. Two: they wanted to magnify the time the mothers smiled at them. Three: they wanted to extend simultaneous laughing, and four: no smiling at all.";
+        const rawText = @json($topic['text']);
 
-        // Indices of the incorrect words in the array. 
-        // For mockup purposes, let's mark the words "strategic" (idx: 36), "interacting" (idx: 50), "simultaneous" (idx: 111)
-        const targetIndices = [36, 50, 111]; 
+        // Indices of the words in $topic['text'] that differ from the audio transcript
+        const targetIndices = @json($targetIndices);
         
         const container = document.getElementById('transcriptContainer');
         let isAnswered = false;
@@ -429,10 +449,7 @@
             btn.classList.add('active');
             document.getElementById('speedDropdown').classList.add('hidden');
             document.getElementById('speedChevron').style.transform = '';
-            if (isAudioPlaying) {
-                clearInterval(audioPlayInterval);
-                audioPlayInterval = setInterval(audioTick, 1000 / currentSpeed);
-            }
+            dictationAudio.playbackRate = currentSpeed;
         }
 
         document.addEventListener('click', function(e) {
@@ -445,52 +462,56 @@
 
         // Audio and Timer Logic
         let prepTimerInterval;
-        let audioPlayInterval;
         let prepTime = 5;
-        let audioDuration = 54; // 00:54
-        let audioCurrentTime = 0;
-        
+
+        const dictationAudio = document.getElementById('dictationAudio');
         const prepTimerEl = document.getElementById('prepTimer');
         const playBtn = document.getElementById('playBtn');
         const currentTimeEl = document.getElementById('currentTime');
+        const totalTimeEl = document.getElementById('totalTime');
         const progressBar = document.getElementById('progressBar');
         const progressHandle = document.getElementById('progressHandle');
         const startTimerBtn = document.getElementById('startTimerBtn');
 
+        const PLAY_ICON_SVG = '<svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4l12 6-12 6z"></path></svg>';
+        const PAUSE_ICON_SVG = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>';
+
         function fmtTime(s) {
+            s = Math.floor(s || 0);
             let m = Math.floor(s / 60);
             let sec = s % 60;
             return (m < 10 ? '0'+m : m) + ':' + (sec < 10 ? '0'+sec : sec);
         }
 
-        function audioTick() {
-            audioCurrentTime++;
-            currentTimeEl.textContent = fmtTime(audioCurrentTime);
-            let perc = (audioCurrentTime / audioDuration) * 100;
+        dictationAudio.addEventListener('loadedmetadata', () => {
+            totalTimeEl.textContent = fmtTime(dictationAudio.duration);
+        });
+
+        dictationAudio.addEventListener('timeupdate', () => {
+            currentTimeEl.textContent = fmtTime(dictationAudio.currentTime);
+            let perc = dictationAudio.duration ? (dictationAudio.currentTime / dictationAudio.duration) * 100 : 0;
             progressBar.style.width = perc + '%';
             progressHandle.style.left = perc + '%';
-            if(audioCurrentTime >= audioDuration) {
-                clearInterval(audioPlayInterval);
-                isAudioPlaying = false;
-                playBtn.innerHTML = '<svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4l12 6-12 6z"></path></svg>';
-                document.getElementById('prepTimer').parentElement.innerHTML = 'Status: <span class="teal-text">Audio Completed</span>';
-            }
-        }
+        });
+
+        dictationAudio.addEventListener('ended', () => {
+            playBtn.innerHTML = PLAY_ICON_SVG;
+            document.getElementById('prepTimer').parentElement.innerHTML = 'Status: <span class="teal-text">Audio Completed</span>';
+        });
 
         function startAudio() {
             document.getElementById('prepTimer').parentElement.innerHTML = 'Status: <span class="teal-text">Playing Audio</span>';
-            playBtn.innerHTML = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>';
-            audioCurrentTime = 0;
-            isAudioPlaying = true;
-            clearInterval(audioPlayInterval);
-            audioPlayInterval = setInterval(audioTick, 1000 / currentSpeed);
+            playBtn.innerHTML = PAUSE_ICON_SVG;
+            dictationAudio.currentTime = 0;
+            dictationAudio.playbackRate = currentSpeed;
+            dictationAudio.play().catch(err => console.error(err));
         }
 
         function startPrepTimer() {
             startTimerBtn.style.display = 'none';
             prepTime = 5;
             prepTimerEl.parentElement.innerHTML = 'Beginning in <span class="teal-text" id="prepTimer">5 sec</span>';
-            
+
             clearInterval(prepTimerInterval);
             prepTimerInterval = setInterval(() => {
                 prepTime--;
@@ -510,7 +531,7 @@
         // Scoring Logic
         function checkAnswer() {
             clearInterval(prepTimerInterval);
-            clearInterval(audioPlayInterval);
+            dictationAudio.pause();
             isAnswered = true;
 
             let correctHits = 0;
@@ -569,20 +590,36 @@
                 resultIcon.innerHTML = "<path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 18L18 6M6 6l12 12'></path>";
             }
             
+            
+            var formData = new FormData();
+            formData.append('module', 'listening-highlight-incorrect-words');
+            formData.append('topic_id', '{{ $topicId }}');
+            formData.append('score', finalScore);
+            formData.append('max_score', targetIndices.length);
+
+            fetch('/pte/practice/save-score', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+                body: formData
+            }).then(res => res.json()).then(data => {
+                if (data.success) PTEScorePopup.show({ skill: 'Listening', score: data.scores.overall_score, max: 90 });
+            }).catch(err => console.error(err));
+        
             document.getElementById('answerBtn').style.opacity = '0.5';
             document.getElementById('answerBtn').style.pointerEvents = 'none';
         }
 
         function restartPractice() {
             clearInterval(prepTimerInterval);
-            clearInterval(audioPlayInterval);
+            dictationAudio.pause();
+            dictationAudio.currentTime = 0;
             isAnswered = false;
-            
+
             currentTimeEl.textContent = "00:00";
             progressBar.style.width = '0%';
             progressHandle.style.left = '0%';
-            playBtn.innerHTML = '<svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4l12 6-12 6z"></path></svg>';
-            
+            playBtn.innerHTML = PLAY_ICON_SVG;
+
             document.getElementById('resultBox').classList.add('hidden');
             document.getElementById('answerBtn').style.opacity = '1';
             document.getElementById('answerBtn').style.pointerEvents = 'auto';
@@ -596,6 +633,7 @@
             startPrepTimer();
         }
     </script>
-    @include('assignments.ielts.writing.practice_toolbar', ['meeting' => (object)['task_type' => 1], 'grammarLevel' => 'all'])
+    @include('components.pte-score-popup')
+    @include('components.pte-practice-tracker', ['module' => 'listening-highlight-incorrect-words', 'topicId' => $topicId])
 </body>
 </html>

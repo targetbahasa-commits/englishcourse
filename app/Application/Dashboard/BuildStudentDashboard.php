@@ -146,6 +146,8 @@ class BuildStudentDashboard
 
         $targetScholarship = $user->targetScholarships()->first();
 
+        $offlineTestResults = \App\Models\OfflineTestResult::where('email', $user->email)->orderBy('created_at', 'desc')->get();
+
         return [
             'progressPercentage' => $progressPercentage,
             'totalCompleted' => $completedAssignments,
@@ -167,6 +169,8 @@ class BuildStudentDashboard
             'enrolledPrograms' => $enrolledPrograms,
             'diagnosticStats' => $diagnosticStats,
             'targetScholarship' => $targetScholarship,
+            'offlineTestResults' => $offlineTestResults,
+            'pteScores' => $this->repository->getPteScores($user->id),
         ];
     }
 }

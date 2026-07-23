@@ -38,14 +38,14 @@
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-4xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">IELTS Reading Skills</h1>
-                    <p class="text-gray-600 mt-1">Practice your reading comprehension skills for IELTS! 📖</p>
+                    <h1 class="text-4xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">{{ !empty($isGeneral) ? 'IELTS General Reading' : 'IELTS Reading Skills' }}</h1>
+                    <p class="text-gray-600 mt-1">{{ !empty($isGeneral) ? 'Practice your general reading comprehension skills! 📖' : 'Practice your reading comprehension skills for IELTS! 📖' }}</p>
                 </div>
             </div>
 
-            <a href="{{ route('assignments.ielts-academic') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
+            <a href="{{ !empty($isGeneral) ? route('assignments.ielts-general') : route('assignments.ielts-academic') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Back to IELTS
+                {{ !empty($isGeneral) ? 'Back to IELTS General' : 'Back to IELTS' }}
             </a>
         </div>
 
@@ -86,7 +86,7 @@
             @endif
 
             @php
-                $calendarClassPeriodId = $selectedClassPeriod->id ?? Auth::user()->class_period_id ?? optional($batchProgram->classPeriods->first())->id ?? '';
+                $calendarClassPeriodId = $selectedClassPeriod->id ?? Auth::user()->class_period_id ?? optional(optional($batchProgram)->classPeriods)->first()?->id ?? '';
                 $calendarBatchName = addslashes($batchProgram->name ?? 'Assignments');
             @endphp
             @if($calendarClassPeriodId)

@@ -1,0 +1,222 @@
+
+        body {
+            background-color: white !important;
+        }
+        .instruction-box {
+            background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+            border-left: 6px solid #f59e0b;
+        }
+        .part-header {
+            color: #0f766e;
+            font-weight: 700;
+        }
+        .listening-answer-sheet .divide-y > .group {
+            padding-top: 0.125rem;
+            padding-bottom: 0.125rem;
+        }
+        .listening-answer-sheet .group .mb-2.text-sm {
+            font-size: 1.05rem;
+            line-height: 1.35;
+            margin-bottom: 0.2rem;
+        }
+        .listening-answer-sheet .group .space-y-2 > :not([hidden]) ~ :not([hidden]) {
+            margin-top: 0.2rem;
+        }
+        .listening-answer-sheet .group .space-y-2 .p-2 {
+            padding: 0.4rem 0.62rem;
+        }
+        .listening-answer-sheet .group .space-y-2 span.text-sm {
+            font-size: 1.08rem;
+            line-height: 1.32;
+        }
+        .listening-answer-sheet .bg-white.rounded-lg.border.border-gray-200.shadow-sm.p-4 {
+            padding: 0.7rem;
+        }
+        .listening-answer-sheet .grid.grid-cols-1.md\:grid-cols-2.gap-4.md\:gap-6 {
+            gap: 0.5rem;
+        }
+        .listening-answer-sheet .listening-option-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+            min-height: 3.35rem;
+            transition: border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease, transform 0.12s ease;
+        }
+        .listening-answer-sheet input[type="radio"]:checked + .listening-option-card {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 12px rgba(220, 38, 38, 0.16);
+        }
+        .listening-answer-sheet .listening-option-card::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 2.1rem;
+            width: 6px;
+            height: 6px;
+            border-radius: 9999px;
+            background: rgba(220, 38, 38, 0.22);
+            transform: translate(-50%, -50%) scale(0);
+            pointer-events: none;
+            opacity: 0;
+        }
+        .listening-answer-sheet input[type="radio"]:checked + .listening-option-card::after {
+            animation: listeningOptionRipple 0.34s ease-out;
+        }
+        .listening-answer-sheet input[type="radio"]:checked + .listening-option-card span.text-sm {
+            color: #b91c1c;
+        }
+        .listening-answer-sheet .listening-option-badge {
+            width: 2.32rem;
+            height: 2.32rem;
+            transform-origin: center;
+            will-change: transform, box-shadow;
+        }
+        .listening-answer-sheet input[type="radio"]:checked + .listening-option-card .listening-option-badge {
+            border-color: #dc2626;
+            background-color: #dc2626;
+            color: #ffffff;
+            animation: listeningBadgePop 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .listening-answer-sheet input[type="radio"]:checked + .listening-option-card .listening-option-badge span {
+            color: #ffffff;
+        }
+        .listening-answer-sheet input[type="radio"]:checked + .listening-option-card {
+            border-color: #e02424;
+            background-color: #fff7f7;
+            box-shadow: 0 0 0 1px rgba(224, 36, 36, 0.36), 0 3px 12px rgba(224, 36, 36, 0.14);
+        }
+        .listening-answer-sheet input[type="radio"]:checked + .listening-option-card span.text-sm {
+            font-weight: 700;
+            letter-spacing: 0.005em;
+        }
+        .listening-answer-sheet .listening-option-card .mr-3 {
+            margin-right: 0.78rem;
+        }
+        .listening-answer-sheet .listening-option-card span.text-sm {
+            padding-left: 0.1rem;
+        }
+        @keyframes listeningBadgePop {
+            0% {
+                transform: scale(0.82);
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.45);
+            }
+            65% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 8px rgba(220, 38, 38, 0.12);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+            }
+        }
+        @keyframes listeningOptionRipple {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(42);
+                opacity: 0;
+            }
+        }
+        @media (max-width: 768px) {
+            .listening-answer-sheet .group .space-y-2 .p-2 {
+                padding: 0.32rem 0.5rem;
+            }
+            .listening-answer-sheet .group .space-y-2 span.text-sm {
+                font-size: 1rem;
+                line-height: 1.28;
+            }
+            .listening-answer-sheet .listening-option-card {
+                min-height: 3rem;
+            }
+            .listening-answer-sheet .listening-option-badge {
+                width: 2.05rem;
+                height: 2.05rem;
+            }
+            .listening-answer-sheet .listening-option-card .mr-3 {
+                margin-right: 0.58rem;
+            }
+            .listening-answer-sheet input[type="radio"]:checked + .listening-option-card .listening-option-badge {
+                animation-duration: 0.14s;
+            }
+            .listening-answer-sheet input[type="radio"]:checked + .listening-option-card::after {
+                animation-duration: 0.24s;
+            }
+            .listening-answer-sheet .listening-option-card {
+                transition-duration: 0.11s;
+            }
+        }
+        @media (min-width: 769px) and (max-width: 1199px) {
+            .listening-answer-sheet .group .space-y-2 .p-2 {
+                padding: 0.36rem 0.58rem;
+            }
+            .listening-answer-sheet .group .space-y-2 span.text-sm {
+                font-size: 1.04rem;
+                line-height: 1.3;
+            }
+            .listening-answer-sheet .listening-option-card {
+                min-height: 3.22rem;
+            }
+            .listening-answer-sheet .listening-option-badge {
+                width: 2.2rem;
+                height: 2.2rem;
+            }
+            .listening-answer-sheet .listening-option-card .mr-3 {
+                margin-right: 0.68rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .listening-answer-sheet .group .space-y-2 span.text-sm {
+                font-size: 1.12rem;
+            }
+            .listening-answer-sheet .listening-option-card {
+                min-height: 3.45rem;
+            }
+            .listening-answer-sheet .listening-option-badge {
+                width: 2.38rem;
+                height: 2.38rem;
+            }
+        }
+        .listening-option-ellipse {
+            width: 26px;
+            height: 18px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 12px;
+            flex-shrink: 0;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        input[type="radio"]:checked + div .listening-option-ellipse {
+            background-color: #111;
+            border-color: #111;
+        }
+
+        /* Paginated question option styles */
+        .mockup-option-label input[type="radio"]:checked ~ .mockup-option-card {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+        .mockup-option-label input[type="radio"]:checked ~ .mockup-option-card .mockup-option-badge {
+            background-color: #dc2626;
+            border-color: #dc2626;
+            color: #ffffff;
+        }
+        .mockup-option-label input[type="radio"]:checked ~ .mockup-option-card .mockup-option-text {
+            color: #b91c1c;
+            font-weight: 700;
+        }
+        .mockup-option-label:hover .mockup-option-card {
+            border-color: #d1d5db;
+            background-color: #f9fafb;
+        }
+        .mockup-option-badge {
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+        .mockup-option-card {
+            transition: border-color 0.15s ease, background-color 0.15s ease;
+        }
+    

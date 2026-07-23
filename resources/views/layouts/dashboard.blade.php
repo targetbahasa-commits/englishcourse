@@ -22,7 +22,7 @@
     <div class="flex min-h-screen">
         <!-- Sidebar - Automatically selected based on user role -->
         @auth
-            @php($sidebarRole = strtolower(Auth::user()->active_role ?? 'student'))
+            <?php $sidebarRole = strtolower(Auth::user()->active_role ?? 'student'); ?>
 
             @if($sidebarRole === 'admin')
                 @include('components.sidebar-admin')
@@ -52,7 +52,7 @@
                 
                 <div class="flex items-center gap-4 md:gap-6">
                     @auth
-                        @php($activeRole = strtolower(Auth::user()->active_role ?? 'student'))
+                        <?php $activeRole = strtolower(Auth::user()->active_role ?? 'student'); ?>
                         @if(!in_array($activeRole, ['guest', 'guest_quick'], true))
                             @include('components.topbar-action-icons')
                         @endif

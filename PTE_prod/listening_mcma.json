@@ -1,0 +1,107 @@
+[
+    {
+        "id": 0,
+        "text": "The new campus library will feature several modern amenities, including private study pods, a 24-hour cafe, and an extensive digital archive. However, the physical book collection will be slightly reduced.",
+        "voice": "af_heart",
+        "filename": "lmcma_topic_0.mp3",
+        "folder": "listening-multiple-choice-multiple-answer"
+    },
+    {
+        "id": 1,
+        "text": "Students must submit their assignments online by Friday. Late submissions will incur a penalty of 10% per day. Extension requests must be made by Wednesday.",
+        "voice": "af_heart",
+        "filename": "lmcma_topic_1.mp3",
+        "folder": "listening-multiple-choice-multiple-answer"
+    },
+    {
+        "id": 2,
+        "text": "The new campus library will feature several modern amenities, including private study pods, a 24-hour cafe, and an extensive digital archive. However, the physical book collection will be slightly reduced.",
+        "voice": "am_michael",
+        "filename": "lmcma_topic_2.mp3",
+        "folder": "listening-multiple-choice-multiple-answer"
+    },
+    {
+        "id": 3,
+        "text": "Students must submit their assignments online by Friday. Late submissions will incur a penalty of 10% per day. Extension requests must be made by Wednesday.",
+        "voice": "am_michael",
+        "filename": "lmcma_topic_3.mp3",
+        "folder": "listening-multiple-choice-multiple-answer"
+    },
+    {
+        "id": 4,
+        "text": "The new campus library will feature several modern amenities, including private study pods, a 24-hour cafe, and an extensive digital archive. However, the physical book collection will be slightly reduced.",
+        "voice": "af_heart",
+        "filename": "lmcma_topic_4.mp3",
+        "folder": "listening-multiple-choice-multiple-answer"
+    },
+    {
+        "id": 5,
+        "text": "Students must submit their assignments online by Friday. Late submissions will incur a penalty of 10% per day. Extension requests must be made by Wednesday.",
+        "voice": "am_michael",
+        "filename": "lmcma_topic_5.mp3",
+        "folder": "listening-multiple-choice-multiple-answer"
+    },
+    {
+        "id": 6,
+        "text": "The new campus library will feature several modern amenities, including private study pods, a 24-hour cafe, and an extensive digital archive. However, the physical book collection will be slightly reduced.",
+        "voice": "am_michael",
+        "filename": "lmcma_topic_6.mp3",
+        "folder": "listening-multiple-choice-multiple-answer"
+    },
+    {
+        "id": 7,
+        "text": "Students must submit their assignments online by Friday. Late submissions will incur a penalty of 10% per day. Extension requests must be made by Wednesday.",
+        "voice": "af_sky",
+        "filename": "lmcma_topic_7.mp3",
+        "folder": "listening-multiple-choice-multiple-answer"
+    },
+    {
+        "id": 8,
+        "text": "The new campus library will feature several modern amenities, including private study pods, a 24-hour cafe, and an extensive digital archive. However, the physical book collection will be slightly reduced.",
+        "voice": "af_bella",
+        "filename": "lmcma_topic_8.mp3",
+        "folder": "listening-multiple-choice-multiple-answer"
+    },
+    {
+        "id": 9,
+        "text": "Students must submit their assignments online by Friday. Late submissions will incur a penalty of 10% per day. Extension requests must be made by Wednesday.",
+        "voice": "am_michael",
+        "filename": "lmcma_topic_9.mp3",
+        "folder": "listening-multiple-choice-multiple-answer"
+    },
+    {
+        "id": 10,
+        "text": "The new campus library will feature several modern amenities, including private study pods, a 24-hour cafe, and an extensive digital archive. However, the physical book collection will be slightly reduced.",
+        "voice": "am_fenrir",
+        "filename": "lmcma_topic_10.mp3",
+        "folder": "listening-multiple-choice-multiple-answer"
+    },
+    {
+        "id": 11,
+        "text": "Students must submit their assignments online by Friday. Late submissions will incur a penalty of 10% per day. Extension requests must be made by Wednesday.",
+        "voice": "af_bella",
+        "filename": "lmcma_topic_11.mp3",
+        "folder": "listening-multiple-choice-multiple-answer"
+    },
+    {
+        "id": 12,
+        "text": "The new campus library will feature several modern amenities, including private study pods, a 24-hour cafe, and an extensive digital archive. However, the physical book collection will be slightly reduced.",
+        "voice": "am_fenrir",
+        "filename": "lmcma_topic_12.mp3",
+        "folder": "listening-multiple-choice-multiple-answer"
+    },
+    {
+        "id": 13,
+        "text": "Students must submit their assignments online by Friday. Late submissions will incur a penalty of 10% per day. Extension requests must be made by Wednesday.",
+        "voice": "am_fenrir",
+        "filename": "lmcma_topic_13.mp3",
+        "folder": "listening-multiple-choice-multiple-answer"
+    },
+    {
+        "id": 14,
+        "text": "The new campus library will feature several modern amenities, including private study pods, a 24-hour cafe, and an extensive digital archive. However, the physical book collection will be slightly reduced.",
+        "voice": "af_sky",
+        "filename": "lmcma_topic_14.mp3",
+        "folder": "listening-multiple-choice-multiple-answer"
+    }
+]

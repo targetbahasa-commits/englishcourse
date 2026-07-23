@@ -25,9 +25,12 @@
     @include('components.program-sidebar')
     <div class="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
         <div class="flex justify-between items-center mb-8">
-            <a href="{{ $backRoute ?? route('assignments.grammar-writing') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium">
-                &laquo; Kembali
-            </a>
+            <a href="{{ $backRoute ?? route('assignments.grammar-writing') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+    <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+    </svg>
+    Back
+</a>
         </div>
 
         <h1 class="text-3xl font-bold text-center text-purple-600 mb-8">Gerund, To Infinitive, and Complex Ditransitive Verb (Pertemuan 5)</h1>
@@ -225,5 +228,6 @@
             </form>
         @endif
     </div>
+    <x-live-drawing />
 </body>
 </html>

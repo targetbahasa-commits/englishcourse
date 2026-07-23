@@ -37,6 +37,10 @@ class BuildGrammarWritingMeeting3ViewData
                 'vocab' => $fallbackParagraph['vocab'],
             ];
 
+        $userId = auth()->id();
+        $cachedUserAnswers = \Illuminate\Support\Facades\Cache::get('user_' . $userId . '_meeting3_user_answers');
+        $cachedParagraphAnswer = \Illuminate\Support\Facades\Cache::get('user_' . $userId . '_meeting3_user_paragraph_answer');
+
         return [
             'questions' => $questions,
             'fullParagraphId' => $paragraphData['id'],
@@ -46,8 +50,8 @@ class BuildGrammarWritingMeeting3ViewData
             'results' => session('meeting3_results', []),
             'paragraphResult' => session('meeting3_paragraph_result', []),
             'finalScore' => session('meeting3_final_score', 0),
-            'userAnswers' => session('meeting3_user_answers', []),
-            'userParagraphAnswer' => session('meeting3_user_paragraph_answer', ''),
+            'userAnswers' => $cachedUserAnswers !== null ? $cachedUserAnswers : session('meeting3_user_answers', []),
+            'userParagraphAnswer' => $cachedParagraphAnswer !== null ? $cachedParagraphAnswer : session('meeting3_user_paragraph_answer', ''),
             'paragraphId' => $paragraph->id ?? 0,
         ];
     }

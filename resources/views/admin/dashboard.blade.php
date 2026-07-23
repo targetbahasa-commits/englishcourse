@@ -192,6 +192,7 @@
                 lastRefreshed: null,
                 search: '',
                 selectedProgram: '',
+                filterOnline: false,
                 programOptions: ['IELTS Academic', 'IELTS General', 'PTE', 'Grammar for Writing'],
                 students: {{ Js::from(array_values(array_map(function($s) {
                     $s = is_object($s) ? $s : (object)$s;
@@ -231,7 +232,8 @@
                         const q = this.search.toLowerCase();
                         const ok = s.name.toLowerCase().includes(q) || (s.program_name||'').toLowerCase().includes(q);
                         const mp = !this.selectedProgram || this.normalizeProgram(s.program_name) === this.selectedProgram;
-                        return ok && mp;
+                        const mo = !this.filterOnline || this.isOnline(s.last_activity);
+                        return ok && mp && mo;
                     }).sort((a,b) => b.last_activity - a.last_activity);
                 },
 
@@ -283,6 +285,19 @@
                                 &nbsp;·&nbsp;
                                 <button @click="pollStudents()" class="text-blue-500 hover:text-blue-700 font-medium underline-offset-2 hover:underline">Refresh</button>
                             </span>
+                            
+                            <!-- Toggle Online Saja -->
+                            <button @click="filterOnline = !filterOnline" 
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium border transition-colors focus:outline-none"
+                                    :class="filterOnline ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'">
+                                <span class="relative flex h-2 w-2">
+                                    <span x-show="filterOnline" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2"
+                                          :class="filterOnline ? 'bg-green-500' : 'bg-gray-400'"></span>
+                                </span>
+                                <span x-text="filterOnline ? 'Online Saja' : 'Semua (24 Jam)'"></span>
+                            </button>
+
                             <select x-model="selectedProgram" class="form-control rounded-xl text-sm border-gray-200 min-w-[170px]">
                                 <option value="">Semua Program</option>
                                 <template x-for="p in programOptions" :key="p">
@@ -406,7 +421,7 @@
                                 <tr x-show="filteredStudents.length === 0">
                                     <td colspan="6" class="py-10 text-center text-gray-400">
                                         <svg class="w-10 h-10 mx-auto mb-2 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                        Tidak ada siswa aktif dalam 24 jam terakhir.
+                                        <span x-text="filterOnline ? 'Tidak ada siswa yang sedang online saat ini.' : 'Tidak ada siswa aktif dalam 24 jam terakhir.'"></span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -421,6 +436,7 @@
                 lastRefreshed: null,
                 search: '',
                 selectedProgram: '',
+                filterOnline: false,
                 programOptions: ['IELTS Academic', 'IELTS General', 'PTE', 'Grammar for Writing'],
                 teachers: {{ Js::from(array_values(array_map(function($s) {
                     $s = is_object($s) ? $s : (object)$s;
@@ -460,7 +476,8 @@
                         const q = this.search.toLowerCase();
                         const ok = s.name.toLowerCase().includes(q) || (s.program_name||'').toLowerCase().includes(q);
                         const mp = !this.selectedProgram || this.normalizeProgram(s.program_name) === this.selectedProgram;
-                        return ok && mp;
+                        const mo = !this.filterOnline || this.isOnline(s.last_activity);
+                        return ok && mp && mo;
                     }).sort((a,b) => b.last_activity - a.last_activity);
                 },
 
@@ -512,6 +529,19 @@
                                 &nbsp;·&nbsp;
                                 <button @click="pollTeachers()" class="text-blue-500 hover:text-blue-700 font-medium underline-offset-2 hover:underline">Refresh</button>
                             </span>
+
+                            <!-- Toggle Online Saja -->
+                            <button @click="filterOnline = !filterOnline" 
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium border transition-colors focus:outline-none"
+                                    :class="filterOnline ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'">
+                                <span class="relative flex h-2 w-2">
+                                    <span x-show="filterOnline" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2"
+                                          :class="filterOnline ? 'bg-green-500' : 'bg-gray-400'"></span>
+                                </span>
+                                <span x-text="filterOnline ? 'Online Saja' : 'Semua (24 Jam)'"></span>
+                            </button>
+
                             <select x-model="selectedProgram" class="form-control rounded-xl text-sm border-gray-200 min-w-[170px]">
                                 <option value="">Semua Program</option>
                                 <template x-for="p in programOptions" :key="p">
@@ -635,7 +665,7 @@
                                 <tr x-show="filteredTeachers.length === 0">
                                     <td colspan="6" class="py-10 text-center text-gray-400">
                                         <svg class="w-10 h-10 mx-auto mb-2 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                        Tidak ada guru aktif dalam 24 jam terakhir.
+                                        <span x-text="filterOnline ? 'Tidak ada guru yang sedang online saat ini.' : 'Tidak ada guru aktif dalam 24 jam terakhir.'"></span>
                                     </td>
                                 </tr>
                             </tbody>

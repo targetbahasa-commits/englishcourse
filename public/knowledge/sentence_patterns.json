@@ -1,0 +1,12 @@
+[
+    "{Subject} {Verb} {Object}.",
+    "{Subject} {Verb} {Adjective} {Object}.",
+    "{Subject} {Verb} {Noun Phrase}.",
+    "{Institution} {Verb} {Academic Object}.",
+    "{Company} {Verb} {Business Object}.",
+    "{Government} {Verb} {Policy Object}.",
+    "{Researcher} {Verb} {Research Object}.",
+    "{University} {Verb} {Educational Object}.",
+    "{Organization} {Verb} {Strategic Object}.",
+    "{Committee} {Verb} {Administrative Object}."
+]

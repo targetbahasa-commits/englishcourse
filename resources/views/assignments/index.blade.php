@@ -125,7 +125,7 @@
                         'ielts-academic-reading' => 'ielts-academic-reading',
                         'ielts-academic-writing' => 'ielts-academic-writing',
                         'ielts-academic-speaking' => 'ielts-academic-speaking',
-                        'ielts-academic-full-package' => 'ielts-academic-full-package',
+                        'ielts-academic-full-package' => 'ielts-academic',
                         default => $program->slug,
                         };
 
@@ -145,7 +145,7 @@
                         $routeName = route('assignments.ielts-academic.writing.index');
                         } elseif ($programSlug === 'ielts-academic-speaking') {
                         $routeName = route('assignments.ielts-academic.speaking.index');
-                        } elseif ($programSlug === 'ielts-academic-full-package') {
+                        } elseif ($programSlug === 'ielts-academic') {
                         $routeName = route('assignments.ielts-academic');
                         } elseif ($programSlug === 'pte-academic') {
                         $routeName = route('assignments.pte-academic');
@@ -189,7 +189,7 @@
                                 <h3 class="text-lg font-bold text-gray-800 mb-1">{{ $program->name }}</h3>
                                 <p class="text-gray-600 text-sm mb-4 leading-relaxed">{{ $program->description }}</p>
 
-                                @if($isLocked || $programSlug === 'ielts-general')
+                                @if($isLocked)
                                     <!-- Brochure Button -->
                                     <a href="{{ route('brochure') }}" target="_blank" class="flex items-center justify-center gap-2 w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition-all duration-300 text-sm">
                                         Lihat Brosur Program

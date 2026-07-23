@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Listening: Write from Dictation - {{ $topic['title'] }} | Target Bahasa</title>
     <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    @php
+        $audioFile = 'kokoro-tts/write-from-dictation/wfd_topic_' . $topicId . '.mp3';
+        $audioPath = public_path('storage/' . $audioFile);
+        $audioSrc = asset('storage/' . $audioFile) . '?v=' . (file_exists($audioPath) ? filemtime($audioPath) : '1');
+    @endphp
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -216,7 +223,9 @@
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         @if(Auth::check())
-            @php($sidebarRole = strtolower(Auth::user()->active_role ?? 'student'))
+            @php
+                $sidebarRole = strtolower(Auth::user()->active_role ?? 'student');
+            @endphp
             @if($sidebarRole === 'admin')
                 @include('components.sidebar-admin')
             @elseif($sidebarRole === 'teacher')
@@ -235,7 +244,7 @@
 
                 <!-- Header -->
                 <div class="mb-8">
-                    <a href="{{ route('assignments.pte-academic.listening.listening-write-from-dictation.index') }}" class="inline-flex items-center text-gray-600 hover:text-purple-500 transition-colors mb-4">
+                    <a href="{{ route('assignments.pte-academic.listening.listening-write-from-dictation.index') }}#topic-{{ $topicId }}" class="inline-flex items-center text-gray-600 hover:text-purple-500 transition-colors mb-4">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         Back to Selection
                     </a>
@@ -247,6 +256,8 @@
                         </div>
                         <div>
                             <h1 class="text-3xl font-bold text-gray-800">Listening: Write from Dictation</h1>
+                            <span id="pteAttemptBadge" class="hidden text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700"></span>
+                            <span id="pteAvgScoreBadge" class="hidden text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700"></span>
                             <p class="text-gray-500">PTE Academic Practice - {{ $topic['title'] }}</p>
                         </div>
                     </div>
@@ -270,20 +281,21 @@
 
                         <!-- Audio Player Area -->
                         <div class="px-8 pb-6">
+                            <audio id="dictationAudio" preload="auto" src="{{ $audioSrc }}"></audio>
                             <div class="audio-player-box shadow-sm">
                                 <button class="play-btn" id="playBtn">
                                     <svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M4 4l12 6-12 6z"></path>
                                     </svg>
                                 </button>
-                                
+
                                 <div class="progress-container">
                                     <span class="time-text" id="currentTime">00:00</span>
                                     <div class="progress-bar-bg">
                                         <div class="progress-bar-fill" id="progressBar"></div>
                                         <div class="progress-handle" id="progressHandle"></div>
                                     </div>
-                                    <span class="time-text">00:04</span>
+                                    <span class="time-text" id="totalTime">00:00</span>
                                 </div>
 
                                 <div class="controls-right">
@@ -390,6 +402,98 @@
                 </div>
 
             </div>
+            {{-- Floating Tips Button --}}
+            <div x-data="{ 
+                showTips: false,
+                isDragged: false,
+                dragging: false,
+                x: window.innerWidth / 2 - 50,
+                y: window.innerHeight - 100,
+                startX: 0,
+                startY: 0,
+                start(e) {
+                    this.dragging = true;
+                    this.isDragged = false;
+                    let clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    let clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+                    this.startX = clientX - this.x;
+                    this.startY = clientY - this.y;
+                },
+                move(e) {
+                    if (!this.dragging) return;
+                    e.preventDefault();
+                    this.isDragged = true;
+                    let clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    let clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+                    this.x = clientX - this.startX;
+                    this.y = clientY - this.startY;
+                    
+                    // Keep within screen bounds
+                    this.x = Math.max(0, Math.min(this.x, window.innerWidth - 60));
+                    this.y = Math.max(0, Math.min(this.y, window.innerHeight - 60));
+                },
+                end() {
+                    this.dragging = false;
+                    // Reset position if dragged out of bounds
+                    if (this.x < 0) this.x = 0;
+                    if (this.y < 0) this.y = 0;
+                    if (this.x > window.innerWidth - 60) this.x = window.innerWidth - 60;
+                    if (this.y > window.innerHeight - 60) this.y = window.innerHeight - 60;
+                }
+            }" 
+            @mousemove.window="move" @mouseup.window="end" @touchmove.window="move" @touchend.window="end">
+                <button @click.prevent="if(!isDragged) showTips = true" 
+                        @mousedown="start" @touchstart="start"
+                        class="fixed z-50 text-white p-4 rounded-full shadow-2xl flex items-center gap-2 select-none"
+                        :style="`left: ${x}px; top: ${y}px; background-color: #eab308; touch-action: none;`"
+                        :class="dragging ? 'cursor-grabbing scale-105' : 'cursor-grab hover:scale-105 transition-transform'"
+                        title="Tips & Strategi">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="font-bold hidden md:inline text-white">Tips</span>
+                </button>
+
+                {{-- Tips Modal --}}
+                <template x-teleport="body">
+                    <div x-show="showTips" style="display: none;" class="fixed inset-0 bg-transparent z-[100] flex items-center justify-center p-4">
+                        <div @click.away="showTips = false" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-gray-200">
+                            <div class="flex items-center justify-between p-6 border-b border-purple-100 bg-purple-50 shrink-0">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-xl font-bold text-purple-900">Tips Write From Dictation (WFD)</h2>
+                                        <p class="text-purple-600 text-sm">Panduan dan format jawaban Anda.</p>
+                                    </div>
+                                </div>
+                                <button @click="showTips = false" class="text-purple-400 hover:text-purple-600 hover:bg-purple-100 p-2 rounded-full transition">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                            </div>
+                            <div class="p-6 overflow-y-auto bg-gray-50 flex-1">
+
+                                <div class="bg-white rounded-xl border border-purple-100 shadow-sm overflow-hidden mb-6">
+                                    <div class="bg-purple-50 px-4 py-3 border-b border-purple-100">
+                                        <h4 class="font-bold text-purple-900">Daftar Kosakata Pembantu (Grammar Fillers)</h4>
+                                    </div>
+                                    <div class="p-4 text-purple-800 leading-relaxed text-sm sm:text-base space-y-4">
+                                        <p>Hafalkan dan tambahkan <em>articles, conjunctions, prepositions,</em> dan <em>modals</em> di bawah ini pada akhir/sela kalimat jika Anda merasa ada kata minor yang terlewat saat dikte:</p>
+                                        <div class="bg-purple-50 p-4 rounded-lg font-medium leading-loose border border-purple-100">
+                                            a, an, at, the, on, in, by, to, from, with, of, for, into, onto, out, off, and, but, or, so, yet, because, if, that, is, am, are, was, were, be, been, while, when, where, being, have, has, had, do, does, did, can, could, will, would, shall, should, may, might, must, through, about, over, under, across, behind, beside, around, before, after, during, within, without, between, against, although, though, since, unless, ought, this, these, those, some, any, much, many, few, little, who, whom, whose, which, what, whichever, whenever, wherever, maybe.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
         </main>
     </div>
 
@@ -461,11 +565,7 @@
             btn.classList.add('active');
             document.getElementById('speedDropdown').classList.add('hidden');
             document.getElementById('speedChevron').style.transform = '';
-            // Restart interval if audio is playing
-            if (isAudioPlaying) {
-                clearInterval(audioPlayInterval);
-                audioPlayInterval = setInterval(audioTick, 1000 / currentSpeed);
-            }
+            dictationAudio.playbackRate = currentSpeed;
         }
 
         document.addEventListener('click', function(e) {
@@ -478,29 +578,49 @@
 
         // Audio and Timer Logic
         let prepTimerInterval;
-        let audioPlayInterval;
         let prepTime = 5;
-        let audioDuration = 4; // 00:04 (short dictation sentence)
-        let audioCurrentTime = 0;
-        
+
+        const dictationAudio = document.getElementById('dictationAudio');
         const prepTimerEl = document.getElementById('prepTimer');
         const playBtn = document.getElementById('playBtn');
         const currentTimeEl = document.getElementById('currentTime');
+        const totalTimeEl = document.getElementById('totalTime');
         const progressBar = document.getElementById('progressBar');
         const progressHandle = document.getElementById('progressHandle');
         const startTimerBtn = document.getElementById('startTimerBtn');
 
+        const PLAY_ICON_SVG = '<svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4l12 6-12 6z"></path></svg>';
+        const PAUSE_ICON_SVG = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>';
+
         function fmtTime(s) {
+            s = Math.floor(s || 0);
             let m = Math.floor(s / 60);
             let sec = s % 60;
             return (m < 10 ? '0'+m : m) + ':' + (sec < 10 ? '0'+sec : sec);
         }
 
+        dictationAudio.addEventListener('loadedmetadata', () => {
+            totalTimeEl.textContent = fmtTime(dictationAudio.duration);
+        });
+
+        dictationAudio.addEventListener('timeupdate', () => {
+            currentTimeEl.textContent = fmtTime(dictationAudio.currentTime);
+            let perc = dictationAudio.duration ? (dictationAudio.currentTime / dictationAudio.duration) * 100 : 0;
+            progressBar.style.width = perc + '%';
+            progressHandle.style.left = perc + '%';
+        });
+
+        dictationAudio.addEventListener('ended', () => {
+            playBtn.innerHTML = PLAY_ICON_SVG;
+            document.getElementById('prepTimer').parentElement.innerHTML = 'Status: <span class="teal-text">Audio Completed</span>';
+            dictationInput.focus();
+        });
+
         function startPrepTimer() {
             startTimerBtn.style.display = 'none';
             prepTime = 5;
             prepTimerEl.parentElement.innerHTML = 'Beginning in <span class="teal-text" id="prepTimer">5 sec</span>';
-            
+
             clearInterval(prepTimerInterval);
             prepTimerInterval = setInterval(() => {
                 prepTime--;
@@ -512,28 +632,12 @@
             }, 1000);
         }
 
-        function audioTick() {
-            audioCurrentTime++;
-            currentTimeEl.textContent = fmtTime(audioCurrentTime);
-            let perc = (audioCurrentTime / audioDuration) * 100;
-            progressBar.style.width = perc + '%';
-            progressHandle.style.left = perc + '%';
-            if(audioCurrentTime >= audioDuration) {
-                clearInterval(audioPlayInterval);
-                isAudioPlaying = false;
-                playBtn.innerHTML = '<svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4l12 6-12 6z"></path></svg>';
-                document.getElementById('prepTimer').parentElement.innerHTML = 'Status: <span class="teal-text">Audio Completed</span>';
-                dictationInput.focus();
-            }
-        }
-
         function startAudio() {
             document.getElementById('prepTimer').parentElement.innerHTML = 'Status: <span class="teal-text">Playing Audio</span>';
-            playBtn.innerHTML = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>';
-            audioCurrentTime = 0;
-            isAudioPlaying = true;
-            clearInterval(audioPlayInterval);
-            audioPlayInterval = setInterval(audioTick, 1000 / currentSpeed);
+            playBtn.innerHTML = PAUSE_ICON_SVG;
+            dictationAudio.currentTime = 0;
+            dictationAudio.playbackRate = currentSpeed;
+            dictationAudio.play().catch(err => console.error(err));
         }
 
         // Auto start
@@ -542,7 +646,7 @@
         });
 
         // Scoring Logic
-        const targetSentence = "The researchers call it shaded timing.";
+        const targetSentence = @json($topic['transcript']);
 
         function normalizeWord(word) {
             return word.toLowerCase().replace(/[.,!?;:'"()]/g, '');
@@ -550,7 +654,7 @@
 
         function checkAnswer() {
             clearInterval(prepTimerInterval);
-            clearInterval(audioPlayInterval);
+            dictationAudio.pause();
 
             dictationInput.disabled = true;
 
@@ -620,23 +724,39 @@
                 resultMessage.className = "text-red-700 font-medium text-sm mt-1";
             }
             
+            
+            var formData = new FormData();
+            formData.append('module', 'listening-write-from-dictation');
+            formData.append('topic_id', '{{ $topicId }}');
+            formData.append('score', correctCount);
+            formData.append('max_score', targetWordsRaw.length);
+
+            fetch('/pte/practice/save-score', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+                body: formData
+            }).then(res => res.json()).then(data => {
+                if (data.success) PTEScorePopup.show({ skill: 'Listening', score: data.scores.overall_score, max: 90 });
+            }).catch(err => console.error(err));
+        
             document.getElementById('answerBtn').style.opacity = '0.5';
             document.getElementById('answerBtn').style.pointerEvents = 'none';
         }
 
         function restartPractice() {
             clearInterval(prepTimerInterval);
-            clearInterval(audioPlayInterval);
-            
+            dictationAudio.pause();
+            dictationAudio.currentTime = 0;
+
             dictationInput.disabled = false;
             dictationInput.value = '';
             wordCountDisplay.textContent = '0';
-            
+
             currentTimeEl.textContent = "00:00";
             progressBar.style.width = '0%';
             progressHandle.style.left = '0%';
-            playBtn.innerHTML = '<svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4l12 6-12 6z"></path></svg>';
-            
+            playBtn.innerHTML = PLAY_ICON_SVG;
+
             document.getElementById('resultBox').classList.add('hidden');
             document.getElementById('answerBtn').style.opacity = '1';
             document.getElementById('answerBtn').style.pointerEvents = 'auto';
@@ -645,6 +765,7 @@
             startPrepTimer();
         }
     </script>
-    @include('assignments.ielts.writing.practice_toolbar', ['meeting' => (object)['task_type' => 1], 'grammarLevel' => 'all'])
+    @include('components.pte-score-popup')
+    @include('components.pte-practice-tracker', ['module' => 'listening-write-from-dictation', 'topicId' => $topicId])
 </body>
 </html>

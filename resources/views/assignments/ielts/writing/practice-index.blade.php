@@ -255,7 +255,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($task2Meetings as $m)
                 <a href="{{ route('assignments.ielts-academic.writing.meeting', ['task' => 2, 'id' => $m->id]) }}"
-                   class="block p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300 border-l-4 border-orange-400 hover:border-orange-500 group">
+                   class="block p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300 group">
                     <div class="flex items-start justify-between mb-3">
                         <h3 class="font-bold text-gray-800 flex-1 group-hover:text-orange-600 transition">{{ $m->title }}</h3>
                     </div>
@@ -344,7 +344,7 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($items as $item)
-                <a href="{{ route('assignments.ielts-academic.writing.meeting', ['task' => 1, 'id' => $item->id]) }}" class="block p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300 border-l-4 border-teal-500 hover:border-teal-600 group">
+                <a href="{{ route('assignments.ielts-academic.writing.meeting', ['task' => 1, 'id' => $item->id]) }}" class="block p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300 group">
                     <div class="flex items-start justify-between mb-3">
                         <h3 class="font-bold text-gray-800 flex-1 group-hover:text-teal-600 transition">{{ $item->title }}</h3>
                     </div>

@@ -252,7 +252,103 @@
                 @endif
             </div>
 
-            <!-- Free Test History -->
+            {{-- ─── All Assignment Scores ──────────────────────────────── --}}
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center text-violet-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                        </div>
+                        All Assignment Scores
+                    </h3>
+                    @if($allAssignmentScores->count() > 0)
+                        <span class="text-xs font-semibold bg-violet-100 text-violet-700 px-3 py-1 rounded-full">
+                            {{ $allAssignmentScores->count() }} submission{{ $allAssignmentScores->count() !== 1 ? 's' : '' }}
+                        </span>
+                    @endif
+                </div>
+
+                @if($allAssignmentScores->count() > 0)
+                    @php
+                        $scoresByProgram = $allAssignmentScores->groupBy(fn($s) => $s->program?->name ?? 'Unknown Program');
+                    @endphp
+
+                    <div class="space-y-6">
+                        @foreach($scoresByProgram as $programName => $scores)
+                        @php
+                            $progAvg    = round($scores->avg('score'), 1);
+                            $progMin    = $scores->min('score');
+                            $progMax    = $scores->max('score');
+                            $avgColor   = $progAvg >= 80 ? 'text-green-600' : ($progAvg >= 60 ? 'text-amber-500' : 'text-red-500');
+                            $barColor   = $progAvg >= 80 ? 'bg-green-500' : ($progAvg >= 60 ? 'bg-amber-400' : 'bg-red-400');
+                        @endphp
+                        <div class="border border-gray-100 rounded-2xl overflow-hidden">
+                            {{-- Program header --}}
+                            <div class="flex items-center justify-between px-5 py-3 bg-gray-50 border-b border-gray-100">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-sm font-bold text-gray-800">{{ $programName }}</span>
+                                    <span class="text-xs text-gray-400 font-medium">{{ $scores->count() }} meetings</span>
+                                </div>
+                                <div class="flex items-center gap-4 text-xs text-gray-500">
+                                    <span>Min: <strong class="text-gray-700">{{ $progMin }}</strong></span>
+                                    <span>Max: <strong class="text-gray-700">{{ $progMax }}</strong></span>
+                                    <span>Avg: <strong class="{{ $avgColor }}">{{ $progAvg }}</strong></span>
+                                </div>
+                            </div>
+
+                            {{-- Score progress bar --}}
+                            <div class="px-5 pt-3 pb-1">
+                                <div class="w-full bg-gray-100 rounded-full h-1.5">
+                                    <div class="{{ $barColor }} h-1.5 rounded-full transition-all" style="width: {{ min(100, $progAvg) }}%"></div>
+                                </div>
+                            </div>
+
+                            {{-- Scores table --}}
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-50">
+                                    <thead>
+                                        <tr class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                            <th class="px-5 py-2">Meeting</th>
+                                            <th class="px-5 py-2 text-center">Score</th>
+                                            <th class="px-5 py-2 text-right">Submitted</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-50">
+                                        @foreach($scores as $score)
+                                        @php
+                                            $scoreVal   = $score->score;
+                                            $badgeClass = $scoreVal >= 80
+                                                ? 'bg-green-100 text-green-800'
+                                                : ($scoreVal >= 60 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800');
+                                        @endphp
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-5 py-3 text-sm font-medium text-gray-900">
+                                                Meeting {{ str_pad($score->meeting_number, 2, '0', STR_PAD_LEFT) }}
+                                            </td>
+                                            <td class="px-5 py-3 text-center">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold {{ $badgeClass }}">
+                                                    {{ $scoreVal }}
+                                                </span>
+                                            </td>
+                                            <td class="px-5 py-3 text-right text-xs text-gray-400">
+                                                {{ $score->submitted_at ? \Carbon\Carbon::parse($score->submitted_at)->format('d M Y, H:i') : '-' }}
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                        <svg class="mx-auto h-10 w-10 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        <p class="text-gray-500 font-medium text-sm">No assignment scores recorded yet.</p>
+                    </div>
+                @endif
+            </div>
+
             <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
                 <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
                     <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">

@@ -150,9 +150,17 @@
                     <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     <span class="text-sm">Final Test Results</span>
                 </a>
+                <a href="{{ route('admin.offline-tests.create') }}" class="flex items-center gap-2.5 px-3 py-2.5 {{ request()->routeIs('admin.offline-tests.create') ? 'bg-indigo-50 text-indigo-600 ' : 'text-gray-500 hover:bg-gray-50 ' }} rounded-xl text-base font-medium transition pl-8">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                    <span class="text-sm">Manage Offline Tests</span>
+                </a>
+                <a href="{{ route('admin.offline-tests.index') }}" class="flex items-center gap-2.5 px-3 py-2.5 {{ request()->routeIs('admin.offline-tests.index') || request()->routeIs('admin.offline-tests.edit') || request()->routeIs('admin.offline-test-certificates.*') ? 'bg-teal-50 text-teal-600 ' : 'text-gray-500 hover:bg-gray-50 ' }} rounded-xl text-base font-medium transition pl-8">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                    <span class="text-sm">Offline Test Results</span>
+                </a>
             @endif
             <a href="{{ route('admin.online-tests.index') }}" class="flex items-center gap-2.5 px-3 py-2.5 {{ request()->routeIs('admin.online-tests.*') ? 'bg-indigo-50 text-indigo-600 ' : 'text-gray-500 hover:bg-gray-50 ' }} rounded-xl text-base font-medium transition">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h18M3 12h18M3 19h18"></path></svg>
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                 <span>Manage Online Tests</span>
             </a>
             <a href="{{ route('admin.online-test-results.index') }}" class="flex items-center gap-2.5 px-3 py-2.5 {{ request()->routeIs('admin.online-test-results.*') ? 'bg-teal-50 text-teal-600 ' : 'text-gray-500 hover:bg-gray-50 ' }} rounded-xl text-base font-medium transition pl-8">
@@ -212,6 +220,34 @@
             <a href="{{ route('admin.social-media.all') }}" class="flex items-center gap-2.5 px-3 py-2.5 {{ request()->routeIs('admin.social-media.*') ? 'bg-indigo-50 text-indigo-600 ' : 'text-gray-500 hover:bg-gray-50 ' }} rounded-xl text-base font-medium transition">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
                 <span>Social Media</span>
+            </a>
+            <a href="{{ route('admin.school-camp.index') }}" class="flex items-center gap-2.5 px-3 py-2.5 {{ request()->routeIs('admin.school-camp.*') ? 'bg-amber-50 text-amber-600 ' : 'text-gray-500 hover:bg-gray-50 ' }} rounded-xl text-base font-medium transition">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                <span class="flex-1">School English Camp</span>
+            </a>
+        </nav>
+    </div>
+
+    {{-- E-COMMERCE --}}
+    <div class="mb-4">
+        <p class="text-xs font-semibold text-gray-400 mb-3">E-COMMERCE</p>
+        <nav class="space-y-0.5">
+            <a href="{{ route('admin.shop.dashboard') }}" class="flex items-center gap-2.5 px-3 py-2.5 {{ request()->routeIs('admin.shop.dashboard') ? 'bg-amber-50 text-amber-600 ' : 'text-gray-500 hover:bg-gray-50 ' }} rounded-xl text-base font-medium transition-all group">
+                <svg class="h-5 w-5 shrink-0 {{ request()->routeIs('admin.shop.dashboard') ? 'text-amber-600' : 'text-gray-400 group-hover:text-gray-500' }} transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                </svg>
+                Laporan Penjualan
+            </a>
+            <a href="{{ route('admin.shop.products.index') }}" class="flex items-center gap-2.5 px-3 py-2.5 {{ request()->routeIs('admin.shop.products.*') ? 'bg-orange-50 text-orange-600 ' : 'text-gray-500 hover:bg-gray-50 ' }} rounded-xl text-base font-medium transition">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                <span class="flex-1">Kelola Produk</span>
+            </a>
+            <a href="{{ route('admin.shop.orders.index') }}" class="flex items-center gap-2.5 px-3 py-2.5 {{ request()->routeIs('admin.shop.orders.*') ? 'bg-amber-50 text-amber-600 ' : 'text-gray-500 hover:bg-gray-50 ' }} rounded-xl text-base font-medium transition-all group">
+                <svg class="h-5 w-5 shrink-0 {{ request()->routeIs('admin.shop.orders.*') ? 'text-amber-600' : 'text-gray-400 group-hover:text-gray-500' }} transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                Pesanan Masuk
             </a>
         </nav>
     </div>

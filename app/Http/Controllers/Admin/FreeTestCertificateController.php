@@ -90,7 +90,7 @@ class FreeTestCertificateController extends Controller
     {
         $certificate = $this->useCase->findOrFail($id);
 
-        if (! $certificate->background_image || ! Storage::disk('public')->exists($certificate->background_image)) {
+        if (! $certificate->background_image || ! \Illuminate\Support\Facades\Storage::disk('public')->exists($certificate->background_image)) {
             abort(404);
         }
 

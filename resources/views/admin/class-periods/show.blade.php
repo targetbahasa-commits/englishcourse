@@ -182,7 +182,7 @@
                                         </span>
                                         
                                         <!-- Toggle Form -->
-                                        <form action="{{ route('class-periods.meetings.toggle', [$classPeriod, $meeting]) }}" method="POST">
+                                        <form action="{{ route('class-periods.toggle-meeting', [$classPeriod, $meeting]) }}" method="POST">
                                             @csrf
                                             <button type="submit" 
                                                 class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 {{ $meeting->is_open_for_period ? 'bg-green-600' : 'bg-gray-200' }}" 
@@ -226,6 +226,7 @@
             <form method="POST" action="{{ route('class-periods.update', $classPeriod) }}" class="mt-6">
                 @csrf
                 @method('PUT')
+                <input type="hidden" name="batch_type" value="{{ $classPeriod->batch_type }}">
                 <div class="mb-4">
                     <x-input-label for="edit_name" value="Period Name" />
                     <x-text-input id="edit_name" name="name" type="text" class="mt-1 block w-full" value="{{ $classPeriod->name }}" required />

@@ -25,9 +25,12 @@
     @include('components.program-sidebar')
     <div x-data="{ editMode: false, editId: null, editSection: '', editQ: '', editA: '', editTense: '', editStructure: '', matrixAnswers: {} }" class="max-w-7xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
         <div class="flex justify-between items-center mb-8">
-            <a href="{{ $backRoute ?? route('assignments.grammar-writing') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium">
-                &laquo; Kembali
-            </a>
+            <a href="{{ $backRoute ?? route('assignments.grammar-writing') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+    <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+    </svg>
+    Back
+</a>
         </div>
 
         @if($stage === 3)
@@ -662,7 +665,7 @@
             }
 
             const meetingNumber = match[1];
-            const draftEndpoint = '/assignments/grammar-writing/meeting' + meetingNumber + '/draft';
+            const draftEndpoint = '/assignments/grammar-writing/fast-track/meeting' + meetingNumber + '/draft';
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
             const payload = {};
@@ -770,7 +773,7 @@
             if (!indicator) {
                 indicator = document.createElement('div');
                 indicator.id = 'auto-save-indicator';
-                indicator.className = 'fixed bottom-4 left-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+                indicator.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
                 indicator.style.transition = 'opacity 0.3s';
                 indicator.innerHTML = '✓ Tersimpan otomatis';
                 document.body.appendChild(indicator);
@@ -818,5 +821,6 @@
     </script>
 
 
+    <x-live-drawing />
 </body>
 </html>
