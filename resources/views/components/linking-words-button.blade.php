@@ -7,6 +7,10 @@
     offset: { x: 0, y: 0 },
     hasMoved: false,
     words: [
+        { category: 'Coordinating Conjunctions (FANBOYS)', words: 'For – Karena/Alasan, And – Dan/Penambahan, Nor – Dan tidak juga, But – Tetapi/Pertentangan, Or – Atau/Pilihan, Yet – Namun/Pertentangan, So – Jadi/Akibat' },
+        { category: 'Adjective Clause (Relative Clause)', words: 'Who – Orang (Subjek), Whom – Orang (Objek), Whose – Kepemilikan, Which – Benda/Hewan, That – Orang/Benda, Where – Tempat, When – Waktu, Why – Alasan' },
+        { category: 'Adverbial Clause (Penjelas Kalimat)', words: 'Time – when / while / before / after / since / until / as soon as, Cause/Effect – because / since / so that / in order that, Contrast – although / even though / whereas / while, Condition – if / unless / provided that / as long as, Place – where / wherever, Manner – as / as if / as though' },
+        { category: 'Noun Clause (Kata Benda)', words: 'That – bahwa, Wh-Words – what / who / whom / which / where / when / why / how / whatever / whoever / whichever, If/Whether – apakah / apakah atau tidak' },
         { category: 'Time / Chronological (Waktu)', words: 'Afterwards – Setelah itu, Soon – Segera, Meanwhile – Sementara itu, In the meantime – Selagi itu, Next – Berikutnya, Then – Lalu, Later – Nanti, Eventually – Akhirnya, At the same time – Pada saat yang sama, In the same instant – Dalam waktu yang bersamaan, Today – Hari ini, Nowadays – Sekarang ini, In the beginning – Pada awalnya, To begin – Untuk memulai, In time – Pada waktunya, In future – Di masa depan, Finally – Akhirnya, Initially – Awalnya, Subsequently – Selanjutnya, Simultaneously – Secara bersamaan' },
         
         { category: 'Addition (Penambahan)', words: 'Moreover – Selain itu, Furthermore – Lebih lanjut, In addition – Sebagai tambahan, Further – Selanjutnya' },
@@ -67,19 +71,11 @@
             this.searchQuery = ''; 
         }
     }
-}"
-@mousemove.window="doDrag"
-@touchmove.window="doDrag"
-@mouseup.window="stopDrag"
-@touchend.window="stopDrag"
-class="fixed z-50 select-none touch-none"
-:style="`left: ${x}px; top: ${y}px;`">
+}">
     <!-- Floating Button -->
-    <button @mousedown="startDrag"
-            @touchstart="startDrag"
-            @click="handleClick"
-            class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2 cursor-move">
-        <span>🔗</span> Linking Words
+    <button @click="open = true"
+            class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2.5 px-5 rounded-full shadow-lg transition hover:scale-105 flex items-center gap-2 text-sm opacity-60 hover:opacity-100 transition-all duration-300">
+        Linking Words
     </button>
 
     <!-- Modal Backdrop -->

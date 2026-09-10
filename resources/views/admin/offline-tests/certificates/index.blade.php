@@ -252,8 +252,14 @@
                         <div>
                             <p class="text-sm font-semibold text-slate-700 mb-2">Background Saat Ini</p>
                             @if($cert->background_image)
-                                <div class="rounded-xl overflow-hidden border border-slate-200 mb-3 h-32 bg-slate-50 relative group">
-                                    <img src="{{ asset('storage/' . $cert->background_image) }}" alt="Certificate Background" class="w-full h-full object-contain">
+                                <div class="rounded-xl overflow-hidden border border-slate-200 mb-2 h-32 bg-slate-50 relative group">
+                                    <img src="{{ route('offline-test-certificates.background', $cert->id) }}" alt="Certificate Background" class="w-full h-full object-contain">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="inline-flex items-center gap-1.5 text-xs text-rose-600 font-medium cursor-pointer">
+                                        <input type="checkbox" name="remove_background_image" value="1" class="rounded border-slate-300 text-rose-600 focus:ring-rose-500">
+                                        Hapus background template
+                                    </label>
                                 </div>
                             @else
                                 <div class="rounded-xl border border-dashed border-slate-300 mb-3 h-32 flex items-center justify-center bg-slate-50">
@@ -263,6 +269,51 @@
                             
                             <input type="file" name="background_image" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 file:cursor-pointer transition">
                             <p class="text-xs text-slate-400 mt-1.5">Gunakan gambar resolusi tinggi landscape (misal A4 landscape).</p>
+                        </div>
+
+                        <!-- Signature and Stamp Upload Section -->
+                        <div class="grid gap-4 md:grid-cols-2 pt-2 border-t border-slate-100">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Tanda Tangan Digital</label>
+                                @if(!empty($templateConfig['signature_image']))
+                                    <div class="rounded-xl border border-slate-200 p-2 mb-2 bg-slate-50 flex items-center justify-center h-24 relative group">
+                                        <img src="{{ route('offline-test-certificates.signature', $cert->id) }}" alt="Tanda Tangan" class="max-h-20 max-w-full object-contain">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="inline-flex items-center gap-1.5 text-xs text-rose-600 font-medium cursor-pointer">
+                                            <input type="checkbox" name="remove_signature_image" value="1" class="rounded border-slate-300 text-rose-600 focus:ring-rose-500">
+                                            Hapus tanda tangan
+                                        </label>
+                                    </div>
+                                @else
+                                    <div class="rounded-xl border border-dashed border-slate-300 mb-2 h-24 flex items-center justify-center bg-slate-50">
+                                        <span class="text-xs text-slate-400 font-medium">Belum ada tanda tangan</span>
+                                    </div>
+                                @endif
+                                <input type="file" name="signature_image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 file:cursor-pointer transition">
+                                <p class="text-[11px] text-slate-400 mt-1">Disarankan format PNG transparan (maks 3MB).</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Stempel Resmi (Seal/Stamp)</label>
+                                @if(!empty($templateConfig['stamp_image']))
+                                    <div class="rounded-xl border border-slate-200 p-2 mb-2 bg-slate-50 flex items-center justify-center h-24 relative group">
+                                        <img src="{{ route('offline-test-certificates.stamp', $cert->id) }}" alt="Stempel" class="max-h-20 max-w-full object-contain">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="inline-flex items-center gap-1.5 text-xs text-rose-600 font-medium cursor-pointer">
+                                            <input type="checkbox" name="remove_stamp_image" value="1" class="rounded border-slate-300 text-rose-600 focus:ring-rose-500">
+                                            Hapus stempel
+                                        </label>
+                                    </div>
+                                @else
+                                    <div class="rounded-xl border border-dashed border-slate-300 mb-2 h-24 flex items-center justify-center bg-slate-50">
+                                        <span class="text-xs text-slate-400 font-medium">Belum ada stempel</span>
+                                    </div>
+                                @endif
+                                <input type="file" name="stamp_image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 file:cursor-pointer transition">
+                                <p class="text-[11px] text-slate-400 mt-1">Disarankan format PNG transparan stempel (maks 3MB).</p>
+                            </div>
                         </div>
 
                         <!-- Main Configuration Fields -->
@@ -367,7 +418,7 @@
 
                     <div class="mini-cert-canvas" style="--cert-color: {{ $cert->text_color ?: '#0f172a' }};">
                         @if($cert->background_image)
-                            <div style="position:absolute; inset:0; background-image:url('{{ asset('storage/' . $cert->background_image) }}'); background-size:cover; background-position:center; opacity:0.15; z-index:0; pointer-events:none;"></div>
+                            <div style="position:absolute; inset:0; background-image:url('{{ route('admin.offline-test-certificates.background', $cert->id) }}'); background-size:cover; background-position:center; opacity:0.15; z-index:0; pointer-events:none;"></div>
                         @endif
                         <div class="mini-cert-border-outer">
                             <div class="mini-cert-border-inner">
@@ -413,6 +464,7 @@
                                     <div class="mini-cert-footer" style="margin-top: 10px;">
                                         <div class="mini-cert-col">
                                             <span class="mini-cert-label">{{ $templateConfig['footer_left_label'] ?? 'Date' }}</span>
+                                            <div style="height: {{ (!empty($templateConfig['signature_image']) || !empty($templateConfig['stamp_image'])) ? '34px' : '10px' }};"></div>
                                             <div class="mini-cert-line"></div>
                                             <span class="mini-cert-value">{{ now()->format('d M Y') }}</span>
                                         </div>
@@ -421,6 +473,14 @@
 
                                         <div class="mini-cert-col">
                                             <span class="mini-cert-label">{{ $templateConfig['footer_right_label'] ?? 'Authorized Signature' }}</span>
+                                            <div class="mini-cert-signature-wrap" style="position: relative; height: {{ (!empty($templateConfig['signature_image']) || !empty($templateConfig['stamp_image'])) ? '34px' : '10px' }}; width: 80px; display: flex; align-items: center; justify-content: center;">
+                                                @if(!empty($templateConfig['stamp_image']))
+                                                    <img src="{{ route('offline-test-certificates.stamp', $cert->id) }}" alt="Stamp" style="position: absolute; left: 2px; bottom: -3px; height: 32px; max-width: 38px; object-fit: contain; opacity: 0.88; transform: rotate(-6deg); pointer-events: none; z-index: 1;">
+                                                @endif
+                                                @if(!empty($templateConfig['signature_image']))
+                                                    <img src="{{ route('offline-test-certificates.signature', $cert->id) }}" alt="Signature" style="position: relative; max-height: 32px; max-width: 76px; object-fit: contain; z-index: 2;">
+                                                @endif
+                                            </div>
                                             <div class="mini-cert-line"></div>
                                             <span class="mini-cert-value">{{ $templateConfig['signature_name'] ?? 'Target Bahasa' }}</span>
                                         </div>
@@ -452,6 +512,7 @@
                                     <div class="mini-cert-footer" style="margin-top: 10px;">
                                         <div class="mini-cert-col">
                                             <span class="mini-cert-label">{{ $templateConfig['footer_left_label'] ?? 'Date' }}</span>
+                                            <div style="height: {{ (!empty($templateConfig['signature_image']) || !empty($templateConfig['stamp_image'])) ? '34px' : '10px' }};"></div>
                                             <div class="mini-cert-line"></div>
                                             <span class="mini-cert-value">{{ now()->format('d M Y') }}</span>
                                         </div>
@@ -460,6 +521,14 @@
 
                                         <div class="mini-cert-col">
                                             <span class="mini-cert-label">{{ $templateConfig['footer_right_label'] ?? 'Authorized Signature' }}</span>
+                                            <div class="mini-cert-signature-wrap" style="position: relative; height: {{ (!empty($templateConfig['signature_image']) || !empty($templateConfig['stamp_image'])) ? '34px' : '10px' }}; width: 80px; display: flex; align-items: center; justify-content: center;">
+                                                @if(!empty($templateConfig['stamp_image']))
+                                                    <img src="{{ route('offline-test-certificates.stamp', $cert->id) }}" alt="Stamp" style="position: absolute; left: 2px; bottom: -3px; height: 32px; max-width: 38px; object-fit: contain; opacity: 0.88; transform: rotate(-6deg); pointer-events: none; z-index: 1;">
+                                                @endif
+                                                @if(!empty($templateConfig['signature_image']))
+                                                    <img src="{{ route('offline-test-certificates.signature', $cert->id) }}" alt="Signature" style="position: relative; max-height: 32px; max-width: 76px; object-fit: contain; z-index: 2;">
+                                                @endif
+                                            </div>
                                             <div class="mini-cert-line"></div>
                                             <span class="mini-cert-value">{{ $templateConfig['signature_name'] ?? 'Target Bahasa' }}</span>
                                         </div>
@@ -468,6 +537,7 @@
                                     <div class="mini-cert-footer">
                                         <div class="mini-cert-col">
                                             <span class="mini-cert-label">{{ $templateConfig['footer_left_label'] ?? 'Date' }}</span>
+                                            <div style="height: {{ (!empty($templateConfig['signature_image']) || !empty($templateConfig['stamp_image'])) ? '34px' : '10px' }};"></div>
                                             <div class="mini-cert-line"></div>
                                             <span class="mini-cert-value">{{ now()->format('d M Y') }}</span>
                                         </div>
@@ -484,6 +554,14 @@
 
                                         <div class="mini-cert-col">
                                             <span class="mini-cert-label">{{ $templateConfig['footer_right_label'] ?? 'Authorized Signature' }}</span>
+                                            <div class="mini-cert-signature-wrap" style="position: relative; height: {{ (!empty($templateConfig['signature_image']) || !empty($templateConfig['stamp_image'])) ? '34px' : '10px' }}; width: 80px; display: flex; align-items: center; justify-content: center;">
+                                                @if(!empty($templateConfig['stamp_image']))
+                                                    <img src="{{ route('offline-test-certificates.stamp', $cert->id) }}" alt="Stamp" style="position: absolute; left: 2px; bottom: -3px; height: 32px; max-width: 38px; object-fit: contain; opacity: 0.88; transform: rotate(-6deg); pointer-events: none; z-index: 1;">
+                                                @endif
+                                                @if(!empty($templateConfig['signature_image']))
+                                                    <img src="{{ route('offline-test-certificates.signature', $cert->id) }}" alt="Signature" style="position: relative; max-height: 32px; max-width: 76px; object-fit: contain; z-index: 2;">
+                                                @endif
+                                            </div>
                                             <div class="mini-cert-line"></div>
                                             <span class="mini-cert-value">{{ $templateConfig['signature_name'] ?? 'Target Bahasa' }}</span>
                                         </div>

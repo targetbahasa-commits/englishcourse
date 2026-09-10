@@ -16,7 +16,7 @@
         .dotted-answer { border-bottom: 1px dotted #000; display: inline-block; min-width: 120px; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.cambridge-guest-signup-modal')
     @include('components.program-sidebar')
@@ -38,7 +38,7 @@
                     <p class="text-sm text-gray-500">Cambridge IELTS Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ $backUrl ?? route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+            <a href="{{ $backUrl ?? route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 {{ $backLabel ?? 'Back' }}
             </a>
@@ -232,7 +232,7 @@
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar">
+        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
             <div class="px-8 py-8 pb-24 max-w-2xl mx-auto">
 
                 {{-- Questions 1–7: True/False/Not Given --}}
@@ -241,7 +241,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 1?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 1–7 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                             <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -252,7 +252,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -268,7 +268,7 @@
                                     [6, "It was found that the bones of female polar bears were very weak when they came out of their dens in spring."],
                                     [7, "The polar bear's mechanism for increasing bone density could also be used by people one day."],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -298,7 +298,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 8–13 on your answer sheet.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <h4 class="text-base font-bold text-center mb-4">Reasons why polar bears should be protected</h4>
 
                         <p class="mb-3 text-gray-800">People think of bears as unintelligent and <span class="font-bold">8</span>
@@ -355,7 +355,7 @@
                     <p class="text-sm italic text-gray-700 mb-4">Write the correct number, <strong><em>i–ix</em></strong>, in boxes 14–20 on your answer sheet.</p>
 
                     {{-- List of Headings box --}}
-                    <div class="border-2 border-gray-400 p-4 rounded mb-6 bg-gray-50 text-sm">
+                    <div class="border-2 border-gray-400 p-4 rounded mb-6 bg-white text-sm">
                         <p class="text-center font-bold mb-3">List of Headings</p>
                         @foreach([
                             ['i',    'The areas and artefacts within the pyramid itself'],
@@ -379,7 +379,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Paragraph</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -389,7 +389,7 @@
                                 @foreach([
                                     [14, 'A'], [15, 'B'], [16, 'C'], [17, 'D'], [18, 'E'], [19, 'F'], [20, 'G']
                                 ] as [$num, $para])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm font-medium">Paragraph <strong>{{ $para }}</strong></td>
                                     <td class="py-3 px-3 text-center">
@@ -419,7 +419,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 21–24 on your answer sheet.</p>
 
-                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <h4 class="text-base font-bold text-center mb-4">The Step Pyramid of Djoser</h4>
 
                         <p class="mb-4 text-gray-800 leading-loose">
@@ -532,7 +532,7 @@
                     <p class="text-sm italic text-gray-700 mb-5">Write the correct letter, <strong>A–G</strong>, in boxes 31–34 on your answer sheet.</p>
 
                     {{-- Summary box --}}
-                    <div class="border border-gray-300 rounded-lg p-5 bg-gray-50 text-sm mb-5">
+                    <div class="border border-gray-300 rounded-lg p-5 bg-white text-sm mb-5">
                         <h4 class="text-base font-bold text-center mb-4">The 'algorithmication' of jobs</h4>
 
                         <p class="text-gray-800 leading-loose mb-4">
@@ -596,7 +596,7 @@
                     <p class="text-sm italic text-gray-700 mb-4"><strong>NB</strong> You may use any letter more than once.</p>
 
                     {{-- List of people --}}
-                    <div class="border border-gray-300 rounded p-4 bg-gray-50 text-sm mb-5 inline-block">
+                    <div class="border border-gray-300 rounded p-4 bg-white text-sm mb-5 inline-block">
                         <p class="font-bold text-center mb-2">List of people</p>
                         <div class="space-y-1">
                             <div><span class="font-bold">A</span>&nbsp; Stella Pachidi</div>
@@ -608,7 +608,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-28 text-center">Person</th>
@@ -623,7 +623,7 @@
                                     [39, 'People are going to follow a less conventional career path than in the past.'],
                                     [40, 'Authorities should take measures to ensure that there will be adequately paid work for everyone.'],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">

@@ -9,7 +9,7 @@
     <h4 class="text-xl font-bold mb-4 text-center uppercase">Radio Writing</h4>
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-12">
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>You may have to ignore some of the ordinary</span>
                 <strong class="text-blue-600">31</strong>
@@ -19,7 +19,7 @@
                 <span>of writing.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Written words do not indicate things like emphasis, the</span>
                 <strong class="text-blue-600">32</strong>
@@ -29,7 +29,7 @@
                 <span>of reading or where to pause.</span>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>A script needs to sound like a</span>
                 <strong class="text-blue-600">33</strong>
@@ -48,13 +48,13 @@
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
 
         {{-- Know who you are talking to --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Know who you are talking to</p>
         </div>
         <div class="border-b border-gray-200 p-3">
             <p class="text-gray-700 font-medium italic text-sm">Imagine a typical listener:</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>e.g. imagine telling your</span>
                 <strong class="text-blue-600">34</strong>
@@ -64,10 +64,10 @@
                 <span>about a film.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="text-gray-700 font-medium italic text-sm">Create an informal tone:</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>e.g. use words like</span>
                 <strong class="text-blue-600">35</strong>
@@ -78,16 +78,16 @@
         </div>
 
         {{-- Work out what you are going to say --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Work out what you are going to say</p>
         </div>
         <div class="border-b border-gray-200 p-3">
             <p class="text-gray-700 font-medium italic text-sm">Remember:</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <p class="text-gray-700">listeners cannot ask questions</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>you cannot</span>
                 <strong class="text-blue-600">36</strong>
@@ -100,7 +100,7 @@
         <div class="border-b border-gray-200 p-3">
             <p class="text-gray-700 font-medium italic text-sm">Make your script logical:</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <strong class="text-blue-600">37</strong>
                 <span class="inline-block w-36 mx-1">
@@ -109,7 +109,7 @@
                 <span>the information.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Use concrete images e.g. compare the size of a field to a</span>
                 <strong class="text-blue-600">38</strong>
@@ -118,7 +118,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Use the</span>
                 <strong class="text-blue-600">39</strong>
@@ -128,7 +128,7 @@
                 <span>to get attention.</span>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Check the script by</span>
                 <strong class="text-blue-600">40</strong>

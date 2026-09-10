@@ -8,7 +8,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         {{-- Sidebar --}}
@@ -16,51 +16,52 @@
             @include('components.sidebar-admin')
         @elseif(Auth::user()->isTeacher())
             @include('components.sidebar-teacher')
+        @elseif(Auth::user()->isGuest() || Auth::user()->role === 'guest_quick')
+            @include('components.sidebar-guest')
         @else
             @include('components.sidebar-student')
         @endif
 
         {{-- Main Content --}}
-        <main class="flex-1 md:ml-64 p-8">
+        <main class="flex-1 md:ml-64 p-4 md:p-8">
             {{-- Header --}}
-            <div class="mb-8">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="p-3 bg-gradient-to-br from-orange-500 to-orange-700 rounded-2xl shadow-lg">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2 text-sm text-gray-400 mb-1">
-                                <a href="{{ route('assignments.pte-academic') }}" class="hover:text-orange-600 transition">PTE Academic</a>
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                                <span class="text-gray-600 font-medium">Speaking & Writing</span>
-                            </div>
-                            <h1 class="text-3xl font-bold text-gray-800">Speaking & Writing</h1>
-                            <p class="text-gray-600 mt-1">54 – 67 Minutes. Kedua kemampuan ini digabung dalam satu sesi.</p>
-                        </div>
+            <div class="mb-6 bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
+                <div class="flex justify-end items-center gap-2 mb-2">
+                    @php
+                        $calendarClassPeriodId = Auth::user()->class_period_id ?? '';
+                        $calendarBatchName = 'PTE Academic';
+                    @endphp
+                    @if($calendarClassPeriodId)
+                        <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-gray-600 bg-white hover:bg-white border border-gray-200 rounded-full transition-colors duration-200 shadow-sm shrink-0">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <span>Lihat Kalender</span>
+                        </button>
+                    @endif
+                    <a href="{{ route('assignments.pte-academic') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-gray-600 bg-white hover:bg-white border border-gray-200 rounded-full shadow-sm transition-all shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        <span>Back</span>
+                    </a>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="p-3 bg-gradient-to-br from-orange-500 to-orange-700 rounded-2xl shadow-lg shrink-0">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                        </svg>
                     </div>
-                    <div class="flex items-center gap-2">
-                        @php
-                            $calendarClassPeriodId = Auth::user()->class_period_id ?? '';
-                            $calendarBatchName = 'PTE Academic';
-                        @endphp
-                        @if($calendarClassPeriodId)
-                            <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 font-medium rounded-lg transition-colors duration-200 shadow-sm">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                Lihat Kalender
-                            </button>
-                        @endif
-                        <a href="{{ route('assignments.pte-academic') }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                            Back
-                        </a>
+                    <div>
+                        <div class="flex items-center gap-2 text-sm text-gray-400 mb-1">
+                            <a href="{{ route('assignments.pte-academic') }}" class="hover:text-orange-600 transition">PTE Academic</a>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            <span class="text-gray-600 font-medium">Speaking & Writing</span>
+                        </div>
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Speaking & Writing</h1>
+                        <p class="text-xs md:text-sm text-gray-600 mt-1">54 – 67 Minutes. Kedua kemampuan ini digabung dalam satu sesi.</p>
                     </div>
                 </div>
             </div>
 
-            {{-- 8 Question Types --}}
+            {{-- 10 Question Types --}}
             @php
                 $questions = [
                     ['title' => 'Personal Introduction', 'desc' => 'Perkenalan diri (tidak dinilai, hanya untuk dikirim ke universitas).', 'icon' => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', 'route' => route('assignments.pte-academic.speaking-writing.personal-introduction.practice')],
@@ -68,6 +69,8 @@
                     ['title' => 'Repeat Sentence', 'desc' => 'Mendengarkan kalimat lalu mengulanginya dengan tepat.', 'icon' => 'M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 012.828 2.828', 'route' => route('assignments.pte-academic.speaking-writing.repeat-sentence.index')],
                     ['title' => 'Describe Image', 'desc' => 'Menjelaskan gambar atau grafik yang muncul di layar.', 'icon' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', 'route' => route('assignments.pte-academic.speaking-writing.describe-image.index')],
                     ['title' => 'Re-tell Lecture', 'desc' => 'Mendengarkan kuliah singkat lalu menceritakan kembali isinya.', 'icon' => 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z', 'route' => route('assignments.pte-academic.speaking-writing.retell-lecture.index')],
+                    ['title' => 'Summarize Group Discussion', 'desc' => 'Mendengarkan diskusi kelompok lalu merangkum poin utama secara lisan.', 'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z', 'route' => route('assignments.pte-academic.speaking-writing.summarize-group-discussion.index')],
+                    ['title' => 'Respond to a Situation', 'desc' => 'Mendengarkan situasi kehidupan nyata lalu memberikan respon lisan.', 'icon' => 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', 'route' => route('assignments.pte-academic.speaking-writing.respond-to-a-situation.index')],
                     ['title' => 'Answer Short Question', 'desc' => 'Menjawab pertanyaan singkat dengan satu atau beberapa kata.', 'icon' => 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'route' => route('assignments.pte-academic.speaking-writing.answer-short-question.index')],
                     ['title' => 'Summarize Written Text', 'desc' => 'Membaca teks dan merangkumnya dalam satu kalimat saja.', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'route' => route('assignments.pte-academic.speaking-writing.summarize-written-text.index')],
                     ['title' => 'Write Essay', 'desc' => 'Menulis esai 200–300 kata berdasarkan topik yang diberikan.', 'icon' => 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z', 'route' => route('assignments.pte-academic.speaking-writing.write-essay.index')],

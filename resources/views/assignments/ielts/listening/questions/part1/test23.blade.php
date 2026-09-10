@@ -14,13 +14,13 @@
         </div>
 
         {{-- Example: Name --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 font-bold italic text-gray-500 text-sm">• Name:</div>
             <div class="p-3 font-bold italic text-gray-500 text-sm">Mary Collins</div>
         </div>
 
         {{-- Q1: Factility available --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">• Factility available:</div>
             <div class="p-3">
                 <strong>1</strong>
@@ -31,7 +31,7 @@
         </div>
 
         {{-- Q2: General layout --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">• General layout:</div>
             <div class="p-3 space-y-2">
                 <p class="text-gray-700 text-sm">upstairs: living room bedrooms downstairs:</p>
@@ -45,7 +45,7 @@
         </div>
 
         {{-- Q3: Car park --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">• Car park:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">availability of a large</span>
@@ -57,7 +57,7 @@
         </div>
 
         {{-- Q4: Shopping --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">• Shopping:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">at the</span>
@@ -69,7 +69,7 @@
         </div>
 
         {{-- Q5: Place for children playing --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">• Place for children playing:</div>
             <div class="p-3">
                 <strong>5</strong>
@@ -80,7 +80,7 @@
         </div>
 
         {{-- Q6: Education resources --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">• Education resources:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">a</span>
@@ -93,7 +93,7 @@
         </div>
 
         {{-- Q7: Rent --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">• Rent:</div>
             <div class="p-3 space-y-2 text-gray-700">
                 <p>$980 a month</p>
@@ -108,7 +108,7 @@
         </div>
 
         {{-- Q8: Date of house available --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">• Date of house available:</div>
             <div class="p-3">
                 <strong>8</strong>
@@ -119,7 +119,7 @@
         </div>
 
         {{-- Q9: Viewing arrangement --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">• Viewing arrangement (time):</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">meet at</span>
@@ -131,13 +131,13 @@
         </div>
 
         {{-- Postcode (given) --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 text-gray-700">• Postcode:</div>
             <div class="p-3 text-gray-700">GA58ER</div>
         </div>
 
         {{-- Q10: Address --}}
-        <div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">• Address:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">8</span>

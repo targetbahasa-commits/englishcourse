@@ -178,7 +178,7 @@
     </script>
 </head>
 
-<body class="font-sans antialiased bg-gray-50 h-screen flex flex-col overflow-hidden" 
+<body class="font-sans antialiased bg-white h-screen flex flex-col overflow-hidden" 
       x-data="readingTest()" 
       @mouseup="handleMouseUp" 
       @resize.window="resizeCanvas">
@@ -198,13 +198,13 @@
                 </div>
             </div>
             
-                <div class="bg-gray-100 p-1.5 rounded-lg flex gap-1 hidden">
+                <div class="bg-white p-1.5 rounded-lg flex gap-1 hidden">
                     <!-- Removed passage navigation to match C16 style -->
                 </div>
 
                 <!-- Tools Menu -->
                 <div class="relative" x-data="{ toolsOpen: false }" @click.away="toolsOpen = false">
-                    <button @click="toolsOpen = !toolsOpen" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                    <button @click="toolsOpen = !toolsOpen" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-white flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                         Tools
                     </button>
@@ -216,13 +216,13 @@
                             <button @click="setTool('highlight', 'blue')" class="h-8 rounded flex items-center justify-center bg-blue-200 hover:bg-blue-300 ring-2 ring-transparent transition" :class="{'ring-blue-500 shadow-md': activeTool === 'highlight' && activeColor === 'blue'}"></button>
                             <button @click="setTool('highlight', 'pink')" class="h-8 rounded flex items-center justify-center bg-pink-200 hover:bg-pink-300 ring-2 ring-transparent transition" :class="{'ring-pink-500 shadow-md': activeTool === 'highlight' && activeColor === 'pink'}"></button>
                         </div>
-                        <button @click="setTool('remove_highlight')" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2" :class="{'bg-gray-100 font-semibold': activeTool === 'remove_highlight'}">
+                        <button @click="setTool('remove_highlight')" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-white rounded-lg flex items-center gap-2" :class="{'bg-white font-semibold': activeTool === 'remove_highlight'}">
                             <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             Eraser (Highlights)
                         </button>
 
                         <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100 mt-2 mb-2">Pen Tool</div>
-                        <button @click="toggleDrawing()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center justify-between" :class="{'bg-blue-50 text-blue-700 font-semibold': isDrawingMode}">
+                        <button @click="toggleDrawing()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-white rounded-lg flex items-center justify-between" :class="{'bg-white text-blue-700 font-semibold': isDrawingMode}">
                             <div class="flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 Draw on Screen
@@ -231,7 +231,7 @@
                                 <div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full transition-transform" :class="{'translate-x-4': isDrawingMode}"></div>
                             </div>
                         </button>
-                        <div x-show="isDrawingMode" class="mt-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
+                        <div x-show="isDrawingMode" class="mt-2 px-3 py-2 bg-white rounded-lg border border-gray-200">
                              <div class="flex text-xs justify-between mb-1 text-gray-500"><span>Size</span><span x-text="penSize+'px'"></span></div>
                              <input type="range" x-model="penSize" min="1" max="10" class="w-full accent-blue-600 block">
                              <button @click="clearCanvas()" class="mt-2 w-full text-center text-xs text-red-600 hover:text-red-700 font-semibold py-1 border border-red-200 hover:bg-red-50 rounded transition">Clear Drawings</button>
@@ -246,14 +246,14 @@
                         Admin
                     </button>
                     <div x-show="adminOpen" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
-                        <button onclick="document.getElementById('uploadAnswerKeyModal').classList.remove('hidden')" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-purple-700 flex items-center gap-2">
+                        <button onclick="document.getElementById('uploadAnswerKeyModal').classList.remove('hidden')" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-white hover:text-purple-700 flex items-center gap-2">
                             <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                             Upload Answer Key
                         </button>
                     </div>
                 </div>
                 @endif
-                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => 20, 'id' => 4]) }}" class="px-4 py-2 bg-white text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 font-medium transition cursor-pointer">
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => 20, 'id' => 4]) }}" class="px-4 py-2 bg-white text-gray-600 border border-gray-300 rounded-lg hover:bg-white flex items-center gap-2 font-medium transition cursor-pointer">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     Exit
                 </a>
@@ -374,7 +374,7 @@
                     <p class="text-sm text-gray-800 mb-1">Complete the notes below.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                     
-                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <h4 class="text-base font-bold text-center mb-4">The life and work of Georgia O’Keeffe</h4>
                         <div class="space-y-4 text-gray-800 leading-loose">
                             <div class="flex items-center gap-2">
@@ -432,7 +432,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
                     <p class="text-sm italic text-gray-600 mb-1"><strong>Questions 8–13</strong></p>
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 1?</p>
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                             <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -523,7 +523,7 @@
                     <p class="text-sm text-gray-800 mb-1">Complete the sentences below.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm space-y-4">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm space-y-4">
                         <p class="text-gray-800 leading-loose"><span class="font-bold text-blue-600 mr-1">18</span> The stormwater-management programme in Miami Beach has involved the installation of efficient <input type="text" class="border-b border-gray-500 outline-none px-1 w-32 bg-transparent text-sm placeholder-gray-400"> .</p>
                         <p class="text-gray-800 leading-loose"><span class="font-bold text-blue-600 mr-1">19</span> The construction of <input type="text" class="border-b border-gray-500 outline-none px-1 w-32 bg-transparent text-sm placeholder-gray-400"> was the first stage of a project to ensure the success of mangroves in Indonesia.</p>
                         <p class="text-gray-800 leading-loose"><span class="font-bold text-blue-600 mr-1">20</span> As a response to rising floodwaters in the Mekong Delta, a not-for-profit organisation has been building houses that can <input type="text" class="border-b border-gray-500 outline-none px-1 w-32 bg-transparent text-sm placeholder-gray-400"> .</p>
@@ -536,7 +536,7 @@
                     <p class="text-sm italic text-gray-600 mb-1"><strong>Questions 23–26</strong></p>
                     <p class="text-sm italic text-gray-700 mb-1">Look at the following statements (Questions 23–26) and the list of people below. Match each statement with the correct person, <strong>A–E</strong>.</p>
                     
-                    <div class="border border-gray-300 rounded p-4 bg-gray-50 text-sm mb-5 inline-block">
+                    <div class="border border-gray-300 rounded p-4 bg-white text-sm mb-5 inline-block">
                         <p class="font-bold text-center mb-2">List of People</p>
                         <div class="space-y-1">
                             <div><span class="font-bold">A</span>&nbsp; Yanira Pineda</div>
@@ -550,7 +550,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-28 text-center">Person</th>
@@ -566,7 +566,7 @@
                         ];
                         @endphp
                             @foreach($q23_26 as $num => $text)
-                            <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                            <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                 <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                 <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $text }}</td>
                                 <td class="py-3 px-3 text-center">
@@ -638,7 +638,7 @@
                     <p class="text-sm italic text-gray-600 mb-1"><strong>Questions 32–36</strong></p>
                     <p class="text-sm italic text-gray-700 mb-1">Look at the following statements (Questions 32–36) and the list of people below. Match each statement with the correct person, <strong>A–E</strong>.</p>
 
-                    <div class="border border-gray-300 rounded p-4 bg-gray-50 text-sm mb-5 inline-block">
+                    <div class="border border-gray-300 rounded p-4 bg-white text-sm mb-5 inline-block">
                         <p class="font-bold text-center mb-2">List of People</p>
                         <div class="space-y-1">
                             <div><span class="font-bold">A</span>&nbsp; Dan Macon</div>
@@ -652,7 +652,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-28 text-center">Person</th>
@@ -666,7 +666,7 @@
                                     [35, "Livestock guard dogs are the best way of protecting farm animals, as long as the dogs are appropriately handled."],
                                     [36, "Teaching a livestock guard dog how to do its work needs a different focus from teaching a house guard dog."]
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -694,7 +694,7 @@
                     <p class="text-sm text-gray-800 mb-1">Complete the summary below.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <h4 class="text-base font-bold text-center mb-4">Unintended ecological effects of using guard dogs</h4>
                         <p class="text-gray-800 leading-loose mb-4">In Namibia, livestock guard dogs have been used to protect domestic animals from attacks by cheetahs. This has led to a rise in the deaths of other predators, particularly <span class="font-bold text-blue-600 mr-1">37</span> <input type="text" class="border-b border-gray-500 outline-none px-1 w-32 bg-transparent text-sm placeholder-gray-400"> . In addition, it has been suggested that the dogs could have <span class="font-bold text-blue-600 mr-1">38</span> <input type="text" class="border-b border-gray-500 outline-none px-1 w-32 bg-transparent text-sm placeholder-gray-400"> which may affect other species, and that they may reduce the amount of <span class="font-bold text-blue-600 mr-1">39</span> <input type="text" class="border-b border-gray-500 outline-none px-1 w-32 bg-transparent text-sm placeholder-gray-400"> available to certain wild animals.</p>
                         <p class="text-gray-800 leading-loose">On the other hand, these dogs may help birds by protecting their nests. These might otherwise be threatened by predators such as <span class="font-bold text-blue-600 mr-1">40</span> <input type="text" class="border-b border-gray-500 outline-none px-1 w-32 bg-transparent text-sm placeholder-gray-400"> .</p>

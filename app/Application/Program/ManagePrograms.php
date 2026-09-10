@@ -95,7 +95,11 @@ class ManagePrograms
             $validated['slug'] = Str::slug($validated['name']);
         }
 
-        $validated['is_active'] = $request->has('is_active');
+        $validated['is_active'] = $request->boolean('is_active');
+        $priceKeys = ['price', 'price_offline', 'price_private', 'price_private_offline', 'price_semi_private', 'price_semi_private_offline'];
+        foreach ($priceKeys as $pk) {
+            $validated[$pk] = $validated[$pk] ?? 0;
+        }
 
         if ($request->hasFile('brochure_image')) {
             $this->brochureStorage->deleteFile($program->brochure_image);

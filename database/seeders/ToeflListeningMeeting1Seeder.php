@@ -15,7 +15,7 @@ class ToeflListeningMeeting1Seeder extends Seeder
         $questions = [
             [
                 'question_number' => 1,
-                'question_text' => 'Focus: listening to dialogs that involve agreement and disagreement.\nDirections: listen to the following dialogs. Decide which choice best answers the question.',
+                'question_text' => 'Focus: listening to dialogs that involve agreement and disagreement. Directions: listen to the following dialogs. Decide which choice best answers the question.',
                 'option_a' => 'Get a different line.',
                 'option_b' => 'Stand in another line.',
                 'option_c' => 'N/A',

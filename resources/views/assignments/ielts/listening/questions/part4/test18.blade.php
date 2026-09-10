@@ -10,13 +10,13 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-12">
         {{-- Header --}}
-        <div class="grid grid-cols-3 border-b border-gray-200 bg-gray-50" style="grid-template-columns: 1fr 3fr;">
+        <div class="grid grid-cols-3 border-b border-gray-200 bg-white" style="grid-template-columns: 1fr 3fr;">
             <div class="p-3 font-bold text-gray-800 border-r border-gray-200"></div>
             <div class="p-3 font-bold text-gray-800"></div>
         </div>
 
         {{-- Safety --}}
-        <div class="grid border-b border-gray-200 hover:bg-gray-50 transition-colors" style="grid-template-columns: 1fr 3fr;">
+        <div class="grid border-b border-gray-200 hover:bg-white transition-colors" style="grid-template-columns: 1fr 3fr;">
             <div class="p-3 font-semibold text-gray-700 border-r border-gray-200">Safety</div>
             <div class="p-3 text-gray-700 flex items-center flex-wrap gap-1">
                 <span>No deaths (bar 1 from passenger misadventure) since its launch in</span>
@@ -28,7 +28,7 @@
         </div>
 
         {{-- Speed --}}
-        <div class="grid border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors" style="grid-template-columns: 1fr 3fr;">
+        <div class="grid border-b border-gray-200 bg-white hover:bg-white transition-colors" style="grid-template-columns: 1fr 3fr;">
             <div class="p-3 font-semibold text-gray-700 border-r border-gray-200">Speed</div>
             <div class="p-3 text-gray-700">
                 <div class="flex items-center flex-wrap gap-1 mb-2">
@@ -44,7 +44,7 @@
         </div>
 
         {{-- Punctuality --}}
-        <div class="grid border-b border-gray-200 hover:bg-gray-50 transition-colors" style="grid-template-columns: 1fr 3fr;">
+        <div class="grid border-b border-gray-200 hover:bg-white transition-colors" style="grid-template-columns: 1fr 3fr;">
             <div class="p-3 font-semibold text-gray-700 border-r border-gray-200">Punctuality</div>
             <div class="p-3 text-gray-700">
                 <p class="mb-2">Punctual to within the second.</p>
@@ -60,7 +60,7 @@
         </div>
 
         {{-- History --}}
-        <div class="grid border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors" style="grid-template-columns: 1fr 3fr;">
+        <div class="grid border-b border-gray-200 bg-white hover:bg-white transition-colors" style="grid-template-columns: 1fr 3fr;">
             <div class="p-3 font-semibold text-gray-700 border-r border-gray-200">History</div>
             <div class="p-3 text-gray-700">
                 <p>First used on Tokyo to Osaka route. Old models have now been retired. 300, 500 and 700 are recent models.</p>
@@ -68,7 +68,7 @@
         </div>
 
         {{-- Services --}}
-        <div class="grid hover:bg-gray-50 transition-colors" style="grid-template-columns: 1fr 3fr;">
+        <div class="grid hover:bg-white transition-colors" style="grid-template-columns: 1fr 3fr;">
             <div class="p-3 font-semibold text-gray-700 border-r border-gray-200">Services</div>
             <div class="p-3 text-gray-700">
                 <div class="flex items-center flex-wrap gap-1 mb-2">
@@ -96,7 +96,7 @@
     <p class="mb-6 text-gray-700">Write <strong>NO MORE THAN THREE WORDS</strong> for each answer.</p>
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>French TGV locomotives pull the T6V trains from both ends using a</span>
                 <strong class="text-blue-600">36</strong>
@@ -105,7 +105,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Japanese ground is unsuitable for the TGV type of train because it is</span>
                 <strong class="text-blue-600">37</strong>
@@ -115,7 +115,7 @@
                 <span>and the tracks frequently curve horizontally and vertically.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>An extra advantage of the Japanese electric car system is that it can act as a</span>
                 <strong class="text-blue-600">38</strong>
@@ -124,7 +124,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Even after the power supply is cut off in the electric car system, electricity is still produced by</span>
                 <strong class="text-blue-600">39</strong>
@@ -133,7 +133,7 @@
                 </span>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Huge improvements in power, operability and safety administration have been made possible by advances in</span>
                 <strong class="text-blue-600">40</strong>

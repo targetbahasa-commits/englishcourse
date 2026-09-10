@@ -10,15 +10,15 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong>11</strong>&nbsp; The company deals mostly with:</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[11]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span><span>Big cities.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[11]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span><span>Nature holidays.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[11]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span><span>Nepal.</span>
                 </label>
@@ -29,15 +29,15 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong>12</strong>&nbsp; The overseas consultants deal mostly with:</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[12]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span><span>Asia.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[12]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span><span>North America.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[12]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span><span>Europe.</span>
                 </label>
@@ -48,15 +48,15 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong>13</strong>&nbsp; For deserts and gorges, customers should come in the:</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[13]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span><span>Morning.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[13]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span><span>Afternoon.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[13]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span><span>Night.</span>
                 </label>
@@ -67,15 +67,15 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong>14</strong>&nbsp; Trips to regional locations are good because:</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[14]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span><span>The buses are comfortable.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[14]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span><span>There is storage for suitcases.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[14]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span><span>They can be seen quickly.</span>
                 </label>
@@ -86,15 +86,15 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong>15</strong>&nbsp; SleekLine buses are particularly known for their:</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[15]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span><span>Service.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[15]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span><span>Size.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[15]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span><span>Comfort.</span>
                 </label>
@@ -107,12 +107,10 @@
     <p class="mb-1 text-gray-700">Identify the rooms in the office plan.</p>
     <p class="mb-6 text-gray-700 italic">Write the correct letter, <strong>A-G</strong>, next to the questions.</p>
 
-    {{-- Map Image Placeholder --}}
-    <div class="mb-8 text-center">
-        <div class="inline-block p-4 border-2 border-dashed border-gray-300 bg-gray-50 rounded-lg w-full max-w-2xl bg-white relative">
-            <p class="text-gray-500 mb-2 font-medium">Office Plan Map Insert</p>
-            <p class="text-sm text-gray-400 mb-4">Please upload the map image to: <code>public/images/assignments/ielts/listening/part2/test1-map.png</code></p>
-            <img src="{{ asset('images/assignments/ielts/listening/part2/test1-map.png') }}" onerror="this.style.display='none'" class="max-w-full h-auto mx-auto" alt="Office Plan Map">
+    {{-- Map Image --}}
+    <div class="mb-8 flex justify-center">
+        <div class="p-3 border border-gray-200 bg-white rounded-xl shadow-sm max-w-2xl">
+            <img src="{{ asset('images/assignments/ielts/listening/part2/test1-map.png') }}" class="w-full h-auto rounded-lg" alt="Office Plan Map">
         </div>
     </div>
 

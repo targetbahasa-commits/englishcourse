@@ -1,0 +1,28 @@
+<div class="mb-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 4 - Practice Test 50</h3>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 31-35</h4>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the notes below.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>NO MORE THAN TWO WORDS</strong> for each answer.</p>
+<h4 class="text-xl font-bold mb-4 text-gray-800">History of time-measurement</h4>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Primitive measurements by observing</strong></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Two time keepers:</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>•</strong> The <strong class="text-blue-600 font-bold ml-1 mr-1">31</strong><input type="text" name="answers[31]" value="{{ old('answers.31') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>•</strong> Natural events, such as winds and rains, rivers flooding, plants flowering, and the cycles of breeding or <strong class="text-blue-600 font-bold ml-1 mr-1">32</strong><input type="text" name="answers[32]" value="{{ old('answers.32') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> behaviour.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Precise measurements</strong></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">They became important for organising activities for:</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>•33</strong>……………</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>•34</strong>……………</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">The oldest time keepers were discovered in Mesopotamia and <strong class="text-blue-600 font-bold ml-1 mr-1">35</strong><input type="text" name="answers[35]" value="{{ old('answers.35') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
+<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 36-40</h4>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the table below.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>ONE WORD ONLY</strong> for each answer.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Time Keeper</strong><strong>Disadvantages</strong></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">The sundial In different parts of the year, the time for day <strong class="text-blue-600 font-bold ml-1 mr-1">36</strong><input type="text" name="answers[36]" value="{{ old('answers.36') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">The clepsydra</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">(Water clock)The changing pressure and <strong class="text-blue-600 font-bold ml-1 mr-1">37</strong><input type="text" name="answers[37]" value="{{ old('answers.37') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> were what the flow of water still relied on.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">The <strong class="text-blue-600 font-bold ml-1 mr-1">38</strong><input type="text" name="answers[38]" value="{{ old('answers.38') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">The time duration was <strong class="text-blue-600 font-bold ml-1 mr-1">39</strong><input type="text" name="answers[39]" value="{{ old('answers.39') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Fire candle clock The burning <strong class="text-blue-600 font-bold ml-1 mr-1">40</strong><input type="text" name="answers[40]" value="{{ old('answers.40') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> or the rate of burning, was subject to the candles wax.</p>
+    </div>
+</div>

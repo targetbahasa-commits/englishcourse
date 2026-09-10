@@ -10,7 +10,7 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
         {{-- Example row --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 italic text-gray-600">Example</div>
             <div class="p-3 italic text-gray-600">Answer</div>
         </div>
@@ -20,7 +20,7 @@
         </div>
 
         {{-- Q1: Phone Number --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Phone Number:</div>
             <div class="p-3">
                 <strong>1</strong>
@@ -31,7 +31,7 @@
         </div>
 
         {{-- Q2, Q3: USA Address --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">USA Address:</div>
             <div class="p-3 space-y-3">
                 <p class="flex items-center flex-wrap gap-1">
@@ -53,7 +53,7 @@
         </div>
 
         {{-- Q4: Packing Day --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Packing Day:</div>
             <div class="p-3">
                 <strong>4</strong>
@@ -64,19 +64,19 @@
         </div>
 
         {{-- Date --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Date:</div>
             <div class="p-3 text-gray-700">11th March</div>
         </div>
 
         {{-- Clean-up by --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Clean-up by:</div>
             <div class="p-3 text-gray-700">5:00 p.m.</div>
         </div>
 
         {{-- Q5: Day --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Day:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <strong>5</strong>
@@ -88,13 +88,13 @@
         </div>
 
         {{-- About the Price --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">About the Price:</div>
             <div class="p-3 text-gray-700">Rather expensive</div>
         </div>
 
         {{-- Q6: Storage Time --}}
-        <div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Storage Time:</div>
             <div class="p-3">
                 <strong>6</strong>
@@ -111,11 +111,11 @@
     <p class="mb-4 text-gray-700 italic">Write the correct letter, <strong>A, B,</strong> or <strong>C,</strong> next to questions <strong>7-10</strong>.</p>
 
     {{-- Options box --}}
-    <div class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg inline-block min-w-[300px]">
+    <div class="mb-6 p-4 bg-white border border-gray-200 rounded-lg inline-block min-w-[300px]">
         <div class="space-y-2 text-gray-800 font-medium">
-            <p><strong>A</strong> &nbsp; in emergency pack</p>
-            <p><strong>B</strong> &nbsp; in personal package</p>
-            <p><strong>C</strong> &nbsp; in storage with the furniture</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[6]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>&nbsp; in emergency pack</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[6]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>&nbsp; in personal package</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[6]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>&nbsp; in storage with the furniture</span></label>
         </div>
     </div>
 

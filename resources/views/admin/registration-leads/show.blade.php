@@ -196,8 +196,23 @@
                         <label class="block text-xs font-medium text-gray-500 mb-1">Program</label>
                         <select name="program_id" x-model="form.program_id" @change="onProgramOrModeChanged()" class="w-full border border-gray-200 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                             <option value="">Belum ditentukan</option>
-                            @foreach($programs as $program)
-                                <option value="{{ $program->id }}" {{ (string) old('program_id', $lead->program_id) === (string) $program->id ? 'selected' : '' }}>{{ $program->name }}</option>
+                            @php
+                                $categoryPriority = [
+                                    'IELTS Courses & Skills' => 1,
+                                    'TOEFL & PTE Courses' => 2,
+                                    'Grammar & Speaking Courses' => 3,
+                                    'TOEFL Mock Packages' => 4,
+                                    'Cambridge Practice Tests' => 5,
+                                    'Program Lainnya' => 99,
+                                ];
+                                $groupedPrograms = $programs->groupBy('category')->sortBy(fn($items, $key) => $categoryPriority[$key] ?? 99);
+                            @endphp
+                            @foreach($groupedPrograms as $categoryName => $groupPrograms)
+                                <optgroup label="── {{ $categoryName }} ──">
+                                    @foreach($groupPrograms as $program)
+                                        <option value="{{ $program->id }}" {{ (string) old('program_id', $lead->program_id) === (string) $program->id ? 'selected' : '' }}>{{ $program->name }}</option>
+                                    @endforeach
+                                </optgroup>
                             @endforeach
                         </select>
                     </div>

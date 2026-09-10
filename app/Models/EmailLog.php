@@ -33,13 +33,16 @@ class EmailLog extends Model
      */
     public function related()
     {
-        if ($this->related_type === 'registration_lead') {
-            return $this->belongsTo(RegistrationLead::class, 'related_id');
-        }
-        if ($this->related_type === 'payment') {
-            return $this->belongsTo(Payment::class, 'related_id');
-        }
-        return null;
+        return match ($this->related_type) {
+            'registration_lead' => $this->belongsTo(RegistrationLead::class, 'related_id'),
+            'payment' => $this->belongsTo(Payment::class, 'related_id'),
+            'free_test_submission' => $this->belongsTo(FreeTestSubmission::class, 'related_id'),
+            'outreach_message' => $this->belongsTo(OutreachMessage::class, 'related_id'),
+            'offline_test_result' => $this->belongsTo(OfflineTestResult::class, 'related_id'),
+            'final_test_result' => $this->belongsTo(FinalTestResult::class, 'related_id'),
+            'user' => $this->belongsTo(User::class, 'related_id'),
+            default => null,
+        };
     }
 
     /**

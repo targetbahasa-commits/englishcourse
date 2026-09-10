@@ -17,7 +17,7 @@
             'Perbanyak ' . ($type === 'speaking' ? 'mendengarkan' : 'membaca') . ' teks bahasa Inggris pendek dan hafalkan kosakata dasar sehari-hari.'
         ];
     } elseif ($score >= 2.5 && $score <= 3.5) {
-        $messageTitle = '📚 Selamat telah menyelesaikan evaluasi!';
+        $messageTitle = ' Selamat telah menyelesaikan evaluasi!';
         $messageDesc = "Anda telah menunjukkan dasar kemampuan yang baik. Dengan memperkaya kosakata, memperbaiki tata bahasa, dan lebih banyak berlatih $skillName, skor yang lebih tinggi sangat mungkin Anda capai.";
         $practicalTips = [
             'Coba hubungkan kalimat-kalimat pendek menjadi kalimat majemuk menggunakan kata hubung dasar (and, but, because).',
@@ -34,7 +34,7 @@
                 : 'Berlatihlah menulis dalam paragraf dengan struktur yang jelas (pendahuluan, isi, penutup).'
         ];
     } elseif ($score >= 5 && $score <= 5.5) {
-        $messageTitle = '⭐ Kerja yang baik!';
+        $messageTitle = ' Kerja yang baik!';
         $messageDesc = "Kemampuan $skillName Anda sudah cukup baik dan menunjukkan perkembangan yang positif. Dengan meningkatkan akurasi tata bahasa, kohesi, dan penggunaan kosakata yang lebih beragam, Anda dapat mencapai band yang lebih tinggi.";
         $practicalTips = [
             'Gunakan struktur kalimat majemuk bertingkat (complex sentences) lebih sering untuk menunjukkan kemampuan gramatikal Anda.',
@@ -93,20 +93,20 @@
 @endphp
 @extends('layouts.admin')
 @section('content')
-<div class="fixed inset-0 z-50 bg-gray-50 flex overflow-hidden">
+<div class="fixed inset-0 z-50 bg-white flex overflow-hidden">
     <!-- Main Content -->
     <div class="flex-1 flex flex-col h-full bg-cover bg-center bg-fixed custom-scrollbar overflow-y-auto" style="background-image: url('{{ asset('images/background-container/background-kelas.png') }}');">
         <!-- Top Navigation -->
         <div class="bg-transparent px-4 md:px-6 py-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4 sticky top-0 z-10">
             <div class="flex items-start md:items-center gap-4">
-                <a href="{{ route('promo.test.show', ['type' => $type, 'id' => $id]) }}" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 text-gray-600 transition-colors">
+                <a href="{{ isset($submission->id) && $submission->id === 'mock' ? route('assignments.ielts-academic.writing.meeting', ['task' => $task ?? 1, 'id' => $id]) : route('promo.test.show', ['type' => $type, 'id' => $id]) }}" class="p-2 bg-white rounded-lg hover:bg-gray-200 text-gray-600 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </a>
                 <div>
                     <h2 class="text-xl md:text-2xl font-bold text-red-600">Your Evaluation Results</h2>
                     <div class="flex flex-wrap items-center gap-2 mt-1">
                         <span class="text-gray-500 text-sm">Overall Band Score:</span>
-                        <span class="px-3 py-0.5 bg-blue-100 text-red-700 font-bold rounded-full text-lg">{{ $aiFeedback['overall_band_score'] ?? 'N/A' }}</span>
+                        <span class="px-3 py-0.5 bg-white text-red-700 font-bold rounded-full text-lg">{{ $aiFeedback['overall_band_score'] ?? 'N/A' }}</span>
                     </div>
                 </div>
             </div>
@@ -145,7 +145,7 @@
                 }
             }">
                 <template x-if="!sent">
-                    <div class="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
+                    <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-blue-100">
                         <svg class="w-5 h-5 text-green-500 hidden xl:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                         <div class="mr-2 hidden md:block">
                             <span class="text-xs font-bold text-blue-900 block leading-tight">Ingin mengirim hasil evaluasi ini ke Whatsapp?</span>
@@ -196,7 +196,7 @@
                     @if($type === 'speaking')
                     <!-- Speaking Analysis: Question and Audio -->
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col flex-1 min-h-0">
-                        <div class="p-4 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
+                        <div class="p-4 border-b border-gray-100 bg-white flex items-center gap-2">
                             <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
                             <h3 class="font-bold text-gray-700">Transkrip & Analisis Detail</h3>
                         </div>
@@ -206,7 +206,7 @@
                                     <div class="flex flex-col gap-2">
                                         <div class="text-xs font-bold text-gray-400 uppercase tracking-wide">PERTANYAAN {{ $index + 1 }}</div>
                                         <div class="text-gray-800 font-medium">{{ $rec['question'] }}</div>
-                                        <div class="bg-gray-50 rounded-xl p-4 mt-1 border border-gray-100">
+                                        <div class="bg-white rounded-xl p-4 mt-1 border border-gray-100">
                                             @if(!empty($rec['audio_url']))
                                                 <audio controls src="{{ $rec['audio_url'] }}" class="w-full h-10 outline-none"></audio>
                                             @else
@@ -222,15 +222,29 @@
                         </div>
                     </div>
                     @else
-                    <!-- Topic Card -->
+                    <!-- Topic Card & Chart -->
                     <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex-shrink-0">
                         <h5 class="font-bold text-gray-800 mb-2">Topic</h5>
-                        <p class="text-gray-600 text-sm leading-relaxed">{{ $prompt }}</p>
+                        <div class="text-gray-600 text-sm leading-relaxed">{!! $prompt !!}</div>
+                        @if(isset($meeting) && !empty($meeting->image))
+                            <div class="mt-4 p-2 bg-white rounded-xl border border-gray-100 flex justify-center">
+                                <img src="{{ asset('storage/' . $meeting->image) }}" class="max-h-80 object-contain rounded-lg shadow-sm" alt="Task Diagram" />
+                            </div>
+                        @elseif(class_exists('\App\Support\IeltsTask1ChartResolver') && isset($meeting))
+                            @php
+                                $chart = \App\Support\IeltsTask1ChartResolver::resolve($meeting);
+                            @endphp
+                            @if(!empty($chart['publicUrl']))
+                                <div class="mt-4 p-2 bg-white rounded-xl border border-gray-100 flex justify-center">
+                                    <img src="{{ asset($chart['publicUrl']) }}" class="max-h-80 object-contain rounded-lg shadow-sm" alt="Task Diagram" />
+                                </div>
+                            @endif
+                        @endif
                     </div>
 
                     <!-- Analysis Card -->
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col flex-1 min-h-0">
-                        <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                        <div class="p-4 border-b border-gray-100 bg-white flex justify-between items-center">
                             <h3 class="font-bold text-gray-700">Detailed Text Analysis</h3>
                             <div class="flex items-center gap-3 text-xs font-medium">
                                 <span class="bg-red-100 text-red-600 px-1 rounded">Error</span>
@@ -241,7 +255,7 @@
                             .detailed-analysis del { text-decoration: none; background-color: #fee2e2; color: #dc2626; padding: 0 2px; border-radius: 2px; word-break: break-word; }
                             .detailed-analysis ins { text-decoration: none; background-color: #fef08a; color: #854d0e; padding: 0 4px; border-radius: 2px; font-weight: 600; margin-left: 2px; word-break: break-word; }
                         </style>
-                        <div class="detailed-analysis p-4 md:p-6 overflow-y-auto overflow-x-hidden flex-1 prose prose-sm md:prose-lg max-w-none leading-loose text-base md:text-lg text-gray-800 break-words w-full selection:bg-blue-100">
+                        <div class="detailed-analysis p-4 md:p-6 overflow-y-auto overflow-x-hidden flex-1 prose prose-sm md:prose-lg max-w-none leading-loose text-base md:text-lg text-gray-800 break-words w-full selection:bg-white">
                             <div class="break-words" x-html="(() => {
                                 try {
                                     const html = result?.correction_html;
@@ -264,7 +278,7 @@
                 </div>
 
                 <!-- Right Column: Improvements & Feedback -->
-                <div class="bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden flex flex-col h-full min-h-0 lg:col-span-2">
+                <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden flex flex-col h-full min-h-0 lg:col-span-2">
                     <!-- Tabs -->
                     <div class="flex border-b border-gray-200 bg-white overflow-x-auto no-scrollbar">
                         <button @click="tab = 'feedback'" :class="{ 'border-b-2 border-blue-500 text-blue-600': tab === 'feedback' }" class="px-4 py-3 font-semibold text-gray-500 hover:text-blue-500 transition-colors whitespace-nowrap flex-shrink-0">Examiner Feedback</button>
@@ -307,6 +321,55 @@
                                 <h5 class="font-bold text-gray-800 mb-1 text-sm uppercase tracking-wider">Lexical Detailed Feedback</h5>
                                 <div class="text-gray-600 text-sm prose max-w-none overflow-x-auto custom-scrollbar" x-html="result?.lexical_resource || 'No specific feedback.'"></div>
                             </div>
+
+                            <!-- Lexical Improvements Section -->
+                            <template x-if="(result?.lexical_improvements && result?.lexical_improvements?.length > 0) || (result?.vocabulary_improvements && result?.vocabulary_improvements?.length > 0)">
+                                <div class="space-y-4 mt-6 pt-4 border-t border-gray-100">
+                                    <div class="bg-white rounded-xl border border-purple-100 p-4">
+                                        <h6 class="font-bold text-purple-700 text-sm flex items-center gap-2 mb-3">
+                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                             Upgrade Vocabulary (Band 7-9)
+                                        </h6>
+                                        <div class="space-y-3">
+                                            <template x-for="(item, index) in (result?.lexical_improvements || result?.vocabulary_improvements || [])" :key="index">
+                                                <div class="bg-white p-3 rounded-lg border border-purple-100 shadow-sm">
+                                                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                                                        <span class="text-red-400 line-through text-sm" x-text="item.text || item.original"></span>
+                                                        <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                                        <span class="text-green-700 font-bold text-sm bg-green-50 px-2 py-0.5 rounded shadow-sm border border-green-100" x-text="item.improved || item.correction"></span>
+                                                    </div>
+                                                    <p class="text-gray-600 text-xs mt-1 italic" x-text="item.explanation"></p>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <template x-if="result?.topic_vocabularies && result?.topic_vocabularies?.length > 0">
+                                        <div class="bg-white rounded-xl border border-purple-100 p-4 shadow-sm">
+                                            <h6 class="font-bold text-purple-700 text-sm flex items-center gap-2 mb-1">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                                C1 Vocabulary You Could Use (from this topic)
+                                            </h6>
+                                            <p class="text-xs text-gray-500 mb-3">Kosakata tingkat lanjut (CEFR C1 / IELTS Band 7-8) yang relevan dengan topik esai ini.</p>
+                                            <div class="space-y-3">
+                                                <template x-for="(vocab, index) in result?.topic_vocabularies" :key="index">
+                                                    <div class="bg-white p-3 rounded-lg border border-purple-100">
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="font-bold text-purple-800 text-sm" x-text="vocab.term"></span>
+                                                            <span class="text-xs px-2 py-0.5 bg-white text-purple-700 font-bold rounded-full">C1</span>
+                                                        </div>
+                                                        <p class="text-sm text-gray-700 mt-1 font-medium" x-text="vocab.meaning"></p>
+                                                        <p class="text-xs text-gray-500 mt-1 italic">
+                                                            <span class="font-semibold text-purple-600">Ex:</span>
+                                                            <span x-text="vocab.example"></span>
+                                                        </p>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
                         </div>
                         
                         <!-- Tab 5: Grammar -->
@@ -315,6 +378,55 @@
                                 <h5 class="font-bold text-gray-800 mb-1 text-sm uppercase tracking-wider">Grammar Detailed Feedback</h5>
                                 <div class="text-gray-600 text-sm prose max-w-none overflow-x-auto custom-scrollbar" x-html="result?.grammatical_range_and_accuracy || result?.grammatical_range || 'No specific feedback.'"></div>
                             </div>
+
+                            <!-- Grammar Improvements / Upgrade Grammar Section -->
+                            <template x-if="result?.grammar_improvements && result?.grammar_improvements?.length > 0">
+                                <div class="space-y-4 mt-6 pt-4 border-t border-gray-100">
+                                    <!-- Grammar Errors List Section -->
+                                    <div class="bg-red-50 rounded-xl border border-red-100 p-4">
+                                        <h6 class="font-bold text-red-700 text-sm flex items-center gap-2 mb-3">
+                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                             Kesalahan Grammar yang Ditemukan
+                                        </h6>
+                                        <div class="space-y-2">
+                                            <template x-for="(item, index) in result?.grammar_improvements" :key="index">
+                                                <div class="bg-white p-3 rounded-lg border border-red-200 flex items-start gap-3 hover:shadow-sm transition-shadow">
+                                                    <div class="flex-shrink-0 mt-0.5">
+                                                        <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full" x-text="index + 1"></span>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-red-700 text-sm italic line-clamp-2" x-text="item.text || item.original"></p>
+                                                        <p class="text-xs text-gray-500 mt-1"> Grammar issue: <span x-text="item.explanation?.split('(')[0]?.trim() || 'Structure needs improvement'"></span></p>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Upgrade Grammar Section -->
+                                    <div class="bg-white rounded-xl border border-purple-100 p-4">
+                                        <h6 class="font-bold text-purple-700 text-sm flex items-center gap-2 mb-3">
+                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                             Upgrade Grammar (Band 7-9)
+                                        </h6>
+                                        <div class="space-y-3">
+                                            <template x-for="(item, index) in result?.grammar_improvements" :key="index">
+                                                <div class="bg-white p-3 rounded-lg border border-purple-100 shadow-sm">
+                                                    <div class="mb-2">
+                                                        <span class="text-xs font-semibold text-purple-800 bg-white px-2 py-0.5 rounded">KALIMAT ASLI</span>
+                                                        <p class="text-gray-600 text-sm mt-1 italic" x-text="item.text || item.original"></p>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <span class="text-xs font-semibold text-purple-800 bg-purple-200 px-2 py-0.5 rounded">VERSI LEBIH BAIK (BAND 9)</span>
+                                                        <p class="text-purple-800 font-medium text-sm mt-1" x-text="item.improved || item.correction"></p>
+                                                    </div>
+                                                    <p class="text-purple-700 text-xs mt-2 border-t border-purple-100 pt-2" x-text="item.explanation"></p>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
 
                         <!-- Tab 6: Band 9 Version -->
@@ -330,7 +442,7 @@
 
                     <div class="flex flex-col gap-4 p-5 shrink-0 border-t border-gray-200">
                         @if(isset($messageTitle))
-                        <div class="bg-blue-50 p-5 rounded-2xl border border-blue-200 flex flex-col h-full">
+                        <div class="bg-white p-5 rounded-2xl border border-blue-200 flex flex-col h-full">
                             <div class="flex-1">
                                 <h5 class="text-lg font-extrabold text-blue-900 mb-2">{{ $messageTitle }}</h5>
                                 <p class="text-sm text-blue-800 leading-relaxed mb-3">{{ $messageDesc }}</p>
@@ -368,7 +480,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
                             @foreach($eligibleScholarships as $scholarship)
                             <a href="{{ route('scholarships.search.show', $scholarship->id) }}" class="group block border border-yellow-200/80 rounded-xl p-4 hover:shadow-lg hover:border-yellow-400 transition-all bg-white relative overflow-hidden h-full flex flex-col">
-                                <div class="absolute -right-4 -top-4 w-24 h-24 bg-yellow-100 rounded-full z-0 opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
+                                <div class="absolute -right-4 -top-4 w-24 h-24 bg-white rounded-full z-0 opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
                                 
                                 <div class="relative z-10 flex-1 flex flex-col">
                                     <h4 class="font-extrabold text-gray-800 text-sm mb-1 group-hover:text-yellow-700 transition-colors">{{ $scholarship->title }}</h4>
@@ -376,8 +488,8 @@
                                     
                                     <div class="flex flex-col gap-2 mt-auto">
                                         <div class="flex flex-wrap items-center gap-1.5 text-[10px] font-bold">
-                                            <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md border border-blue-200">IELTS: {{ $scholarship->min_ielts ?? 'Tanpa Minimum' }}</span>
-                                            <span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md border border-gray-200">{{ $scholarship->level_of_study }}</span>
+                                            <span class="bg-white text-blue-800 px-2 py-0.5 rounded-md border border-blue-200">IELTS: {{ $scholarship->min_ielts ?? 'Tanpa Minimum' }}</span>
+                                            <span class="bg-white text-gray-700 px-2 py-0.5 rounded-md border border-gray-200">{{ $scholarship->level_of_study }}</span>
                                         </div>
                                         <div class="text-[11px] text-gray-500 flex items-center gap-1 pt-2 border-t border-gray-100 mt-1">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -389,7 +501,7 @@
                             @endforeach
                             </div>
                             
-                            <a href="{{ route('scholarships.search.index') }}" class="mt-auto block text-center w-full py-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 text-xs font-bold rounded-lg transition-colors border border-yellow-300">
+                            <a href="{{ route('scholarships.search.index') }}" class="mt-auto block text-center w-full py-2 bg-white hover:bg-yellow-200 text-yellow-800 text-xs font-bold rounded-lg transition-colors border border-yellow-300">
                                 Informasi beasiswa lainnya &rarr;
                             </a>
                         </div>
@@ -407,7 +519,7 @@
                                 Tunggu soal gratis lainnya yang diberikan setiap hari di Tiktok, Instagram, dan WhatsApp group. <strong class="text-yellow-300">ATAU</strong> kalian bisa mendaftar kelas IELTS dan dapatkan ratusan soal dengan hasil evaluasi yang lebih mendalam.
                              </p>
                          </div>
-                         <a href="{{ url('/brochure/' . (request('b') ?: 'offline')) }}" target="_blank" class="shrink-0 bg-white text-indigo-700 text-sm font-extrabold py-2 px-4 rounded-lg shadow hover:bg-gray-50 hover:scale-105 transition-all whitespace-nowrap text-center">
+                         <a href="{{ url('/brochure/' . (request('b') ?: 'offline')) }}" target="_blank" class="shrink-0 bg-white text-indigo-700 text-sm font-extrabold py-2 px-4 rounded-lg shadow hover:bg-white hover:scale-105 transition-all whitespace-nowrap text-center">
                              Lihat Brosur<br>Kelas
                          </a>
                     </div>

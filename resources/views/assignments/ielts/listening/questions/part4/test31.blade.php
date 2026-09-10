@@ -1,0 +1,24 @@
+<div class="mb-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 4 - Practice Test 31</h3>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 31-37</h4>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the table below.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>NO MORE THAN TWO WORDS AND/OR A NUMBER</strong> for each answer.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Talking about the history of bikes</strong></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Years/Time</strong><strong>Feature</strong><strong>Advantage</strong><strong>Disadvantage</strong></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">1830s wooden wheels covered with metal need <strong class="text-blue-600 font-bold ml-1 mr-1">31</strong><input type="text" name="answers[31]" value="{{ old('answers.31') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> than walking quite <strong class="text-blue-600 font-bold ml-1 mr-1">32</strong><input type="text" name="answers[32]" value="{{ old('answers.32') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong class="text-blue-600 font-bold ml-1 mr-1">33</strong><input type="text" name="answers[33]" value="{{ old('answers.33') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">Chain and sprocket are <strong class="text-blue-600 font-bold ml-1 mr-1">34</strong><input type="text" name="answers[34]" value="{{ old('answers.34') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">easier and <strong class="text-blue-600 font-bold ml-1 mr-1">35</strong><input type="text" name="answers[35]" value="{{ old('answers.35') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> ride harder to balance</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">1880s use <strong class="text-blue-600 font-bold ml-1 mr-1">36</strong><input type="text" name="answers[36]" value="{{ old('answers.36') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">more comfortable The faster you go, the more you feel every bump.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">1890s equal-sized wheels<strong class="text-blue-600 font-bold ml-1 mr-1">37</strong><input type="text" name="answers[37]" value="{{ old('answers.37') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">dangerous before brakes appeared</p>
+<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 38-40</h4>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">_Choose <strong>THREE</strong> letters, <strong>A-F</strong>, and write them next to questions <strong>38-40</strong>._</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">The invention of different gears on a bicycle affected which <strong>THREE</strong> of the following?</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>A</strong> Wheel size</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>B</strong> Balance</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>C</strong> Rate of speed</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>D</strong> The back wheel</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>E</strong> Safety</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>F</strong> Downhill travel</p>
+    </div>
+</div>

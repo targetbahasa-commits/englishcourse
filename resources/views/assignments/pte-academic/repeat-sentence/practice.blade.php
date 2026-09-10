@@ -10,7 +10,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="font-sans antialiased bg-gray-50 flex flex-col min-h-screen">
+<body class="font-sans antialiased bg-white flex flex-col min-h-screen">
     @include('components.impersonation-banner')
 
     <div class="flex min-h-screen">
@@ -38,9 +38,6 @@
             {{-- Top Navigation Bar --}}
             <nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
                 <div class="flex items-center gap-4">
-                    <a href="{{ route('assignments.pte-academic.speaking-writing.repeat-sentence.index') }}#topic-{{ $topicId }}" class="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    </a>
                     <div class="flex items-center gap-2">
                         <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold" style="background-color: #e0f2fe; color: #0284c7;">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
@@ -51,6 +48,10 @@
                         </div>
                     </div>
                 </div>
+                <a href="{{ route('assignments.pte-academic.speaking-writing.repeat-sentence.index') }}#topic-{{ $topicId }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-gray-600 bg-white hover:bg-white border border-gray-200 rounded-full shadow-sm transition-all shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <span>Back</span>
+                </a>
             </nav>
 
             {{-- Main Test Area --}}
@@ -90,7 +91,7 @@
                         </button>
                         <div x-show="openSpeed" @click.away="openSpeed = false" class="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 w-20 text-xs text-center font-bold">
                             <template x-for="spd in [0.8, 1.0, 1.2, 1.5]" :key="spd">
-                                <div @click="setSpeed(spd); openSpeed = false" class="py-1.5 hover:bg-gray-100 cursor-pointer" :class="playbackSpeed === spd ? 'text-[#00b4d8]' : 'text-gray-700'" x-text="spd.toFixed(1)"></div>
+                                <div @click="setSpeed(spd); openSpeed = false" class="py-1.5 hover:bg-white cursor-pointer" :class="playbackSpeed === spd ? 'text-[#00b4d8]' : 'text-gray-700'" x-text="spd.toFixed(1)"></div>
                             </template>
                         </div>
                     </div>
@@ -126,7 +127,7 @@
                     <button @click="isRecording ? stopRecording() : startRecording()" class="px-6 py-2.5 font-bold rounded-full shadow transition-all cursor-pointer hover:opacity-90" style="background-color: #00b4d8; color: #ffffff;">
                         Practice with AI Scoring
                     </button>
-                    <button @click="resetRecording()" class="px-6 py-2.5 font-medium rounded-full shadow-sm transition-all cursor-pointer hover:bg-gray-50" style="background-color: #ffffff; color: #374151; border: 1px solid #d1d5db;">
+                    <button @click="resetRecording()" class="px-6 py-2.5 font-medium rounded-full shadow-sm transition-all cursor-pointer hover:bg-white" style="background-color: #ffffff; color: #374151; border: 1px solid #d1d5db;">
                         Restart
                     </button>
                     @if(Auth::check() && Auth::user()->isAdmin())
@@ -182,6 +183,30 @@
     @include('components.pte-score-popup')
 
     <script>
+        function pteGetSupportedMimeType() {
+            var candidates = [
+                'audio/webm;codecs=opus',
+                'audio/webm',
+                'audio/mp4',
+                'audio/mp4;codecs=mp4a.40.2',
+                'audio/aac',
+                'audio/ogg;codecs=opus'
+            ];
+            for (var i = 0; i < candidates.length; i++) {
+                if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(candidates[i])) {
+                    return candidates[i];
+                }
+            }
+            return '';
+        }
+
+        function pteMimeTypeToExtension(mimeType) {
+            if (!mimeType) return 'webm';
+            if (mimeType.indexOf('mp4') !== -1 || mimeType.indexOf('aac') !== -1) return 'm4a';
+            if (mimeType.indexOf('ogg') !== -1) return 'ogg';
+            return 'webm';
+        }
+
         document.addEventListener('alpine:init', () => {
             Alpine.data('repeatSentenceApp', () => ({
                 promptAudio: document.getElementById('promptAudio'),
@@ -197,6 +222,7 @@
                 audioChunks: [],
                 audioUrl: null,
                 audioBlob: null,
+                recordedMimeType: '',
                 recordingTime: 0,
                 recordingInterval: null,
                 
@@ -254,7 +280,13 @@
                 async startRecording() {
                     try {
                         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                        this.mediaRecorder = new MediaRecorder(stream);
+                        var mimeType = pteGetSupportedMimeType();
+                        try {
+                            this.mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType: mimeType }) : new MediaRecorder(stream);
+                        } catch (e) {
+                            this.mediaRecorder = new MediaRecorder(stream);
+                        }
+                        this.recordedMimeType = this.mediaRecorder.mimeType || mimeType || 'audio/webm';
                         this.audioChunks = [];
 
                         this.mediaRecorder.ondataavailable = (event) => {
@@ -262,13 +294,14 @@
                         };
 
                         this.mediaRecorder.onstop = () => {
-                            this.audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                            this.audioBlob = new Blob(this.audioChunks, { type: this.recordedMimeType });
                             this.audioUrl = URL.createObjectURL(this.audioBlob);
                             this.playbackAudio.src = this.audioUrl;
                             stream.getTracks().forEach(track => track.stop());
                             if (window.PTETracker) {
                                 PTETracker.saveResult({ score: 1, maxScore: 1, durationSeconds: this.recordingTime });
                             }
+                            this.evaluateAudio(this.audioBlob);
                         };
 
                         this.mediaRecorder.start();
@@ -278,14 +311,18 @@
                             this.recordingTime++;
                             if (this.recordingTime >= 15) this.stopRecording();
                         }, 1000);
-                        
+
                         if (this.isPlayingPrompt) {
                             this.promptAudio.pause();
                             this.promptAudio.currentTime = 0;
                             this.isPlayingPrompt = false;
                         }
                     } catch (err) {
-                        alert("Tidak dapat mengakses mikrofon. Pastikan Anda telah memberikan izin.");
+                        if (!window.MediaRecorder) {
+                            alert("Browser Anda tidak mendukung perekaman audio. Silakan gunakan versi terbaru Chrome, Firefox, atau Safari.");
+                        } else {
+                            alert("Tidak dapat mengakses mikrofon. Pastikan Anda telah memberikan izin.");
+                        }
                     }
                 },
 
@@ -303,10 +340,54 @@
                     this.audioBlob = null;
                     this.recordingTime = 0;
                     clearInterval(this.recordingInterval);
+                },
+
+                async evaluateAudio(blob) {
+                    if (!blob || blob.size < 1000) {
+                        alert('No audio was captured. This can happen on some browsers/devices — please try again.');
+                        return;
+                    }
+                    var formData = new FormData();
+                    formData.append('audio', blob, 'repeat_sentence.' + pteMimeTypeToExtension(this.recordedMimeType));
+                    formData.append('module', 'repeat-sentence');
+                    formData.append('topic_id', {{ $topicId }});
+                    formData.append('original_text', @json($topic['content'] ?? ''));
+
+                    try {
+                        var response = await fetch('/pte/practice/evaluate-speaking', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: formData
+                        });
+                        var data = await response.json();
+                        if (data.success && data.scores) {
+                            PTEScorePopup.show({
+                                skill: 'Speaking',
+                                score: data.scores.overall_score || 70,
+                                max: 90,
+                                breakdown: {
+                                    'Content': data.scores.content_score || 70,
+                                    'Pronunciation': data.scores.pronunciation_score || 70,
+                                    'Oral_Fluency': data.scores.fluency_score || 70
+                                },
+                                feedback: data.scores.feedback || ('Transcription: ' + (data.transcription || ''))
+                            });
+                        } else {
+                            alert('Evaluasi AI Gagal: ' + (data.message || 'Speech not recognized'));
+                        }
+                    } catch (err) {
+                        console.error('Error evaluating audio:', err);
+                        alert('Evaluasi AI Gagal: terjadi kesalahan saat menghubungi server. Silakan coba lagi.');
+                    }
                 }
             }));
         });
     </script>
     @include('components.pte-practice-tracker', ['module' => 'repeat-sentence', 'topicId' => $topicId])
+    <x-live-drawing />
 </body>
 </html>

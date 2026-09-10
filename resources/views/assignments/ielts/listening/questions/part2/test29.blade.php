@@ -47,7 +47,7 @@
     <div class="overflow-x-auto mb-12">
         <table class="w-full border-collapse border border-gray-300 text-left text-gray-700">
             <thead>
-                <tr class="bg-gray-100">
+                <tr class="bg-white">
                     <th class="border border-gray-300 p-3 font-bold text-center">People need<br>help</th>
                     <th class="border border-gray-300 p-3 font-bold text-center">Duties</th>
                     <th class="border border-gray-300 p-3 font-bold text-center">Requirement for<br>volunteers</th>

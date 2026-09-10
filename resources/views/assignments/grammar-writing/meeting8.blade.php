@@ -35,18 +35,11 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-[#F3F4FF] p-8">
+<body class="font-sans antialiased bg-[#F3F4FF] p-3 sm:p-6 lg:p-8">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
-    <div class="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-        <div class="flex justify-between items-center mb-8">
-            <a href="{{ route('assignments.grammar-writing') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
-    <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-    </svg>
-    Back
-</a>
-        </div>
+    <div class="max-w-5xl mx-auto bg-white p-4 sm:p-6 lg:p-8 rounded-xl shadow-sm border border-gray-100">
+        <x-grammar-meeting-actions :meetingNumber="8" track="fast-track" />
 
         <h1 class="text-3xl font-bold text-center text-orange-600 mb-8">Prepositional Phrase (Pertemuan 8)</h1>
         
@@ -60,7 +53,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('assignments.grammar-writing.meeting8.submit') }}">
+        <form method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting8.submit'), PHP_URL_PATH) }}">
             @csrf
             
             <!-- Section 1: Sentence Translation -->
@@ -317,7 +310,7 @@
         </form>
         
         @if($submitted)
-            <form method="POST" action="{{ route('assignments.grammar-writing.meeting8.reset') }}" class="mt-4">
+            <form method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting8.reset'), PHP_URL_PATH) }}" class="mt-4">
                 @csrf
                 <button type="submit" class="w-full py-4 bg-gray-500 text-white rounded-xl font-bold text-lg hover:bg-gray-600 transition-colors shadow-lg">
                     Coba Lagi
@@ -338,7 +331,7 @@
 
         <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
             <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
-                <form action="{{ route('admin.grammar.question.store') }}" method="POST">
+                <form action="{{ parse_url(route('admin.grammar.question.store'), PHP_URL_PATH) }}" method="POST">
                     @csrf
                     <input type="hidden" name="meeting_number" value="8">
                     <input type="hidden" name="section" value="prepositional_phrases">
@@ -385,7 +378,7 @@
 
         <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
             <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
-                <form x-bind:action="'/admin/grammar/question/' + data.id" method="POST">
+                <form x-bind:action="'/admin/assignments/grammar-writing/questions/' + data.id" method="POST">
                     @csrf
                     @method('PUT')
                     
@@ -414,250 +407,7 @@
     </div>
 
     </div>
-    <x-irregular-verbs-button />
 
-    <!-- Lesson Chart Button -->
-    <div x-data="{ openLesson: false }" class="fixed bottom-48 right-8 z-50">
-       <!-- Floating Button -->
-       <button @click="openLesson = true"
-               class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2">
-           <span>📖</span> Lesson Chart
-       </button>
-
-       <!-- Modal Backdrop -->
-       <div x-show="openLesson"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-            style="display: none;">
-          
-           <!-- Modal Content -->
-           <div @click.outside="openLesson = false"
-                class="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden">
-              
-               <!-- Header -->
-               <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-indigo-50">
-                   <h3 class="text-xl font-bold text-gray-800">Materi Meeting 8: Prepositional Phrase</h3>
-                   <button @click="openLesson = false" class="text-gray-400 hover:text-gray-600">
-                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                   </button>
-               </div>
-
-               <!-- Content Container -->
-               <div class="overflow-y-auto p-8 space-y-8" style="max-height: 75vh;">
-                   
-                   <!-- Table 1: Limiting Adjective -->
-                   <div>
-                       <h4 class="text-lg font-bold text-indigo-700 mb-4">1. Limiting Adjective (LA)</h4>
-                       <div class="overflow-x-auto">
-                           <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden">
-                               <thead class="bg-indigo-100">
-                                   <tr>
-                                       <th class="px-6 py-3 text-left text-xs font-bold text-indigo-800 uppercase tracking-wider">Jenis LA</th>
-                                       <th class="px-6 py-3 text-left text-xs font-bold text-indigo-800 uppercase tracking-wider">Definisi</th>
-                                       <th class="px-6 py-3 text-left text-xs font-bold text-indigo-800 uppercase tracking-wider">Anggota & Aturan</th>
-                                       <th class="px-6 py-3 text-left text-xs font-bold text-indigo-800 uppercase tracking-wider">Contoh (English)</th>
-                                   </tr>
-                               </thead>
-                               <tbody class="bg-white divide-y divide-gray-200 text-sm">
-                                   <tr>
-                                       <td class="px-6 py-4 font-medium text-gray-900">1. Article</td>
-                                       <td class="px-6 py-4 text-gray-600">Kata sandang.</td>
-                                       <td class="px-6 py-4 text-gray-600">
-                                           <strong>Definite (The):</strong> + Nc/Nu (sing/pl).<br>
-                                           <strong>Indefinite (A/An):</strong> + Nc (sing).<br>
-                                           <em>A sebelum bunyi konsonan, An sebelum bunyi vokal.</em>
-                                       </td>
-                                       <td class="px-6 py-4 text-gray-600 italic">The book, The money. A man, An apple, An hour.</td>
-                                   </tr>
-                                   <tr class="bg-gray-50">
-                                       <td class="px-6 py-4 font-medium text-gray-900">2. Demonstrative</td>
-                                       <td class="px-6 py-4 text-gray-600">Kata tunjuk.</td>
-                                       <td class="px-6 py-4 text-gray-600">
-                                           <strong>Singular:</strong> This, That (+ Nc sing/Nu).<br>
-                                           <strong>Plural:</strong> These, Those (+ Nc plural).
-                                       </td>
-                                       <td class="px-6 py-4 text-gray-600 italic">This book is big. Those books are big.</td>
-                                   </tr>
-                                   <tr>
-                                       <td class="px-6 py-4 font-medium text-gray-900">3. Possessive Adjective</td>
-                                       <td class="px-6 py-4 text-gray-600">Kepemilikan dari pronoun.</td>
-                                       <td class="px-6 py-4 text-gray-600">My, Your, Our, Their, Her, His, Its (+ Nc/Nu).</td>
-                                       <td class="px-6 py-4 text-gray-600 italic">My dream, Our home.</td>
-                                   </tr>
-                                   <tr class="bg-gray-50">
-                                       <td class="px-6 py-4 font-medium text-gray-900">4. Possessive Genitive</td>
-                                       <td class="px-6 py-4 text-gray-600">Kepemilikan dari noun.</td>
-                                       <td class="px-6 py-4 text-gray-600">
-                                           <strong>Benda Hidup:</strong> Tambah 's (Adi's shoes).<br>
-                                           <strong>Benda Mati:</strong> Pola N + N atau Np of Np.
-                                       </td>
-                                       <td class="px-6 py-4 text-gray-600 italic">Andi's shoes, Teachers' car. The car door, The door of the car.</td>
-                                   </tr>
-                                   <tr>
-                                       <td class="px-6 py-4 font-medium text-gray-900">5. Indefinite Quantity</td>
-                                       <td class="px-6 py-4 text-gray-600">Jumlah yang tidak jelas.</td>
-                                       <td class="px-6 py-4 text-gray-600">Many (+ Nc pl), Much (+ Nu), Some (+ Nc pl/Nu), Every (+ Nc sing), dll.</td>
-                                       <td class="px-6 py-4 text-gray-600 italic">Many people, Much money. Little water, Every day.</td>
-                                   </tr>
-                                   <tr class="bg-gray-50">
-                                       <td class="px-6 py-4 font-medium text-gray-900">6. Numeral</td>
-                                       <td class="px-6 py-4 text-gray-600">Bilangan/angka.</td>
-                                       <td class="px-6 py-4 text-gray-600">
-                                           <strong>Ordinal:</strong> First, Second, Third (bilangan bertingkat).<br>
-                                           <strong>Cardinal:</strong> One, Two, Three (bilangan pokok).
-                                       </td>
-                                       <td class="px-6 py-4 text-gray-600 italic">The second winner. Two winners.</td>
-                                   </tr>
-                               </tbody>
-                           </table>
-                       </div>
-                   </div>
-
-                   <!-- Table 2: Adjective Order -->
-                   <div>
-                       <h4 class="text-lg font-bold text-indigo-700 mb-4">2. Adjective Order</h4>
-                       <div class="overflow-x-auto">
-                           <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden">
-                               <thead class="bg-indigo-100">
-                                   <tr>
-                                       <th class="px-6 py-3 text-left text-xs font-bold text-indigo-800 uppercase tracking-wider w-16">No.</th>
-                                       <th class="px-6 py-3 text-left text-xs font-bold text-indigo-800 uppercase tracking-wider">Kategori</th>
-                                       <th class="px-6 py-3 text-left text-xs font-bold text-indigo-800 uppercase tracking-wider">Fokus Deskripsi</th>
-                                       <th class="px-6 py-3 text-left text-xs font-bold text-indigo-800 uppercase tracking-wider">Contoh Kata</th>
-                                   </tr>
-                               </thead>
-                               <tbody class="bg-white divide-y divide-gray-200 text-sm">
-                                   <tr>
-                                       <td class="px-6 py-3 font-medium text-gray-900 text-center">1</td>
-                                       <td class="px-6 py-3 font-bold text-gray-800">Quality</td>
-                                       <td class="px-6 py-3 text-gray-600">Kualitas/Penampilan luar.</td>
-                                       <td class="px-6 py-3 text-gray-600 italic">Beautiful, Handsome, Ugly, Pretty.</td>
-                                   </tr>
-                                   <tr class="bg-gray-50">
-                                       <td class="px-6 py-3 font-medium text-gray-900 text-center">2</td>
-                                       <td class="px-6 py-3 font-bold text-gray-800">Size</td>
-                                       <td class="px-6 py-3 text-gray-600">Ukuran.</td>
-                                       <td class="px-6 py-3 text-gray-600 italic">Big, Small, Huge, Tall, Short.</td>
-                                   </tr>
-                                   <tr>
-                                       <td class="px-6 py-3 font-medium text-gray-900 text-center">3</td>
-                                       <td class="px-6 py-3 font-bold text-gray-800">Age</td>
-                                       <td class="px-6 py-3 text-gray-600">Usia.</td>
-                                       <td class="px-6 py-3 text-gray-600 italic">Old, Young, Classic, Ancient, New.</td>
-                                   </tr>
-                                   <tr class="bg-gray-50">
-                                       <td class="px-6 py-3 font-medium text-gray-900 text-center">4</td>
-                                       <td class="px-6 py-3 font-bold text-gray-800">Temperature</td>
-                                       <td class="px-6 py-3 text-gray-600">Suhu.</td>
-                                       <td class="px-6 py-3 text-gray-600 italic">Hot, Cold, Warm, Freeze, Cool.</td>
-                                   </tr>
-                                   <tr>
-                                       <td class="px-6 py-3 font-medium text-gray-900 text-center">5</td>
-                                       <td class="px-6 py-3 font-bold text-gray-800">Shape</td>
-                                       <td class="px-6 py-3 text-gray-600">Bentuk.</td>
-                                       <td class="px-6 py-3 text-gray-600 italic">Circle, Square, Cube, Round.</td>
-                                   </tr>
-                                   <tr class="bg-gray-50">
-                                       <td class="px-6 py-3 font-medium text-gray-900 text-center">6</td>
-                                       <td class="px-6 py-3 font-bold text-gray-800">Color</td>
-                                       <td class="px-6 py-3 text-gray-600">Warna.</td>
-                                       <td class="px-6 py-3 text-gray-600 italic">Red, Yellow, Green, Black, White.</td>
-                                   </tr>
-                                   <tr>
-                                       <td class="px-6 py-3 font-medium text-gray-900 text-center">7</td>
-                                       <td class="px-6 py-3 font-bold text-gray-800">Character</td>
-                                       <td class="px-6 py-3 text-gray-600">Sifat (karakter dalam diri).</td>
-                                       <td class="px-6 py-3 text-gray-600 italic">Kind, Evil, Honest, Sincere.</td>
-                                   </tr>
-                                   <tr class="bg-gray-50">
-                                       <td class="px-6 py-3 font-medium text-gray-900 text-center">8</td>
-                                       <td class="px-6 py-3 font-bold text-gray-800">Nationality/Origin</td>
-                                       <td class="px-6 py-3 text-gray-600">Negara atau asal.</td>
-                                       <td class="px-6 py-3 text-gray-600 italic">American, Javanese, Indian, European.</td>
-                                   </tr>
-                                   <tr>
-                                       <td class="px-6 py-3 font-medium text-gray-900 text-center">9</td>
-                                       <td class="px-6 py-3 font-bold text-gray-800">Material</td>
-                                       <td class="px-6 py-3 text-gray-600">Bahan pembentuk.</td>
-                                       <td class="px-6 py-3 text-gray-600 italic">Wooden, Iron, Silk, Plastic.</td>
-                                   </tr>
-                                   <tr class="bg-gray-50">
-                                       <td class="px-6 py-3 font-medium text-gray-900 text-center">10</td>
-                                       <td class="px-6 py-3 font-bold text-gray-800">Purpose</td>
-                                       <td class="px-6 py-3 text-gray-600">Fungsi/Tujuan Nomina.</td>
-                                       <td class="px-6 py-3 text-gray-600 italic">Swimming (pool), Football (field).</td>
-                                   </tr>
-                               </tbody>
-                           </table>
-                       </div>
-                   </div>
-
-               </div>
-
-               <!-- Footer Note -->
-               <div class="p-4 bg-indigo-50 border-t border-indigo-100 text-center">
-                   <p class="text-sm text-gray-700 font-medium">
-                       💡 Pelajari tabel ini untuk memahami struktur Prepositional Phrase dengan lebih baik.
-                   </p>
-               </div>
-           </div>
-       </div>
-    </div>
-
-    <!-- Tenses Chart Button -->
-    <div x-data="{ openTenses: false }" class="fixed bottom-28 right-8 z-50">
-       <!-- Floating Button -->
-       <button @click="openTenses = true"
-               class="bg-cyan-400 hover:bg-cyan-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2">
-           <span>💡</span> Tenses
-       </button>
-
-       <!-- Modal Backdrop -->
-       <div x-show="openTenses"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-            style="display: none;">
-          
-           <!-- Modal Content -->
-           <div @click.outside="openTenses = false"
-                class="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
-              
-               <!-- Header -->
-               <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-cyan-50">
-                   <h3 class="text-xl font-bold text-gray-800">Tenses Chart</h3>
-                   <button @click="openTenses = false" class="text-gray-400 hover:text-gray-600">
-                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                   </button>
-               </div>
-
-               <!-- Image Container -->
-               <div class="overflow-y-auto p-6" style="max-height: 75vh;">
-                   <img src="{{ asset('images/materials/grammar/tenses-chart.png') }}" 
-                        alt="Tenses Chart" 
-                        class="w-full h-auto rounded-lg shadow-md">
-               </div>
-
-               <!-- Footer Note -->
-               <div class="p-4 bg-cyan-50 border-t border-cyan-100 text-center">
-                   <p class="text-sm text-gray-700 font-medium">
-                       💡 Gunakan chart ini sebagai panduan untuk menentukan tenses yang tepat
-                   </p>
-               </div>
-           </div>
-       </div>
-    </div>
-    
-    
     <!-- Auto-Save Script -->
 
     <!-- INLINE AUTO-SAVE SCRIPT -->
@@ -805,13 +555,13 @@
 
         async syncDraftToServer(form) {
             if (!form) {
-                return;
+                return false;
             }
 
             const action = form.getAttribute('action') || '';
             const match = action.match(/\/assignments\/grammar-writing\/meeting(\d+)/);
             if (!match) {
-                return;
+                return false;
             }
 
             const meetingNumber = match[1];
@@ -859,8 +609,10 @@
                     body: JSON.stringify(payload),
                     keepalive: true,
                 });
+                return true;
             } catch (e) {
                 console.error('Failed to sync draft to server:', e);
+                return false;
             }
         },
 
@@ -923,7 +675,7 @@
             if (!indicator) {
                 indicator = document.createElement('div');
                 indicator.id = 'auto-save-indicator';
-                indicator.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+                indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
                 indicator.style.transition = 'opacity 0.3s';
                 indicator.innerHTML = '✓ Tersimpan otomatis';
                 document.body.appendChild(indicator);
@@ -960,11 +712,63 @@
 
     // Make AutoSave available globally
     window.AutoSave = AutoSave;
+    AutoSave.showSaveErrorIndicator = function () {
+        const indicator = document.createElement('div');
+        indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+        indicator.style.transition = 'opacity 0.3s';
+        indicator.innerHTML = '✗ Gagal menyimpan, coba lagi';
+        document.body.appendChild(indicator);
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+            setTimeout(() => indicator.remove(), 300);
+        }, 3000);
+    };
+
+    AutoSave.manualSave = async function () {
+        const form = document.querySelector('form[action*="/assignments/grammar-writing/meeting"][method="POST"]');
+        if (!form) {
+            return;
+        }
+
+        const btn = document.getElementById('manual-save-btn');
+        if (btn) {
+            btn.dataset.originalText = btn.dataset.originalText || btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Menyimpan...';
+        }
+
+        try {
+            const inputs = form.querySelectorAll('input[type="text"], textarea');
+            const answers = {};
+            inputs.forEach((input) => {
+                if (input.name && input.value) {
+                    answers[input.name] = input.value;
+                }
+            });
+            localStorage.setItem(this.storageKey, JSON.stringify(answers));
+        } catch (e) {
+            console.error('[ManualSave] Failed to update localStorage:', e);
+        }
+
+        const ok = await this.syncDraftToServer(form);
+
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.originalText;
+        }
+
+        if (ok) {
+            this.showSaveIndicator();
+        } else {
+            this.showSaveErrorIndicator();
+        }
+    };
+
 
     // Initialize auto-save for meeting 7
     document.addEventListener('DOMContentLoaded', function() {
         const userId = {{ Auth::id() ?? 'null' }};
-        if (userId) {
+        if (userId && !window.location.search.includes('live_preview_for')) {
             AutoSave.init('7', userId);
         }
     });
@@ -980,7 +784,7 @@
         function confirmDelete(id) {
             if (confirm('Are you sure you want to delete this question?')) {
                 const form = document.getElementById('delete-question-form');
-                form.action = `/admin/grammar/question/${id}`;
+                form.action = `/admin/assignments/grammar-writing/questions/${id}`;
                 form.submit();
             }
         }
@@ -996,6 +800,35 @@
         }
     </script>
 
+
     <x-live-drawing />
+    @include('components.student-broadcaster')
+
+    {{-- Consolidated Floating Helper Buttons (hidden during admin Live
+         Preview - these are student-only interactive tools, not relevant
+         to the admin's read-only observation view) --}}
+    @if(!request()->filled('live_preview_for'))
+    <div class="fixed bottom-4 right-3 sm:right-8 z-50 flex flex-col gap-1.5 sm:gap-2 items-end">
+        <x-dictionary-button />
+        <x-conjunction-button />
+        <x-preposition-button />
+        <x-pronouns-button />
+        <x-verb-patterns-button />
+        <x-modal-button />
+        <x-tenses-button />
+        <x-irregular-verbs-button />
+    </div>
+    @endif
+
+    @if(!$submitted)
+        <div class="fixed bottom-4 z-50" style="left: 50%; transform: translateX(-50%);">
+            <button type="button" id="manual-save-btn" onclick="AutoSave.manualSave()"
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold shadow-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3M8 7h8"></path></svg>
+                Save
+            </button>
+        </div>
+    @endif
+
 </body>
 </html>

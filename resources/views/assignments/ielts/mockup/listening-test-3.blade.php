@@ -14,7 +14,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
     <div class="flex min-h-screen">
@@ -43,7 +43,7 @@
                              <p class="text-gray-600 mt-1">Full Listening Test</p>
                         </div>
                     </div>
-                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge.edition', ['edition' => $edition]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge.edition', ['edition' => $edition]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
@@ -68,7 +68,7 @@
 
                         <div class="bg-white border-2 border-gray-800 p-0 rounded-none shadow-none text-gray-900">
                             <!-- Header -->
-                            <div class="border-b-2 border-gray-800 p-4 text-center bg-gray-100">
+                            <div class="border-b-2 border-gray-800 p-4 text-center bg-white">
                                 <h4 class="text-2xl font-bold uppercase tracking-wide">JUNIOR CYCLE CAMP</h4>
                             </div>
                             
@@ -85,7 +85,7 @@
                                         First of all, children at this level are taken to practise in a 
                                         <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                             <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">1</span>
-                                            <input type="text" name="q1" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                            <input type="text" name="q1" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                         </span>
                                         .
                                     </li>
@@ -99,7 +99,7 @@
                                             Instructors wear 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">2</span>
-                                                <input type="text" name="q2" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q2" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                             shirts.
                                         </li>
@@ -107,7 +107,7 @@
                                             A 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">3</span>
-                                                <input type="text" name="q3" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q3" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                             is required and training is given.
                                         </li>
@@ -123,7 +123,7 @@
                                             There are quiet times during the morning for a 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">4</span>
-                                                <input type="text" name="q4" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q4" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                             or a game.
                                         </li>
@@ -131,7 +131,7 @@
                                             Classes are held even if there is 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">5</span>
-                                                <input type="text" name="q5" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q5" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                             .
                                         </li>
@@ -147,7 +147,7 @@
                                             a 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">6</span>
-                                                <input type="text" name="q6" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q6" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                         </li>
                                         <li>shoes (not sandals)</li>
@@ -155,7 +155,7 @@
                                             Charlie's 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">7</span>
-                                                <input type="text" name="q7" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q7" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                         </li>
                                     </ul>
@@ -170,7 +170,7 @@
                                             Before the class, his 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">8</span>
-                                                <input type="text" name="q8" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q8" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                             will be checked.
                                         </li>
@@ -178,7 +178,7 @@
                                             He should then go to the 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">9</span>
-                                                <input type="text" name="q9" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q9" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                             to meet his class instructor.
                                         </li>
@@ -194,7 +194,7 @@
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">10</span>
                                                 <span class="font-bold text-xl mr-1">$</span>
-                                                <input type="text" name="q10" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q10" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                             per week.
                                         </li>
@@ -228,7 +228,7 @@
                             <div class="space-y-6">
                                 <h3 class="font-bold text-lg text-gray-700 italic border-l-4 border-blue-500 pl-3">Questions 11 and 12: Choose TWO letters, A–E.</h3>
                                 
-                                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                <div class="bg-white rounded-lg p-6 border border-gray-200">
                                     <p class="font-medium text-gray-900 mb-4">According to Megan, what are the <span class="font-bold">TWO</span> main advantages of working in the agriculture and horticulture sectors?</p>
                                     <div class="space-y-2">
                                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition cursor-pointer">
@@ -259,7 +259,7 @@
                             <div class="space-y-6">
                                 <h3 class="font-bold text-lg text-gray-700 italic border-l-4 border-blue-500 pl-3">Questions 13 and 14: Choose TWO letters, A–E.</h3>
                                 
-                                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                <div class="bg-white rounded-lg p-6 border border-gray-200">
                                     <p class="font-medium text-gray-900 mb-4">Which <span class="font-bold">TWO</span> of the following are likely to be disadvantages for people working outdoors?</p>
                                     <div class="space-y-2">
                                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition cursor-pointer">
@@ -293,7 +293,7 @@
 
                                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                                     <!-- Options Box -->
-                                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-sm">
+                                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                                         <h4 class="font-bold text-center text-xl text-gray-800 mb-6 border-b pb-4">Information</h4>
                                         <div class="space-y-4 text-lg text-gray-700 font-medium">
                                             <div class="flex gap-4"><span class="font-bold w-8 text-gray-900">A</span> <span>not a permanent job</span></div>
@@ -397,7 +397,7 @@
                             <div class="space-y-6">
                                 <h3 class="font-bold text-lg text-gray-700 italic border-l-4 border-blue-500 pl-3">Questions 21 and 22: Choose TWO letters, A–E.</h3>
                                 
-                                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                <div class="bg-white rounded-lg p-6 border border-gray-200">
                                     <p class="font-medium text-gray-900 mb-4">Which <span class="font-bold">TWO</span> points does Adam make about his experiment on artificial sweeteners?</p>
                                     <div class="space-y-2">
                                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition cursor-pointer">
@@ -428,7 +428,7 @@
                             <div class="space-y-6">
                                 <h3 class="font-bold text-lg text-gray-700 italic border-l-4 border-blue-500 pl-3">Questions 23 and 24: Choose TWO letters, A–E.</h3>
                                 
-                                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                <div class="bg-white rounded-lg p-6 border border-gray-200">
                                     <p class="font-medium text-gray-900 mb-4">Which <span class="font-bold">TWO</span> problems did Rosie have when measuring the fat content of nuts?</p>
                                     <div class="space-y-2">
                                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition cursor-pointer">
@@ -461,7 +461,7 @@
                                 
                                 <div class="space-y-6">
                                     <!-- Q25 -->
-                                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                    <div class="bg-white rounded-lg p-6 border border-gray-200">
                                         <p class="font-medium text-gray-900 mb-4"><span class="font-bold mr-2">25</span> Adam suggests that restaurants could reduce obesity if their menus</p>
                                         <div class="space-y-2">
                                             <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition cursor-pointer">
@@ -480,7 +480,7 @@
                                     </div>
 
                                     <!-- Q26 -->
-                                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                    <div class="bg-white rounded-lg p-6 border border-gray-200">
                                         <p class="font-medium text-gray-900 mb-4"><span class="font-bold mr-2">26</span> The students agree that food manufacturers deliberately</p>
                                         <div class="space-y-2">
                                             <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition cursor-pointer">
@@ -499,7 +499,7 @@
                                     </div>
 
                                     <!-- Q27 -->
-                                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                    <div class="bg-white rounded-lg p-6 border border-gray-200">
                                         <p class="font-medium text-gray-900 mb-4"><span class="font-bold mr-2">27</span> What does Rosie say about levels of exercise in England?</p>
                                         <div class="space-y-2">
                                             <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition cursor-pointer">
@@ -518,7 +518,7 @@
                                     </div>
 
                                     <!-- Q28 -->
-                                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                    <div class="bg-white rounded-lg p-6 border border-gray-200">
                                         <p class="font-medium text-gray-900 mb-4"><span class="font-bold mr-2">28</span> Adam refers to the location and width of stairs in a train station to illustrate</p>
                                         <div class="space-y-2">
                                             <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition cursor-pointer">
@@ -537,7 +537,7 @@
                                     </div>
 
                                     <!-- Q29 -->
-                                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                    <div class="bg-white rounded-lg p-6 border border-gray-200">
                                         <p class="font-medium text-gray-900 mb-4"><span class="font-bold mr-2">29</span> What do the students agree about including reference to exercise in their presentation?</p>
                                         <div class="space-y-2">
                                             <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition cursor-pointer">
@@ -556,7 +556,7 @@
                                     </div>
 
                                     <!-- Q30 -->
-                                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                    <div class="bg-white rounded-lg p-6 border border-gray-200">
                                         <p class="font-medium text-gray-900 mb-4"><span class="font-bold mr-2">30</span> What are the students going to do next for their presentation?</p>
                                         <div class="space-y-2">
                                             <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition cursor-pointer">

@@ -1,16 +1,35 @@
 @extends('layouts.admin')
 
 @section('content')
+@php
+    $roleParam = request('role');
+    $roleTitle = match($roleParam) {
+        'teacher' => 'Teacher',
+        'student' => 'Student',
+        default => 'User'
+    };
+    $parentRoute = match($roleParam) {
+        'teacher' => route('teachers.index'),
+        'student' => route('students.index'),
+        default => route('users.index')
+    };
+    $parentLabel = match($roleParam) {
+        'teacher' => 'Teachers',
+        'student' => 'Students',
+        default => 'Users'
+    };
+@endphp
+
 <div class="p-8 pb-24 max-w-4xl mx-auto">
     <!-- Header -->
     <div class="flex items-center justify-between mb-8">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900">Add New User</h1>
+            <h1 class="text-3xl font-bold text-gray-900">Add New {{ $roleTitle }}</h1>
             <nav class="flex mt-2" aria-label="Breadcrumb">
                 <ol class="inline-flex items-center space-x-1 md:space-x-3">
                     <li class="inline-flex items-center">
-                        <a href="{{ route('users.index') }}" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">
-                            Users
+                        <a href="{{ $parentRoute }}" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">
+                            {{ $parentLabel }}
                         </a>
                     </li>
                     <li>
@@ -28,7 +47,7 @@
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden text-gray-800">
         <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
-            @include('admin.users._form', ['submitText' => 'Create User'])
+            @include('admin.users._form', ['submitText' => 'Create ' . $roleTitle])
         </form>
     </div>
 </div>

@@ -56,20 +56,14 @@
             this.searchQuery = '';
         }
     }
-}"
-@mousemove.window="doDrag"
-@touchmove.window="doDrag"
-@mouseup.window="stopDrag"
-@touchend.window="stopDrag"
-class="fixed z-50 select-none touch-none"
-:style="`left: ${x}px; top: ${y}px;`">
-   <!-- Floating Button -->
-   <button @mousedown="startDrag"
-            @touchstart="startDrag"
-            @click="handleClick"
-           class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2 cursor-move">
-       Pronoun
-   </button>
+}">
+    <!-- Floating Button -->
+    <button @click="open = true"
+            title="Pronouns (Kata Ganti)"
+            class="bg-blue-500 hover:bg-blue-600 text-white font-bold p-2.5 sm:py-2.5 sm:px-4 rounded-full shadow-lg transition hover:scale-105 flex items-center justify-center gap-2 text-sm opacity-70 hover:opacity-100 transition-all duration-300">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+        <span class="hidden sm:inline">Pronoun</span>
+    </button>
 
    <!-- Modal Backdrop -->
    <div x-show="open"

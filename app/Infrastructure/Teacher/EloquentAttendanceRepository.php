@@ -140,7 +140,20 @@ class EloquentAttendanceRepository implements AttendanceRepository
 
     public function bulkSaveAttendance(int $meetingId, array $attendanceData, int $recorderId): void
     {
+        $classMeeting = ClassMeeting::find($meetingId);
+        if (!$classMeeting) {
+            return;
+        }
+
+        $validUserIds = collect($this->getStudentsInClass($classMeeting->class_period_id))
+            ->pluck('id')
+            ->all();
+
         foreach ($attendanceData as $userId => $data) {
+            if (!in_array((int) $userId, $validUserIds, true)) {
+                continue;
+            }
+
             Attendance::updateOrCreate(
                 [
                     'class_meeting_id' => $meetingId,

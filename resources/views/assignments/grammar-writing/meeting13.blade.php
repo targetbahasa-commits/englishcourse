@@ -18,14 +18,7 @@
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
     <div class="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-        <div class="flex justify-between items-center mb-8">
-            <a href="{{ route('assignments.grammar-writing') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
-    <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-    </svg>
-    Back
-</a>
-        </div>
+        <x-grammar-meeting-actions :meetingNumber="13" track="fast-track" />
 
         <h1 class="text-3xl font-bold text-center text-violet-600 mb-8">Adjective Clause in Relative Pronoun as Object (Pertemuan 13)</h1>
         
@@ -49,7 +42,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('assignments.grammar-writing.meeting13.submit') }}">
+        <form method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting13.submit'), PHP_URL_PATH) }}">
             @csrf
             
             <!-- Section 1: Sentence Translation -->
@@ -300,7 +293,7 @@
         </form>
         
         @if($submitted)
-            <form method="POST" action="{{ route('assignments.grammar-writing.meeting13.reset') }}" class="mt-4">
+            <form method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting13.reset'), PHP_URL_PATH) }}" class="mt-4">
                 @csrf
                 <button type="submit" class="w-full py-4 bg-gray-500 text-white rounded-xl font-bold text-lg hover:bg-gray-600 transition-colors shadow-lg">
                     Coba Lagi
@@ -315,133 +308,7 @@
         .word-missing { color: #3b82f6; font-weight: bold; }
         .word-extra { color: #f59e0b; text-decoration: line-through; }
     </style>
-    <x-irregular-verbs-button />
 
-    <!-- Lesson Chart Button -->
-    <div x-data="{ openLesson: false }" class="fixed bottom-48 right-8 z-50">
-       <!-- Floating Button -->
-       <button @click="openLesson = true"
-               class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2">
-           <span>📊</span> Lesson Chart
-       </button>
-
-       <!-- Modal Backdrop -->
-       <div x-show="openLesson"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-            style="display: none;">
-          
-           <!-- Modal Content -->
-           <div @click.outside="openLesson = false"
-                class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-              
-               <!-- Header -->
-               <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-violet-50">
-                   <h3 class="text-xl font-bold text-gray-800">Lesson Chart</h3>
-                   <button @click="openLesson = false" class="text-gray-400 hover:text-gray-600">
-                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                   </button>
-               </div>
-
-               <!-- Content Container -->
-               <div class="overflow-y-auto p-6">
-                    <h3 class="font-bold text-xl text-violet-800 mb-6 border-b pb-2">Relative Pronoun as Object (RPO)</h3>
-                    
-                    <div class="space-y-6">
-                        <div class="bg-violet-50 p-5 rounded-xl border border-violet-100">
-                            <p class="font-bold text-gray-700 mb-2">Pola:</p>
-                            <div class="bg-white p-3 rounded-lg border border-violet-200 text-center shadow-sm">
-                                <span class="text-xl text-violet-700 font-bold font-mono">Conjunction + Subject + Verb</span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <p class="font-bold text-gray-700 mb-3 text-lg">Conjunctions:</p>
-                            <div class="grid grid-cols-1 gap-3">
-                                <div class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                    <span class="w-32 font-bold text-violet-600 text-lg">Who / Whom</span>
-                                    <span class="text-gray-600">(person)</span>
-                                </div>
-                                <div class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                    <span class="w-32 font-bold text-violet-600 text-lg">Which</span>
-                                    <span class="text-gray-600">(non-person)</span>
-                                </div>
-                                <div class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                    <span class="w-32 font-bold text-violet-600 text-lg">That</span>
-                                    <span class="text-gray-600">(all)</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-yellow-50 p-5 rounded-xl border border-yellow-200 flex items-center gap-4">
-                            <div class="bg-yellow-100 p-2 rounded-full text-yellow-600">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-700">Bermakna:</p>
-                                <p class="text-2xl text-gray-800 font-bold">“YANG”</p>
-                            </div>
-                        </div>
-                    </div>
-               </div>
-           </div>
-       </div>
-    </div>
-
-    <!-- Tenses Chart Button -->
-    <div x-data="{ openTenses: false }" class="fixed bottom-28 right-8 z-50">
-       <!-- Floating Button -->
-       <button @click="openTenses = true"
-               class="bg-cyan-400 hover:bg-cyan-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2">
-           <span>💡</span> Tenses
-       </button>
-
-       <!-- Modal Backdrop -->
-       <div x-show="openTenses"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-            style="display: none;">
-          
-           <!-- Modal Content -->
-           <div @click.outside="openTenses = false"
-                class="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
-              
-               <!-- Header -->
-               <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-cyan-50">
-                   <h3 class="text-xl font-bold text-gray-800">Tenses Chart</h3>
-                   <button @click="openTenses = false" class="text-gray-400 hover:text-gray-600">
-                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                   </button>
-               </div>
-
-               <!-- Image Container -->
-               <div class="overflow-y-auto p-6" style="max-height: 75vh;">
-                   <img src="{{ asset('images/materials/grammar/tenses-chart.png') }}" 
-                        alt="Tenses Chart" 
-                        class="w-full h-auto rounded-lg shadow-md">
-               </div>
-
-               <!-- Footer Note -->
-               <div class="p-4 bg-cyan-50 border-t border-cyan-100 text-center">
-                   <p class="text-sm text-gray-700 font-medium">
-                       💡 Gunakan chart ini sebagai panduan untuk menentukan tenses yang tepat
-                   </p>
-               </div>
-           </div>
-       </div>
-    </div>
-    
-    
     <!-- Auto-Save Script -->
 
     <!-- INLINE AUTO-SAVE SCRIPT -->
@@ -589,13 +456,13 @@
 
         async syncDraftToServer(form) {
             if (!form) {
-                return;
+                return false;
             }
 
             const action = form.getAttribute('action') || '';
             const match = action.match(/\/assignments\/grammar-writing\/meeting(\d+)/);
             if (!match) {
-                return;
+                return false;
             }
 
             const meetingNumber = match[1];
@@ -643,8 +510,10 @@
                     body: JSON.stringify(payload),
                     keepalive: true,
                 });
+                return true;
             } catch (e) {
                 console.error('Failed to sync draft to server:', e);
+                return false;
             }
         },
 
@@ -707,7 +576,7 @@
             if (!indicator) {
                 indicator = document.createElement('div');
                 indicator.id = 'auto-save-indicator';
-                indicator.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+                indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
                 indicator.style.transition = 'opacity 0.3s';
                 indicator.innerHTML = '✓ Tersimpan otomatis';
                 document.body.appendChild(indicator);
@@ -744,11 +613,63 @@
 
     // Make AutoSave available globally
     window.AutoSave = AutoSave;
+    AutoSave.showSaveErrorIndicator = function () {
+        const indicator = document.createElement('div');
+        indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+        indicator.style.transition = 'opacity 0.3s';
+        indicator.innerHTML = '✗ Gagal menyimpan, coba lagi';
+        document.body.appendChild(indicator);
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+            setTimeout(() => indicator.remove(), 300);
+        }, 3000);
+    };
+
+    AutoSave.manualSave = async function () {
+        const form = document.querySelector('form[action*="/assignments/grammar-writing/meeting"][method="POST"]');
+        if (!form) {
+            return;
+        }
+
+        const btn = document.getElementById('manual-save-btn');
+        if (btn) {
+            btn.dataset.originalText = btn.dataset.originalText || btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Menyimpan...';
+        }
+
+        try {
+            const inputs = form.querySelectorAll('input[type="text"], textarea');
+            const answers = {};
+            inputs.forEach((input) => {
+                if (input.name && input.value) {
+                    answers[input.name] = input.value;
+                }
+            });
+            localStorage.setItem(this.storageKey, JSON.stringify(answers));
+        } catch (e) {
+            console.error('[ManualSave] Failed to update localStorage:', e);
+        }
+
+        const ok = await this.syncDraftToServer(form);
+
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.originalText;
+        }
+
+        if (ok) {
+            this.showSaveIndicator();
+        } else {
+            this.showSaveErrorIndicator();
+        }
+    };
+
 
     // Initialize auto-save for meeting 13
     document.addEventListener('DOMContentLoaded', function() {
         const userId = {{ Auth::id() ?? 'null' }};
-        if (userId) {
+        if (userId && !window.location.search.includes('live_preview_for')) {
             AutoSave.init('13', userId);
         }
     });
@@ -758,7 +679,7 @@
         function confirmDelete(id) {
             if (confirm('Are you sure you want to delete this content?')) {
                 const form = document.getElementById('delete-question-form');
-                form.action = `/admin/grammar/question/${id}`;
+                form.action = `/admin/assignments/grammar-writing/questions/${id}`;
                 form.submit();
             }
         }
@@ -800,7 +721,7 @@
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                 <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                    <form action="{{ route('admin.grammar.question.store') }}" method="POST" class="p-6">
+                    <form action="{{ parse_url(route('admin.grammar.question.store'), PHP_URL_PATH) }}" method="POST" class="p-6">
                         @csrf
                         <input type="hidden" name="meeting_number" value="13">
                         <input type="hidden" name="question_number" value="{{ count($questions) + 1 }}">
@@ -842,7 +763,7 @@
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                 <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                    <form :action="'/admin/grammar/question/' + data.id" method="POST" class="p-6">
+                    <form :action="'/admin/assignments/grammar-writing/questions/' + data.id" method="POST" class="p-6">
                         @csrf @method('PUT')
                         <h3 class="text-xl font-bold text-gray-900 mb-6">Edit Question</h3>
                         <div class="mb-4">
@@ -881,7 +802,7 @@
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                 <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
-                    <form action="{{ route('admin.grammar.question.store') }}" method="POST" class="p-6">
+                    <form action="{{ parse_url(route('admin.grammar.question.store'), PHP_URL_PATH) }}" method="POST" class="p-6">
                         @csrf
                         <input type="hidden" name="meeting_number" value="13">
                         <input type="hidden" name="question_number" value="100">
@@ -920,7 +841,7 @@
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                 <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
-                    <form :action="'/admin/grammar/question/' + data.id" method="POST" class="p-6">
+                    <form :action="'/admin/assignments/grammar-writing/questions/' + data.id" method="POST" class="p-6">
                         @csrf @method('PUT')
                         <h3 class="text-xl font-bold text-gray-900 mb-6">Edit Paragraph</h3>
                         <div class="mb-4">
@@ -946,6 +867,35 @@
         </div>
     </div>
 
+
     <x-live-drawing />
+    @include('components.student-broadcaster')
+
+    {{-- Consolidated Floating Helper Buttons (hidden during admin Live
+         Preview - these are student-only interactive tools, not relevant
+         to the admin's read-only observation view) --}}
+    @if(!request()->filled('live_preview_for'))
+    <div class="fixed bottom-4 right-8 z-50 flex flex-col gap-2 items-end">
+        <x-dictionary-button />
+        <x-conjunction-button />
+        <x-preposition-button />
+        <x-pronouns-button />
+        <x-verb-patterns-button />
+        <x-modal-button />
+        <x-tenses-button />
+        <x-irregular-verbs-button />
+    </div>
+    @endif
+
+    @if(!$submitted)
+        <div class="fixed bottom-4 z-50" style="left: 50%; transform: translateX(-50%);">
+            <button type="button" id="manual-save-btn" onclick="AutoSave.manualSave()"
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold shadow-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3M8 7h8"></path></svg>
+                Save
+            </button>
+        </div>
+    @endif
+
 </body>
 </html>

@@ -10,7 +10,7 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
         {{-- Header / Example --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 font-bold italic text-gray-700">Example</div>
             <div class="p-3 font-bold italic text-gray-700">Answer</div>
         </div>
@@ -20,7 +20,7 @@
         </div>
 
         {{-- Q1: Model Number --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Model Number:</div>
             <div class="p-3 text-right pr-6">
                 <strong>1</strong>
@@ -31,7 +31,7 @@
         </div>
 
         {{-- Q2: Price --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Price of the Product:</div>
             <div class="p-3 text-right pr-6 flex items-center justify-end">
                 <span class="text-gray-700 mr-1">£</span>
@@ -43,7 +43,7 @@
         </div>
 
         {{-- Q3: Branch Name --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Name of the Branch:</div>
             <div class="p-3 text-right pr-6">
                 <strong>3</strong>
@@ -54,7 +54,7 @@
         </div>
 
         {{-- Q4: Problem --}}
-        <div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Problem:</div>
             <div class="p-3 text-right pr-6">
                 <strong>4</strong>
@@ -74,7 +74,7 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden">
         {{-- Given Name --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Name:</div>
             <div class="p-3 text-right pr-6 text-gray-700">
                 Herbert Hewitt
@@ -82,7 +82,7 @@
         </div>
 
         {{-- Q5: Address --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Address:</div>
             <div class="p-3 text-right pr-6">
                 <strong>5</strong>
@@ -93,7 +93,7 @@
         </div>
 
         {{-- Q6: Postcode --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Postcode:</div>
             <div class="p-3 text-right pr-6">
                 <strong>6</strong>
@@ -104,7 +104,7 @@
         </div>
 
         {{-- Q7: Method of payment --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Method of payment:</div>
             <div class="p-3 text-right pr-6">
                 <strong>7</strong>
@@ -115,7 +115,7 @@
         </div>
 
         {{-- Q8: Card's Expiry Date --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Card's Expiry Date:</div>
             <div class="p-3 text-right pr-6">
                 <strong>8</strong>
@@ -126,7 +126,7 @@
         </div>
 
         {{-- Q9: Method of Compensation --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Method of Compensation:</div>
             <div class="p-3 text-right pr-6">
                 <strong>9</strong>
@@ -137,7 +137,7 @@
         </div>
 
         {{-- Q10: Shopping Frequency --}}
-        <div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Shopping Frequency:</div>
             <div class="p-3 text-right pr-6">
                 <strong>10</strong>

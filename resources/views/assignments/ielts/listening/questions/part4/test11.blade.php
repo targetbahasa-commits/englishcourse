@@ -23,13 +23,13 @@
         </div>
 
         {{-- Section: Colors --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Colors:</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <p class="text-gray-700">• usual yellow, orange, or brown</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• uncommon colors e.g. blue (what causes the blue color in amber is related to the occurrence of</span>
                 <strong class="text-blue-600">32</strong>
@@ -41,10 +41,10 @@
         </div>
 
         {{-- Section: Formation --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Formation</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• under sustained</span>
                 <strong class="text-blue-600">33</strong>
@@ -54,7 +54,7 @@
                 <span>and pressure</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• during an</span>
                 <strong class="text-blue-600">34</strong>
@@ -66,10 +66,10 @@
         </div>
 
         {{-- Section: Places and Conditions --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Places and Conditions</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• commonly found on</span>
                 <strong class="text-blue-600">35</strong>
@@ -79,7 +79,7 @@
                 <span>e.g. in Russia</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• avoid exposure to</span>
                 <strong class="text-blue-600">36</strong>
@@ -91,13 +91,13 @@
         </div>
 
         {{-- Section: Inclusions --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Inclusions</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <p class="text-gray-700">• Dominican amber: 1 inclusion to every 100 pieces</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Baltic amber: 1 inclusion to every</span>
                 <strong class="text-blue-600">37</strong>
@@ -109,10 +109,10 @@
         </div>
 
         {{-- Section: Uses and Applications --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Uses and Applications</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• It can be used to make ornamental objects and jewelry in</span>
                 <strong class="text-blue-600">38</strong>
@@ -122,7 +122,7 @@
                 <span>settings.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Some people believe that its powder mixed with</span>
                 <strong class="text-blue-600">39</strong>
@@ -132,7 +132,7 @@
                 <span>cures throat, eye and ear diseases.</span>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• It has even been used as a</span>
                 <strong class="text-blue-600">40</strong>

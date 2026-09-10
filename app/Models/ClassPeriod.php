@@ -17,6 +17,7 @@ class ClassPeriod extends Model
         'status',
         'learning_mode',
         'batch_type',
+        'min_capacity',
         'max_capacity',
         'batch_number',
         'start_date',
@@ -26,6 +27,9 @@ class ClassPeriod extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'quota_met_at' => 'datetime',
+        'quota_met_notified_at' => 'datetime',
+        'quota_met_decided_at' => 'datetime',
     ];
 
     public function program(): BelongsTo
@@ -58,5 +62,25 @@ class ClassPeriod extends Model
     public function classMeetings(): HasMany
     {
         return $this->hasMany(ClassMeeting::class);
+    }
+
+    public function studentGroups(): HasMany
+    {
+        return $this->hasMany(StudentGroup::class);
+    }
+
+    /**
+     * Counts occupied seats as the union of the legacy users.class_period_id
+     * assignment (admin's manual "Add Student") and active Enrollment rows
+     * (self-service / admin-registered booking), deduplicated by student - a
+     * seat is occupied either way, and a student could in principle appear
+     * via both.
+     */
+    public function occupiedSeats(): int
+    {
+        $legacyIds = User::where('class_period_id', $this->id)->where('role', 'student')->pluck('id');
+        $enrollmentIds = Enrollment::where('class_period_id', $this->id)->where('status', 'active')->pluck('user_id');
+
+        return $legacyIds->merge($enrollmentIds)->unique()->count();
     }
 }

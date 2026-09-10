@@ -10,15 +10,15 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">11</strong>&nbsp; What is the purpose of the talk?</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[11]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span><span>to welcome its new members</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[11]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span><span>to commemorate its 10th anniversary</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[11]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span><span>to celebrate the award it received recently</span>
                 </label>
@@ -29,15 +29,15 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">12</strong>&nbsp; What's the audience of this speech?</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[12]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span><span>journalists</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[12]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span><span>local residents</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[12]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span><span>school children</span>
                 </label>
@@ -48,15 +48,15 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">13</strong>&nbsp; Why is the speaker most proud of the skating rink?</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[13]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span><span>Because two world champions have been trained there.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[13]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span><span>Because people in this area are fitter than the rest of the country.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[13]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span><span>Because they have encouraged local school children to participate more in sports.</span>
                 </label>
@@ -67,15 +67,15 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">14</strong>&nbsp; The complex has recently opened a new venue for</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[14]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span><span>the unemployed.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[14]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span><span>mothers with babies.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[14]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span><span>pensioners</span>
                 </label>
@@ -86,15 +86,15 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">15</strong>&nbsp; What does the complex plan to do next year?</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[15]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span><span>extend opening hours</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[15]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span><span>expand the space</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[15]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span><span>sell fitness equipment</span>
                 </label>
@@ -105,15 +105,15 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">16</strong>&nbsp; What does the complex encourage people to do?</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[16]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span><span>become a coach</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[16]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span><span>be on the committee</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[16]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span><span>work as volunteers</span>
                 </label>
@@ -126,7 +126,7 @@
     <h4 class="text-lg font-bold mb-2">Questions 17-20</h4>
     <p class="mb-6 text-gray-700 italic">Choose <strong>FOUR</strong> answers from the box and write the correct letter, <strong>A-G</strong>, next to Questions <strong>17-20</strong>.</p>
 
-    <div class="mb-6 bg-gray-50 p-6 rounded-2xl inline-block min-w-[300px]">
+    <div class="mb-6 bg-white p-6 rounded-2xl inline-block min-w-[300px]">
         <div class="space-y-3">
             @foreach([
                 'A' => 'A one-on-one coach is bookable.',
@@ -153,7 +153,7 @@
             19 => 'Skating rink',
             20 => 'Gym'
         ] as $q => $label)
-        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 transition-colors">
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-white transition-colors">
             <div class="flex items-center gap-3">
                 <strong class="text-blue-600">{{ $q }}</strong>
                 <span class="text-gray-700">{{ $label }}</span>

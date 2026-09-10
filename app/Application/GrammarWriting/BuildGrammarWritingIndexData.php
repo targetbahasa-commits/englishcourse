@@ -22,11 +22,11 @@ class BuildGrammarWritingIndexData
                 3 => 'Modal',
                 4 => 'Negative sentence',
                 5 => 'To Infinitive & Gerund',
-                6 => 'Comparative, superlative, positive degree & Parallel Structures',
-                7 => 'Adverbial Clause',
-                8 => 'Adjective Clause - RPS / RPP',
+                6 => 'Noun Phrase, Comparative, Superlative, & Positive Degree',
+                7 => 'FANBOYS & Adverbial Clause',
+                8 => 'Adjective Clause - RPS / RPO',
                 9 => 'Adjective Clause RPP, RA',
-                10 => 'Noun Clause',
+                10 => 'Noun Clause & Prepositional Phrase',
             ];
             foreach ($topics as $i => $topic) {
                 \App\Models\Meeting::firstOrCreate(

@@ -13,7 +13,7 @@
         .dotted-line { border-bottom: 1px dotted #000; display: inline-block; width: 150px; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -33,7 +33,7 @@
                             <p class="text-gray-600 mt-1">Cambridge {{ $edition ?? 20 }} Listening Practice</p>
                         </div>
                     </div>
-                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? 20, 'id' => $testId ?? 3]) }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2 border border-gray-200">
+                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? 20, 'id' => $testId ?? 3]) }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-white font-medium transition flex items-center gap-2 border border-gray-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         Back
                     </a>
@@ -60,10 +60,10 @@
     <div class="p-4 border border-gray-300 overflow-x-auto">
         <table class="w-full text-sm border-collapse">
             <thead>
-                <tr class="bg-gray-100">
+                <tr class="bg-white">
                     <th colspan="3" class="border border-gray-400 px-3 py-2 text-center font-bold">Furniture Rental Companies</th>
                 </tr>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <th class="border border-gray-400 px-3 py-2 font-bold text-left w-1/4">Name of company</th>
                     <th class="border border-gray-400 px-3 py-2 font-bold text-left w-2/5">Information about costs</th>
                     <th class="border border-gray-400 px-3 py-2 font-bold text-left">Additional notes</th>
@@ -384,7 +384,7 @@
 
         <div class="flex flex-col md:flex-row gap-8">
             {{-- Comment options --}}
-            <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg md:w-1/2 self-start shadow-sm">
+            <div class="bg-white border border-blue-200 p-6 rounded-lg md:w-1/2 self-start shadow-sm">
                 <p class="font-bold mb-3">Comments about programme</p>
                 <ul class="space-y-3 font-medium">
                     <li class="flex gap-3"><span class="font-bold">A</span><span>Its origin is somewhat controversial.</span></li>
@@ -437,7 +437,7 @@
         <p class="italic">Write <span class="font-bold">ONE WORD ONLY</span> for each answer.</p>
     </div>
 
-    <div class="p-8 border border-gray-300 bg-gray-50 max-w-4xl mx-auto">
+    <div class="p-8 border border-gray-300 bg-white max-w-4xl mx-auto">
         <h2 class="text-2xl font-bold text-center mb-8">Inclusive design</h2>
 
         <p class="font-bold text-lg mb-4">Definition</p>

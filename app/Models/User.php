@@ -36,6 +36,7 @@ class User extends Authenticatable
         'referral_code',
         'referral_points',
         'referred_by_id',
+        'partner_id',
         'utm_source',
         'utm_medium',
         'utm_campaign',
@@ -54,6 +55,7 @@ class User extends Authenticatable
         'camp_id',
         'camp_room_id',
         'bio',
+        'last_seen_at',
     ];
 
     /**
@@ -87,6 +89,29 @@ class User extends Authenticatable
     public function program(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Program::class, 'program_id');
+    }
+
+    public function getEnrolledProgramIdsAttribute(): array
+    {
+        $ids = [];
+        if ($this->program_id) {
+            $ids[] = (int) $this->program_id;
+        }
+        if ($this->relationLoaded('enrollments')) {
+            foreach ($this->enrollments as $enrollment) {
+                if ($enrollment->program_id && in_array($enrollment->status, ['active', 'completed'])) {
+                    $ids[] = (int) $enrollment->program_id;
+                }
+            }
+        } else {
+            $enrollmentIds = \App\Models\Enrollment::where('user_id', $this->id)
+                ->whereIn('status', ['active', 'completed'])
+                ->pluck('program_id')
+                ->map(fn($id) => (int) $id)
+                ->toArray();
+            $ids = array_merge($ids, $enrollmentIds);
+        }
+        return array_values(array_unique(array_filter($ids)));
     }
 
     public function camp(): \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -200,6 +225,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'last_seen_at' => 'datetime',
         ];
     }
 
@@ -209,6 +235,11 @@ class User extends Authenticatable
     public function referrer()
     {
         return $this->belongsTo(User::class, 'referred_by_id');
+    }
+
+    public function partner(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Partner::class);
     }
 
     public function announcementReads()

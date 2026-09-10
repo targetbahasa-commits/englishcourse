@@ -19,7 +19,7 @@
         input[type=text].ans:focus { border-bottom-color: #3b82f6; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -39,7 +39,7 @@
                     <p class="text-sm text-gray-500">Cambridge {{ $edition ?? 17 }} Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? 17, 'id' => $testId ?? 3]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? 17, 'id' => $testId ?? 3]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back
             </a>
@@ -220,7 +220,7 @@
             <div class="sticky bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200 px-4 py-2 flex items-center gap-2 shadow-md">
                 <span class="text-xs text-gray-500 font-medium mr-1">Tools:</span>
                 <button @click="highlightMode = !highlightMode; pencilMode = false; eraserMode = false;"
-                        :class="highlightMode ? 'bg-yellow-200 border-yellow-400' : 'bg-white border-gray-300 hover:bg-gray-50'"
+                        :class="highlightMode ? 'bg-yellow-200 border-yellow-400' : 'bg-white border-gray-300 hover:bg-white'"
                         class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium text-gray-700 transition-colors">
                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zM3 15a1 1 0 112 0 1 1 0 01-2 0z" clip-rule="evenodd"></path></svg>
                     Highlight
@@ -231,23 +231,23 @@
                     @endforeach
                 </div>
                 <button @click="pencilMode = !pencilMode; highlightMode = false; eraserMode = false;"
-                        :class="pencilMode ? 'bg-indigo-100 border-indigo-400' : 'bg-white border-gray-300 hover:bg-gray-50'"
+                        :class="pencilMode ? 'bg-white border-indigo-400' : 'bg-white border-gray-300 hover:bg-white'"
                         class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium text-gray-700 transition-colors">
                     ✏️ Pencil
                 </button>
                 <button @click="eraserMode = !eraserMode; pencilMode = false; highlightMode = false;"
-                        :class="eraserMode ? 'bg-red-100 border-red-400' : 'bg-white border-gray-300 hover:bg-gray-50'"
+                        :class="eraserMode ? 'bg-red-100 border-red-400' : 'bg-white border-gray-300 hover:bg-white'"
                         class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium text-gray-700 transition-colors">
                     🧹 Eraser
                 </button>
-                <button @click="if(canvasObj) canvasObj.clear();" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-xs font-medium text-gray-700 transition-colors">
+                <button @click="if(canvasObj) canvasObj.clear();" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 bg-white hover:bg-white text-xs font-medium text-gray-700 transition-colors">
                     🗑️ Clear
                 </button>
             </div>
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar">
+        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
             <div class="px-8 py-8 pb-24 max-w-2xl mx-auto">
 
                 {{-- Passage 1 divider --}}
@@ -264,7 +264,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 1–5 on your answer sheet.</p>
 
-                    <div class="border border-gray-300 rounded-lg p-5 text-[15px] bg-gray-50">
+                    <div class="border border-gray-300 rounded-lg p-5 text-[15px] bg-white">
                         <h3 class="font-bold text-center text-base mb-5">The thylacine</h3>
 
                         <h4 class="font-bold mb-3">Appearance and behaviour</h4>
@@ -291,7 +291,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 1?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 6–13 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                             <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -302,7 +302,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -319,7 +319,7 @@
                                     [12, 'From 1930 to 1936, the only known living thylacines were all in captivity.'],
                                     [13, 'Attempts to find living thylacines are now rarely made.'],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -513,7 +513,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the claims of the writer in Reading Passage 3?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 32–35 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-5 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-5 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">YES</span></div><div class="italic">if the statement agrees with the claims of the writer</div>
                             <div><span class="font-bold italic">NO</span></div><div class="italic">if the statement contradicts the claims of the writer</div>
@@ -524,7 +524,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -537,7 +537,7 @@
                                     [34, 'The biggest problem for many nineteenth-century New York immigrant neighbourhoods was a lack of amenities.'],
                                     [35, "In the nineteenth century, New York's immigrant neighbourhoods tended to concentrate around the harbour."],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -567,7 +567,7 @@
                     <p class="text-sm italic text-gray-700 mb-5">Write the correct letter, <strong>A–J</strong>, in boxes 36–40 on your answer sheet.</p>
 
                     {{-- Summary box --}}
-                    <div class="border border-gray-300 rounded-lg p-5 bg-gray-50 text-[14px] text-gray-800 mb-5 leading-relaxed">
+                    <div class="border border-gray-300 rounded-lg p-5 bg-white text-[14px] text-gray-800 mb-5 leading-relaxed">
                         <h4 class="font-bold text-center text-base mb-4">The bedrock myth</h4>
                         <p class="mb-4">In chapter seven, Barr indicates how the lack of bedrock close to the surface does not explain why skyscrapers are absent from <strong>36</strong>
                             <div class="relative inline-block w-16 mx-1">

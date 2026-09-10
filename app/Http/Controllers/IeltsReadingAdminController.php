@@ -136,4 +136,23 @@ class IeltsReadingAdminController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function uploadDiagram(Request $request)
+    {
+        $this->requireAdmin();
+
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:4096',
+        ]);
+
+        if ($request->file('image')) {
+            $path = $request->file('image')->store('diagrams', 'public');
+            return response()->json([
+                'success' => true,
+                'url' => asset('storage/' . $path)
+            ]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Upload failed'], 400);
+    }
 }

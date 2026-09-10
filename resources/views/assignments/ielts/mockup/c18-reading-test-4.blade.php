@@ -16,7 +16,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -36,7 +36,7 @@
                     <p class="text-sm text-gray-500">Cambridge {{ $edition }} Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back
             </a>
@@ -204,7 +204,7 @@
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar">
+        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
             <div class="px-8 py-8 pb-24 max-w-2xl mx-auto">
 
                 {{-- PASSAGE 1 QUESTIONS header --}}
@@ -223,7 +223,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Information</th>
                                     <th class="p-3 font-bold text-gray-600 w-24 text-center">Answer</th>
@@ -237,7 +237,7 @@
                                     [4, 'examples of how green roofs can work in combination with other green urban initiatives'],
                                     [5, 'the need to make a persuasive argument for the financial benefits of green roofs'],
                                 ] as [$num, $info])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $info }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -262,7 +262,7 @@
                     <p class="text-sm text-gray-800 mb-1">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 6–9 on your answer sheet.</p>
 
-                    <div class="border border-gray-300 rounded-xl p-5 bg-gray-50">
+                    <div class="border border-gray-300 rounded-xl p-5 bg-white">
                         <h4 class="text-lg font-bold text-center text-gray-900 mb-4">Advantages of green roofs</h4>
 
                         <div class="text-sm text-gray-800 leading-relaxed space-y-4">
@@ -302,7 +302,7 @@
                             ['D', 'ability to cultivate more plant types'],
                             ['E', 'a large surface area for growing plants'],
                         ] as [$letter, $text])
-                        <label class="flex items-start gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <label class="flex items-start gap-3 cursor-pointer hover:bg-white p-2 rounded">
                             <input type="checkbox" name="q10_11[]" value="{{ $letter }}" class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                             <span class="text-sm"><strong>{{ $letter }}</strong> {{ $text }}</span>
                         </label>
@@ -325,7 +325,7 @@
                             ['D', 'to generate power from a sustainable source'],
                             ['E', 'to collect water to supply other buildings'],
                         ] as [$letter, $text])
-                        <label class="flex items-start gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <label class="flex items-start gap-3 cursor-pointer hover:bg-white p-2 rounded">
                             <input type="checkbox" name="q12_13[]" value="{{ $letter }}" class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                             <span class="text-sm"><strong>{{ $letter }}</strong> {{ $text }}</span>
                         </label>
@@ -349,11 +349,11 @@
                         [15, 'The second paragraph describes how schools encourage students to', ['A' => 'identify their personal ambitions.', 'B' => 'help each other to realise their goals.', 'C' => 'have confidence in their potential to succeed.', 'D' => 'concentrate on where their particular strengths lie.']],
                         [16, 'In the third paragraph, the writer suggests that students with a fixed mindset', ['A' => 'tend to be less competitive.', 'B' => 'generally have a low sense of self-esteem.', 'C' => 'will only work hard if they are given constant encouragement.', 'D' => 'are afraid to push themselves beyond what they see as their limitations.']],
                     ] as [$num, $question, $options])
-                    <div class="mb-6 p-4 {{ $loop->even ? 'bg-gray-50' : '' }} rounded-lg">
+                    <div class="mb-6 p-4 {{ $loop->even ? 'bg-white' : '' }} rounded-lg">
                         <p class="mb-3 text-sm"><strong>{{ $num }}</strong> {{ $question }}</p>
                         <div class="space-y-2 ml-6">
                             @foreach($options as $letter => $text)
-                            <label class="flex items-start gap-3 cursor-pointer hover:bg-gray-100 p-1.5 rounded">
+                            <label class="flex items-start gap-3 cursor-pointer hover:bg-white p-1.5 rounded">
                                 <input type="radio" name="q{{ $num }}" value="{{ $letter }}" class="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
                                 <span class="text-sm"><strong>{{ $letter }}</strong> {{ $text }}</span>
                             </label>
@@ -372,7 +372,7 @@
                     <p class="text-sm text-gray-700 mb-5"><strong>NB</strong> You may use any letter more than once.</p>
 
                     {{-- List of People box --}}
-                    <div class="border border-gray-400 rounded-xl p-5 mb-6 bg-gray-50">
+                    <div class="border border-gray-400 rounded-xl p-5 mb-6 bg-white">
                         <p class="text-center font-bold mb-3 text-sm">List of People</p>
                         <div class="space-y-2 text-sm">
                             <div><strong>A</strong> Alfred Binet</div>
@@ -386,7 +386,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-24 text-center">Answer</th>
@@ -401,7 +401,7 @@
                                     [21, 'The growth mindset is not simply about boosting students\' morale.'],
                                     [22, 'Research shows that the growth mindset has no effect on academic achievement.'],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -433,7 +433,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-28 text-center">Answer</th>
@@ -446,7 +446,7 @@
                                     [25, 'Recent evidence about growth mindset interventions has attracted unfair coverage in the media.'],
                                     [26, 'Deliberate attempts to encourage students to strive for high achievement may have a negative effect.'],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -488,7 +488,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-28 text-center">Answer</th>
@@ -501,7 +501,7 @@
                                     [29, 'Wegener relied on a limited range of scientific fields to support his theory of continental drift.'],
                                     [30, 'The similarities between Wegener\'s theory of continental drift and modern-day plate tectonics are enormous.'],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -530,7 +530,7 @@
                     <p class="text-sm text-gray-800 mb-1">Complete the summary using the list of phrases, <strong>A–J</strong>, below.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write the correct letter, <strong>A–J</strong>, in boxes 31–36 on your answer sheet.</p>
 
-                    <div class="border border-gray-300 rounded-xl p-5 bg-gray-50 mb-6">
+                    <div class="border border-gray-300 rounded-xl p-5 bg-white mb-6">
                         <h4 class="text-lg font-bold text-center text-gray-900 mb-4">Wegener's life and work</h4>
 
                         <div class="text-sm text-gray-800 leading-relaxed space-y-3">
@@ -576,7 +576,7 @@
                     </div>
 
                     {{-- Phrase options box --}}
-                    <div class="border border-gray-400 rounded-xl p-5 bg-gray-50">
+                    <div class="border border-gray-400 rounded-xl p-5 bg-white">
                         <div class="grid grid-cols-3 gap-3 text-sm">
                             <div><strong>A</strong> modest fame</div>
                             <div><strong>B</strong> vast range</div>
@@ -604,11 +604,11 @@
                         [39, 'What does Greene say about some other famous scientists?', ['A' => 'Their published works had a greater impact than Wegener\'s did.', 'B' => 'They had fewer doubts about their scientific ideas than Wegener did.', 'C' => 'Their scientific ideas were more controversial than Wegener\'s.', 'D' => 'They are easier subjects to write about than Wegener.']],
                         [40, 'What is Greene\'s main point in the final paragraph?', ['A' => 'It is not enough in life to have good intentions.', 'B' => 'People need to plan carefully if they want to succeed.', 'C' => 'People have little control over many aspects of their lives.', 'D' => 'It is important that people ensure they have the freedom to act.']],
                     ] as [$num, $question, $options])
-                    <div class="mb-6 p-4 {{ $loop->even ? 'bg-gray-50' : '' }} rounded-lg">
+                    <div class="mb-6 p-4 {{ $loop->even ? 'bg-white' : '' }} rounded-lg">
                         <p class="mb-3 text-sm"><strong>{{ $num }}</strong> {{ $question }}</p>
                         <div class="space-y-2 ml-6">
                             @foreach($options as $letter => $text)
-                            <label class="flex items-start gap-3 cursor-pointer hover:bg-gray-100 p-1.5 rounded">
+                            <label class="flex items-start gap-3 cursor-pointer hover:bg-white p-1.5 rounded">
                                 <input type="radio" name="q{{ $num }}" value="{{ $letter }}" class="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
                                 <span class="text-sm"><strong>{{ $letter }}</strong> {{ $text }}</span>
                             </label>

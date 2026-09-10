@@ -15,7 +15,7 @@
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
         <div class="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-indigo-200/40 blur-3xl"></div>
         <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-purple-200/30 blur-3xl"></div>
-        <div class="absolute top-[20%] left-[20%] w-[300px] h-[300px] rounded-full bg-blue-100/40 blur-2xl"></div>
+        <div class="absolute top-[20%] left-[20%] w-[300px] h-[300px] rounded-full bg-white blur-2xl"></div>
     </div>
 
     <div class="container mx-auto px-4 relative z-10 max-w-5xl">
@@ -23,7 +23,7 @@
         <div class="mb-8 flex items-center justify-between">
             <a href="{{ route('assignments.ielts-academic.listening.index') }}" 
                class="inline-flex items-center text-gray-500 hover:text-indigo-600 transition-colors group text-sm font-medium tracking-wide">
-                <div class="w-8 h-8 rounded-full bg-blue-100/40 flex items-center justify-center mr-3 group-hover:bg-indigo-100 transition-all">
+                <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center mr-3 group-hover:bg-white transition-all">
                     <svg class="w-4 h-4 transform group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
@@ -95,10 +95,10 @@
                             @for($i = 1; $i <= 12; $i++)
                             @php
                                 $colors = [
-                                    ['bg' => 'bg-orange-100', 'text' => 'text-orange-600', 'border' => 'border-orange-300', 'ring' => 'ring-orange-500/10', 'focus' => 'focus:border-orange-500'],
-                                    ['bg' => 'bg-indigo-100', 'text' => 'text-indigo-600', 'border' => 'border-indigo-300', 'ring' => 'ring-indigo-500/10', 'focus' => 'focus:border-indigo-500'],
+                                    ['bg' => 'bg-white', 'text' => 'text-orange-600', 'border' => 'border-orange-300', 'ring' => 'ring-orange-500/10', 'focus' => 'focus:border-orange-500'],
+                                    ['bg' => 'bg-white', 'text' => 'text-indigo-600', 'border' => 'border-indigo-300', 'ring' => 'ring-indigo-500/10', 'focus' => 'focus:border-indigo-500'],
                                     ['bg' => 'bg-pink-100', 'text' => 'text-pink-600', 'border' => 'border-pink-300', 'ring' => 'ring-pink-500/10', 'focus' => 'focus:border-pink-500'],
-                                    ['bg' => 'bg-teal-100', 'text' => 'text-teal-600', 'border' => 'border-teal-300', 'ring' => 'ring-teal-500/10', 'focus' => 'focus:border-teal-500'],
+                                    ['bg' => 'bg-white', 'text' => 'text-teal-600', 'border' => 'border-teal-300', 'ring' => 'ring-teal-500/10', 'focus' => 'focus:border-teal-500'],
                                 ];
                                 $color = $colors[($i - 1) % 4];
                             @endphp

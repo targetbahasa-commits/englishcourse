@@ -7,89 +7,89 @@ class GrammarWritingDataRepository
 
     public $meeting5TenseExamples = [
         'Simple Present' => [
-            'verbal' => ['id' => 'Saya tidak makan nasi.', 'en' => 'I do not eat rice'],
-            'nominal' => ['id' => 'Dia bukan guru.', 'en' => 'He is not a teacher'],
-            'passive' => ['id' => 'Buku itu tidak dibaca.', 'en' => 'The book is not read']
+            'verbal' => ['id' => 'Peneliti tidak mengabaikan temuan statistik yang signifikan.', 'en' => 'Researchers do not ignore significant statistical findings'],
+            'nominal' => ['id' => 'Fasilitas ini bukan merupakan laboratorium utama.', 'en' => 'This facility is not the primary laboratory'],
+            'passive' => ['id' => 'Laporan tahunan tersebut tidak dipublikasikan secara terbuka.', 'en' => 'The annual report is not published openly']
         ],
         'Present Continuous' => [
-            'verbal' => ['id' => 'Mereka tidak sedang bermain.', 'en' => 'They are not playing'],
-            'nominal' => ['id' => 'Dia tidak sedang menjadi nakal.', 'en' => 'He is not being naughty'],
-            'passive' => ['id' => 'Mobil itu tidak sedang dicuci.', 'en' => 'The car is not being washed']
+            'verbal' => ['id' => 'Para analis tidak sedang mengabaikan fluktuasi pasar.', 'en' => 'The analysts are not ignoring market fluctuations'],
+            'nominal' => ['id' => 'Kebijakan tersebut tidak sedang menjadi hambatan regulasi.', 'en' => 'The policy is not being a regulatory hindrance'],
+            'passive' => ['id' => 'Instrumen ilmiah tersebut tidak sedang dikalibrasi.', 'en' => 'The scientific instrument is not being calibrated']
         ],
         'Present Perfect' => [
-            'verbal' => ['id' => 'Kita belum selesai.', 'en' => 'We have not finished'],
-            'nominal' => ['id' => 'Dia belum pernah ke sana.', 'en' => 'He has not been there'],
-            'passive' => ['id' => 'Surat itu belum dikirim.', 'en' => 'The letter has not been sent']
+            'verbal' => ['id' => 'Tim peneliti belum menyelesaikan evaluasi komprehensif.', 'en' => 'The research team has not completed the comprehensive evaluation'],
+            'nominal' => ['id' => 'Perusahaan tersebut belum pernah menjadi pimpinan pasar.', 'en' => 'The company has not been a market leader'],
+            'passive' => ['id' => 'Dokumen rahasia tersebut belum disebarkan ke publik.', 'en' => 'The confidential document has not been distributed to the public']
         ],
         'Present Perfect Continuous' => [
-            'verbal' => ['id' => 'Saya belum sedang menunggu.', 'en' => 'I have not been waiting'],
-            'nominal' => ['id' => 'Dia belum sedang menjadi baik.', 'en' => 'He has not been being good'],
-            'passive' => ['id' => 'Rumah itu belum sedang dibangun.', 'en' => 'The house has not been being built']
+            'verbal' => ['id' => 'Para ilmuwan belum sedang mengamati fenomena tersebut.', 'en' => 'The scientists have not been observing the phenomenon'],
+            'nominal' => ['id' => 'Otoritas terkait belum sedang menjadi transparan.', 'en' => 'The relevant authority has not been being transparent'],
+            'passive' => ['id' => 'Infrastruktur tersebut belum sedang direnovasi.', 'en' => 'The infrastructure has not been being renovated']
         ],
         'Simple Past' => [
-            'verbal' => ['id' => 'Dia tidak datang kemarin.', 'en' => 'He did not come yesterday'],
-            'nominal' => ['id' => 'Saya tidak sedih tadi malam.', 'en' => 'I was not sad last night'],
-            'passive' => ['id' => 'Kue itu tidak dimakan.', 'en' => 'The cake was not eaten']
+            'verbal' => ['id' => 'Dewan direksi tidak menyetujui usulan akuisisi kemarin.', 'en' => 'The board of directors did not approve the acquisition proposal yesterday'],
+            'nominal' => ['id' => 'Hasil eksperimen tersebut tidak konsisten minggu lalu.', 'en' => 'The experimental results were not consistent last week'],
+            'passive' => ['id' => 'Keputusan strategis tersebut tidak diambil tanpa pertimbangan.', 'en' => 'The strategic decision was not made without consideration']
         ],
         'Past Continuous' => [
-            'verbal' => ['id' => 'Saya tidak sedang tidur jam 9.', 'en' => 'I was not sleeping at 9'],
-            'nominal' => ['id' => 'Dia tidak sedang menjadi marah.', 'en' => 'He was not being angry'],
-            'passive' => ['id' => 'Lagu itu tidak sedang dinyanyikan.', 'en' => 'The song was not being sung']
+            'verbal' => ['id' => 'Tim investigasi tidak sedang menginspeksi lokasi saat kejadian.', 'en' => 'The investigation team was not inspecting the site during the incident'],
+            'nominal' => ['id' => 'Kondisi ekonomi tidak sedang menjadi stabil pada periode itu.', 'en' => 'The economic condition was not being stable during that period'],
+            'passive' => ['id' => 'Data mentah tersebut tidak sedang diolah oleh sistem.', 'en' => 'The raw data was not being processed by the system']
         ],
         'Past Perfect' => [
-            'verbal' => ['id' => 'Mereka belum pergi sebelum hujan.', 'en' => 'They had not gone before rain'],
-            'nominal' => ['id' => 'Dia belum pernah sakit sebelumnya.', 'en' => 'He had not been sick before'],
-            'passive' => ['id' => 'Pekerjaan itu belum diselesaikan.', 'en' => 'The job had not been finished']
+            'verbal' => ['id' => 'Perusahaan belum mengimplementasikan sistem baru sebelum krisis.', 'en' => 'The company had not implemented the new system before the crisis'],
+            'nominal' => ['id' => 'Proyek tersebut belum pernah menjadi prioritas sebelumnya.', 'en' => 'The project had not been a priority before'],
+            'passive' => ['id' => 'Naskah akademik tersebut belum diterbitkan sebelum tahun 2020.', 'en' => 'The academic manuscript had not been published before 2020']
         ],
         'Past Perfect Continuous' => [
-            'verbal' => ['id' => 'Kami belum sedang bekerja selama 2 jam.', 'en' => 'We had not been working for 2 hours'],
-            'nominal' => ['id' => 'Dia belum sedang menjadi sibuk.', 'en' => 'He had not been being busy'],
-            'passive' => ['id' => 'Jalan itu belum sedang diperbaiki.', 'en' => 'The road had not been being repaired']
+            'verbal' => ['id' => 'Para peneliti belum sedang menganalisis sampel selama tiga bulan.', 'en' => 'The researchers had not been analyzing samples for three months'],
+            'nominal' => ['id' => 'Sektor finansial belum sedang menjadi produktif.', 'en' => 'The financial sector had not been being productive'],
+            'passive' => ['id' => 'Gedung cagar budaya tersebut belum sedang dipugar.', 'en' => 'The heritage building had not been being restored']
         ],
         'Simple Future' => [
-            'verbal' => ['id' => 'Saya tidak akan pergi.', 'en' => 'I will not go'],
-            'nominal' => ['id' => 'Itu tidak akan mudah.', 'en' => 'It will not be easy'],
-            'passive' => ['id' => 'Masalah itu tidak akan dilupakan.', 'en' => 'The problem will not be forgotten']
+            'verbal' => ['id' => 'Manajemen tidak akan mengeksekusi rencana tanpa verifikasi.', 'en' => 'Management will not execute the plan without verification'],
+            'nominal' => ['id' => 'Proses adaptasi teknologi tidak akan mudah.', 'en' => 'The technology adaptation process will not be easy'],
+            'passive' => ['id' => 'Pelanggaran etik tersebut tidak akan ditoleransi oleh komite.', 'en' => 'The ethical violation will not be tolerated by the committee']
         ],
         'Future Continuous' => [
-            'verbal' => ['id' => 'Kita tidak akan sedang belajar besok pagi.', 'en' => 'We will not be studying tomorrow morning'],
-            'nominal' => ['id' => 'Dia tidak akan sedang menjadi malas.', 'en' => 'He will not be being lazy'],
-            'passive' => ['id' => 'Kamar itu tidak akan sedang dibersihkan.', 'en' => 'The room will not be being cleaned']
+            'verbal' => ['id' => 'Delegasi internasional tidak akan sedang berdiskusi besok pagi.', 'en' => 'The international delegation will not be discussing tomorrow morning'],
+            'nominal' => ['id' => 'Manajer tidak akan sedang menjadi kaku dalam negosiasi.', 'en' => 'The manager will not be being rigid in negotiations'],
+            'passive' => ['id' => 'Fasilitas manufaktur tidak akan sedang diuji coba.', 'en' => 'The manufacturing facility will not be being tested']
         ],
         'Future Perfect' => [
-            'verbal' => ['id' => 'Saya tidak akan sudah sampai jam 5.', 'en' => 'I will not have arrived by 5'],
-            'nominal' => ['id' => 'Dia tidak akan sudah siap.', 'en' => 'He will not have been ready'],
-            'passive' => ['id' => 'Proyek itu tidak akan sudah selesai.', 'en' => 'The project will not have been completed']
+            'verbal' => ['id' => 'Tim tidak akan sudah mencapai kesepakatan pada pukul lima.', 'en' => 'The team will not have reached an agreement by five oclock'],
+            'nominal' => ['id' => 'Infrastruktur baru tidak akan sudah siap pada kuartal depan.', 'en' => 'The new infrastructure will not have been ready by next quarter'],
+            'passive' => ['id' => 'Proyek penelitian tidak akan sudah diselesaikan akhir tahun ini.', 'en' => 'The research project will not have been completed by the end of this year']
         ],
         'Future Perfect Continuous' => [
-            'verbal' => ['id' => 'Mereka tidak akan sudah sedang menunggu lama.', 'en' => 'They will not have been waiting long'],
-            'nominal' => ['id' => 'Dia tidak akan sudah sedang menjadi lelah.', 'en' => 'He will not have been being tired'],
-            'passive' => ['id' => 'Gedung itu tidak akan sudah sedang dicat.', 'en' => 'The building will not have been being painted']
+            'verbal' => ['id' => 'Para pakar tidak akan sudah sedang meneliti masalah tersebut.', 'en' => 'The experts will not have been researching that issue for long'],
+            'nominal' => ['id' => 'Kondisi tidak akan sudah sedang menjadi kondusif.', 'en' => 'Conditions will not have been being conducive'],
+            'passive' => ['id' => 'Jaringan komunikasi tidak akan sudah sedang diperbarui.', 'en' => 'The communication network will not have been being upgraded']
         ],
         'Simple Past Future' => [
-            'verbal' => ['id' => 'Saya tidak akan melakukannya.', 'en' => 'I would not do it'],
-            'nominal' => ['id' => 'Itu tidak akan benar.', 'en' => 'It would not be true'],
-            'passive' => ['id' => 'Undangan itu tidak akan diterima.', 'en' => 'The invitation would not be accepted']
+            'verbal' => ['id' => 'Pemerintah tidak akan menerapkan sanksi ekstrem.', 'en' => 'The government would not enforce extreme sanctions'],
+            'nominal' => ['id' => 'Asumsi awal tersebut tidak akan akurat.', 'en' => 'The initial assumption would not be accurate'],
+            'passive' => ['id' => 'Rekomendasi teknis tersebut tidak akan ditolak oleh dewan.', 'en' => 'The technical recommendation would not be rejected by the board']
         ],
         'Past Future Continuous' => [
-            'verbal' => ['id' => 'Kita tidak akan sedang rapat.', 'en' => 'We would not be meeting'],
-            'nominal' => ['id' => 'Dia tidak akan sedang menjadi kasar.', 'en' => 'He would not be being rude'],
-            'passive' => ['id' => 'Mobil itu tidak akan sedang diperbaiki.', 'en' => 'The car would not be being fixed']
+            'verbal' => ['id' => 'Para ilmuwan tidak akan sedang melakukan uji klinis.', 'en' => 'The scientists would not be conducting clinical trials'],
+            'nominal' => ['id' => 'Otoritas tidak akan sedang menjadi kooperatif.', 'en' => 'The authority would not be being cooperative'],
+            'passive' => ['id' => 'Sistem jaringan tidak akan sedang diperbaiki.', 'en' => 'The network system would not be being repaired']
         ],
         'Past Future Perfect' => [
-            'verbal' => ['id' => 'Saya tidak akan sudah lupa.', 'en' => 'I would not have forgotten'],
-            'nominal' => ['id' => 'Dia tidak akan sudah ada di sana.', 'en' => 'He would not have been there'],
-            'passive' => ['id' => 'Paket itu tidak akan sudah dikirim.', 'en' => 'The package would not have been sent']
+            'verbal' => ['id' => 'Tim riset tidak akan sudah melupakan protokol keselamatan.', 'en' => 'The research team would not have forgotten the safety protocol'],
+            'nominal' => ['id' => 'Eksperimen tersebut tidak akan sudah menjadi sukses.', 'en' => 'The experiment would not have been successful'],
+            'passive' => ['id' => 'Laporan evaluasi tidak akan sudah diserahkan.', 'en' => 'The evaluation report would not have been submitted']
         ],
         'Past Future Perfect Continuous' => [
-            'verbal' => ['id' => 'Mereka tidak akan sudah sedang tidur.', 'en' => 'They would not have been sleeping'],
-            'nominal' => ['id' => 'Dia tidak akan sudah sedang menjadi senang.', 'en' => 'He would not have been being happy'],
-            'passive' => ['id' => 'Buku itu tidak akan sudah sedang ditulis.', 'en' => 'The book would not have been being written']
+            'verbal' => ['id' => 'Mereka tidak akan sudah sedang bernegosiasi.', 'en' => 'They would not have been negotiating'],
+            'nominal' => ['id' => 'Situasi tidak akan sudah sedang menjadi stabil.', 'en' => 'The situation would not have been being stable'],
+            'passive' => ['id' => 'Dokumen hukum tidak akan sudah sedang direvisi.', 'en' => 'The legal document would not have been being revised']
         ],
         'Modal' => [
-            'verbal' => ['id' => 'Kamu tidak boleh merokok.', 'en' => 'You must not smoke'],
-            'nominal' => ['id' => 'Dia mungkin tidak sakit.', 'en' => 'He might not be sick'],
-            'passive' => ['id' => 'Pintu itu tidak bisa dibuka.', 'en' => 'The door cannot be opened']
+            'verbal' => ['id' => 'Staf peneliti tidak boleh memanipulasi data eksperimen.', 'en' => 'Research staff must not manipulate experimental data'],
+            'nominal' => ['id' => 'Hipotesis tersebut mungkin tidak valid.', 'en' => 'The hypothesis might not be valid'],
+            'passive' => ['id' => 'Pintu laboratorium tidak bisa diakses tanpa otorisasi.', 'en' => 'The laboratory door cannot be accessed without authorization']
         ]
     ];
 
@@ -279,219 +279,1473 @@ class GrammarWritingDataRepository
         ]
     ];
 
-    public $meeting12Questions = [
-        1 => [
-            'id' => 'Masyarakat agraris berkembang pesat ketika sistem irigasi kuno mulai digunakan.',
-            'en' => 'Agrarian societies developed rapidly when ancient irrigation systems began to be used',
-            'type' => 'time',
-            'conjunction' => 'when (ketika)',
-            'example' => ['id' => 'Dia menelepon ketika saya sedang makan.', 'en' => 'He called when I was eating.'],
-            'vocab' => [
-                'Agrarian' => ['id' => 'Agraris', 'pos' => '(adj)'],
-                'Society' => ['id' => 'Masyarakat', 'pos' => '(n)'],
-                'Develop' => ['id' => 'Berkembang', 'pos' => '(v)'],
-                'Rapidly' => ['id' => 'Pesat', 'pos' => '(adv)'],
-                'Irrigation' => ['id' => 'Irigasi', 'pos' => '(n)'],
-                'Ancient' => ['id' => 'Kuno', 'pos' => '(adj)']
-            ]
-        ],
-        2 => [
-            'id' => 'Kebudayaan Mesir meninggalkan piramida megah, sementara banyak peradaban kuno lain telah runtuh.',
-            'en' => 'Egyptian culture left magnificent pyramids, while many other ancient civilizations have collapsed',
-            'type' => 'time',
-            'conjunction' => 'while (sementara)',
-            'example' => ['id' => 'Saya belajar, sementara adik saya bermain.', 'en' => 'I study, while my brother plays.'],
-            'vocab' => [
-                'Culture' => ['id' => 'Kebudayaan', 'pos' => '(n)'],
-                'Magnificent' => ['id' => 'Megah', 'pos' => '(adj)'],
-                'Pyramid' => ['id' => 'Piramida', 'pos' => '(n)'],
-                'Civilization' => ['id' => 'Peradaban', 'pos' => '(n)'],
-                'Collapse' => ['id' => 'Runtuh', 'pos' => '(v)']
-            ]
-        ],
-        3 => [
-            'id' => 'Penyebaran ilmu pengetahuan terbatas, sebelum mesin cetak Gutenberg diperkenalkan di Eropa.',
-            'en' => 'The spread of knowledge was limited, before the Gutenberg printing press was introduced in Europe',
-            'type' => 'time',
-            'conjunction' => 'before (sebelum)',
-            'example' => ['id' => 'Cuci tangan sebelum kamu makan.', 'en' => 'Wash your hands before you eat.'],
-            'vocab' => [
-                'Spread' => ['id' => 'Penyebaran', 'pos' => '(n)'],
-                'Knowledge' => ['id' => 'Ilmu pengetahuan', 'pos' => '(n)'],
-                'Limited' => ['id' => 'Terbatas', 'pos' => '(adj)'],
-                'Printing press' => ['id' => 'Mesin cetak', 'pos' => '(n)'],
-                'Introduce' => ['id' => 'Diperkenalkan', 'pos' => '(v)']
-            ]
-        ],
-        4 => [
-            'id' => 'Pola kerja manusia berubah drastis setelah revolusi industri dimulai di Inggris.',
-            'en' => 'Human work patterns changed drastically after the industrial revolution began in England',
-            'type' => 'time',
-            'conjunction' => 'after (setelah)',
-            'example' => ['id' => 'Dia pergi setelah rapat selesai.', 'en' => 'He left after the meeting ended.'],
-            'vocab' => [
-                'Pattern' => ['id' => 'Pola', 'pos' => '(n)'],
-                'Work' => ['id' => 'Kerja', 'pos' => '(n)'],
-                'Change' => ['id' => 'Berubah', 'pos' => '(v)'],
-                'Drastically' => ['id' => 'Drastis', 'pos' => '(adv)'],
-                'Industrial revolution' => ['id' => 'Revolusi industri', 'pos' => '(n)']
-            ]
-        ],
-        5 => [
-            'id' => 'Pemahaman tentang tata surya semakin akurat sejak astronomi berkembang sebagai ilmu modern.',
-            'en' => 'Understanding of the solar system became increasingly accurate since astronomy developed as a modern science',
-            'type' => 'time',
-            'conjunction' => 'since (sejak)',
-            'example' => ['id' => 'Saya tinggal di sini sejak tahun 2020.', 'en' => 'I have lived here since 2020.'],
-            'vocab' => [
-                'Understanding' => ['id' => 'Pemahaman', 'pos' => '(n)'],
-                'Solar system' => ['id' => 'Tata surya', 'pos' => '(n)'],
-                'Accurate' => ['id' => 'Akurat', 'pos' => '(adj)'],
-                'Astronomy' => ['id' => 'Astronomi', 'pos' => '(n)'],
-                'Modern' => ['id' => 'Modern', 'pos' => '(adj)']
-            ]
-        ],
-        6 => [
-            'id' => 'Epidemi luas sering terjadi sampai vaksin berhasil ditemukan.',
-            'en' => 'Widespread epidemics often occurred until vaccines were successfully discovered',
-            'type' => 'time',
-            'conjunction' => 'until (sampai)',
-            'example' => ['id' => 'Tunggu sampai hujan berhenti.', 'en' => 'Wait until the rain stops.'],
-            'vocab' => [
-                'Epidemic' => ['id' => 'Epidemi', 'pos' => '(n)'],
-                'Widespread' => ['id' => 'Luas', 'pos' => '(adj)'],
-                'Occur' => ['id' => 'Terjadi', 'pos' => '(v)'],
-                'Vaccine' => ['id' => 'Vaksin', 'pos' => '(n)'],
-                'Discover' => ['id' => 'Ditemukan', 'pos' => '(v)']
-            ]
-        ],
-        7 => [
-            'id' => 'Produktivitas industri meningkat signifikan segera setelah listrik diperkenalkan di kota besar.',
-            'en' => 'Industrial productivity increased significantly as soon as electricity was introduced in big cities',
-            'type' => 'time',
-            'conjunction' => 'as soon as (segera setelah)',
-            'example' => ['id' => 'Hubungi saya segera setelah kamu tiba.', 'en' => 'Contact me as soon as you arrive.'],
-            'vocab' => [
-                'Productivity' => ['id' => 'Produktivitas', 'pos' => '(n)'],
-                'Industrial' => ['id' => 'Industri', 'pos' => '(adj)'],
-                'Increase' => ['id' => 'Meningkat', 'pos' => '(v)'],
-                'Significantly' => ['id' => 'Signifikan', 'pos' => '(adv)'],
-                'Electricity' => ['id' => 'Listrik', 'pos' => '(n)']
-            ]
-        ],
-        8 => [
-            'id' => 'Banyak masyarakat tinggal di sekitar gunung berapi karena tanah di sekitarnya sangat subur.',
-            'en' => 'Many communities live around volcanoes because the surrounding soil is very fertile',
-            'type' => 'cause',
-            'conjunction' => 'because (karena)',
-            'example' => ['id' => 'Dia tidak datang karena dia sakit.', 'en' => 'He did not come because he was sick.'],
-            'vocab' => [
-                'Community' => ['id' => 'Masyarakat', 'pos' => '(n)'],
-                'Volcano' => ['id' => 'Gunung berapi', 'pos' => '(n)'],
-                'Surrounding' => ['id' => 'Sekitar', 'pos' => '(adj)'],
-                'Soil' => ['id' => 'Tanah', 'pos' => '(n)'],
-                'Fertile' => ['id' => 'Subur', 'pos' => '(adj)']
-            ]
-        ],
-        9 => [
-            'id' => 'Teori heliosentris akhirnya diterima sebagai dasar ilmu astronomi, meskipun awalnya ditolak.',
-            'en' => 'The heliocentric theory was finally accepted as the basis of astronomy, although it was initially rejected',
-            'type' => 'contrast',
-            'conjunction' => 'although (meskipun)',
-            'example' => ['id' => 'Dia tetap bekerja meskipun dia lelah.', 'en' => 'He kept working although he was tired.'],
-            'vocab' => [
-                'Heliocentric' => ['id' => 'Heliosentris', 'pos' => '(adj)'],
-                'Theory' => ['id' => 'Teori', 'pos' => '(n)'],
-                'Accept' => ['id' => 'Diterima', 'pos' => '(v)'],
-                'Basis' => ['id' => 'Dasar', 'pos' => '(n)'],
-                'Reject' => ['id' => 'Ditolak', 'pos' => '(v)']
-            ]
-        ],
-        10 => [
-            'id' => 'Para penjelajah berhasil menyeberangi Samudra Pasifik, walaupun lautannya sangat luas.',
-            'en' => 'Explorers successfully crossed the Pacific Ocean, although the ocean was very vast',
-            'type' => 'contrast',
-            'conjunction' => 'although (walaupun)',
-            'example' => ['id' => 'Dia lulus walaupun jarang belajar.', 'en' => 'He passed although he rarely studied.'],
-            'vocab' => [
-                'Explorer' => ['id' => 'Penjelajah', 'pos' => '(n)'],
-                'Successfully' => ['id' => 'Berhasil', 'pos' => '(adv)'],
-                'Cross' => ['id' => 'Menyeberangi', 'pos' => '(v)'],
-                'Ocean' => ['id' => 'Samudra', 'pos' => '(n)'],
-                'Vast' => ['id' => 'Luas', 'pos' => '(adj)']
-            ]
-        ],
-        11 => [
-            'id' => 'Keanekaragaman hayati dapat bertahan jika hutan hujan tropis tetap terjaga.',
-            'en' => 'Biodiversity can survive if tropical rainforests remain preserved',
-            'type' => 'condition',
-            'conjunction' => 'if (jika)',
-            'example' => ['id' => 'Jika hujan, saya akan di rumah.', 'en' => 'If it rains, I will stay home.'],
-            'vocab' => [
-                'Biodiversity' => ['id' => 'Keanekaragaman hayati', 'pos' => '(n)'],
-                'Survive' => ['id' => 'Bertahan', 'pos' => '(v)'],
-                'Tropical' => ['id' => 'Tropis', 'pos' => '(adj)'],
-                'Rainforest' => ['id' => 'Hutan hujan', 'pos' => '(n)'],
-                'Preserve' => ['id' => 'Terjaga', 'pos' => '(v)']
-            ]
-        ],
-        12 => [
-            'id' => 'Populasi ikan menurun drastis kecuali jika konservasi laut dilakukan secara serius.',
-            'en' => 'Fish populations decline drastically unless marine conservation is carried out seriously',
-            'type' => 'condition',
-            'conjunction' => 'unless (kecuali jika)',
-            'example' => ['id' => 'Kamu akan gagal kecuali jika kamu belajar.', 'en' => 'You will fail unless you study.'],
-            'vocab' => [
-                'Population' => ['id' => 'Populasi', 'pos' => '(n)'],
-                'Decline' => ['id' => 'Menurun', 'pos' => '(v)'],
-                'Marine' => ['id' => 'Laut', 'pos' => '(adj)'],
-                'Conservation' => ['id' => 'Konservasi', 'pos' => '(n)'],
-                'Carry out' => ['id' => 'Dilakukan', 'pos' => '(v)']
-            ]
-        ],
-        13 => [
-            'id' => 'Teknologi satelit dikembangkan agar komunikasi antarnegara menjadi lebih mudah.',
-            'en' => 'Satellite technology was developed so that communication between countries became easier',
-            'type' => 'purpose',
-            'conjunction' => 'so that (agar)',
-            'example' => ['id' => 'Dia belajar keras agar bisa lulus.', 'en' => 'He studies hard so that he can pass.'],
-            'vocab' => [
-                'Satellite' => ['id' => 'Satelit', 'pos' => '(n)'],
-                'Technology' => ['id' => 'Teknologi', 'pos' => '(n)'],
-                'Develop' => ['id' => 'Dikembangkan', 'pos' => '(v)'],
-                'Communication' => ['id' => 'Komunikasi', 'pos' => '(n)'],
-                'Easier' => ['id' => 'Lebih mudah', 'pos' => '(adj)']
-            ]
-        ],
-        14 => [
-            'id' => 'Interaksi budaya meningkat pesat di mana pun jalur perdagangan internasional terbuka.',
-            'en' => 'Cultural interaction increased rapidly wherever international trade routes opened',
-            'type' => 'place',
-            'conjunction' => 'wherever (di mana pun)',
-            'example' => ['id' => 'Dia pergi ke mana pun dia mau.', 'en' => 'He goes wherever he wants.'],
-            'vocab' => [
-                'Interaction' => ['id' => 'Interaksi', 'pos' => '(n)'],
-                'Cultural' => ['id' => 'Budaya', 'pos' => '(adj)'],
-                'Trade route' => ['id' => 'Jalur perdagangan', 'pos' => '(n)'],
-                'International' => ['id' => 'Internasional', 'pos' => '(adj)'],
-                'Open' => ['id' => 'Terbuka', 'pos' => '(v)']
-            ]
-        ],
-        15 => [
-            'id' => 'Kota Petra terlihat seakan keluar dari tebing batu, seolah-olah arsitekturnya terukir secara alami.',
-            'en' => 'The city of Petra looks as if it emerges from the rock cliffs, as if its architecture was carved naturally',
-            'type' => 'manner',
-            'conjunction' => 'as if (seolah-olah)',
-            'example' => ['id' => 'Dia bertingkah seolah-olah dia raja.', 'en' => 'He acts as if he is a king.'],
-            'vocab' => [
-                'Emerge' => ['id' => 'Keluar', 'pos' => '(v)'],
-                'Rock cliff' => ['id' => 'Tebing batu', 'pos' => '(n)'],
-                'Architecture' => ['id' => 'Arsitektur', 'pos' => '(n)'],
-                'Carve' => ['id' => 'Terukir', 'pos' => '(v)'],
-                'Naturally' => ['id' => 'Secara alami', 'pos' => '(adv)']
-            ]
-        ]
-    ];
+        public $meeting12Questions = array (
+  1 => 
+  array (
+    'id' => 'Burung-burung Trumpeter lebih suka dengan kanopi yang tebal untuk menyediakan perlindungan dan penutup di sarang mereka.',
+    'en' => 'Trumpeter birds more prefer thick canopy to provide protection and cover on their nests',
+    'type' => 'fanboys',
+    'conjunction' => 'and (dan)',
+    'example' => 
+    array (
+      'id' => 'Burung mencari tempat teduh untuk sarang mereka.',
+      'en' => 'Birds seek shade for their nests.',
+    ),
+    'vocab' => 
+    array (
+      'Trumpeter bird' => 
+      array (
+        'id' => 'Burung Trumpeter',
+        'pos' => '(n)',
+      ),
+      'Prefer' => 
+      array (
+        'id' => 'Lebih suka',
+        'pos' => '(v)',
+      ),
+      'Thick canopy' => 
+      array (
+        'id' => 'Kanopi yang tebal',
+        'pos' => '(n)',
+      ),
+      'Provide' => 
+      array (
+        'id' => 'Menyediakan',
+        'pos' => '(v)',
+      ),
+      'Protection' => 
+      array (
+        'id' => 'Perlindungan',
+        'pos' => '(n)',
+      ),
+      'Cover' => 
+      array (
+        'id' => 'Penutup',
+        'pos' => '(n)',
+      ),
+      'Nest' => 
+      array (
+        'id' => 'Sarang',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  2 => 
+  array (
+    'id' => 'Perencanaan dari proyek baru termasuk dari pendesainan, perhitungan biaya, dan pembangunan.',
+    'en' => 'The planning of the new project includes designing, cost calculation, and construction',
+    'type' => 'fanboys',
+    'conjunction' => 'and (dan)',
+    'example' => 
+    array (
+      'id' => 'Proyek ini mencakup analisis dan implementasi.',
+      'en' => 'This project includes analysis and implementation.',
+    ),
+    'vocab' => 
+    array (
+      'Planning' => 
+      array (
+        'id' => 'Perencanaan',
+        'pos' => '(n)',
+      ),
+      'New project' => 
+      array (
+        'id' => 'Proyek baru',
+        'pos' => '(n)',
+      ),
+      'Include' => 
+      array (
+        'id' => 'Termasuk / Mencakup',
+        'pos' => '(v)',
+      ),
+      'Designing' => 
+      array (
+        'id' => 'Pendesainan',
+        'pos' => '(n/gerund)',
+      ),
+      'Cost calculation' => 
+      array (
+        'id' => 'Perhitungan biaya',
+        'pos' => '(n)',
+      ),
+      'Construction' => 
+      array (
+        'id' => 'Pembangunan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  3 => 
+  array (
+    'id' => 'Permintaan, kecantikan, keawetan, kelangkaan, dan kesempurnaan dari potongan menentukan nilai dari batu berharga.',
+    'en' => 'Demand, beauty, durability, rarity, and perfection of the cut determine the value of precious stones',
+    'type' => 'fanboys',
+    'conjunction' => 'and (dan)',
+    'example' => 
+    array (
+      'id' => 'Kualitas dan warna menentukan harga permata.',
+      'en' => 'Quality and color determine the gemstone price.',
+    ),
+    'vocab' => 
+    array (
+      'Demand' => 
+      array (
+        'id' => 'Permintaan',
+        'pos' => '(n)',
+      ),
+      'Beauty' => 
+      array (
+        'id' => 'Kecantikan',
+        'pos' => '(n)',
+      ),
+      'Durability' => 
+      array (
+        'id' => 'Keawetan',
+        'pos' => '(n)',
+      ),
+      'Rarity' => 
+      array (
+        'id' => 'Kelangkaan',
+        'pos' => '(n)',
+      ),
+      'Perfection of the cut' => 
+      array (
+        'id' => 'Kesempurnaan dari potongan',
+        'pos' => '(n)',
+      ),
+      'Determine' => 
+      array (
+        'id' => 'Menentukan',
+        'pos' => '(v)',
+      ),
+      'Precious stone' => 
+      array (
+        'id' => 'Batu berharga',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  4 => 
+  array (
+    'id' => 'Perkembangan bayi dipengaruhi oleh keturunan dan oleh lingkungan.',
+    'en' => 'Infant development is influenced by heredity and by the environment',
+    'type' => 'fanboys',
+    'conjunction' => 'and (dan)',
+    'example' => 
+    array (
+      'id' => 'Pertumbuhan anak dipengaruhi oleh nutrisi dan pola asuh.',
+      'en' => 'Child growth is influenced by nutrition and parenting.',
+    ),
+    'vocab' => 
+    array (
+      'Infant development' => 
+      array (
+        'id' => 'Perkembangan bayi',
+        'pos' => '(n)',
+      ),
+      'Influence' => 
+      array (
+        'id' => 'Mempengaruhi / Dipengaruhi',
+        'pos' => '(v)',
+      ),
+      'Heredity' => 
+      array (
+        'id' => 'Keturunan',
+        'pos' => '(n)',
+      ),
+      'Environment' => 
+      array (
+        'id' => 'Lingkungan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  5 => 
+  array (
+    'id' => 'Terumbu karang terpengaruhi oleh perubahan iklim dan dasar samudra dipengaruhi oleh sampah plastik.',
+    'en' => 'Coral reefs are affected by climate change, and the ocean floor is affected by plastic waste',
+    'type' => 'fanboys',
+    'conjunction' => 'and (dan)',
+    'example' => 
+    array (
+      'id' => 'Hutan terancam deforestasi, dan satwa terancam perburuan.',
+      'en' => 'Forests are threatened by deforestation, and animals are threatened by poaching.',
+    ),
+    'vocab' => 
+    array (
+      'Coral reef' => 
+      array (
+        'id' => 'Terumbu karang',
+        'pos' => '(n)',
+      ),
+      'Climate change' => 
+      array (
+        'id' => 'Perubahan iklim',
+        'pos' => '(n)',
+      ),
+      'Ocean floor' => 
+      array (
+        'id' => 'Dasar samudra',
+        'pos' => '(n)',
+      ),
+      'Plastic waste' => 
+      array (
+        'id' => 'Sampah plastik',
+        'pos' => '(n)',
+      ),
+      'Affect' => 
+      array (
+        'id' => 'Mempengaruhi / Terpengaruhi',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  6 => 
+  array (
+    'id' => 'Hutan harus dilindungi, diamankan, dan dilestarikan untuk generasi mendatang.',
+    'en' => 'Forests must be protected, secured, and preserved for future generations',
+    'type' => 'fanboys',
+    'conjunction' => 'and (dan)',
+    'example' => 
+    array (
+      'id' => 'Sumber air harus dijaga dan dilindungi untuk masa depan.',
+      'en' => 'Water sources must be maintained and protected for the future.',
+    ),
+    'vocab' => 
+    array (
+      'Forest' => 
+      array (
+        'id' => 'Hutan',
+        'pos' => '(n)',
+      ),
+      'Protect' => 
+      array (
+        'id' => 'Dilindungi',
+        'pos' => '(v)',
+      ),
+      'Secure' => 
+      array (
+        'id' => 'Diamankan',
+        'pos' => '(v)',
+      ),
+      'Preserve' => 
+      array (
+        'id' => 'Dilestarikan',
+        'pos' => '(v)',
+      ),
+      'Future generations' => 
+      array (
+        'id' => 'Generasi mendatang',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  7 => 
+  array (
+    'id' => 'Kepolisian bertugas menjaga negara dan tentara bertugas mempertahankan negara.',
+    'en' => 'The police are tasked with guarding the country, and the army is tasked with defending the country',
+    'type' => 'fanboys',
+    'conjunction' => 'and (dan)',
+    'example' => 
+    array (
+      'id' => 'Dokter merawat pasien, dan perawat membantu pemulihan.',
+      'en' => 'Doctors treat patients, and nurses assist in recovery.',
+    ),
+    'vocab' => 
+    array (
+      'Police' => 
+      array (
+        'id' => 'Kepolisian',
+        'pos' => '(n)',
+      ),
+      'Tasked with' => 
+      array (
+        'id' => 'Bertugas',
+        'pos' => '(phrase)',
+      ),
+      'Guard' => 
+      array (
+        'id' => 'Menjaga',
+        'pos' => '(v)',
+      ),
+      'Army' => 
+      array (
+        'id' => 'Tentara',
+        'pos' => '(n)',
+      ),
+      'Defend' => 
+      array (
+        'id' => 'Mempertahankan',
+        'pos' => '(v)',
+      ),
+      'Country' => 
+      array (
+        'id' => 'Negara',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  8 => 
+  array (
+    'id' => 'Kita harus mencari solusi dari masalah ini atau negara kita akan menghadapi masalah yang serius.',
+    'en' => 'We must find a solution to this problem, or our country will face serious problems',
+    'type' => 'fanboys',
+    'conjunction' => 'or (atau)',
+    'example' => 
+    array (
+      'id' => 'Kita harus bertindak sekarang, atau kita akan terlambat.',
+      'en' => 'We must act now, or we will be too late.',
+    ),
+    'vocab' => 
+    array (
+      'Find a solution' => 
+      array (
+        'id' => 'Mencari solusi',
+        'pos' => '(phrase)',
+      ),
+      'Problem' => 
+      array (
+        'id' => 'Masalah',
+        'pos' => '(n)',
+      ),
+      'Our country' => 
+      array (
+        'id' => 'Negara kita',
+        'pos' => '(n)',
+      ),
+      'Face' => 
+      array (
+        'id' => 'Menghadapi',
+        'pos' => '(v)',
+      ),
+      'Serious problem' => 
+      array (
+        'id' => 'Masalah yang serius',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  9 => 
+  array (
+    'id' => 'Penelitian genetik telah memberikan banyak kontribusi kepada masyarakat namun banyak orang yang masih tidak setuju dengan bidang ini.',
+    'en' => 'Genetic research has made many contributions to society, yet many people still disagree with this field',
+    'type' => 'fanboys',
+    'conjunction' => 'yet / but (namun)',
+    'example' => 
+    array (
+      'id' => 'Teknologi membawa manfaat, namun beberapa pihak masih ragu.',
+      'en' => 'Technology brings benefits, yet some parties remain doubtful.',
+    ),
+    'vocab' => 
+    array (
+      'Genetic research' => 
+      array (
+        'id' => 'Penelitian genetik',
+        'pos' => '(n)',
+      ),
+      'Contribution' => 
+      array (
+        'id' => 'Kontribusi',
+        'pos' => '(n)',
+      ),
+      'Society' => 
+      array (
+        'id' => 'Masyarakat',
+        'pos' => '(n)',
+      ),
+      'Disagree' => 
+      array (
+        'id' => 'Tidak setuju',
+        'pos' => '(v)',
+      ),
+      'Field' => 
+      array (
+        'id' => 'Bidang',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  10 => 
+  array (
+    'id' => 'Sayangnya, ini saat sekarang hampir mustahil untuk memprediksi kesuksesan dari spesies invasif, tidak juga kita bisa membuat prediksi daftar dari penginvasi.',
+    'en' => 'Unfortunately, it is currently almost impossible to predict the success of invasive species, nor can we make a predicted list of invaders',
+    'type' => 'fanboys',
+    'conjunction' => 'nor (tidak juga)',
+    'example' => 
+    array (
+      'id' => 'Dia tidak dapat datang, dan tidak juga dia memberi kabar.',
+      'en' => 'He cannot come, nor did he give notice.',
+    ),
+    'vocab' => 
+    array (
+      'Unfortunately' => 
+      array (
+        'id' => 'Sayangnya',
+        'pos' => '(adv)',
+      ),
+      'Currently' => 
+      array (
+        'id' => 'Saat sekarang',
+        'pos' => '(adv)',
+      ),
+      'Almost impossible' => 
+      array (
+        'id' => 'Hampir mustahil',
+        'pos' => '(phrase)',
+      ),
+      'Predict' => 
+      array (
+        'id' => 'Memprediksi',
+        'pos' => '(v)',
+      ),
+      'Invasive species' => 
+      array (
+        'id' => 'Spesies invasif',
+        'pos' => '(n)',
+      ),
+      'Invader' => 
+      array (
+        'id' => 'Penginvasi',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  11 => 
+  array (
+    'id' => 'Pengoperasian dari sistem ini tidak menyebabkan kehilangan biodiversitas dalam lingkungan alam. Tidak juga terdapat bukti untuk membangun aturan yang ketat.',
+    'en' => 'The operation of this system does not cause loss of biodiversity in the natural environment, nor is there evidence to establish strict regulations',
+    'type' => 'fanboys',
+    'conjunction' => 'nor (tidak juga)',
+    'example' => 
+    array (
+      'id' => 'Pabrik tidak mencemari sungai, dan tidak juga melanggar baku mutu.',
+      'en' => 'The factory does not pollute the river, nor does it violate standards.',
+    ),
+    'vocab' => 
+    array (
+      'Operation' => 
+      array (
+        'id' => 'Pengoperasian',
+        'pos' => '(n)',
+      ),
+      'Loss of biodiversity' => 
+      array (
+        'id' => 'Kehilangan biodiversitas',
+        'pos' => '(phrase)',
+      ),
+      'Natural environment' => 
+      array (
+        'id' => 'Lingkungan alam',
+        'pos' => '(n)',
+      ),
+      'Evidence' => 
+      array (
+        'id' => 'Bukti',
+        'pos' => '(n)',
+      ),
+      'Establish' => 
+      array (
+        'id' => 'Membangun / Menetapkan',
+        'pos' => '(v)',
+      ),
+      'Strict regulations' => 
+      array (
+        'id' => 'Aturan yang ketat',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  12 => 
+  array (
+    'id' => 'Dalam beberapa situasi, kapasitas untuk terbang menjadi tidak diperlukan, sehingga ini ditinggalkan.',
+    'en' => 'In some situations, the capacity to fly becomes unnecessary, so it is abandoned',
+    'type' => 'fanboys',
+    'conjunction' => 'so (sehingga)',
+    'example' => 
+    array (
+      'id' => 'Fitur tersebut jarang dipakai, sehingga dihapus.',
+      'en' => 'The feature was rarely used, so it was removed.',
+    ),
+    'vocab' => 
+    array (
+      'Situation' => 
+      array (
+        'id' => 'Situasi',
+        'pos' => '(n)',
+      ),
+      'Capacity to fly' => 
+      array (
+        'id' => 'Kapasitas untuk terbang',
+        'pos' => '(phrase)',
+      ),
+      'Unnecessary' => 
+      array (
+        'id' => 'Tidak diperlukan',
+        'pos' => '(adj)',
+      ),
+      'Abandoned' => 
+      array (
+        'id' => 'Ditinggalkan',
+        'pos' => '(v3)',
+      ),
+    ),
+  ),
+  13 => 
+  array (
+    'id' => 'Penelitian menunjukkan bahwa kelompok experimental tidak menunjukkan perubahan signifikan dalam kinerja kognitif mereka setelah intervensi, tidak juga group kendali.',
+    'en' => 'Research shows that the experimental group did not show significant changes in their cognitive performance after the intervention, nor did the control group',
+    'type' => 'fanboys',
+    'conjunction' => 'nor (tidak juga)',
+    'example' => 
+    array (
+      'id' => 'Siswa kelas A tidak mengalami penurunan nilai, dan tidak juga kelas B.',
+      'en' => 'Class A students saw no score drop, nor did Class B.',
+    ),
+    'vocab' => 
+    array (
+      'Experimental group' => 
+      array (
+        'id' => 'Kelompok experimental',
+        'pos' => '(n)',
+      ),
+      'Significant change' => 
+      array (
+        'id' => 'Perubahan signifikan',
+        'pos' => '(n)',
+      ),
+      'Cognitive performance' => 
+      array (
+        'id' => 'Kinerja kognitif',
+        'pos' => '(n)',
+      ),
+      'Intervention' => 
+      array (
+        'id' => 'Intervensi',
+        'pos' => '(n)',
+      ),
+      'Control group' => 
+      array (
+        'id' => 'Grup kendali',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  14 => 
+  array (
+    'id' => 'Penurunan nilai ekonomi mempengaruhi pasar saham, sehingga hal ini juga menghasilkan kehilangan pekerjaan yang meluas ke berbagai industri.',
+    'en' => 'The economic decline affects the stock market, so this also results in widespread job losses across various industries',
+    'type' => 'fanboys',
+    'conjunction' => 'so (sehingga)',
+    'example' => 
+    array (
+      'id' => 'Inflasi meningkat tinggi, sehingga daya beli masyarakat menurun.',
+      'en' => 'Inflation rose high, so public purchasing power decreased.',
+    ),
+    'vocab' => 
+    array (
+      'Economic decline' => 
+      array (
+        'id' => 'Penurunan nilai ekonomi',
+        'pos' => '(n)',
+      ),
+      'Stock market' => 
+      array (
+        'id' => 'Pasar saham',
+        'pos' => '(n)',
+      ),
+      'Affect' => 
+      array (
+        'id' => 'Mempengaruhi',
+        'pos' => '(v)',
+      ),
+      'Result in' => 
+      array (
+        'id' => 'Menghasilkan',
+        'pos' => '(v)',
+      ),
+      'Widespread job loss' => 
+      array (
+        'id' => 'Kehilangan pekerjaan yang meluas',
+        'pos' => '(n)',
+      ),
+      'Various industries' => 
+      array (
+        'id' => 'Berbagai industri',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  15 => 
+  array (
+    'id' => 'Ilmuwan dan ahli lingkungan sedang semakin khawatir mengenai dampak dari perubahan iklim terhadap ekosistem laut, tidak juga masalah ini bisa diabaikan.',
+    'en' => 'Scientists and environmentalists are increasingly worried about the impact of climate change on marine ecosystems, nor can this problem be ignored',
+    'type' => 'fanboys',
+    'conjunction' => 'nor (tidak juga)',
+    'example' => 
+    array (
+      'id' => 'Pakar riset cemas akan polusi udara, dan isu ini tidak bisa disepelekan.',
+      'en' => 'Researchers worry about air pollution, nor can this issue be downplayed.',
+    ),
+    'vocab' => 
+    array (
+      'Scientist' => 
+      array (
+        'id' => 'Ilmuwan',
+        'pos' => '(n)',
+      ),
+      'Environmentalist' => 
+      array (
+        'id' => 'Ahli lingkungan',
+        'pos' => '(n)',
+      ),
+      'Increasingly worried' => 
+      array (
+        'id' => 'Semakin khawatir',
+        'pos' => '(phrase)',
+      ),
+      'Impact' => 
+      array (
+        'id' => 'Dampak',
+        'pos' => '(n)',
+      ),
+      'Marine ecosystem' => 
+      array (
+        'id' => 'Ekosistem laut',
+        'pos' => '(n)',
+      ),
+      'Ignored' => 
+      array (
+        'id' => 'Diabaikan',
+        'pos' => '(v3)',
+      ),
+    ),
+  ),
+  16 => 
+  array (
+    'id' => 'Banyak orang menolak AI. Namun begitu kemajuan dari kecerdasan buatan telah merevolusi berbagai industri dari bidang kesehatan hingga keuangan.',
+    'en' => 'Many people reject AI, yet advancements in artificial intelligence have revolutionized various industries from healthcare to finance',
+    'type' => 'fanboys',
+    'conjunction' => 'yet (namun begitu)',
+    'example' => 
+    array (
+      'id' => 'Banyak yang menolak metode baru, namun hasilnya terbukti efektif.',
+      'en' => 'Many rejected the new method, yet its results proved effective.',
+    ),
+    'vocab' => 
+    array (
+      'Reject' => 
+      array (
+        'id' => 'Menolak',
+        'pos' => '(v)',
+      ),
+      'Advancement' => 
+      array (
+        'id' => 'Kemajuan',
+        'pos' => '(n)',
+      ),
+      'Artificial intelligence' => 
+      array (
+        'id' => 'Kecerdasan buatan',
+        'pos' => '(n)',
+      ),
+      'Revolutionize' => 
+      array (
+        'id' => 'Merevolusi',
+        'pos' => '(v)',
+      ),
+      'Healthcare' => 
+      array (
+        'id' => 'Bidang kesehatan',
+        'pos' => '(n)',
+      ),
+      'Finance' => 
+      array (
+        'id' => 'Keuangan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  17 => 
+  array (
+    'id' => 'Karenakan media sosial memiliki peran yang kuat dalam membentuk arah politik, ini telah menjadi point utama dalam berbagai penelitian akademik dan debat publik.',
+    'en' => 'Social media has a strong role in shaping political direction, for it has become a focal point in various academic studies and public debates',
+    'type' => 'fanboys',
+    'conjunction' => 'for (karenakan / sebab)',
+    'example' => 
+    array (
+      'id' => 'Isu ini sangat krusial, sebab menentukan masa depan organisasi.',
+      'en' => 'This issue is very crucial, for it determines the organization future.',
+    ),
+    'vocab' => 
+    array (
+      'Social media' => 
+      array (
+        'id' => 'Media sosial',
+        'pos' => '(n)',
+      ),
+      'Strong role' => 
+      array (
+        'id' => 'Peran yang kuat',
+        'pos' => '(n)',
+      ),
+      'Shape political direction' => 
+      array (
+        'id' => 'Membentuk arah politik',
+        'pos' => '(phrase)',
+      ),
+      'Focal point' => 
+      array (
+        'id' => 'Poin utama',
+        'pos' => '(n)',
+      ),
+      'Academic study' => 
+      array (
+        'id' => 'Penelitian akademik',
+        'pos' => '(n)',
+      ),
+      'Public debate' => 
+      array (
+        'id' => 'Debat publik',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  18 => 
+  array (
+    'id' => 'Implikasi etis dari modifikasi gen telah menyalakan debat di antara para ilmuwan, pembuat kebijakan, dan publik. Namun, masyarakat telah merasakan manfaatnya secara langsung.',
+    'en' => 'The ethical implications of gene modification have sparked debate among scientists, policymakers, and the public, but society has directly experienced its benefits',
+    'type' => 'fanboys',
+    'conjunction' => 'but / yet (namun)',
+    'example' => 
+    array (
+      'id' => 'Teknologi ini memicu perdebatan, namun manfaatnya sudah terasa.',
+      'en' => 'This technology sparked debate, but its benefits are already felt.',
+    ),
+    'vocab' => 
+    array (
+      'Ethical implications' => 
+      array (
+        'id' => 'Implikasi etis',
+        'pos' => '(n)',
+      ),
+      'Gene modification' => 
+      array (
+        'id' => 'Modifikasi gen',
+        'pos' => '(n)',
+      ),
+      'Spark debate' => 
+      array (
+        'id' => 'Menyalakan / Memicu debat',
+        'pos' => '(phrase)',
+      ),
+      'Policymakers' => 
+      array (
+        'id' => 'Pembuat kebijakan',
+        'pos' => '(n)',
+      ),
+      'Directly' => 
+      array (
+        'id' => 'Secara langsung',
+        'pos' => '(adv)',
+      ),
+      'Benefit' => 
+      array (
+        'id' => 'Manfaat',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  19 => 
+  array (
+    'id' => 'Sampai kekebalan kelompok yang memadai tercapai secara komprehensif, otoritas kesehatan terus memantau mutasi patogen secara ketat.',
+    'en' => 'Until adequate herd immunity is comprehensively achieved, health authorities continually monitor pathogen mutations closely',
+    'type' => 'time',
+    'pos_type' => 'initial',
+    'conjunction' => 'until (sampai / hingga)',
+    'example' => 
+    array (
+      'id' => 'Sebelum rapat dimulai, peserta membaca dokumen.',
+      'en' => 'Before the meeting started, attendees read documents.',
+    ),
+    'vocab' => 
+    array (
+      'Until' => 
+      array (
+        'id' => 'Sampai / Hingga',
+        'pos' => '(conj)',
+      ),
+      'Adequate' => 
+      array (
+        'id' => 'Memadai',
+        'pos' => '(adj)',
+      ),
+      'Herd immunity' => 
+      array (
+        'id' => 'Kekebalan kelompok',
+        'pos' => '(n)',
+      ),
+      'Comprehensively' => 
+      array (
+        'id' => 'Secara komprehensif',
+        'pos' => '(adv)',
+      ),
+      'Health authority' => 
+      array (
+        'id' => 'Otoritas kesehatan',
+        'pos' => '(n)',
+      ),
+      'Continually monitor' => 
+      array (
+        'id' => 'Terus memantau',
+        'pos' => '(v)',
+      ),
+      'Pathogen mutation' => 
+      array (
+        'id' => 'Mutasi patogen',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  20 => 
+  array (
+    'id' => 'Ketika instrumen teleskopik canggih mendeteksi anomali gelombang mikro, para astronom mengidentifikasi radiasi kosmik purba.',
+    'en' => 'When sophisticated telescopic instruments detected microwave anomalies, astronomers identified ancient cosmic radiation',
+    'type' => 'time',
+    'pos_type' => 'initial',
+    'conjunction' => 'when (ketika / saat)',
+    'example' => 
+    array (
+      'id' => 'Ketika alarm berbunyi, petugas evakuasi bertindak.',
+      'en' => 'When the alarm sounded, evacuation officers acted.',
+    ),
+    'vocab' => 
+    array (
+      'When' => 
+      array (
+        'id' => 'Ketika / Saat',
+        'pos' => '(conj)',
+      ),
+      'Sophisticated' => 
+      array (
+        'id' => 'Canggih',
+        'pos' => '(adj)',
+      ),
+      'Telescopic instrument' => 
+      array (
+        'id' => 'Instrumen teleskopik',
+        'pos' => '(n)',
+      ),
+      'Detect' => 
+      array (
+        'id' => 'Mendeteksi',
+        'pos' => '(v)',
+      ),
+      'Microwave anomaly' => 
+      array (
+        'id' => 'Anomali gelombang mikro',
+        'pos' => '(n)',
+      ),
+      'Astronomer' => 
+      array (
+        'id' => 'Astronom',
+        'pos' => '(n)',
+      ),
+      'Identify' => 
+      array (
+        'id' => 'Mengidentifikasi',
+        'pos' => '(v)',
+      ),
+      'Cosmic radiation' => 
+      array (
+        'id' => 'Radiasi kosmik',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  21 => 
+  array (
+    'id' => 'Sebelum teknologi percetakan tipe bergerak diperkenalkan di Eropa Barat, diseminasi literatur ilmiah sangat terbatas.',
+    'en' => 'Before movable-type printing technology was introduced in Western Europe, the dissemination of scientific literature was profoundly constrained',
+    'type' => 'time',
+    'pos_type' => 'initial',
+    'conjunction' => 'before (sebelum)',
+    'example' => 
+    array (
+      'id' => 'Sebelum eksperimen dimulai, lab disterilkan.',
+      'en' => 'Before the experiment began, the lab was sterilized.',
+    ),
+    'vocab' => 
+    array (
+      'Before' => 
+      array (
+        'id' => 'Sebelum',
+        'pos' => '(conj)',
+      ),
+      'Movable-type printing' => 
+      array (
+        'id' => 'Percetakan tipe bergerak',
+        'pos' => '(n)',
+      ),
+      'Introduce' => 
+      array (
+        'id' => 'Diperkenalkan',
+        'pos' => '(v)',
+      ),
+      'Dissemination' => 
+      array (
+        'id' => 'Diseminasi / Penyebaran',
+        'pos' => '(n)',
+      ),
+      'Scientific literature' => 
+      array (
+        'id' => 'Literatur ilmiah',
+        'pos' => '(n)',
+      ),
+      'Profoundly constrained' => 
+      array (
+        'id' => 'Sangat terbatas / Terhambat',
+        'pos' => '(adj)',
+      ),
+    ),
+  ),
+  22 => 
+  array (
+    'id' => 'Karena sedimentasi aluvial sangat memperkaya kesuburan tanah, banyak peradaban agraris mendiami wilayah delta sungai.',
+    'en' => 'Because alluvial sedimentation greatly enriched soil fertility, many agrarian civilizations inhabited river delta regions',
+    'type' => 'cause',
+    'pos_type' => 'initial',
+    'conjunction' => 'because (karena)',
+    'example' => 
+    array (
+      'id' => 'Karena iklim mendukung, hasil panen melimpah.',
+      'en' => 'Because the climate was favorable, yields were abundant.',
+    ),
+    'vocab' => 
+    array (
+      'Because' => 
+      array (
+        'id' => 'Karena',
+        'pos' => '(conj)',
+      ),
+      'Alluvial sedimentation' => 
+      array (
+        'id' => 'Sedimentasi aluvial',
+        'pos' => '(n)',
+      ),
+      'Enrich soil fertility' => 
+      array (
+        'id' => 'Memperkaya kesuburan tanah',
+        'pos' => '(v)',
+      ),
+      'Agrarian civilization' => 
+      array (
+        'id' => 'Peradaban agraris',
+        'pos' => '(n)',
+      ),
+      'Inhabit' => 
+      array (
+        'id' => 'Mendiami / Menghuni',
+        'pos' => '(v)',
+      ),
+      'River delta region' => 
+      array (
+        'id' => 'Wilayah delta sungai',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  23 => 
+  array (
+    'id' => 'Meskipun tantangan kestabilan medan magnet plasma masih sangat kompleks, eksperimen fusi nuklir tetap dilanjutkan.',
+    'en' => 'Although the challenges of plasma magnetic field stability remain exceptionally complex, nuclear fusion experiments are still continued',
+    'type' => 'contrast',
+    'pos_type' => 'initial',
+    'conjunction' => 'although (meskipun)',
+    'example' => 
+    array (
+      'id' => 'Meskipun biaya tinggi, riset tetap berjalan.',
+      'en' => 'Although costs were high, research continued.',
+    ),
+    'vocab' => 
+    array (
+      'Although' => 
+      array (
+        'id' => 'Meskipun / Walaupun',
+        'pos' => '(conj)',
+      ),
+      'Stability challenge' => 
+      array (
+        'id' => 'Tantangan kestabilan',
+        'pos' => '(n)',
+      ),
+      'Plasma magnetic field' => 
+      array (
+        'id' => 'Medan magnet plasma',
+        'pos' => '(n)',
+      ),
+      'Exceptionally complex' => 
+      array (
+        'id' => 'Sangat kompleks',
+        'pos' => '(adj)',
+      ),
+      'Nuclear fusion experiment' => 
+      array (
+        'id' => 'Eksperimen fusi nuklir',
+        'pos' => '(n)',
+      ),
+      'Continue' => 
+      array (
+        'id' => 'Dilanjutkan',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  24 => 
+  array (
+    'id' => 'Paradigma sosioekonomi global, setelah otomatisasi industri berskala besar diterapkan, bertransformasi secara radikal.',
+    'en' => 'The global socioeconomic paradigm, after large-scale industrial automation was implemented, transformed radically',
+    'type' => 'time',
+    'pos_type' => 'middle',
+    'conjunction' => 'after (setelah)',
+    'example' => 
+    array (
+      'id' => 'Perusahaan, setelah regulasi baru berlaku, meningkatkan standar keselamatan.',
+      'en' => 'The company, after new rules took effect, upgraded safety standards.',
+    ),
+    'vocab' => 
+    array (
+      'Socioeconomic paradigm' => 
+      array (
+        'id' => 'Paradigma sosioekonomi',
+        'pos' => '(n)',
+      ),
+      'After' => 
+      array (
+        'id' => 'Setelah',
+        'pos' => '(conj)',
+      ),
+      'Large-scale' => 
+      array (
+        'id' => 'Berskala besar',
+        'pos' => '(adj)',
+      ),
+      'Industrial automation' => 
+      array (
+        'id' => 'Otomatisasi industri',
+        'pos' => '(n)',
+      ),
+      'Implement' => 
+      array (
+        'id' => 'Diterapkan',
+        'pos' => '(v)',
+      ),
+      'Transform radically' => 
+      array (
+        'id' => 'Bertransformasi secara radikal',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  25 => 
+  array (
+    'id' => 'Pemodelan iklim global, sejak komputasi kuantum diterapkan dalam meteorologi modern, menjadi semakin presisi.',
+    'en' => 'Global climate modeling, since quantum computing was implemented in modern meteorology, became increasingly precise',
+    'type' => 'time',
+    'pos_type' => 'middle',
+    'conjunction' => 'since (sejak)',
+    'example' => 
+    array (
+      'id' => 'Kualitas udara, sejak filter baru dipasang, membaik drastis.',
+      'en' => 'Air quality, since new filters were installed, improved drastically.',
+    ),
+    'vocab' => 
+    array (
+      'Climate modeling' => 
+      array (
+        'id' => 'Pemodelan iklim',
+        'pos' => '(n)',
+      ),
+      'Since' => 
+      array (
+        'id' => 'Sejak',
+        'pos' => '(conj)',
+      ),
+      'Quantum computing' => 
+      array (
+        'id' => 'Komputasi kuantum',
+        'pos' => '(n)',
+      ),
+      'Meteorology' => 
+      array (
+        'id' => 'Meteorologi',
+        'pos' => '(n)',
+      ),
+      'Increasingly precise' => 
+      array (
+        'id' => 'Semakin presisi',
+        'pos' => '(adj)',
+      ),
+    ),
+  ),
+  26 => 
+  array (
+    'id' => 'Model heliosentris, meskipun awalnya ditentang keras oleh kalangan ortodoks, akhirnya diakui sebagai landasan kosmologi modern.',
+    'en' => 'The heliocentric model, although the notion was initially vehemently opposed by orthodox circles, was eventually acknowledged as the cornerstone of modern cosmology',
+    'type' => 'contrast',
+    'pos_type' => 'middle',
+    'conjunction' => 'although (meskipun)',
+    'example' => 
+    array (
+      'id' => 'Teori itu, meskipun diragukan pada awalnya, kini terbukti benar.',
+      'en' => 'The theory, although initially doubted, is now proven correct.',
+    ),
+    'vocab' => 
+    array (
+      'Heliocentric model' => 
+      array (
+        'id' => 'Model heliosentris',
+        'pos' => '(n)',
+      ),
+      'Although' => 
+      array (
+        'id' => 'Meskipun',
+        'pos' => '(conj)',
+      ),
+      'Vehemently opposed' => 
+      array (
+        'id' => 'Ditentang keras',
+        'pos' => '(v)',
+      ),
+      'Orthodox circles' => 
+      array (
+        'id' => 'Kalangan ortodoks',
+        'pos' => '(n)',
+      ),
+      'Eventually acknowledged' => 
+      array (
+        'id' => 'Akhirnya diakui',
+        'pos' => '(v)',
+      ),
+      'Cornerstone' => 
+      array (
+        'id' => 'Landasan / Batu penjuru',
+        'pos' => '(n)',
+      ),
+      'Cosmology' => 
+      array (
+        'id' => 'Kosmologi',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  27 => 
+  array (
+    'id' => 'Keanekaragaman hayati ekosistem laut, jika eksploitasi terumbu karang dihentikan secara permanen, dapat dipertahankan secara optimal.',
+    'en' => 'Marine ecosystem biodiversity, if coral reef exploitation is permanently halted, can be preserved optimally',
+    'type' => 'condition',
+    'pos_type' => 'middle',
+    'conjunction' => 'if (jika)',
+    'example' => 
+    array (
+      'id' => 'Populasi satwa, jika perburuan liar dilarang, akan pulih dengan cepat.',
+      'en' => 'Wildlife populations, if poaching is banned, will recover quickly.',
+    ),
+    'vocab' => 
+    array (
+      'Biodiversity' => 
+      array (
+        'id' => 'Keanekaragaman hayati',
+        'pos' => '(n)',
+      ),
+      'Marine ecosystem' => 
+      array (
+        'id' => 'Ekosistem laut',
+        'pos' => '(n)',
+      ),
+      'If' => 
+      array (
+        'id' => 'Jika',
+        'pos' => '(conj)',
+      ),
+      'Coral reef exploitation' => 
+      array (
+        'id' => 'Eksploitasi terumbu karang',
+        'pos' => '(n)',
+      ),
+      'Permanently halted' => 
+      array (
+        'id' => 'Dihentikan secara permanen',
+        'pos' => '(v)',
+      ),
+      'Preserve optimally' => 
+      array (
+        'id' => 'Dipertahankan secara optimal',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  28 => 
+  array (
+    'id' => 'Stabilitas fiskal nasional, kecuali jika reformasi perpajakan progresif diimplementasikan secara konsisten, akan memburuk secara drastis.',
+    'en' => 'National fiscal stability, unless progressive tax reforms are implemented consistently, will deteriorate drastically',
+    'type' => 'condition',
+    'pos_type' => 'middle',
+    'conjunction' => 'unless (kecuali jika)',
+    'example' => 
+    array (
+      'id' => 'Perekonomian, kecuali jika suku bunga distabilkan, akan mengalami resesi.',
+      'en' => 'The economy, unless interest rates are stabilized, will face a recession.',
+    ),
+    'vocab' => 
+    array (
+      'Fiscal stability' => 
+      array (
+        'id' => 'Stabilitas fiskal',
+        'pos' => '(n)',
+      ),
+      'Unless' => 
+      array (
+        'id' => 'Kecuali jika',
+        'pos' => '(conj)',
+      ),
+      'Progressive tax reform' => 
+      array (
+        'id' => 'Reformasi pajak progresif',
+        'pos' => '(n)',
+      ),
+      'Implement consistently' => 
+      array (
+        'id' => 'Diimplementasikan secara konsisten',
+        'pos' => '(v)',
+      ),
+      'Deteriorate drastically' => 
+      array (
+        'id' => 'Memburuk secara drastis',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  29 => 
+  array (
+    'id' => 'Sektor bioteknologi mengalami ekspansi eksponensial, sementara industri manufaktur konvensional menghadapi stagnasi berkepanjangan.',
+    'en' => 'The biotechnology sector experiences exponential expansion, while conventional manufacturing industries face prolonged stagnation',
+    'type' => 'time',
+    'pos_type' => 'final',
+    'conjunction' => 'while / whereas (sementara)',
+    'example' => 
+    array (
+      'id' => 'Ekspor meningkat sementara impor menurun.',
+      'en' => 'Exports rose while imports declined.',
+    ),
+    'vocab' => 
+    array (
+      'Biotechnology sector' => 
+      array (
+        'id' => 'Sektor bioteknologi',
+        'pos' => '(n)',
+      ),
+      'Exponential expansion' => 
+      array (
+        'id' => 'Ekspansi eksponensial',
+        'pos' => '(n)',
+      ),
+      'While / Whereas' => 
+      array (
+        'id' => 'Sementara',
+        'pos' => '(conj)',
+      ),
+      'Conventional manufacturing' => 
+      array (
+        'id' => 'Manufaktur konvensional',
+        'pos' => '(n)',
+      ),
+      'Prolonged stagnation' => 
+      array (
+        'id' => 'Stagnasi berkepanjangan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  30 => 
+  array (
+    'id' => 'Efisiensi termodinamika meningkat secara signifikan segera setelah katalis nanoteknologi disintesis ke dalam reaktor.',
+    'en' => 'Thermodynamic efficiency increases significantly as soon as nanotechnology catalysts are synthesized into the reactor',
+    'type' => 'time',
+    'pos_type' => 'final',
+    'conjunction' => 'as soon as (segera setelah)',
+    'example' => 
+    array (
+      'id' => 'Reaksi terjadi segera setelah suhu dinaikkan.',
+      'en' => 'The reaction occurred as soon as temperature rose.',
+    ),
+    'vocab' => 
+    array (
+      'Thermodynamic efficiency' => 
+      array (
+        'id' => 'Efisiensi termodinamika',
+        'pos' => '(n)',
+      ),
+      'Significantly' => 
+      array (
+        'id' => 'Secara signifikan',
+        'pos' => '(adv)',
+      ),
+      'As soon as' => 
+      array (
+        'id' => 'Segera setelah',
+        'pos' => '(conj)',
+      ),
+      'Nanotechnology catalyst' => 
+      array (
+        'id' => 'Katalis nanoteknologi',
+        'pos' => '(n)',
+      ),
+      'Synthesize' => 
+      array (
+        'id' => 'Disintesis',
+        'pos' => '(v)',
+      ),
+      'Reactor' => 
+      array (
+        'id' => 'Reaktor',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  31 => 
+  array (
+    'id' => 'Protokol enkripsi kuantum dikembangkan agar transmisi data antarlembaga tetap terlindungi dari intersepsi siber.',
+    'en' => 'Quantum encryption protocols were developed so that inter-institutional data transmission remains safeguarded from cyber interception',
+    'type' => 'purpose',
+    'pos_type' => 'final',
+    'conjunction' => 'so that (agar / supaya)',
+    'example' => 
+    array (
+      'id' => 'Sistem diamankan agar data tidak bocor.',
+      'en' => 'Systems are secured so that data is safe.',
+    ),
+    'vocab' => 
+    array (
+      'Quantum encryption protocol' => 
+      array (
+        'id' => 'Protokol enkripsi kuantum',
+        'pos' => '(n)',
+      ),
+      'So that' => 
+      array (
+        'id' => 'Agar / Supaya',
+        'pos' => '(conj)',
+      ),
+      'Inter-institutional' => 
+      array (
+        'id' => 'Antarlembaga',
+        'pos' => '(adj)',
+      ),
+      'Transmission' => 
+      array (
+        'id' => 'Transmisi',
+        'pos' => '(n)',
+      ),
+      'Safeguarded' => 
+      array (
+        'id' => 'Terlindungi',
+        'pos' => '(v)',
+      ),
+      'Cyber interception' => 
+      array (
+        'id' => 'Intersepsi siber',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  32 => 
+  array (
+    'id' => 'Kolaborasi akademik berkembang secara dinamis di mana pun ekosistem riset interdisipliner didukung secara optimal.',
+    'en' => 'Academic collaboration flourishes dynamically wherever interdisciplinary research ecosystems are optimally supported',
+    'type' => 'place',
+    'pos_type' => 'final',
+    'conjunction' => 'wherever (di mana pun)',
+    'example' => 
+    array (
+      'id' => 'Inovasi muncul di mana pun ada dukungan.',
+      'en' => 'Innovation emerges wherever there is support.',
+    ),
+    'vocab' => 
+    array (
+      'Academic collaboration' => 
+      array (
+        'id' => 'Kolaborasi akademik',
+        'pos' => '(n)',
+      ),
+      'Flourish dynamically' => 
+      array (
+        'id' => 'Berkembang secara dinamis',
+        'pos' => '(v)',
+      ),
+      'Wherever' => 
+      array (
+        'id' => 'Di mana pun',
+        'pos' => '(conj)',
+      ),
+      'Interdisciplinary' => 
+      array (
+        'id' => 'Interdisipliner',
+        'pos' => '(adj)',
+      ),
+      'Optimally supported' => 
+      array (
+        'id' => 'Didukung secara optimal',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  33 => 
+  array (
+    'id' => 'Formasi geologis ngarai tersebut tampak seolah-olah struktur batuannya terukir oleh gaya tektonik prasejarah yang masif.',
+    'en' => 'The geological formation of the canyon appears as if its rock structure was sculpted by massive prehistoric tectonic forces',
+    'type' => 'manner',
+    'pos_type' => 'final',
+    'conjunction' => 'as if (seolah-olah)',
+    'example' => 
+    array (
+      'id' => 'Batu itu tampak seolah-olah dipahat.',
+      'en' => 'The rock looks as if it was carved.',
+    ),
+    'vocab' => 
+    array (
+      'Geological formation' => 
+      array (
+        'id' => 'Formasi geologis',
+        'pos' => '(n)',
+      ),
+      'Canyon' => 
+      array (
+        'id' => 'Ngarai / Lembah curam',
+        'pos' => '(n)',
+      ),
+      'As if' => 
+      array (
+        'id' => 'Seolah-olah',
+        'pos' => '(conj)',
+      ),
+      'Sculpted' => 
+      array (
+        'id' => 'Terukir / Terpahat',
+        'pos' => '(v)',
+      ),
+      'Prehistoric' => 
+      array (
+        'id' => 'Prasejarah',
+        'pos' => '(adj)',
+      ),
+      'Tectonic forces' => 
+      array (
+        'id' => 'Gaya tektonik',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+);
 
     public $meeting12Paragraph = [
         'id' => 'Perkembangan teknologi terus mengalami percepatan sejak revolusi industri dimulai di Eropa. Inovasi dalam bidang komunikasi semakin penting ketika mesin telegraf diperkenalkan pada abad ke-19. Internet menjadi tonggak besar, karena ia menghubungkan miliaran manusia dalam waktu nyata. Penyebaran informasi menjadi semakin cepat, walaupun masih terdapat kesenjangan digital di beberapa wilayah. Penelitian ilmiah pun berkembang pesat, agar masyarakat dapat memperoleh solusi atas tantangan global yang semakin kompleks.',
@@ -628,215 +1882,211 @@ class GrammarWritingDataRepository
 
     public $meeting17Questions = [
         1 => [
-            'id' => 'NASA masih belum membuktikan secara visual apakah (whether) Mars mengandung air saat ini.',
-            'en' => 'NASA has not yet visually proven whether Mars contains water at present',
-            'example' => ['id' => 'Para ilmuwan belum membuktikan secara eksperimental apakah Jupiter memiliki inti padat.', 'en' => 'Scientists have not yet experimentally proven whether Jupiter has a solid core.'],
+            'id' => 'Para astrofisikawan belum dapat memastikan secara empiris apakah biosfer ekstraterestrial eksis di exoplanet lain.',
+            'en' => 'Astrophysicists have not yet empirically ascertained whether extraterrestrial biospheres exist on other exoplanets',
+            'example' => ['id' => 'Ilmuwan meneliti apakah ada air di Mars.', 'en' => 'Scientists investigate whether water exists on Mars.'],
             'vocab' => [
-                'Prove' => ['id' => 'Membuktikan', 'pos' => '(v)'],
-                'Visually' => ['id' => 'Secara visual', 'pos' => '(adv)'],
-                'Contain' => ['id' => 'Mengandung', 'pos' => '(v)'],
-                'Water' => ['id' => 'Air', 'pos' => '(n)'],
-                'At present' => ['id' => 'Saat ini', 'pos' => '(adv)']
+                'Astrophysicist' => ['id' => 'Astrofisikawan', 'pos' => '(n)'],
+                'Empirically ascertain' => ['id' => 'Memastikan secara empiris', 'pos' => '(v)'],
+                'Extraterrestrial' => ['id' => 'Ekstraterestrial / Luar bumi', 'pos' => '(adj)'],
+                'Biosphere' => ['id' => 'Biosfer', 'pos' => '(n)'],
+                'Exoplanet' => ['id' => 'Exoplanet', 'pos' => '(n)']
             ]
         ],
         2 => [
-            'id' => 'Kita tidak bisa mengasumsikan bahwa suhu Bumi akan bisa menurun secara sendirinya.',
-            'en' => 'We cannot assume that Earth\'s temperature will decrease on its own',
-            'example' => ['id' => 'Mereka tidak bisa mengasumsikan bahwa populasi hewan akan meningkat secara alami.', 'en' => 'They cannot assume that animal populations will increase naturally.'],
+            'id' => 'Para pembuat kebijakan tidak boleh mengasumsikan bahwa degradasi biosfer global akan pulih secara spontan.',
+            'en' => 'Policymakers cannot presume that global biosphere degradation will regenerate spontaneously',
+            'example' => ['id' => 'Kita tidak boleh menganggap bahwa masalah selesai sendiri.', 'en' => 'We cannot assume that problems resolve on their own.'],
             'vocab' => [
-                'Assume' => ['id' => 'Mengasumsikan', 'pos' => '(v)'],
-                'Temperature' => ['id' => 'Suhu', 'pos' => '(n)'],
-                'Decrease' => ['id' => 'Menurun', 'pos' => '(v)'],
-                'On its own' => ['id' => 'Secara sendirinya', 'pos' => '(adv)']
+                'Policymaker' => ['id' => 'Pembuat kebijakan', 'pos' => '(n)'],
+                'Presume' => ['id' => 'Mengasumsikan / Menganggap', 'pos' => '(v)'],
+                'Degradation' => ['id' => 'Degradasi', 'pos' => '(n)'],
+                'Regenerate' => ['id' => 'Pulih / Regenerasi', 'pos' => '(v)'],
+                'Spontaneously' => ['id' => 'Secara spontan', 'pos' => '(adv)']
             ]
         ],
         3 => [
-            'id' => 'Banyak orang bertanya-tanya apakah kehidupan ada di planet lain.',
-            'en' => 'Many people wonder whether life exists on other planets',
-            'example' => ['id' => 'Beberapa peneliti bertanya-tanya apakah air ada di bulan Saturnus.', 'en' => 'Some researchers wonder whether water exists on Saturn\'s moons.'],
+            'id' => 'Para filsuf epistemologi sering memperdebatkan apakah kesadaran manusia murni merupakan fenomena neurologis.',
+            'en' => 'Epistemologists frequently debate whether human consciousness is purely a neurological phenomenon',
+            'example' => ['id' => 'Banyak orang bertanya-tanya apakah robot bisa berpikir.', 'en' => 'Many wonder whether robots can think.'],
             'vocab' => [
-                'Wonder' => ['id' => 'Bertanya-tanya', 'pos' => '(v)'],
-                'Life' => ['id' => 'Kehidupan', 'pos' => '(n)'],
-                'Exist' => ['id' => 'Ada', 'pos' => '(v)'],
-                'Planet' => ['id' => 'Planet', 'pos' => '(n)']
+                'Epistemologist' => ['id' => 'Filsuf epistemologi', 'pos' => '(n)'],
+                'Consciousness' => ['id' => 'Kesadaran', 'pos' => '(n)'],
+                'Purely' => ['id' => 'Murni / Semata-mata', 'pos' => '(adv)'],
+                'Neurological phenomenon' => ['id' => 'Fenomena neurologis', 'pos' => '(n)']
             ]
         ],
         4 => [
-            'id' => 'Jika sebuah populasi dari sebuah spesies menjadi terisolasi, mereka berpisah dalam apa yang disebut spesiasi.',
-            'en' => 'If a population of a species becomes isolated, they separate in what is called speciation',
-            'example' => ['id' => 'Ketika sebuah kelompok dari sebuah organisme menjadi terpisah, mereka berkembang dalam apa yang disebut adaptasi.', 'en' => 'When a group of an organism becomes separated, they develop in what is called adaptation.'],
+            'id' => 'Ketika populasi biologis terisolasi secara geografis, mereka mengalami divergensi dalam apa yang didefinisikan sebagai spesiasi.',
+            'en' => 'When biological populations become geographically isolated, they undergo divergence in what is defined as speciation',
+            'example' => ['id' => 'Hewan terpisah dalam apa yang disebut isolasi habitat.', 'en' => 'Animals separate in what is called habitat isolation.'],
             'vocab' => [
-                'Population' => ['id' => 'Populasi', 'pos' => '(n)'],
-                'Species' => ['id' => 'Spesies', 'pos' => '(n)'],
-                'Isolated' => ['id' => 'Terisolasi', 'pos' => '(adj)'],
-                'Separate' => ['id' => 'Berpisah', 'pos' => '(v)'],
-                'Speciation' => ['id' => 'Spesiasi', 'pos' => '(n)']
+                'Biological population' => ['id' => 'Populasi biologis', 'pos' => '(n)'],
+                'Geographically isolated' => ['id' => 'Terisolasi secara geografis', 'pos' => '(adj)'],
+                'Undergo divergence' => ['id' => 'Mengalami divergensi / pemisahan', 'pos' => '(v)'],
+                'Speciation' => ['id' => 'Spesiasi / pembentukan spesies baru', 'pos' => '(n)']
             ]
         ],
         5 => [
-            'id' => 'Negara mana yang akan menjadi tujuan migrasi adalah suatu fenomena yang masih diperdebatkan.',
-            'en' => 'Which country will become a migration destination is a phenomenon that is still debated',
-            'example' => ['id' => 'Pulau mana yang akan menjadi habitat terakhir adalah suatu misteri yang masih dipelajari.', 'en' => 'Which island will become the last habitat is a mystery that is still being studied.'],
+            'id' => 'Yurisdiksi mana yang akan mengadopsi regulasi kecerdasan buatan paling ketat tetap menjadi diskursus global yang intens.',
+            'en' => 'Which jurisdiction will adopt the most stringent artificial intelligence regulations remains an intense global discourse',
+            'example' => ['id' => 'Negara mana yang memimpin inovasi masih diperdebatkan.', 'en' => 'Which country leads innovation is still debated.'],
             'vocab' => [
-                'Country' => ['id' => 'Negara', 'pos' => '(n)'],
-                'Destination' => ['id' => 'Tujuan', 'pos' => '(n)'],
-                'Migration' => ['id' => 'Migrasi', 'pos' => '(n)'],
-                'Phenomenon' => ['id' => 'Fenomena', 'pos' => '(n)'],
-                'Debated' => ['id' => 'Diperdebatkan', 'pos' => '(v)']
+                'Jurisdiction' => ['id' => 'Yurisdiksi / Wilayah hukum', 'pos' => '(n)'],
+                'Adopt' => ['id' => 'Mengadopsi', 'pos' => '(v)'],
+                'Stringent' => ['id' => 'Ketat / Mengikat', 'pos' => '(adj)'],
+                'Discourse' => ['id' => 'Diskursus / Pembahasan', 'pos' => '(n)']
             ]
         ],
         6 => [
-            'id' => 'Bagaimana orang mesir kuno membangun piramida giza masih menjadi perdebatan dari para ahli sejarah.',
-            'en' => 'How the ancient Egyptians built the Giza pyramids is still a matter of debate among historians',
-            'example' => ['id' => 'Bagaimana suku Maya kuno membangun kota Tikal masih menjadi perdebatan dari para ahli arkeologi.', 'en' => 'How the ancient Maya built the city of Tikal is still a matter of debate among archaeologists.'],
+            'id' => 'Bagaimana peradaban kuno mendirikan monumen megalitik dengan presisi geometris tinggi terus membingungkan para arkeolog.',
+            'en' => 'How ancient civilizations erected megalithic monuments with immense geometric precision continues to confound archaeologists',
+            'example' => ['id' => 'Bagaimana piramida dibangun masih menjadi misteri.', 'en' => 'How pyramids were built remains a mystery.'],
             'vocab' => [
-                'Ancient' => ['id' => 'Kuno', 'pos' => '(adj)'],
-                'Egyptian' => ['id' => 'Mesir', 'pos' => '(n)'],
-                'Build' => ['id' => 'Membangun', 'pos' => '(v)'],
-                'Pyramid' => ['id' => 'Piramida', 'pos' => '(n)'],
-                'Debate' => ['id' => 'Perdebatan', 'pos' => '(n)'],
-                'Historian' => ['id' => 'Ahli sejarah', 'pos' => '(n)']
+                'Ancient civilization' => ['id' => 'Peradaban kuno', 'pos' => '(n)'],
+                'Erect' => ['id' => 'Mendirikan', 'pos' => '(v)'],
+                'Megalithic monument' => ['id' => 'Monumen megalitik', 'pos' => '(n)'],
+                'Geometric precision' => ['id' => 'Presisi geometris', 'pos' => '(n)'],
+                'Confound' => ['id' => 'Membingungkan', 'pos' => '(v)']
             ]
         ],
         7 => [
-            'id' => 'Bahwa manusia tidak menyebabkan kepunahan banyak spesies adalah peremehan.',
-            'en' => 'That humans do not cause the extinction of many species is an understatement',
-            'example' => ['id' => 'Bahwa teknologi tidak menyebabkan polusi udara adalah kesalahpahaman.', 'en' => 'That technology does not cause air pollution is a misconception.'],
+            'id' => 'Bahwa aktivitas antropogenik telah mempercepat laju kepunahan spesies global merupakan konsensus ilmiah yang tak terbantahkan.',
+            'en' => 'That anthropogenic activities have accelerated the rate of global species extinction is an irrefutable scientific consensus',
+            'example' => ['id' => 'Bahwa polusi merusak bumi sudah terbukti.', 'en' => 'That pollution harms the Earth is proven.'],
             'vocab' => [
-                'Cause' => ['id' => 'Menyebabkan', 'pos' => '(v)'],
-                'Extinction' => ['id' => 'Kepunahan', 'pos' => '(n)'],
-                'Species' => ['id' => 'Spesies', 'pos' => '(n)'],
-                'Understatement' => ['id' => 'Peremehan', 'pos' => '(n)']
+                'Anthropogenic activity' => ['id' => 'Aktivitas antropogenik', 'pos' => '(n)'],
+                'Accelerate' => ['id' => 'Mempercepat', 'pos' => '(v)'],
+                'Extinction rate' => ['id' => 'Laju kepunahan', 'pos' => '(n)'],
+                'Irrefutable' => ['id' => 'Tak terbantahkan', 'pos' => '(adj)'],
+                'Consensus' => ['id' => 'Konsensus', 'pos' => '(n)']
             ]
         ],
         8 => [
-            'id' => 'Kita mengelompokkan makhluk hidup melalui apa yang disebut taxonomy.',
-            'en' => 'We classify living things through what is called taxonomy',
-            'example' => ['id' => 'Kita mengorganisir tumbuhan melalui apa yang disebut botani.', 'en' => 'We organize plants through what is called botany.'],
+            'id' => 'Para ahli biologi taksonomi mengklasifikasikan organisme hidup melalui apa yang dirumuskan sebagai filogenetika molekuler.',
+            'en' => 'Taxonomic biologists classify living organisms through what is formulated as molecular phylogenetics',
+            'example' => ['id' => 'Saintis mengelompokkan hewan melalui apa yang disebut taksonomi.', 'en' => 'Scientists group animals through what is called taxonomy.'],
             'vocab' => [
-                'Classify' => ['id' => 'Mengelompokkan', 'pos' => '(v)'],
-                'Living things' => ['id' => 'Makhluk hidup', 'pos' => '(n)'],
-                'Taxonomy' => ['id' => 'Taxonomy', 'pos' => '(n)']
+                'Taxonomic biologist' => ['id' => 'Ahli biologi taksonomi', 'pos' => '(n)'],
+                'Classify' => ['id' => 'Mengklasifikasikan', 'pos' => '(v)'],
+                'Living organism' => ['id' => 'Organisme hidup', 'pos' => '(n)'],
+                'Formulate' => ['id' => 'Dirumuskan', 'pos' => '(v)'],
+                'Molecular phylogenetics' => ['id' => 'Filogenetika molekuler', 'pos' => '(n)']
             ]
         ],
         9 => [
-            'id' => 'Faktor-faktor yang menentukan bagaimana manusia berinteraksi dengan lingkungan adalah komplek.',
-            'en' => 'The factors that determine how humans interact with the environment are complex',
-            'example' => ['id' => 'Elemen-elemen yang menentukan bagaimana organisme beradaptasi dengan habitat adalah beragam.', 'en' => 'The elements that determine how organisms adapt to habitats are diverse.'],
+            'id' => 'Faktor sosioekonomi yang menentukan bagaimana masyarakat beradaptasi terhadap disrupsi iklim sangatlah kompleks.',
+            'en' => 'The socioeconomic factors that determine how communities adapt to climate disruption are exceptionally complex',
+            'example' => ['id' => 'Faktor yang mengatur interaksi manusia sangat rumit.', 'en' => 'Factors that regulate human interaction are complex.'],
             'vocab' => [
-                'Factor' => ['id' => 'Faktor', 'pos' => '(n)'],
+                'Socioeconomic factor' => ['id' => 'Faktor sosioekonomi', 'pos' => '(n)'],
                 'Determine' => ['id' => 'Menentukan', 'pos' => '(v)'],
-                'Interact' => ['id' => 'Berinteraksi', 'pos' => '(v)'],
-                'Environment' => ['id' => 'Lingkungan', 'pos' => '(n)'],
-                'Complex' => ['id' => 'Komplek', 'pos' => '(adj)']
+                'Adapt' => ['id' => 'Beradaptasi', 'pos' => '(v)'],
+                'Climate disruption' => ['id' => 'Disrupsi iklim', 'pos' => '(n)'],
+                'Exceptionally complex' => ['id' => 'Sangatlah kompleks', 'pos' => '(adj)']
             ]
         ],
         10 => [
-            'id' => 'Teori Perdagangan Baru menjelaskan mengapa banyak perdagangan dari ekonomi maju terdiri dari komoditas terbedakan yang dihasilkan dari kondisi kompetisi yang tidak sempurna.',
-            'en' => 'New Trade Theory explains why much trade from advanced economies consists of differentiated commodities produced from imperfect competition conditions',
-            'example' => ['id' => 'Teori Ekonomi Klasik menjelaskan mengapa banyak transaksi dari pasar bebas terdiri dari barang standar yang dihasilkan dari kondisi persaingan yang sempurna.', 'en' => 'Classical Economic Theory explains why many transactions from free markets consist of standard goods produced from perfect competition conditions.'],
+            'id' => 'Teori Perdagangan Modern mengelaborasi mengapa negara-negara maju mendominasi pertukaran komoditas bernilai tambah tinggi.',
+            'en' => 'Modern Trade Theory elaborates why industrialized nations dominate the exchange of high-value-added commodities',
+            'example' => ['id' => 'Teori ekonomi menjelaskan mengapa negara kaya berdagang.', 'en' => 'Economic theory explains why rich nations trade.'],
             'vocab' => [
-                'Trade' => ['id' => 'Perdagangan', 'pos' => '(n)'],
-                'Advanced economy' => ['id' => 'Ekonomi maju', 'pos' => '(n)'],
-                'Consist of' => ['id' => 'Terdiri dari', 'pos' => '(v)'],
-                'Commodity' => ['id' => 'Komoditas', 'pos' => '(n)'],
-                'Differentiated' => ['id' => 'Terbedakan', 'pos' => '(adj)'],
-                'Competition' => ['id' => 'Kompetisi', 'pos' => '(n)']
+                'Trade theory' => ['id' => 'Teori perdagangan', 'pos' => '(n)'],
+                'Elaborate' => ['id' => 'Mengelaborasi / Menguraikan', 'pos' => '(v)'],
+                'Industrialized nation' => ['id' => 'Negara maju / terindustrialisasi', 'pos' => '(n)'],
+                'Dominate' => ['id' => 'Mendominasi', 'pos' => '(v)'],
+                'High-value-added commodity' => ['id' => 'Komoditas bernilai tambah tinggi', 'pos' => '(n)']
             ]
         ],
         11 => [
-            'id' => 'Kapan manusia mulai menghuni Australia masih belum dapat secara akurat ditentukan.',
-            'en' => 'When humans began to inhabit Australia has not yet been accurately determined',
-            'example' => ['id' => 'Kapan dinosaurus mulai menghuni Amerika masih belum dapat secara pasti ditentukan.', 'en' => 'When dinosaurs began to inhabit America has not yet been certainly determined.'],
+            'id' => 'Kapan hominin purba pertama kali mengolonisasi benua Australia belum dapat ditentukan secara definitif.',
+            'en' => 'When early hominins initially colonized the Australian continent has not yet been definitively determined',
+            'example' => ['id' => 'Kapan manusia tiba di pulau itu belum diketahui pasti.', 'en' => 'When humans arrived on the island is not known for sure.'],
             'vocab' => [
-                'Inhabit' => ['id' => 'Menghuni', 'pos' => '(v)'],
-                'Accurately' => ['id' => 'Secara akurat', 'pos' => '(adv)'],
-                'Determined' => ['id' => 'Ditentukan', 'pos' => '(v)']
+                'Early hominin' => ['id' => 'Hominin purba', 'pos' => '(n)'],
+                'Colonize' => ['id' => 'Mengolonisasi / Mendiami', 'pos' => '(v)'],
+                'Definitively' => ['id' => 'Secara definitif / Pasti', 'pos' => '(adv)'],
+                'Determine' => ['id' => 'Ditentukan', 'pos' => '(v)']
             ]
         ],
         12 => [
-            'id' => 'Di Afrika Barat, dimana sedimen dibuang menyebabkan kerusakan yang signifikan terhadap terumbu karang di pesisir Kenya.',
-            'en' => 'In West Africa, where sediment is dumped causes significant damage to coral reefs off the coast of Kenya',
-            'example' => ['id' => 'Di Asia Tenggara, dimana limbah dibuang menyebabkan kerusakan yang serius terhadap ekosistem sungai di pesisir Thailand.', 'en' => 'In Southeast Asia, where waste is dumped causes serious damage to river ecosystems off the coast of Thailand.'],
+            'id' => 'Di mana limbah industri radioaktif didepositokan menimbulkan kekhawatiran ekologis yang mendalam bagi ekosistem marin.',
+            'en' => 'Where radioactive industrial waste is deposited generates profound ecological concerns for marine ecosystems',
+            'example' => ['id' => 'Di mana sampah dibuang mencemari laut.', 'en' => 'Where trash is dumped pollutes the sea.'],
             'vocab' => [
-                'Sediment' => ['id' => 'Sedimen', 'pos' => '(n)'],
-                'Dump' => ['id' => 'Dibuang', 'pos' => '(v)'],
-                'Damage' => ['id' => 'Kerusakan', 'pos' => '(n)'],
-                'Significant' => ['id' => 'Signifikan', 'pos' => '(adj)'],
-                'Coral reef' => ['id' => 'Terumbu karang', 'pos' => '(n)'],
-                'Coast' => ['id' => 'Pesisir', 'pos' => '(n)']
+                'Radioactive waste' => ['id' => 'Limbah radioaktif', 'pos' => '(n)'],
+                'Deposit' => ['id' => 'Didepositokan / Dibuang', 'pos' => '(v)'],
+                'Profound' => ['id' => 'Mendalam / Serius', 'pos' => '(adj)'],
+                'Ecological concern' => ['id' => 'Kekhawatiran ekologis', 'pos' => '(n)'],
+                'Marine ecosystem' => ['id' => 'Ekosistem marin / laut', 'pos' => '(n)']
             ]
         ],
         13 => [
-            'id' => 'Apa yang mungkin bernilai bagi kita di masa depan adalah hampir mustahil untuk diprediksi.',
-            'en' => 'What might be valuable to us in the future is almost impossible to predict',
-            'example' => ['id' => 'Apa yang mungkin berguna bagi kita di masa lalu adalah hampir mustahil untuk diingat.', 'en' => 'What might be useful to us in the past is almost impossible to remember.'],
+            'id' => 'Apa yang dianggap sebagai aset strategis di masa depan hampir mustahil untuk diproyeksikan secara akurat.',
+            'en' => 'What constitutes a strategic asset in the future is virtually impossible to project accurately',
+            'example' => ['id' => 'Apa yang berharga kelak sulit ditebak.', 'en' => 'What will be valuable later is hard to guess.'],
             'vocab' => [
-                'Valuable' => ['id' => 'Bernilai', 'pos' => '(adj)'],
-                'Future' => ['id' => 'Masa depan', 'pos' => '(n)'],
-                'Impossible' => ['id' => 'Mustahil', 'pos' => '(adj)'],
-                'Predict' => ['id' => 'Diprediksi', 'pos' => '(v)']
+                'Constitute' => ['id' => 'Dianggap sebagai / Membentuk', 'pos' => '(v)'],
+                'Strategic asset' => ['id' => 'Aset strategis', 'pos' => '(n)'],
+                'Virtually impossible' => ['id' => 'Hampir mustahil', 'pos' => '(adj)'],
+                'Project accurately' => ['id' => 'Diproyeksikan secara akurat', 'pos' => '(v)']
             ]
         ],
         14 => [
-            'id' => 'Beberapa merasa bahwa pemerintah dan perusahaan memiliki pengaruh yang lebih besar daripada individu terhadap keanekaragaman hayati lokal dan global.',
-            'en' => 'Some feel that governments and companies have a greater influence than individuals on local and global biodiversity',
-            'example' => ['id' => 'Beberapa berpendapat bahwa universitas dan institusi memiliki dampak yang lebih besar daripada individu terhadap inovasi teknologi lokal dan global.', 'en' => 'Some argue that universities and institutions have a greater impact than individuals on local and global technological innovation.'],
+            'id' => 'Sejumlah analis berpendapat bahwa korporasi multinasional memiliki pengaruh yang lebih determinan daripada entitas negara.',
+            'en' => 'Several analysts contend that multinational corporations wield a more decisive influence than state entities',
+            'example' => ['id' => 'Pengamat merasa perusahaan besar sangat berkuasa.', 'en' => 'Observers feel that big corporations are powerful.'],
             'vocab' => [
-                'Government' => ['id' => 'Pemerintah', 'pos' => '(n)'],
-                'Company' => ['id' => 'Perusahaan', 'pos' => '(n)'],
-                'Influence' => ['id' => 'Pengaruh', 'pos' => '(n)'],
-                'Individual' => ['id' => 'Individu', 'pos' => '(n)'],
-                'Biodiversity' => ['id' => 'Keanekaragaman hayati', 'pos' => '(n)']
+                'Contend' => ['id' => 'Berpendapat / Menegaskan', 'pos' => '(v)'],
+                'Multinational corporation' => ['id' => 'Korporasi multinasional', 'pos' => '(n)'],
+                'Wield influence' => ['id' => 'Memiliki pengaruh', 'pos' => '(v)'],
+                'Decisive' => ['id' => 'Determinan / Menentukan', 'pos' => '(adj)'],
+                'State entity' => ['id' => 'Entitas negara', 'pos' => '(n)']
             ]
         ],
         15 => [
-            'id' => 'Ini masih belum jelas apakah spesies burung Carolina parakeet bersarang di musim semi atau musim panas.',
-            'en' => 'It is still unclear whether the Carolina parakeet bird species nested in spring or summer',
-            'example' => ['id' => 'Ini masih belum jelas apakah spesies ikan Coelacanth berkembang biak di musim hujan atau musim kemarau.', 'en' => 'It is still unclear whether the Coelacanth fish species reproduces in rainy season or dry season.'],
+            'id' => 'Masih belum dapat disimpulkan secara konklusif apakah pemanasan global akan memicu titik kritis iklim yang ireversibel.',
+            'en' => 'It remains inconclusive whether global warming will precipitate irreversible climatic tipping points',
+            'example' => ['id' => 'Belum jelas apakah spesies burung bermigrasi saat musim dingin.', 'en' => 'It is unclear whether birds migrate in winter.'],
             'vocab' => [
-                'Unclear' => ['id' => 'Belum jelas', 'pos' => '(adj)'],
-                'Bird species' => ['id' => 'Spesies burung', 'pos' => '(n)'],
-                'Nest' => ['id' => 'Bersarang', 'pos' => '(v)'],
-                'Spring' => ['id' => 'Musim semi', 'pos' => '(n)'],
-                'Summer' => ['id' => 'Musim panas', 'pos' => '(n)']
+                'Inconclusive' => ['id' => 'Belum konklusif / pasti', 'pos' => '(adj)'],
+                'Precipitate' => ['id' => 'Memicu / Mempercepat', 'pos' => '(v)'],
+                'Irreversible' => ['id' => 'Ireversibel / Tak dapat dipulihkan', 'pos' => '(adj)'],
+                'Climatic tipping point' => ['id' => 'Titik kritis iklim', 'pos' => '(n)']
             ]
         ],
         16 => [
-            'id' => 'Apa yang terjadi di pada suku Anasazi sebelum abad 12 menjadi bahan perdebatan banyak ahli.',
-            'en' => 'What happened to the Anasazi tribe before the 12th century is a matter of debate among many experts',
-            'example' => ['id' => 'Apa yang terjadi pada suku Inca sebelum abad 16 menjadi bahan perdebatan banyak sejarawan.', 'en' => 'What happened to the Inca tribe before the 16th century is a matter of debate among many historians.'],
+            'id' => 'Apa yang memicu keruntuhan peradaban Maya kuno masih menjadi subjek perdebatan ilmiah di kalangan sejarawan.',
+            'en' => 'What triggered the collapse of the ancient Maya civilization remains a subject of scholarly debate among historians',
+            'example' => ['id' => 'Apa yang terjadi pada masa lalu masih diperdebatkan.', 'en' => 'What happened in the past is still debated.'],
             'vocab' => [
-                'Happen' => ['id' => 'Terjadi', 'pos' => '(v)'],
-                'Tribe' => ['id' => 'Suku', 'pos' => '(n)'],
-                'Century' => ['id' => 'Abad', 'pos' => '(n)'],
-                'Matter of debate' => ['id' => 'Bahan perdebatan', 'pos' => '(n)'],
-                'Expert' => ['id' => 'Ahli', 'pos' => '(n)']
+                'Trigger' => ['id' => 'Memicu', 'pos' => '(v)'],
+                'Collapse' => ['id' => 'Keruntuhan', 'pos' => '(n)'],
+                'Ancient civilization' => ['id' => 'Peradaban kuno', 'pos' => '(n)'],
+                'Scholarly debate' => ['id' => 'Perdebatan ilmiah', 'pos' => '(n)']
             ]
         ],
         17 => [
-            'id' => 'Apa yang ahli ekonomi acu sebagai sebuah pilihan marginal adalah pilihan untuk memproduksi atau mengkonsumsi jasa atau barang selanjutnya.',
-            'en' => 'What economists refer to as a marginal choice is the choice to produce or consume the next service or good',
-            'example' => ['id' => 'Apa yang ahli biologi acu sebagai sebuah mutasi genetik adalah perubahan untuk menghasilkan atau mengadaptasi sifat atau karakteristik selanjutnya.', 'en' => 'What biologists refer to as a genetic mutation is the change to produce or adapt the next trait or characteristic.'],
+            'id' => 'Apa yang para ekonom konseptualisasikan sebagai eksternalitas negatif mengacu pada dampak sampingan yang merugikan.',
+            'en' => 'What economists conceptualize as negative externalities refers to adverse side effects imposed on third parties',
+            'example' => ['id' => 'Apa yang ahli maksud adalah pilihan marjinal.', 'en' => 'What experts mean is marginal choice.'],
             'vocab' => [
-                'Economist' => ['id' => 'Ahli ekonomi', 'pos' => '(n)'],
-                'Refer to' => ['id' => 'Acu sebagai', 'pos' => '(v)'],
-                'Marginal choice' => ['id' => 'Pilihan marginal', 'pos' => '(n)'],
-                'Produce' => ['id' => 'Memproduksi', 'pos' => '(v)'],
-                'Consume' => ['id' => 'Mengkonsumsi', 'pos' => '(v)'],
-                'Service' => ['id' => 'Jasa', 'pos' => '(n)'],
-                'Good' => ['id' => 'Barang', 'pos' => '(n)']
+                'Conceptualize' => ['id' => 'Mengonseptualisasikan', 'pos' => '(v)'],
+                'Negative externality' => ['id' => 'Eksternalitas negatif', 'pos' => '(n)'],
+                'Refer to' => ['id' => 'Mengacu pada', 'pos' => '(v)'],
+                'Adverse side effect' => ['id' => 'Dampak sampingan yang merugikan', 'pos' => '(n)']
             ]
         ],
         18 => [
-            'id' => 'Apa yang ratu lebah konsumsi berbeda dengan apa yang lebah pekerja konsumsi.',
-            'en' => 'What the queen bee consumes differs from what worker bees consume',
-            'example' => ['id' => 'Apa yang burung hantu konsumsi berbeda dengan apa yang burung elang konsumsi.', 'en' => 'What owls consume differs from what eagles consume.'],
+            'id' => 'Bagaimana transmisi sinaptik mentransmisikan impuls neurokimia membedakan mekanisme kognitif manusia dari pemrosesan silikon.',
+            'en' => 'How synaptic transmission propagates neurochemical impulses distinguishes human cognitive mechanisms from silicon processing',
+            'example' => ['id' => 'Bagaimana otak bekerja berbeda dari komputer.', 'en' => 'How the brain works differs from computers.'],
             'vocab' => [
-                'Queen bee' => ['id' => 'Ratu lebah', 'pos' => '(n)'],
-                'Consume' => ['id' => 'Konsumsi', 'pos' => '(v)'],
-                'Differ' => ['id' => 'Berbeda', 'pos' => '(v)'],
-                'Worker bee' => ['id' => 'Lebah pekerja', 'pos' => '(n)']
+                'Synaptic transmission' => ['id' => 'Transmisi sinaptik', 'pos' => '(n)'],
+                'Propagate' => ['id' => 'Mentransmisikan / Merambatkan', 'pos' => '(v)'],
+                'Neurochemical impulse' => ['id' => 'Impuls neurokimia', 'pos' => '(n)'],
+                'Distinguish' => ['id' => 'Membedakan', 'pos' => '(v)'],
+                'Cognitive mechanism' => ['id' => 'Mekanisme kognitif', 'pos' => '(n)']
             ]
         ]
     ];
@@ -1918,6 +3168,312 @@ class GrammarWritingDataRepository
                 'Can' => ['id' => 'Bisa', 'pos' => '(modal)']
             ]
         ]
+    ];
+
+    // ── Meeting 4 (Fast-track) — Negative Sentence, mirrors the
+    // matrix+sentences architecture used by Meeting 2 (Tenses), negated. ──
+
+    public $meeting4NegativeFormulas = [
+        'Simple Present' => ['verbal' => 'S + do/does + not + V1', 'nominal' => 'S + Be(am/is/are) + not', 'passive' => 'S + Be(am/is/are) + not + V3'],
+        'Present Continuous' => ['verbal' => 'S + Be(am/is/are) + not + Ving', 'nominal' => 'S + Be(am/is/are) + not + Being', 'passive' => 'S + Be(am/is/are) + not + Being + V3'],
+        'Present Perfect' => ['verbal' => 'S + Have/Has + not + V3', 'nominal' => 'S + Have/Has + not + Been', 'passive' => 'S + Have/Has + not + Been + V3'],
+        'Present Perfect Continuous' => ['verbal' => 'S + Have/Has + not + Been + Ving', 'nominal' => 'S + Have/Has + not + Been + Being', 'passive' => 'S + Have/Has + not + Been + Being + V3'],
+        'Simple Past' => ['verbal' => 'S + did + not + V1', 'nominal' => 'S + Be(was/were) + not', 'passive' => 'S + Be(was/were) + not + V3'],
+        'Past Continuous' => ['verbal' => 'S + Be(was/were) + not + Ving', 'nominal' => 'S + Be(was/were) + not + Being', 'passive' => 'S + Be(was/were) + not + Being + V3'],
+        'Past Perfect' => ['verbal' => 'S + Had + not + V3', 'nominal' => 'S + Had + not + Been', 'passive' => 'S + Had + not + Been + V3'],
+        'Past Perfect Continuous' => ['verbal' => 'S + Had + not + Been + Ving', 'nominal' => 'S + Had + not + Been + Being', 'passive' => 'S + Had + not + Been + Being + V3'],
+        'Simple Future' => ['verbal' => 'S + Will + not + V1', 'nominal' => 'S + Will + not + Be', 'passive' => 'S + Will + not + Be + V3'],
+        'Future Continuous' => ['verbal' => 'S + Will + not + Be + Ving', 'nominal' => 'S + Will + not + Be + Being', 'passive' => 'S + Will + not + Be + Being + V3'],
+        'Future Perfect' => ['verbal' => 'S + Will + not + Have + V3', 'nominal' => 'S + Will + not + Have + Been', 'passive' => 'S + Will + not + Have + Been + V3'],
+        'Future Perfect Continuous' => ['verbal' => 'S + Will + not + Have + Been + Ving', 'nominal' => 'S + Will + not + Have + Been + Being', 'passive' => 'S + Will + not + Have + Been + Being + V3'],
+        'Simple Past Future' => ['verbal' => 'S + Would + not + V1', 'nominal' => 'S + Would + not + Be', 'passive' => 'S + Would + not + Be + V3'],
+        'Past Future Continuous' => ['verbal' => 'S + Would + not + Be + Ving', 'nominal' => 'S + Would + not + Be + Being', 'passive' => 'S + Would + not + Be + Being + V3'],
+        'Past Future Perfect' => ['verbal' => 'S + Would + not + Have + V3', 'nominal' => 'S + Would + not + Have + Been', 'passive' => 'S + Would + not + Have + Been + V3'],
+        'Past Future Perfect Continuous' => ['verbal' => 'S + Would + not + Have + Been + Ving', 'nominal' => 'S + Would + not + Have + Been + Being', 'passive' => 'S + Would + not + Have + Been + Being + V3'],
+        'Modal' => ['verbal' => 'S + Modal + not + V1', 'nominal' => 'S + Modal + not + Be', 'passive' => 'S + Modal + not + Be + V3']
+    ];
+
+    public $meeting4NegativeMatrixIntroSentences = [
+        1 => ['id' => 'Kita tidak menyelesaikan masalah ini.', 'en' => 'We do not solve this problem', 'tense' => 'Simple Present', 'type' => 'verbal'],
+        2 => ['id' => 'Dia (it) tidak membantu.', 'en' => 'It does not help', 'tense' => 'Simple Present', 'type' => 'verbal'],
+        3 => ['id' => 'Pemerintah tidak melindungi hutan.', 'en' => 'The government does not protect the forest', 'tense' => 'Simple Present', 'type' => 'verbal'],
+        4 => ['id' => 'Undang-undang tidak menjamin kebebasan berekspresi.', 'en' => 'The law does not guarantee freedom of expression', 'tense' => 'Simple Present', 'type' => 'verbal'],
+        5 => ['id' => 'Mamalia tidak menyebar secara luas 2 juta tahun yang lalu.', 'en' => 'Mammals did not spread widely 2 million years ago', 'tense' => 'Simple Past', 'type' => 'verbal'],
+    ];
+
+    public $meeting4NegativeTranslationSentences = [
+        1 => ['id' => 'Pemerintah tidak mengabaikan dampak perubahan iklim global.', 'en' => 'The government does not ignore the impact of global climate change', 'tense' => 'Simple Present', 'type' => 'verbal'],
+        2 => ['id' => 'Bahan bakar fosil bukan sumber energi terbarukan.', 'en' => 'Fossil fuels are not renewable energy sources', 'tense' => 'Simple Present', 'type' => 'nominal'],
+        3 => ['id' => 'Para peneliti tidak menemukan bukti pencemaran air pada ekspedisi kemarin.', 'en' => 'Researchers did not find evidence of water pollution on yesterday\'s expedition', 'tense' => 'Simple Past', 'type' => 'verbal'],
+        4 => ['id' => 'Stasiun penelitian itu tidak aktif selama musim dingin tahun lalu.', 'en' => 'The research station was not active during the winter last year', 'tense' => 'Simple Past', 'type' => 'nominal'],
+        5 => ['id' => 'Para ilmuwan tidak sedang menguji vaksin baru tersebut saat ini.', 'en' => 'Scientists are not testing the new vaccine at present', 'tense' => 'Present Continuous', 'type' => 'verbal'],
+        6 => ['id' => 'Tim geologi tidak sedang mengebor batuan vulkanik ketika badai terjadi.', 'en' => 'The geological team was not drilling volcanic rock when the storm occurred', 'tense' => 'Past Continuous', 'type' => 'verbal'],
+        7 => ['id' => 'Banyak negara berkembang belum menerapkan teknologi energi terbarukan.', 'en' => 'Many developing countries have not implemented renewable energy technology', 'tense' => 'Present Perfect', 'type' => 'verbal'],
+        8 => ['id' => 'Spesies langka itu belum punah sebelum bencana letusan gunung terjadi.', 'en' => 'The rare species had not become extinct before the volcanic eruption occurred', 'tense' => 'Past Perfect', 'type' => 'verbal'],
+        9 => ['id' => 'Kecerdasan buatan tidak akan menggantikan seluruh peran tenaga medis profesional.', 'en' => 'Artificial intelligence will not replace all roles of professional medical personnel', 'tense' => 'Simple Future', 'type' => 'verbal'],
+        10 => ['id' => 'Masyarakat seharusnya tidak membuang limbah kimia berbahaya ke sungai.', 'en' => 'Society should not dispose of hazardous chemical waste into the river', 'tense' => 'Modal', 'type' => 'verbal'],
+    ];
+
+    public $meeting4NegativeTranslationMatrix = [
+        'Simple Present' => [
+            'nominal' => ['id' => 'Beruang bukan karnivora.', 'en' => 'Bears are not carnivores'],
+            'passive' => ['id' => 'Gajah utamanya tidak diburu untuk dagingnya.', 'en' => 'Elephants are not primarily hunted for their meat']
+        ],
+        'Present Continuous' => [
+            'verbal' => ['id' => 'Ekonomi global tidak sedang tumbuh.', 'en' => 'The global economy is not growing'],
+            'nominal' => ['id' => 'Pemerintah tidak sedang berhati-hati.', 'en' => 'The government is not being careful'],
+            'passive' => ['id' => 'Konsumsi bahan bakar tidak sedang dikurangi.', 'en' => 'Fuel consumption is not being reduced']
+        ],
+        'Present Perfect' => [
+            'verbal' => ['id' => 'Beberapa negara belum bergabung dengan PBB.', 'en' => 'Some countries have not joined the UN'],
+            'nominal' => ['id' => 'Hukum ini masih belum ada di negara kami.', 'en' => 'This law has not been in our country yet'],
+            'passive' => ['id' => 'Air bersih masih belum dinikmati oleh banyak orang.', 'en' => 'Clean water has not been enjoyed by many people yet']
+        ],
+        'Present Perfect Continuous' => [
+            'verbal' => ['id' => 'Negara belum sedang mengembangkan teknologi semikonduktor.', 'en' => 'The country has not been developing semiconductor technology'],
+            'nominal' => ['id' => 'Pemerintah belum sedang berhati-hati.', 'en' => 'The government has not been being careful'],
+            'passive' => ['id' => 'Proyek ini belum sedang dibangun.', 'en' => 'This project has not been being built']
+        ],
+        'Simple Past' => [
+            'nominal' => ['id' => 'Pantodonta tidak ada di berbagai ekosistem pada 66 juta tahun yang lalu.', 'en' => 'Pantodonts were not in various ecosystems 66 million years ago'],
+            'passive' => ['id' => 'Kehidupan mamalia tidak dimusnahkan oleh komet.', 'en' => 'Mammal life was not wiped out by the comet']
+        ],
+        'Past Continuous' => [
+            'verbal' => ['id' => 'Manusia tidak sedang menjelajahi Antartika 400 tahun yang lalu.', 'en' => 'Humans were not exploring Antarctica 400 years ago'],
+            'nominal' => ['id' => 'Pemerintah tidak sedang berhati-hati tahun lalu.', 'en' => 'The government was not being careful last year'],
+            'passive' => ['id' => 'Minyak tidak sedang ditambang di Alaska.', 'en' => 'Oil was not being mined in Alaska']
+        ],
+        'Past Perfect' => [
+            'verbal' => ['id' => 'Columbus belum mengunjungi dataran utama Amerika di pelayaran pertama.', 'en' => 'Columbus had not visited mainland America on his first voyage'],
+            'nominal' => ['id' => 'Mamalia belum ada di Selandia Baru 1000 tahun yang lalu.', 'en' => 'Mammals had not been in New Zealand 1000 years ago'],
+            'passive' => ['id' => 'Permafrost belum ditemukan dulu.', 'en' => 'Permafrost had not been discovered in the past']
+        ],
+        'Past Perfect Continuous' => [
+            'verbal' => ['id' => 'Banyak pabrik belum sedang menerapkan regulasi keamanan 50 tahun yang lalu.', 'en' => 'Many factories had not been implementing safety regulations 50 years ago'],
+            'nominal' => ['id' => 'Pemerintah belum sedang berhati-hati.', 'en' => 'The government had not been being careful'],
+            'passive' => ['id' => 'Nuklir belum sedang dikembangkan 100 tahun lalu.', 'en' => 'Nuclear technology had not been being developed 100 years ago']
+        ],
+        'Simple Future' => [
+            'verbal' => ['id' => 'AI tidak akan menghancurkan lapangan pekerjaan.', 'en' => 'AI will not destroy jobs'],
+            'nominal' => ['id' => 'Dunia tidak akan sama dalam 50 tahun lagi.', 'en' => 'The world will not be the same in 50 years'],
+            'passive' => ['id' => 'Hidrogen tidak akan digunakan untuk bahan bakar utama dalam 10 tahun.', 'en' => 'Hydrogen will not be used as the main fuel within 10 years']
+        ],
+        'Future Continuous' => [
+            'verbal' => ['id' => 'Matahari tidak akan sedang meledak.', 'en' => 'The sun will not be exploding'],
+            'nominal' => ['id' => 'Pemerintah tidak akan sedang berhati-hati.', 'en' => 'The government will not be being careful'],
+            'passive' => ['id' => 'Asteroid tidak akan sedang ditambang dalam waktu dekat.', 'en' => 'The asteroid will not be being mined in the near future']
+        ],
+        'Future Perfect' => [
+            'verbal' => ['id' => 'Lautan tidak akan telah membanjiri kota-kota pesisir.', 'en' => 'The oceans will not have flooded coastal cities'],
+            'nominal' => ['id' => 'Ekosistem di lantai samudra belum akan aman dari sampah plastik.', 'en' => 'Ecosystems on the ocean floor will not have been safe from plastic waste'],
+            'passive' => ['id' => 'Mesin anti gravitasi belum akan diciptakan dalam 100 tahun.', 'en' => 'Anti-gravity machines will not have been invented within 100 years']
+        ],
+        'Future Perfect Continuous' => [
+            'verbal' => ['id' => 'Ekosistem akan belum sedang menyembuhkan.', 'en' => 'The ecosystem will not have been healing'],
+            'nominal' => ['id' => 'Pemerintah tidak akan telah sedang berhati-hati.', 'en' => 'The government will not have been being careful'],
+            'passive' => ['id' => 'Dyson Sphere belum akan sedang dibangun.', 'en' => 'The Dyson Sphere will not have been being built']
+        ],
+        'Simple Past Future' => [
+            'verbal' => ['id' => 'Bencana ini tidak akan terjadi dengan pencegahan.', 'en' => 'This disaster would not happen with prevention'],
+            'nominal' => ['id' => 'Burung kiwi tidak akan ada di Selandia Baru.', 'en' => 'Kiwi birds would not be in New Zealand'],
+            'passive' => ['id' => 'Teknologi ini tidak akan dikembangkan.', 'en' => 'This technology would not be developed']
+        ],
+        'Past Future Continuous' => [
+            'verbal' => ['id' => 'Geyser tidak akan sedang membanjiri kota.', 'en' => 'The geyser would not be flooding the city'],
+            'nominal' => ['id' => 'Pemerintah tidak akan sedang berhati-hati.', 'en' => 'The government would not be being careful'],
+            'passive' => ['id' => 'Tanah di daerah ini tidak akan sedang diteliti.', 'en' => 'The land in this area would not be being researched']
+        ],
+        'Past Future Perfect' => [
+            'verbal' => ['id' => 'Aircraft belum akan menyebar tanpa insiden Heidelberg.', 'en' => 'Aircraft would not have spread without the Heidelberg incident'],
+            'nominal' => ['id' => 'Mammoth tidak akan punah.', 'en' => 'Mammoths would not be extinct'],
+            'passive' => ['id' => 'Pesawat jet belum akan dikembangkan di perang.', 'en' => 'Jet planes would not have been developed in the war']
+        ],
+        'Past Future Perfect Continuous' => [
+            'verbal' => ['id' => 'Letusan Yellowstone belum akan sedang mengubah iklim.', 'en' => 'The Yellowstone eruption would not have been changing the climate'],
+            'nominal' => ['id' => 'Pemerintah tidak akan telah sedang berhati-hati.', 'en' => 'The government would not have been being careful'],
+            'passive' => ['id' => 'Proyek ini belum akan sedang diajukan.', 'en' => 'This project would not have been being proposed']
+        ],
+        'Modal' => [
+            'verbal' => ['id' => 'Manusia seharusnya tidak menghancurkan alam.', 'en' => 'Humans should not destroy nature'],
+            'nominal' => ['id' => 'Teori ini mungkin tidak benar.', 'en' => 'This theory might not be true'],
+            'passive' => ['id' => 'Ekosistem terumbu karang seharusnya tidak dieksploitasi.', 'en' => 'Coral reef ecosystems should not be exploited']
+        ]
+    ];
+
+    public $meeting4NegativeTenseExamples = [
+        'Simple Present' => [
+            'verbal' => ['id' => 'Saya tidak makan.', 'en' => 'I do not eat.'],
+            'nominal' => ['id' => 'Saya tidak senang.', 'en' => 'I am not happy.'],
+            'passive' => ['id' => 'Nasi tidak dimakan.', 'en' => 'Rice is not eaten.']
+        ],
+        'Present Continuous' => [
+            'verbal' => ['id' => 'Saya tidak sedang makan.', 'en' => 'I am not eating.'],
+            'nominal' => ['id' => 'Saya tidak sedang senang.', 'en' => 'I am not being happy.'],
+            'passive' => ['id' => 'Nasi tidak sedang dimakan.', 'en' => 'Rice is not being eaten.']
+        ],
+        'Present Perfect' => [
+            'verbal' => ['id' => 'Saya belum makan.', 'en' => 'I have not eaten.'],
+            'nominal' => ['id' => 'Saya belum senang.', 'en' => 'I have not been happy.'],
+            'passive' => ['id' => 'Nasi belum dimakan.', 'en' => 'Rice has not been eaten.']
+        ],
+        'Present Perfect Continuous' => [
+            'verbal' => ['id' => 'Saya belum sedang makan.', 'en' => 'I have not been eating.'],
+            'nominal' => ['id' => 'Saya belum sedang senang.', 'en' => 'I have not been being happy.'],
+            'passive' => ['id' => 'Nasi belum sedang dimakan.', 'en' => 'Rice has not been being eaten.']
+        ],
+        'Simple Past' => [
+            'verbal' => ['id' => 'Saya tidak makan (dulu).', 'en' => 'I did not eat.'],
+            'nominal' => ['id' => 'Saya tidak senang (dulu).', 'en' => 'I was not happy.'],
+            'passive' => ['id' => 'Nasi tidak dimakan (dulu).', 'en' => 'Rice was not eaten.']
+        ],
+        'Past Continuous' => [
+            'verbal' => ['id' => 'Saya tidak sedang makan (dulu).', 'en' => 'I was not eating.'],
+            'nominal' => ['id' => 'Saya tidak sedang senang (dulu).', 'en' => 'I was not being happy.'],
+            'passive' => ['id' => 'Nasi tidak sedang dimakan (dulu).', 'en' => 'Rice was not being eaten.']
+        ],
+        'Past Perfect' => [
+            'verbal' => ['id' => 'Saya belum makan (dulu).', 'en' => 'I had not eaten.'],
+            'nominal' => ['id' => 'Saya belum senang (dulu).', 'en' => 'I had not been happy.'],
+            'passive' => ['id' => 'Nasi belum dimakan (dulu).', 'en' => 'Rice had not been eaten.']
+        ],
+        'Past Perfect Continuous' => [
+            'verbal' => ['id' => 'Saya belum sedang makan (dulu).', 'en' => 'I had not been eating.'],
+            'nominal' => ['id' => 'Saya belum sedang senang (dulu).', 'en' => 'I had not been being happy.'],
+            'passive' => ['id' => 'Nasi belum sedang dimakan (dulu).', 'en' => 'Rice had not been being eaten.']
+        ],
+        'Simple Future' => [
+            'verbal' => ['id' => 'Saya tidak akan makan.', 'en' => 'I will not eat.'],
+            'nominal' => ['id' => 'Saya tidak akan senang.', 'en' => 'I will not be happy.'],
+            'passive' => ['id' => 'Nasi tidak akan dimakan.', 'en' => 'Rice will not be eaten.']
+        ],
+        'Future Continuous' => [
+            'verbal' => ['id' => 'Saya tidak akan sedang makan.', 'en' => 'I will not be eating.'],
+            'nominal' => ['id' => 'Saya tidak akan sedang senang.', 'en' => 'I will not be being happy.'],
+            'passive' => ['id' => 'Nasi tidak akan sedang dimakan.', 'en' => 'Rice will not be being eaten.']
+        ],
+        'Future Perfect' => [
+            'verbal' => ['id' => 'Saya tidak akan sudah makan.', 'en' => 'I will not have eaten.'],
+            'nominal' => ['id' => 'Saya tidak akan sudah senang.', 'en' => 'I will not have been happy.'],
+            'passive' => ['id' => 'Nasi tidak akan sudah dimakan.', 'en' => 'Rice will not have been eaten.']
+        ],
+        'Future Perfect Continuous' => [
+            'verbal' => ['id' => 'Saya tidak akan sudah sedang makan.', 'en' => 'I will not have been eating.'],
+            'nominal' => ['id' => 'Saya tidak akan sudah sedang senang.', 'en' => 'I will not have been being happy.'],
+            'passive' => ['id' => 'Nasi tidak akan sudah sedang dimakan.', 'en' => 'Rice will not have been being eaten.']
+        ],
+        'Simple Past Future' => [
+            'verbal' => ['id' => 'Saya tidak akan makan (dulu).', 'en' => 'I would not eat.'],
+            'nominal' => ['id' => 'Saya tidak akan senang (dulu).', 'en' => 'I would not be happy.'],
+            'passive' => ['id' => 'Nasi tidak akan dimakan (dulu).', 'en' => 'Rice would not be eaten.']
+        ],
+        'Past Future Continuous' => [
+            'verbal' => ['id' => 'Saya tidak akan sedang makan (dulu).', 'en' => 'I would not be eating.'],
+            'nominal' => ['id' => 'Saya tidak akan sedang senang (dulu).', 'en' => 'I would not be being happy.'],
+            'passive' => ['id' => 'Nasi tidak akan sedang dimakan (dulu).', 'en' => 'Rice would not be being eaten.']
+        ],
+        'Past Future Perfect' => [
+            'verbal' => ['id' => 'Saya tidak akan sudah makan (dulu).', 'en' => 'I would not have eaten.'],
+            'nominal' => ['id' => 'Saya tidak akan sudah senang (dulu).', 'en' => 'I would not have been happy.'],
+            'passive' => ['id' => 'Nasi tidak akan sudah dimakan (dulu).', 'en' => 'Rice would not have been eaten.']
+        ],
+        'Past Future Perfect Continuous' => [
+            'verbal' => ['id' => 'Saya tidak akan sudah sedang makan (dulu).', 'en' => 'I would not have been eating.'],
+            'nominal' => ['id' => 'Saya tidak akan sudah sedang senang (dulu).', 'en' => 'I would not have been being happy.'],
+            'passive' => ['id' => 'Nasi tidak akan sudah sedang dimakan (dulu).', 'en' => 'Rice would not have been being eaten.']
+        ],
+        'Modal' => [
+            'verbal' => ['id' => 'Saya tidak bisa makan.', 'en' => 'I cannot eat.'],
+            'nominal' => ['id' => 'Saya tidak bisa senang.', 'en' => 'I cannot be happy.'],
+            'passive' => ['id' => 'Nasi tidak bisa dimakan.', 'en' => 'Rice cannot be eaten.']
+        ]
+    ];
+
+    public $meeting4NegativeVocabularies = [
+        'Simple Present' => [
+            'verbal' => ['solve' => ['id' => 'menyelesaikan', 'pos' => '(v1)'], 'problem' => ['id' => 'masalah', 'pos' => '(n)']],
+            'nominal' => ['carnivore' => ['id' => 'karnivora', 'pos' => '(n)']],
+            'passive' => ['hunt' => ['id' => 'memburu', 'pos' => '(v1)'], 'meat' => ['id' => 'daging', 'pos' => '(n)']],
+        ],
+        'Present Continuous' => [
+            'verbal' => ['economy' => ['id' => 'ekonomi', 'pos' => '(n)'], 'grow' => ['id' => 'tumbuh', 'pos' => '(v1)']],
+            'nominal' => ['careful' => ['id' => 'berhati-hati', 'pos' => '(adj)']],
+            'passive' => ['fuel consumption' => ['id' => 'konsumsi bahan bakar', 'pos' => '(n)'], 'reduce' => ['id' => 'mengurangi', 'pos' => '(v1)']],
+        ],
+        'Present Perfect' => [
+            'verbal' => ['join' => ['id' => 'bergabung', 'pos' => '(v1)']],
+            'nominal' => ['law' => ['id' => 'hukum', 'pos' => '(n)']],
+            'passive' => ['clean water' => ['id' => 'air bersih', 'pos' => '(n)'], 'enjoy' => ['id' => 'menikmati', 'pos' => '(v1)']],
+        ],
+        'Present Perfect Continuous' => [
+            'verbal' => ['semiconductor' => ['id' => 'semikonduktor', 'pos' => '(n)'], 'develop' => ['id' => 'mengembangkan', 'pos' => '(v1)']],
+            'nominal' => ['careful' => ['id' => 'berhati-hati', 'pos' => '(adj)']],
+            'passive' => ['project' => ['id' => 'proyek', 'pos' => '(n)'], 'build' => ['id' => 'membangun', 'pos' => '(v1)']],
+        ],
+        'Simple Past' => [
+            'verbal' => ['mammal' => ['id' => 'mamalia', 'pos' => '(n)'], 'spread' => ['id' => 'menyebar', 'pos' => '(v1)'], 'widely' => ['id' => 'secara luas', 'pos' => '(adv)']],
+            'nominal' => ['ecosystem' => ['id' => 'ekosistem', 'pos' => '(n)']],
+            'passive' => ['wipe out' => ['id' => 'memusnahkan', 'pos' => '(v1)'], 'comet' => ['id' => 'komet', 'pos' => '(n)']],
+        ],
+        'Past Continuous' => [
+            'verbal' => ['explore' => ['id' => 'menjelajahi', 'pos' => '(v1)']],
+            'nominal' => ['careful' => ['id' => 'berhati-hati', 'pos' => '(adj)']],
+            'passive' => ['mine' => ['id' => 'menambang', 'pos' => '(v1)']],
+        ],
+        'Past Perfect' => [
+            'verbal' => ['visit' => ['id' => 'mengunjungi', 'pos' => '(v1)'], 'mainland' => ['id' => 'dataran utama', 'pos' => '(n)']],
+            'nominal' => ['mammal' => ['id' => 'mamalia', 'pos' => '(n)']],
+            'passive' => ['permafrost' => ['id' => 'permafrost', 'pos' => '(n)'], 'discover' => ['id' => 'menemukan', 'pos' => '(v1)']],
+        ],
+        'Past Perfect Continuous' => [
+            'verbal' => ['factory' => ['id' => 'pabrik', 'pos' => '(n)'], 'safety regulation' => ['id' => 'regulasi keamanan', 'pos' => '(n)']],
+            'nominal' => ['careful' => ['id' => 'berhati-hati', 'pos' => '(adj)']],
+            'passive' => ['nuclear' => ['id' => 'nuklir', 'pos' => '(n)'], 'develop' => ['id' => 'mengembangkan', 'pos' => '(v1)']],
+        ],
+        'Simple Future' => [
+            'verbal' => ['destroy' => ['id' => 'menghancurkan', 'pos' => '(v1)'], 'job' => ['id' => 'lapangan pekerjaan', 'pos' => '(n)']],
+            'nominal' => ['same' => ['id' => 'sama', 'pos' => '(adj)']],
+            'passive' => ['hydrogen' => ['id' => 'hidrogen', 'pos' => '(n)'], 'fuel' => ['id' => 'bahan bakar', 'pos' => '(n)']],
+        ],
+        'Future Continuous' => [
+            'verbal' => ['explode' => ['id' => 'meledak', 'pos' => '(v1)']],
+            'nominal' => ['careful' => ['id' => 'berhati-hati', 'pos' => '(adj)']],
+            'passive' => ['asteroid' => ['id' => 'asteroid', 'pos' => '(n)'], 'mine' => ['id' => 'menambang', 'pos' => '(v1)']],
+        ],
+        'Future Perfect' => [
+            'verbal' => ['flood' => ['id' => 'membanjiri', 'pos' => '(v1)'], 'coastal city' => ['id' => 'kota pesisir', 'pos' => '(n)']],
+            'nominal' => ['ocean floor' => ['id' => 'lantai samudra', 'pos' => '(n)'], 'plastic waste' => ['id' => 'sampah plastik', 'pos' => '(n)']],
+            'passive' => ['anti-gravity' => ['id' => 'anti gravitasi', 'pos' => '(n)'], 'invent' => ['id' => 'menciptakan', 'pos' => '(v1)']],
+        ],
+        'Future Perfect Continuous' => [
+            'verbal' => ['heal' => ['id' => 'menyembuhkan', 'pos' => '(v1)']],
+            'nominal' => ['careful' => ['id' => 'berhati-hati', 'pos' => '(adj)']],
+            'passive' => ['Dyson Sphere' => ['id' => 'Dyson Sphere', 'pos' => '(n)']],
+        ],
+        'Simple Past Future' => [
+            'verbal' => ['disaster' => ['id' => 'bencana', 'pos' => '(n)'], 'prevention' => ['id' => 'pencegahan', 'pos' => '(n)']],
+            'nominal' => ['kiwi bird' => ['id' => 'burung kiwi', 'pos' => '(n)']],
+            'passive' => ['develop' => ['id' => 'mengembangkan', 'pos' => '(v1)']],
+        ],
+        'Past Future Continuous' => [
+            'verbal' => ['geyser' => ['id' => 'geyser', 'pos' => '(n)'], 'flood' => ['id' => 'membanjiri', 'pos' => '(v1)']],
+            'nominal' => ['careful' => ['id' => 'berhati-hati', 'pos' => '(adj)']],
+            'passive' => ['research' => ['id' => 'meneliti', 'pos' => '(v1)']],
+        ],
+        'Past Future Perfect' => [
+            'verbal' => ['aircraft' => ['id' => 'pesawat terbang', 'pos' => '(n)'], 'incident' => ['id' => 'insiden', 'pos' => '(n)']],
+            'nominal' => ['mammoth' => ['id' => 'mammoth', 'pos' => '(n)'], 'extinct' => ['id' => 'punah', 'pos' => '(adj)']],
+            'passive' => ['jet plane' => ['id' => 'pesawat jet', 'pos' => '(n)']],
+        ],
+        'Past Future Perfect Continuous' => [
+            'verbal' => ['eruption' => ['id' => 'letusan', 'pos' => '(n)'], 'climate' => ['id' => 'iklim', 'pos' => '(n)']],
+            'nominal' => ['careful' => ['id' => 'berhati-hati', 'pos' => '(adj)']],
+            'passive' => ['propose' => ['id' => 'mengajukan', 'pos' => '(v1)']],
+        ],
+        'Modal' => [
+            'verbal' => ['destroy' => ['id' => 'menghancurkan', 'pos' => '(v1)'], 'nature' => ['id' => 'alam', 'pos' => '(n)']],
+            'nominal' => ['theory' => ['id' => 'teori', 'pos' => '(n)']],
+            'passive' => ['coral reef' => ['id' => 'terumbu karang', 'pos' => '(n)'], 'exploit' => ['id' => 'mengeksploitasi', 'pos' => '(v1)']],
+        ],
     ];
 
 }

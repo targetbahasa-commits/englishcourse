@@ -12,7 +12,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">21</strong>&nbsp; The proposal will</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'be reviewed by two examiners.', 'B' => 'be added to the final grade.', 'C' => 'be returned with feedback.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[21]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -25,7 +25,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">22</strong>&nbsp; The proposal will consist mostly of</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'topics', 'B' => 'methods', 'C' => 'results'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[22]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -38,7 +38,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">23</strong>&nbsp; For the practice paper, the tutor has directed the students to make sure to</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'pay attention to time limits.', 'B' => 'write at least 6,000 words.', 'C' => 'keep on topic.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[23]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>

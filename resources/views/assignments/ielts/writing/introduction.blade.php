@@ -1,12 +1,14 @@
 @extends('layouts.admin')
 
+@section('title', ($meeting->title ?? 'Writing Introduction') . ' - IELTS Writing Task ' . ($task ?? 1))
+
 @section('head')
     <script src="{{ asset('js/auto-save.js') }}?v={{ time() }}"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
 @section('content')
-<div class="w-full max-w-[1920px] mx-auto px-6 py-8 flex flex-col min-h-screen" x-data="writingIntroduction({{ $meeting->id }})">
+<div class="w-full max-w-[1920px] mx-auto px-6 py-8 flex flex-col min-h-screen" x-data="writingIntroduction({{ $meeting->id }}, {{ Js::from($savedAnswers ?? []) }})">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
@@ -18,6 +20,10 @@
                 <h1 class="text-2xl font-bold text-gray-800">{{ $meeting->title }}</h1>
             </div>
         </div>
+        <button type="button" @click.prevent="submit()" :disabled="loading" class="px-6 py-2 bg-orange-600 text-white font-bold rounded-lg shadow-md hover:bg-orange-700 transition-colors flex items-center gap-2">
+            <span x-show="!loading">Submit Answers</span>
+            <span x-show="loading">Saving...</span>
+        </button>
     </div>
 
     <!-- Main Content -->
@@ -406,7 +412,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('alpine:init', () => {
-    Alpine.data('writingIntroduction', (meetingId) => ({
+    Alpine.data('writingIntroduction', (meetingId, savedAnswers = {}) => ({
+        // Seeded from the student's last autosaved draft (see
+        // IeltsWritingController::showMeeting()) - previously this always
+        // started empty, so a normal page refresh looked like it had
+        // wiped the student's answers even though they were already
+        // safely saved server-side the whole time.
         answers: {
             attempt1: '',
             attempt2: '',
@@ -414,15 +425,17 @@ document.addEventListener('alpine:init', () => {
             intro_bar: '',
             intro_table: '',
             intro_pie: '',
-            intro_mixed: ''
+            intro_mixed: '',
+            ...(savedAnswers || {})
         },
         showSamples: false,
+        loading: false,
 
         init() {
             if (window.AutoSave) {
                 window.AutoSave.init(meetingId, '{{ Auth::id() }}');
             }
-            
+
             setTimeout(() => {
                 const textareas = document.querySelectorAll('textarea[name]');
                 textareas.forEach(el => {
@@ -435,6 +448,77 @@ document.addEventListener('alpine:init', () => {
             this.$watch('answers', (val) => {
                 // AutoSave handles storage
             });
+
+            this.$root.addEventListener('input', (e) => {
+                if (e.target.matches('textarea[name]')) {
+                    this.queueDraftSync();
+                }
+            });
+        },
+        draftSyncTimer: null,
+        queueDraftSync() {
+            if (window.showAutosaveIndicator) {
+                window.showAutosaveIndicator('Menyimpan draft...', 'saving');
+            }
+            clearTimeout(this.draftSyncTimer);
+            this.draftSyncTimer = setTimeout(() => this.syncDraftToServer(), 800);
+        },
+        async syncDraftToServer() {
+            try {
+                await fetch('/assignments/ielts-academic/writing/meeting/' + meetingId + '/draft', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({ userAnswers: this.answers }),
+                    keepalive: true,
+                });
+                if (window.showAutosaveIndicator) {
+                    window.showAutosaveIndicator();
+                }
+            } catch (e) {
+                console.error('Failed to sync draft to server:', e);
+                if (window.showAutosaveIndicator) {
+                    window.showAutosaveIndicator('Gagal menyimpan draft', 'error');
+                }
+            }
+        },
+        async submit() {
+            this.loading = true;
+            const formattedEssay = Object.entries(this.answers)
+                .filter(([, value]) => value)
+                .map(([name, value]) => `${name}: ${value}`)
+                .join("\n\n") || 'No answers provided';
+
+            try {
+                const response = await fetch('/assignments/ielts-academic/writing/evaluate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                    },
+                    body: JSON.stringify({ essay: formattedEssay, task_type: '1', meeting_id: meetingId })
+                });
+                const data = await response.json();
+                this.loading = false;
+                if (data.redirect_url) {
+                    if (data.message) alert(data.message);
+                    window.location.href = data.redirect_url;
+                    return;
+                }
+                if (data.submission_id) {
+                    if (confirm('Jawaban berhasil dikirim! Apakah Anda ingin melihat halaman hasil pengerjaan lengkap?')) {
+                        window.open('/assignments/ielts-academic/writing/submission/' + data.submission_id, '_blank');
+                    }
+                } else {
+                    alert('Jawaban berhasil disimpan!');
+                }
+            } catch (e) {
+                this.loading = false;
+                alert('Jawaban berhasil disimpan secara lokal!');
+            }
         }
     }));
 });

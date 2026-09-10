@@ -50,9 +50,10 @@
                 <select name="module" class="form-select rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm" onchange="this.form.submit()">
                     <option value="">Semua Modul</option>
                     <option value="IELTS Mockup" {{ request('module') == 'IELTS Mockup' ? 'selected' : '' }}>IELTS Mockup</option>
-                    <option value="IELTS" {{ request('module') == 'IELTS' ? 'selected' : '' }}>IELTS Lainnya</option>
-                    <option value="TOEFL" {{ request('module') == 'TOEFL' ? 'selected' : '' }}>TOEFL</option>
-                    <option value="PTE" {{ request('module') == 'PTE' ? 'selected' : '' }}>PTE</option>
+                    <option value="IELTS" {{ request('module') == 'IELTS' ? 'selected' : '' }}>IELTS</option>
+                    <option value="PTE Academic" {{ request('module') == 'PTE Academic' || request('module') == 'PTE' ? 'selected' : '' }}>PTE Academic</option>
+                    <option value="TOEFL ITP" {{ request('module') == 'TOEFL ITP' || request('module') == 'TOEFL' ? 'selected' : '' }}>TOEFL ITP</option>
+                    <option value="AI Voice / TTS" {{ request('module') == 'AI Voice / TTS' ? 'selected' : '' }}>AI Voice / TTS</option>
                     <option value="Lainnya" {{ request('module') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
                 </select>
 

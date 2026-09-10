@@ -16,7 +16,7 @@
         .dotted-answer { border-bottom: 1px dotted #000; display: inline-block; min-width: 120px; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -37,7 +37,7 @@
                     <p class="text-sm text-gray-500">Cambridge IELTS Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back
             </a>
@@ -225,7 +225,7 @@
         </div>
 
         
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar">
+        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
             <div class="px-8 py-8 pb-24 max-w-2xl mx-auto">
 
                 
@@ -234,7 +234,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 1?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 1–8 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                             <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -245,7 +245,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -262,7 +262,7 @@
                                     [7, "The shape of some geoglyphs has been altered over time."],
                                     [8, "The fame of the Uffington White Horse is due to its size."],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -292,7 +292,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 9–13 on your answer sheet.</p>
 
-                    <div class="border-2 border-gray-400 rounded-lg p-6 bg-gray-50 text-sm font-sans relative shadow-sm">
+                    <div class="border-2 border-gray-400 rounded-lg p-6 bg-white text-sm font-sans relative shadow-sm">
                         <h4 class="text-xl font-bold text-center mb-6">The Uffington White Horse</h4>
                         
                         <p class="font-bold text-gray-900 mb-3 text-base">The location of the Uffington White Horse:</p>
@@ -387,7 +387,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Complete the summary using the list of words, <strong>A–H</strong>, below.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write the correct letter, <strong>A–H</strong>, in boxes 17–20 on your answer sheet.</p>
 
-                    <div class="border border-gray-300 rounded-lg p-5 bg-gray-50 text-sm mb-5">
+                    <div class="border border-gray-300 rounded-lg p-5 bg-white text-sm mb-5">
                         <h4 class="text-lg font-bold text-center mb-6">We should be more tolerant of microbes</h4>
 
                         <p class="text-gray-800 leading-[2.5] mb-4">
@@ -450,7 +450,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the claims of the writer in Reading Passage 2?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 21–26 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">YES</span></div><div class="italic">if the statement agrees with the claims of the writer</div>
                             <div><span class="font-bold italic">NO</span></div><div class="italic">if the statement contradicts the claims of the writer</div>
@@ -461,7 +461,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -476,7 +476,7 @@
                                     [25, "Efforts to control dengue fever have been surprisingly successful."],
                                     [26, "Microbes that reduce the risk of infection have already been put inside the walls of some hospital wards."],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -551,7 +551,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Complete the summary using the list of words, <strong>A–H</strong>, below.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write the correct letter, <strong>A–H</strong>, in boxes 17–20 on your answer sheet.</p>
 
-                    <div class="border border-gray-300 rounded-lg p-5 bg-gray-50 text-sm mb-5">
+                    <div class="border border-gray-300 rounded-lg p-5 bg-white text-sm mb-5">
                         <h4 class="text-lg font-bold text-center mb-6">We should be more tolerant of microbes</h4>
 
                         <p class="text-gray-800 leading-[2.5] mb-4">
@@ -614,7 +614,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the claims of the writer in Reading Passage 2?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 21–26 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">YES</span></div><div class="italic">if the statement agrees with the claims of the writer</div>
                             <div><span class="font-bold italic">NO</span></div><div class="italic">if the statement contradicts the claims of the writer</div>
@@ -625,7 +625,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -640,7 +640,7 @@
                                     [25, "Efforts to control dengue fever have been surprisingly successful."],
                                     [26, "Microbes that reduce the risk of infection have already been put inside the walls of some hospital wards."],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -720,7 +720,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Complete the summary using the list of words, <strong>A–J</strong>, below.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write the correct letter, <strong>A–J</strong>, in boxes 31–35 on your answer sheet.</p>
 
-                    <div class="border border-gray-300 rounded-lg p-5 bg-gray-50 text-sm mb-5">
+                    <div class="border border-gray-300 rounded-lg p-5 bg-white text-sm mb-5">
                         <h4 class="text-lg font-bold text-center mb-6">The characteristics of wise reasoning</h4>
 
                         <p class="text-gray-800 leading-[2.5] mb-4">
@@ -791,7 +791,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 3?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 36–40 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                             <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -802,7 +802,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -816,7 +816,7 @@
                                     [39, "In both experiments, the participants who looked at the situation from a more detached viewpoint tended to make wiser decisions."],
                                     [40, "Grossmann believes that a person’s wisdom is determined by their intelligence to only a very limited extent."],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">

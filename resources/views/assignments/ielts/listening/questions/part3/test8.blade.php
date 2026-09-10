@@ -12,7 +12,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">21</strong>&nbsp; Information on the test is from</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'the teacher.', 'B' => 'a class.', 'C' => 'a handout.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[21]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -25,7 +25,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">22</strong>&nbsp; This assignment is important because</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'it will become a permanent record.', 'B' => 'it is a must for passing 11th grade English.', 'C' => 'it will affect the English level next year.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[22]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -38,7 +38,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">23</strong>&nbsp; Bobby chooses football as project topic because</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'he often plays football.', 'B' => 'his father loves football.', 'C' => 'he is interested in football.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[23]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>

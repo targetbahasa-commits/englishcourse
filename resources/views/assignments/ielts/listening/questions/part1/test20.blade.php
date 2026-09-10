@@ -14,13 +14,13 @@
         </div>
 
         {{-- Example row --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 italic text-gray-500">Looking for driving lessons given during the:</div>
             <div class="p-3 italic text-gray-500">weekends</div>
         </div>
 
         {{-- Q1: Address --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Address:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <strong>1</strong>
@@ -32,7 +32,7 @@
         </div>
 
         {{-- Q2: Drive --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Drive:</div>
             <div class="p-3 space-y-2">
                 <p class="text-gray-700">the city center</p>
@@ -47,7 +47,7 @@
         </div>
 
         {{-- Q3: Teacher's name --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Teacher's name:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">Allen</span>
@@ -59,7 +59,7 @@
         </div>
 
         {{-- Q4: Popular type of car --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Popular type of car on roads:</div>
             <div class="p-3">
                 <strong>4</strong>
@@ -70,7 +70,7 @@
         </div>
 
         {{-- Q5: Best time to take lessons --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Best time to take lessons:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">practice during the</span>
@@ -82,7 +82,7 @@
         </div>
 
         {{-- Q6: Safety driving depends on --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Safety driving depends on:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">good</span>
@@ -94,7 +94,7 @@
         </div>
 
         {{-- Q7: Obtain --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Obtain:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">a driving</span>
@@ -106,7 +106,7 @@
         </div>
 
         {{-- Q8: Final test fee --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Final test fee:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">$</span>
@@ -118,7 +118,7 @@
         </div>
 
         {{-- Q9: Duration of test --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Duration of test:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">approximately</span>
@@ -131,7 +131,7 @@
         </div>
 
         {{-- Q10: More advice --}}
-        <div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">More advice:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">keep a driving</span>

@@ -33,9 +33,9 @@ class UserController extends Controller
      */
     public function create()
     {
-        ['teachers' => $teachers, 'programs' => $programs, 'camps' => $camps] = $this->manageUsers->formOptions();
+        ['teachers' => $teachers, 'programs' => $programs, 'camps' => $camps, 'classPeriods' => $classPeriods] = $this->manageUsers->formOptions();
         
-        return view('admin.users.create', compact('teachers', 'programs', 'camps'));
+        return view('admin.users.create', compact('teachers', 'programs', 'camps', 'classPeriods'));
     }
 
     /**
@@ -45,7 +45,17 @@ class UserController extends Controller
     {
         $validated = $request->validated();
 
-        $this->manageUsers->create($validated, $request);
+        $user = $this->manageUsers->create($validated, $request);
+
+        if ($user && $user->role === 'teacher') {
+            return redirect()->route('teachers.index')
+                ->with('success', 'Teacher created successfully.');
+        }
+
+        if ($user && $user->role === 'student') {
+            return redirect()->route('students.index')
+                ->with('success', 'Student created successfully.');
+        }
 
         return redirect()->route('users.index')
             ->with('success', 'User created successfully.');
@@ -64,9 +74,9 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        ['teachers' => $teachers, 'programs' => $programs, 'camps' => $camps] = $this->manageUsers->formOptions();
+        ['teachers' => $teachers, 'programs' => $programs, 'camps' => $camps, 'classPeriods' => $classPeriods] = $this->manageUsers->formOptions();
         
-        return view('admin.users.edit', compact('user', 'teachers', 'programs', 'camps'));
+        return view('admin.users.edit', compact('user', 'teachers', 'programs', 'camps', 'classPeriods'));
     }
 
     /**
@@ -111,6 +121,23 @@ class UserController extends Controller
             'status' => $user->status,
             'message' => 'User status updated successfully.'
         ]);
+    }
+
+    /**
+     * Change password for student, teacher, or any user (Admin only).
+     */
+    public function changePassword(Request $request, User $user)
+    {
+        $request->validate([
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $user->update([
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+        ]);
+
+        $roleTitle = ucfirst($user->role);
+        return back()->with('success', "Password for {$roleTitle} ({$user->name}) has been updated successfully.");
     }
 
     /**

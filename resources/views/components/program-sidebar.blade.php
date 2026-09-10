@@ -1,7 +1,62 @@
 @php
     $programSidebarAlwaysVisible = $programSidebarAlwaysVisible ?? false;
+    $programSidebarIsAdminOrTeacher = Auth::check() && (optional(Auth::user())->isAdmin() || optional(Auth::user())->isTeacher());
+    $programSidebarIsStudent = Auth::check() && optional(Auth::user())->isStudent();
 @endphp
 
+@if($programSidebarIsAdminOrTeacher)
+    @include('components.sidebar-admin')
+    <style>
+        body.has-admin-sidebar {
+            margin-left: var(--admin-sidebar-offset, 16rem) !important;
+            transition: margin-left .2s ease;
+        }
+
+        /* This page's <body> has its own padding (unlike the plain admin
+           layout), which shifts the sidebar's fixed-position static-position
+           fallback away from the viewport edge. Pin it explicitly. */
+        body.has-admin-sidebar .admin-sidebar-shell,
+        body.has-admin-sidebar > button[aria-label="Open menu"] {
+            left: 0 !important;
+        }
+
+        @media (max-width: 767px) {
+            body.has-admin-sidebar {
+                margin-left: 0 !important;
+            }
+
+            body.has-admin-sidebar .admin-sidebar-shell {
+                left: 0 !important;
+            }
+        }
+    </style>
+@elseif($programSidebarIsStudent)
+    @include('components.sidebar-student')
+    <style>
+        body.has-student-sidebar {
+            margin-left: var(--student-sidebar-offset, 16rem) !important;
+            transition: margin-left .2s ease;
+        }
+
+        /* Same static-position fix as the admin sidebar branch above: this
+           page's <body> padding shifts the sidebar's fixed-position fallback
+           away from the viewport edge without an explicit left:0. */
+        body.has-student-sidebar .student-sidebar-shell,
+        body.has-student-sidebar > button[aria-label="Open menu"] {
+            left: 0 !important;
+        }
+
+        @media (max-width: 767px) {
+            body.has-student-sidebar {
+                margin-left: 0 !important;
+            }
+
+            body.has-student-sidebar .student-sidebar-shell {
+                left: 0 !important;
+            }
+        }
+    </style>
+@else
 <div x-data="{
         programSidebarOpen: {{ $programSidebarAlwaysVisible ? 'true' : 'false' }},
         sidebarCollapsed: JSON.parse(localStorage.getItem('programSidebarCollapsed') || 'false')
@@ -118,29 +173,7 @@
         
         <div class="flex-1 overflow-y-auto custom-scrollbar flex flex-col program-sidebar-scroll-safe">
             @if(Auth::check())
-                @if(optional(Auth::user())->isAdmin() || optional(Auth::user())->isTeacher())
-                    <div class="sidebar-menu">
-                        @include('components.admin-sidebar')
-                    </div>
-                    
-                    <!-- Account Section -->
-                    <div class="sidebar-menu program-sidebar-account-safe mt-auto px-6 py-6 border-t border-gray-100 bg-white flex-shrink-0">
-                        <p class="text-xs font-semibold text-gray-400 mb-4">ACCOUNT - {{ strtoupper(optional(Auth::user())->role) }}</p>
-                        <nav class="space-y-1">
-                            <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-xl font-medium transition">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                                Profile
-                            </a>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl font-medium transition w-full text-left">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                                    Log Out
-                                </button>
-                            </form>
-                        </nav>
-                    </div>
-                @elseif(in_array(optional(Auth::user())->role, ['guest', 'guest_quick']))
+                @if(in_array(optional(Auth::user())->role, ['guest', 'guest_quick']))
                     {{-- Guest Menu --}}
                     <div class="sidebar-menu px-6 py-4">
                         <p class="text-xs font-semibold text-gray-400 mb-4 uppercase tracking-wider">Explore</p>
@@ -207,6 +240,7 @@
         </div>
     </aside>
 </div>
+@endif
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

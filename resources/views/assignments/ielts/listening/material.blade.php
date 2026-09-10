@@ -510,18 +510,18 @@
         <!-- Question Block -->
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-indigo-500 p-8 relative overflow-hidden">
             <!-- Decorative Background Element -->
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
             <!-- Header Section -->
             <div class="relative z-10 mb-8">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Sample Question 1</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Sample Question 1</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Protecting Environment through Recycling Listening Answers</h3>
             </div>
 
             <!-- Instructions -->
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -540,56 +540,56 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         <!-- Example Row -->
-                        <tr class="group hover:bg-gray-50 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-lg font-medium">Type of group:</td>
                             <td class="p-3 text-gray-900 text-lg font-bold">non-profit</td>
                         </tr>
                         <!-- Q1 -->
-                        <tr class="group hover:bg-indigo-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-lg font-medium">Frequency of newspaper collection:</td>
                             <td class="p-3">
                                 <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">1</span>
+                                    <span class="w-6 h-6 rounded-full bg-white text-indigo-600 flex items-center justify-center text-xs font-bold">1</span>
                                     <input type="text" name="q1" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Your answer...">
                                 </div>
                             </td>
                         </tr>
                         <!-- Q2 -->
-                        <tr class="group hover:bg-indigo-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-lg font-medium">Name:</td>
                             <td class="p-3">
                                 <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">2</span>
+                                    <span class="w-6 h-6 rounded-full bg-white text-indigo-600 flex items-center justify-center text-xs font-bold">2</span>
                                     <input type="text" name="q2" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Your answer...">
                                 </div>
                             </td>
                         </tr>
                         <!-- Q3 -->
-                        <tr class="group hover:bg-indigo-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-lg font-medium">Address:</td>
                             <td class="p-3">
                                 <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">3</span>
+                                    <span class="w-6 h-6 rounded-full bg-white text-indigo-600 flex items-center justify-center text-xs font-bold">3</span>
                                     <input type="text" name="q3" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Your answer...">
                                 </div>
                             </td>
                         </tr>
                         <!-- Q4 -->
-                        <tr class="group hover:bg-indigo-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-lg font-medium">E-mail:</td>
                             <td class="p-3">
                                 <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">4</span>
+                                    <span class="w-6 h-6 rounded-full bg-white text-indigo-600 flex items-center justify-center text-xs font-bold">4</span>
                                     <input type="text" name="q4" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Your answer...">
                                 </div>
                             </td>
                         </tr>
                         <!-- Q5 -->
-                        <tr class="group hover:bg-indigo-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-lg font-medium">Postcode:</td>
                             <td class="p-3">
                                 <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">5</span>
+                                    <span class="w-6 h-6 rounded-full bg-white text-indigo-600 flex items-center justify-center text-xs font-bold">5</span>
                                     <input type="text" name="q5" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Your answer...">
                                 </div>
                             </td>
@@ -604,18 +604,18 @@
             <!-- Question Block 2 -->
             <div class="bg-white rounded-3xl shadow-xl border-t-4 border-emerald-500 p-8 relative overflow-hidden">
                 <!-- Decorative Background Element -->
-                <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-emerald-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+                <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
                 <!-- Header Section -->
                 <div class="relative z-10 mb-8">
                     <div class="flex items-center gap-3 mb-3">
-                        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider">Questions 6-10</span>
+                        <span class="px-3 py-1 bg-white text-emerald-700 text-xs font-bold uppercase tracking-wider">Questions 6-10</span>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 leading-tight">Recycling</h3>
                 </div>
 
                 <!-- Instructions -->
-                <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                     <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <div>
                         <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -628,13 +628,13 @@
                     <table class="w-full text-left border-collapse">
                         <tbody class="divide-y divide-gray-100">
                             <!-- Q6 -->
-                            <tr class="group hover:bg-emerald-50/30 transition-colors">
+                            <tr class="group hover:bg-white transition-colors">
                                 <td class="p-3 text-gray-800 text-lg font-medium w-1/2 align-top">Ways of recycling</td>
                                 <td class="p-3 w-1/2">
                                     <div class="flex items-center gap-2 flex-wrap">
                                         <span class="text-gray-900 text-lg">Newspaper: in a</span>
                                         <div class="flex items-center gap-2">
-                                             <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold shrink-0">6</span>
+                                             <span class="w-6 h-6 rounded-full bg-white text-emerald-600 flex items-center justify-center text-xs font-bold shrink-0">6</span>
                                              <input type="text" name="q6" class="min-w-[120px] bg-transparent border-b-2 border-gray-300 focus:border-emerald-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Answer...">
                                         </div>
                                         <span class="text-gray-900 text-lg">box</span>
@@ -642,27 +642,27 @@
                                 </td>
                             </tr>
                             <!-- Q7 -->
-                            <tr class="group hover:bg-emerald-50/30 transition-colors">
+                            <tr class="group hover:bg-white transition-colors">
                                 <td class="p-3 text-gray-800 text-lg font-medium align-top">Nearest rubbish collection centre</td>
                                 <td class="p-3">
                                     <div class="flex items-center gap-2 flex-wrap">
                                         <span class="text-gray-900 text-lg">On the East Side of</span>
                                         <div class="flex items-center gap-2">
-                                             <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold shrink-0">7</span>
+                                             <span class="w-6 h-6 rounded-full bg-white text-emerald-600 flex items-center justify-center text-xs font-bold shrink-0">7</span>
                                              <input type="text" name="q7" class="min-w-[150px] bg-transparent border-b-2 border-gray-300 focus:border-emerald-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Answer...">
                                         </div>
                                     </div>
                                 </td>
                             </tr>
                             <!-- Q8 -->
-                            <tr class="group hover:bg-emerald-50/30 transition-colors">
+                            <tr class="group hover:bg-white transition-colors">
                                 <td class="p-3 text-gray-800 text-lg font-medium align-top">Rubbish that can be recycled</td>
                                 <td class="p-3">
                                     <div class="space-y-4">
                                         <div class="flex items-center gap-2 flex-wrap">
                                             <span class="text-gray-900 text-lg">Blue box:</span>
                                             <div class="flex items-center gap-2">
-                                                <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold shrink-0">8</span>
+                                                <span class="w-6 h-6 rounded-full bg-white text-emerald-600 flex items-center justify-center text-xs font-bold shrink-0">8</span>
                                                 <input type="text" name="q8" class="min-w-[120px] bg-transparent border-b-2 border-gray-300 focus:border-emerald-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Answer...">
                                             </div>
                                         </div>
@@ -678,21 +678,21 @@
                                 </td>
                             </tr>
                             <!-- Q9 -->
-                            <tr class="group hover:bg-emerald-50/30 transition-colors">
+                            <tr class="group hover:bg-white transition-colors">
                                 <td class="p-3 text-gray-800 text-lg font-medium align-top">Rubbish that cannot be recycled</td>
                                 <td class="p-3">
                                     <div class="flex items-center gap-3">
-                                        <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold shrink-0">9</span>
+                                        <span class="w-6 h-6 rounded-full bg-white text-emerald-600 flex items-center justify-center text-xs font-bold shrink-0">9</span>
                                         <input type="text" name="q9" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-emerald-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Your answer...">
                                     </div>
                                 </td>
                             </tr>
                             <!-- Q10 -->
-                            <tr class="group hover:bg-emerald-50/30 transition-colors">
+                            <tr class="group hover:bg-white transition-colors">
                                 <td class="p-3 text-gray-800 text-lg font-medium align-top">Name of a booklet</td>
                                 <td class="p-3">
                                     <div class="flex items-center gap-3">
-                                        <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold shrink-0">10</span>
+                                        <span class="w-6 h-6 rounded-full bg-white text-emerald-600 flex items-center justify-center text-xs font-bold shrink-0">10</span>
                                         <input type="text" name="q10" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-emerald-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Your answer...">
                                     </div>
                                 </td>
@@ -706,16 +706,16 @@
             @if(request()->get('practice') == 4)
             <!-- Question Block 3 -->
             <div class="mt-8 bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 p-8 relative overflow-hidden">
-                <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+                <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-60 pointer-events-none"></div>
 
                 <div class="relative z-10 mb-8">
                     <div class="flex items-center gap-3 mb-3">
-                        <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Questions 11-20</span>
+                        <span class="px-3 py-1 bg-white text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Questions 11-20</span>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 leading-tight">John Kepler's Memo</h3>
                 </div>
 
-                <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                     <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <div>
                         <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -726,101 +726,101 @@
                 <div class="overflow-hidden bg-white rounded-xl border border-gray-200 shadow-sm">
                     <table class="w-full text-left border-collapse">
                         <tbody class="divide-y divide-gray-100">
-                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                            <tr class="group hover:bg-white transition-colors">
                                 <td class="p-3 text-gray-800 text-lg font-medium w-1/2">Exam at</td>
                                 <td class="p-3 w-1/2">
                                     <div class="flex items-center gap-3 flex-wrap">
-                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">11</span>
+                                        <span class="w-6 h-6 rounded-full bg-white text-amber-700 flex items-center justify-center text-xs font-bold">11</span>
                                         <input type="text" name="q11" class="flex-1 min-w-[180px] bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Answer...">
                                         <span class="text-gray-900 text-lg">Primary School</span>
                                     </div>
                                 </td>
                             </tr>
-                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                            <tr class="group hover:bg-white transition-colors">
                                 <td class="p-3 text-gray-800 text-lg font-medium">Arrive at the school by</td>
                                 <td class="p-3">
                                     <div class="flex items-center gap-3">
-                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">12</span>
+                                        <span class="w-6 h-6 rounded-full bg-white text-amber-700 flex items-center justify-center text-xs font-bold">12</span>
                                         <input type="text" name="q12" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Answer...">
                                     </div>
                                 </td>
                             </tr>
-                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                            <tr class="group hover:bg-white transition-colors">
                                 <td class="p-3 text-gray-800 text-lg font-medium">Tuning: four strings C, G,</td>
                                 <td class="p-3">
                                     <div class="flex items-center gap-3 flex-wrap">
-                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">13</span>
+                                        <span class="w-6 h-6 rounded-full bg-white text-amber-700 flex items-center justify-center text-xs font-bold">13</span>
                                         <input type="text" name="q13" class="w-36 bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="...">
                                         <span class="text-gray-900 text-lg">, A</span>
                                     </div>
                                 </td>
                             </tr>
-                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                            <tr class="group hover:bg-white transition-colors">
                                 <td class="p-3 text-gray-800 text-lg font-medium">Take: a spare bow / a cleaning cloth / a</td>
                                 <td class="p-3">
                                     <div class="flex items-center gap-3">
-                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">14</span>
+                                        <span class="w-6 h-6 rounded-full bg-white text-amber-700 flex items-center justify-center text-xs font-bold">14</span>
                                         <input type="text" name="q14" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Answer...">
                                     </div>
                                 </td>
                             </tr>
-                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                            <tr class="group hover:bg-white transition-colors">
                                 <td class="p-3 text-gray-800 text-lg font-medium">Also, take own music</td>
                                 <td class="p-3">
                                     <div class="flex items-center gap-3">
-                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">15</span>
+                                        <span class="w-6 h-6 rounded-full bg-white text-amber-700 flex items-center justify-center text-xs font-bold">15</span>
                                         <input type="text" name="q15" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Answer...">
                                     </div>
                                 </td>
                             </tr>
-                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                            <tr class="group hover:bg-white transition-colors">
                                 <td class="p-3 text-gray-800 text-lg font-medium align-top">Order of three-part exam</td>
                                 <td class="p-3 space-y-3">
                                     <div class="text-gray-900 text-lg">First part: sight-reading</div>
                                     <div class="flex items-center gap-2 flex-wrap text-gray-900 text-lg">
                                         <span>Second part:</span>
-                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">16</span>
+                                        <span class="w-6 h-6 rounded-full bg-white text-amber-700 flex items-center justify-center text-xs font-bold">16</span>
                                         <input type="text" name="q16" class="min-w-[180px] bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 placeholder-gray-300" placeholder="Answer...">
                                         <span>prepared pieces of music</span>
                                     </div>
                                     <div class="text-gray-900 text-lg">Third part: <span class="inline-block align-middle ml-2 w-40 border-b-2 border-gray-300"></span></div>
                                 </td>
                             </tr>
-                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                            <tr class="group hover:bg-white transition-colors">
                                 <td class="p-3 text-gray-800 text-lg font-medium">Marking of first and third parts is out of</td>
                                 <td class="p-3">
                                     <div class="flex items-center gap-3 flex-wrap">
-                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">17</span>
+                                        <span class="w-6 h-6 rounded-full bg-white text-amber-700 flex items-center justify-center text-xs font-bold">17</span>
                                         <input type="text" name="q17" class="w-40 bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="...">
                                         <span class="text-gray-900 text-lg">%</span>
                                     </div>
                                 </td>
                             </tr>
-                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                            <tr class="group hover:bg-white transition-colors">
                                 <td class="p-3 text-gray-800 text-lg font-medium">Examiner looking for</td>
                                 <td class="p-3">
                                     <div class="flex items-center gap-3 flex-wrap text-gray-900 text-lg">
-                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">18</span>
+                                        <span class="w-6 h-6 rounded-full bg-white text-amber-700 flex items-center justify-center text-xs font-bold">18</span>
                                         <input type="text" name="q18" class="w-44 bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 placeholder-gray-300" placeholder="...">
                                         <span>and fluency</span>
                                     </div>
                                 </td>
                             </tr>
-                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                            <tr class="group hover:bg-white transition-colors">
                                 <td class="p-3 text-gray-800 text-lg font-medium">Results made available on the Woodlands</td>
                                 <td class="p-3">
                                     <div class="flex items-center gap-3 flex-wrap text-gray-900 text-lg">
-                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">19</span>
+                                        <span class="w-6 h-6 rounded-full bg-white text-amber-700 flex items-center justify-center text-xs font-bold">19</span>
                                         <input type="text" name="q19" class="w-44 bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 placeholder-gray-300" placeholder="...">
                                         <span>and through the mail</span>
                                     </div>
                                 </td>
                             </tr>
-                            <tr class="group hover:bg-amber-50/30 transition-colors">
+                            <tr class="group hover:bg-white transition-colors">
                                 <td class="p-3 text-gray-800 text-lg font-medium">Aim for 2009: Grade</td>
                                 <td class="p-3">
                                     <div class="flex items-center gap-3">
-                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">20</span>
+                                        <span class="w-6 h-6 rounded-full bg-white text-amber-700 flex items-center justify-center text-xs font-bold">20</span>
                                         <input type="text" name="q20" class="w-40 bg-transparent border-b-2 border-gray-300 focus:border-amber-500 outline-none px-2 py-1 transition-colors text-gray-900 text-lg placeholder-gray-300" placeholder="Answer...">
                                     </div>
                                 </td>
@@ -849,12 +849,12 @@
                 <!-- Controls -->
                 <div class="flex-1 flex items-center gap-3 w-full justify-center md:justify-center">
                     <!-- Key (Dummy) -->
-                    <button class="px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded-lg text-xs font-bold border border-yellow-200 hidden sm:block">
+                    <button class="px-3 py-1.5 bg-white text-yellow-700 rounded-lg text-xs font-bold border border-yellow-200 hidden sm:block">
                         Key
                     </button>
 
                     <!-- Skip Back -->
-                    <button type="button" onclick="skipAudio(-10)" class="p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-indigo-600 transition-colors">
+                    <button type="button" onclick="skipAudio(-10)" class="p-2 bg-white hover:bg-white rounded-lg text-indigo-600 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path></svg>
                     </button>
 
@@ -870,14 +870,14 @@
                             <span id="oldCurrentTime">0:00</span>
                             <span id="oldDuration">0:00</span>
                         </div>
-                        <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="oldProgressContainer">
+                        <div class="relative h-2 bg-white rounded-full cursor-pointer group" id="oldProgressContainer">
                             <div id="oldProgressBar" class="absolute h-full bg-indigo-600 rounded-full" style="width: 0%"></div>
                             <div id="oldProgressHandle" class="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
                         </div>
                     </div>
 
                     <!-- Skip Forward -->
-                    <button type="button" onclick="skipAudio(10)" class="p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-indigo-600 transition-colors">
+                    <button type="button" onclick="skipAudio(10)" class="p-2 bg-white hover:bg-white rounded-lg text-indigo-600 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"></path></svg>
                     </button>
                     
@@ -899,13 +899,13 @@
                        <!-- Upload Buttons (Admin Only) -->
                        <div class="flex items-center gap-2">
                            <div class="hidden xl:flex items-center gap-1.5 mr-1">
-                               <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasAudio ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
+                               <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasAudio ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
                                    <span>{{ $hasAudio ? '✓' : '✕' }}</span> Audio
                                </span>
-                               <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasTranscript ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
+                               <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasTranscript ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
                                    <span>{{ $hasTranscript ? '✓' : '✕' }}</span> Transcript
                                </span>
-                               <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasAnswerKey ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
+                               <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasAnswerKey ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
                                    <span>{{ $hasAnswerKey ? '✓' : '✕' }}</span> Kunci
                                </span>
                            </div>
@@ -935,8 +935,8 @@
         <div id="oldTranscriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
             <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                 {{-- English Column --}}
-                <div class="flex flex-col h-full bg-slate-50">
-                    <div class="flex-none px-4 py-2 bg-slate-100 border-b border-slate-200 font-semibold text-slate-700 flex items-center justify-between z-10">
+                <div class="flex flex-col h-full bg-white">
+                    <div class="flex-none px-4 py-2 bg-white border-b border-slate-200 font-semibold text-slate-700 flex items-center justify-between z-10">
                         <div class="flex items-center gap-2">
                             <img src="https://flagcdn.com/w20/us.png" alt="US" class="rounded-sm"> English Script
                         </div>
@@ -955,7 +955,7 @@
                                             <div class="mb-2">
                                                 @php $words = explode(' ', $block['text']); @endphp
                                                 @foreach($words as $word)
-                                                    <span class="transcript-word cursor-pointer hover:bg-yellow-100 transition-colors duration-200 rounded px-0.5 inline-block">{{ $word }}</span>
+                                                    <span class="transcript-word cursor-pointer hover:bg-white transition-colors duration-200 rounded px-0.5 inline-block">{{ $word }}</span>
                                                 @endforeach
                                             </div>
                                         @endforeach
@@ -971,8 +971,8 @@
                 </div>
                 
                 {{-- Indonesian Column --}}
-                <div class="flex flex-col h-full bg-indigo-50">
-                    <div class="flex-none px-4 py-2 bg-indigo-100 border-b border-indigo-200 font-semibold text-indigo-800 flex items-center justify-between z-10">
+                <div class="flex flex-col h-full bg-white">
+                    <div class="flex-none px-4 py-2 bg-white border-b border-indigo-200 font-semibold text-indigo-800 flex items-center justify-between z-10">
                         <div class="flex items-center gap-2">
                             <img src="https://flagcdn.com/w20/id.png" alt="ID" class="rounded-sm"> Terjemahan Indonesia
                         </div>
@@ -999,18 +999,18 @@
         <!-- Question Block -->
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-purple-500 p-8 relative overflow-hidden">
             <!-- Decorative Background Element -->
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-purple-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
             <!-- Header Section -->
             <div class="relative z-10 mb-8">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Questions 1-6</span>
+                    <span class="px-3 py-1 bg-white text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Questions 1-6</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Hotel Information</h3>
             </div>
 
             <!-- Instructions -->
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -1030,73 +1030,73 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         <!-- Example Row -->
-                        <tr class="bg-gray-50">
+                        <tr class="bg-white">
                             <td class="p-3 text-gray-700 text-base font-medium italic">Example answer</td>
                             <td class="p-3"></td>
                         </tr>
-                        <tr class="group hover:bg-gray-50 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium">Name of accommodation:</td>
                             <td class="p-3 text-gray-900 text-base"><strong>(0)</strong> <em>Carlton Hotel</em></td>
                         </tr>
                         
                         <!-- Length of stay -->
-                        <tr class="group hover:bg-purple-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium">Length of stay:</td>
                             <td class="p-3 text-gray-900 text-base">3 nights</td>
                         </tr>
                         
                         <!-- Q1: Ages of children -->
-                        <tr class="group hover:bg-purple-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium">Ages of children:</td>
                             <td class="p-3">
                                 <div class="flex items-center gap-3">
-                                    <span class="w-7 h-7 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold">(1)</span>
+                                    <span class="w-7 h-7 rounded-full bg-white text-purple-600 flex items-center justify-center text-sm font-bold">(1)</span>
                                     <input type="text" name="q1" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-purple-500 outline-none px-2 py-1 transition-colors text-gray-900 text-base placeholder-gray-300" placeholder="Your answer...">
                                 </div>
                             </td>
                         </tr>
                         
                         <!-- Rooms available -->
-                        <tr class="group hover:bg-purple-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium">Rooms available:</td>
                             <td class="p-3 text-gray-900 text-base">Two en-suites at £270</td>
                         </tr>
                         
                         <!-- Q2: Price inclusive of -->
-                        <tr class="group hover:bg-purple-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium">Price inclusive of:</td>
                             <td class="p-3">
                                 <div class="flex items-center gap-3">
-                                    <span class="w-7 h-7 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold">(2)</span>
+                                    <span class="w-7 h-7 rounded-full bg-white text-purple-600 flex items-center justify-center text-sm font-bold">(2)</span>
                                     <input type="text" name="q2" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-purple-500 outline-none px-2 py-1 transition-colors text-gray-900 text-base placeholder-gray-300" placeholder="Your answer...">
                                 </div>
                             </td>
                         </tr>
                         
                         <!-- Payment method -->
-                        <tr class="group hover:bg-purple-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium">Payment method:</td>
                             <td class="p-3 text-gray-900 text-base">credit card</td>
                         </tr>
                         
                         <!-- Q3: Name -->
-                        <tr class="group hover:bg-purple-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium">Name:</td>
                             <td class="p-3">
                                 <div class="flex items-center gap-3">
                                     <span class="text-gray-900 text-base">Michael</span>
-                                    <span class="w-7 h-7 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold">(3)</span>
+                                    <span class="w-7 h-7 rounded-full bg-white text-purple-600 flex items-center justify-center text-sm font-bold">(3)</span>
                                     <input type="text" name="q3" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-purple-500 outline-none px-2 py-1 transition-colors text-gray-900 text-base placeholder-gray-300" placeholder="Your answer...">
                                 </div>
                             </td>
                         </tr>
                         
                         <!-- Q4: Date of birth -->
-                        <tr class="group hover:bg-purple-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium">Date of birth:</td>
                             <td class="p-3">
                                 <div class="flex items-center gap-3">
-                                    <span class="w-7 h-7 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold">(4)</span>
+                                    <span class="w-7 h-7 rounded-full bg-white text-purple-600 flex items-center justify-center text-sm font-bold">(4)</span>
                                     <input type="text" name="q4" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-purple-500 outline-none px-2 py-1 transition-colors text-gray-900 text-base placeholder-gray-300" placeholder="Your answer...">
                                     <span class="text-gray-900 text-base">1968</span>
                                 </div>
@@ -1104,29 +1104,29 @@
                         </tr>
                         
                         <!-- Address -->
-                        <tr class="group hover:bg-purple-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium">Address:</td>
                             <td class="p-3 text-gray-900 text-base">273, Stanton Court, London.</td>
                         </tr>
                         
                         <!-- Q5: Post code -->
-                        <tr class="group hover:bg-purple-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium">Post code:</td>
                             <td class="p-3">
                                 <div class="flex items-center gap-3">
-                                    <span class="w-7 h-7 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold">(5)</span>
+                                    <span class="w-7 h-7 rounded-full bg-white text-purple-600 flex items-center justify-center text-sm font-bold">(5)</span>
                                     <input type="text" name="q5" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-purple-500 outline-none px-2 py-1 transition-colors text-gray-900 text-base placeholder-gray-300" placeholder="Your answer...">
                                 </div>
                             </td>
                         </tr>
                         
                         <!-- Q6: Telephone -->
-                        <tr class="group hover:bg-purple-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium">Telephone:</td>
                             <td class="p-3">
                                 <div class="flex items-center gap-3">
                                     <span class="text-gray-900 text-base">08773</span>
-                                    <span class="w-7 h-7 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold">(6)</span>
+                                    <span class="w-7 h-7 rounded-full bg-white text-purple-600 flex items-center justify-center text-sm font-bold">(6)</span>
                                     <input type="text" name="q6" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-purple-500 outline-none px-2 py-1 transition-colors text-gray-900 text-base placeholder-gray-300" placeholder="Your answer...">
                                 </div>
                             </td>
@@ -1150,7 +1150,7 @@
             </div>
 
             <!-- Instructions -->
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -1245,12 +1245,12 @@
             <!-- Controls -->
             <div class="flex-1 flex items-center gap-3 w-full justify-center md:justify-center">
                 <!-- Key (Dummy) -->
-                <button class="px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded-lg text-xs font-bold border border-yellow-200 hidden sm:block">
+                <button class="px-3 py-1.5 bg-white text-yellow-700 rounded-lg text-xs font-bold border border-yellow-200 hidden sm:block">
                     Key
                 </button>
 
                 <!-- Skip Back -->
-                <button type="button" onclick="skipAudio(-10)" class="p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-indigo-600 transition-colors">
+                <button type="button" onclick="skipAudio(-10)" class="p-2 bg-white hover:bg-white rounded-lg text-indigo-600 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path></svg>
                 </button>
 
@@ -1266,14 +1266,14 @@
                         <span id="oldCurrentTime">0:00</span>
                         <span id="oldDuration">0:00</span>
                     </div>
-                    <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="oldProgressContainer">
+                    <div class="relative h-2 bg-white rounded-full cursor-pointer group" id="oldProgressContainer">
                         <div id="oldProgressBar" class="absolute h-full bg-indigo-600 rounded-full" style="width: 0%"></div>
                         <div id="oldProgressHandle" class="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
                     </div>
                 </div>
 
                 <!-- Skip Forward -->
-                <button type="button" onclick="skipAudio(10)" class="p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-indigo-600 transition-colors">
+                <button type="button" onclick="skipAudio(10)" class="p-2 bg-white hover:bg-white rounded-lg text-indigo-600 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"></path></svg>
                 </button>
                 
@@ -1315,8 +1315,8 @@
         <div id="oldTranscriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
             <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                 {{-- English Column --}}
-                <div class="flex flex-col h-full bg-slate-50">
-                    <div class="flex-none px-4 py-2 bg-slate-100 border-b border-slate-200 font-semibold text-slate-700 flex items-center justify-between z-10">
+                <div class="flex flex-col h-full bg-white">
+                    <div class="flex-none px-4 py-2 bg-white border-b border-slate-200 font-semibold text-slate-700 flex items-center justify-between z-10">
                         <div class="flex items-center gap-2">
                             <img src="https://flagcdn.com/w20/us.png" alt="US" class="rounded-sm"> English Script
                         </div>
@@ -1335,7 +1335,7 @@
                                             <div class="mb-2">
                                                 @php $words = explode(' ', $block['text']); @endphp
                                                 @foreach($words as $word)
-                                                    <span class="transcript-word cursor-pointer hover:bg-yellow-100 transition-colors duration-200 rounded px-0.5 inline-block">{{ $word }}</span>
+                                                    <span class="transcript-word cursor-pointer hover:bg-white transition-colors duration-200 rounded px-0.5 inline-block">{{ $word }}</span>
                                                 @endforeach
                                             </div>
                                         @endforeach
@@ -1351,8 +1351,8 @@
                 </div>
 
                 {{-- Indonesian Column --}}
-                <div class="flex flex-col h-full bg-amber-50">
-                    <div class="flex-none px-4 py-2 bg-amber-100 border-b border-amber-200 font-semibold text-amber-800 flex items-center justify-between z-10">
+                <div class="flex flex-col h-full bg-white">
+                    <div class="flex-none px-4 py-2 bg-white border-b border-amber-200 font-semibold text-amber-800 flex items-center justify-between z-10">
                         <div class="flex items-center gap-2">
                             <img src="https://flagcdn.com/w20/id.png" alt="ID" class="rounded-sm"> Indonesian Script
                         </div>
@@ -1376,18 +1376,18 @@
         <!-- Question Block -->
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-blue-500 p-8 relative overflow-hidden">
             <!-- Decorative Background Element -->
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-blue-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
             <!-- Header Section -->
             <div class="relative z-10 mb-8">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider rounded-full">Questions 1-5</span>
+                    <span class="px-3 py-1 bg-white text-blue-700 text-xs font-bold uppercase tracking-wider rounded-full">Questions 1-5</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Apartment for Rent</h3>
             </div>
 
             <!-- Instructions -->
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -1407,13 +1407,13 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         <!-- Street -->
-                        <tr class="group hover:bg-gray-50 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium w-1/3">Street</td>
                             <td class="p-3 text-gray-900 text-base"><u>Bridge</u> street</td>
                         </tr>
                         
                         <!-- Q1: Street No -->
-                        <tr class="group hover:bg-blue-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium">Street Nº</td>
                             <td class="p-3 text-gray-900 text-base">
                                 <div class="flex items-center gap-3">
@@ -1424,7 +1424,7 @@
                         </tr>
                         
                         <!-- Q2: Included utilities -->
-                        <tr class="group hover:bg-blue-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium">Included utilities</td>
                             <td class="p-3 text-gray-900 text-base">
                                 <div class="flex items-center gap-2 flex-wrap">
@@ -1437,7 +1437,7 @@
                         </tr>
                         
                         <!-- Q3: Not included utilities -->
-                        <tr class="group hover:bg-blue-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium">Not included utilities</td>
                             <td class="p-3 text-gray-900 text-base">
                                 <div class="flex items-center gap-3">
@@ -1448,7 +1448,7 @@
                         </tr>
                         
                         <!-- Q4: Public transport -->
-                        <tr class="group hover:bg-blue-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium">Public transport</td>
                             <td class="p-3 text-gray-900 text-base">
                                 <div class="flex items-center gap-3">
@@ -1460,7 +1460,7 @@
                         </tr>
                         
                         <!-- Q5: Tenant's name -->
-                        <tr class="group hover:bg-blue-50/30 transition-colors">
+                        <tr class="group hover:bg-white transition-colors">
                             <td class="p-3 text-gray-800 text-base font-medium">Tenant's name</td>
                             <td class="p-3 text-gray-900 text-base">
                                 <div class="flex items-center gap-3">
@@ -1480,17 +1480,17 @@
             <!-- Question Block: Questions 6-8 (Multiple Choice - Multiple Answer) -->
             <div class="bg-white rounded-3xl shadow-xl border-t-4 border-purple-500 p-8 relative overflow-hidden">
                 <!-- Decorative Background Element -->
-                <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-purple-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+                <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
                 <!-- Header Section -->
                 <div class="relative z-10 mb-8">
                     <div class="flex items-center gap-3 mb-3">
-                        <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Questions 6-8</span>
+                        <span class="px-3 py-1 bg-white text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Questions 6-8</span>
                     </div>
                 </div>
 
                 <!-- Instructions -->
-                <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                     <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <div>
                         <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -1502,27 +1502,27 @@
                 <div class="mb-6">
                     <h4 class="text-lg font-semibold text-gray-900 mb-4">Which <span class="font-bold">THREE</span> things should the caller bring to the meeting?</h4>
                     <div class="space-y-3">
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-purple-50 cursor-pointer transition-colors group">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group">
                             <input type="checkbox" name="q6_8[]" value="A" class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
                             <span class="text-gray-700 font-medium group-hover:text-gray-900"><span class="font-bold mr-2">A.</span> Driving license</span>
                         </label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-purple-50 cursor-pointer transition-colors group">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group">
                             <input type="checkbox" name="q6_8[]" value="B" class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
                             <span class="text-gray-700 font-medium group-hover:text-gray-900"><span class="font-bold mr-2">B.</span> Passport</span>
                         </label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-purple-50 cursor-pointer transition-colors group">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group">
                             <input type="checkbox" name="q6_8[]" value="C" class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
                             <span class="text-gray-700 font-medium group-hover:text-gray-900"><span class="font-bold mr-2">C.</span> Tax bill</span>
                         </label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-purple-50 cursor-pointer transition-colors group">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group">
                             <input type="checkbox" name="q6_8[]" value="D" class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
                             <span class="text-gray-700 font-medium group-hover:text-gray-900"><span class="font-bold mr-2">D.</span> Employment contract</span>
                         </label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-purple-50 cursor-pointer transition-colors group">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group">
                             <input type="checkbox" name="q6_8[]" value="E" class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
                             <span class="text-gray-700 font-medium group-hover:text-gray-900"><span class="font-bold mr-2">E.</span> Reference from a friend or colleague</span>
                         </label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-purple-50 cursor-pointer transition-colors group">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group">
                             <input type="checkbox" name="q6_8[]" value="F" class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
                             <span class="text-gray-700 font-medium group-hover:text-gray-900"><span class="font-bold mr-2">F.</span> Reference from an employer</span>
                         </label>
@@ -1546,7 +1546,7 @@
                 </div>
 
                 <!-- Instructions -->
-                <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+                <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                     <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <div>
                         <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -1611,12 +1611,12 @@
                 <!-- Controls -->
                 <div class="flex-1 flex items-center gap-3 w-full justify-center md:justify-center">
                     <!-- Key (Dummy) -->
-                    <button class="px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded-lg text-xs font-bold border border-yellow-200 hidden sm:block">
+                    <button class="px-3 py-1.5 bg-white text-yellow-700 rounded-lg text-xs font-bold border border-yellow-200 hidden sm:block">
                         Key
                     </button>
 
                     <!-- Skip Back -->
-                    <button type="button" onclick="skipAudio(-10)" class="p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-indigo-600 transition-colors">
+                    <button type="button" onclick="skipAudio(-10)" class="p-2 bg-white hover:bg-white rounded-lg text-indigo-600 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path></svg>
                     </button>
 
@@ -1632,14 +1632,14 @@
                             <span id="oldCurrentTime">0:00</span>
                             <span id="oldDuration">0:00</span>
                         </div>
-                        <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="oldProgressContainer">
+                        <div class="relative h-2 bg-white rounded-full cursor-pointer group" id="oldProgressContainer">
                             <div id="oldProgressBar" class="absolute h-full bg-indigo-600 rounded-full" style="width: 0%"></div>
                             <div id="oldProgressHandle" class="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
                         </div>
                     </div>
 
                     <!-- Skip Forward -->
-                    <button type="button" onclick="skipAudio(10)" class="p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-indigo-600 transition-colors">
+                    <button type="button" onclick="skipAudio(10)" class="p-2 bg-white hover:bg-white rounded-lg text-indigo-600 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"></path></svg>
                     </button>
                     
@@ -1681,8 +1681,8 @@
         <div id="oldTranscriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
             <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                 {{-- English Column --}}
-                <div class="flex flex-col h-full bg-slate-50">
-                    <div class="flex-none px-4 py-2 bg-slate-100 border-b border-slate-200 font-semibold text-slate-700 flex items-center justify-between z-10">
+                <div class="flex flex-col h-full bg-white">
+                    <div class="flex-none px-4 py-2 bg-white border-b border-slate-200 font-semibold text-slate-700 flex items-center justify-between z-10">
                         <div class="flex items-center gap-2">
                             <img src="https://flagcdn.com/w20/us.png" alt="US" class="rounded-sm"> English Script
                         </div>
@@ -1701,7 +1701,7 @@
                                             <div class="mb-2">
                                                 @php $words = explode(' ', $block['text']); @endphp
                                                 @foreach($words as $word)
-                                                    <span class="transcript-word cursor-pointer hover:bg-yellow-100 transition-colors duration-200 rounded px-0.5 inline-block">{{ $word }}</span>
+                                                    <span class="transcript-word cursor-pointer hover:bg-white transition-colors duration-200 rounded px-0.5 inline-block">{{ $word }}</span>
                                                 @endforeach
                                             </div>
                                         @endforeach
@@ -1717,8 +1717,8 @@
                 </div>
 
                 {{-- Indonesian Column --}}
-                <div class="flex flex-col h-full bg-amber-50">
-                    <div class="flex-none px-4 py-2 bg-amber-100 border-b border-amber-200 font-semibold text-amber-800 flex items-center justify-between z-10">
+                <div class="flex flex-col h-full bg-white">
+                    <div class="flex-none px-4 py-2 bg-white border-b border-amber-200 font-semibold text-amber-800 flex items-center justify-between z-10">
                         <div class="flex items-center gap-2">
                             <img src="https://flagcdn.com/w20/id.png" alt="ID" class="rounded-sm"> Indonesian Script
                         </div>
@@ -1739,12 +1739,12 @@
     @elseif(request()->get('practice') == 5)
     <div class="space-y-8">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-teal-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-teal-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
             <div class="relative z-10 mb-8">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-teal-100 text-teal-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Part A</span>
+                    <span class="px-3 py-1 bg-white text-teal-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Part A</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Choose the correct letter, A, B, or C</h3>
             </div>
@@ -1753,44 +1753,44 @@
                 <div class="bg-white border border-gray-200 rounded-xl p-5">
                     <h4 class="text-lg font-semibold text-gray-900 mb-4">1. Where are they sitting?</h4>
                     <div class="space-y-3 pl-2">
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q1" value="A" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>next to the window</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q1" value="B" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>next to the door</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q1" value="C" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>in the centre of the room</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q1" value="A" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>next to the window</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q1" value="B" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>next to the door</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q1" value="C" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>in the centre of the room</span></label>
                     </div>
                 </div>
 
                 <div class="bg-white border border-gray-200 rounded-xl p-5">
                     <h4 class="text-lg font-semibold text-gray-900 mb-4">2. What is Dan having as a starter?</h4>
                     <div class="space-y-3 pl-2">
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q2" value="A" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>tomato soup</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q2" value="B" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>green salad</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q2" value="C" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>He isn't having a starter.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q2" value="A" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>tomato soup</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q2" value="B" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>green salad</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q2" value="C" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>He isn't having a starter.</span></label>
                     </div>
                 </div>
 
                 <div class="bg-white border border-gray-200 rounded-xl p-5">
                     <h4 class="text-lg font-semibold text-gray-900 mb-4">3. When did Lucy last eat?</h4>
                     <div class="space-y-3 pl-2">
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q3" value="A" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>in the morning</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q3" value="B" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>at lunchtime</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-teal-50 cursor-pointer transition-colors group"><input type="radio" name="q3" value="C" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>in the afternoon</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q3" value="A" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>in the morning</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q3" value="B" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>at lunchtime</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q3" value="C" class="w-5 h-5 text-teal-600 border-gray-300 focus:ring-teal-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>in the afternoon</span></label>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-cyan-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-cyan-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
             <div class="relative z-10 mb-8">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Part B</span>
-                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Form Completion</span>
+                    <span class="px-3 py-1 bg-white text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Part B</span>
+                    <span class="px-3 py-1 bg-white text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Form Completion</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the form below</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -1832,17 +1832,17 @@
     @elseif(request()->get('practice') == 6)
     <div class="space-y-8">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-indigo-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
             <div class="relative z-10 mb-8">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
-                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Sentence Completion</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-white text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Sentence Completion</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the sentences below</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -1868,12 +1868,12 @@
             <div class="relative z-10 mb-8">
                 <div class="flex items-center gap-3 mb-3">
                     <span class="px-3 py-1 bg-rose-100 text-rose-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
-                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Sentence Completion</span>
+                    <span class="px-3 py-1 bg-white text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Sentence Completion</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the sentences below</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -1894,17 +1894,17 @@
     @elseif(request()->get('practice') == 8)
     <div class="space-y-8">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-emerald-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-emerald-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
             <div class="relative z-10 mb-8">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
-                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Sentence Completion</span>
+                    <span class="px-3 py-1 bg-white text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-white text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Sentence Completion</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the sentences below</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -1926,17 +1926,17 @@
     @elseif(request()->get('practice') == 9)
     <div class="space-y-8">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
             <div class="relative z-10 mb-8">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
-                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Sentence Completion</span>
+                    <span class="px-3 py-1 bg-white text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-white text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Sentence Completion</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the sentences below</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -1993,17 +1993,17 @@
     @elseif(request()->get('practice') == 1)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-teal-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-teal-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-teal-100 text-teal-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Short Answer</span>
+                    <span class="px-3 py-1 bg-white text-teal-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Short Answer</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the short-answer questions</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -2047,17 +2047,17 @@
     @elseif(request()->get('practice') == 2)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-indigo-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
-                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Short Answer</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-white text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Short Answer</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the short-answer questions</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -2180,12 +2180,12 @@
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
                     <span class="px-3 py-1 bg-rose-100 text-rose-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Summary Completion</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Summary Completion</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the summary</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -2225,17 +2225,17 @@
     @elseif(request()->get('practice') == 2)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-indigo-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
-                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Summary Completion</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-white text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Summary Completion</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Complete the summary</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -2275,16 +2275,16 @@
     @elseif(request()->get('practice') == 3)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
+                    <span class="px-3 py-1 bg-white text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Assessment Schedule</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Questions 1-3:</p>
@@ -2296,32 +2296,32 @@
                 <div class="bg-white border border-gray-200 rounded-xl p-5">
                     <h4 class="text-lg font-semibold text-gray-900 mb-4">1. Ms. Potts prefers to work with</h4>
                     <div class="space-y-3 pl-2">
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q1" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>a computer.</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q1" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>a pencil and paper.</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q1" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>spreadsheets.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q1" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>a computer.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q1" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>a pencil and paper.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q1" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>spreadsheets.</span></label>
                     </div>
                 </div>
 
                 <div class="bg-white border border-gray-200 rounded-xl p-5">
                     <h4 class="text-lg font-semibold text-gray-900 mb-4">2. She believes it is essential to have</h4>
                     <div class="space-y-3 pl-2">
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q2" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>a good system.</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q2" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>good old days.</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q2" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>one major assessment.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q2" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>a good system.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q2" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>good old days.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q2" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>one major assessment.</span></label>
                     </div>
                 </div>
 
                 <div class="bg-white border border-gray-200 rounded-xl p-5">
                     <h4 class="text-lg font-semibold text-gray-900 mb-4">3. John thinks continuous assessment</h4>
                     <div class="space-y-3 pl-2">
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q3" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>makes him sick.</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q3" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>affects his performance.</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q3" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>is fair.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q3" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>makes him sick.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q3" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>affects his performance.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q3" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>is fair.</span></label>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-8 mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mt-8 mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Questions 4-10:</p>
@@ -2358,16 +2358,16 @@
     @elseif(request()->get('practice') == 4)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-cyan-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-cyan-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
+                    <span class="px-3 py-1 bg-white text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Assessment Schedule</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Questions 1-4:</p>
@@ -2382,7 +2382,7 @@
                 <div><span class="font-semibold" style="color:#2563eb;">4.</span> There are <input type="text" name="q4a" class="w-24 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"> books and <input type="text" name="q4b" class="w-24 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"> articles on the reading list.</div>
             </div>
 
-            <div class="mt-8 mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mt-8 mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Questions 5-10:</p>
@@ -2533,16 +2533,16 @@
     @elseif(request()->get('practice') == 1 || request()->get('practice') == 2 || request()->get('practice') == 3 || request()->get('practice') == 4)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 {{ request()->get('practice') == 1 ? 'border-teal-500' : (request()->get('practice') == 2 ? 'border-sky-500' : (request()->get('practice') == 3 ? 'border-violet-500' : 'border-fuchsia-500')) }} p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 {{ request()->get('practice') == 1 ? 'bg-teal-50' : (request()->get('practice') == 2 ? 'bg-sky-50' : (request()->get('practice') == 3 ? 'bg-violet-50' : 'bg-fuchsia-50')) }} rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 {{ request()->get('practice') == 1 ? 'bg-white' : (request()->get('practice') == 2 ? 'bg-white' : (request()->get('practice') == 3 ? 'bg-violet-50' : 'bg-fuchsia-50')) }} rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 {{ request()->get('practice') == 1 ? 'bg-teal-100 text-teal-700' : (request()->get('practice') == 2 ? 'bg-sky-100 text-sky-700' : (request()->get('practice') == 3 ? 'bg-violet-100 text-violet-700' : 'bg-fuchsia-100 text-fuchsia-700')) }} text-xs font-bold uppercase tracking-wider rounded-full">{{ request()->get('practice') == 1 ? 'Listening 1' : (request()->get('practice') == 2 ? 'Listening 2' : (request()->get('practice') == 3 ? 'Soal 3' : 'Soal 4')) }}</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Diagram Labeling</span>
+                    <span class="px-3 py-1 {{ request()->get('practice') == 1 ? 'bg-white text-teal-700' : (request()->get('practice') == 2 ? 'bg-white text-sky-700' : (request()->get('practice') == 3 ? 'bg-violet-100 text-violet-700' : 'bg-fuchsia-100 text-fuchsia-700')) }} text-xs font-bold uppercase tracking-wider rounded-full">{{ request()->get('practice') == 1 ? 'Listening 1' : (request()->get('practice') == 2 ? 'Listening 2' : (request()->get('practice') == 3 ? 'Soal 3' : 'Soal 4')) }}</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Diagram Labeling</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">{{ request()->get('practice') == 1 ? 'Label the map (Questions 1-2)' : (request()->get('practice') == 2 ? 'Label the map (Questions 3-7)' : (request()->get('practice') == 3 ? 'Label the camera diagram (Questions 1-4)' : 'Label the equipment case diagram (Questions 5-8)')) }}</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -2553,14 +2553,14 @@
             @if(request()->get('practice') == 1)
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="rounded-xl border border-teal-200 overflow-hidden">
-                    <div class="bg-teal-50 px-4 py-2 text-sm font-semibold text-teal-700">Available Letters</div>
+                    <div class="bg-white px-4 py-2 text-sm font-semibold text-teal-700">Available Letters</div>
                     <div class="divide-y divide-teal-100 text-sm">
                         <div class="px-4 py-2">Use letters <span class="font-semibold">B, C, D, E, F, G</span>.</div>
                         <div class="px-4 py-2 text-gray-600">A is already used as the example.</div>
                     </div>
                 </div>
 
-                <div class="bg-gray-50 rounded-xl border border-gray-200 p-4">
+                <div class="bg-white rounded-xl border border-gray-200 p-4">
                     <div class="text-sm font-semibold text-gray-700 mb-3">Listening 1 Map</div>
                     <img src="{{ asset('images/listening/material9/map-listening1.png') }}" alt="Listening 1 town map" class="w-full h-[26rem] object-contain bg-white border border-gray-200 rounded-lg p-3">
                 </div>
@@ -2571,18 +2571,18 @@
                 <div class="flex items-center gap-3"><label class="w-40 text-sm text-gray-700">2. Helen's house</label><select name="q2" class="flex-1 rounded-lg border-gray-300 focus:border-teal-500 focus:ring-teal-500"><option value="">Select letter</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
             </div>
 
-            <div class="mt-8 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-amber-800 font-medium">Listening 1 - Check: Check your answers.</div>
+            <div class="mt-8 bg-white border border-amber-200 rounded-xl px-4 py-3 text-amber-800 font-medium">Listening 1 - Check: Check your answers.</div>
             @elseif(request()->get('practice') == 2)
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="rounded-xl border border-sky-200 overflow-hidden">
-                    <div class="bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700">Available Letters</div>
+                    <div class="bg-white px-4 py-2 text-sm font-semibold text-sky-700">Available Letters</div>
                     <div class="divide-y divide-sky-100 text-sm">
                         <div class="px-4 py-2">Use letters <span class="font-semibold">B, C, D, E, F, G, H</span>.</div>
                         <div class="px-4 py-2 text-gray-600">A is already used as the example.</div>
                     </div>
                 </div>
 
-                <div class="bg-gray-50 rounded-xl border border-gray-200 p-4">
+                <div class="bg-white rounded-xl border border-gray-200 p-4">
                     <div class="text-sm font-semibold text-gray-700 mb-3">Listening 2 Map</div>
                     <img src="{{ asset('images/listening/material9/map-listening2.png') }}" alt="Listening 2 city map" class="w-full h-[26rem] object-contain bg-white border border-gray-200 rounded-lg p-3">
                 </div>
@@ -2611,7 +2611,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-50 rounded-xl border border-gray-200 p-4">
+                <div class="bg-white rounded-xl border border-gray-200 p-4">
                     <div class="text-sm font-semibold text-gray-700 mb-3">Camera Diagram</div>
                     <img src="{{ asset('images/listening/material9/listening1-camera.png') }}" alt="Camera diagram labels" class="w-full h-[26rem] object-contain bg-white border border-gray-200 rounded-lg p-3">
                 </div>
@@ -2638,7 +2638,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-50 rounded-xl border border-gray-200 p-4">
+                <div class="bg-white rounded-xl border border-gray-200 p-4">
                     <div class="text-sm font-semibold text-gray-700 mb-3">Equipment Case Diagram</div>
                     <img src="{{ asset('images/listening/material9/listening2-equipment-case.png') }}" alt="Equipment case diagram labels" class="w-full h-[26rem] object-contain bg-white border border-gray-200 rounded-lg p-3">
                 </div>
@@ -2656,16 +2656,16 @@
     @elseif(request()->get('practice') == 5)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Plan Labeling</span>
+                    <span class="px-3 py-1 bg-white text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Plan Labeling</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Label the station plan (Questions 1-6)</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -2674,7 +2674,7 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-gray-50 rounded-xl border border-gray-200 p-5">
+                <div class="bg-white rounded-xl border border-gray-200 p-5">
                     <div class="text-sm font-semibold text-gray-700 mb-3">Plan</div>
                     <div class="grid grid-cols-3 gap-2">
                         <div class="h-20 border-2 border-gray-300 rounded-lg flex items-start justify-start p-2 text-lg font-bold text-gray-600">1</div>
@@ -2692,7 +2692,7 @@
                 </div>
 
                 <div class="rounded-xl border border-amber-200 overflow-hidden">
-                    <div class="bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700">Answer Box (A-I)</div>
+                    <div class="bg-white px-4 py-2 text-sm font-semibold text-amber-700">Answer Box (A-I)</div>
                     <div class="divide-y divide-amber-100 text-sm">
                         <div class="px-4 py-2"><span class="font-semibold mr-2">A</span>cafe</div>
                         <div class="px-4 py-2"><span class="font-semibold mr-2">B</span>information desk</div>
@@ -2720,16 +2720,16 @@
     @elseif(request()->get('practice') == 6)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-emerald-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-emerald-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Plan Labeling</span>
+                    <span class="px-3 py-1 bg-white text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Plan Labeling</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Label the shopping plan (Questions 7-12)</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -2738,7 +2738,7 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-gray-50 rounded-xl border border-gray-200 p-5">
+                <div class="bg-white rounded-xl border border-gray-200 p-5">
                     <div class="text-sm font-semibold text-gray-700 mb-3">Plan</div>
                     <div class="grid grid-cols-4 gap-2">
                         <div class="h-16 border-2 border-gray-300 rounded-lg"></div>
@@ -2765,7 +2765,7 @@
                 </div>
 
                 <div class="rounded-xl border border-emerald-200 overflow-hidden">
-                    <div class="bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">Answer Box (A-I)</div>
+                    <div class="bg-white px-4 py-2 text-sm font-semibold text-emerald-700">Answer Box (A-I)</div>
                     <div class="divide-y divide-emerald-100 text-sm">
                         <div class="px-4 py-2"><span class="font-semibold mr-2">A</span>jewellery store</div>
                         <div class="px-4 py-2"><span class="font-semibold mr-2">B</span>supermarket</div>
@@ -2808,11 +2808,11 @@
             ];
             $cMap = [
                 'rose'    => ['bg' => 'bg-rose-50',    'text' => 'text-rose-600',    'btn' => 'bg-rose-600 hover:bg-rose-700',    'badge' => 'bg-rose-100 text-rose-600'],
-                'orange'  => ['bg' => 'bg-orange-50',  'text' => 'text-orange-600',  'btn' => 'bg-orange-600 hover:bg-orange-700',  'badge' => 'bg-orange-100 text-orange-600'],
-                'emerald' => ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-600', 'btn' => 'bg-emerald-600 hover:bg-emerald-700', 'badge' => 'bg-emerald-100 text-emerald-600'],
-                'sky'     => ['bg' => 'bg-sky-50',     'text' => 'text-sky-600',     'btn' => 'bg-sky-600 hover:bg-sky-700',     'badge' => 'bg-sky-100 text-sky-600'],
+                'orange'  => ['bg' => 'bg-white',  'text' => 'text-orange-600',  'btn' => 'bg-orange-600 hover:bg-orange-700',  'badge' => 'bg-white text-orange-600'],
+                'emerald' => ['bg' => 'bg-white', 'text' => 'text-emerald-600', 'btn' => 'bg-emerald-600 hover:bg-emerald-700', 'badge' => 'bg-white text-emerald-600'],
+                'sky'     => ['bg' => 'bg-white',     'text' => 'text-sky-600',     'btn' => 'bg-sky-600 hover:bg-sky-700',     'badge' => 'bg-white text-sky-600'],
                 'violet'  => ['bg' => 'bg-violet-50',  'text' => 'text-violet-600',  'btn' => 'bg-violet-600 hover:bg-violet-700',  'badge' => 'bg-violet-100 text-violet-600'],
-                'amber'   => ['bg' => 'bg-amber-50',   'text' => 'text-amber-600',   'btn' => 'bg-amber-600 hover:bg-amber-700',   'badge' => 'bg-amber-100 text-amber-600'],
+                'amber'   => ['bg' => 'bg-white',   'text' => 'text-amber-600',   'btn' => 'bg-amber-600 hover:bg-amber-700',   'badge' => 'bg-white text-amber-600'],
                 'lime'    => ['bg' => 'bg-lime-50',    'text' => 'text-lime-600',    'btn' => 'bg-lime-600 hover:bg-lime-700',    'badge' => 'bg-lime-100 text-lime-600'],
             ];
         @endphp
@@ -2847,15 +2847,15 @@
     @elseif(request()->get('practice') == 1 || request()->get('practice') == 2 || request()->get('practice') == 3)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 {{ request()->get('practice') == 1 ? 'border-rose-500' : (request()->get('practice') == 2 ? 'border-orange-500' : 'border-emerald-500') }} p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 {{ request()->get('practice') == 1 ? 'bg-rose-50' : (request()->get('practice') == 2 ? 'bg-orange-50' : 'bg-emerald-50') }} rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 {{ request()->get('practice') == 1 ? 'bg-rose-50' : (request()->get('practice') == 2 ? 'bg-white' : 'bg-white') }} rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 {{ request()->get('practice') == 1 ? 'bg-rose-100 text-rose-700' : (request()->get('practice') == 2 ? 'bg-orange-100 text-orange-700' : 'bg-emerald-100 text-emerald-700') }} text-xs font-bold uppercase tracking-wider rounded-full">{{ request()->get('practice') == 1 ? 'Listening 1' : (request()->get('practice') == 2 ? 'Listening 2' : 'Listening 3') }}</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">{{ request()->get('practice') == 3 ? 'Matching' : 'Multiple Choice' }}</span>
+                    <span class="px-3 py-1 {{ request()->get('practice') == 1 ? 'bg-rose-100 text-rose-700' : (request()->get('practice') == 2 ? 'bg-white text-orange-700' : 'bg-white text-emerald-700') }} text-xs font-bold uppercase tracking-wider rounded-full">{{ request()->get('practice') == 1 ? 'Listening 1' : (request()->get('practice') == 2 ? 'Listening 2' : 'Listening 3') }}</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">{{ request()->get('practice') == 3 ? 'Matching' : 'Multiple Choice' }}</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">{{ request()->get('practice') == 1 ? 'School Tuck Shops - Multiple Choice' : (request()->get('practice') == 2 ? 'Healthy Lifestyle - Multiple Choice' : 'Relay Race - Matching Information') }}</h3>
             </div>
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -2872,20 +2872,20 @@
                 <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">6. How could parents be educated about healthy eating?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q6" value="A" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>magazine advertisements</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q6" value="B" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>public meetings</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q6" value="C" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>advertisements on television</span></label></div></div>
                 <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">7. How can schools help children eat healthily?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q7" value="A" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>check children's lunchboxes</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q7" value="B" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>sell mainly healthy food</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-rose-50 cursor-pointer transition-colors group"><input type="radio" name="q7" value="C" class="w-5 h-5 text-rose-600 border-gray-300 focus:ring-rose-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>ban junk food in school</span></label></div></div>
                 @elseif(request()->get('practice') == 2)
-                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">8. Mr. White is a</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q8" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>nutritionist.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q8" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>school principal.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q8" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>health expert.</span></label></div></div>
-                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">9. The children will be happier and healthier by</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q9" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>eating less fruit and vegetables.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q9" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>eating greater amounts of fast food.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q9" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>eating greater amounts of fruit and vegetables.</span></label></div></div>
-                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">10. How many servings of vegetables per day do health specialists recommend?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q10" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>five</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q10" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>two</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q10" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>three</span></label></div></div>
-                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">11. What happens to people when they don't eat breakfast?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q11" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>They feel tired.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q11" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>They usually eat a banana late in the morning.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q11" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>They don't feel hungry at lunchtime.</span></label></div></div>
-                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">12. Which food item is NOT suggested for lunch?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q12" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>a wholesome sandwich</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q12" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>steamed vegetables</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q12" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>fried chicken</span></label></div></div>
-                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">13. What recommendations does the speaker make for summer?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q13" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>select green, white, and purple vegetables</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q13" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>make a salad with uncooked vegetables</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q13" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>use a high-fat cooking method</span></label></div></div>
-                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">14. How much exercise per day does she recommend for young people?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q14" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>30 minutes</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q14" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>13 minutes</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q14" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>20 minutes</span></label></div></div>
-                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">15. What should children do if they can't walk or bike to school?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q15" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>take a taxi</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q15" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>play sports with friends</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-orange-50 cursor-pointer transition-colors group"><input type="radio" name="q15" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>join a chess club</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">8. Mr. White is a</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q8" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>nutritionist.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q8" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>school principal.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q8" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>health expert.</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">9. The children will be happier and healthier by</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q9" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>eating less fruit and vegetables.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q9" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>eating greater amounts of fast food.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q9" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>eating greater amounts of fruit and vegetables.</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">10. How many servings of vegetables per day do health specialists recommend?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q10" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>five</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q10" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>two</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q10" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>three</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">11. What happens to people when they don't eat breakfast?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q11" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>They feel tired.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q11" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>They usually eat a banana late in the morning.</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q11" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>They don't feel hungry at lunchtime.</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">12. Which food item is NOT suggested for lunch?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q12" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>a wholesome sandwich</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q12" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>steamed vegetables</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q12" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>fried chicken</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">13. What recommendations does the speaker make for summer?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q13" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>select green, white, and purple vegetables</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q13" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>make a salad with uncooked vegetables</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q13" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>use a high-fat cooking method</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">14. How much exercise per day does she recommend for young people?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q14" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>30 minutes</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q14" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>13 minutes</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q14" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>20 minutes</span></label></div></div>
+                <div class="bg-white border border-gray-200 rounded-xl p-5"><h4 class="text-lg font-semibold text-gray-900 mb-4">15. What should children do if they can't walk or bike to school?</h4><div class="space-y-3 pl-2"><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q15" value="A" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">A.</span>take a taxi</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q15" value="B" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">B.</span>play sports with friends</span></label><label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors group"><input type="radio" name="q15" value="C" class="w-5 h-5 text-orange-600 border-gray-300 focus:ring-orange-500"><span class="text-gray-700 font-medium"><span class="font-bold mr-2">C.</span>join a chess club</span></label></div></div>
                 @else
                 @if(!request()->has('section'))
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <a href="?practice=3&section=1" class="group block bg-white rounded-2xl shadow-md border border-emerald-100 hover:border-emerald-300 hover:shadow-xl transition-all duration-300 p-6">
                         <div class="flex items-center justify-between mb-4">
-                            <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                            <span class="px-3 py-1 bg-white text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
                             <span class="text-xs text-gray-500">Q1-Q12</span>
                         </div>
                         <h4 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-emerald-600">Teams, Colours, and Events</h4>
@@ -2893,7 +2893,7 @@
                     </a>
                     <a href="?practice=3&section=2" class="group block bg-white rounded-2xl shadow-md border border-cyan-100 hover:border-cyan-300 hover:shadow-xl transition-all duration-300 p-6">
                         <div class="flex items-center justify-between mb-4">
-                            <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                            <span class="px-3 py-1 bg-white text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
                             <span class="text-xs text-gray-500">Q13-Q24</span>
                         </div>
                         <h4 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-cyan-600">Positions and After-Race Phrases</h4>
@@ -2906,7 +2906,7 @@
                     <p class="text-gray-600 mb-4">Choose your answers from the box. Write the correct letters, A - D, next to questions 1 - 4.</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="rounded-xl border border-emerald-200 overflow-hidden">
-                            <div class="bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">Athletes</div>
+                            <div class="bg-white px-4 py-2 text-sm font-semibold text-emerald-700">Athletes</div>
                             <div class="divide-y divide-emerald-100 text-sm">
                                 <div class="px-4 py-2"><span class="font-semibold mr-2">A</span>Andy</div>
                                 <div class="px-4 py-2"><span class="font-semibold mr-2">B</span>Pete</div>
@@ -2928,7 +2928,7 @@
                     <p class="text-gray-600 mb-4">Choose your answers from the box. Write the correct letters, A - C, next to questions 5 - 7.</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="rounded-xl border border-emerald-200 overflow-hidden">
-                            <div class="bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">Teams</div>
+                            <div class="bg-white px-4 py-2 text-sm font-semibold text-emerald-700">Teams</div>
                             <div class="divide-y divide-emerald-100 text-sm">
                                 <div class="px-4 py-2"><span class="font-semibold mr-2">A</span>Lancaster College</div>
                                 <div class="px-4 py-2"><span class="font-semibold mr-2">B</span>Ashgrove College</div>
@@ -2948,7 +2948,7 @@
                     <p class="text-gray-600 mb-4">Choose your answers from the box. Write the correct letters, A - E, next to questions 8 - 12.</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="rounded-xl border border-emerald-200 overflow-hidden">
-                            <div class="bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">Events</div>
+                            <div class="bg-white px-4 py-2 text-sm font-semibold text-emerald-700">Events</div>
                             <div class="divide-y divide-emerald-100 text-sm">
                                 <div class="px-4 py-2"><span class="font-semibold mr-2">A</span>hurdles</div>
                                 <div class="px-4 py-2"><span class="font-semibold mr-2">B</span>high jump</div>
@@ -2975,7 +2975,7 @@
                     <p class="text-gray-600 mb-4">Choose your answers from the box. Write the correct letters, A - G, next to questions 13 - 18.</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="rounded-xl border border-emerald-200 overflow-hidden">
-                            <div class="bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">People</div>
+                            <div class="bg-white px-4 py-2 text-sm font-semibold text-emerald-700">People</div>
                             <div class="divide-y divide-emerald-100 text-sm">
                                 <div class="px-4 py-2"><span class="font-semibold mr-2">A</span>Catherine</div>
                                 <div class="px-4 py-2"><span class="font-semibold mr-2">B</span>Elizabeth</div>
@@ -3003,7 +3003,7 @@
                     <p class="text-gray-600 mb-4">Choose your answers from the box. Write the correct letters, A - K, next to questions 19 - 24.</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="rounded-xl border border-emerald-200 overflow-hidden">
-                            <div class="bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">Phrases</div>
+                            <div class="bg-white px-4 py-2 text-sm font-semibold text-emerald-700">Phrases</div>
                             <div class="divide-y divide-emerald-100 text-sm">
                                 <div class="px-4 py-2"><span class="font-semibold mr-2">A</span>everyone</div>
                                 <div class="px-4 py-2"><span class="font-semibold mr-2">B</span>next week</div>
@@ -3036,15 +3036,15 @@
     @elseif(request()->get('practice') == 4)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-sky-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-sky-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-sky-100 text-sky-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 4</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Matching</span>
+                    <span class="px-3 py-1 bg-white text-sky-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 4</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Matching</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">What do the students say about each teacher?</h3>
             </div>
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -3052,7 +3052,7 @@
                 </div>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="rounded-xl border border-sky-200 overflow-hidden bg-sky-50/50">
+                <div class="rounded-xl border border-sky-200 overflow-hidden bg-white">
                     <div class="divide-y divide-sky-100 text-base">
                         <div class="px-4 py-3"><span class="font-semibold mr-2">A</span>Mr. Smith</div>
                         <div class="px-4 py-3"><span class="font-semibold mr-2">B</span>Miss Williams</div>
@@ -3079,11 +3079,11 @@
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
                     <span class="px-3 py-1 bg-violet-100 text-violet-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 5</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Matching</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Matching</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">What do the students say about each teacher?</h3>
             </div>
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -3114,16 +3114,16 @@
     @elseif(request()->get('practice') == 6)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Classification</span>
+                    <span class="px-3 py-1 bg-white text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Classification</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Olympic Games Timeline</h3>
             </div>
 
-            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-6 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -3160,12 +3160,12 @@
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
                     <span class="px-3 py-1 bg-lime-100 text-lime-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Classification</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Classification</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Flight Development Timeline</h3>
             </div>
 
-            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-6 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -3210,10 +3210,10 @@
                             $statusTranscript = filled($material->transcript_en ?? null) || filled($material->transcript_id ?? null);
                         @endphp
                         <div class="flex items-center gap-1 flex-shrink-0">
-                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusAudio ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusAudio ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
                                 <span class="font-bold">{{ $statusAudio ? '✓' : '✕' }}</span> Audio
                             </span>
-                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusTranscript ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusTranscript ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
                                 <span class="font-bold">{{ $statusTranscript ? '✓' : '✕' }}</span> SRT
                             </span>
                         </div>
@@ -3227,7 +3227,7 @@
                 <div class="flex-1 min-w-[220px] flex items-center gap-1.5 md:gap-3 max-w-3xl">
                     @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher()))
                         <button type="button" id="toggleKeyBtn" onclick="toggleAnswerKey()"
-                                class="p-2 bg-yellow-100 text-yellow-700 hover:bg-yellow-200 rounded-lg transition-colors flex-shrink-0 flex items-center gap-2 border border-yellow-300 mr-2"
+                                class="p-2 bg-white text-yellow-700 hover:bg-yellow-200 rounded-lg transition-colors flex-shrink-0 flex items-center gap-2 border border-yellow-300 mr-2"
                                 title="Toggle Answer Key">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0" />
@@ -3238,7 +3238,7 @@
                     @endif
 
                     <button type="button" onclick="skipAudio(-10)"
-                            class="p-1.5 md:p-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Mundur 10 detik">
+                            class="p-1.5 md:p-2 bg-white hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Mundur 10 detik">
                         <svg class="w-4 h-4 md:w-5 md:h-5 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path>
                         </svg>
@@ -3260,14 +3260,14 @@
                             <span id="oldDuration">0:00</span>
                         </div>
 
-                        <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="oldProgressContainer">
+                        <div class="relative h-2 bg-white rounded-full cursor-pointer group" id="oldProgressContainer">
                             <div id="oldProgressBar" class="absolute h-full bg-indigo-600 rounded-full transition-all" style="width: 0%"></div>
                             <div id="oldProgressHandle" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
                         </div>
                     </div>
 
                     <button type="button" onclick="skipAudio(10)"
-                            class="p-1.5 md:p-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Maju 10 detik">
+                            class="p-1.5 md:p-2 bg-white hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Maju 10 detik">
                         <svg class="w-4 h-4 md:w-5 md:h-5 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"></path>
                         </svg>
@@ -3322,8 +3322,8 @@
 
     <div id="oldTranscriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mt-20 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
         <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
-            <div class="flex flex-col h-full bg-slate-50">
-                <div class="flex-none px-4 py-2 bg-slate-100 border-b border-slate-200 font-semibold text-slate-700">English Script</div>
+            <div class="flex flex-col h-full bg-white">
+                <div class="flex-none px-4 py-2 bg-white border-b border-slate-200 font-semibold text-slate-700">English Script</div>
                 <div class="flex-1 overflow-y-auto p-4 text-sm text-slate-600">
                     @if(isset($material) && $material->transcript_en)
                         {!! nl2br(e($material->transcript_en)) !!}
@@ -3332,8 +3332,8 @@
                     @endif
                 </div>
             </div>
-            <div class="flex flex-col h-full bg-indigo-50">
-                <div class="flex-none px-4 py-2 bg-indigo-100 border-b border-indigo-200 font-semibold text-indigo-800">Terjemahan Indonesia</div>
+            <div class="flex flex-col h-full bg-white">
+                <div class="flex-none px-4 py-2 bg-white border-b border-indigo-200 font-semibold text-indigo-800">Terjemahan Indonesia</div>
                 <div class="flex-1 overflow-y-auto p-4 text-sm text-indigo-900/80">
                     @if(isset($material) && $material->transcript_id)
                         {!! nl2br(e($material->transcript_id)) !!}
@@ -3422,17 +3422,17 @@
     <!-- Table Completion: Material 5 -->
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-indigo-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
-                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Table Completion</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-white text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Table Completion</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Woodlands School of Music - Examination Entry Form 2008</h3>
             </div>
 
-            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-6 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -3449,86 +3449,86 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        <tr class="hover:bg-gray-50 transition-colors">
+                        <tr class="hover:bg-white transition-colors">
                             <td class="p-4 text-gray-700 font-medium">Candidate's name</td>
                             <td class="p-4 text-gray-900"><span class="text-gray-500 mr-2">Example</span> <span class="font-semibold italic">John Kepler</span></td>
                         </tr>
-                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                        <tr class="hover:bg-white transition-colors">
                             <td class="p-4 text-gray-700 font-medium">Grade exam this weekend</td>
                             <td class="p-4">
                                 <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">1</span>
+                                    <span class="w-6 h-6 rounded-full bg-white text-indigo-600 flex items-center justify-center text-xs font-bold">1</span>
                                     <span class="text-gray-600">Grade</span>
                                     <input type="text" name="q1" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
                                 </div>
                             </td>
                         </tr>
-                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                        <tr class="hover:bg-white transition-colors">
                             <td class="p-4 text-gray-700 font-medium">Grade attained in 2007</td>
                             <td class="p-4">
                                 <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">2</span>
+                                    <span class="w-6 h-6 rounded-full bg-white text-indigo-600 flex items-center justify-center text-xs font-bold">2</span>
                                     <span class="text-gray-600">Grade</span>
                                     <input type="text" name="q2" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
                                 </div>
                             </td>
                         </tr>
-                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                        <tr class="hover:bg-white transition-colors">
                             <td class="p-4 text-gray-700 font-medium">Instrument</td>
                             <td class="p-4">
                                 <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">3</span>
+                                    <span class="w-6 h-6 rounded-full bg-white text-indigo-600 flex items-center justify-center text-xs font-bold">3</span>
                                     <input type="text" name="q3" class="flex-1 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
                                 </div>
                             </td>
                         </tr>
-                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                        <tr class="hover:bg-white transition-colors">
                             <td class="p-4 text-gray-700 font-medium">Date and time of examination</td>
                             <td class="p-4 space-y-3">
                                 <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">4</span>
+                                    <span class="w-6 h-6 rounded-full bg-white text-indigo-600 flex items-center justify-center text-xs font-bold">4</span>
                                     <span class="text-gray-600">Date: Saturday, July</span>
                                     <input type="text" name="q4" class="w-32 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">5</span>
+                                    <span class="w-6 h-6 rounded-full bg-white text-indigo-600 flex items-center justify-center text-xs font-bold">5</span>
                                     <span class="text-gray-600">Time:</span>
                                     <input type="text" name="q5" class="w-40 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
                                 </div>
                             </td>
                         </tr>
-                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                        <tr class="hover:bg-white transition-colors">
                             <td class="p-4 text-gray-700 font-medium">Examination fee</td>
                             <td class="p-4">
                                 <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">6</span>
+                                    <span class="w-6 h-6 rounded-full bg-white text-indigo-600 flex items-center justify-center text-xs font-bold">6</span>
                                     <span class="text-gray-700 font-semibold">$</span>
                                     <input type="text" name="q6" class="w-40 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
                                 </div>
                             </td>
                         </tr>
-                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                        <tr class="hover:bg-white transition-colors">
                             <td class="p-4 text-gray-700 font-medium">Examination room</td>
                             <td class="p-4 space-y-3">
                                 <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">7</span>
+                                    <span class="w-6 h-6 rounded-full bg-white text-indigo-600 flex items-center justify-center text-xs font-bold">7</span>
                                     <span class="text-gray-600">Room</span>
                                     <input type="text" name="q7" class="w-36 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">8</span>
+                                    <span class="w-6 h-6 rounded-full bg-white text-indigo-600 flex items-center justify-center text-xs font-bold">8</span>
                                     <span class="text-gray-600">in</span>
                                     <input type="text" name="q8" class="w-36 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
                                     <span class="text-gray-600">Block</span>
                                 </div>
                             </td>
                         </tr>
-                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                        <tr class="hover:bg-white transition-colors">
                             <td class="p-4 text-gray-700 font-medium">Candidate's choice of three pieces</td>
                             <td class="p-4 space-y-3">
                                 <div class="text-gray-700">List A <span class="ml-6">No. 1</span></div>
                                 <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">9</span>
+                                    <span class="w-6 h-6 rounded-full bg-white text-indigo-600 flex items-center justify-center text-xs font-bold">9</span>
                                     <span class="text-gray-700">List B</span>
                                     <span class="text-gray-600">No.</span>
                                     <input type="text" name="q9" class="w-40 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
@@ -3536,11 +3536,11 @@
                                 <div class="text-gray-700">List C <span class="ml-6">No. 6</span></div>
                             </td>
                         </tr>
-                        <tr class="hover:bg-indigo-50/30 transition-colors">
+                        <tr class="hover:bg-white transition-colors">
                             <td class="p-4 text-gray-700 font-medium">Number of scales candidates must play</td>
                             <td class="p-4">
                                 <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">10</span>
+                                    <span class="w-6 h-6 rounded-full bg-white text-indigo-600 flex items-center justify-center text-xs font-bold">10</span>
                                     <input type="text" name="q10" class="w-48 bg-transparent border-b-2 border-gray-300 focus:border-indigo-500 outline-none px-2 py-1 text-gray-900 placeholder-gray-300" placeholder="...">
                                 </div>
                             </td>
@@ -3554,16 +3554,16 @@
     @elseif(request()->get('practice') == 3)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-sky-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-sky-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-sky-100 text-sky-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
-                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Table Completion</span>
+                    <span class="px-3 py-1 bg-white text-sky-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-white text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Table Completion</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Mobile Phone Features Comparison</h3>
             </div>
 
-            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-6 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -3584,7 +3584,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach(['LUNA 500', 'AQUILA 50', 'HERMES 580', 'RIVA A65'] as $idx => $phone)
-                        <tr class="hover:bg-sky-50/40 transition-colors">
+                        <tr class="hover:bg-white transition-colors">
                             <td class="p-4 font-semibold text-gray-800">{{ $phone }}</td>
                             <td class="p-4 text-center"><input type="checkbox" name="p3_{{ $idx }}_games" class="w-5 h-5 text-sky-600 border-gray-300 rounded"></td>
                             <td class="p-4 text-center"><input type="checkbox" name="p3_{{ $idx }}_camera" class="w-5 h-5 text-sky-600 border-gray-300 rounded"></td>
@@ -3601,16 +3601,16 @@
     @elseif(request()->get('practice') == 4)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-cyan-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-cyan-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
-                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Table Completion</span>
+                    <span class="px-3 py-1 bg-white text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-white text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Table Completion</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Phone Company Rates Table</h3>
             </div>
 
-            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-6 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -3629,19 +3629,19 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        <tr class="hover:bg-cyan-50/40 transition-colors">
+                        <tr class="hover:bg-white transition-colors">
                             <td class="p-4 font-semibold text-gray-800">Basic Plan</td>
                             <td class="p-4 text-center text-gray-900">$ <input type="text" name="q7" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"></td>
                             <td class="p-4 text-center text-gray-900"><input type="text" name="q8" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"> cents</td>
                             <td class="p-4 text-center text-gray-900">2 GB</td>
                         </tr>
-                        <tr class="hover:bg-cyan-50/40 transition-colors">
+                        <tr class="hover:bg-white transition-colors">
                             <td class="p-4 font-semibold text-gray-800">Family Plan</td>
                             <td class="p-4 text-center text-gray-900">$35</td>
                             <td class="p-4 text-center text-gray-900">10 cents</td>
                             <td class="p-4 text-center text-gray-900"><input type="text" name="q9" class="w-24 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"></td>
                         </tr>
-                        <tr class="hover:bg-cyan-50/40 transition-colors">
+                        <tr class="hover:bg-white transition-colors">
                             <td class="p-4 font-semibold text-gray-800">Business Plan</td>
                             <td class="p-4 text-center text-gray-900">$ <input type="text" name="q10" class="w-16 border-b-2 border-gray-300 focus:border-cyan-500 outline-none text-center"></td>
                             <td class="p-4 text-center text-gray-900">5 cents</td>
@@ -3665,16 +3665,16 @@
     @elseif(request()->get('practice') == 5)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-cyan-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-cyan-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
-                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Part A + Part B</span>
+                    <span class="px-3 py-1 bg-white text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-white text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Part A + Part B</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Restaurant Conversation - Menu Choices</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Part A:</p>
@@ -3686,32 +3686,32 @@
                 <div class="bg-white border border-gray-200 rounded-xl p-5">
                     <h4 class="text-lg font-semibold text-gray-900 mb-4">7. What is the name of the couple?</h4>
                     <div class="space-y-3 pl-2">
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q7" value="A" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">A.</span>Mr. and Mrs. Watson</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q7" value="B" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">B.</span>Mr. and Mrs. Williams</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q7" value="C" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">C.</span>Mr. and Mrs. Wilson</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q7" value="A" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">A.</span>Mr. and Mrs. Watson</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q7" value="B" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">B.</span>Mr. and Mrs. Williams</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q7" value="C" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">C.</span>Mr. and Mrs. Wilson</span></label>
                     </div>
                 </div>
 
                 <div class="bg-white border border-gray-200 rounded-xl p-5">
                     <h4 class="text-lg font-semibold text-gray-900 mb-4">8. Where do they decide to sit?</h4>
                     <div class="space-y-3 pl-2">
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q8" value="A" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">A.</span>next to the window</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q8" value="B" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">B.</span>next to the door</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q8" value="C" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">C.</span>in the centre of the room</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q8" value="A" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">A.</span>next to the window</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q8" value="B" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">B.</span>next to the door</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q8" value="C" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">C.</span>in the centre of the room</span></label>
                     </div>
                 </div>
 
                 <div class="bg-white border border-gray-200 rounded-xl p-5">
                     <h4 class="text-lg font-semibold text-gray-900 mb-4">9. What number is their table?</h4>
                     <div class="space-y-3 pl-2">
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q9" value="A" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">A.</span>14</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q9" value="B" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">B.</span>24</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-cyan-50 cursor-pointer transition-colors"><input type="radio" name="q9" value="C" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">C.</span>34</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q9" value="A" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">A.</span>14</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q9" value="B" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">B.</span>24</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q9" value="C" class="w-5 h-5 text-cyan-600 border-gray-300 focus:ring-cyan-500"><span><span class="font-bold mr-2">C.</span>34</span></label>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-8 mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mt-8 mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Part B:</p>
@@ -3764,7 +3764,7 @@
             </div>
 
             <div class="flex-1 flex items-center gap-3 w-full justify-center md:justify-center">
-                <button type="button" onclick="skipAudio(-10)" class="p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-indigo-600 transition-colors">
+                <button type="button" onclick="skipAudio(-10)" class="p-2 bg-white hover:bg-white rounded-lg text-indigo-600 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path></svg>
                 </button>
 
@@ -3778,13 +3778,13 @@
                         <span id="oldCurrentTime">0:00</span>
                         <span id="oldDuration">0:00</span>
                     </div>
-                    <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="oldProgressContainer">
+                    <div class="relative h-2 bg-white rounded-full cursor-pointer group" id="oldProgressContainer">
                         <div id="oldProgressBar" class="absolute h-full bg-indigo-600 rounded-full" style="width: 0%"></div>
                         <div id="oldProgressHandle" class="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
                     </div>
                 </div>
 
-                <button type="button" onclick="skipAudio(10)" class="p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-indigo-600 transition-colors">
+                <button type="button" onclick="skipAudio(10)" class="p-2 bg-white hover:bg-white rounded-lg text-indigo-600 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"></path></svg>
                 </button>
 
@@ -3803,9 +3803,9 @@
                     @endphp
                     <div class="flex items-center gap-2">
                         <div class="hidden xl:flex items-center gap-1.5 mr-1">
-                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasAudio ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}"><span>{{ $hasAudio ? '✓' : '✕' }}</span> Audio</span>
-                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasTranscript ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}"><span>{{ $hasTranscript ? '✓' : '✕' }}</span> Transcript</span>
-                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasAnswerKey ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}"><span>{{ $hasAnswerKey ? '✓' : '✕' }}</span> Kunci</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasAudio ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}"><span>{{ $hasAudio ? '✓' : '✕' }}</span> Audio</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasTranscript ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}"><span>{{ $hasTranscript ? '✓' : '✕' }}</span> Transcript</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $hasAnswerKey ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}"><span>{{ $hasAnswerKey ? '✓' : '✕' }}</span> Kunci</span>
                         </div>
                         <button onclick="const modal=document.getElementById('uploadSrtModal'); modal.classList.remove('hidden'); modal.classList.add('flex');" class="px-3 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 shadow-md relative z-10 text-sm" title="Upload SRT">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -3831,8 +3831,8 @@
 
     <div id="oldTranscriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mt-20 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
         <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
-            <div class="flex flex-col h-full bg-slate-50">
-                <div class="flex-none px-4 py-2 bg-slate-100 border-b border-slate-200 font-semibold text-slate-700">English Script</div>
+            <div class="flex flex-col h-full bg-white">
+                <div class="flex-none px-4 py-2 bg-white border-b border-slate-200 font-semibold text-slate-700">English Script</div>
                 <div class="flex-1 overflow-y-auto p-4 text-sm text-slate-600">
                     @if(isset($material) && $material->transcript_en)
                         {!! nl2br(e($material->transcript_en)) !!}
@@ -3841,8 +3841,8 @@
                     @endif
                 </div>
             </div>
-            <div class="flex flex-col h-full bg-indigo-50">
-                <div class="flex-none px-4 py-2 bg-indigo-100 border-b border-indigo-200 font-semibold text-indigo-800">Terjemahan Indonesia</div>
+            <div class="flex flex-col h-full bg-white">
+                <div class="flex-none px-4 py-2 bg-white border-b border-indigo-200 font-semibold text-indigo-800">Terjemahan Indonesia</div>
                 <div class="flex-1 overflow-y-auto p-4 text-sm text-indigo-900/80">
                     @if(isset($material) && $material->transcript_id)
                         {!! nl2br(e($material->transcript_id)) !!}
@@ -3932,16 +3932,16 @@
     @elseif(request()->get('practice') == 1)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Flow-Chart Completion</span>
+                    <span class="px-3 py-1 bg-white text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Flow-Chart Completion</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Glass Recycling Process</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -3974,16 +3974,16 @@
     @elseif(request()->get('practice') == 2)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-cyan-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-cyan-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Flow-Chart Completion</span>
+                    <span class="px-3 py-1 bg-white text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Flow-Chart Completion</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Can Recycling Process</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -4017,16 +4017,16 @@
     @elseif(request()->get('practice') == 3)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Flow-Chart Completion</span>
+                    <span class="px-3 py-1 bg-white text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Flow-Chart Completion</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Soft Drink Factory Production Line</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -4054,16 +4054,16 @@
     @elseif(request()->get('practice') == 4)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-cyan-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-cyan-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Flow-Chart Completion</span>
+                    <span class="px-3 py-1 bg-white text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Flow-Chart Completion</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Chewing Gum Factory Production Line</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Instructions:</p>
@@ -4218,16 +4218,16 @@
     @elseif(request()->get('practice') == 1)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-emerald-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-emerald-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
+                    <span class="px-3 py-1 bg-white text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Comparison of Three Digital Cameras</h3>
             </div>
 
-            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-6 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Part A:</p>
@@ -4266,7 +4266,7 @@
                 </div>
             </div>
 
-            <div class="mt-8 mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mt-8 mb-6 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Part B:</p>
@@ -4317,16 +4317,16 @@
     @elseif(request()->get('practice') == 2)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-indigo-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
-                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-white text-purple-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Comparison of Three Notebook Computers</h3>
             </div>
 
-            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-6 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Part B:</p>
@@ -4370,16 +4370,16 @@
     @elseif(request()->get('practice') == 3)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-amber-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
+                    <span class="px-3 py-1 bg-white text-amber-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Assessment Schedule</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Questions 1-3:</p>
@@ -4391,32 +4391,32 @@
                 <div class="bg-white border border-gray-200 rounded-xl p-5">
                     <h4 class="text-lg font-semibold text-gray-900 mb-4">1. Ms. Potts prefers to work with</h4>
                     <div class="space-y-3 pl-2">
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q1" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>a computer.</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q1" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>a pencil and paper.</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q1" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>spreadsheets.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q1" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>a computer.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q1" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>a pencil and paper.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q1" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>spreadsheets.</span></label>
                     </div>
                 </div>
 
                 <div class="bg-white border border-gray-200 rounded-xl p-5">
                     <h4 class="text-lg font-semibold text-gray-900 mb-4">2. She believes it is essential to have</h4>
                     <div class="space-y-3 pl-2">
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q2" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>a good system.</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q2" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>good old days.</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q2" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>one major assessment.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q2" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>a good system.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q2" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>good old days.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q2" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>one major assessment.</span></label>
                     </div>
                 </div>
 
                 <div class="bg-white border border-gray-200 rounded-xl p-5">
                     <h4 class="text-lg font-semibold text-gray-900 mb-4">3. John thinks continuous assessment</h4>
                     <div class="space-y-3 pl-2">
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q3" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>makes him sick.</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q3" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>affects his performance.</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-amber-50 cursor-pointer transition-colors"><input type="radio" name="q3" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>is fair.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q3" value="A" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">A.</span>makes him sick.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q3" value="B" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">B.</span>affects his performance.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q3" value="C" class="w-5 h-5 text-amber-600 border-gray-300 focus:ring-amber-500"><span><span class="font-bold mr-2">C.</span>is fair.</span></label>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-8 mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mt-8 mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Questions 4-10:</p>
@@ -4453,16 +4453,16 @@
     @elseif(request()->get('practice') == 4)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-cyan-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-cyan-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
+                    <span class="px-3 py-1 bg-white text-cyan-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Assessment Schedule</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Questions 1-4:</p>
@@ -4477,7 +4477,7 @@
                 <div><span class="font-semibold" style="color:#2563eb;">4.</span> There are <input type="text" name="q4a" class="w-24 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"> books and <input type="text" name="q4b" class="w-24 border-b-2 border-gray-300 focus:border-cyan-500 outline-none"> articles on the reading list.</div>
             </div>
 
-            <div class="mt-8 mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mt-8 mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Questions 5-10:</p>
@@ -4612,12 +4612,12 @@
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
                     <span class="px-3 py-1 bg-lime-100 text-lime-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 1</span>
-                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
+                    <span class="px-3 py-1 bg-white text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Tourism: Benefits and Local Impact</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Questions 1-2:</p>
@@ -4645,7 +4645,7 @@
                 </div>
             </div>
 
-            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-6 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Questions 3-7:</p>
@@ -4673,16 +4673,16 @@
     @elseif(request()->get('practice') == 8)
     <div class="space-y-6">
         <div class="bg-white rounded-3xl shadow-xl border-t-4 border-sky-500 p-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-sky-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-50 pointer-events-none"></div>
             <div class="relative z-10 mb-6">
                 <div class="flex items-center gap-3 mb-3">
-                    <span class="px-3 py-1 bg-sky-100 text-sky-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
+                    <span class="px-3 py-1 bg-white text-sky-700 text-xs font-bold uppercase tracking-wider rounded-full">Listening 2</span>
+                    <span class="px-3 py-1 bg-white text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">Mixed Exercise</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 leading-tight">Tourism: Water Use and Pollution</h3>
             </div>
 
-            <div class="mb-8 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-8 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Questions 8-10:</p>
@@ -4694,32 +4694,32 @@
                 <div class="bg-white border border-gray-200 rounded-xl p-5">
                     <h4 class="text-lg font-semibold text-gray-900 mb-4">8. How much water does a tropical golf course use?</h4>
                     <div class="space-y-3 pl-2">
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q8" value="A" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">A.</span>the same amount as 60,000 villagers</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q8" value="B" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">B.</span>more than 60,000 villagers</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q8" value="C" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">C.</span>less than 60,000 villagers</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q8" value="A" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">A.</span>the same amount as 60,000 villagers</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q8" value="B" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">B.</span>more than 60,000 villagers</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q8" value="C" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">C.</span>less than 60,000 villagers</span></label>
                     </div>
                 </div>
 
                 <div class="bg-white border border-gray-200 rounded-xl p-5">
                     <h4 class="text-lg font-semibold text-gray-900 mb-4">9. What is a typical 'peak season' population increase?</h4>
                     <div class="space-y-3 pl-2">
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q9" value="A" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">A.</span>twenty times</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q9" value="B" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">B.</span>seven times</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q9" value="C" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">C.</span>ten times</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q9" value="A" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">A.</span>twenty times</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q9" value="B" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">B.</span>seven times</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q9" value="C" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">C.</span>ten times</span></label>
                     </div>
                 </div>
 
                 <div class="bg-white border border-gray-200 rounded-xl p-5">
                     <h4 class="text-lg font-semibold text-gray-900 mb-4">10. What happens if pollution is not well managed?</h4>
                     <div class="space-y-3 pl-2">
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q10" value="A" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">A.</span>There are too many swimming pools.</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q10" value="B" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">B.</span>Fewer tourists visit.</span></label>
-                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-sky-50 cursor-pointer transition-colors"><input type="radio" name="q10" value="C" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">C.</span>Poor countries need modern facilities.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q10" value="A" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">A.</span>There are too many swimming pools.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q10" value="B" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">B.</span>Fewer tourists visit.</span></label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors"><input type="radio" name="q10" value="C" class="w-5 h-5 text-sky-600 border-gray-300 focus:ring-sky-500"><span><span class="font-bold mr-2">C.</span>Poor countries need modern facilities.</span></label>
                     </div>
                 </div>
             </div>
 
-            <div class="mb-6 flex items-start p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
+            <div class="mb-6 flex items-start p-4 bg-white border-l-4 border-amber-400 rounded-r-lg">
                 <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
                     <p class="text-amber-800 font-medium mb-1">Questions 11-14:</p>
@@ -4781,7 +4781,7 @@
                 <p class="text-gray-600">Pilih paket soal untuk Section 4 (Questions 31-40).</p>
             </div>
             <a href="{{ route('assignments.ielts-academic.listening.material', ['id' => 4]) }}"
-               class="inline-flex items-center justify-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
+               class="inline-flex items-center justify-center px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
                 Reset ke Test 1
             </a>
         </div>
@@ -4789,7 +4789,7 @@
         <div class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-10 gap-2 mb-8">
             @foreach(range(1, 30) as $testNumber)
                 <a href="?practice={{ $testNumber }}"
-                   class="h-9 flex items-center justify-center rounded-lg border text-sm font-semibold transition-colors {{ $selectedTest === $testNumber ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-200 text-gray-700 hover:bg-indigo-50 hover:border-indigo-300' }}">
+                   class="h-9 flex items-center justify-center rounded-lg border text-sm font-semibold transition-colors {{ $selectedTest === $testNumber ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-200 text-gray-700 hover:bg-white hover:border-indigo-300' }}">
                     {{ $testNumber }}
                 </a>
             @endforeach
@@ -4823,7 +4823,7 @@
                 <p class="text-gray-600">Pilih paket soal untuk Section 3 (Questions 21-30).</p>
             </div>
             <a href="{{ route('assignments.ielts-academic.listening.material', ['id' => 3]) }}"
-               class="inline-flex items-center justify-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
+               class="inline-flex items-center justify-center px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
                 Reset ke Test 1
             </a>
         </div>
@@ -4831,7 +4831,7 @@
         <div class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-10 gap-2 mb-8">
             @foreach(range(1, 30) as $testNumber)
                 <a href="?practice={{ $testNumber }}"
-                   class="h-9 flex items-center justify-center rounded-lg border text-sm font-semibold transition-colors {{ $selectedTest === $testNumber ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-200 text-gray-700 hover:bg-indigo-50 hover:border-indigo-300' }}">
+                   class="h-9 flex items-center justify-center rounded-lg border text-sm font-semibold transition-colors {{ $selectedTest === $testNumber ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-200 text-gray-700 hover:bg-white hover:border-indigo-300' }}">
                     {{ $testNumber }}
                 </a>
             @endforeach
@@ -4884,7 +4884,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 <!-- Options Column -->
                 <div class="lg:sticky lg:top-8">
-                    <div class="bg-indigo-50 rounded-2xl p-6 shadow-inner border border-indigo-100">
+                    <div class="bg-white rounded-2xl p-6 shadow-inner border border-indigo-100">
                         <h3 class="text-lg font-bold text-indigo-800 mb-4 flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             Options (A-K)
@@ -4904,7 +4904,7 @@
                                 'K' => 'faster'
                             ] as $key => $value)
                             <li class="flex items-start gap-2 bg-white p-2 rounded-lg border border-indigo-100 shadow-sm">
-                                <span class="flex-none flex items-center justify-center w-5 h-5 rounded bg-indigo-100 text-indigo-700 font-bold text-xs">{{ $key }}</span>
+                                <span class="flex-none flex items-center justify-center w-5 h-5 rounded bg-white text-indigo-700 font-bold text-xs">{{ $key }}</span>
                                 <span class="text-gray-800">{{ $value }}</span>
                             </li>
                             @endforeach
@@ -4920,7 +4920,7 @@
                     </div>
                     
                     <!-- Example -->
-                    <div class="mb-4 p-3 bg-gray-100 rounded-lg border border-gray-200">
+                    <div class="mb-4 p-3 bg-white rounded-lg border border-gray-200">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-gray-600 text-sm">Example: The language of dictionary the customer wants is</span>
                             <span class="font-bold text-indigo-600 bg-white border border-indigo-200 px-2 py-1 rounded text-sm">A</span>
@@ -4934,9 +4934,9 @@
                         29 => 'An electronic dictionary has',
                         30 => 'For advanced learners, an electronic dictionary is'
                     ] as $qNum => $qText)
-                    <div class="group flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-indigo-400 hover:bg-white hover:shadow-md transition-all duration-200">
+                    <div class="group flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 hover:border-indigo-400 hover:bg-white hover:shadow-md transition-all duration-200">
                         <div class="flex items-center gap-4 flex-1">
-                            <span class="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-300 text-gray-600 font-bold text-sm shadow-sm group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:border-indigo-200 transition-colors">{{ $qNum }}.</span>
+                            <span class="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-300 text-gray-600 font-bold text-sm shadow-sm group-hover:bg-white group-hover:text-indigo-600 group-hover:border-indigo-200 transition-colors">{{ $qNum }}.</span>
                             <span class="font-medium text-gray-800 group-hover:text-indigo-900 transition-colors">{{ $qText }}</span>
                         </div>
                         <div class="relative ml-4">
@@ -5008,7 +5008,7 @@
                 <!-- Questions Column -->
                 <div class="space-y-6">
                     <!-- Webster's Dictionary -->
-                    <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                         <div class="flex items-center gap-3 mb-4 border-b border-gray-200 pb-2">
                             <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-rose-600 shadow-sm border border-gray-100">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
@@ -5021,7 +5021,7 @@
                         <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 hover:border-rose-300 transition-colors">
                             <span class="font-bold text-gray-500 w-8">{{ $qNum }}.</span>
                             <div class="relative">
-                                <select name="part6_q{{ $qNum }}" class="appearance-none bg-gray-50 block w-20 pl-3 pr-8 py-2 border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 font-bold text-center cursor-pointer hover:bg-white transition-colors">
+                                <select name="part6_q{{ $qNum }}" class="appearance-none bg-white block w-20 pl-3 pr-8 py-2 border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 font-bold text-center cursor-pointer hover:bg-white transition-colors">
                                     <option value="" disabled selected>-</option>
                                     @foreach(range('A', 'J') as $opt)
                                         <option value="{{ $opt }}">{{ $opt }}</option>
@@ -5037,7 +5037,7 @@
                     </div>
 
                     <!-- Branston's Dictionary -->
-                    <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                         <div class="flex items-center gap-3 mb-4 border-b border-gray-200 pb-2">
                             <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-indigo-600 shadow-sm border border-gray-100">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
@@ -5050,7 +5050,7 @@
                         <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 hover:border-indigo-300 transition-colors">
                             <span class="font-bold text-gray-500 w-8">{{ $qNum }}.</span>
                             <div class="relative">
-                                <select name="part6_q{{ $qNum }}" class="appearance-none bg-gray-50 block w-20 pl-3 pr-8 py-2 border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-bold text-center cursor-pointer hover:bg-white transition-colors">
+                                <select name="part6_q{{ $qNum }}" class="appearance-none bg-white block w-20 pl-3 pr-8 py-2 border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-bold text-center cursor-pointer hover:bg-white transition-colors">
                                     <option value="" disabled selected>-</option>
                                     @foreach(range('A', 'J') as $opt)
                                         <option value="{{ $opt }}">{{ $opt }}</option>
@@ -5089,7 +5089,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 <!-- Options Column -->
                 <div class="lg:sticky lg:top-8 order-2 lg:order-1">
-                    <div class="bg-amber-50 rounded-2xl p-6 shadow-inner border border-amber-100">
+                    <div class="bg-white rounded-2xl p-6 shadow-inner border border-amber-100">
                         <h3 class="text-lg font-bold text-amber-800 mb-4 flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             Descriptions (A-I)
@@ -5107,7 +5107,7 @@
                                 'I' => 'vegetables in flour, fried'
                             ] as $key => $value)
                             <li class="flex items-start gap-2 bg-white p-2 rounded-lg border border-amber-100 shadow-sm">
-                                <span class="flex-none flex items-center justify-center w-5 h-5 rounded bg-amber-100 text-amber-700 font-bold text-xs">{{ $key }}</span>
+                                <span class="flex-none flex items-center justify-center w-5 h-5 rounded bg-white text-amber-700 font-bold text-xs">{{ $key }}</span>
                                 <span class="text-gray-800">{{ $value }}</span>
                             </li>
                             @endforeach
@@ -5131,7 +5131,7 @@
                         44 => 'Thai seafood curry',
                         45 => 'Bhaji'
                     ] as $qNum => $foodName)
-                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-amber-400 hover:bg-white hover:shadow-md transition-all duration-200">
+                    <div class="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 hover:border-amber-400 hover:bg-white hover:shadow-md transition-all duration-200">
                         <div class="flex items-center gap-4 flex-1">
                             <span class="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-300 text-gray-600 font-bold text-sm shadow-sm">{{ $qNum }}.</span>
                             <span class="font-medium text-gray-800">{{ $foodName }}</span>
@@ -5174,7 +5174,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 <!-- Options Column -->
                 <div class="lg:sticky lg:top-8 order-2 lg:order-1">
-                    <div class="bg-emerald-50 rounded-2xl p-6 shadow-inner border border-emerald-100">
+                    <div class="bg-white rounded-2xl p-6 shadow-inner border border-emerald-100">
                         <h3 class="text-lg font-bold text-emerald-800 mb-4 flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                             Hotels (A-C)
@@ -5186,7 +5186,7 @@
                                 'C' => 'Backpacker Hotel'
                             ] as $key => $value)
                             <li class="flex items-center gap-3 bg-white p-3 rounded-lg border border-emerald-100 shadow-sm">
-                                <span class="flex-none flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold text-lg">{{ $key }}</span>
+                                <span class="flex-none flex items-center justify-center w-8 h-8 rounded-full bg-white text-emerald-700 font-bold text-lg">{{ $key }}</span>
                                 <span class="text-gray-800 font-semibold text-lg">{{ $value }}</span>
                             </li>
                             @endforeach
@@ -5209,7 +5209,7 @@
                         50 => 'Internet in room',
                         51 => 'Credit cards accepted'
                     ] as $qNum => $qText)
-                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-emerald-400 hover:bg-white hover:shadow-md transition-all duration-200">
+                    <div class="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 hover:border-emerald-400 hover:bg-white hover:shadow-md transition-all duration-200">
                         <div class="flex items-center gap-4 flex-1">
                             <span class="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-300 text-gray-600 font-bold text-sm shadow-sm">{{ $qNum }}.</span>
                             <span class="font-medium text-gray-800">{{ $qText }}</span>
@@ -5248,7 +5248,7 @@
     @else
     <!-- Content Placeholder for other materials -->
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 min-h-[400px] flex flex-col items-center justify-center text-center">
-        <div class="w-20 h-20 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mb-6">
+        <div class="w-20 h-20 bg-white text-purple-600 rounded-full flex items-center justify-center mb-6">
             <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
             </svg>
@@ -5362,7 +5362,7 @@ Start translating here..."></textarea>
                     </div>
 
                     @if(isset($material) && $material->audio_file)
-                        <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <div class="p-3 bg-white rounded-lg border border-blue-200">
                             <p class="text-sm text-blue-800">
                                 <span class="font-semibold">Current file:</span> 
                                 {{ basename($material->audio_file) }}

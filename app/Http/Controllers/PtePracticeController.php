@@ -7,8 +7,7 @@ use App\Models\PteBookmark;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use App\Services\GroqKeyManager;
+use App\Services\PteScoringService;
 
 class PtePracticeController extends Controller
 {
@@ -171,86 +170,49 @@ class PtePracticeController extends Controller
         ]);
 
         try {
-            // 1. Save audio to temp file
-            $audioFile = $request->file('audio');
-            $tempPath = $audioFile->store('temp_pte_audio', 'local');
-            $fullTempPath = Storage::disk('local')->path($tempPath);
+            $module = $validated['module'];
+            $result = app(PteScoringService::class)->scoreSpeaking(
+                $request->file('audio'),
+                $validated['original_text'] ?? '',
+                $module
+            );
 
-            // 2. Call Whisper
-            $whisperResult = GroqKeyManager::callWhisperWithFallback('speaking', $fullTempPath);
-            $transcription = $whisperResult['body']['text'] ?? '';
-
-            // Clean up audio
-            Storage::disk('local')->delete($tempPath);
-
-            if (empty(trim($transcription))) {
+            if (!$result['success']) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No speech detected.'
+                    'message' => $result['message'],
                 ], 400);
             }
 
-            // 3. Score with LLM
-            $module = $validated['module'];
-            $original = $validated['original_text'] ?? '';
-            
-            $prompt = "You are a highly accurate PTE Academic scoring AI. Evaluate the student's spoken response based on the PTE rubric (Pronunciation, Fluency, Content).
-Module: {$module}
-Original Text/Prompt: \"{$original}\"
-Student Transcription (from Whisper): \"{$transcription}\"
+            $transcription = $result['transcription'];
+            $scores = $result['scores'];
 
-Score the response strictly on a scale matching PTE standard scoring criteria. Return ONLY a valid JSON object matching exactly this schema, without markdown formatting:
-{
-  \"overall_score\": 90,
-  \"content_score\": 90,
-  \"fluency_score\": 90,
-  \"pronunciation_score\": 90,
-  \"feedback\": \"Your overall pronunciation was clear. You hesitated twice. You omitted the word 'xyz'.\"
-}";
-
-            $payload = [
-                'model'       => 'llama-3.3-70b-versatile',
-                'messages'    => [
-                    ['role' => 'system', 'content' => 'You are a PTE Academic API that strictly outputs JSON.'],
-                    ['role' => 'user', 'content' => $prompt],
-                ],
-                'temperature' => 0.1,
-                'response_format' => ['type' => 'json_object'],
-            ];
-
-            $llmResult = GroqKeyManager::callWithFallback('speaking', $payload);
-            $jsonContent = $llmResult['body']['choices'][0]['message']['content'];
-            $scores = json_decode($jsonContent, true);
-
-            if (!$scores) {
-                throw new \Exception("Invalid JSON returned by LLM: {$jsonContent}");
-            }
-
-            // 4. Save result
+            // Save result
             $dbResult = PtePracticeResult::create([
                 'user_id'          => Auth::id(),
                 'module'           => $module,
                 'topic_id'         => $validated['topic_id'],
                 'score'            => $scores['overall_score'] ?? 0,
                 'max_score'        => 90,
-                'duration_seconds' => 0,
+                'duration_seconds' => round($scores['acoustic_metrics']['duration_seconds'] ?? 0),
                 'detail'           => [
                     'transcription'       => $transcription,
                     'content_score'       => $scores['content_score'] ?? 0,
                     'fluency_score'       => $scores['fluency_score'] ?? 0,
                     'pronunciation_score' => $scores['pronunciation_score'] ?? 0,
                     'feedback'            => $scores['feedback'] ?? '',
+                    'acoustic_metrics'    => $scores['acoustic_metrics'] ?? [],
                 ],
             ]);
 
             return response()->json([
-                'success' => true,
-                'result_id' => $dbResult->id,
-                'scores' => $scores,
+                'success'       => true,
+                'result_id'     => $dbResult->id,
+                'scores'        => $scores,
                 'transcription' => $transcription
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error("evaluateSpeaking Error: " . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Evaluation failed: ' . $e->getMessage()], 500);
         }
@@ -273,40 +235,8 @@ Score the response strictly on a scale matching PTE standard scoring criteria. R
             $module = $validated['module'];
             $answer = $validated['answer'];
             $promptText = $validated['prompt_text'] ?? '';
-            
-            $prompt = "You are a highly accurate PTE Academic scoring AI. Evaluate the student's written response based on the PTE rubric (Content, Form, Grammar, Vocabulary, Spelling).
-Module: {$module}
-Question/Prompt: \"{$promptText}\"
-Student Answer: \"{$answer}\"
 
-Score the response strictly on a scale matching PTE standard scoring criteria. Return ONLY a valid JSON object matching exactly this schema, without markdown formatting:
-{
-  \"overall_score\": 90,
-  \"content_score\": 90,
-  \"form_score\": 90,
-  \"grammar_score\": 90,
-  \"vocabulary_score\": 90,
-  \"spelling_score\": 90,
-  \"feedback\": \"Your response addresses the prompt well. However, you have a spelling error in 'xyz' and a grammatical error 'abc'.\"
-}";
-
-            $payload = [
-                'model'       => 'llama-3.3-70b-versatile',
-                'messages'    => [
-                    ['role' => 'system', 'content' => 'You are a PTE Academic API that strictly outputs JSON.'],
-                    ['role' => 'user', 'content' => $prompt],
-                ],
-                'temperature' => 0.1,
-                'response_format' => ['type' => 'json_object'],
-            ];
-
-            $llmResult = GroqKeyManager::callWithFallback('writing', $payload);
-            $jsonContent = $llmResult['body']['choices'][0]['message']['content'];
-            $scores = json_decode($jsonContent, true);
-
-            if (!$scores) {
-                throw new \Exception("Invalid JSON returned by LLM: {$jsonContent}");
-            }
+            $scores = app(PteScoringService::class)->scoreWriting($module, $promptText, $answer);
 
             // Save result
             $dbResult = PtePracticeResult::create([
@@ -332,7 +262,7 @@ Score the response strictly on a scale matching PTE standard scoring criteria. R
                 'scores' => $scores
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error("evaluateWriting Error: " . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Evaluation failed: ' . $e->getMessage()], 500);
         }

@@ -39,7 +39,7 @@
     <div class="overflow-x-auto mb-6">
         <table class="w-full border-collapse border border-gray-300 text-gray-700">
             <tbody>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="border border-gray-300 px-4 py-3 w-1/2">Observation checklist</td>
                     <td class="border border-gray-300 px-4 py-3">Conduct</td>
                 </tr>
@@ -61,7 +61,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="border border-gray-300 px-4 py-3">
                         <div class="flex items-center gap-2 flex-wrap">
                             <span>Carry out</span>
@@ -86,7 +86,7 @@
     <div class="overflow-x-auto">
         <table class="w-full border-collapse border border-gray-300 text-gray-700">
             <tbody>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="border border-gray-300 px-4 py-3 w-1/2">Non-observation checklist</td>
                     <td class="border border-gray-300 px-4 py-3">Conduct</td>
                 </tr>
@@ -100,7 +100,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="border border-gray-300 px-4 py-3">Questionnaires</td>
                     <td class="border border-gray-300 px-4 py-3">
                         <div class="space-y-3">

@@ -29,7 +29,7 @@
     <div class="overflow-x-auto w-full max-w-2xl mb-8">
         <table class="w-full text-left border-collapse border border-gray-300">
             <thead>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <th class="p-3 border border-gray-300 font-bold w-1/3">PART</th>
                     <th class="p-3 border border-gray-300 font-bold">USED FOR</th>
                 </tr>
@@ -45,7 +45,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="p-3 border border-gray-300">white blood cells</td>
                     <td class="p-3 border border-gray-300">
                         <div class="flex items-center gap-2">
@@ -59,7 +59,7 @@
                     <td class="p-3 border border-gray-300">platelets</td>
                     <td class="p-3 border border-gray-300">blood clotting</td>
                 </tr>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="p-3 border border-gray-300">plasma</td>
                     <td class="p-3 border border-gray-300">
                         <div class="flex items-center gap-2">
@@ -73,7 +73,7 @@
                     <td class="p-3 border border-gray-300 font-semibold">GIVING BLOOD DAYS</td>
                     <td class="p-3 border border-gray-300">Wednesday + next 2 days</td>
                 </tr>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="p-3 border border-gray-300 font-semibold">WHERE</td>
                     <td class="p-3 border border-gray-300">
                         <div class="flex items-center gap-2 flex-wrap">

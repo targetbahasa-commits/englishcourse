@@ -14,6 +14,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(\App\Http\Middleware\RedirectApexToWww::class);
         $middleware->authenticateSessions();
+        // Appended to the 'web' group (not the global stack above) since it
+        // needs the session to already be started for auth() to resolve.
+        $middleware->web(append: [\App\Http\Middleware\UpdateLastSeen::class]);
         $middleware->redirectGuestsTo(function ($request) {
             if ($request->is('online-test') || $request->is('online-test/*')) {
                 return secure_url('/test-taker/register');
@@ -33,7 +36,33 @@ $app = Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'CSRF token mismatch. Please refresh.',
+                    'token' => csrf_token(),
+                ], 419);
+            }
+
+            return redirect()->back()
+                ->withInput($request->except(['password', 'password_confirmation', '_token']))
+                ->with('error', 'Sesi Anda telah diperbarui secara otomatis demi keamanan. Silakan klik tombol Masuk kembali.');
+        });
+
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, \Illuminate\Http\Request $request) {
+            if ($e->getStatusCode() === 419) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => 'CSRF token mismatch. Please refresh.',
+                        'token' => csrf_token(),
+                    ], 419);
+                }
+
+                return redirect()->back()
+                    ->withInput($request->except(['password', 'password_confirmation', '_token']))
+                    ->with('error', 'Sesi Anda telah diperbarui secara otomatis demi keamanan. Silakan klik tombol Masuk kembali.');
+            }
+        });
     })->create();
 
 if (str_ends_with(base_path(), 'public_html')) {

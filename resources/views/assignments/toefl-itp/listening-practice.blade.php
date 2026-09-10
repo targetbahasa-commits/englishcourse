@@ -206,7 +206,7 @@
     </script>
 
     @if(session('success'))
-        <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800">
+        <div class="mb-6 rounded-xl border border-emerald-200 bg-white px-4 py-3 text-emerald-800">
             {{ session('success') }}
         </div>
     @endif
@@ -222,7 +222,7 @@
             $review = session('listeningPackageReview');
         @endphp
         <div class="mb-6 rounded-2xl border border-blue-200 bg-white shadow-sm overflow-hidden" x-data="{ reviewFilter: 'all' }">
-            <div class="px-5 py-4 bg-blue-50 border-b border-blue-100">
+            <div class="px-5 py-4 bg-white border-b border-blue-100">
                 <h3 class="text-lg font-bold text-blue-900">Review Jawaban Paket {{ $packageNumber ?? 1 }}</h3>
                 <p class="text-sm text-blue-800 mt-1">Skor {{ $review['score'] }} - Benar {{ $review['correct'] }}/{{ $review['total'] }}</p>
                 <div class="mt-3 flex flex-wrap gap-2">
@@ -242,8 +242,8 @@
                     @foreach(($review['rows'] ?? []) as $row)
                         @php
                             $statusClass = $row['is_correct']
-                                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                                : ($row['is_unanswered'] ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-red-50 border-red-200 text-red-800');
+                                ? 'bg-white border-emerald-200 text-emerald-800'
+                                : ($row['is_unanswered'] ? 'bg-white border-amber-200 text-amber-800' : 'bg-red-50 border-red-200 text-red-800');
                             $statusText = $row['is_correct'] ? 'Benar' : ($row['is_unanswered'] ? 'Kosong' : 'Salah');
                         @endphp
                         <div x-show="reviewFilter === 'all' || (reviewFilter === 'wrong' && {{ $row['is_correct'] ? 'false' : ($row['is_unanswered'] ? 'false' : 'true') }}) || (reviewFilter === 'unanswered' && {{ $row['is_unanswered'] ? 'true' : 'false' }})" class="rounded-lg border px-3 py-2 text-sm {{ $statusClass }}">
@@ -295,7 +295,7 @@
             </div>
 
             <!-- Part A Instructions -->
-            <div class="border-l-4 border-teal-600 pl-6 py-4 bg-teal-50">
+            <div class="border-l-4 border-teal-600 pl-6 py-4 bg-white">
                 <h3 class="part-header text-2xl mb-4">Part A</h3>
                 
                 <div class="space-y-4 text-gray-700">
@@ -307,7 +307,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <p class="text-sm text-gray-600 mb-2">On the recording, you hear:</p>
-                                <div class="bg-gray-50 p-4 rounded italic text-gray-700 mb-4">
+                                <div class="bg-white p-4 rounded italic text-gray-700 mb-4">
                                     <p class="mb-2">(Man) That exam was just awful.</p>
                                     <p class="mb-2">(Woman) Oh, it could have been worse.</p>
                                     <p class="font-semibold">(Narrator) What does the woman mean?</p>
@@ -329,13 +329,13 @@
                                         <span class="font-semibold">(C)</span>
                                         <span>It couldn't have been more difficult.</span>
                                     </div>
-                                    <div class="flex items-start gap-2 bg-teal-100 p-2 rounded">
+                                    <div class="flex items-start gap-2 bg-white p-2 rounded">
                                         <span class="font-semibold">(D)</span>
                                         <span><strong>The exam wasn't that bad.</strong></span>
                                     </div>
                                 </div>
                                 
-                                <div class="mt-4 p-3 bg-blue-50 rounded text-sm">
+                                <div class="mt-4 p-3 bg-white rounded text-sm">
                                     <p class="text-blue-900">The best answer to the question "What does the woman mean?" is (D), "The exam wasn't that bad." Therefore, the correct choice is (D).</p>
                                 </div>
                             </div>
@@ -397,7 +397,7 @@
                             {{-- Column 1 --}}
                             <div class="space-y-0 divide-y divide-gray-100">
                                 @foreach($listeningPartA->slice(0, $splitIndex) as $question)
-                                    <div class="py-1 group transition-colors hover:bg-gray-50/50 rounded-md px-1 -mx-1">
+                                    <div class="py-1 group transition-colors hover:bg-white rounded-md px-1 -mx-1">
                                         <div class="flex items-baseline gap-3">
                                             <div class="flex-none flex items-center justify-end gap-2 w-8">
                                                 <span class="font-bold text-gray-500 text-base">{{ $question->question_number }}.</span>
@@ -437,7 +437,7 @@
                             {{-- Column 2 --}}
                             <div class="space-y-0 divide-y divide-gray-100">
                                 @foreach($listeningPartA->slice($splitIndex) as $question)
-                                    <div class="py-1 group transition-colors hover:bg-gray-50/50 rounded-md px-1 -mx-1">
+                                    <div class="py-1 group transition-colors hover:bg-white rounded-md px-1 -mx-1">
                                         <div class="flex items-baseline gap-3">
                                             <div class="flex-none flex items-center justify-end gap-2 w-8">
                                                 <span class="font-bold text-gray-500 text-base">{{ $question->question_number }}.</span>
@@ -492,7 +492,7 @@
                     </div>
 
                 @else
-                    <div class="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                    <div class="text-center py-12 bg-white rounded-lg border-2 border-dashed border-gray-300">
                         <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         <p class="text-gray-500 text-lg font-medium">No questions available</p>
                         <p class="text-gray-400 text-sm mt-2">Please run the seeder to add questions</p>
@@ -506,7 +506,7 @@
                 @if($listeningPartB->count() > 0)
                     <div class="mt-8 pt-5 border-t-4 border-purple-200">
                         <!-- Part B Directions -->
-                        <div class="mb-6 p-6 bg-purple-50 border-l-4 border-purple-600 rounded-r-lg">
+                        <div class="mb-6 p-6 bg-white border-l-4 border-purple-600 rounded-r-lg">
                             <h3 class="text-2xl font-bold text-purple-700 mb-4">Part B</h3>
                             <div class="space-y-3 text-gray-700">
                                 <p><strong>Directions:</strong> In this part of the test, you will hear longer conversations. After each conversation, you will hear several questions. The conversations and questions will not be repeated.</p>
@@ -522,7 +522,7 @@
                                 {{-- Column 1 --}}
                                 <div class="space-y-0 divide-y divide-gray-100">
                                     @foreach($listeningPartB->take(4) as $question)
-                                        <div class="py-1 group transition-colors hover:bg-gray-50/50 rounded-md px-1 -mx-1">
+                                        <div class="py-1 group transition-colors hover:bg-white rounded-md px-1 -mx-1">
                                             <div class="flex items-baseline gap-3">
                                                 <div class="flex-none flex items-center justify-end gap-2 w-8">
                                                     <span class="font-bold text-gray-500 text-base">{{ $question->question_number }}.</span>
@@ -565,7 +565,7 @@
                                 {{-- Column 2 --}}
                                 <div class="space-y-0 divide-y divide-gray-100">
                                     @foreach($listeningPartB->skip(4) as $question)
-                                        <div class="py-1 group transition-colors hover:bg-gray-50/50 rounded-md px-1 -mx-1">
+                                        <div class="py-1 group transition-colors hover:bg-white rounded-md px-1 -mx-1">
                                             <div class="flex items-baseline gap-3">
                                                 <div class="flex-none flex items-center justify-end gap-2 w-8">
                                                     <span class="font-bold text-gray-500 text-base">{{ $question->question_number }}.</span>
@@ -628,7 +628,7 @@
                 @if($listeningPartC->count() > 0)
                     <div class="mt-8 pt-5 border-t-4 border-indigo-200">
                         <!-- Part C Directions -->
-                        <div class="mb-6 p-6 bg-indigo-50 border-l-4 border-indigo-600 rounded-r-lg">
+                        <div class="mb-6 p-6 bg-white border-l-4 border-indigo-600 rounded-r-lg">
                             <h3 class="text-2xl font-bold text-indigo-700 mb-4">Part C</h3>
                             <div class="space-y-3 text-gray-700">
                                 <p><strong>Directions:</strong> In this part of the test, you will hear several short talks. After each talk, you will hear some questions. The talks and questions will not be repeated.</p>
@@ -647,7 +647,7 @@
                                         $splitIndex = ceil($listeningPartC->count() / 2);
                                     @endphp
                                     @foreach($listeningPartC->slice(0, $splitIndex) as $question)
-                                        <div class="py-1 group transition-colors hover:bg-gray-50/50 rounded-md px-1 -mx-1">
+                                        <div class="py-1 group transition-colors hover:bg-white rounded-md px-1 -mx-1">
                                             <div class="flex items-baseline gap-3">
                                                 <div class="flex-none flex items-center justify-end gap-2 w-8">
                                                     <span class="font-bold text-gray-500 text-base">{{ $question->question_number }}.</span>
@@ -690,7 +690,7 @@
                                 {{-- Column 2 --}}
                                 <div class="space-y-0 divide-y divide-gray-100">
                                     @foreach($listeningPartC->slice($splitIndex) as $question)
-                                        <div class="py-1 group transition-colors hover:bg-gray-50/50 rounded-md px-1 -mx-1">
+                                        <div class="py-1 group transition-colors hover:bg-white rounded-md px-1 -mx-1">
                                             <div class="flex items-baseline gap-3">
                                                 <div class="flex-none flex items-center justify-end gap-2 w-8">
                                                     <span class="font-bold text-gray-500 text-base">{{ $question->question_number }}.</span>
@@ -769,7 +769,7 @@
             </div>
 
             <!-- Structure Instructions -->
-            <div class="border-l-4 border-teal-600 pl-6 py-4 bg-teal-50">
+            <div class="border-l-4 border-teal-600 pl-6 py-4 bg-white">
                 <h3 class="part-header text-2xl mb-4">Structure</h3>
                 
                 <div class="space-y-4 text-gray-700">
@@ -788,7 +788,7 @@
                             </div>
                         </div>
                         
-                        <div class="p-3 bg-blue-50 rounded text-sm">
+                        <div class="p-3 bg-white rounded text-sm">
                             <p class="text-blue-900">The sentence should read, "Geysers have often been compared to volcanoes because they both emit hot liquids from beneath the Earth's surface." Therefore, the correct choice is (B).</p>
                         </div>
                     </div>
@@ -796,7 +796,7 @@
             </div>
 
             <!-- Written Expression Instructions -->
-            <div class="border-l-4 border-orange-600 pl-6 py-4 bg-orange-50 mt-6">
+            <div class="border-l-4 border-orange-600 pl-6 py-4 bg-white mt-6">
                 <h3 class="text-2xl font-bold text-orange-700 mb-4">Written Expression</h3>
                 
                 <div class="space-y-4 text-gray-700">
@@ -815,7 +815,7 @@
                             </div>
                         </div>
                         
-                        <div class="p-3 bg-blue-50 rounded text-sm">
+                        <div class="p-3 bg-white rounded text-sm">
                             <p class="text-blue-900">The sentence should read, "Guppies are sometimes called rainbow fish due to the bright colors of the males." Therefore, you should choose (A).</p>
                         </div>
                     </div>
@@ -853,7 +853,7 @@
                     
                     <div class="space-y-6">
                         @foreach($structureQuestions as $question)
-                            <div class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div class="p-4 bg-white rounded-lg hover:bg-white transition-colors">
                                 <div class="flex items-start gap-3">
                                     <div class="flex-none">
                                         <span class="font-bold text-gray-600 text-lg">{{ $question->question_number }}.</span>
@@ -890,7 +890,7 @@
                     
                     <div class="space-y-6">
                         @foreach($writtenQuestions as $question)
-                            <div class="p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
+                            <div class="p-4 bg-white rounded-lg hover:bg-white transition-colors">
                                 <div class="flex items-start gap-3">
                                     <div class="flex-none">
                                         <span class="font-bold text-gray-600 text-lg">{{ $question->question_number }}.</span>

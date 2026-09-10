@@ -11,13 +11,13 @@
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
 
         {{-- Section: Primitive measurements --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Primitive measurements by observing</p>
         </div>
         <div class="border-b border-gray-200 p-3">
             <p class="text-gray-700">Two time keepers:</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• The</span>
                 <strong class="text-blue-600">31</strong>
@@ -26,7 +26,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Natural events, such as winds and rains, rivers flooding, plants flowering, and the cycles of breeding or</span>
                 <strong class="text-blue-600">32</strong>
@@ -38,13 +38,13 @@
         </div>
 
         {{-- Section: Precise measurements --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Precise measurements</p>
         </div>
         <div class="border-b border-gray-200 p-3">
             <p class="text-gray-700">They became important for organising activities for:</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>•</span>
                 <strong class="text-blue-600">33</strong>
@@ -53,7 +53,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>•</span>
                 <strong class="text-blue-600">34</strong>
@@ -62,7 +62,7 @@
                 </span>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>The oldest time keepers were discovered in Mesopotamia and</span>
                 <strong class="text-blue-600">35</strong>
@@ -80,13 +80,13 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
         {{-- Header row --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 font-bold text-gray-800 border-r border-gray-200">Time Keeper</div>
             <div class="p-3 font-bold text-gray-800">Disadvantages</div>
         </div>
 
         {{-- Row 1: The sundial --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 border-r border-gray-200">The sundial</div>
             <div class="p-3 text-gray-700 flex items-center flex-wrap gap-1">
                 <span>In different parts of the year, the time for day</span>
@@ -98,7 +98,7 @@
         </div>
 
         {{-- Row 2: The clepsydra --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 border-r border-gray-200">
                 <p>The clepsydra</p>
                 <p class="text-sm text-gray-500">(Water clock)</p>
@@ -114,7 +114,7 @@
         </div>
 
         {{-- Row 3: The Q38 --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 border-r border-gray-200 flex items-center gap-1">
                 <span>The</span>
                 <strong class="text-blue-600">38</strong>
@@ -132,7 +132,7 @@
         </div>
 
         {{-- Row 4: Fire candle clock --}}
-        <div class="grid grid-cols-2 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 border-r border-gray-200">Fire candle clock</div>
             <div class="p-3 text-gray-700 flex items-center flex-wrap gap-1">
                 <span>The burning</span>

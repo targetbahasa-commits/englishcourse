@@ -5,14 +5,14 @@
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
         <div class="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-indigo-200/40 blur-3xl"></div>
         <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-purple-200/30 blur-3xl"></div>
-        <div class="absolute top-[20%] left-[20%] w-[300px] h-[300px] rounded-full bg-blue-100/40 blur-2xl"></div>
+        <div class="absolute top-[20%] left-[20%] w-[300px] h-[300px] rounded-full bg-white blur-2xl"></div>
     </div>
 
     <div class="container mx-auto px-4 relative z-10 max-w-5xl">
         <div class="mb-8 flex items-center justify-between">
             <a href="{{ route('assignments.ielts-academic.listening.index') }}"
                class="inline-flex items-center text-gray-500 hover:text-indigo-600 transition-colors group text-sm font-medium tracking-wide">
-                <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3 group-hover:bg-indigo-100 transition-all">
+                <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center mr-3 group-hover:bg-white transition-all">
                     <svg class="w-4 h-4 transform group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
@@ -39,7 +39,7 @@
 
             <div class="p-6 md:px-10 md:pb-10 bg-white min-h-[400px] space-y-8">
                 <form class="space-y-8">
-                    <section class="rounded-2xl border border-indigo-100 bg-indigo-50/30 p-5 md:p-6">
+                    <section class="rounded-2xl border border-indigo-100 bg-white p-5 md:p-6">
                         <h2 class="text-xl font-bold text-slate-900 mb-2">Part A: Map Labelling</h2>
                         <p class="text-slate-600 text-sm mb-5">Write the correct letters, <span class="font-bold">B-G</span>, next to Questions 1 and 2. 'A' is already given as an example.</p>
 
@@ -65,7 +65,7 @@
                         </div>
                     </section>
 
-                    <section class="rounded-2xl border border-amber-100 bg-amber-50/30 p-5 md:p-6">
+                    <section class="rounded-2xl border border-amber-100 bg-white p-5 md:p-6">
                         <h2 class="text-xl font-bold text-slate-900 mb-2">Part B: Prepositional Phrases</h2>
                         <p class="text-slate-600 text-sm mb-5">Write the prepositional phrases next to the correct pictures (a-h).</p>
 
@@ -83,7 +83,7 @@
                         </div>
                     </section>
 
-                    <section class="rounded-2xl border border-emerald-100 bg-emerald-50/30 p-5 md:p-6">
+                    <section class="rounded-2xl border border-emerald-100 bg-white p-5 md:p-6">
                         <h2 class="text-xl font-bold text-slate-900 mb-2">Part C: Direction Phrases</h2>
                         <p class="text-slate-600 text-sm mb-5">Write the phrases next to the correct pictures (a-k).</p>
 
@@ -202,7 +202,7 @@
                 </button>
             </div>
 
-            <div id="transcriptDrawer" class="hidden border-t border-slate-100 bg-slate-50 p-6 md:p-8 animate-slide-down">
+            <div id="transcriptDrawer" class="hidden border-t border-slate-100 bg-white p-6 md:p-8 animate-slide-down">
                <div class="max-w-3xl mx-auto prose prose-sm text-slate-600">
                     <h3 class="text-slate-900 mb-2">Transcript</h3>
                     <p class="italic text-slate-500">Transcript content will appear here if available.</p>

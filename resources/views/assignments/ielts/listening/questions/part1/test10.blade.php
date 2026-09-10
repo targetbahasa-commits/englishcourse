@@ -14,13 +14,13 @@
         </div>
 
         {{-- Example row --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 italic text-gray-500">The discussion topic:</div>
             <div class="p-3 italic text-gray-500">lease for next year</div>
         </div>
 
         {{-- Q1: The total rent --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">The total rent:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">Peter £ 110 &amp; Jim £</span>
@@ -32,7 +32,7 @@
         </div>
 
         {{-- Q2: Car parking --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Car parking:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">in the</span>
@@ -44,7 +44,7 @@
         </div>
 
         {{-- Q3: A place to buy things --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">A place to buy things:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <strong>3</strong>
@@ -56,7 +56,7 @@
         </div>
 
         {{-- Q4: The fees they should share --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">The fees they should share:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <strong>4</strong>
@@ -68,7 +68,7 @@
         </div>
 
         {{-- Q5, Q6: The appliances needed --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">The appliances needed:</div>
             <div class="p-3 space-y-3 text-gray-700">
                 <p>• The landlord will provide the microwave.</p>
@@ -93,7 +93,7 @@
         </div>
 
         {{-- Q7: Location of the telephone --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Location of the telephone:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">in the</span>
@@ -105,7 +105,7 @@
         </div>
 
         {{-- Q8: Move-in date --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Move-in date:</div>
             <div class="p-3">
                 <strong>8</strong>
@@ -116,7 +116,7 @@
         </div>
 
         {{-- Q9: Watching the game together --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Watching the game together:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">on</span>
@@ -128,7 +128,7 @@
         </div>
 
         {{-- Q10: What Jim needs to do before move-in --}}
-        <div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">What Jim needs to do before move-in:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">take</span>

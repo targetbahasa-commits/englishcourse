@@ -18,14 +18,7 @@
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
     <div class="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-        <div class="flex justify-between items-center mb-8">
-            <a href="{{ route('assignments.grammar-writing') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
-    <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-    </svg>
-    Back
-</a>
-        </div>
+        <x-grammar-meeting-actions :meetingNumber="16" track="fast-track" />
 
         <h1 class="text-3xl font-bold text-center text-teal-600 mb-8">Pelestarian Lingkungan (Pertemuan 16)</h1>
         
@@ -47,7 +40,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('assignments.grammar-writing.meeting16.submit') }}">
+        <form method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting16.submit'), PHP_URL_PATH) }}">
             @csrf
             
             <!-- Paragraph Translation -->
@@ -146,7 +139,7 @@
         </form>
         
         @if($submitted)
-            <form method="POST" action="{{ route('assignments.grammar-writing.meeting16.reset') }}" class="mt-4">
+            <form method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting16.reset'), PHP_URL_PATH) }}" class="mt-4">
                 @csrf
                 <button type="submit" class="w-full py-4 bg-gray-500 text-white rounded-xl font-bold text-lg hover:bg-gray-600 transition-colors shadow-lg">
                     Coba Lagi
@@ -161,57 +154,7 @@
         .word-missing { color: #3b82f6; font-weight: bold; }
         .word-extra { color: #f59e0b; text-decoration: line-through; }
     </style>
-    <x-irregular-verbs-button />
 
-    <!-- Tenses Chart Button -->
-    <div x-data="{ openTenses: false }" class="fixed bottom-28 right-8 z-50">
-       <!-- Floating Button -->
-       <button @click="openTenses = true"
-               class="bg-cyan-400 hover:bg-cyan-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2">
-           <span>💡</span> Tenses
-       </button>
-
-       <!-- Modal Backdrop -->
-       <div x-show="openTenses"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-            style="display: none;">
-          
-           <!-- Modal Content -->
-           <div @click.outside="openTenses = false"
-                class="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
-              
-               <!-- Header -->
-               <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-cyan-50">
-                   <h3 class="text-xl font-bold text-gray-800">Tenses Chart</h3>
-                   <button @click="openTenses = false" class="text-gray-400 hover:text-gray-600">
-                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                   </button>
-               </div>
-
-               <!-- Image Container -->
-               <div class="overflow-y-auto p-6" style="max-height: 75vh;">
-                   <img src="{{ asset('images/materials/grammar/tenses-chart.png') }}" 
-                        alt="Tenses Chart" 
-                        class="w-full h-auto rounded-lg shadow-md">
-               </div>
-
-               <!-- Footer Note -->
-               <div class="p-4 bg-cyan-50 border-t border-cyan-100 text-center">
-                   <p class="text-sm text-gray-700 font-medium">
-                       💡 Gunakan chart ini sebagai panduan untuk menentukan tenses yang tepat
-                   </p>
-               </div>
-           </div>
-       </div>
-    </div>
-    
-    
     <!-- Auto-Save Script -->
 
     <!-- INLINE AUTO-SAVE SCRIPT -->
@@ -359,13 +302,13 @@
 
         async syncDraftToServer(form) {
             if (!form) {
-                return;
+                return false;
             }
 
             const action = form.getAttribute('action') || '';
             const match = action.match(/\/assignments\/grammar-writing\/meeting(\d+)/);
             if (!match) {
-                return;
+                return false;
             }
 
             const meetingNumber = match[1];
@@ -413,8 +356,10 @@
                     body: JSON.stringify(payload),
                     keepalive: true,
                 });
+                return true;
             } catch (e) {
                 console.error('Failed to sync draft to server:', e);
+                return false;
             }
         },
 
@@ -477,7 +422,7 @@
             if (!indicator) {
                 indicator = document.createElement('div');
                 indicator.id = 'auto-save-indicator';
-                indicator.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+                indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
                 indicator.style.transition = 'opacity 0.3s';
                 indicator.innerHTML = '✓ Tersimpan otomatis';
                 document.body.appendChild(indicator);
@@ -514,17 +459,98 @@
 
     // Make AutoSave available globally
     window.AutoSave = AutoSave;
+    AutoSave.showSaveErrorIndicator = function () {
+        const indicator = document.createElement('div');
+        indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+        indicator.style.transition = 'opacity 0.3s';
+        indicator.innerHTML = '✗ Gagal menyimpan, coba lagi';
+        document.body.appendChild(indicator);
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+            setTimeout(() => indicator.remove(), 300);
+        }, 3000);
+    };
+
+    AutoSave.manualSave = async function () {
+        const form = document.querySelector('form[action*="/assignments/grammar-writing/meeting"][method="POST"]');
+        if (!form) {
+            return;
+        }
+
+        const btn = document.getElementById('manual-save-btn');
+        if (btn) {
+            btn.dataset.originalText = btn.dataset.originalText || btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Menyimpan...';
+        }
+
+        try {
+            const inputs = form.querySelectorAll('input[type="text"], textarea');
+            const answers = {};
+            inputs.forEach((input) => {
+                if (input.name && input.value) {
+                    answers[input.name] = input.value;
+                }
+            });
+            localStorage.setItem(this.storageKey, JSON.stringify(answers));
+        } catch (e) {
+            console.error('[ManualSave] Failed to update localStorage:', e);
+        }
+
+        const ok = await this.syncDraftToServer(form);
+
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.originalText;
+        }
+
+        if (ok) {
+            this.showSaveIndicator();
+        } else {
+            this.showSaveErrorIndicator();
+        }
+    };
+
 
     // Initialize auto-save for meeting 16
     document.addEventListener('DOMContentLoaded', function() {
         const userId = {{ Auth::id() ?? 'null' }};
-        if (userId) {
+        if (userId && !window.location.search.includes('live_preview_for')) {
             AutoSave.init('16', userId);
         }
     });
     </script>
 
 
+
     <x-live-drawing />
+    @include('components.student-broadcaster')
+
+    {{-- Consolidated Floating Helper Buttons (hidden during admin Live
+         Preview - these are student-only interactive tools, not relevant
+         to the admin's read-only observation view) --}}
+    @if(!request()->filled('live_preview_for'))
+    <div class="fixed bottom-4 right-8 z-50 flex flex-col gap-2 items-end">
+        <x-dictionary-button />
+        <x-conjunction-button />
+        <x-preposition-button />
+        <x-pronouns-button />
+        <x-verb-patterns-button />
+        <x-modal-button />
+        <x-tenses-button />
+        <x-irregular-verbs-button />
+    </div>
+    @endif
+
+    @if(!$submitted)
+        <div class="fixed bottom-4 z-50" style="left: 50%; transform: translateX(-50%);">
+            <button type="button" id="manual-save-btn" onclick="AutoSave.manualSave()"
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold shadow-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3M8 7h8"></path></svg>
+                Save
+            </button>
+        </div>
+    @endif
+
 </body>
 </html>

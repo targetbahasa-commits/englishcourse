@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', 'IELTS Speaking Part 3')
+
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <!-- Header -->
@@ -26,14 +28,14 @@
             @php
             $colorMap = [
                 'blue' => [
-                    'bg_hover' => 'group-hover:bg-blue-50',
+                    'bg_hover' => 'group-hover:bg-white',
                     'border' => 'border-blue-100',
                     'border_hover' => 'group-hover:border-blue-300',
                     'shadow_hover' => 'group-hover:shadow-blue-200',
                     'icon_bg' => 'bg-blue-500',
                     'icon_ring' => 'ring-blue-200',
                     'text' => 'text-blue-600',
-                    'badge_bg' => 'group-hover:bg-blue-100',
+                    'badge_bg' => 'group-hover:bg-white',
                     'badge_text' => 'group-hover:text-blue-700',
                     'blob' => 'bg-blue-500' 
                 ],
@@ -50,38 +52,38 @@
                     'blob' => 'bg-green-500'
                 ],
                 'indigo' => [
-                    'bg_hover' => 'group-hover:bg-indigo-50',
+                    'bg_hover' => 'group-hover:bg-white',
                     'border' => 'border-indigo-100',
                     'border_hover' => 'group-hover:border-indigo-300',
                     'shadow_hover' => 'group-hover:shadow-indigo-200',
                     'icon_bg' => 'bg-indigo-500',
                     'icon_ring' => 'ring-indigo-200',
                     'text' => 'text-indigo-600',
-                    'badge_bg' => 'group-hover:bg-indigo-100',
+                    'badge_bg' => 'group-hover:bg-white',
                     'badge_text' => 'group-hover:text-indigo-700',
                     'blob' => 'bg-indigo-500'
                 ],
                 'orange' => [
-                    'bg_hover' => 'group-hover:bg-orange-50',
+                    'bg_hover' => 'group-hover:bg-white',
                     'border' => 'border-orange-100',
                     'border_hover' => 'group-hover:border-orange-300',
                     'shadow_hover' => 'group-hover:shadow-orange-200',
                     'icon_bg' => 'bg-orange-500',
                     'icon_ring' => 'ring-orange-200',
                     'text' => 'text-orange-600',
-                    'badge_bg' => 'group-hover:bg-orange-100',
+                    'badge_bg' => 'group-hover:bg-white',
                     'badge_text' => 'group-hover:text-orange-700',
                     'blob' => 'bg-orange-500'
                 ],
                 'purple' => [
-                    'bg_hover' => 'group-hover:bg-purple-50',
+                    'bg_hover' => 'group-hover:bg-white',
                     'border' => 'border-purple-100',
                     'border_hover' => 'group-hover:border-purple-300',
                     'shadow_hover' => 'group-hover:shadow-purple-200',
                     'icon_bg' => 'bg-purple-500',
                     'icon_ring' => 'ring-purple-200',
                     'text' => 'text-purple-600',
-                    'badge_bg' => 'group-hover:bg-purple-100',
+                    'badge_bg' => 'group-hover:bg-white',
                     'badge_text' => 'group-hover:text-purple-700',
                     'blob' => 'bg-purple-500'
                 ],
@@ -98,26 +100,26 @@
                     'blob' => 'bg-red-500'
                 ],
                 'sky' => [
-                    'bg_hover' => 'group-hover:bg-sky-50',
+                    'bg_hover' => 'group-hover:bg-white',
                     'border' => 'border-sky-100',
                     'border_hover' => 'group-hover:border-sky-300',
                     'shadow_hover' => 'group-hover:shadow-sky-200',
                     'icon_bg' => 'bg-sky-500',
                     'icon_ring' => 'ring-sky-200',
                     'text' => 'text-sky-600',
-                    'badge_bg' => 'group-hover:bg-sky-100',
+                    'badge_bg' => 'group-hover:bg-white',
                     'badge_text' => 'group-hover:text-sky-700',
                     'blob' => 'bg-sky-500'
                 ],
                 'cyan' => [
-                    'bg_hover' => 'group-hover:bg-cyan-50',
+                    'bg_hover' => 'group-hover:bg-white',
                     'border' => 'border-cyan-100',
                     'border_hover' => 'group-hover:border-cyan-300',
                     'shadow_hover' => 'group-hover:shadow-cyan-200',
                     'icon_bg' => 'bg-cyan-500',
                     'icon_ring' => 'ring-cyan-200',
                     'text' => 'text-cyan-600',
-                    'badge_bg' => 'group-hover:bg-cyan-100',
+                    'badge_bg' => 'group-hover:bg-white',
                     'badge_text' => 'group-hover:text-cyan-700',
                     'blob' => 'bg-cyan-500'
                 ],
@@ -134,31 +136,31 @@
                     'blob' => 'bg-pink-500'
                 ],
                 'teal' => [
-                    'bg_hover' => 'group-hover:bg-teal-50',
+                    'bg_hover' => 'group-hover:bg-white',
                     'border' => 'border-teal-100',
                     'border_hover' => 'group-hover:border-teal-300',
                     'shadow_hover' => 'group-hover:shadow-teal-200',
                     'icon_bg' => 'bg-teal-500',
                     'icon_ring' => 'ring-teal-200',
                     'text' => 'text-teal-600',
-                    'badge_bg' => 'group-hover:bg-teal-100',
+                    'badge_bg' => 'group-hover:bg-white',
                     'badge_text' => 'group-hover:text-teal-700',
                     'blob' => 'bg-teal-500'
                 ],
                 'emerald' => [
-                    'bg_hover' => 'group-hover:bg-emerald-50',
+                    'bg_hover' => 'group-hover:bg-white',
                     'border' => 'border-emerald-100',
                     'border_hover' => 'group-hover:border-emerald-300',
                     'shadow_hover' => 'group-hover:shadow-emerald-200',
                     'icon_bg' => 'bg-emerald-500',
                     'icon_ring' => 'ring-emerald-200',
                     'text' => 'text-emerald-600',
-                    'badge_bg' => 'group-hover:bg-emerald-100',
+                    'badge_bg' => 'group-hover:bg-white',
                     'badge_text' => 'group-hover:text-emerald-700',
                     'blob' => 'bg-emerald-500'
                 ],
                 'slate' => [
-                    'bg_hover' => 'group-hover:bg-gray-50',
+                    'bg_hover' => 'group-hover:bg-white',
                     'border' => 'border-gray-100',
                     'border_hover' => 'group-hover:border-gray-400',
                     'shadow_hover' => 'group-hover:shadow-gray-200',
@@ -170,14 +172,14 @@
                     'blob' => 'bg-gray-400'
                 ],
                 'amber' => [
-                    'bg_hover' => 'group-hover:bg-amber-50',
+                    'bg_hover' => 'group-hover:bg-white',
                     'border' => 'border-amber-100',
                     'border_hover' => 'group-hover:border-amber-300',
                     'shadow_hover' => 'group-hover:shadow-amber-200',
                     'icon_bg' => 'bg-amber-500',
                     'icon_ring' => 'ring-amber-200',
                     'text' => 'text-amber-600',
-                    'badge_bg' => 'group-hover:bg-amber-100',
+                    'badge_bg' => 'group-hover:bg-white',
                     'badge_text' => 'group-hover:text-amber-700',
                     'blob' => 'bg-amber-500'
                 ],
@@ -194,19 +196,19 @@
                     'blob' => 'bg-rose-500'
                 ],
                 'yellow' => [
-                    'bg_hover' => 'group-hover:bg-yellow-50',
+                    'bg_hover' => 'group-hover:bg-white',
                     'border' => 'border-yellow-200',
                     'border_hover' => 'group-hover:border-yellow-400',
                     'shadow_hover' => 'group-hover:shadow-yellow-200',
                     'icon_bg' => 'bg-yellow-500',
                     'icon_ring' => 'ring-yellow-200',
                     'text' => 'text-yellow-700',
-                    'badge_bg' => 'group-hover:bg-yellow-100',
+                    'badge_bg' => 'group-hover:bg-white',
                     'badge_text' => 'group-hover:text-yellow-800',
                     'blob' => 'bg-yellow-500'
                 ],
                 'gray' => [
-                    'bg_hover' => 'group-hover:bg-gray-100',
+                    'bg_hover' => 'group-hover:bg-white',
                     'border' => 'border-gray-200',
                     'border_hover' => 'group-hover:border-gray-400',
                     'shadow_hover' => 'group-hover:shadow-gray-200',
@@ -311,7 +313,7 @@
                     </div>
                     
                     <!-- Question Badge -->
-                    <span class="px-3 py-1 rounded-full bg-gray-50 text-gray-500 border border-gray-100 text-xs font-bold {{ $theme['badge_bg'] }} {{ $theme['badge_text'] }} transition-colors">
+                    <span class="px-3 py-1 rounded-full bg-white text-gray-500 border border-gray-100 text-xs font-bold {{ $theme['badge_bg'] }} {{ $theme['badge_text'] }} transition-colors">
                         Discussion
                     </span>
                 </div>

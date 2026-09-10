@@ -31,6 +31,23 @@ class RegisteredUserController extends Controller
         return view('auth.register', compact('ref'));
     }
 
+    /**
+     * Shareable per-partner link (distributed by an HR/L&D contact to their
+     * employees) - resolves the code and hands off to the normal student
+     * registration page with it attached, so registration itself stays a
+     * single code path.
+     */
+    public function partnerRedirect(string $code): RedirectResponse
+    {
+        $partner = \App\Models\Partner::where('registration_code', $code)->where('is_active', true)->first();
+
+        if (!$partner) {
+            return redirect()->route('student.register')->with('error', 'Kode kerjasama instansi tidak valid atau sudah tidak aktif.');
+        }
+
+        return redirect()->route('student.register', ['partner' => $partner->registration_code]);
+    }
+
     public function createTeacher(): View
     {
         return view('auth.register-teacher');
@@ -61,6 +78,11 @@ class RegisteredUserController extends Controller
     private function renderStudentRegistrationView(Request $request, bool $skipPaymentFlow): View
     {
         $ref = $request->query('ref');
+        $partner = null;
+        $partnerCode = $request->query('partner');
+        if ($partnerCode) {
+            $partner = \App\Models\Partner::where('registration_code', $partnerCode)->where('is_active', true)->first();
+        }
         $classPeriods = \App\Models\ClassPeriod::where('status', '!=', 'closed')->latest()->get();
 
         $requestedProgram = strtolower(trim((string) $request->query('program', '')));
@@ -83,7 +105,7 @@ class RegisteredUserController extends Controller
 
         $programs = \App\Models\Program::where('is_active', true)->withoutMockTests()->orderBy('name')->get();
 
-        return view('auth.register-student', compact('classPeriods', 'ref', 'preselectedProgramSlug', 'skipPaymentFlow', 'programs'));
+        return view('auth.register-student', compact('classPeriods', 'ref', 'partner', 'preselectedProgramSlug', 'skipPaymentFlow', 'programs'));
     }
 
     /**
@@ -101,6 +123,7 @@ class RegisteredUserController extends Controller
             'role' => ['nullable', 'string', 'in:student,teacher,guest,test-taker'],
             'phone_number' => ['nullable', 'string', 'max:20'],
             'referral_code' => ['nullable', 'string', 'exists:users,referral_code'],
+            'partner_code' => ['nullable', 'string', 'exists:partners,registration_code'],
             'utm_source' => ['nullable', 'string', 'max:100'],
             'utm_medium' => ['nullable', 'string', 'max:100'],
             'utm_campaign' => ['nullable', 'string', 'max:150'],
@@ -160,7 +183,7 @@ class RegisteredUserController extends Controller
 
             $slugsToFind = $acceptedProgramSlugs[$selectedProgramSlug] ?? [$selectedProgramSlug];
 
-            $program = Program::whereIn('slug', $slugsToFind)->first();
+            $program = Program::whereIn('slug', $slugsToFind)->where('is_active', true)->first();
 
             if (!$program) {
                 return back()->withInput()->withErrors([
@@ -192,6 +215,16 @@ class RegisteredUserController extends Controller
             }
         }
 
+        $partnerId = null;
+        if ($request->filled('partner_code')) {
+            $partner = \App\Models\Partner::where('registration_code', $request->partner_code)
+                ->where('is_active', true)
+                ->first();
+            if ($partner) {
+                $partnerId = $partner->id;
+            }
+        }
+
         // Generate a unique referral code for the new user
         $newReferralCode = strtoupper(Str::random(6));
         while (User::where('referral_code', $newReferralCode)->exists()) {
@@ -206,6 +239,7 @@ class RegisteredUserController extends Controller
             'role' => $role,
             'referral_code' => $newReferralCode,
             'referred_by_id' => $referredBy,
+            'partner_id' => $partnerId,
             // 'program_id' is intentionally left null until admin approves the Payment
         ] + $attributionData);
 

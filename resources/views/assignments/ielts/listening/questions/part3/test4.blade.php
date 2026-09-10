@@ -32,7 +32,7 @@
     <div class="overflow-x-auto">
         <table class="w-full border-collapse border border-gray-300 text-gray-700">
             <thead>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <th class="border border-gray-300 px-4 py-3 text-left font-bold w-1/3">Subject</th>
                     <th class="border border-gray-300 px-4 py-3 text-left font-bold">Recommended Page Design</th>
                 </tr>
@@ -54,7 +54,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="border border-gray-300 px-4 py-3">Culture Studies</td>
                     <td class="border border-gray-300 px-4 py-3">
                         <div class="flex items-center gap-2 flex-wrap">
@@ -76,7 +76,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="border border-gray-300 px-4 py-3">Political Science</td>
                     <td class="border border-gray-300 px-4 py-3">
                         <div class="flex items-center gap-2 flex-wrap">

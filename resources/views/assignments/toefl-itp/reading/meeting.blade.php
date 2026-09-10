@@ -62,7 +62,7 @@
                             <button 
                                 onclick="openAnswerKeyStatusModal()"
                                 class="px-4 py-2 rounded-full font-semibold text-sm transition-all cursor-pointer hover:scale-105 shadow-md"
-                                :class="$isAnswerKeyComplete ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-amber-100 text-amber-700 border border-amber-300'"
+                                :class="$isAnswerKeyComplete ? 'bg-white text-emerald-700 border border-emerald-300' : 'bg-white text-amber-700 border border-amber-300'"
                             >
                                 @if($isAnswerKeyComplete)
                                     ✓ Answer Key Ditambahkan
@@ -74,7 +74,7 @@
                             <!-- Count Chip -->
                             <button 
                                 onclick="openAnswerKeyStatusModal()"
-                                class="px-4 py-2 rounded-full font-semibold text-sm bg-blue-100 text-blue-700 border border-blue-300 transition-all cursor-pointer hover:scale-105 shadow-md"
+                                class="px-4 py-2 rounded-full font-semibold text-sm bg-white text-blue-700 border border-blue-300 transition-all cursor-pointer hover:scale-105 shadow-md"
                             >
                                 {{ $answerKeyFilledCount }}/{{ $totalQuestionCount }} Soal
                             </button>
@@ -84,26 +84,26 @@
                 </div>
 
                 <div class="prose max-w-none mb-8">
-                     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                     <div class="bg-white border-l-4 border-yellow-400 p-4 mb-6">
                         <p class="font-bold">Directions:</p>
                         <p>Read the passages. Then choose the correct answer for each question.</p>
                      </div>
 
                      @foreach($passages as $passage)
                         <div class="mb-10 p-6 bg-white border border-gray-100 rounded-2xl shadow-sm">
-                            <div class="bg-gray-50 p-6 rounded-xl mb-6 text-gray-800 leading-relaxed text-justify relative group" 
+                            <div class="bg-white p-6 rounded-xl mb-6 text-gray-800 leading-relaxed text-justify relative group" 
                                  x-data="{ 
                                     translateMode: false, 
                                     originalContent: `{{ $passage->content }}`,
                                     passageTranslation: `{{ addslashes($passage->indonesian_translation ?? '') }}`
                                  }"
                             >
-                                <span class="absolute top-0 right-0 bg-blue-100 text-blue-600 text-xs font-bold px-2 py-1 rounded-bl-lg rounded-tr-lg">Passage {{ $passage->passage_number }}</span>
+                                <span class="absolute top-0 right-0 bg-white text-blue-600 text-xs font-bold px-2 py-1 rounded-bl-lg rounded-tr-lg">Passage {{ $passage->passage_number }}</span>
                                 
                                 <!-- Admin Controls -->
                                 @if(Auth::user()->isAdmin())
                                 <div class="absolute top-8 right-2 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity p-2 z-10">
-                                    <button onclick='openEditPassageModal(@json($passage))' class="w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded-xl hover:bg-blue-200 transition-colors">
+                                    <button onclick='openEditPassageModal(@json($passage))' class="w-10 h-10 flex items-center justify-center bg-white text-blue-600 rounded-xl hover:bg-blue-200 transition-colors">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
                                     <form action="{{ route('assignments.toefl-itp.reading.passage.destroy', $passage->id) }}" method="POST" onsubmit="return confirm('Delete this passage? This will also delete all associated questions.');">
@@ -138,7 +138,7 @@
                                     <!-- Admin Controls -->
                                     @if(Auth::user()->isAdmin())
                                     <div class="absolute top-0 right-0 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity p-2">
-                                        <button onclick='openEditQuestionModal(@json($question))' class="w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded-xl hover:bg-blue-200 transition-colors">
+                                        <button onclick='openEditQuestionModal(@json($question))' class="w-10 h-10 flex items-center justify-center bg-white text-blue-600 rounded-xl hover:bg-blue-200 transition-colors">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                         </button>
                                         <form action="{{ route('assignments.toefl-itp.reading.question.destroy', $question->id) }}" method="POST" onsubmit="return confirm('Delete this question?');">
@@ -156,7 +156,7 @@
                                     @endphp
 
                                     <div class="flex gap-4 mb-4">
-                                        <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-600 rounded-lg font-bold text-sm">{{ $question->question_number }}</span>
+                                        <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-white text-gray-600 rounded-lg font-bold text-sm">{{ $question->question_number }}</span>
                                         <div class="flex-1">
                                             <p class="font-medium text-gray-800 inline">{{ $question->question_text }}</p>
                                             
@@ -189,7 +189,7 @@
                                                 
                                                 <div class="flex items-center gap-4 w-full">
                                                     <span class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-200 shrink-0"
-                                                        :class="selected === '{{ strtoupper($opt) }}' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'"
+                                                        :class="selected === '{{ strtoupper($opt) }}' ? 'bg-red-600 text-white' : 'bg-white text-gray-500 group-hover:bg-gray-200'"
                                                     >
                                                         {{ strtoupper($opt) }}
                                                     </span>
@@ -598,7 +598,7 @@
                 // Update status badge
                 const statusBadge = document.getElementById(`status-badge-${questionId}`);
                 if (statusBadge) {
-                    statusBadge.className = 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700';
+                    statusBadge.className = 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-white text-emerald-700';
                     statusBadge.innerHTML = '✓ Terisi';
                 }
                 // Reload page to sync header chips
@@ -622,7 +622,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full border-collapse">
                         <thead>
-                            <tr class="bg-gray-100 border-b-2 border-gray-300">
+                            <tr class="bg-white border-b-2 border-gray-300">
                                 <th class="px-4 py-3 text-left font-bold text-gray-700">No</th>
                                 <th class="px-4 py-3 text-left font-bold text-gray-700">Pertanyaan</th>
                                 <th class="px-4 py-3 text-left font-bold text-gray-700">Answer Key</th>
@@ -640,7 +640,7 @@
                                         $answerKeyValue = $question->correct_answer ?? '';
                                         $isAnswerKeyFilled = !empty($answerKeyValue) && strtoupper($answerKeyValue) !== '';
                                     @endphp
-                                    <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                                    <tr class="border-b border-gray-200 hover:bg-white transition">
                                         <td class="px-4 py-3 font-semibold text-gray-800 whitespace-nowrap">{{ $questionNumber }}</td>
                                         <td class="px-4 py-3 text-gray-800 text-sm max-w-xs overflow-hidden text-ellipsis">
                                             {{ $question->question_text }}
@@ -655,7 +655,7 @@
                                             </select>
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            <span id="status-badge-{{ $question->id }}" class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold {{ $isAnswerKeyFilled ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
+                                            <span id="status-badge-{{ $question->id }}" class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold {{ $isAnswerKeyFilled ? 'bg-white text-emerald-700' : 'bg-white text-amber-700' }}">
                                                 {{ $isAnswerKeyFilled ? '✓ Terisi' : '○ Kosong' }}
                                             </span>
                                         </td>
@@ -677,15 +677,16 @@
         </div>
     </div>
             <h3 id="def_word" class="text-lg font-bold text-gray-800 mb-1 capitalize">Word</h3>
-            <div class="bg-blue-50 text-blue-700 text-sm font-semibold px-3 py-1 rounded-lg inline-block mb-3" id="def_translation">
+            <div class="bg-white text-blue-700 text-sm font-semibold px-3 py-1 rounded-lg inline-block mb-3" id="def_translation">
                 Translation
             </div>
             
-            <div class="text-left bg-gray-50 rounded-lg p-3">
+            <div class="text-left bg-white rounded-lg p-3">
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Synonyms</p>
                 <p id="def_synonyms" class="text-sm text-gray-700 italic">synonym 1, synonym 2</p>
             </div>
         </div>
     </div>
+    <x-live-drawing />
 </body>
 </html>

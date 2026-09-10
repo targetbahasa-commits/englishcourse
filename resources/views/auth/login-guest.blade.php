@@ -171,5 +171,21 @@
         </div>
     </div>
 
+    <script>
+        // Auto-refresh CSRF token on back-forward cache or stale session tab
+        window.addEventListener('pageshow', async function(event) {
+            try {
+                const res = await fetch('/csrf-token', { headers: { 'Accept': 'application/json' } });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.token) {
+                        document.querySelectorAll('input[name="_token"]').forEach(input => input.value = data.token);
+                        const meta = document.querySelector('meta[name="csrf-token"]');
+                        if (meta) meta.content = data.token;
+                    }
+                }
+            } catch(e) {}
+        });
+    </script>
 </body>
 </html>

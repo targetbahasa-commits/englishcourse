@@ -1,12 +1,14 @@
 @extends('layouts.admin')
 
+@section('title', ($meeting->title ?? 'Reducing Clauses') . ' - IELTS Writing Task ' . ($task ?? 1))
+
 @section('head')
     <script src="{{ asset('js/auto-save.js') }}?v={{ time() }}"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
 @section('content')
-<div class="w-full max-w-[1920px] mx-auto px-6 py-8 flex flex-col min-h-screen" x-data="reducingClauses({{ $meeting->id }})">
+<div class="w-full max-w-[1920px] mx-auto px-6 py-8 flex flex-col min-h-screen" x-data="reducingClauses({{ $meeting->id }}, {{ Js::from($savedAnswers ?? []) }})">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
@@ -22,6 +24,10 @@
         <div class="flex gap-4 items-center">
              <button type="button" @click="checkAnswers()" class="px-6 py-2 bg-indigo-600 text-white font-bold rounded-lg shadow-md hover:bg-indigo-700 transition-colors flex items-center gap-2">
                 <span>Check Answers</span>
+             </button>
+             <button type="button" @click.prevent="submit()" :disabled="loading" class="px-6 py-2 bg-orange-600 text-white font-bold rounded-lg shadow-md hover:bg-orange-700 transition-colors flex items-center gap-2">
+                <span x-show="!loading">Submit Answers</span>
+                <span x-show="loading">Saving...</span>
              </button>
         </div>
     </div>
@@ -211,8 +217,14 @@
 
 <script>
 document.addEventListener('alpine:init', () => {
-    Alpine.data('reducingClauses', (meetingId) => ({
-        answers: {},
+    Alpine.data('reducingClauses', (meetingId, savedAnswers = {}) => ({
+        // Seeded from the student's last autosaved draft (see
+        // IeltsWritingController::showMeeting()) - previously this always
+        // started empty, so a normal page refresh looked like it had
+        // wiped the student's answers even though they were already
+        // safely saved server-side the whole time.
+        answers: savedAnswers || {},
+        loading: false,
         showResults: false,
         correctAnswers: {
             q1: ["The figure then fell sharply to below 5000, being a record low in 40 years", "The figure then fell sharply to below 5000, reaching a record low in 40 years"],
@@ -245,10 +257,81 @@ document.addEventListener('alpine:init', () => {
                     }
                 });
             }, 500);
+
+            this.$root.addEventListener('input', (e) => {
+                if (e.target.matches('input[type="text"][name^="q"]')) {
+                    this.queueDraftSync();
+                }
+            });
         },
 
         checkAnswers() {
             this.showResults = true;
+        },
+
+        draftSyncTimer: null,
+        queueDraftSync() {
+            if (window.showAutosaveIndicator) {
+                window.showAutosaveIndicator('Menyimpan draft...', 'saving');
+            }
+            clearTimeout(this.draftSyncTimer);
+            this.draftSyncTimer = setTimeout(() => this.syncDraftToServer(), 800);
+        },
+        async syncDraftToServer() {
+            try {
+                await fetch('/assignments/ielts-academic/writing/meeting/' + meetingId + '/draft', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({ userAnswers: this.answers }),
+                    keepalive: true,
+                });
+                if (window.showAutosaveIndicator) {
+                    window.showAutosaveIndicator();
+                }
+            } catch (e) {
+                console.error('Failed to sync draft to server:', e);
+                if (window.showAutosaveIndicator) {
+                    window.showAutosaveIndicator('Gagal menyimpan draft', 'error');
+                }
+            }
+        },
+        async submit() {
+            this.loading = true;
+            const formattedEssay = Object.keys(this.correctAnswers)
+                .map(key => `${key}: ${this.answers[key] || '-'}`)
+                .join("\n");
+
+            try {
+                const response = await fetch('/assignments/ielts-academic/writing/evaluate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                    },
+                    body: JSON.stringify({ essay: formattedEssay || 'No answers provided', task_type: '1', meeting_id: meetingId })
+                });
+                const data = await response.json();
+                this.loading = false;
+                if (data.redirect_url) {
+                    if (data.message) alert(data.message);
+                    window.location.href = data.redirect_url;
+                    return;
+                }
+                if (data.submission_id) {
+                    if (confirm('Jawaban berhasil dikirim! Apakah Anda ingin melihat halaman hasil pengerjaan lengkap?')) {
+                        window.open('/assignments/ielts-academic/writing/submission/' + data.submission_id, '_blank');
+                    }
+                } else {
+                    alert('Jawaban berhasil disimpan!');
+                }
+            } catch (e) {
+                this.loading = false;
+                alert('Jawaban berhasil disimpan secara lokal!');
+            }
         },
 
         getInputClass(questionId) {

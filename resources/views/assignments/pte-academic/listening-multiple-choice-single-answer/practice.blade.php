@@ -212,9 +212,32 @@
             background-color: rgba(16, 185, 129, 0.05);
             border-style: dashed;
         }
+
+        /* Mobile: the audio player's row of controls (play button, progress
+           bar, speed selector, volume) doesn't fit on one line under ~480px,
+           so wrap the speed/volume controls onto their own row below. */
+        @media (max-width: 480px) {
+            .audio-player-box {
+                flex-wrap: wrap;
+                padding: 12px 16px;
+                gap: 10px;
+            }
+            .progress-container {
+                min-width: 0;
+                flex-basis: 0;
+            }
+            .controls-right {
+                width: 100%;
+                justify-content: space-between;
+                order: 3;
+            }
+            .volume-slider {
+                width: 50px;
+            }
+        }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-100">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         @if(Auth::check())
@@ -234,15 +257,18 @@
             @include('components.sidebar-guest')
         @endif
 
-        <main class="flex-1 md:ml-64 p-4 md:p-8">
+        <main class="flex-1 min-w-0 md:ml-64 p-4 md:p-8">
             <div class="container mx-auto">
 
                 <!-- Header -->
-                <div class="mb-8">
-                    <a href="{{ route('assignments.pte-academic.listening.listening-multiple-choice-single-answer.index') }}#topic-{{ $topicId }}" class="inline-flex items-center text-gray-600 hover:text-purple-500 transition-colors mb-4">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                        Back to Selection
-                    </a>
+                <div class="mb-6">
+                    <div class="flex justify-end mb-2">
+                        <a href="{{ route('assignments.pte-academic.listening.listening-multiple-choice-single-answer.index') }}#topic-{{ $topicId }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-gray-600 bg-white hover:bg-white border border-gray-200 rounded-full shadow-sm transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                            <span>Back</span>
+                        </a>
+                    </div>
+
                     <div class="flex items-center gap-4">
                         <div class="w-14 h-14 flex items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-purple-600 text-white shadow-lg shadow-purple-500/30">
                             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -251,8 +277,8 @@
                         </div>
                         <div>
                             <h1 class="text-3xl font-bold text-gray-800">Listening: Multiple Choice, Single Answer</h1>
-                            <span id="pteAttemptBadge" class="hidden text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700"></span>
-                            <span id="pteAvgScoreBadge" class="hidden text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700"></span>
+                            <span id="pteAttemptBadge" class="hidden text-xs font-semibold px-2.5 py-1 rounded-full bg-white text-emerald-700"></span>
+                            <span id="pteAvgScoreBadge" class="hidden text-xs font-semibold px-2.5 py-1 rounded-full bg-white text-emerald-700"></span>
                             <p class="text-gray-500">PTE Academic Practice - {{ $topic['title'] }}</p>
                         </div>
                     </div>
@@ -352,11 +378,11 @@
                                 Practice with AI Scoring
                             </button>
                             <button onclick="restartPractice()"
-                                class="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-bold rounded-full text-sm hover:bg-gray-50 transition">
+                                class="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-bold rounded-full text-sm hover:bg-white transition">
                                 Restart
                             </button>
                             <button onclick="checkAnswer()" id="answerBtn"
-                                class="px-6 py-2.5 bg-white font-bold rounded-full text-sm border-2 transition hover:bg-emerald-50"
+                                class="px-6 py-2.5 bg-white font-bold rounded-full text-sm border-2 transition hover:bg-white"
                                 style="color:#10b981; border-color:#10b981;">
                                 Answer
                             </button>
@@ -368,7 +394,7 @@
                         </div>
 
                         <!-- Submit Result -->
-                        <div id="resultBox" class="hidden bg-gray-50 border-t border-gray-200 p-6 px-8 mx-8 mb-8 rounded-xl">
+                        <div id="resultBox" class="hidden bg-white border-t border-gray-200 p-6 px-8 mx-8 mb-8 rounded-xl">
                             <div class="flex items-start gap-4">
                                 <div id="resultIconBox" class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
                                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="resultIcon"></svg>
@@ -381,9 +407,9 @@
                         </div>
 
                         <!-- Navigation Footer -->
-                        <div class="px-8 md:px-10 py-6 border-t border-gray-100 flex justify-between items-center bg-gray-50/50">
+                        <div class="px-8 md:px-10 py-6 border-t border-gray-100 flex justify-between items-center bg-white">
                             <a href="{{ route('assignments.pte-academic.listening.listening-multiple-choice-single-answer.practice', ['id' => max(1, $topicId - 1)]) }}"
-                               class="px-8 py-3 rounded-xl bg-white border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition-all hover:shadow flex items-center gap-2 {{ $topicId <= 1 ? 'pointer-events-none opacity-40' : '' }}">
+                               class="px-8 py-3 rounded-xl bg-white border border-gray-200 text-gray-600 font-medium hover:bg-white transition-all hover:shadow flex items-center gap-2 {{ $topicId <= 1 ? 'pointer-events-none opacity-40' : '' }}">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                                 Previous
                             </a>

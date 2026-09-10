@@ -140,7 +140,7 @@ class ToeflReadingPackage1Part3Seeder extends Seeder
             foreach ($q36_40 as $q) {
                 ToeflReadingQuestion::create(array_merge(['passage_id' => $passage4->id], $q));
             }
-            echo "✅ Updated Passage 4 (Insect Wings): Q30-35 (placeholder) + Q36-40 (confirmed)\n";
+            echo "✅ Updated Passage 4 (Insect Wings): Q30-35 (placeholder) + Q36-40 (confirmed) ";
         }
 
         // ==============================
@@ -157,7 +157,7 @@ class ToeflReadingPackage1Part3Seeder extends Seeder
             'meeting_id'     => $meeting->id,
             'package_number' => 1,
             'passage_number' => 5,
-            'content'        => "Viewed from a formalist perspective, art is appreciated for the enlivening aesthetic experience its visual form can provide. The name formalism stems from the primary focus of this perspective on the artistic form of the work: its line, shape, color, texture, and composition. For the formalist, art is to be valued for its artistic qualities, separate from its connection to the larger world. In the case of a film, the viewer would concentrate on its formal qualities (for instance, camera compositions, editing rhythms, settings, lighting effects, dialogue, and sound track) while ignoring the film's contextual relationships to social and political issues. It is believed that such \"nonartistic\" considerations only detract from the aesthetic experience the work's artistic form can provide. Although the formalist approach pares away history, morality, and virtually everything other than color, shape, technique, and composition, this approach does get the viewer to look closely and respond with feeling to the artwork's sensuous qualities.\n\nIn contrast to formalism, contextualism is concerned with the appreciation of art \"in context,\" that is, in relation to the rest of life. Like a wide-angle camera shot, contextualism takes in the big picture. Everything that surrounds and relates to the artwork is relevant: the viewer; the artist; the physical setting of the work; and the art, culture, and society that gave birth to it. For the contextualist, a full appreciation of a film is impossible without information about its director and the director's creative process, as well as knowledge about the era and the culture of the country in which the film was made. The strong point of the contextualist approach is its ability to expand the viewer's understanding of the work in relation to the larger world. In contrast to the reductive focus of formalism, contextualism offers the viewer many ways of looking at and giving meaning to the artwork. Its major limitation, the formalists say, stems from its primary concern with facts and theories. They argue that contextualists can often emphasize fact-finding and theorizing to the exclusion of any sensuous response to the work of art.",
+            'content'        => "Viewed from a formalist perspective, art is appreciated for the enlivening aesthetic experience its visual form can provide. The name formalism stems from the primary focus of this perspective on the artistic form of the work: its line, shape, color, texture, and composition. For the formalist, art is to be valued for its artistic qualities, separate from its connection to the larger world. In the case of a film, the viewer would concentrate on its formal qualities (for instance, camera compositions, editing rhythms, settings, lighting effects, dialogue, and sound track) while ignoring the film's contextual relationships to social and political issues. It is believed that such \"nonartistic\" considerations only detract from the aesthetic experience the work's artistic form can provide. Although the formalist approach pares away history, morality, and virtually everything other than color, shape, technique, and composition, this approach does get the viewer to look closely and respond with feeling to the artwork's sensuous qualities.  In contrast to formalism, contextualism is concerned with the appreciation of art \"in context,\" that is, in relation to the rest of life. Like a wide-angle camera shot, contextualism takes in the big picture. Everything that surrounds and relates to the artwork is relevant: the viewer; the artist; the physical setting of the work; and the art, culture, and society that gave birth to it. For the contextualist, a full appreciation of a film is impossible without information about its director and the director's creative process, as well as knowledge about the era and the culture of the country in which the film was made. The strong point of the contextualist approach is its ability to expand the viewer's understanding of the work in relation to the larger world. In contrast to the reductive focus of formalism, contextualism offers the viewer many ways of looking at and giving meaning to the artwork. Its major limitation, the formalists say, stems from its primary concern with facts and theories. They argue that contextualists can often emphasize fact-finding and theorizing to the exclusion of any sensuous response to the work of art.",
         ]);
 
         $questions5 = [
@@ -256,15 +256,15 @@ class ToeflReadingPackage1Part3Seeder extends Seeder
         foreach ($questions5 as $q) {
             ToeflReadingQuestion::create(array_merge(['passage_id' => $passage5->id], $q));
         }
-        echo "✅ Added Passage 5 (Formalism vs Contextualism): 10 questions (Q41-50)\n";
+        echo "✅ Added Passage 5 (Formalism vs Contextualism): 10 questions (Q41-50) ";
 
         // Summary
-        echo "\n=== Final Summary ===\n";
+        echo " === Final Summary === ";
         ToeflReadingPassage::where('package_number', 1)->with('questions')->orderBy('passage_number')->get()->each(function($p) {
             $min = $p->questions->min('question_number');
             $max = $p->questions->max('question_number');
-            echo "Passage {$p->passage_number}: {$p->questions->count()} questions | Q{$min}-Q{$max}\n";
+            echo "Passage {$p->passage_number}: {$p->questions->count()} questions | Q{$min}-Q{$max} ";
         });
-        echo "Total: " . ToeflReadingPassage::where('package_number', 1)->count() . " passages\n";
+        echo "Total: " . ToeflReadingPassage::where('package_number', 1)->count() . " passages ";
     }
 }

@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
 class OutreachFollowUpMail extends Mailable
@@ -38,6 +39,15 @@ class OutreachFollowUpMail extends Mailable
         return new Envelope(
             subject: "Hasil Tes {$testName} Anda & Rekomendasi Belajar - Target Bahasa",
         );
+    }
+
+    public function headers(): Headers
+    {
+        return new Headers(text: [
+            'X-Related-Type' => 'outreach_message',
+            'X-Related-Id' => (string) $this->outreachMessage->id,
+            'X-User-Id' => (string) $this->testResult->user_id,
+        ]);
     }
 
     /**

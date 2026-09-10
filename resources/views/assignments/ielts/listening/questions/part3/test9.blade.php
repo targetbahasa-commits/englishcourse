@@ -12,7 +12,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">21</strong>&nbsp; The subjects in questionnaire are</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'tourists in the hotel in this area.', 'B' => 'local residents.', 'C' => 'people who are living in this area.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[21]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -25,7 +25,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">22</strong>&nbsp; The results of the questionnaire should be</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'directly entered into the computer.', 'B' => 'scored by hand.', 'C' => 'submitted directly to Professor Curran.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[22]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -38,7 +38,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">23</strong>&nbsp; Why should John give a copy of plans to the professor?</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'to receive a good grade', 'B' => 'to get advice', 'C' => 'to earn high praise'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[23]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -51,7 +51,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">24</strong>&nbsp; How will the instructions be presented?</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'given by a group representative', 'B' => 'given by all members of the group', 'C' => 'given by the professor'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[24]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -64,7 +64,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">25</strong>&nbsp; What does Dani suggest to John when those subjects receive the questionnaire?</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'divide into 2 parts to argue', 'B' => 'focus on the opinion of the interviewees', 'C' => 'take consideration of both sides'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[25]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -77,7 +77,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">26</strong>&nbsp; Why is this project particularly important to John?</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'to earn respect from professors in the department', 'B' => 'to raise his grade', 'C' => 'to impress his professor'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[26]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>

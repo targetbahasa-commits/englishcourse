@@ -9,7 +9,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
 
     <div class="flex min-h-screen">
@@ -37,9 +37,6 @@
             {{-- Top Navigation Bar --}}
             <nav class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
                 <div class="flex items-center gap-4">
-                    <a href="{{ route('assignments.pte-academic.speaking-writing.read-aloud.index') }}#topic-{{ $topicId }}" class="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    </a>
                     <div class="flex items-center gap-2">
                         <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold" style="background-color: #e0f2fe; color: #0284c7;">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
@@ -51,10 +48,14 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg text-sm text-gray-600">
+                    <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg text-sm text-gray-600">
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         Look at the text below. In 40 seconds, you must read this text aloud as naturally and clearly as possible.
                     </div>
+                    <a href="{{ route('assignments.pte-academic.speaking-writing.read-aloud.index') }}#topic-{{ $topicId }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-gray-600 bg-white hover:bg-white border border-gray-200 rounded-full shadow-sm transition-all shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        <span>Back</span>
+                    </a>
                 </div>
             </nav>
 
@@ -102,7 +103,7 @@
                     <button id="playBtn" onclick="playAnswer()" style="display:none; background-color: #00b4d8; color: #ffffff;" class="px-6 py-2.5 font-bold rounded-full shadow transition-all cursor-pointer hover:opacity-90 items-center gap-2">
                         ▶ Play Answer
                     </button>
-                    <button id="restartBtn" onclick="restartSession()" style="display:none;" class="px-6 py-2.5 font-medium rounded-full shadow-sm transition-all cursor-pointer hover:bg-gray-50" style="background-color: #ffffff; color: #374151; border: 1px solid #d1d5db;">
+                    <button id="restartBtn" onclick="restartSession()" style="display:none;" class="px-6 py-2.5 font-medium rounded-full shadow-sm transition-all cursor-pointer hover:bg-white" style="background-color: #ffffff; color: #374151; border: 1px solid #d1d5db;">
                         Restart
                     </button>
                     @if(Auth::check() && Auth::user()->isAdmin())
@@ -153,6 +154,36 @@
         var mediaRecorder = null;
         var audioChunks = [];
         var audioUrl = null;
+        var recordedMimeType = '';
+
+        // Safari/WebKit doesn't support 'audio/webm' recording — MediaRecorder there
+        // either throws or silently falls back to its own default. Explicitly probe
+        // for a format the current browser actually supports instead of hardcoding
+        // webm, so recording (and the resulting file sent for AI scoring) works the
+        // same way on Safari as it does on Chrome/Firefox.
+        function pteGetSupportedMimeType() {
+            var candidates = [
+                'audio/webm;codecs=opus',
+                'audio/webm',
+                'audio/mp4',
+                'audio/mp4;codecs=mp4a.40.2',
+                'audio/aac',
+                'audio/ogg;codecs=opus'
+            ];
+            for (var i = 0; i < candidates.length; i++) {
+                if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(candidates[i])) {
+                    return candidates[i];
+                }
+            }
+            return '';
+        }
+
+        function pteMimeTypeToExtension(mimeType) {
+            if (!mimeType) return 'webm';
+            if (mimeType.indexOf('mp4') !== -1 || mimeType.indexOf('aac') !== -1) return 'm4a';
+            if (mimeType.indexOf('ogg') !== -1) return 'ogg';
+            return 'webm';
+        }
 
         var playbackAudio = document.getElementById('playbackAudio');
         var statusLine    = document.getElementById('statusLine');
@@ -192,11 +223,11 @@
                     playBtn.style.display = 'none';
                     restartBtn.style.display = 'inline-flex';
                     micBtn.style.background = '#00b4d8';
-                    setStatus('Beginning in ' + prepTimeLeft + ' sec', '#00b4d8');
+                    setStatus('Beginning in ' + prepTimeLeft + ' sec', '#ea580c');
 
                     prepTimer = setInterval(function() {
                         prepTimeLeft--;
-                        setStatus('Beginning in ' + prepTimeLeft + ' sec', '#00b4d8');
+                        setStatus('Beginning in ' + prepTimeLeft + ' sec', '#ea580c');
                         if (prepTimeLeft <= 0) {
                             clearInterval(prepTimer);
                             startRecording();
@@ -204,23 +235,82 @@
                     }, 1000);
                 })
                 .catch(function(err) {
-                    alert('Microphone access is required. Please allow microphone access and try again.');
+                    if (!window.MediaRecorder) {
+                        alert('Your browser does not support audio recording. Please try a recent version of Chrome, Firefox, or Safari.');
+                    } else {
+                        alert('Microphone access is required. Please allow microphone access and try again.');
+                    }
                 });
         }
 
         function setupMediaRecorder(stream) {
-            mediaRecorder = new MediaRecorder(stream);
+            var mimeType = pteGetSupportedMimeType();
+            try {
+                mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType: mimeType }) : new MediaRecorder(stream);
+            } catch (e) {
+                mediaRecorder = new MediaRecorder(stream);
+            }
+            recordedMimeType = mediaRecorder.mimeType || mimeType || 'audio/webm';
             audioChunks = [];
             mediaRecorder.ondataavailable = function(e) {
                 if (e.data.size > 0) audioChunks.push(e.data);
             };
             mediaRecorder.onstop = function() {
-                var blob = new Blob(audioChunks, { type: 'audio/webm' });
+                var blob = new Blob(audioChunks, { type: recordedMimeType });
                 audioUrl = URL.createObjectURL(blob);
                 playbackAudio.src = audioUrl;
                 stream.getTracks().forEach(function(t) { t.stop(); });
                 playBtn.style.display = 'inline-flex';
+                evaluateAudio(blob);
             };
+        }
+
+        async function evaluateAudio(blob) {
+            if (!blob || blob.size < 1000) {
+                setStatus('Recording complete.', '#ea580c');
+                alert('No audio was captured. This can happen on some browsers/devices — please try again, and make sure your microphone is working.');
+                return;
+            }
+            setStatus('Evaluating audio with AI...', '#f59e0b');
+            var formData = new FormData();
+            formData.append('audio', blob, 'read_aloud.' + pteMimeTypeToExtension(recordedMimeType));
+            formData.append('module', 'read-aloud');
+            formData.append('topic_id', {{ $topicId }});
+            formData.append('original_text', @json($topic['content'] ?? ''));
+
+            try {
+                var response = await fetch('/pte/practice/evaluate-speaking', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+                var data = await response.json();
+                if (data.success && data.scores) {
+                    setStatus('Recording complete. AI Evaluation ready.', '#00b4d8');
+                    PTEScorePopup.show({
+                        skill: 'Speaking',
+                        score: data.scores.overall_score || 70,
+                        max: 90,
+                        breakdown: {
+                            'Content': data.scores.content_score || 70,
+                            'Pronunciation': data.scores.pronunciation_score || 70,
+                            'Oral_Fluency': data.scores.fluency_score || 70
+                        },
+                        feedback: data.scores.feedback || ('Transcription: ' + (data.transcription || ''))
+                    });
+                } else {
+                    setStatus('Recording complete.', '#00b4d8');
+                    alert('Evaluasi AI Gagal: ' + (data.message || 'Speech not recognized'));
+                }
+            } catch (err) {
+                setStatus('Recording complete.', '#00b4d8');
+                console.error('Error evaluating audio:', err);
+                alert('Evaluasi AI Gagal: terjadi kesalahan saat menghubungi server. Silakan coba lagi.');
+            }
         }
 
         function startRecording() {
@@ -253,7 +343,7 @@
             micBtn.style.boxShadow = 'none';
             progressBar.style.width = '100%';
             progressBar.style.background = '#00b4d8';
-            setStatus('Recording complete. Listen to your answer below.', '#00b4d8');
+            setStatus('Recording complete. Processing AI Evaluation...', '#00b4d8');
             if (window.PTETracker) {
                 PTETracker.saveResult({ score: 1, maxScore: 1, durationSeconds: recordTimeElapsed });
             }
@@ -312,5 +402,6 @@
         }
     </script>
     @include('components.pte-practice-tracker', ['module' => 'read-aloud', 'topicId' => $topicId])
+    <x-live-drawing />
 </body>
 </html>

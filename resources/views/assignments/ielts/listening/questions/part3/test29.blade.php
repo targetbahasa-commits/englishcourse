@@ -8,7 +8,7 @@
         <span>Write <strong>NO MORE THAN TWO WORDS AND/OR A NUMBER</strong> for each answer.</span>
     </p>
 
-    <div class="max-w-2xl text-gray-700 mx-auto bg-gray-50 border border-gray-300 rounded-lg p-6 mb-12">
+    <div class="max-w-2xl text-gray-700 mx-auto bg-white border border-gray-300 rounded-lg p-6 mb-12">
         <h5 class="text-lg font-bold text-center mb-6 text-gray-800">Environmental change Discussion</h5>
 
         <div class="space-y-6">

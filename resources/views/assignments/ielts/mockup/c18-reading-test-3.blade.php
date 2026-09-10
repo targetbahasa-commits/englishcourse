@@ -16,7 +16,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -36,7 +36,7 @@
                     <p class="text-sm text-gray-500">Cambridge {{ $edition }} Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back
             </a>
@@ -209,7 +209,7 @@
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar">
+        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
             <div class="px-8 py-8 pb-24 max-w-2xl mx-auto">
 
                 {{-- PASSAGE 1 QUESTIONS header --}}
@@ -227,7 +227,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Information</th>
                                     <th class="p-3 font-bold text-gray-600 w-24 text-center">Answer</th>
@@ -240,7 +240,7 @@
                                     [3, 'an indication of how widely available the raw materials of concrete are'],
                                     [4, 'the belief that more high-rise wooden buildings are needed before wood can be regarded as a viable construction material'],
                                 ] as [$num, $info])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $info }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -265,7 +265,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 5–8 on your answer sheet.</p>
 
-                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <h4 class="text-base font-bold text-center mb-5">Making buildings with wood</h4>
 
                         <p class="leading-loose mb-3">
@@ -298,7 +298,7 @@
                     <p class="text-sm italic text-gray-700 mb-5"><strong>NB</strong> You may use any letter more than once.</p>
 
                     {{-- People list box --}}
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <p class="font-bold text-center mb-3">List of People</p>
                         <div class="space-y-1 ml-4">
                             <div><strong>A</strong> Chris Cheeseman</div>
@@ -311,7 +311,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-24 text-center">Answer</th>
@@ -325,7 +325,7 @@
                                     [12, 'Expense has been a factor in the negative response to the development of new cements.'],
                                     [13, 'The environmental damage caused by concrete is due to it being produced in large quantities.'],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -357,7 +357,7 @@
                     <p class="text-sm italic text-gray-700 mb-5">Write the correct number, <strong>i–viii</strong>, in boxes 14–20 on your answer sheet.</p>
 
                     {{-- Headings list --}}
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <p class="font-bold text-center mb-3">List of Headings</p>
                         <div class="space-y-1 ml-4">
                             <div><strong>i</strong>&nbsp;&nbsp;&nbsp;A period in cold conditions before the technology is assessed</div>
@@ -374,7 +374,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Paragraph</th>
                                     <th class="p-3 font-bold text-gray-600 w-24 text-center">Answer</th>
@@ -390,7 +390,7 @@
                                     [19, 'Paragraph F'],
                                     [20, 'Paragraph G'],
                                 ] as [$num, $para])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm">{{ $para }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -419,11 +419,11 @@
                         [22, 'When building their first steam car, the Doble brothers', ['A' => 'constructed all the parts themselves.', 'B' => 'made written notes at each stage of the construction.', 'C' => 'needed several attempts to achieve a competitive model.', 'D' => 'sought the advice of experienced people in the car industry.']],
                         [23, 'In order to produce the Model C, the Doble brothers', ['A' => 'moved production to a different city.', 'B' => 'raised financial capital.', 'C' => 'employed an additional worker.', 'D' => 'abandoned their earlier designs.']],
                     ] as [$num, $question, $options])
-                    <div class="mb-6 p-4 {{ $loop->even ? 'bg-gray-50' : '' }} rounded-lg">
+                    <div class="mb-6 p-4 {{ $loop->even ? 'bg-white' : '' }} rounded-lg">
                         <p class="mb-3 text-sm"><strong>{{ $num }}</strong> {{ $question }}</p>
                         <div class="space-y-2 ml-6">
                             @foreach($options as $letter => $text)
-                            <label class="flex items-start gap-3 cursor-pointer hover:bg-gray-100 p-1.5 rounded text-sm">
+                            <label class="flex items-start gap-3 cursor-pointer hover:bg-white p-1.5 rounded text-sm">
                                 <input type="radio" name="q{{ $num }}" value="{{ $letter }}" class="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
                                 <span><strong>{{ $letter }}</strong> {{ $text }}</span>
                             </label>
@@ -440,7 +440,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD AND/OR A NUMBER</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 24–26 on your answer sheet.</p>
 
-                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <h4 class="text-base font-bold text-center mb-5">The Model E</h4>
 
                         <p class="leading-loose mb-3">
@@ -478,11 +478,11 @@
                         [29, 'What idea is suggested by the reference to Mount Qomolangma in the fifth paragraph?', ['A' => 'students following unsuitable paths', 'B' => 'students attempting interesting tasks', 'C' => 'students not achieving their full potential', 'D' => 'students not being aware of their limitations']],
                         [30, "What does the word 'scaffolding' in the sixth paragraph refer to?", ['A' => 'the factors which prevent a student from learning effectively', 'B' => 'the environment where most of a student\'s learning takes place', 'C' => 'the assistance given to a student in their initial stages of learning', 'D' => 'the setting of appropriate learning targets for a student\'s aptitude']],
                     ] as [$num, $question, $options])
-                    <div class="mb-6 p-4 {{ $loop->even ? 'bg-gray-50' : '' }} rounded-lg">
+                    <div class="mb-6 p-4 {{ $loop->even ? 'bg-white' : '' }} rounded-lg">
                         <p class="mb-3 text-sm"><strong>{{ $num }}</strong> {!! $question !!}</p>
                         <div class="space-y-2 ml-6">
                             @foreach($options as $letter => $text)
-                            <label class="flex items-start gap-3 cursor-pointer hover:bg-gray-100 p-1.5 rounded text-sm">
+                            <label class="flex items-start gap-3 cursor-pointer hover:bg-white p-1.5 rounded text-sm">
                                 <input type="radio" name="q{{ $num }}" value="{{ $letter }}" class="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
                                 <span><strong>{{ $letter }}</strong> {{ $text }}</span>
                             </label>
@@ -498,7 +498,7 @@
                     <p class="text-sm text-gray-800 mb-1">Complete the summary using the list of phrases, <strong>A–I</strong>, below.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write the correct letter, <strong>A–I</strong>, in boxes 31–35 on your answer sheet.</p>
 
-                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <h4 class="text-base font-bold text-center mb-5">Is streaming effective?</h4>
 
                         <p class="leading-loose mb-3">
@@ -537,7 +537,7 @@
                     </div>
 
                     {{-- Phrases box --}}
-                    <div class="border border-gray-300 p-4 rounded-lg mt-4 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mt-4 text-sm bg-white">
                         <div class="grid grid-cols-3 gap-x-4 gap-y-2">
                             <div><strong>A</strong> wrong classes</div>
                             <div><strong>B</strong> lower expectations</div>
@@ -558,7 +558,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the views of the writer in Reading Passage 3?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 36–40 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">YES</span></div><div class="italic">if the statement agrees with the views of the writer</div>
                             <div><span class="font-bold italic">NO</span></div><div class="italic">if the statement contradicts the views of the writer</div>
@@ -569,7 +569,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -583,7 +583,7 @@
                                     [39, 'The priority should be to ensure that the highest-achieving students attain their goals.'],
                                     [40, 'Taking part in collaborative outdoor activities with teachers and classmates can improve student outcomes in the classroom.'],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">

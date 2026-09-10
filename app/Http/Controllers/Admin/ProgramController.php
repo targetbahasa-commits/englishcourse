@@ -10,6 +10,7 @@ use App\Http\Requests\Admin\ProgramSyllabusStoreRequest;
 use App\Http\Requests\Admin\ProgramUpsertRequest;
 use App\Models\Meeting;
 use App\Models\Program;
+use App\Models\User;
 
 class ProgramController extends Controller
 {
@@ -65,6 +66,11 @@ class ProgramController extends Controller
     /**
      * Show the brochure management page for a program.
      */
+    public function show(Program $program)
+    {
+        return redirect()->route('programs.index');
+    }
+
     public function brochure(Program $program)
     {
         return view('admin.programs.brochure', compact('program'));
@@ -100,10 +106,26 @@ class ProgramController extends Controller
             return back()->with('error', 'Program must be deactivated before it can be permanently deleted. Click "Deactivate" first.');
         }
 
-        // Guard: cannot delete if there are active students enrolled
-        $activeUsers = $program->users()->where('role', 'student')->where('status', 'active')->count();
-        if ($activeUsers > 0) {
-            return back()->with('error', "Cannot delete program. There are $activeUsers active students currently enrolled.");
+        // Guard: cannot delete if there are active students enrolled.
+        // Checks three separate signals because a student can be tied to a program
+        // through any of them independently: users.program_id (set by the payment/
+        // conversion flow), an Enrollment record, or class_period_id (set by the
+        // admin "assign student to class period" action, which never touches
+        // users.program_id or creates an Enrollment).
+        $classPeriodIds = $program->classPeriods()->pluck('id');
+
+        $hasActiveUsers = User::where('role', 'student')
+            ->where('status', 'active')
+            ->where(function ($query) use ($program, $classPeriodIds) {
+                $query->where('program_id', $program->id)
+                    ->orWhereIn('class_period_id', $classPeriodIds);
+            })
+            ->exists();
+
+        $hasActiveEnrollments = $program->enrollments()->where('status', 'active')->exists();
+
+        if ($hasActiveUsers || $hasActiveEnrollments) {
+            return back()->with('error', 'Cannot delete program. There are active students, enrollments, or class period assignments associated with it.');
         }
 
         $programName = $program->name;

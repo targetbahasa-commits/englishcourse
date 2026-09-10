@@ -29,7 +29,7 @@ class PromoTestController extends Controller
                 $type = 'writing_t' . $testConfig->task_type;
             }
         } elseif ($type === 'grammar') {
-            $testConfig = DB::table('meetings')->where('id', $id)->first();
+            return app(\App\Http\Controllers\GrammarWritingAdminController::class)->grammarWritingIntroductoryMeetingPromo(request(), (int) $id);
         } else {
             $testConfig = DB::table('ielts_speaking_topics')->where('id', $id)->first();
             if ($testConfig) {
@@ -97,8 +97,9 @@ class PromoTestController extends Controller
             ], 422);
         }
 
-        $aiFeedback = [];
-        $bandScore = null;
+        if ($type === 'grammar') {
+            return app(\App\Http\Controllers\GrammarWritingAdminController::class)->grammarWritingIntroductoryMeetingSubmitPromo($request, (int) $id);
+        }
 
         if ($type === 'writing') {
             $testConfig = DB::table('ielts_writing_meetings')->where('id', $id)->first();
@@ -107,23 +108,56 @@ class PromoTestController extends Controller
             }
         }
 
-        try {
-            if ($request->input('is_admin_debug') == '1' && auth()->check() && auth()->user()->isAdmin()) {
-                $bandScore = (float) $request->input('target_band_score', 7.5);
-                $aiFeedback = [
+        // Store audio to disk (if any) and persist the lead + raw answer FIRST, before
+        // calling the AI. This way, if AI evaluation fails, the test taker's answer and
+        // contact info are never lost and evaluation can be retried on the saved data.
+        $questions = $request->input('questions', []);
+        $recordings = [];
+        if ($type === 'speaking') {
+            $audioFiles = $request->file('audio_files') ?? [];
+            if ($request->hasFile('audio_file')) {
+                $audioFiles[] = $request->file('audio_file');
+            }
+            foreach ($audioFiles as $index => $audioFile) {
+                $path = $audioFile->store('promo_recordings', 'public');
+                $recordings[] = [
+                    'question' => $questions[$index] ?? 'Part ' . ($index + 1),
+                    'audio_url' => asset('storage/' . $path),
+                    'path' => $path,
+                ];
+            }
+        }
+
+        $leadId = DB::table('free_test_submissions')->insertGetId([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'whatsapp_number' => $validated['whatsapp_number'] ?? null,
+            'test_type' => $type,
+            'answer_text' => $validated['answer_text'] ?? null,
+            'audio_paths' => !empty($recordings) ? json_encode($recordings) : null,
+            'evaluation_status' => 'pending',
+            'estimated_band_score' => null,
+            'ai_raw_json_feedback' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        if ($request->input('is_admin_debug') == '1' && auth()->check() && auth()->user()->isAdmin()) {
+            $bandScore = (float) $request->input('target_band_score', 7.5);
+            $aiFeedback = [
                     'overall_band_score' => $bandScore,
                     'task_response_score' => $bandScore,
-                    'task_response' => '<p>Dummy Task Response summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-gray-50"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
+                    'task_response' => '<p>Dummy Task Response summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-white"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
                     'coherence_cohesion_score' => $bandScore,
-                    'coherence_cohesion' => '<p>Dummy Coherence summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-gray-50"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
+                    'coherence_cohesion' => '<p>Dummy Coherence summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-white"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
                     'lexical_resource_score' => $bandScore,
-                    'lexical_resource' => '<p>Dummy Lexical summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-gray-50"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-gray-50"><tr><th class="border border-gray-200 p-2">Kosa Kata Asli</th><th class="border border-gray-200 p-2">Kosa Kata yang Lebih Baik</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Good</td><td class="border border-gray-200 p-2">Excellent</td></tr></tbody></table>',
+                    'lexical_resource' => '<p>Dummy Lexical summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-white"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-white"><tr><th class="border border-gray-200 p-2">Kosa Kata Asli</th><th class="border border-gray-200 p-2">Kosa Kata yang Lebih Baik</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Good</td><td class="border border-gray-200 p-2">Excellent</td></tr></tbody></table>',
                     'grammatical_range_score' => $bandScore,
-                    'grammatical_range' => '<p>Dummy Grammar summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-gray-50"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
+                    'grammatical_range' => '<p>Dummy Grammar summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-white"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
                     'pronunciation_score' => $bandScore,
-                    'pronunciation' => '<p>Dummy Pronunciation summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-gray-50"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
+                    'pronunciation' => '<p>Dummy Pronunciation summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-white"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
                     'fluency_and_coherence_score' => $bandScore,
-                    'fluency_and_coherence' => '<p>Dummy Fluency summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-gray-50"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
+                    'fluency_and_coherence' => '<p>Dummy Fluency summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-white"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
                     'overall_comment' => 'This is an admin debug submission for Target Band Score: ' . $bandScore,
                     'band_9_version' => '<p>Dummy band 9 version.</p>',
                     'correction_html' => '<p>Dummy <del>correction</del> <ins>html</ins>.</p>',
@@ -142,40 +176,11 @@ class PromoTestController extends Controller
                         ]
                     ]
                 ];
-            } else if ($type === 'writing_t1') {
-                $aiFeedback = $this->evaluateWritingTask1($id, $validated['answer_text'] ?? '');
-                $bandScore = $aiFeedback['overall_band_score'] ?? null;
-            } elseif ($type === 'writing_t2') {
-                $aiFeedback = $this->evaluateWritingTask2($id, $validated['answer_text'] ?? '');
-                $bandScore = $aiFeedback['overall_band_score'] ?? null;
-            } elseif ($type === 'speaking') {
-                $audioFiles = $request->file('audio_files') ?? [];
-                if ($request->hasFile('audio_file')) {
-                    $audioFiles[] = $request->file('audio_file');
-                }
-                $questions = $request->input('questions', []);
-                $aiFeedback = $this->evaluateSpeaking($id, $audioFiles, $questions);
-                $bandScore = $aiFeedback['overall_band_score'] ?? null;
 
-                $recordings = [];
-                foreach ($audioFiles as $index => $audioFile) {
-                    $path = $audioFile->store('promo_recordings', 'public');
-                    $recordings[] = [
-                        'question' => $questions[$index] ?? 'Part ' . ($index + 1),
-                        'audio_url' => asset('storage/' . $path)
-                    ];
-                }
-                $aiFeedback['recordings'] = $recordings;
-            }
-
-            $leadId = DB::table('free_test_submissions')->insertGetId([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'whatsapp_number' => $validated['whatsapp_number'] ?? null,
-                'test_type' => $type,
+            DB::table('free_test_submissions')->where('id', $leadId)->update([
                 'estimated_band_score' => is_numeric($bandScore) ? $bandScore : null,
                 'ai_raw_json_feedback' => json_encode($aiFeedback),
-                'created_at' => now(),
+                'evaluation_status' => 'success',
                 'updated_at' => now(),
             ]);
 
@@ -186,16 +191,98 @@ class PromoTestController extends Controller
                 'feedback' => $aiFeedback,
                 'submission_id' => $leadId,
             ]);
+        }
+
+        return $this->runEvaluationAndUpdate($leadId, $type, $id, $validated['answer_text'] ?? '', $audioFiles ?? [], $recordings, $questions, $validated['whatsapp_number'] ?? null);
+    }
+
+    /**
+     * Runs AI evaluation for an already-persisted lead and updates its row.
+     * On failure, marks the row 'failed' (answer stays saved) and returns a
+     * retryable response instead of discarding the submission.
+     */
+    private function runEvaluationAndUpdate($leadId, $type, $id, $answerText, $audioFiles, $recordings, $questions, $whatsappNumber)
+    {
+        try {
+            $aiFeedback = [];
+            $bandScore = null;
+
+            if ($type === 'writing_t1') {
+                $aiFeedback = $this->evaluateWritingTask1($id, $answerText);
+                $bandScore = $aiFeedback['overall_band_score'] ?? null;
+            } elseif ($type === 'writing_t2') {
+                $aiFeedback = $this->evaluateWritingTask2($id, $answerText);
+                $bandScore = $aiFeedback['overall_band_score'] ?? null;
+            } elseif ($type === 'speaking') {
+                $aiFeedback = $this->evaluateSpeaking($id, $audioFiles, $questions);
+                $bandScore = $aiFeedback['overall_band_score'] ?? null;
+                $aiFeedback['recordings'] = $recordings;
+            }
+
+            if (empty($aiFeedback) || !is_array($aiFeedback)) {
+                throw new \Exception('AI evaluation returned no result (all providers failed).');
+            }
+
+            DB::table('free_test_submissions')->where('id', $leadId)->update([
+                'estimated_band_score' => is_numeric($bandScore) ? $bandScore : null,
+                'ai_raw_json_feedback' => json_encode($aiFeedback),
+                'evaluation_status' => 'success',
+                'updated_at' => now(),
+            ]);
+
+            event(new \App\Events\PromoTestCompleted($leadId, $whatsappNumber, $aiFeedback));
+
+            return response()->json([
+                'success' => true,
+                'feedback' => $aiFeedback,
+                'submission_id' => $leadId,
+            ]);
         } catch (\Exception $e) {
-            Log::error('Promo Test Submission Error: ' . $e->getMessage());
+            Log::error('Promo Test Evaluation Error: ' . $e->getMessage());
+
+            DB::table('free_test_submissions')->where('id', $leadId)->update([
+                'evaluation_status' => 'failed',
+                'updated_at' => now(),
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred during AI evaluation: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Jawaban Anda sudah tersimpan. Sistem penilaian AI sedang bermasalah — silakan coba kirim ulang untuk mendapatkan penilaian.',
+                'submission_id' => $leadId,
+                'retryable' => true,
+            ]);
         }
     }
 
-    private function evaluateWritingTask1($questionId, $answerText)
+    /**
+     * Retries AI evaluation for a lead whose answer was already saved (e.g. a
+     * previous submit attempt failed). No form re-submission needed.
+     */
+    public function retryEvaluation($type, $id, $submission_id)
+    {
+        $lead = DB::table('free_test_submissions')->where('id', $submission_id)->first();
+
+        if (!$lead) {
+            return response()->json(['success' => false, 'message' => 'Data tidak ditemukan.'], 404);
+        }
+
+        if ($lead->evaluation_status === 'success') {
+            return response()->json([
+                'success' => true,
+                'feedback' => json_decode($lead->ai_raw_json_feedback, true),
+                'submission_id' => $lead->id,
+            ]);
+        }
+
+        $evalType = $lead->test_type;
+        $recordings = $lead->audio_paths ? json_decode($lead->audio_paths, true) : [];
+        $audioPaths = array_column($recordings, 'path');
+        $questions = array_column($recordings, 'question');
+
+        return $this->runEvaluationAndUpdate($lead->id, $evalType, $id, $lead->answer_text ?? '', $audioPaths, $recordings, $questions, $lead->whatsapp_number);
+    }
+
+    public function evaluateWritingTask1($questionId, $answerText)
     {
         $rubric = file_get_contents(storage_path('app/IELTS_band_descriptors/writing_ielts_rubic/ielts_grader_system_prompt.txt'));
         
@@ -203,14 +290,14 @@ class PromoTestController extends Controller
         $graphData = $question->graph_data_json ?? '{}';
         $systemOverride1 = $question->system_prompt_override ?? "Evaluate Task Achievement based on the graph data: $graphData.\n\n$rubric";
         $systemOverride1 .= "\n\nCRITICAL INSTRUCTION: You must provide a LOT of specific, actionable suggestions for improvement based on the candidate's actual writing. You MUST analyze the essay comprehensively from the first sentence to the last. Your table MUST contain AT LEAST 5 to 10 rows of detailed corrections and feedback. You MUST check the word count of the essay. If it is under 150 words, you MUST mention this as a severe penalty in the Task Achievement summary.";
-        $systemOverride1 .= "\n\nIGNORE THE 'OUTPUT FORMAT' SECTION FROM THE RUBRIC ABOVE. YOU MUST FORMAT YOUR DETAILED FEEDBACK AS AN HTML TABLE. Present your actionable feedback using exactly this styled HTML table format:\n`<table class=\"w-full text-left border-collapse border border-gray-200 mt-4 mb-4\"><thead class=\"bg-gray-50\"><tr><th class=\"border border-gray-200 p-2\">Kutipan Asli (English)</th><th class=\"border border-gray-200 p-2\">Masalah / Kesalahan</th><th class=\"border border-gray-200 p-2\">Penjelasan</th><th class=\"border border-gray-200 p-2\">Perbaikan (English)</th></tr></thead><tbody><tr><td class=\"border border-gray-200 p-2\">...</td>...</tr></tbody></table>`";
+        $systemOverride1 .= "\n\nIGNORE THE 'OUTPUT FORMAT' SECTION FROM THE RUBRIC ABOVE. YOU MUST FORMAT YOUR DETAILED FEEDBACK AS AN HTML TABLE. Present your actionable feedback using exactly this styled HTML table format:\n`<table class=\"w-full text-left border-collapse border border-gray-200 mt-4 mb-4\"><thead class=\"bg-white\"><tr><th class=\"border border-gray-200 p-2\">Kutipan Asli (English)</th><th class=\"border border-gray-200 p-2\">Masalah / Kesalahan</th><th class=\"border border-gray-200 p-2\">Penjelasan</th><th class=\"border border-gray-200 p-2\">Perbaikan (English)</th></tr></thead><tbody><tr><td class=\"border border-gray-200 p-2\">...</td>...</tr></tbody></table>`";
         $systemOverride1 .= "\nLanguage Rules for the Table: 'Kutipan Asli' MUST be the exact snippet from the candidate's essay in English. 'Masalah / Kesalahan' and 'Penjelasan' MUST be entirely in Bahasa Indonesia. 'Perbaikan' MUST be the corrected snippet in English.";
         $systemOverride1 .= "\n\nYou MUST return a JSON object with the keys 'task_achievement_score' (number) and 'task_achievement' (string). The 'task_achievement' string MUST start with a short summary paragraph (<p>...</p>) in Bahasa Indonesia explaining the performance, FOLLOWED BY the HTML table (<table>...</table>) containing detailed feedback.";
 
         $systemOverride2 = "Evaluate Grammar, Lexical Resource, and Coherence based on the rubric.\n\n$rubric\n\n 
 CRITICAL INSTRUCTION: You must provide a LOT of specific, actionable suggestions for improvement for Coherence, Lexical Resource, and Grammar based on the candidate's actual writing. You MUST analyze the essay comprehensively from the first sentence to the last. Each table MUST contain AT LEAST 5 to 10 rows of detailed corrections and feedback, covering issues from the introduction, body paragraphs, and conclusion.
 IGNORE THE 'OUTPUT FORMAT' SECTION FROM THE RUBRIC ABOVE. YOU MUST FORMAT YOUR DETAILED FEEDBACK STRINGS AS HTML TABLES. Present your actionable feedback using exactly this styled HTML table format for EACH criteria field:
-`<table class=\"w-full text-left border-collapse border border-gray-200 mt-4 mb-4\"><thead class=\"bg-gray-50\"><tr><th class=\"border border-gray-200 p-2\">Kutipan Asli (English)</th><th class=\"border border-gray-200 p-2\">Masalah / Kesalahan</th><th class=\"border border-gray-200 p-2\">Penjelasan</th><th class=\"border border-gray-200 p-2\">Perbaikan (English)</th></tr></thead><tbody><tr><td class=\"border border-gray-200 p-2\">...</td>...</tr></tbody></table>`
+`<table class=\"w-full text-left border-collapse border border-gray-200 mt-4 mb-4\"><thead class=\"bg-white\"><tr><th class=\"border border-gray-200 p-2\">Kutipan Asli (English)</th><th class=\"border border-gray-200 p-2\">Masalah / Kesalahan</th><th class=\"border border-gray-200 p-2\">Penjelasan</th><th class=\"border border-gray-200 p-2\">Perbaikan (English)</th></tr></thead><tbody><tr><td class=\"border border-gray-200 p-2\">...</td>...</tr></tbody></table>`
 Language Rules for the Table: 'Kutipan Asli' MUST be the exact snippet from the candidate's essay in English. 'Masalah / Kesalahan' and 'Penjelasan' MUST be entirely in Bahasa Indonesia. 'Perbaikan' MUST be the corrected snippet in English.
 
 You MUST return a JSON object with EXACTLY the following keys:
@@ -218,14 +305,14 @@ You MUST return a JSON object with EXACTLY the following keys:
 - 'coherence_cohesion_score': (number)
 - 'coherence_cohesion': (string) MUST start with a short summary paragraph (<p>...</p>) in Bahasa Indonesia explaining the performance, FOLLOWED BY the HTML table (<table>...</table>) containing detailed feedback.
 - 'lexical_resource_score': (number)
-- 'lexical_resource': (string) MUST start with a short summary paragraph (<p>...</p>) in Bahasa Indonesia explaining the performance, FOLLOWED BY the main HTML table (<table>...</table>), and THEN you MUST provide a SECOND HTML table listing vocabulary upgrades with 2 columns: 'Kosa Kata Asli' (Original Vocabulary) and 'Kosa Kata yang Lebih Baik' (Band 9 Alternative). This second table MUST contain AT LEAST 10 ROWS of vocabulary upgrades.
+- 'lexical_resource': (string) MUST start with a short summary paragraph (<p>...</p>) in Bahasa Indonesia explaining the performance, FOLLOWED BY the main HTML table (<table>...</table>), and THEN you MUST provide a SECOND HTML table listing vocabulary upgrades with 2 columns: 'Kosa Kata Asli' (Original Vocabulary) and 'Kosa Kata yang Lebih Baik' (Band 9 Alternative). This second table MUST contain AT LEAST 15 to 20 ROWS of vocabulary upgrades.
 - 'grammatical_range_score': (number)
 - 'grammatical_range': (string) MUST start with a short summary paragraph (<p>...</p>) in Bahasa Indonesia explaining the performance, FOLLOWED BY the HTML table (<table>...</table>) containing detailed feedback.
 - 'overall_comment': (string) General feedback. If under 150 words, mention the word count penalty here too.
 - 'band_9_version': (string) A complete Band 9 version of the essay answering the same prompt. It MUST be at least 150 words. It MUST have distinct paragraphs, and you MUST wrap EVERY single paragraph with <p class=\"mb-4\"> and </p> tags to ensure proper spacing.
 - 'correction_html': (string) The FULL original essay text, paragraph by paragraph using <p> tags. Wrap errors in <del>error</del> and corrections in <ins>correction</ins>.";
 
-        $providers = ['sambanova', 'gemini', 'openrouter'];
+        $providers = ['groq', 'sambanova', 'cerebras', 'deepinfra', 'mistral', 'siliconflow', 'gemini', 'openrouter', 'openai'];
         $taskAchievement = null;
         $otherCriteria = null;
 
@@ -238,31 +325,30 @@ You MUST return a JSON object with EXACTLY the following keys:
             foreach ($keys as $index => $key) {
                 try {
                     $responses = null;
-                    if ($provider === 'sambanova') {
+                    if ($provider === 'groq') {
                         $responses = Http::pool(fn (Pool $pool) => [
-                            // DeepSeek for Task Achievement
                             $pool->as('task_achievement')->withHeaders([
                                 'Authorization' => 'Bearer ' . $key,
                                 'Content-Type' => 'application/json'
-                            ])->post('https://api.sambanova.ai/v1/chat/completions', [
-                                'model' => 'DeepSeek-V3.1',
+                            ])->timeout(75)->post('https://api.groq.com/openai/v1/chat/completions', [
+                                'model' => 'openai/gpt-oss-120b',
                                 'messages' => [
                                     ['role' => 'system', 'content' => $systemOverride1],
                                     ['role' => 'user', 'content' => $answerText]
                                 ],
+                                'max_tokens' => 8192,
                                 'response_format' => ['type' => 'json_object']
                             ]),
-
-                            // Llama 3.3 for Grammar, Lexical Resource, Coherence
                             $pool->as('other_criteria')->withHeaders([
                                 'Authorization' => 'Bearer ' . $key,
                                 'Content-Type' => 'application/json'
-                            ])->post('https://api.sambanova.ai/v1/chat/completions', [
-                                'model' => 'Meta-Llama-3.3-70B-Instruct',
+                            ])->timeout(75)->post('https://api.groq.com/openai/v1/chat/completions', [
+                                'model' => 'openai/gpt-oss-120b',
                                 'messages' => [
                                     ['role' => 'system', 'content' => $systemOverride2],
                                     ['role' => 'user', 'content' => $answerText]
                                 ],
+                                'max_tokens' => 8192,
                                 'response_format' => ['type' => 'json_object']
                             ])
                         ]);
@@ -270,7 +356,7 @@ You MUST return a JSON object with EXACTLY the following keys:
                         $responses = Http::pool(fn (Pool $pool) => [
                             $pool->as('task_achievement')->withHeaders([
                                 'Content-Type' => 'application/json'
-                            ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $key, [
+                            ])->timeout(75)->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $key, [
                                 'contents' => [
                                     ['parts' => [
                                         ['text' => $systemOverride1],
@@ -279,11 +365,12 @@ You MUST return a JSON object with EXACTLY the following keys:
                                 ],
                                 'generationConfig' => [
                                     'responseMimeType' => 'application/json',
+                                    'maxOutputTokens' => 8192,
                                 ]
                             ]),
                             $pool->as('other_criteria')->withHeaders([
                                 'Content-Type' => 'application/json'
-                            ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $key, [
+                            ])->timeout(75)->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $key, [
                                 'contents' => [
                                     ['parts' => [
                                         ['text' => $systemOverride2],
@@ -292,7 +379,119 @@ You MUST return a JSON object with EXACTLY the following keys:
                                 ],
                                 'generationConfig' => [
                                     'responseMimeType' => 'application/json',
+                                    'maxOutputTokens' => 8192,
                                 ]
+                            ])
+                        ]);
+                    } elseif ($provider === 'sambanova') {
+                        $responses = Http::pool(fn (Pool $pool) => [
+                            // DeepSeek for Task Achievement
+                            $pool->as('task_achievement')->withHeaders([
+                                'Authorization' => 'Bearer ' . $key,
+                                'Content-Type' => 'application/json'
+                            ])->timeout(75)->post('https://api.sambanova.ai/v1/chat/completions', [
+                                'model' => 'Meta-Llama-3.3-70B-Instruct',
+                                'messages' => [
+                                    ['role' => 'system', 'content' => $systemOverride1],
+                                    ['role' => 'user', 'content' => $answerText]
+                                ],
+                                'max_tokens' => 8192,
+                                'response_format' => ['type' => 'json_object']
+                            ]),
+
+                            // Llama 3.3 for Grammar, Lexical Resource, Coherence
+                            $pool->as('other_criteria')->withHeaders([
+                                'Authorization' => 'Bearer ' . $key,
+                                'Content-Type' => 'application/json'
+                            ])->timeout(75)->post('https://api.sambanova.ai/v1/chat/completions', [
+                                'model' => 'Meta-Llama-3.3-70B-Instruct',
+                                'messages' => [
+                                    ['role' => 'system', 'content' => $systemOverride2],
+                                    ['role' => 'user', 'content' => $answerText]
+                                ],
+                                'max_tokens' => 8192,
+                                'response_format' => ['type' => 'json_object']
+                            ])
+                        ]);
+                    } elseif ($provider === 'cerebras') {
+                        $responses = Http::pool(fn (Pool $pool) => [
+                            $pool->as('task_achievement')->withHeaders([
+                                'Authorization' => 'Bearer ' . $key,
+                                'Content-Type' => 'application/json'
+                            ])->timeout(75)->post('https://api.cerebras.ai/v1/chat/completions', [
+                                'model' => 'gpt-oss-120b',
+                                'messages' => [
+                                    ['role' => 'system', 'content' => $systemOverride1],
+                                    ['role' => 'user', 'content' => $answerText]
+                                ],
+                                'max_tokens' => 8192,
+                                'response_format' => ['type' => 'json_object']
+                            ]),
+                            $pool->as('other_criteria')->withHeaders([
+                                'Authorization' => 'Bearer ' . $key,
+                                'Content-Type' => 'application/json'
+                            ])->timeout(75)->post('https://api.cerebras.ai/v1/chat/completions', [
+                                'model' => 'gpt-oss-120b',
+                                'messages' => [
+                                    ['role' => 'system', 'content' => $systemOverride2],
+                                    ['role' => 'user', 'content' => $answerText]
+                                ],
+                                'max_tokens' => 8192,
+                                'response_format' => ['type' => 'json_object']
+                            ])
+                        ]);
+                    } elseif ($provider === 'deepinfra') {
+                        $responses = Http::pool(fn (Pool $pool) => [
+                            $pool->as('task_achievement')->withHeaders([
+                                'Authorization' => 'Bearer ' . $key,
+                                'Content-Type' => 'application/json'
+                            ])->timeout(75)->post('https://api.deepinfra.com/v1/openai/chat/completions', [
+                                'model' => 'meta-llama/Llama-3.3-70B-Instruct',
+                                'messages' => [
+                                    ['role' => 'system', 'content' => $systemOverride1],
+                                    ['role' => 'user', 'content' => $answerText]
+                                ],
+                                'max_tokens' => 8192,
+                                'response_format' => ['type' => 'json_object']
+                            ]),
+                            $pool->as('other_criteria')->withHeaders([
+                                'Authorization' => 'Bearer ' . $key,
+                                'Content-Type' => 'application/json'
+                            ])->timeout(75)->post('https://api.deepinfra.com/v1/openai/chat/completions', [
+                                'model' => 'meta-llama/Llama-3.3-70B-Instruct',
+                                'messages' => [
+                                    ['role' => 'system', 'content' => $systemOverride2],
+                                    ['role' => 'user', 'content' => $answerText]
+                                ],
+                                'max_tokens' => 8192,
+                                'response_format' => ['type' => 'json_object']
+                            ])
+                        ]);
+                    } elseif ($provider === 'mistral') {
+                        $responses = Http::pool(fn (Pool $pool) => [
+                            $pool->as('task_achievement')->withHeaders([
+                                'Authorization' => 'Bearer ' . $key,
+                                'Content-Type' => 'application/json'
+                            ])->timeout(75)->post('https://api.mistral.ai/v1/chat/completions', [
+                                'model' => 'mistral-large-latest',
+                                'messages' => [
+                                    ['role' => 'system', 'content' => $systemOverride1],
+                                    ['role' => 'user', 'content' => $answerText]
+                                ],
+                                'max_tokens' => 8192,
+                                'response_format' => ['type' => 'json_object']
+                            ]),
+                            $pool->as('other_criteria')->withHeaders([
+                                'Authorization' => 'Bearer ' . $key,
+                                'Content-Type' => 'application/json'
+                            ])->timeout(75)->post('https://api.mistral.ai/v1/chat/completions', [
+                                'model' => 'mistral-large-latest',
+                                'messages' => [
+                                    ['role' => 'system', 'content' => $systemOverride2],
+                                    ['role' => 'user', 'content' => $answerText]
+                                ],
+                                'max_tokens' => 8192,
+                                'response_format' => ['type' => 'json_object']
                             ])
                         ]);
                     } elseif ($provider === 'openrouter') {
@@ -308,6 +507,7 @@ You MUST return a JSON object with EXACTLY the following keys:
                                     ['role' => 'system', 'content' => $systemOverride1],
                                     ['role' => 'user', 'content' => $answerText]
                                 ],
+                                'max_tokens' => 8192,
                                 'response_format' => ['type' => 'json_object']
                             ]),
                             $pool->as('other_criteria')->withHeaders([
@@ -321,6 +521,61 @@ You MUST return a JSON object with EXACTLY the following keys:
                                     ['role' => 'system', 'content' => $systemOverride2],
                                     ['role' => 'user', 'content' => $answerText]
                                 ],
+                                'max_tokens' => 8192,
+                                'response_format' => ['type' => 'json_object']
+                            ])
+                        ]);
+                    } elseif ($provider === 'siliconflow') {
+                        $responses = Http::pool(fn (Pool $pool) => [
+                            $pool->as('task_achievement')->withHeaders([
+                                'Authorization' => 'Bearer ' . $key,
+                                'Content-Type' => 'application/json'
+                            ])->post('https://api.siliconflow.com/v1/chat/completions', [
+                                'model' => 'deepseek-ai/DeepSeek-V3',
+                                'messages' => [
+                                    ['role' => 'system', 'content' => $systemOverride1],
+                                    ['role' => 'user', 'content' => $answerText]
+                                ],
+                                'max_tokens' => 8192,
+                                'response_format' => ['type' => 'json_object']
+                            ]),
+                            $pool->as('other_criteria')->withHeaders([
+                                'Authorization' => 'Bearer ' . $key,
+                                'Content-Type' => 'application/json'
+                            ])->post('https://api.siliconflow.com/v1/chat/completions', [
+                                'model' => 'deepseek-ai/DeepSeek-V3',
+                                'messages' => [
+                                    ['role' => 'system', 'content' => $systemOverride2],
+                                    ['role' => 'user', 'content' => $answerText]
+                                ],
+                                'max_tokens' => 8192,
+                                'response_format' => ['type' => 'json_object']
+                            ])
+                        ]);
+                    } elseif ($provider === 'openai') {
+                        $responses = Http::pool(fn (Pool $pool) => [
+                            $pool->as('task_achievement')->withHeaders([
+                                'Authorization' => 'Bearer ' . $key,
+                                'Content-Type' => 'application/json'
+                            ])->post('https://api.openai.com/v1/chat/completions', [
+                                'model' => 'gpt-4o-mini',
+                                'messages' => [
+                                    ['role' => 'system', 'content' => $systemOverride1],
+                                    ['role' => 'user', 'content' => $answerText]
+                                ],
+                                'max_tokens' => 8192,
+                                'response_format' => ['type' => 'json_object']
+                            ]),
+                            $pool->as('other_criteria')->withHeaders([
+                                'Authorization' => 'Bearer ' . $key,
+                                'Content-Type' => 'application/json'
+                            ])->post('https://api.openai.com/v1/chat/completions', [
+                                'model' => 'gpt-4o-mini',
+                                'messages' => [
+                                    ['role' => 'system', 'content' => $systemOverride2],
+                                    ['role' => 'user', 'content' => $answerText]
+                                ],
+                                'max_tokens' => 8192,
                                 'response_format' => ['type' => 'json_object']
                             ])
                         ]);
@@ -356,14 +611,14 @@ You MUST return a JSON object with EXACTLY the following keys:
         return [];
     }
 
-    private function evaluateWritingTask2($questionId, $answerText)
+    public function evaluateWritingTask2($questionId, $answerText)
     {
         $rubric = file_get_contents(storage_path('app/IELTS_band_descriptors/writing_ielts_rubic/ielts_grader_system_prompt.txt'));
         
         $question = DB::table('ielts_writing_meetings')->find($questionId);
         $systemOverride = $question->system_prompt_override ?? "You are an expert IELTS Writing Task 2 examiner. Evaluate the essay based on the rubric.\n\n$rubric";
         $systemOverride .= "\n\nCRITICAL INSTRUCTION: You must provide a LOT of specific, actionable suggestions for improvement for Task Response, Coherence & Cohesion, Lexical Resource, and Grammatical Range. You MUST analyze the essay comprehensively from the first sentence to the last. Each table MUST contain AT LEAST 5 to 10 rows of detailed corrections and feedback. You MUST check the word count of the essay. If it is under 250 words, you MUST mention this as a severe penalty in the Task Response summary.";
-        $systemOverride .= "\n\nIGNORE THE 'OUTPUT FORMAT' SECTION FROM THE RUBRIC ABOVE. YOU MUST FORMAT YOUR DETAILED FEEDBACK STRINGS AS HTML TABLES. Present your actionable feedback using exactly this styled HTML table format for EACH criteria field:\n`<table class=\"w-full text-left border-collapse border border-gray-200 mt-4 mb-4\"><thead class=\"bg-gray-50\"><tr><th class=\"border border-gray-200 p-2\">Kutipan Asli (English)</th><th class=\"border border-gray-200 p-2\">Masalah / Kesalahan</th><th class=\"border border-gray-200 p-2\">Penjelasan</th><th class=\"border border-gray-200 p-2\">Perbaikan (English)</th></tr></thead><tbody><tr><td class=\"border border-gray-200 p-2\">...</td>...</tr></tbody></table>`";
+        $systemOverride .= "\n\nIGNORE THE 'OUTPUT FORMAT' SECTION FROM THE RUBRIC ABOVE. YOU MUST FORMAT YOUR DETAILED FEEDBACK STRINGS AS HTML TABLES. Present your actionable feedback using exactly this styled HTML table format for EACH criteria field:\n`<table class=\"w-full text-left border-collapse border border-gray-200 mt-4 mb-4\"><thead class=\"bg-white\"><tr><th class=\"border border-gray-200 p-2\">Kutipan Asli (English)</th><th class=\"border border-gray-200 p-2\">Masalah / Kesalahan</th><th class=\"border border-gray-200 p-2\">Penjelasan</th><th class=\"border border-gray-200 p-2\">Perbaikan (English)</th></tr></thead><tbody><tr><td class=\"border border-gray-200 p-2\">...</td>...</tr></tbody></table>`";
         $systemOverride .= "\nLanguage Rules for the Table: 'Kutipan Asli' MUST be the exact snippet from the candidate's essay in English. 'Masalah / Kesalahan' and 'Penjelasan' MUST be entirely in Bahasa Indonesia. 'Perbaikan' MUST be the corrected snippet in English.";
         $systemOverride .= "\n\nYou MUST return a JSON object with EXACTLY the following keys:
 - 'overall_band_score': (number)
@@ -372,18 +627,24 @@ You MUST return a JSON object with EXACTLY the following keys:
 - 'coherence_cohesion_score': (number)
 - 'coherence_cohesion': (string) MUST start with a short summary paragraph (<p>...</p>) in Bahasa Indonesia explaining the performance, FOLLOWED BY the HTML table (<table>...</table>) containing detailed feedback.
 - 'lexical_resource_score': (number)
-- 'lexical_resource': (string) MUST start with a short summary paragraph (<p>...</p>) in Bahasa Indonesia explaining the performance, FOLLOWED BY the main HTML table (<table>...</table>), and THEN you MUST provide a SECOND HTML table listing vocabulary upgrades with 2 columns: 'Kosa Kata Asli' (Original Vocabulary) and 'Kosa Kata yang Lebih Baik' (Band 9 Alternative). This second table MUST contain AT LEAST 10 ROWS of vocabulary upgrades.
+- 'lexical_resource': (string) MUST start with a short summary paragraph (<p>...</p>) in Bahasa Indonesia explaining the performance, FOLLOWED BY the main HTML table (<table>...</table>), and THEN you MUST provide a SECOND HTML table listing vocabulary upgrades with 2 columns: 'Kosa Kata Asli' (Original Vocabulary) and 'Kosa Kata yang Lebih Baik' (Band 9 Alternative). This second table MUST contain AT LEAST 15 to 20 ROWS of vocabulary upgrades.
 - 'grammatical_range_score': (number)
 - 'grammatical_range': (string) MUST start with a short summary paragraph (<p>...</p>) in Bahasa Indonesia explaining the performance, FOLLOWED BY the HTML table (<table>...</table>) containing detailed feedback.
 - 'overall_comment': (string) General feedback. If under 250 words, mention the word count penalty here too.
 - 'band_9_version': (string) A complete Band 9 version of the essay answering the same prompt. It MUST be at least 250 words. It MUST have distinct paragraphs, and you MUST wrap EVERY single paragraph with <p class=\"mb-4\"> and </p> tags to ensure proper spacing.
 - 'correction_html': (string) The FULL original essay text, paragraph by paragraph using <p> tags. Wrap errors in <del>error</del> and corrections in <ins>correction</ins>.";
 
-        $providers = ['sambanova', 'gemini', 'openrouter'];
+        $providers = ['groq', 'sambanova', 'cerebras', 'deepinfra', 'mistral', 'siliconflow', 'gemini', 'openrouter', 'openai'];
         $feedback = [];
 
         foreach ($providers as $provider) {
             $keys = \App\Services\AiProviderKeyManager::getKeys($provider);
+            
+            // Tambahan fallback khusus untuk gemini di evaluasi task 2 IELTS academic
+            if ($provider === 'gemini') {
+                $keys[] = 'AQ.Ab8RN6KCrOzaZ59qQzvTr_kVCcd-L3_Q50VEcEL3hy-TdRvbjw';
+            }
+
             if (empty($keys)) {
                 continue;
             }
@@ -391,22 +652,23 @@ You MUST return a JSON object with EXACTLY the following keys:
             foreach ($keys as $index => $key) {
                 try {
                     $response = null;
-                    if ($provider === 'sambanova') {
+                    if ($provider === 'groq') {
                         $response = Http::withHeaders([
                             'Authorization' => 'Bearer ' . $key,
                             'Content-Type' => 'application/json'
-                        ])->timeout(60)->post('https://api.sambanova.ai/v1/chat/completions', [
-                            'model' => 'Meta-Llama-3.3-70B-Instruct',
+                        ])->timeout(75)->post('https://api.groq.com/openai/v1/chat/completions', [
+                            'model' => 'openai/gpt-oss-120b',
                             'messages' => [
                                 ['role' => 'system', 'content' => $systemOverride],
                                 ['role' => 'user', 'content' => $answerText]
                             ],
+                            'max_tokens' => 8192,
                             'response_format' => ['type' => 'json_object']
                         ]);
                     } elseif ($provider === 'gemini') {
                         $response = Http::withHeaders([
                             'Content-Type' => 'application/json'
-                        ])->timeout(60)->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $key, [
+                        ])->timeout(75)->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $key, [
                             'contents' => [
                                 ['parts' => [
                                     ['text' => $systemOverride],
@@ -415,7 +677,73 @@ You MUST return a JSON object with EXACTLY the following keys:
                             ],
                             'generationConfig' => [
                                 'responseMimeType' => 'application/json',
+                                'maxOutputTokens' => 8192,
                             ]
+                        ]);
+                    } elseif ($provider === 'openai') {
+                        $response = Http::withHeaders([
+                            'Authorization' => 'Bearer ' . $key,
+                            'Content-Type' => 'application/json'
+                        ])->timeout(75)->post('https://api.openai.com/v1/chat/completions', [
+                            'model' => 'gpt-4o-mini',
+                            'messages' => [
+                                ['role' => 'system', 'content' => $systemOverride],
+                                ['role' => 'user', 'content' => $answerText]
+                            ],
+                            'max_tokens' => 8192,
+                            'response_format' => ['type' => 'json_object']
+                        ]);
+                    } elseif ($provider === 'sambanova') {
+                        $response = Http::withHeaders([
+                            'Authorization' => 'Bearer ' . $key,
+                            'Content-Type' => 'application/json'
+                        ])->timeout(75)->post('https://api.sambanova.ai/v1/chat/completions', [
+                            'model' => 'Meta-Llama-3.3-70B-Instruct',
+                            'messages' => [
+                                ['role' => 'system', 'content' => $systemOverride],
+                                ['role' => 'user', 'content' => $answerText]
+                            ],
+                            'max_tokens' => 8192,
+                            'response_format' => ['type' => 'json_object']
+                        ]);
+                    } elseif ($provider === 'cerebras') {
+                        $response = Http::withHeaders([
+                            'Authorization' => 'Bearer ' . $key,
+                            'Content-Type' => 'application/json'
+                        ])->timeout(75)->post('https://api.cerebras.ai/v1/chat/completions', [
+                            'model' => 'gpt-oss-120b',
+                            'messages' => [
+                                ['role' => 'system', 'content' => $systemOverride],
+                                ['role' => 'user', 'content' => $answerText]
+                            ],
+                            'max_tokens' => 8192,
+                            'response_format' => ['type' => 'json_object']
+                        ]);
+                    } elseif ($provider === 'deepinfra') {
+                        $response = Http::withHeaders([
+                            'Authorization' => 'Bearer ' . $key,
+                            'Content-Type' => 'application/json'
+                        ])->timeout(75)->post('https://api.deepinfra.com/v1/openai/chat/completions', [
+                            'model' => 'meta-llama/Llama-3.3-70B-Instruct',
+                            'messages' => [
+                                ['role' => 'system', 'content' => $systemOverride],
+                                ['role' => 'user', 'content' => $answerText]
+                            ],
+                            'max_tokens' => 8192,
+                            'response_format' => ['type' => 'json_object']
+                        ]);
+                    } elseif ($provider === 'mistral') {
+                        $response = Http::withHeaders([
+                            'Authorization' => 'Bearer ' . $key,
+                            'Content-Type' => 'application/json'
+                        ])->timeout(75)->post('https://api.mistral.ai/v1/chat/completions', [
+                            'model' => 'mistral-large-latest',
+                            'messages' => [
+                                ['role' => 'system', 'content' => $systemOverride],
+                                ['role' => 'user', 'content' => $answerText]
+                            ],
+                            'max_tokens' => 8192,
+                            'response_format' => ['type' => 'json_object']
                         ]);
                     } elseif ($provider === 'openrouter') {
                         $response = Http::withHeaders([
@@ -423,12 +751,26 @@ You MUST return a JSON object with EXACTLY the following keys:
                             'Content-Type' => 'application/json',
                             'HTTP-Referer' => 'https://targetbahasa.com',
                             'X-Title' => 'Target Bahasa Course'
-                        ])->timeout(60)->post('https://openrouter.ai/api/v1/chat/completions', [
+                        ])->timeout(75)->post('https://openrouter.ai/api/v1/chat/completions', [
                             'model' => 'meta-llama/llama-3.3-70b-instruct:free',
                             'messages' => [
                                 ['role' => 'system', 'content' => $systemOverride],
                                 ['role' => 'user', 'content' => $answerText]
                             ],
+                            'max_tokens' => 8192,
+                            'response_format' => ['type' => 'json_object']
+                        ]);
+                    } elseif ($provider === 'siliconflow') {
+                        $response = Http::withHeaders([
+                            'Authorization' => 'Bearer ' . $key,
+                            'Content-Type' => 'application/json'
+                        ])->timeout(75)->post('https://api.siliconflow.com/v1/chat/completions', [
+                            'model' => 'deepseek-ai/DeepSeek-V3',
+                            'messages' => [
+                                ['role' => 'system', 'content' => $systemOverride],
+                                ['role' => 'user', 'content' => $answerText]
+                            ],
+                            'max_tokens' => 8192,
                             'response_format' => ['type' => 'json_object']
                         ]);
                     }
@@ -466,14 +808,14 @@ You MUST return a JSON object with EXACTLY the following keys:
                 'overall_band_score' => $bandScore,
                 'task_achievement_score' => $bandScore,
                 'task_response_score' => $bandScore,
-                'task_achievement' => '<p>Dummy Task Achievement summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-gray-50"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
-                'task_response' => '<p>Dummy Task Response summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-gray-50"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
+                'task_achievement' => '<p>Dummy Task Achievement summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-white"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
+                'task_response' => '<p>Dummy Task Response summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-white"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
                 'coherence_cohesion_score' => $bandScore,
-                'coherence_cohesion' => '<p>Dummy Coherence summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-gray-50"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
+                'coherence_cohesion' => '<p>Dummy Coherence summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-white"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
                 'lexical_resource_score' => $bandScore,
-                'lexical_resource' => '<p>Dummy Lexical summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-gray-50"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-gray-50"><tr><th class="border border-gray-200 p-2">Kosa Kata Asli</th><th class="border border-gray-200 p-2">Kosa Kata yang Lebih Baik</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Good</td><td class="border border-gray-200 p-2">Excellent</td></tr></tbody></table>',
+                'lexical_resource' => '<p>Dummy Lexical summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-white"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-white"><tr><th class="border border-gray-200 p-2">Kosa Kata Asli</th><th class="border border-gray-200 p-2">Kosa Kata yang Lebih Baik</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Good</td><td class="border border-gray-200 p-2">Excellent</td></tr></tbody></table>',
                 'grammatical_range_score' => $bandScore,
-                'grammatical_range' => '<p>Dummy Grammar summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-gray-50"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
+                'grammatical_range' => '<p>Dummy Grammar summary.</p><table class="w-full text-left border-collapse border border-gray-200 mt-4 mb-4"><thead class="bg-white"><tr><th class="border border-gray-200 p-2">Kutipan Asli</th><th class="border border-gray-200 p-2">Masalah</th><th class="border border-gray-200 p-2">Penjelasan</th><th class="border border-gray-200 p-2">Perbaikan</th></tr></thead><tbody><tr><td class="border border-gray-200 p-2">Hello</td><td class="border border-gray-200 p-2">Ini masalah</td><td class="border border-gray-200 p-2">Ini penjelasan</td><td class="border border-gray-200 p-2">Hi</td></tr></tbody></table>',
                 'overall_comment' => 'This is a mock admin preview evaluation.',
                 'band_9_version' => '<p>Dummy band 9 version.</p>',
                 'correction_html' => '<p>Dummy <del>correction</del> <ins>html</ins>.</p>',
@@ -543,7 +885,7 @@ You MUST return a JSON object with EXACTLY the following keys:
             $reading = $aiFeedback['reading_score'] ?? 'N/A';
 
             $message = "Halo! Berikut adalah summary hasil evaluasi Free Test TOEFL ITP Anda dari *Target Bahasa*:\n\n";
-            $message .= "⭐️ *Total Score: {$totalScore}*\n\n";
+            $message .= "️ *Total Score: {$totalScore}*\n\n";
             $message .= "Rincian Skor:\n";
             $message .= "- Listening Comprehension: {$listening}\n";
             $message .= "- Structure & Written Expression: {$structure}\n";
@@ -557,14 +899,14 @@ You MUST return a JSON object with EXACTLY the following keys:
             if ($type === 'toefl_reading') $sectionType = 'Reading Comprehension';
 
             $message = "Halo! Berikut adalah summary hasil evaluasi Free Test TOEFL ITP Anda dari *Target Bahasa*:\n\n";
-            $message .= "⭐️ *Section Score: {$score}*\n";
+            $message .= "️ *Section Score: {$score}*\n";
             $message .= "Tipe: {$sectionType}\n\n";
             $message .= "Terus semangat belajar! Untuk panduan dan course TOEFL terbaik, segera hubungi admin Target Bahasa.";
         } elseif (in_array($type, ['ielts_listening', 'ielts_reading_general', 'ielts_reading_academic'])) {
             $bandScore = $aiFeedback['band_score'] ?? 'N/A';
 
             $message = "Halo! Berikut adalah summary hasil evaluasi Free Test IELTS Anda dari *Target Bahasa*:\n\n";
-            $message .= "⭐️ *Band Score: {$bandScore}*\n\n";
+            $message .= "️ *Band Score: {$bandScore}*\n\n";
             $message .= "Terus semangat belajar! Untuk panduan dan course IELTS terbaik, segera hubungi admin Target Bahasa.";
         } else {
             // Default to IELTS formats (Writing/Speaking)
@@ -581,7 +923,7 @@ You MUST return a JSON object with EXACTLY the following keys:
             $saran = $aiFeedback['feedback'] ?? $aiFeedback['overall_comment'] ?? 'Terus tingkatkan latihan Anda.';
             
             $message = "Halo! Berikut adalah summary hasil evaluasi Free Test IELTS Anda dari *Target Bahasa*:\n\n";
-            $message .= "⭐️ *Overall Band Score: {$bandScore}*\n\n";
+            $message .= "️ *Overall Band Score: {$bandScore}*\n\n";
             $message .= "Rincian Skor:\n";
             $message .= "- {$taskScoreLabel}: {$taskScore}\n";
             $message .= "- {$coherenceLabel}: {$coherence}\n";
@@ -631,14 +973,14 @@ You MUST return a JSON object with EXACTLY the following keys:
         }
     }
 
-    private function evaluateSpeaking($topicId, $audioFiles, $questions = [])
+    public function evaluateSpeaking($topicId, $audioFiles, $questions = [])
     {
         $topic = DB::table('ielts_speaking_topics')->find($topicId);
         
         $systemOverride = $topic->system_prompt_override ?? "You are an expert IELTS Speaking examiner. Assess the candidate's speaking audio based on the official IELTS Speaking Band Descriptors: Fluency & Coherence, Lexical Resource, Grammatical Range & Accuracy, and Pronunciation. Assign precise band scores (0-9) and provide highly detailed, analytical feedback. Ensure your evaluation is rigorous and aligns strictly with the official public IELTS grading standards.";
         
         $systemOverride .= "\n\nCRITICAL INSTRUCTION: You must provide a LOT of specific, actionable suggestions for improvement based on the candidate's actual speaking. You MUST analyze the audio comprehensively from start to finish. Each table MUST contain AT LEAST 5 to 10 rows of detailed corrections and feedback.";
-        $systemOverride .= "\n\nYOU MUST FORMAT YOUR DETAILED FEEDBACK STRINGS AS HTML TABLES. Present your actionable feedback using exactly this styled HTML table format for EACH criteria field:\n`<table class=\"w-full text-left border-collapse border border-gray-200 mt-4 mb-4\"><thead class=\"bg-gray-50\"><tr><th class=\"border border-gray-200 p-2\">Kutipan Lisan (English)</th><th class=\"border border-gray-200 p-2\">Masalah / Kesalahan</th><th class=\"border border-gray-200 p-2\">Penjelasan</th><th class=\"border border-gray-200 p-2\">Perbaikan (English)</th></tr></thead><tbody><tr><td class=\"border border-gray-200 p-2\">...</td>...</tr></tbody></table>`";
+        $systemOverride .= "\n\nYOU MUST FORMAT YOUR DETAILED FEEDBACK STRINGS AS HTML TABLES. Present your actionable feedback using exactly this styled HTML table format for EACH criteria field:\n`<table class=\"w-full text-left border-collapse border border-gray-200 mt-4 mb-4\"><thead class=\"bg-white\"><tr><th class=\"border border-gray-200 p-2\">Kutipan Lisan (English)</th><th class=\"border border-gray-200 p-2\">Masalah / Kesalahan</th><th class=\"border border-gray-200 p-2\">Penjelasan</th><th class=\"border border-gray-200 p-2\">Perbaikan (English)</th></tr></thead><tbody><tr><td class=\"border border-gray-200 p-2\">...</td>...</tr></tbody></table>`";
         $systemOverride .= "\nLanguage Rules for the Table: 'Kutipan Lisan' MUST be the exact transcribed snippet from the candidate's audio in English. 'Masalah / Kesalahan' and 'Penjelasan' MUST be entirely in Bahasa Indonesia. 'Perbaikan' MUST be the corrected snippet in English.";
         $systemOverride .= "\n\nYou MUST return a JSON object with EXACTLY the following keys:
 - 'overall_band_score' (number)
@@ -647,7 +989,7 @@ You MUST return a JSON object with EXACTLY the following keys:
 - 'fluency_and_coherence_score' (number)
 - 'fluency_and_coherence' (string) MUST start with a short summary paragraph (<p>...</p>) in Bahasa Indonesia explaining the performance, FOLLOWED BY the HTML table.
 - 'lexical_resource_score' (number)
-- 'lexical_resource' (string) MUST start with a short summary paragraph (<p>...</p>) in Bahasa Indonesia explaining the performance, FOLLOWED BY the main HTML table. THEN you MUST provide a SECOND HTML table listing vocabulary upgrades with 2 columns: 'Kosa Kata Asli' and 'Kosa Kata yang Lebih Baik'. This second table MUST contain AT LEAST 10 ROWS of vocabulary upgrades.
+- 'lexical_resource' (string) MUST start with a short summary paragraph (<p>...</p>) in Bahasa Indonesia explaining the performance, FOLLOWED BY the main HTML table. THEN you MUST provide a SECOND HTML table listing vocabulary upgrades with 2 columns: 'Kosa Kata Asli' and 'Kosa Kata yang Lebih Baik'. This second table MUST contain AT LEAST 15 to 20 ROWS of vocabulary upgrades.
 - 'grammatical_range_score' (number)
 - 'grammatical_range' (string) MUST start with a short summary paragraph (<p>...</p>) in Bahasa Indonesia explaining the performance, FOLLOWED BY the HTML table.
 - 'overall_comment' (string, general summary in Bahasa Indonesia)";
@@ -656,10 +998,17 @@ You MUST return a JSON object with EXACTLY the following keys:
             ['text' => $systemOverride]
         ];
 
-        // Check if any valid audio is provided
+        // Check if any valid audio is provided. $audioFiles may contain fresh
+        // UploadedFile instances (first submit) or stored 'public' disk paths
+        // as strings (retry of a previously-saved answer).
         $hasAudio = false;
         foreach ($audioFiles as $audioFile) {
-            if ($audioFile && $audioFile->getSize() > 0) {
+            if ($audioFile instanceof \Illuminate\Http\UploadedFile) {
+                if ($audioFile->getSize() > 0) {
+                    $hasAudio = true;
+                    break;
+                }
+            } elseif (is_string($audioFile) && $audioFile !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($audioFile)) {
                 $hasAudio = true;
                 break;
             }
@@ -684,10 +1033,17 @@ You MUST return a JSON object with EXACTLY the following keys:
             if (isset($questions[$index])) {
                 $parts[] = ['text' => "Question: " . $questions[$index]];
             }
+            if ($audioFile instanceof \Illuminate\Http\UploadedFile) {
+                $mimeType = $audioFile->getMimeType();
+                $data = file_get_contents($audioFile->getRealPath());
+            } else {
+                $mimeType = \Illuminate\Support\Facades\Storage::disk('public')->mimeType($audioFile) ?: 'audio/webm';
+                $data = \Illuminate\Support\Facades\Storage::disk('public')->get($audioFile);
+            }
             $parts[] = [
                 'inline_data' => [
-                    'mime_type' => $audioFile->getMimeType(),
-                    'data' => base64_encode(file_get_contents($audioFile->getRealPath()))
+                    'mime_type' => $mimeType,
+                    'data' => base64_encode($data)
                 ]
             ];
         }
@@ -697,12 +1053,13 @@ You MUST return a JSON object with EXACTLY the following keys:
         foreach ($geminiKeys as $index => $key) {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json'
-            ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $key, [
+            ])->timeout(25)->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $key, [
                 'contents' => [
                     ['parts' => $parts]
                 ],
                 'generationConfig' => [
                     'responseMimeType' => 'application/json',
+                    'maxOutputTokens' => 8192,
                 ]
             ]);
 
@@ -714,7 +1071,83 @@ You MUST return a JSON object with EXACTLY the following keys:
             Log::warning("Gemini key #{$index} failed in evaluateSpeaking");
         }
 
+        // Fallback: Gemini is the only provider here that can score the raw audio
+        // directly. If it's unavailable, transcribe via Groq Whisper (already used
+        // elsewhere in this app) and score the transcript text with SiliconFlow.
+        if (empty($feedback)) {
+            $feedback = $this->evaluateSpeakingViaTranscriptFallback($audioFiles, $questions, $systemOverride);
+        }
+
         return $feedback;
+    }
+
+    /**
+     * Fallback speaking evaluation when the direct-audio provider (Gemini) is
+     * unavailable. Transcribes each recording via Groq Whisper, then scores the
+     * transcript text via the shared multi-provider text chain. Pronunciation
+     * cannot be judged from text alone, so the prompt instructs the model to
+     * give a conservative estimate for that trait rather than claim to have
+     * heard specific pronunciation errors.
+     */
+    private function evaluateSpeakingViaTranscriptFallback($audioFiles, $questions, $systemOverride)
+    {
+        $transcripts = [];
+        foreach ($audioFiles as $index => $audioFile) {
+            try {
+                $tempPath = null;
+                if ($audioFile instanceof \Illuminate\Http\UploadedFile) {
+                    $tempPath = $audioFile->store('temp_promo_audio', 'local');
+                    $fullPath = \Illuminate\Support\Facades\Storage::disk('local')->path($tempPath);
+                } else {
+                    $fullPath = \Illuminate\Support\Facades\Storage::disk('public')->path($audioFile);
+                }
+
+                $whisperResult = \App\Services\GroqKeyManager::callWhisperWithFallback('speaking', $fullPath, 60, [
+                    'response_format' => 'json',
+                ]);
+                $text = trim($whisperResult['body']['text'] ?? '');
+
+                if ($tempPath) {
+                    \Illuminate\Support\Facades\Storage::disk('local')->delete($tempPath);
+                }
+
+                if ($text !== '') {
+                    $question = $questions[$index] ?? ('Part ' . ($index + 1));
+                    $transcripts[] = "Question: {$question}\nCandidate's spoken response (transcribed): \"{$text}\"";
+                }
+            } catch (\Throwable $e) {
+                Log::warning('SiliconFlow speaking fallback: Whisper transcription failed: ' . $e->getMessage());
+            }
+        }
+
+        if (empty($transcripts)) {
+            return [];
+        }
+
+        $transcriptBlock = implode("\n\n", $transcripts);
+        $fallbackPrompt = $systemOverride
+            . "\n\nNOTE: You are scoring from a TEXT TRANSCRIPT of the candidate's speech, not the audio itself, "
+            . "because the primary audio-scoring provider was unavailable. Score Fluency & Coherence, Lexical "
+            . "Resource, and Grammatical Range normally based on the transcript's language quality, sentence "
+            . "structure, and coherence. For Pronunciation specifically, since you cannot hear the audio, give a "
+            . "conservative, moderate estimate and explicitly note in the feedback that this is a transcript-based "
+            . "estimate, not a true acoustic assessment - do not claim to have heard specific pronunciation errors.\n\n"
+            . "=== TRANSCRIPTS ===\n{$transcriptBlock}\n=== END TRANSCRIPTS ===";
+
+        $providers = ['sambanova', 'siliconflow', 'groq', 'cerebras', 'deepinfra', 'openrouter', 'openai'];
+        $decoded = \App\Services\MultiProviderAiClient::chatJson(
+            $providers,
+            'You are a strict IELTS Speaking examiner API that strictly outputs JSON.',
+            $fallbackPrompt,
+            ['groq_feature' => 'speaking']
+        );
+
+        if ($decoded) {
+            Log::info('Speaking evaluation succeeded via multi-provider transcript fallback.');
+            return $decoded;
+        }
+
+        return [];
     }
 
     public function updateAdmin(Request $request, $type, $id)

@@ -6,7 +6,7 @@ use App\Mail\FinalTestCertificateMail;
 use App\Models\FinalTestResult;
 use App\Models\FreeTestCertificate;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Bus\Dispatchable;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -45,7 +45,7 @@ class SendFinalTestCertificateEmailJob implements ShouldQueue
         }
 
         try {
-            $pdfContent = Pdf::loadView('final-tests.certificate-pdf', [
+            $pdfContent = Pdf::loadView('free-tests.certificate-pdf', [
                 'user' => $result->user ?: (object) ['name' => $result->name ?: 'Student'],
                 'result' => $result,
                 'certificate' => $certificate,

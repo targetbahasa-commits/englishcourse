@@ -20,11 +20,16 @@ class Program extends Model
     {
         return $this->belongsToMany(Program::class, 'program_subprograms', 'package_id', 'subprogram_id');
     }
-    protected $fillable = ['name', 'slug', 'period', 'description', 'color', 'icon', 'price', 'price_offline', 'price_private', 'price_private_offline', 'price_semi_private', 'price_semi_private_offline', 'is_active', 'brochure_image', 'brochure_pdf', 'active_class_period_id', 'program_type'];
+    protected $fillable = ['name', 'slug', 'period', 'description', 'color', 'icon', 'price', 'price_offline', 'price_private', 'price_private_offline', 'price_semi_private', 'price_semi_private_offline', 'is_active', 'brochure_image', 'brochure_pdf', 'active_class_period_id', 'active_class_meeting_id', 'program_type', 'min_cefr_level', 'max_cefr_level'];
 
     public function activeClassPeriod(): BelongsTo
     {
         return $this->belongsTo(ClassPeriod::class, 'active_class_period_id');
+    }
+
+    public function activeClassMeeting(): BelongsTo
+    {
+        return $this->belongsTo(ClassMeeting::class, 'active_class_meeting_id');
     }
     public function certificate(): HasOne
     {
@@ -75,33 +80,27 @@ class Program extends Model
             ->whereRaw('LOWER(name) NOT LIKE ?', ['%mock%']);
     }
 
-    public function getCategoryAttribute()
+    public function getCategoryAttribute(): string
     {
         $name = strtolower($this->name);
 
-        if (str_contains($name, 'ielts academic')) {
-            return 'IELTS Academic';
+        if (str_contains($name, 'cambridge')) {
+            return 'Cambridge Practice Tests';
         }
-        if (str_contains($name, 'ielts general')) {
-            return 'IELTS General';
+        if (str_contains($name, 'toefl itp mock')) {
+            return 'TOEFL Mock Packages';
         }
         if (str_contains($name, 'ielts')) {
-            return 'IELTS Preparation';
+            return 'IELTS Courses & Skills';
         }
-        if (str_contains($name, 'toefl')) {
-            return 'TOEFL Preparation';
+        if (str_contains($name, 'toefl') || str_contains($name, 'pte')) {
+            return 'TOEFL & PTE Courses';
         }
-        if (str_contains($name, 'pte')) {
-            return 'PTE Academic';
-        }
-        if (str_contains($name, 'grammar')) {
-            return 'Grammar for Writing';
-        }
-        if (str_contains($name, 'speaking')) {
-            return 'Speaking';
+        if (str_contains($name, 'grammar') || str_contains($name, 'speaking')) {
+            return 'Grammar & Speaking Courses';
         }
 
-        return 'Other Programs';
+        return 'Program Lainnya';
     }
 }
 

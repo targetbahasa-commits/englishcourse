@@ -38,14 +38,51 @@ class ManageFreeTestCertificates
         return $this->repository->findCertificateById($id);
     }
 
-    public function update(mixed $certificate, array $data, mixed $backgroundImageFile = null): void
-    {
-        if ($backgroundImageFile !== null) {
+    public function update(
+        mixed $certificate,
+        array $data,
+        mixed $backgroundImageFile = null,
+        bool $removeBackgroundImage = false,
+        mixed $signatureImageFile = null,
+        bool $removeSignatureImage = false,
+        mixed $stampImageFile = null,
+        bool $removeStampImage = false
+    ): void {
+        if ($removeBackgroundImage && $certificate->background_image) {
+            $this->certificateStorage->deleteFile($certificate->background_image);
+            $data['background_image'] = null;
+        } elseif ($backgroundImageFile !== null) {
             if ($certificate->background_image) {
                 $this->certificateStorage->deleteFile($certificate->background_image);
             }
             $data['background_image'] = $this->certificateStorage->storeUploadedFile($backgroundImageFile);
         }
+
+        $templateConfig = $data['template_config'] ?? ($certificate->template_config ?? []);
+
+        // Signature image
+        if ($removeSignatureImage && !empty($templateConfig['signature_image'])) {
+            $this->certificateStorage->deleteFile($templateConfig['signature_image']);
+            $templateConfig['signature_image'] = null;
+        } elseif ($signatureImageFile !== null) {
+            if (!empty($templateConfig['signature_image'])) {
+                $this->certificateStorage->deleteFile($templateConfig['signature_image']);
+            }
+            $templateConfig['signature_image'] = $this->certificateStorage->storeUploadedFile($signatureImageFile);
+        }
+
+        // Stamp image
+        if ($removeStampImage && !empty($templateConfig['stamp_image'])) {
+            $this->certificateStorage->deleteFile($templateConfig['stamp_image']);
+            $templateConfig['stamp_image'] = null;
+        } elseif ($stampImageFile !== null) {
+            if (!empty($templateConfig['stamp_image'])) {
+                $this->certificateStorage->deleteFile($templateConfig['stamp_image']);
+            }
+            $templateConfig['stamp_image'] = $this->certificateStorage->storeUploadedFile($stampImageFile);
+        }
+
+        $data['template_config'] = $templateConfig;
 
         $this->repository->updateCertificate($certificate, $data);
     }

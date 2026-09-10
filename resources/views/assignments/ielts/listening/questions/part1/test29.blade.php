@@ -9,7 +9,7 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
         {{-- Header / Example --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 font-bold text-gray-800">example</div>
             <div class="p-3 font-bold text-gray-800">answer</div>
         </div>
@@ -19,7 +19,7 @@
         </div>
 
         {{-- Q1: Included services --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Included services</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <strong>1</strong>
@@ -31,7 +31,7 @@
         </div>
 
         {{-- Q2: Sydney arrival date --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Sydney arrival date:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">15th of</span>
@@ -43,7 +43,7 @@
         </div>
 
         {{-- Q3: Accommodation criteria --}}
-        <div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 hover:bg-white transition-colors">
             <div class="p-3 font-bold text-gray-800">Accommodation criteria:</div>
             <div class="p-3">
                 <strong>3</strong>
@@ -63,7 +63,7 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
         {{-- Q4: Room type --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Room type:</div>
             <div class="p-3 text-right pr-6">
                 <strong>4</strong>
@@ -74,7 +74,7 @@
         </div>
 
         {{-- Q5: Credit card holder --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Credit card holder:</div>
             <div class="p-3 text-right pr-6">
                 <strong>5</strong>
@@ -85,7 +85,7 @@
         </div>
 
         {{-- Q6: Total cost for one night --}}
-        <div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Total cost for one night:</div>
             <div class="p-3 text-right pr-6">
                 <strong>6</strong>

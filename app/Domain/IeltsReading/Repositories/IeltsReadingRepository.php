@@ -10,6 +10,8 @@ interface IeltsReadingRepository
 
     public function getPassagesByMaterialWithQuestions(int $materialId): array;
 
+    public function getQuestionsByType(array $types): array;
+
     public function createPassage(array $data): void;
 
     public function updatePassage(int $id, array $data): void;

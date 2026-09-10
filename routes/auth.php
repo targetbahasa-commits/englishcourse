@@ -87,6 +87,13 @@ Route::middleware('auth')->group(function () {
 Route::get('student/register', [RegisteredUserController::class, 'createStudent'])
     ->name('student.register');
 
+// Shareable per-partner registration link, distributed by an HR/L&D
+// contact to their employees - resolves the code then redirects into the
+// normal student registration page with it attached (see
+// RegisteredUserController::partnerRedirect()).
+Route::get('daftar/mitra/{code}', [RegisteredUserController::class, 'partnerRedirect'])
+    ->name('partner.register');
+
 // Student register-no-payment: accessible to both guests and logged-in users (guest_quick)
 Route::get('student/register-no-payment', [RegisteredUserController::class, 'createStudentNoPayment'])
     ->name('student.register.no-payment');

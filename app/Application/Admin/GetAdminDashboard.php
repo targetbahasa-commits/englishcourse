@@ -14,17 +14,25 @@ class GetAdminDashboard
     ) {
     }
 
-    public function execute(): array
+    /**
+     * @param  int  $activeWindowHours  How far back "recently active" looks for
+     *   the Students/Teachers widgets specifically (24 or 48). Program
+     *   performance's own active-student count always uses the standard
+     *   24h window regardless, since that's a separate metric the caller
+     *   isn't choosing a window for.
+     */
+    public function execute(int $activeWindowHours = 24): array
     {
         $threshold = Carbon::now()->subHours(24)->timestamp;
+        $activeWindowThreshold = Carbon::now()->subHours($activeWindowHours)->timestamp;
 
         $totalStudents = $this->repository->countStudents();
         $totalTeachers = $this->repository->countTeachers();
         $totalPrograms = $this->repository->countPrograms();
         $activeAssignments = $this->repository->countMeetings();
 
-        $activeStudents = $this->repository->getActiveStudents($threshold);
-        $activeTeachers = $this->repository->getActiveTeachers($threshold);
+        $activeStudents = $this->repository->getActiveStudents($activeWindowThreshold);
+        $activeTeachers = $this->repository->getActiveTeachers($activeWindowThreshold);
         $programPerformance = $this->repository->getProgramPerformance($threshold);
         $teacherActivitySummary = $this->repository->getTeacherActivitySummary();
 

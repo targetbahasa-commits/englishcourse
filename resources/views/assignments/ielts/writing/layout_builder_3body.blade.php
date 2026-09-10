@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', ($meeting->title ?? 'Layout Builder 3-Body') . ' - IELTS Writing Task ' . ($task ?? 1))
+
 @section('head')
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
@@ -20,20 +22,30 @@
         result: null,
         error: null,
         showResults: false,
-        
+        draftSyncTimer: null,
+
         init() {
             const key = 'ielts_task2_3body_autosave_' + {{ $meeting->id }};
-            
-            // Restore
+
+            // Restore - localStorage first (same-device, no network round
+            // trip), falling back to the server-synced copy only when this
+            // browser has never saved a local draft (new device, or
+            // localStorage was cleared) - see restoreFromServerAnswers().
             const saved = localStorage.getItem(key);
+            let restoredLocally = false;
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
                     if (data.form) this.form = { ...this.form, ...data.form };
                     if (data.essay) this.essay = data.essay;
+                    restoredLocally = true;
                 } catch (e) {
                     console.error('Autosave Restore Error:', e);
                 }
+            }
+
+            if (!restoredLocally) {
+                this.restoreFromServerAnswers();
             }
 
             // Watch & Save
@@ -42,10 +54,68 @@
                     form: this.form,
                     essay: this.essay
                 }));
+                this.queueDraftSync();
             };
 
             this.$watch('form', saver);
             this.$watch('essay', saver);
+        },
+
+        // Rebuilds form/essay from the flat 'form_intro'/'essay' shape
+        // saveMeetingDraft() stores server-side (see buildDraftPayload()
+        // below - the exact inverse of this).
+        restoreFromServerAnswers() {
+            const flat = {{ Js::from($savedAnswers ?? []) }};
+            if (!flat || typeof flat !== 'object' || Array.isArray(flat) || Object.keys(flat).length === 0) {
+                return;
+            }
+
+            Object.keys(this.form).forEach((key) => {
+                const flatKey = 'form_' + key;
+                if (flat[flatKey] !== undefined) {
+                    this.form[key] = flat[flatKey];
+                }
+            });
+
+            if (flat.essay !== undefined) {
+                this.essay = flat.essay;
+            }
+        },
+
+        // Inverse of restoreFromServerAnswers() - flattens form/essay into
+        // the same 'form_intro'/'essay' names the fields themselves carry
+        // (see their name attributes below), so the admin live-preview's
+        // flatten()-and-match-by-name injection works with no server-side
+        // reshaping needed.
+        buildDraftPayload() {
+            const payload = {};
+            Object.keys(this.form).forEach((key) => {
+                payload['form_' + key] = this.form[key];
+            });
+            payload.essay = this.essay;
+            return payload;
+        },
+
+        queueDraftSync() {
+            clearTimeout(this.draftSyncTimer);
+            this.draftSyncTimer = setTimeout(() => this.syncDraftToServer(), 800);
+        },
+
+        async syncDraftToServer() {
+            try {
+                await fetch('/assignments/ielts-academic/writing/meeting/{{ $meeting->id }}/draft', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({ userAnswers: this.buildDraftPayload() }),
+                    keepalive: true,
+                });
+            } catch (e) {
+                console.error('Failed to sync draft to server:', e);
+            }
         },
 
         refreshEssay() {
@@ -383,7 +453,7 @@
                     <div class="space-y-4">
                         <div class="bg-gray-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Introduction Text</label>
-                            <textarea x-model="form.intro" class="w-full p-3 bg-white rounded border-gray-200 focus:border-gray-300 focus:ring-0 text-sm resize-none" rows="4" placeholder="Tuliskan pendahuluan Anda di sini (Paraphrase Topic + Thesis Statement)..."></textarea>
+                            <textarea name="form_intro" x-model="form.intro" class="w-full p-3 bg-white rounded border-gray-200 focus:border-gray-300 focus:ring-0 text-sm resize-none" rows="4" placeholder="Tuliskan pendahuluan Anda di sini (Paraphrase Topic + Thesis Statement)..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -399,9 +469,9 @@
                         <!-- Argument 1 -->
                         <div class="bg-blue-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-blue-600 uppercase mb-1">Argumen</label>
-                            <input x-model="form.b1_a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-blue-500 text-sm" placeholder="Poin utama...">
-                            <textarea x-model="form.b1_a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
-                            <textarea x-model="form.b1_a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh..."></textarea>
+                            <input name="form_b1_a1" x-model="form.b1_a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-blue-500 text-sm" placeholder="Poin utama...">
+                            <textarea name="form_b1_a1_supp" x-model="form.b1_a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
+                            <textarea name="form_b1_a1_ex" x-model="form.b1_a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -417,9 +487,9 @@
                         <!-- Argument 1 -->
                         <div class="bg-orange-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-orange-600 uppercase mb-1">Argumen</label>
-                            <input x-model="form.b2_a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-orange-500 text-sm" placeholder="Poin utama...">
-                            <textarea x-model="form.b2_a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
-                            <textarea x-model="form.b2_a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh..."></textarea>
+                            <input name="form_b2_a1" x-model="form.b2_a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-orange-500 text-sm" placeholder="Poin utama...">
+                            <textarea name="form_b2_a1_supp" x-model="form.b2_a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
+                            <textarea name="form_b2_a1_ex" x-model="form.b2_a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -435,9 +505,9 @@
                         <!-- Argument 1 -->
                         <div class="bg-purple-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-purple-600 uppercase mb-1">Argumen</label>
-                            <input x-model="form.b3_a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-purple-500 text-sm" placeholder="Poin utama...">
-                            <textarea x-model="form.b3_a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-purple-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
-                            <textarea x-model="form.b3_a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-purple-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh..."></textarea>
+                            <input name="form_b3_a1" x-model="form.b3_a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-purple-500 text-sm" placeholder="Poin utama...">
+                            <textarea name="form_b3_a1_supp" x-model="form.b3_a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-purple-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
+                            <textarea name="form_b3_a1_ex" x-model="form.b3_a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-purple-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -452,7 +522,7 @@
                             x-text="(essay ? essay.trim().split(/\s+/).filter(w => /[A-Za-z]/.test(w)).length : 0) + ' Words'">
                         </span>
                     </div>
-                    <textarea x-model="essay" class="flex-1 w-full p-4 bg-gray-50 rounded-lg border-transparent focus:bg-white focus:ring-2 focus:ring-blue-100 transition-colors resize-none font-serif text-lg leading-relaxed" placeholder="Tuliskan ketiga paragraf tubuh Anda di sini... Gunakan argumen dan ide pendukung yang telah Anda susun."></textarea>
+                    <textarea name="essay" x-model="essay" class="flex-1 w-full p-4 bg-gray-50 rounded-lg border-transparent focus:bg-white focus:ring-2 focus:ring-blue-100 transition-colors resize-none font-serif text-lg leading-relaxed" placeholder="Tuliskan ketiga paragraf tubuh Anda di sini... Gunakan argumen dan ide pendukung yang telah Anda susun."></textarea>
                 </div>
             </div>
 
@@ -577,7 +647,56 @@
                     <div x-show="tab === 'grammar'" class="space-y-4">
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                             <h5 class="font-bold text-gray-800 mb-1 text-sm uppercase text-xs tracking-wider">Grammar Detailed Feedback</h5>
-                            <p class="text-gray-600 text-sm" x-text="result?.feedback?.grammatical_range"></p>
+                            <p class="text-gray-600 text-sm" x-text="result?.feedback?.grammatical_range || result?.grammatical_range"></p>
+
+                            <!-- Grammar Improvements / Upgrade Grammar Section -->
+                            <template x-if="result?.grammar_improvements && result?.grammar_improvements?.length > 0">
+                                <div class="space-y-4 mt-6 pt-4 border-t border-gray-100">
+                                    <!-- Grammar Errors List Section -->
+                                    <div class="bg-red-50 rounded-xl border border-red-100 p-4">
+                                        <h6 class="font-bold text-red-700 text-sm flex items-center gap-2 mb-3">
+                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                             Kesalahan Grammar yang Ditemukan
+                                        </h6>
+                                        <div class="space-y-2">
+                                            <template x-for="(item, index) in result?.grammar_improvements" :key="index">
+                                                <div class="bg-white p-3 rounded-lg border border-red-200 flex items-start gap-3 hover:shadow-sm transition-shadow">
+                                                    <div class="flex-shrink-0 mt-0.5">
+                                                        <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full" x-text="index + 1"></span>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-red-700 text-sm italic line-clamp-2" x-text="item.text || item.original"></p>
+                                                        <p class="text-xs text-gray-500 mt-1">⚠️ Grammar issue: <span x-text="item.explanation?.split('(')[0]?.trim() || 'Structure needs improvement'"></span></p>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Upgrade Grammar Section -->
+                                    <div class="bg-purple-50 rounded-xl border border-purple-100 p-4">
+                                        <h6 class="font-bold text-purple-700 text-sm flex items-center gap-2 mb-3">
+                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                             Upgrade Grammar (Band 7-9)
+                                        </h6>
+                                        <div class="space-y-3">
+                                            <template x-for="(item, index) in result?.grammar_improvements" :key="index">
+                                                <div class="bg-white p-3 rounded-lg border border-purple-100 shadow-sm">
+                                                    <div class="mb-2">
+                                                        <span class="text-xs font-semibold text-purple-800 bg-purple-100 px-2 py-0.5 rounded">KALIMAT ASLI</span>
+                                                        <p class="text-gray-600 text-sm mt-1 italic" x-text="item.text || item.original"></p>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <span class="text-xs font-semibold text-purple-800 bg-purple-200 px-2 py-0.5 rounded">VERSI LEBIH BAIK (BAND 9)</span>
+                                                        <p class="text-purple-800 font-medium text-sm mt-1" x-text="item.improved || item.correction"></p>
+                                                    </div>
+                                                    <p class="text-purple-700 text-xs mt-2 border-t border-purple-100 pt-2" x-text="item.explanation"></p>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                     </div>
 

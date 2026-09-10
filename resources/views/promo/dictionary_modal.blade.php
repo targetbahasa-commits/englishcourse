@@ -19,18 +19,31 @@
                         <h3 class="text-xl font-bold text-slate-800">Translation & Thesaurus</h3><span
                             class="text-xs font-bold text-slate-700 bg-slate-200 px-2 py-1 rounded">Auto-Detect</span>
                     </div>
-                    <button type="button" @click="open = false" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"></path>
-                        </svg></button>
+                    <div class="flex items-center gap-1.5">
+                        <button type="button" @click="resetDictionary()" class="text-slate-600 hover:text-slate-900 p-1.5 rounded-lg hover:bg-slate-200 transition" title="Refresh & Reset (Siap Ketik)">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        </button>
+                        <button type="button" @click="open = false" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition"><svg class="w-6 h-6"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg></button>
+                    </div>
                 </div>
                 <div class="p-4 border-b border-gray-100">
-                    <form @submit.prevent="search" class="flex gap-2"><input type="text" x-model="query"
-                            placeholder="Type a word..."
-                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-black"><button type="submit"
-                            class="bg-slate-700 text-white px-6 py-2 rounded-lg" :disabled="loading"><span
-                                x-show="!loading">Search</span><span x-show="loading">...</span></button></form>
+                    <form @submit.prevent="search" class="flex gap-2">
+                        <input type="text" x-ref="queryInput" x-model="query"
+                               placeholder="Type a word..."
+                               class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-black text-sm">
+                        <button type="submit"
+                                class="bg-slate-700 text-white px-5 py-2 rounded-lg hover:bg-slate-800 font-medium text-sm disabled:opacity-50 flex items-center gap-1.5" :disabled="loading"><span
+                                x-show="!loading">Search</span><span x-show="loading">...</span></button>
+                        <button type="button" @click="resetDictionary()"
+                                class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-slate-800 rounded-lg transition border border-gray-200 flex items-center justify-center gap-1 text-sm font-medium" title="Refresh & Reset">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            <span class="hidden sm:inline">Refresh</span>
+                        </button>
+                    </form>
                 </div>
                 <div class="flex-1 overflow-y-auto p-6 bg-gray-50">
                     <div x-show="loading" class="text-center py-10 text-gray-500">Searching...</div>
@@ -113,121 +126,179 @@
     function dictionaryDataToolbar() {
         return {
             open: false, query: '', dictResult: null, loading: false, error: null, results: {},
+            resetDictionary() {
+                this.query = '';
+                this.dictResult = null;
+                this.error = null;
+                this.loading = false;
+                this.$nextTick(() => {
+                    if (this.$refs.queryInput) this.$refs.queryInput.focus();
+                });
+            },
             async search() {
                 if (!this.query.trim()) return;
-                this.loading = true; this.error = null; this.dictResult = null; this.results.source = 'Auto';
-                const q = this.query.trim(); const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                const q = this.query.trim();
+                const cacheKey = q.toLowerCase();
+
+                // 1. Instant Cache Hit (< 1ms)
+                window.__tbDictCache = window.__tbDictCache || new Map();
+                if (window.__tbDictCache.has(cacheKey)) {
+                    this.dictResult = JSON.parse(JSON.stringify(window.__tbDictCache.get(cacheKey)));
+                    this.results.source = this.dictResult.usedSource || 'Fast Cache';
+                    this.loading = false;
+                    this.error = null;
+                    return;
+                }
+
+                this.loading = true; this.error = null; this.dictResult = null; this.results.source = 'Google Translate';
+
+                // Fast language heuristic detection
+                const idWords = /\b(yang|dan|di|ke|dari|ini|itu|dengan|untuk|pada|adalah|dapat|akan|sudah|telah|oleh|karena|juga|kita|kami|saya|kamu|mereka|hanya|bisa|harus|seperti|secara|proses|metode|sangat|lebih|masih|dalam|atau|tidak|bukan|tentang|bagi|setelah|sebelum|antara|bila|jika|ketika|serta|tersebut|adanya|merupakan)\b/i;
+                const idAffixes = /(^(meng|mem|men|meny|menge|ber|ter|per|di|ke|se)[a-z]+|[a-z]+(kan|an|nya|i)$)/i;
+                const enWords = /\b(the|is|are|was|were|and|or|in|on|at|to|for|with|by|from|of|that|this|these|those|have|has|had|can|could|will|would|should|may|might|must|it|its|their|they|we|you|he|she|about|into|more|most|than|then|which|what|when|where|why|how|not|been|being)\b/i;
+                const enAffixes = /[a-z]+(tion|ment|ness|ity|ing|ed|ly|ous|ive|able|ible|est|er)$/i;
+
+                let isIndonesian = idWords.test(q) || idAffixes.test(q);
+                let isEnglish = enWords.test(q) || enAffixes.test(q);
+                let preferredSl = isIndonesian ? 'id' : (isEnglish ? 'en' : 'auto');
+                let preferredTl = isIndonesian ? 'en' : 'id';
+
+                let translation = '';
+                let source = 'Google Translate';
+                let lang = isIndonesian ? 'id' : 'en';
+                let part_of_speech = '';
+
                 try {
-                    // 1. MyMemory Fallback
-                    const fallback = async () => {
-                        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(q)}&langpair=en|id`);
-                        const d = await res.json();
-                        return d.responseData?.translatedText ? { text: d.responseData.translatedText, source: 'MyMemory', lang: 'en' } : null;
-                    };
-
-                    // 2. Try Direct Connection
-                    const aiTask = async () => {
+                    // TIER 1: Google Translate GTX (Fast with AbortController 2.2s)
+                    const googleTask = async () => {
                         try {
-                            const r = await fetch('/api/ollama/translate', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf }, body: JSON.stringify({ text: q }) });
-                            if (r.ok) {
-                                const d = await r.json();
-                                if (d.translation) return { text: d.translation, source: d.source || 'Groq/Gemini AI', lang: d.detected_source, part_of_speech: d.part_of_speech };
-                            }
-                        } catch (e) { }
+                            const ctrl = new AbortController();
+                            const tid = setTimeout(() => ctrl.abort(), 2200);
+                            const url1 = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${preferredSl}&tl=${preferredTl}&dt=t&q=` + encodeURIComponent(q);
+                            const res1 = await fetch(url1, { signal: ctrl.signal });
+                            clearTimeout(tid);
+                            if (!res1.ok) throw new Error("Google failed");
+                            const data1 = await res1.json();
+                            let detected = (data1 && data1[2]) ? data1[2].toLowerCase() : (isIndonesian ? "id" : "en");
+                            let translatedText = (data1 && data1[0] && Array.isArray(data1[0])) 
+                                ? data1[0].map(c => (c && c[0]) ? c[0] : "").join("").trim()
+                                : "";
 
-                        try {
-                            let activeModel = 'local-model';
-                            let modelNameDisplay = 'Local AI';
-                            try {
-                                const modelsRes = await fetch('http://localhost:1234/v1/models').then(r => r.ok ? r.json() : null).catch(() => null);
-                                if (modelsRes && modelsRes.data && modelsRes.data.length > 0) {
-                                    const m = modelsRes.data.find(m => !m.id.toLowerCase().includes('embed'));
-                                    if (m) {
-                                        activeModel = m.id;
-                                        modelNameDisplay = m.id.split('/').pop();
+                            if (preferredSl === 'auto' && (detected === "en" || translatedText.toLowerCase() === q.toLowerCase()) && preferredTl === 'en') {
+                                const ctrl2 = new AbortController();
+                                const tid2 = setTimeout(() => ctrl2.abort(), 1800);
+                                const url2 = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=id&dt=t&q=" + encodeURIComponent(q);
+                                const res2 = await fetch(url2, { signal: ctrl2.signal });
+                                clearTimeout(tid2);
+                                if (res2.ok) {
+                                    const data2 = await res2.json();
+                                    let translatedText2 = (data2 && data2[0] && Array.isArray(data2[0])) 
+                                        ? data2[0].map(c => (c && c[0]) ? c[0] : "").join("").trim()
+                                        : "";
+                                    if (translatedText2) {
+                                        return { text: translatedText2, source: "Google Translate", lang: "en" };
                                     }
                                 }
-                            } catch (e) { }
-
-                            const sysPrompt = "You are a professional dictionary. Detect language and translate. Return ONLY strict JSON. No chatter. No poems. Max 5 words.";
-                            const userPrompt = `Analyze the word "${q}".\n1. Detect if it is Indonesian or English.\n2. Translate it to the OTHER language.\n3. Determine the part of speech of the English word (e.g., noun, verb, adjective, adverb).\n4. Return JSON: { "detected_source": "id" or "en", "translation": "translated_word", "part_of_speech": "noun" }\n\nExample:\nInput: "house"\nOutput: { "detected_source": "en", "translation": "rumah", "part_of_speech": "noun" }\n\nInput: "${q}"\nOutput:`;
-
-                            const directRes = await fetch('http://localhost:1234/v1/chat/completions', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    model: activeModel,
-                                    messages: [{ role: 'system', content: sysPrompt }, { role: 'user', content: userPrompt }],
-                                    temperature: 0.1, stream: false
-                                })
-                            });
-
-                            if (directRes.ok) {
-                                const dData = await directRes.json();
-                                const content = dData.choices[0].message.content;
-                                let parsed = null;
-                                try { parsed = JSON.parse(content); }
-                                catch (e) {
-                                    const match = content.match(/\{[\s\S]*\}/);
-                                    if (match) parsed = JSON.parse(match[0]);
-                                }
-
-                                if (parsed && parsed.translation) {
-                                    if (parsed.translation.length > 60 && q.length < 20) return null;
-                                    if (q.split(' ').length === 1 && parsed.translation.split(' ').length > 5) return null;
-                                    return { text: parsed.translation, source: modelNameDisplay, lang: parsed.detected_source, part_of_speech: parsed.part_of_speech };
-                                }
                             }
-                        } catch (e) { }
+                            if (translatedText) {
+                                return { text: translatedText, source: "Google Translate", lang: detected === "id" ? "id" : "en" };
+                            }
+                        } catch(e) {}
                         return null;
                     };
 
-                    // Race
-                    let winner = null;
-                    try { winner = await Promise.race([aiTask(), new Promise((_, r) => setTimeout(() => r('timeout'), 4000))]); } catch (e) { }
+                    // TIER 2: MyMemory Fallback (Fast with AbortController 2.2s)
+                    const fallbackTask = async () => {
+                        try {
+                            const ctrl = new AbortController();
+                            const tid = setTimeout(() => ctrl.abort(), 2200);
+                            const pair = (preferredSl === 'id' || preferredTl === 'en') ? 'id|en' : 'en|id';
+                            const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(q)}&langpair=${pair}`, { signal: ctrl.signal });
+                            clearTimeout(tid);
+                            const d = await res.json();
+                            return d.responseData?.translatedText ? { text: d.responseData.translatedText.trim(), source: 'MyMemory', lang: pair === 'id|en' ? 'id' : 'en' } : null;
+                        } catch(e) { return null; }
+                    };
 
-                    let translation = ''; let source = ''; let lang = 'en'; let part_of_speech = '';
-                    if (winner) { translation = winner.text; source = winner.source; lang = winner.lang; part_of_speech = winner.part_of_speech; }
-                    else { const fb = await fallback(); if (fb) { translation = fb.text; source = fb.source; lang = fb.lang; } else throw new Error('Not found'); }
+                    let res = await googleTask();
+                    if (!res || !res.text) res = await fallbackTask();
 
-                    // Examples/Synonyms
-                    this.dictResult = { source: lang, original: q, translation: translation, part_of_speech: part_of_speech, examples: [], synonyms: [] };
-                    this.results.source = source;
+                    if (res && res.text) {
+                        translation = res.text;
+                        source = res.source;
+                        lang = res.lang || (isIndonesian ? "id" : "en");
+                    } else {
+                        throw new Error('Not found');
+                    }
+
+                    // Parallel Examples / Synonyms fetch
+                    let examples = [];
+                    let synonyms = [];
+                    let academic_words = [];
 
                     let enWord = lang === 'en' ? q : translation;
                     if (enWord) {
-                        const cleanEnglish = enWord.replace(/[.,?!]/g, "").trim();
+                        const cleanEnglish = enWord.replace(/[^a-zA-Z\s-]/g, "").trim();
                         if (cleanEnglish && cleanEnglish.split(/\s+/).length === 1) {
-                            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                            const [dRes, mRes, aRes] = await Promise.all([
-                                fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanEnglish)}`).then(r => r.ok ? r.json() : null).catch(() => null),
-                                fetch(`https://api.datamuse.com/words?rel_syn=${encodeURIComponent(cleanEnglish)}&md=p&max=10`).then(r => r.ok ? r.json() : null).catch(() => null),
-                                fetch('/api/ollama/academic-words', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                                    body: JSON.stringify({ word: cleanEnglish })
-                                }).then(r => r.ok ? r.json() : null).catch(() => null)
-                            ]);
-                            if (dRes && dRes[0]?.meanings) {
-                                dRes[0].meanings.forEach(m => m.definitions.forEach(d => { if (d.example) this.dictResult.examples.push(d.example); }));
-                                this.dictResult.examples = [...new Set(this.dictResult.examples)].slice(0, 3);
-                            }
-                            if (mRes) {
-                                this.dictResult.synonyms = mRes.map(i => {
-                                    let pos = '';
-                                    if (i.tags) {
-                                        if (i.tags.includes('n')) pos = 'noun';
-                                        else if (i.tags.includes('v')) pos = 'verb';
-                                        else if (i.tags.includes('adj')) pos = 'adj';
-                                        else if (i.tags.includes('adv')) pos = 'adv';
-                                    }
-                                    return { word: i.word, part_of_speech: pos };
-                                });
-                            }
-                            if (aRes && aRes.academic_words) this.dictResult.academic_words = aRes.academic_words;
+                            const dictCtrl = new AbortController();
+                            const dictTid = setTimeout(() => dictCtrl.abort(), 1800);
+
+                            try {
+                                const [dRes, mRes] = await Promise.allSettled([
+                                    fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanEnglish)}`, { signal: dictCtrl.signal }).then(r => r.ok ? r.json() : null),
+                                    fetch(`https://api.datamuse.com/words?rel_syn=${encodeURIComponent(cleanEnglish)}&md=p&max=8`, { signal: dictCtrl.signal }).then(r => r.ok ? r.json() : null)
+                                ]);
+                                clearTimeout(dictTid);
+
+                                const dictData = dRes.status === 'fulfilled' ? dRes.value : null;
+                                const museData = mRes.status === 'fulfilled' ? mRes.value : null;
+
+                                if (dictData && dictData[0]?.meanings) {
+                                    dictData[0].meanings.forEach(m => {
+                                        if (m.partOfSpeech && !part_of_speech) part_of_speech = m.partOfSpeech;
+                                        if (m.definitions) {
+                                            m.definitions.forEach(d => { if (d.example) examples.push(d.example); });
+                                        }
+                                    });
+                                }
+                                if (museData && Array.isArray(museData)) {
+                                    synonyms = museData.map(i => {
+                                        let pos = '';
+                                        if (i.tags) {
+                                            if (i.tags.includes('n')) pos = 'noun';
+                                            else if (i.tags.includes('v')) pos = 'verb';
+                                            else if (i.tags.includes('adj')) pos = 'adj';
+                                            else if (i.tags.includes('adv')) pos = 'adv';
+                                        }
+                                        return { word: i.word, part_of_speech: pos };
+                                    });
+                                }
+                            } catch(err) {}
                         }
                     }
-                } catch (e) { this.error = "Translation failed."; } finally { this.loading = false; }
+
+                    const finalResult = {
+                        source: lang,
+                        original: q,
+                        translation: translation,
+                        part_of_speech: part_of_speech,
+                        examples: [...new Set(examples)].slice(0, 3),
+                        synonyms: synonyms.slice(0, 8),
+                        academic_words: academic_words,
+                        usedSource: source
+                    };
+
+                    this.dictResult = finalResult;
+                    this.results.source = source;
+
+                    // Save to memory cache
+                    window.__tbDictCache.set(cacheKey, finalResult);
+
+                } catch (e) { 
+                    this.error = "Terjemahan tidak tersedia saat ini. Silakan coba kembali."; 
+                } finally { 
+                    this.loading = false; 
+                }
             },
             playAudio(text, lang) { if (window.speechSynthesis) { const u = new SpeechSynthesisUtterance(text); u.lang = lang; window.speechSynthesis.speak(u); } },
             testConnection() { alert('Connection Test: OK'); }

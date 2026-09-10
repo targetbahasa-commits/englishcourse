@@ -12,12 +12,14 @@ class Enrollment extends Model
         'user_id',
         'program_id',
         'class_period_id',
+        'class_period_booked_at',
         'enrolled_at',
         'status'
     ];
 
     protected $casts = [
         'enrolled_at' => 'datetime',
+        'class_period_booked_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

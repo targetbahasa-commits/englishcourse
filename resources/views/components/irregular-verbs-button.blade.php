@@ -162,13 +162,14 @@
             verb[3].toLowerCase().includes(query)    // Indonesian
         );
     }
-}"
-class="fixed right-8 z-50" style="bottom: 2rem;">
-   <!-- Floating Button -->
-   <button @click="open = true"
-           class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2">
-       Irregular Verbs
-   </button>
+}">
+    <!-- Floating Button -->
+    <button @click="open = true"
+            title="Irregular Verbs (V1, V2, V3)"
+            class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold p-2.5 sm:py-2.5 sm:px-4 rounded-full shadow-lg transition hover:scale-105 flex items-center justify-center gap-2 text-sm opacity-70 hover:opacity-100 transition-all duration-300">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span class="hidden sm:inline">Irregular Verbs</span>
+    </button>
 
    <!-- Modal Backdrop -->
    <div x-show="open"

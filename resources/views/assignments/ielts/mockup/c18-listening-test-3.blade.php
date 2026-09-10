@@ -19,7 +19,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 <div class="flex min-h-screen">
@@ -37,7 +37,7 @@
                         <p class="text-gray-600 mt-1">Cambridge {{ $edition }} Test {{ $testId }}</p>
                     </div>
                 </div>
-                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId ?? 1]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId ?? 1]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
@@ -129,9 +129,9 @@
                             <table class="w-full border-collapse border border-gray-400">
                                 <thead>
                                     <tr>
-                                        <th colspan="3" class="border border-gray-400 p-3 text-center font-bold bg-gray-100">Photography competitions</th>
+                                        <th colspan="3" class="border border-gray-400 p-3 text-center font-bold bg-white">Photography competitions</th>
                                     </tr>
-                                    <tr class="bg-gray-100">
+                                    <tr class="bg-white">
                                         <th class="border border-gray-400 p-3 text-left font-bold">Title of competition</th>
                                         <th class="border border-gray-400 p-3 text-left font-bold">Instructions</th>
                                         <th class="border border-gray-400 p-3 text-left font-bold">Feedback to Dan</th>
@@ -227,7 +227,7 @@
                                 ['D', "Don't eat mushrooms while picking them."],
                                 ['E', "Don't pick old mushrooms."],
                             ] as [$letter, $text])
-                            <label class="flex items-start gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                            <label class="flex items-start gap-3 cursor-pointer hover:bg-white p-2 rounded">
                                 <input type="checkbox" name="q11_12[]" value="{{ $letter }}" class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                                 <span><strong>{{ $letter }}</strong> {{ $text }}</span>
                             </label>
@@ -249,7 +249,7 @@
                                 ['D', 'Brightly coloured mushrooms can be edible.'],
                                 ['E', 'All poisonous mushrooms have a bad smell.'],
                             ] as [$letter, $text])
-                            <label class="flex items-start gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                            <label class="flex items-start gap-3 cursor-pointer hover:bg-white p-2 rounded">
                                 <input type="checkbox" name="q13_14[]" value="{{ $letter }}" class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                                 <span><strong>{{ $letter }}</strong> {{ $text }}</span>
                             </label>
@@ -270,11 +270,11 @@
                             [19, 'Dan says that when storing mushrooms, people should', ['A' => 'keep them in the fridge for no more than two days.', 'B' => 'keep them in a brown bag in a dark room.', 'C' => 'leave them for a period after washing them.']],
                             [20, 'What does Dan say about trying new varieties of mushrooms?', ['A' => 'Experiment with different recipes.', 'B' => 'Expect some to have a strong taste.', 'C' => 'Cook them for a long time.']],
                         ] as [$num, $question, $options])
-                        <div class="mb-6 p-4 {{ $loop->even ? 'bg-gray-50' : '' }} rounded-lg">
+                        <div class="mb-6 p-4 {{ $loop->even ? 'bg-white' : '' }} rounded-lg">
                             <p class="mb-3"><strong>{{ $num }}</strong> {{ $question }}</p>
                             <div class="space-y-2 ml-6">
                                 @foreach($options as $letter => $text)
-                                <label class="flex items-start gap-3 cursor-pointer hover:bg-gray-100 p-1.5 rounded">
+                                <label class="flex items-start gap-3 cursor-pointer hover:bg-white p-1.5 rounded">
                                     <input type="radio" name="q{{ $num }}" value="{{ $letter }}" class="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
                                     <span><strong>{{ $letter }}</strong> {{ $text }}</span>
                                 </label>
@@ -316,7 +316,7 @@
                                 ['D', 'They were proved right.'],
                                 ['E', 'Their attitude is understandable.'],
                             ] as [$letter, $text])
-                            <label class="flex items-start gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                            <label class="flex items-start gap-3 cursor-pointer hover:bg-white p-2 rounded">
                                 <input type="checkbox" name="q21_22[]" value="{{ $letter }}" class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                                 <span><strong>{{ $letter }}</strong> {{ $text }}</span>
                             </label>
@@ -338,7 +338,7 @@
                                 ['D', 'Working hours will be shorter.'],
                                 ['E', 'People will change jobs more frequently.'],
                             ] as [$letter, $text])
-                            <label class="flex items-start gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                            <label class="flex items-start gap-3 cursor-pointer hover:bg-white p-2 rounded">
                                 <input type="checkbox" name="q23_24[]" value="{{ $letter }}" class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                                 <span><strong>{{ $letter }}</strong> {{ $text }}</span>
                             </label>
@@ -352,7 +352,7 @@
                         <p class="mb-1">What comment do the students make about each of the following jobs?</p>
                         <p class="italic mb-4">Choose <span class="font-bold">SIX</span> answers from the box and write the correct letter, <span class="font-bold">A–G</span>, next to Questions 25–30.</p>
 
-                        <div class="border border-gray-400 p-5 mb-6 bg-gray-50">
+                        <div class="border border-gray-400 p-5 mb-6 bg-white">
                             <p class="text-center font-bold mb-4">Comments</p>
                             <div class="space-y-2">
                                 @foreach([
@@ -379,7 +379,7 @@
                                 [29, 'Care workers'],
                                 [30, 'Bank clerks'],
                             ] as [$num, $job])
-                            <div class="flex items-center gap-4 py-2 {{ $loop->even ? 'bg-gray-50' : '' }} px-3 rounded">
+                            <div class="flex items-center gap-4 py-2 {{ $loop->even ? 'bg-white' : '' }} px-3 rounded">
                                 <span class="font-bold w-8">{{ $num }}</span>
                                 <span class="w-48">{{ $job }}</span>
                                 <select name="q{{ $num }}" class="appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-3 pr-8 rounded font-semibold text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer w-16">

@@ -25,8 +25,12 @@ class AiManagementController extends Controller
                     'status_url'  => 'https://api.groq.com/openai/v1/models',
                     'models' => [
                         [
-                            'name'      => 'llama-3.3-70b-versatile',
-                            'use_case'  => 'IELTS Writing Task 2 Evaluation (full rubric grading)',
+                            'name'      => 'openai/gpt-oss-120b',
+                            'use_case'  => 'High-capacity reasoning & grading (GPT OSS 120B)',
+                        ],
+                        [
+                            'name'      => 'qwen/qwen3.6-27b',
+                            'use_case'  => 'Qwen 3.6 27B fast instruction following & grading',
                         ],
                         [
                             'name'      => 'llama-3.1-8b-instant',
@@ -75,7 +79,7 @@ class AiManagementController extends Controller
                     'status_url'  => null,
                     'models' => [
                         [
-                            'name'      => 'gemini-2.5-flash',
+                            'name'      => 'gemini-2.0-flash',
                             'use_case'  => 'IELTS Speaking evaluation (pronunciation, fluency, lexical, grammar)',
                         ],
                     ],
@@ -276,12 +280,12 @@ class AiManagementController extends Controller
 
         if ($action === 'start') {
             $message = $isOnline
-                ? '✅ Server TTS berhasil dinyalakan!'
+                ? ' Server TTS berhasil dinyalakan!'
                 : '⏳ Server sedang menyala. Model AI sedang di-load, tunggu ~10 detik.';
         } else {
             $message = !$isOnline
                 ? '🛑 Server TTS berhasil dimatikan. RAM kembali lega!'
-                : '⚠️ Server masih berjalan. Coba matikan lagi.';
+                : ' Server masih berjalan. Coba matikan lagi.';
         }
 
         return response()->json([

@@ -111,7 +111,7 @@ x-cloak
             <div class="p-6 border-b border-gray-100 bg-rose-50">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-bold text-gray-800">Advanced Verbs List</h3>
-                    <button @click="open = false" class="text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 p-2 rounded-full transition-colors">
+                    <button @click="open = false" class="text-gray-400 hover:text-gray-600 bg-white hover:bg-gray-200 p-2 rounded-full transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -154,8 +154,8 @@ x-cloak
                                 <td class="p-3 border border-gray-200 text-center">
                                     <span class="px-2 py-1 rounded text-xs font-bold tracking-wider"
                                           :class="{
-                                            'bg-blue-100 text-blue-800 border border-blue-200': item.level === 'B2',
-                                            'bg-purple-100 text-purple-800 border border-purple-200': item.level === 'C1',
+                                            'bg-white text-blue-800 border border-blue-200': item.level === 'B2',
+                                            'bg-white text-purple-800 border border-purple-200': item.level === 'C1',
                                             'bg-rose-100 text-rose-800 border border-rose-200': item.level === 'C2'
                                           }" x-text="item.level"></span>
                                 </td>

@@ -30,10 +30,11 @@ class ManageStudents
         $recentActivity      = $this->repository->getRecentActivity($student->id);
         $progressStats       = $this->repository->getProgressStats($student->id);
         $latestTest          = $this->repository->getLatestTest($student->id);
+        $latestFinalTest     = $this->repository->getLatestFinalTest($student->id);
         $allAssignmentScores = $this->repository->getAllAssignmentScores($student->id);
 
         return array_merge(
-            compact('student', 'recentActivity', 'latestTest', 'allAssignmentScores'),
+            compact('student', 'recentActivity', 'latestTest', 'latestFinalTest', 'allAssignmentScores'),
             $progressStats
         );
     }
@@ -54,24 +55,56 @@ class ManageStudents
             'last_activity_human' => $data['lastActivityAt']
                 ? $data['lastActivityAt']->diffForHumans()
                 : null,
+            'is_online' => (bool) ($data['isOnline'] ?? false),
             'snapshot' => $data['snapshot'],
         ];
     }
 
     private function generateCurrentAssignmentData(mixed $student): array
     {
+        if (is_object($student) && method_exists($student, 'loadMissing')) {
+            $student->loadMissing(['program', 'enrollments.program', 'classPeriod.program']);
+        }
+
         $sessionRow  = $this->repository->getLatestSessionForStudent($student->id);
         $sessionData = $this->decodeSessionPayload($sessionRow->payload ?? null);
         $activityUrl = $this->resolveActivityUrl($sessionData, (int) $student->id);
         $programName = $this->mapUrlToProgramName($activityUrl);
-        $lastActivityAt = isset($sessionRow->last_activity)
-            ? now()->setTimestamp((int) $sessionRow->last_activity)
-            : null;
+
+        // Online/last-activity is derived from users.last_seen_at (stamped by
+        // App\Http\Middleware\UpdateLastSeen on every authenticated request,
+        // throttled to 1 write/60s) rather than the `sessions` table. The
+        // shared host intermittently fails to connect for `sessions` reads
+        // (SQLSTATE[HY000] [2002] "Operation not permitted"), which used to
+        // empty $sessionRow even for a student who is genuinely mid-session,
+        // falling all the way through to resolveFallbackLastActivity()'s
+        // MeetingScore/AssignmentDraft lookup - "6 days ago" and Live Preview
+        // flipped to OFF for an actively-working student. $student is already
+        // a loaded model here, so reading last_seen_at costs no extra query
+        // and can't fail on a DB hiccup the way the sessions query can.
+        $lastActivityAt = $student->last_seen_at;
+        $isOnline = $lastActivityAt && $lastActivityAt->gte(now()->subSeconds(180));
+
+        // If programName is Unknown Program, resolve it from student profile/enrollments/scores
+        if ($programName === 'Unknown Program') {
+            $programName = $this->resolveStudentProgramName($student);
+        }
+
+        // If activityUrl is null, resolve fallback activity URL from student's drafts / scores / enrolled program
+        if (!$activityUrl) {
+            $activityUrl = $this->resolveFallbackActivityUrl($student, $sessionData);
+        }
+
+        // If lastActivityAt is null, resolve fallback last activity timestamp
+        if (!$lastActivityAt) {
+            $lastActivityAt = $this->resolveFallbackLastActivity($student);
+        }
 
         return [
             'activityUrl'   => $activityUrl,
             'programName'   => $programName,
             'lastActivityAt'=> $lastActivityAt,
+            'isOnline'      => $isOnline,
             'snapshot'      => $this->resolveCurrentWorkSnapshot($student->id, $activityUrl, $sessionData),
         ];
     }
@@ -141,12 +174,21 @@ class ManageStudents
         //   /broadcasting/auth
         //   /api/*  (all internal JSON endpoints)
         //   /admin/students/*/current-assignment-json  (admin polling endpoint)
+        //   any /*-pdf or /*/pdf download route (a student clicking "Download
+        //   Materi PDF"/"Download Evaluation PDF" makes THAT the last real
+        //   page nav in their session; surfaced into the Live Preview iframe,
+        //   a PDF response just triggers the browser's native Save dialog and
+        //   leaves the iframe blank instead of showing their actual work)
         $ignoredPrefixes = [
             '/api/',
             '/broadcasting/',
         ];
         $ignoredContains = [
             '/current-assignment-json',
+            '/download-material-pdf',
+            '/download-pdf',
+            '/materi/pdf',
+            '/hasil/pdf',
         ];
 
         if (is_string($url) && trim($url) !== '') {
@@ -249,6 +291,154 @@ class ManageStudents
         };
     }
 
+    private function resolveStudentProgramName(mixed $student): string
+    {
+        if (!empty($student->program?->name)) {
+            return $student->program->name;
+        }
+
+        if (isset($student->enrollments) && $student->enrollments->isNotEmpty()) {
+            foreach ($student->enrollments as $enrollment) {
+                if (!empty($enrollment->program?->name)) {
+                    return $enrollment->program->name;
+                }
+            }
+        }
+
+        if (!empty($student->classPeriod?->program?->name)) {
+            return $student->classPeriod->program->name;
+        }
+
+        if (!empty($student->classPeriod?->name)) {
+            return $student->classPeriod->name;
+        }
+
+        $latestScore = \App\Models\MeetingScore::where('user_id', $student->id)
+            ->with('program')
+            ->whereNotNull('program_id')
+            ->latest('updated_at')
+            ->first();
+
+        if ($latestScore?->program?->name) {
+            return $latestScore->program->name;
+        }
+
+        $latestDraft = \App\Models\AssignmentDraft::where('user_id', $student->id)
+            ->with('program')
+            ->whereNotNull('program_id')
+            ->latest('updated_at')
+            ->first();
+
+        if ($latestDraft?->program?->name) {
+            return $latestDraft->program->name;
+        }
+
+        return 'Unknown Program';
+    }
+
+    private function resolveFallbackActivityUrl(mixed $student, array $sessionData): ?string
+    {
+        // 1. Check cache for last valid URL
+        $cached = Cache::get('student_last_valid_activity_url_' . $student->id);
+        if ($cached) {
+            return $cached;
+        }
+
+        // 2. Check latest draft
+        $latestDraft = \App\Models\AssignmentDraft::where('user_id', $student->id)
+            ->latest('updated_at')
+            ->first();
+
+        if ($latestDraft && $latestDraft->meeting_number) {
+            $track = $latestDraft->track ?? 'fast-track';
+            $meeting = $latestDraft->meeting_number;
+
+            // Same root cause as resolveGrammarMeetingSnapshot()'s meeting-2
+            // fallback (see its docblock): fast-track meeting 1's stale
+            // data-meeting="2" bug filed real meeting-1 answers under
+            // meeting_number=2. That's fixed at the source now, but any
+            // AssignmentDraft rows already saved while the bug was live
+            // still say meeting_number=2 - so the "current page" shown here
+            // would otherwise point admins at the wrong meeting entirely,
+            // not just show blank answers. Detect it the same way: content
+            // shaped like meeting 1's matrix (trans_matrix/tenses keys)
+            // saved under meeting_number=2 can only be meeting 1's answers,
+            // since the real meeting 2 ("Latihan penerapan tenses") uses a
+            // completely different answers shape.
+            if ($track === 'fast-track' && $meeting === 2 && is_array($latestDraft->answers)
+                && (isset($latestDraft->answers['trans_matrix']) || isset($latestDraft->answers['tenses']))) {
+                $meeting = 1;
+            }
+
+            $url = match ($track) {
+                'introductory' => "/assignments/grammar-writing/introductory/meeting/{$meeting}",
+                'complexity' => "/assignments/grammar-writing/complexity/meeting/{$meeting}",
+                'proficiency' => "/assignments/grammar-writing/proficiency/meeting/{$meeting}",
+                default => "/assignments/grammar-writing/fast-track/meeting{$meeting}",
+            };
+            return $this->normalizeActivityUrlToCurrentHost($url);
+        }
+
+        // 3. Check latest submitted score
+        $latestScore = \App\Models\MeetingScore::where('user_id', $student->id)
+            ->latest('updated_at')
+            ->first();
+
+        $programSlug = $student->program?->slug
+            ?? $student->enrollments?->first()?->program?->slug
+            ?? ($latestScore ? \App\Models\Program::where('id', $latestScore->program_id)->value('slug') : null);
+
+        if ($latestScore && $latestScore->meeting_number) {
+            $nextMeeting = $latestScore->meeting_number < 20 ? ($latestScore->meeting_number + 1) : $latestScore->meeting_number;
+            
+            if ($programSlug === 'fast-track-grammar-for-writing' || str_contains((string) $programSlug, 'fast-track') || str_contains((string) $programSlug, 'grammar')) {
+                $url = "/assignments/grammar-writing/fast-track/meeting{$nextMeeting}";
+                return $this->normalizeActivityUrlToCurrentHost($url);
+            }
+        }
+
+        // 4. Default to first meeting / entry page of enrolled program
+        if ($programSlug) {
+            $url = match ($programSlug) {
+                'fast-track-grammar-for-writing' => '/assignments/grammar-writing/fast-track/meeting1',
+                'grammar-for-writing-introductory' => '/assignments/grammar-writing/introductory/meeting/1',
+                'grammar-for-writing-complexity' => '/assignments/grammar-writing/complexity/meeting/1',
+                'grammar-for-writing-proficiency' => '/assignments/grammar-writing/proficiency/meeting/1',
+                'toefl-itp' => '/assignments/toefl-itp',
+                'pte-academic' => '/assignments/pte-academic',
+                'ielts-general' => '/assignments/ielts-general',
+                'ielts-academic' => '/assignments/ielts-academic',
+                'speaking' => '/assignments/speaking',
+                default => null,
+            };
+
+            if ($url) {
+                return $this->normalizeActivityUrlToCurrentHost($url);
+            }
+        }
+
+        return null;
+    }
+
+    private function resolveFallbackLastActivity(mixed $student): ?\Carbon\Carbon
+    {
+        $latestScore = \App\Models\MeetingScore::where('user_id', $student->id)->latest('updated_at')->first();
+        if ($latestScore?->updated_at) {
+            return $latestScore->updated_at;
+        }
+
+        $latestDraft = \App\Models\AssignmentDraft::where('user_id', $student->id)->latest('updated_at')->first();
+        if ($latestDraft?->updated_at) {
+            return $latestDraft->updated_at;
+        }
+
+        if (!empty($student->last_seen_at)) {
+            return \Carbon\Carbon::parse($student->last_seen_at);
+        }
+
+        return null;
+    }
+
     private function resolveCurrentWorkSnapshot(int $userId, ?string $activityUrl, array $sessionData): array
     {
         $snapshot = [
@@ -271,6 +461,16 @@ class ManageStudents
         $grammarSessionSnapshot = $this->resolveGrammarMeetingSnapshotFromSession($sessionData);
         if ($grammarSessionSnapshot !== null) {
             return array_merge($snapshot, $grammarSessionSnapshot);
+        }
+
+        $ieltsWritingSnapshot = $this->resolveIeltsWritingMeetingSnapshot($userId, $path, $sessionData);
+        if ($ieltsWritingSnapshot !== null) {
+            return array_merge($snapshot, $ieltsWritingSnapshot);
+        }
+
+        $ieltsWritingSessionSnapshot = $this->resolveIeltsWritingMeetingSnapshotFromSession($sessionData);
+        if ($ieltsWritingSessionSnapshot !== null) {
+            return array_merge($snapshot, $ieltsWritingSessionSnapshot);
         }
 
         $sessionSnapshot = $this->extractAnswerFromSessionData($sessionData);
@@ -322,62 +522,367 @@ class ManageStudents
 
     private function resolveGrammarMeetingSnapshot(int $userId, string $path, array $sessionData): ?array
     {
-        if (!preg_match('#/assignments/grammar-writing/(?:[^/]+/)?meeting(\d+)#', $path, $matches)) {
+        // "meeting/?(\d+)" (not just "meeting(\d+)") because introductory
+        // track's URL is /assignments/grammar-writing/introductory/meeting/{N}
+        // - a literal slash between "meeting" and the number - unlike every
+        // other track's /meeting{N} (no slash). Missing this meant this
+        // method silently never matched ANY introductory meeting's URL at
+        // all, no matter how correct everything else here was - it always
+        // fell straight through to the less-precise, whole-session-scanning
+        // resolveGrammarMeetingSnapshotFromSession() fallback instead.
+        if (!preg_match('#/assignments/grammar-writing/(?:([^/]+)/)?meeting/?(\d+)#', $path, $matches)) {
             return null;
         }
 
-        $meetingNumber = (int) ($matches[1] ?? 0);
+        $track = $matches[1] ?? null;
+        $meetingNumber = (int) ($matches[2] ?? 0);
         if ($meetingNumber <= 0) {
             return null;
         }
 
-        $answersKey = 'meeting' . $meetingNumber . '_user_answers';
-        $paragraphKey = 'meeting' . $meetingNumber . '_user_paragraph_answer';
+        // Two incompatible session-key conventions exist for the same
+        // "current draft answers" concept, depending which controller owns
+        // this meeting: the newer "Complexity-style" pages (see
+        // grammar-writing-complexity-meeting.blade.php's syncGrammarDraft(),
+        // saved by GrammarWritingAdminController::grammarWritingMeetingDraft())
+        // key by "{track}_meeting{N}_draft_answers" - e.g.
+        // "fast-track_meeting2_draft_answers" - since a track-qualified key
+        // is required there (the same meeting number can exist under
+        // multiple tracks). Older/legacy grammar-writing pages key by the
+        // bare "meeting{N}_user_answers" instead, with no track prefix.
+        // Try the modern key(s) first (most current pages use them), only
+        // falling back to the legacy one if nothing's there - this is what
+        // was missing before, silently showing every Complexity-style
+        // meeting's live-typed answers as blank in the admin preview no
+        // matter how fresh the student's session data actually was.
+        $modernAnswerKeys = [];
+        $legacyAnswerKeys = ["meeting{$meetingNumber}_user_answers"];
+        $candidateParagraphKeys = [];
+        if ($track) {
+            $modernAnswerKeys[] = "{$track}_meeting{$meetingNumber}_draft_answers";
+            $modernAnswerKeys[] = "{$track}_meeting{$meetingNumber}_user_answers";
+            $candidateParagraphKeys[] = "{$track}_meeting{$meetingNumber}_draft_paragraph_answer";
+            $candidateParagraphKeys[] = "{$track}_meeting{$meetingNumber}_user_paragraph";
+        }
+        $candidateParagraphKeys[] = "meeting{$meetingNumber}_user_paragraph_answer";
 
-        $rawAnswers = \Illuminate\Support\Facades\Cache::get('user_' . $userId . '_' . $answersKey);
-        if ($rawAnswers === null) {
-            $rawAnswers = isset($sessionData[$answersKey]) && is_array($sessionData[$answersKey])
-                ? $sessionData[$answersKey]
-                : [];
+        // Meeting 1 is the one exception where the "modern track-qualified
+        // key -> wrap under 'answers'" rule above doesn't hold, but ONLY
+        // for fast-track's own meeting 1 and Complexity's (which reuses it -
+        // see BuildGrammarWritingMeeting2ViewData): meeting2.blade.php's
+        // fields are "tenses[...]"/"trans_sent[...]"/"trans_matrix[...]",
+        // not "answers[N]" - Complexity's meeting 1 draft happens to be
+        // saved through the same modern grammarWritingMeetingDraft()
+        // endpoint as every OTHER Complexity meeting (see
+        // meeting2.blade.php's syncDraftToServer()), but with that
+        // different top-level shape, so it must never get the 'answers'
+        // wrap the modern key would otherwise imply. Introductory's and
+        // Proficiency's OWN meeting 1 pages are unrelated - they use the
+        // ordinary "answers[N]" fields just like their other meetings - so
+        // this must stay scoped to fast-track/complexity only, not every
+        // track's meeting 1.
+        $isSharedTensesMatrixMeeting = $meetingNumber === 1 && in_array($track, [null, 'fast-track', 'complexity'], true);
+
+        $rawAnswers = [];
+        $answersWrapperKey = null;
+        foreach ([...$modernAnswerKeys, ...$legacyAnswerKeys] as $answersKey) {
+            $cached = \Illuminate\Support\Facades\Cache::get('user_' . $userId . '_' . $answersKey);
+            if (is_array($cached) && $cached !== []) {
+                $rawAnswers = $cached;
+                $answersWrapperKey = ($isSharedTensesMatrixMeeting || !in_array($answersKey, $modernAnswerKeys, true))
+                    ? $this->resolveLegacyAnswersWrapperKey($track, $meetingNumber)
+                    : 'answers';
+                break;
+            }
+            if (isset($sessionData[$answersKey]) && is_array($sessionData[$answersKey]) && $sessionData[$answersKey] !== []) {
+                $rawAnswers = $sessionData[$answersKey];
+                $answersWrapperKey = ($isSharedTensesMatrixMeeting || !in_array($answersKey, $modernAnswerKeys, true))
+                    ? $this->resolveLegacyAnswersWrapperKey($track, $meetingNumber)
+                    : 'answers';
+                break;
+            }
         }
 
-        $paragraphAnswer = \Illuminate\Support\Facades\Cache::get('user_' . $userId . '_' . $paragraphKey);
-        if ($paragraphAnswer === null) {
-            $paragraphAnswer = isset($sessionData[$paragraphKey])
-                ? trim((string) $sessionData[$paragraphKey])
-                : '';
+        if (empty($rawAnswers)) {
+            $dbDraft = \App\Models\AssignmentDraft::where('user_id', $userId)
+                ->where('meeting_number', $meetingNumber)
+                ->latest('updated_at')
+                ->first();
+            if ($dbDraft && !empty($dbDraft->answers)) {
+                $rawAnswers = is_array($dbDraft->answers) ? $dbDraft->answers : (json_decode((string) $dbDraft->answers, true) ?? []);
+                if (is_array($rawAnswers) && $rawAnswers !== []) {
+                    $answersWrapperKey = ($isSharedTensesMatrixMeeting || !in_array("{$track}_meeting{$meetingNumber}_draft_answers", $modernAnswerKeys, true))
+                        ? $this->resolveLegacyAnswersWrapperKey($track, $meetingNumber)
+                        : 'answers';
+                }
+            }
         }
 
-        return $this->buildGrammarMeetingSnapshot($meetingNumber, $rawAnswers, $paragraphAnswer);
+        // Fast-track meeting 1's form (meeting2.blade.php - see its docblock)
+        // used to carry a stale data-meeting="2" attribute that made every
+        // draft-save silently POST to .../meeting2/draft instead of
+        // .../meeting1/draft, filing the student's real meeting-1 answers
+        // under meeting_number=2 in both the cache and AssignmentDraft.
+        // That's now fixed at the source, but any browser tab that loaded
+        // the page before the fix deploys will keep doing this until it's
+        // reloaded - so meeting 1 specifically also checks meeting_number=2
+        // as a fallback, only accepting it when its shape is unmistakably
+        // this matrix page's own (trans_matrix/tenses keys), never a
+        // genuine unrelated meeting 2 draft.
+        //
+        // Trigger on "no REAL content yet", not just "empty array": some
+        // students have an old, essentially-blank meeting1_user_answers
+        // cache/session entry from a much earlier, mostly-untouched visit
+        // to this page (predating the misfile bug) - a non-empty PHP array
+        // whose every leaf is null/blank. empty() alone treats that as
+        // "found", masking the richer real answers sitting under
+        // meeting_number=2 instead of falling through to find them.
+        $hasFilledTensesContent = static function ($answers): bool {
+            if (!is_array($answers)) {
+                return false;
+            }
+            foreach (['trans_matrix', 'tenses'] as $group) {
+                if (isset($answers[$group]) && is_array($answers[$group])
+                    && collect($answers[$group])->contains(fn ($v) => $v !== null && trim((string) $v) !== '')) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        if ($track === 'fast-track' && $meetingNumber === 1 && !$hasFilledTensesContent($rawAnswers)) {
+            $misfiledCached = \Illuminate\Support\Facades\Cache::get('user_' . $userId . '_meeting2_user_answers');
+            if ($hasFilledTensesContent($misfiledCached)) {
+                $rawAnswers = $misfiledCached;
+                $answersWrapperKey = null;
+            } else {
+                $misfiledDraft = \App\Models\AssignmentDraft::where('user_id', $userId)
+                    ->where('meeting_number', 2)
+                    ->latest('updated_at')
+                    ->first();
+                if ($misfiledDraft && $hasFilledTensesContent($misfiledDraft->answers)) {
+                    $rawAnswers = $misfiledDraft->answers;
+                    $answersWrapperKey = null;
+                }
+            }
+        }
+
+        // Additional fallback: if student has submitted, retrieve answers from MeetingScore
+        if (empty($rawAnswers)) {
+            $scoreRecord = \App\Models\MeetingScore::where('user_id', $userId)
+                ->where('meeting_number', $meetingNumber)
+                ->latest('submitted_at')
+                ->first();
+            if ($scoreRecord && !empty($scoreRecord->answers)) {
+                $scoreAnswers = is_array($scoreRecord->answers) ? $scoreRecord->answers : (json_decode((string) $scoreRecord->answers, true) ?? []);
+                if (is_array($scoreAnswers) && !empty($scoreAnswers)) {
+                    $rawAnswers = $scoreAnswers['user_answers'] ?? ($scoreAnswers['answers'] ?? $scoreAnswers);
+                    $answersWrapperKey = 'answers';
+                }
+            }
+        }
+
+        $paragraphAnswer = '';
+        foreach ($candidateParagraphKeys as $paragraphKey) {
+            $cached = \Illuminate\Support\Facades\Cache::get('user_' . $userId . '_' . $paragraphKey);
+            if (is_string($cached) && trim($cached) !== '') {
+                $paragraphAnswer = trim($cached);
+                break;
+            }
+            if (isset($sessionData[$paragraphKey]) && trim((string) $sessionData[$paragraphKey]) !== '') {
+                $paragraphAnswer = trim((string) $sessionData[$paragraphKey]);
+                break;
+            }
+        }
+
+        if ($paragraphAnswer === '' && !empty($scoreRecord ?? null) && !empty($scoreRecord->answers)) {
+            $scoreAnswers = is_array($scoreRecord->answers) ? $scoreRecord->answers : (json_decode((string) $scoreRecord->answers, true) ?? []);
+            if (isset($scoreAnswers['paragraph_answer'])) {
+                $paragraphAnswer = (string) $scoreAnswers['paragraph_answer'];
+            } elseif (isset($scoreAnswers['user_paragraph_answer'])) {
+                $paragraphAnswer = (string) $scoreAnswers['user_paragraph_answer'];
+            }
+        }
+
+        // Introductory meeting 11 ("Irregular Verb") is its own special
+        // case, even among the already-inconsistent grammar-writing
+        // conventions: its two per-question fields are named
+        // "meeting11_answers[N][v2]" / "[v3]" in the DOM, but
+        // syncGrammarDraft() (grammar-writing-introductory-meeting.blade.php)
+        // reuses the SAME generic per-input draftKey-keyed flat-map
+        // collector every other "answers[N]"-style meeting uses - it just
+        // sets each input's own data-draft-key to a composite "N_v2"/"N_v3"
+        // string instead of a plain N, since a single flat answers[N]
+        // slot can't hold two values. That composite key needs
+        // reconstructing into real nesting before it means anything to
+        // either this method's own per-question extraction below or the
+        // live-preview iframe's field-matching JS.
+        if ($track === 'introductory' && $meetingNumber === 11 && $rawAnswers !== []) {
+            $rawAnswers = $this->reshapeMeeting11Answers($rawAnswers);
+            $answersWrapperKey = 'meeting11_answers';
+        }
+
+        return $this->buildGrammarMeetingSnapshot($meetingNumber, $rawAnswers, $paragraphAnswer, $answersWrapperKey);
+    }
+
+    /**
+     * Turns introductory meeting 11's saved {"3_v2": "...", "3_v3": "..."}
+     * flat composite-key draft map into the real {"3": {"v2": "...", "v3":
+     * "..."}} nesting - see resolveGrammarMeetingSnapshot()'s docblock on
+     * why the saved shape doesn't already look like this.
+     */
+    private function reshapeMeeting11Answers(array $rawAnswers): array
+    {
+        $reshaped = [];
+
+        foreach ($rawAnswers as $key => $value) {
+            if (!preg_match('/^(\d+)_(v2|v3)$/', (string) $key, $matches)) {
+                continue;
+            }
+
+            $questionNumber = $matches[1];
+            $field = $matches[2];
+
+            if (!isset($reshaped[$questionNumber])) {
+                $reshaped[$questionNumber] = [];
+            }
+
+            $reshaped[$questionNumber][$field] = $value;
+        }
+
+        return $reshaped;
+    }
+
+    /**
+     * The legacy draft endpoint (LegacyGrammarWritingController::meetingDraft(),
+     * session key "meeting{N}_user_answers") is shared by every fast-track
+     * meeting from 1-10 and 18-20, but each one's own JS builds a
+     * differently-shaped JSON payload depending on its actual form field
+     * names - and that shape is what ends up saved to the session, since
+     * the handler just stores $request->input('userAnswers', []) (or, if
+     * that key is absent, everything else via $request->except(...)) as-is.
+     *
+     * Most meetings' fields are named "userAnswers[...]" (a plain index,
+     * e.g. meeting6/7/8/9/10/18/19, or a nested group, e.g. meeting3's
+     * "userAnswers[N][tense|trans]" and meeting5's
+     * "userAnswers[section][N]") - Laravel's input('userAnswers') strips
+     * that outer "userAnswers[...]" segment before it ever reaches this
+     * class, so the live-preview iframe's field-matching JS (which
+     * flattens raw_answers with NO assumed prefix) needs it added back, or
+     * every one of those fields' names come out wrong by exactly that one
+     * missing segment.
+     *
+     * Meeting 1 (fast-track) and meeting 4 are the two exceptions: their
+     * fields are named directly as "tenses[...]"/"trans_sent[...]"/
+     * "trans_matrix[...]" (no "userAnswers[" wrapper at all), so
+     * $request->input('userAnswers') is empty and the handler falls
+     * through to $request->except(...) instead - which preserves those
+     * top-level group names exactly as they appear in the real DOM
+     * already, needing no rewrapping.
+     *
+     * Only covers the fast-track track, since that's the one this was
+     * actually verified against field-by-field - other tracks' meeting
+     * numbers may map to entirely different pages/conventions, so they
+     * intentionally fall through to "no wrap" (this class's prior,
+     * unverified-but-unchanged behavior) rather than guessing.
+     */
+    private function resolveLegacyAnswersWrapperKey(?string $track, int $meetingNumber): ?string
+    {
+        if ($track !== 'fast-track') {
+            return null;
+        }
+
+        $noWrapMeetings = [1, 4, 20];
+
+        return in_array($meetingNumber, $noWrapMeetings, true) ? null : 'userAnswers';
     }
 
     private function resolveGrammarMeetingSnapshotFromSession(array $sessionData): ?array
     {
         $candidateMeetings = [];
 
+        // Matches both session-key conventions (see resolveGrammarMeetingSnapshot()'s
+        // docblock): bare "meeting{N}_user_answers" (legacy pages) and
+        // "{track}_meeting{N}_draft_answers" / "{track}_meeting{N}_user_answers"
+        // (Complexity-style pages, track-qualified since the same meeting
+        // number exists under multiple tracks).
         foreach ($sessionData as $key => $value) {
             if (!is_string($key) || !is_array($value)) {
                 continue;
             }
 
-            if (!preg_match('/^meeting(\d+)_user_answers$/', $key, $matches)) {
+            if (!preg_match('/^(?:([a-z-]+)_)?meeting(\d+)_(?:draft_answers|user_answers)$/', $key, $matches)) {
                 continue;
             }
 
-            $meetingNumber = (int) ($matches[1] ?? 0);
+            // preg_match sets an unmatched-but-non-trailing optional group
+            // to "" rather than omitting it, so a bare "meeting5_user_answers"
+            // key (no track prefix) yields $matches[1] === "" here, NOT
+            // null - "?? null" alone never catches that, which silently
+            // broke every "$track === null" / "$track !== null" check
+            // below for genuinely bare legacy keys.
+            $track = ($matches[1] ?? '') !== '' ? $matches[1] : null;
+            $meetingNumber = (int) ($matches[2] ?? 0);
             if ($meetingNumber <= 0) {
                 continue;
             }
 
+            $paragraphKeys = $track
+                ? ["{$track}_meeting{$meetingNumber}_draft_paragraph_answer", "{$track}_meeting{$meetingNumber}_user_paragraph"]
+                : ["meeting{$meetingNumber}_user_paragraph_answer"];
+            $paragraphAnswer = '';
+            foreach ($paragraphKeys as $paragraphKey) {
+                if (isset($sessionData[$paragraphKey]) && trim((string) $sessionData[$paragraphKey]) !== '') {
+                    $paragraphAnswer = trim((string) $sessionData[$paragraphKey]);
+                    break;
+                }
+            }
+
             $normalized = $this->normalizeGrammarAnswerMap($value);
-            $paragraphKey = 'meeting' . $meetingNumber . '_user_paragraph_answer';
-            $paragraphAnswer = isset($sessionData[$paragraphKey]) ? trim((string) $sessionData[$paragraphKey]) : '';
+
+            // A track-qualified key overwrites a same-numbered legacy
+            // candidate seen earlier (or vice versa) - keep whichever one
+            // actually has content, since only one convention is ever
+            // populated for a given meeting in practice.
+            $existing = $candidateMeetings[$meetingNumber] ?? null;
+            if ($existing !== null && $existing['has_answers'] && $normalized === []) {
+                continue;
+            }
+
+            // The bare "meeting{N}_user_answers" key (no track prefix) never
+            // encodes which track it belongs to - resolveGrammarMeetingSnapshot()
+            // (the primary path, using the student's actual current URL)
+            // knows this for certain, but this is the fallback used when
+            // that lookup fails entirely. fast-track is assumed since
+            // that's the only track resolveLegacyAnswersWrapperKey() has
+            // been verified against field-by-field; a wrong guess here
+            // just means an untested track's raw_answers goes back
+            // unwrapped, same as this whole class's behavior before this
+            // fix existed.
+            $rawAnswersForCandidate = $value;
+            // Mirrors resolveGrammarMeetingSnapshot()'s $isSharedTensesMatrixMeeting -
+            // only fast-track's own meeting 1 (bare key, $track === null here)
+            // and Complexity's (which reuses it) skip the 'answers' wrap.
+            // Introductory's and Proficiency's own meeting 1 use ordinary
+            // "answers[N]" fields like their other meetings and must NOT
+            // be swept into this exception just because meetingNumber === 1.
+            $isSharedTensesMatrixMeeting = $meetingNumber === 1 && in_array($track, [null, 'fast-track', 'complexity'], true);
+            $wrapperKey = ($isSharedTensesMatrixMeeting || $track === null)
+                ? $this->resolveLegacyAnswersWrapperKey($track ?? 'fast-track', $meetingNumber)
+                : 'answers';
+
+            // See resolveGrammarMeetingSnapshot()'s docblock on this one.
+            if ($track === 'introductory' && $meetingNumber === 11 && $rawAnswersForCandidate !== []) {
+                $rawAnswersForCandidate = $this->reshapeMeeting11Answers($rawAnswersForCandidate);
+                $wrapperKey = 'meeting11_answers';
+            }
 
             $candidateMeetings[$meetingNumber] = [
                 'meeting_number' => $meetingNumber,
-                'raw_answers' => $value,
+                'raw_answers' => $rawAnswersForCandidate,
                 'has_answers' => $normalized !== [],
                 'paragraph_answer' => $paragraphAnswer,
+                'answers_wrapper_key' => $wrapperKey,
             ];
         }
 
@@ -390,9 +895,10 @@ class ManageStudents
         foreach ($candidateMeetings as $candidate) {
             if ($candidate['has_answers'] || $candidate['paragraph_answer'] !== '') {
                 return $this->buildGrammarMeetingSnapshot(
-                    (int) $candidate['meeting_number'], 
-                    (array) $candidate['raw_answers'], 
-                    (string) $candidate['paragraph_answer']
+                    (int) $candidate['meeting_number'],
+                    (array) $candidate['raw_answers'],
+                    (string) $candidate['paragraph_answer'],
+                    $candidate['answers_wrapper_key'] ?? null
                 );
             }
         }
@@ -405,11 +911,143 @@ class ManageStudents
         return $this->buildGrammarMeetingSnapshot(
             (int) ($first['meeting_number'] ?? 0),
             (array) ($first['raw_answers'] ?? []),
-            (string) ($first['paragraph_answer'] ?? '')
+            (string) ($first['paragraph_answer'] ?? ''),
+            $first['answers_wrapper_key'] ?? null
         );
     }
 
-    private function buildGrammarMeetingSnapshot(int $meetingNumber, array $rawAnswers, string $paragraphAnswer): array
+    /**
+     * Primary path: uses the student's actual current URL
+     * ("/assignments/ielts-academic|general/writing/{task}/meeting/{id}")
+     * to know exactly which meeting's draft to read - IeltsWritingController::
+     * saveMeetingDraft() persists it under both a Cache key
+     * ("ielts_writing_draft_{userId}_{meetingId}") and a session key
+     * ("ielts_writing_meeting{meetingId}_user_answers"), the same pair
+     * showMeeting() itself reads from to restore the page on load.
+     */
+    private function resolveIeltsWritingMeetingSnapshot(int $userId, string $path, array $sessionData): ?array
+    {
+        if (!preg_match('#/assignments/ielts-(?:academic|general)/writing/(\d+)/meeting/(\d+)#', $path, $matches)) {
+            return null;
+        }
+
+        $meetingId = (int) ($matches[2] ?? 0);
+        if ($meetingId <= 0) {
+            return null;
+        }
+
+        $rawAnswers = Cache::get('ielts_writing_draft_' . $userId . '_' . $meetingId);
+        if (!is_array($rawAnswers) || $rawAnswers === []) {
+            $sessionValue = $sessionData['ielts_writing_meeting' . $meetingId . '_user_answers'] ?? null;
+            $rawAnswers = is_array($sessionValue) ? $sessionValue : [];
+        }
+
+        if ($rawAnswers === []) {
+            return null;
+        }
+
+        return $this->buildIeltsWritingMeetingSnapshot($meetingId, $rawAnswers);
+    }
+
+    /**
+     * Fallback used when the URL-based lookup above fails (e.g. the
+     * session's cached "last known good" activity URL is stale) - scans
+     * every "ielts_writing_meeting{N}_user_answers" session key directly,
+     * mirroring resolveGrammarMeetingSnapshotFromSession()'s fallback role
+     * for the grammar-writing tracks.
+     */
+    private function resolveIeltsWritingMeetingSnapshotFromSession(array $sessionData): ?array
+    {
+        foreach ($sessionData as $key => $value) {
+            if (!is_string($key) || !is_array($value) || $value === []) {
+                continue;
+            }
+
+            if (!preg_match('/^ielts_writing_meeting(\d+)_user_answers$/', $key, $matches)) {
+                continue;
+            }
+
+            $meetingId = (int) ($matches[1] ?? 0);
+            if ($meetingId <= 0) {
+                continue;
+            }
+
+            return $this->buildIeltsWritingMeetingSnapshot($meetingId, $value);
+        }
+
+        return null;
+    }
+
+    private function buildIeltsWritingMeetingSnapshot(int $meetingId, array $rawAnswers): ?array
+    {
+        $viewType = \App\Models\IeltsWritingMeeting::find($meetingId)?->view_type;
+        $rawAnswers = $this->reshapeIeltsWritingAnswers($viewType, $rawAnswers);
+
+        $pair = $this->firstNonEmptyAnswerPair($rawAnswers);
+        if ($pair === null) {
+            return null;
+        }
+
+        return [
+            'source' => 'Live IELTS Writing draft (meeting ' . $meetingId . ')',
+            'question' => 'Field ' . $pair['key'],
+            'answer' => $pair['value'],
+            'submitted_at' => null,
+            'meeting_number' => $meetingId,
+            'raw_answers' => $rawAnswers,
+        ];
+    }
+
+    /**
+     * Most of the 9 IELTS Writing sub-lesson pages already store their
+     * userAnswers object with keys that match their real DOM field `name`
+     * attributes exactly (e.g. reducing_clauses' "q1"/"q2", introduction's
+     * "attempt1"/"intro_bar", parts_of_paragraph's "q{id}_topic") - the
+     * live-preview iframe's flatten()-and-match-by-name JS already handles
+     * those correctly with no changes needed here. Two pages don't:
+     *
+     * - graphical_sentences.blade.php stores {itemId: {verb, noun}} (a
+     *   nested object, matching its Alpine `userAnswers[id].verb` state)
+     *   but the real fields are flat "answer_{itemId}_verb"/
+     *   "answer_{itemId}_noun" (see its `:name="'answer_' + item.id +
+     *   '_verb'"` bindings) - flatten() alone would produce bracket-nested
+     *   "itemId[verb]" names that never match anything in the DOM.
+     * - connecting_trend.blade.php stores {itemId: "text"} (bare id key,
+     *   matching `x-model="answers[item.id]"`) but the real field is
+     *   "answer_{itemId}" (see its `:name="'answer_' + item.id"` binding).
+     */
+    private function reshapeIeltsWritingAnswers(?string $viewType, array $rawAnswers): array
+    {
+        if ($viewType === 'graphical_sentences') {
+            $reshaped = [];
+            foreach ($rawAnswers as $itemId => $pair) {
+                if (!is_array($pair)) {
+                    continue;
+                }
+                if (array_key_exists('verb', $pair)) {
+                    $reshaped["answer_{$itemId}_verb"] = $pair['verb'];
+                }
+                if (array_key_exists('noun', $pair)) {
+                    $reshaped["answer_{$itemId}_noun"] = $pair['noun'];
+                }
+            }
+
+            return $reshaped;
+        }
+
+        if ($viewType === 'connecting_trend') {
+            $reshaped = [];
+            foreach ($rawAnswers as $itemId => $value) {
+                $reshaped["answer_{$itemId}"] = $value;
+            }
+
+            return $reshaped;
+        }
+
+        return $rawAnswers;
+    }
+
+    private function buildGrammarMeetingSnapshot(int $meetingNumber, array $rawAnswers, string $paragraphAnswer, ?string $answersWrapperKey = null): array
     {
         $answersKey = 'meeting' . $meetingNumber . '_user_answers';
         $normalizedAnswers = $this->normalizeGrammarAnswerMap($rawAnswers);
@@ -484,6 +1122,23 @@ class ManageStudents
             'meeting_number' => $meetingNumber,
             'live_items' => $liveItems,
             'paragraph_answer' => $paragraphAnswer !== '' ? $paragraphAnswer : null,
+            // Form-field-shaped payload the live-preview iframe's JS
+            // flattens into bracket-notation field names and matches by
+            // exact `name` attribute (see current-assignment.blade.php).
+            // $rawAnswers itself is always keyed by question number (or a
+            // section name) with NO wrapper - Laravel's
+            // $request->input('userAnswers')/('answers') already strips
+            // that outer bracket segment before it's saved. Re-nesting it
+            // one level under $answersWrapperKey here (when the real field
+            // names need one - see resolveLegacyAnswersWrapperKey()) is
+            // what makes flatten() produce "userAnswers[3]"/"answers[1]"
+            // etc. instead of the bare "3"/"1" that never matched anything.
+            // A small number of meetings' fields aren't wrapped at all
+            // (e.g. meeting 4's "trans_sent[N]"/"trans_matrix[N]") - for
+            // those $answersWrapperKey is null and $rawAnswers already
+            // matches the real field names as-is.
+            'raw_answers' => $answersWrapperKey !== null ? [$answersWrapperKey => $rawAnswers] : $rawAnswers,
+            'raw_paragraph_answer' => $paragraphAnswer !== '' ? $paragraphAnswer : null,
         ];
     }
 

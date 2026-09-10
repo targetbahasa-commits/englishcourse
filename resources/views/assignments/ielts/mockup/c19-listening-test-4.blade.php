@@ -33,7 +33,7 @@
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 <div class="flex min-h-screen">
@@ -51,7 +51,7 @@
                         <p class="text-gray-600 mt-1">Cambridge {{ $edition ?? '19' }} Test {{ $testId ?? '4' }}</p>
                     </div>
                 </div>
-                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? '19', 'id' => $testId ?? '4']) }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2 border border-gray-200">
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? '19', 'id' => $testId ?? '4']) }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-white font-medium transition flex items-center gap-2 border border-gray-200">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     Back
                 </a>
@@ -73,7 +73,7 @@
                     </div>
 
                     {{-- Questions 1-6 --}}
-                    <div class="mb-10 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <div class="mb-10 bg-white p-6 rounded-xl border border-gray-200">
                         <p class="font-bold mb-2 text-gray-800 text-lg">Questions 1–6</p>
                         <p class="italic mb-2 text-gray-700">Complete the notes below.</p>
                         <p class="italic mb-6 text-gray-700">Write <span class="font-bold text-black">ONE WORD AND/OR A NUMBER</span> for each answer.</p>
@@ -135,7 +135,7 @@
                     </div>
 
                     {{-- Questions 7-10 --}}
-                    <div class="mb-10 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <div class="mb-10 bg-white p-6 rounded-xl border border-gray-200">
                         <p class="font-bold mb-2 text-gray-800 text-lg">Questions 7–10</p>
                         <p class="italic mb-2 text-gray-700">Complete the table below.</p>
                         <p class="italic mb-6 text-gray-700">Write <span class="font-bold text-black">ONE WORD ONLY</span> for each answer.</p>
@@ -143,10 +143,10 @@
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse border border-gray-800 bg-white shadow-sm font-serif">
                                 <thead>
-                                    <tr class="bg-gray-100">
+                                    <tr class="bg-white">
                                         <th class="border border-gray-800 p-4 font-bold text-center text-gray-900 tracking-wide text-lg" colspan="4">Responsibilities</th>
                                     </tr>
-                                    <tr class="bg-gray-50 text-gray-800">
+                                    <tr class="bg-white text-gray-800">
                                         <th class="border border-gray-800 p-3 w-1/4"></th>
                                         <th class="border border-gray-800 p-3 text-center font-bold">Task 1</th>
                                         <th class="border border-gray-800 p-3 text-center font-bold">Task 2</th>
@@ -166,7 +166,7 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr class="bg-gray-50/50">
+                                    <tr class="bg-white">
                                         <td class="border border-gray-800 p-4 font-bold">Sushi takeaway counter</td>
                                         <td class="border border-gray-800 p-4">
                                             <div class="flex items-center gap-2 flex-wrap">
@@ -222,7 +222,7 @@
                     </div>
 
                     {{-- Questions 11-12 --}}
-                    <div class="mb-10 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <div class="mb-10 bg-white p-6 rounded-xl border border-gray-200">
                         <p class="font-bold mb-2 text-gray-800 text-lg">Questions 11 and 12</p>
                         <p class="italic mb-4 text-gray-700">Choose <span class="font-bold text-black">TWO</span> letters, <span class="font-bold text-black">A–E</span>.</p>
                         <p class="mb-4 text-gray-800 text-[15px] font-bold">Which <span class="uppercase tracking-wide">TWO</span> problems with some training programmes for new runners does Liz mention?</p>
@@ -245,7 +245,7 @@
                     </div>
 
                     {{-- Questions 13-14 --}}
-                    <div class="mb-10 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <div class="mb-10 bg-white p-6 rounded-xl border border-gray-200">
                         <p class="font-bold mb-2 text-gray-800 text-lg">Questions 13 and 14</p>
                         <p class="italic mb-4 text-gray-700">Choose <span class="font-bold text-black">TWO</span> letters, <span class="font-bold text-black">A–E</span>.</p>
                         <p class="mb-4 text-gray-800 text-[15px] font-bold">Which <span class="uppercase tracking-wide">TWO</span> tips does Liz recommend for new runners?</p>
@@ -268,7 +268,7 @@
                     </div>
 
                     {{-- Questions 15-18 --}}
-                    <div class="mb-10 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <div class="mb-10 bg-white p-6 rounded-xl border border-gray-200">
                         <p class="font-bold mb-2 text-gray-800 text-lg">Questions 15–18</p>
                         <p class="mb-4 text-gray-800 text-[15px]">What reason prevented each of the following members of the Compton Park Runners Club from joining until recently?</p>
                         <p class="italic mb-8 text-gray-700">Write the correct letter, <span class="font-bold text-black">A, B, or C</span> next to Questions 15–18.</p>
@@ -319,7 +319,7 @@
                     </div>
 
                     {{-- Questions 19-20 --}}
-                    <div class="mb-10 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <div class="mb-10 bg-white p-6 rounded-xl border border-gray-200">
                         <p class="font-bold mb-2 text-gray-800 text-lg">Questions 19 and 20</p>
                         <p class="italic mb-6 text-gray-700">Choose the correct letter, <span class="font-bold text-black">A, B or C</span>.</p>
                         
@@ -362,7 +362,7 @@
                     </div>
 
                     <div class="flex justify-between mt-8">
-                        <button @click="step = 1" class="px-6 py-2.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl shadow-sm font-medium transition flex items-center gap-2 group border border-gray-300">
+                        <button @click="step = 1" class="px-6 py-2.5 bg-white text-gray-700 hover:bg-gray-200 rounded-xl shadow-sm font-medium transition flex items-center gap-2 group border border-gray-300">
                             <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                             Previous Part
                         </button>
@@ -387,7 +387,7 @@
                     </div>
 
                     {{-- Questions 21-25 --}}
-                    <div class="mb-10 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <div class="mb-10 bg-white p-6 rounded-xl border border-gray-200">
                         <p class="font-bold mb-2 text-gray-800 text-lg">Questions 21–25</p>
                         <p class="italic mb-6 text-gray-700">Choose the correct letter, <span class="font-bold text-black">A, B or C</span>.</p>
                         
@@ -454,7 +454,7 @@
                     </div>
 
                     {{-- Questions 26-30 --}}
-                    <div class="mb-10 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <div class="mb-10 bg-white p-6 rounded-xl border border-gray-200">
                         <p class="font-bold mb-2 text-gray-800 text-lg">Questions 26–30</p>
                         <p class="mb-4 text-gray-800 text-[15px]">Where does Jane's grandfather keep each of the following types of books in his shop?</p>
                         <p class="italic mb-8 text-gray-700">Choose <span class="font-bold text-black uppercase">FIVE</span> answers from the box and write the correct letter, <span class="font-bold text-black">A–G</span>, next to Questions 26–30.</p>
@@ -510,7 +510,7 @@
                     </div>
 
                     <div class="flex justify-between mt-8">
-                        <button @click="step = 2" class="px-6 py-2.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl shadow-sm font-medium transition flex items-center gap-2 group border border-gray-300">
+                        <button @click="step = 2" class="px-6 py-2.5 bg-white text-gray-700 hover:bg-gray-200 rounded-xl shadow-sm font-medium transition flex items-center gap-2 group border border-gray-300">
                             <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                             Previous Part
                         </button>
@@ -534,7 +534,7 @@
                         <span class="ml-6 font-bold text-lg text-gray-700">Questions 31–40</span>
                     </div>
                     
-                    <div class="mb-10 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <div class="mb-10 bg-white p-6 rounded-xl border border-gray-200">
                         <p class="italic mb-6 text-gray-700">Complete the notes below.</p>
                         <p class="italic mb-6 text-gray-700">Write <span class="font-bold text-black">ONE WORD ONLY</span> for each answer.</p>
                         
@@ -637,7 +637,7 @@
                     </div>
 
                     <div class="flex justify-between mt-12">
-                        <button @click="step = 3" class="px-6 py-2.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl shadow-sm font-medium transition flex items-center gap-2 group border border-gray-300">
+                        <button @click="step = 3" class="px-6 py-2.5 bg-white text-gray-700 hover:bg-gray-200 rounded-xl shadow-sm font-medium transition flex items-center gap-2 group border border-gray-300">
                             <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                             Previous Part
                         </button>
@@ -655,7 +655,7 @@
     {{-- Audio Player Footer --}}
     <div class="audio-player-container">
         <div class="w-full max-w-4xl flex items-center gap-6">
-            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center flex-none">
+            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-none">
                 <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
             </div>
             <div class="flex-1 w-full">

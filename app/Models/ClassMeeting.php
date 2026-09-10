@@ -37,4 +37,9 @@ class ClassMeeting extends Model
     {
         return $this->hasMany(Attendance::class);
     }
+
+    public function changeRequests()
+    {
+        return $this->hasMany(ClassMeetingChangeRequest::class);
+    }
 }

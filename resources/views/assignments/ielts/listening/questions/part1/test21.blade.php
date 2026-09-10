@@ -14,19 +14,19 @@
         </div>
 
         {{-- Example row --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 italic text-gray-500 text-sm">•Type of job required:</div>
             <div class="p-3 italic text-gray-500 text-sm">part-time</div>
         </div>
 
         {{-- Column headers --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-100">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 font-semibold text-gray-700">Position Available</div>
             <div class="p-3 font-semibold text-gray-700">Details</div>
         </div>
 
         {{-- Row 1: Q1, Q2, Q3, Q4 --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 flex items-start">
                 <strong>1</strong>
                 <span class="inline-block w-32 ml-1 mt-0.5">
@@ -62,7 +62,7 @@
         </div>
 
         {{-- Row 2: Q5, Q6, Q7, Q8 --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 flex items-start">
                 <strong>5</strong>
                 <span class="inline-block w-32 ml-1 mt-0.5">
@@ -102,7 +102,7 @@
         </div>
 
         {{-- Row 3: Q9, Q10 --}}
-        <div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 hover:bg-white transition-colors">
             <div class="p-3 flex items-start flex-wrap gap-1 text-sm">
                 <span class="text-gray-700">Cashier in a</span>
                 <strong>9</strong>

@@ -16,7 +16,7 @@
         .dotted-answer { border-bottom: 1px dotted #000; display: inline-block; min-width: 120px; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -37,7 +37,7 @@
                     <p class="text-sm text-gray-500">Cambridge IELTS Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back
             </a>
@@ -231,7 +231,7 @@
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar">
+        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
             <div class="px-8 py-8 pb-24 max-w-2xl mx-auto">
 
                 {{-- Questions 1–6: Diagram Labelling --}}
@@ -241,7 +241,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 1–6 on your answer sheet.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <h4 class="text-base font-bold text-center mb-6 text-gray-900">The Persian Qanat Method</h4>
                         
                         <div class="space-y-4 max-w-lg mx-auto mb-10 text-gray-800 leading-loose">
@@ -291,7 +291,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 1?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 7–10 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                             <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -302,7 +302,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -315,7 +315,7 @@
                                     [9, "The information about a problem that occurred during the construction of the Saldae aqueduct system was found in an ancient book."],
                                     [10, "The mistake made by the builders of the Saldae aqueduct system was that the two parts of the tunnel failed to meet."],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{!! $statement !!}</td>
                                     <td class="py-3 px-3 text-center">
@@ -345,7 +345,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>NO MORE THAN TWO WORDS</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 11–13 on your answer sheet.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <div class="space-y-6">
                             <div class="flex flex-col gap-2">
                                 <div class="flex gap-2">
@@ -431,7 +431,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 20–22 on your answer sheet.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <h4 class="text-base font-bold text-center mb-4 text-gray-900">Interesting finds at an archaeological site</h4>
 
                         <p class="mb-4 text-gray-800 leading-loose">
@@ -472,7 +472,7 @@
                             ['D', "Radiocarbon dating of artefacts produced some unreliable results."],
                             ['E', "More artefacts were found in Oppland than at any other mountain site."],
                         ] as [$letter, $option])
-                        <label class="flex items-start gap-4 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors">
+                        <label class="flex items-start gap-4 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors">
                             <input type="checkbox" name="q23_24[]" value="{{ $letter }}" class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 mt-0.5">
                             <div class="flex-1 text-sm text-gray-800"><span class="font-bold mr-2">{{ $letter }}</span> {{ $option }}</div>
                         </label>
@@ -498,7 +498,7 @@
                             ['D', "Norwegian towns at this time attracted traders from around the world."],
                             ['E', "Vikings were primarily interested in their trading links with the Middle East."],
                         ] as [$letter, $option])
-                        <label class="flex items-start gap-4 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors">
+                        <label class="flex items-start gap-4 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors">
                             <input type="checkbox" name="q25_26[]" value="{{ $letter }}" class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 mt-0.5">
                             <div class="flex-1 text-sm text-gray-800"><span class="font-bold mr-2">{{ $letter }}</span> {{ $option }}</div>
                         </label>
@@ -524,7 +524,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 3?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 27–32 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                             <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -607,7 +607,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>NO MORE THAN TWO WORDS</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 38–40 on your answer sheet.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <div class="space-y-4">
                             <p class="text-gray-800 leading-loose">
                                 <span class="font-bold mr-2 text-blue-600">38</span>

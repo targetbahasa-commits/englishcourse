@@ -24,6 +24,12 @@ class PrepareIeltsListeningPracticeData
         }
 
         $program = $this->repository->findProgramBySlugWithMeetings('ielts-academic-listening');
+        if (!$program) {
+            $program = \App\Models\Program::firstOrCreate(
+                ['slug' => 'ielts-academic-listening'],
+                ['name' => 'IELTS Academic Listening']
+            );
+        }
         $meeting = $this->repository->findOrCreateMeeting($program->id, $set, [
             'title' => $practiceParts[$set]['meeting_title'],
         ]);

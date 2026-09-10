@@ -11,21 +11,21 @@
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-12">
 
         {{-- Species --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Species</p>
         </div>
         <div class="border-b border-gray-200 p-4">
             <p class="text-gray-700">• We can find Pan or Pan Troglodytes in West and Central Africa.</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <p class="text-gray-700">• The Bonobo or Pan Paniscus are found in Democratic Republic of Congo.</p>
         </div>
 
         {{-- Current research --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Current research</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• rule out</span>
                 <strong class="text-blue-600">31</strong>
@@ -35,7 +35,7 @@
                 <span>and biological factors</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• learn through</span>
                 <strong class="text-blue-600">32</strong>
@@ -47,13 +47,13 @@
         </div>
 
         {{-- Discoveries --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Discoveries</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <p class="text-gray-700">• The book <em>The Third Chimpanzee</em> by James Diamond discusses some physical features of chimpanzees.</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• The discovery reported by Jane Goodall suggests that chimpanzees know how to use</span>
                 <strong class="text-blue-600">33</strong>
@@ -64,13 +64,13 @@
         </div>
 
         {{-- Chimpanzees in Senegal --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Chimpanzees in Senegal</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <p class="text-gray-700">• use spears sharpened with their teeth</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• can</span>
                 <strong class="text-blue-600">34</strong>
@@ -80,7 +80,7 @@
                 <span>the shell of a coconut</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• use a</span>
                 <strong class="text-blue-600">35</strong>
@@ -90,7 +90,7 @@
                 <span>hammer to crash nuts</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• are capable of learning</span>
                 <strong class="text-blue-600">36</strong>
@@ -102,10 +102,10 @@
         </div>
 
         {{-- Sub-species --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Sub-species</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Bonobos live on the other side of a</span>
                 <strong class="text-blue-600">37</strong>
@@ -114,7 +114,7 @@
                 </span>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Both of them are reducing alarmingly in population</span>
                 <strong class="text-blue-600">38</strong>
@@ -130,7 +130,7 @@
     <p class="mb-6 text-gray-700">Choose <strong>TWO</strong> letters, <strong>A–E</strong>.</p>
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
-        <div class="border-b border-gray-200 bg-gray-50 p-4">
+        <div class="border-b border-gray-200 bg-white p-4">
             <p class="text-gray-700 font-medium">Which TWO topics about chimpanzees will the students discuss next week?</p>
         </div>
         <div class="p-4 space-y-3" id="q39-40-options">

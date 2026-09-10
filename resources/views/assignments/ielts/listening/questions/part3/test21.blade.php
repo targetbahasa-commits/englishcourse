@@ -12,7 +12,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">21</strong>&nbsp; What kind of research method does the professor recommend?</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'interview', 'B' => 'observation', 'C' => 'questionnaire'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[21]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -25,7 +25,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">22</strong>&nbsp; What is the project based on?</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'a study they did before in Australia', 'B' => 'a similar angle someone has done before', 'C' => 'an Australian study'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[22]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -38,7 +38,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">23</strong>&nbsp; What does the professor advise Douglas to do about the formation of the focus groups?</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'strengthen the group in size', 'B' => 'reduce the number of children in each group', 'C' => 'build more than 3 groups'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[23]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -51,7 +51,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">24</strong>&nbsp; To do the project best, the professor suggests the students</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'interview various people or sectors.', 'B' => 'not be too ambitious.', 'C' => 'work hard enough.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[24]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -64,7 +64,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">25</strong>&nbsp; To gather data, the professor asks Jane</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => "to replace other people's advice.", 'B' => 'to simplify the textbook.', 'C' => 'to practice using the date table.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[25]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -77,7 +77,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">26</strong>&nbsp; The reason why Douglas hasn't read enough reference books is that</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => "he doesn't have enough time.", 'B' => 'he thinks there are too many books to read.', 'C' => "he hasn't spent time in the library."] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[26]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>

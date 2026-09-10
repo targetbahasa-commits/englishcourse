@@ -27,6 +27,10 @@ class InitiatePayment
     {
         $program = Program::query()->findOrFail($programId);
 
+        if (!$program->is_active) {
+            return ['status' => 'program_inactive'];
+        }
+
         $alreadyEnrolled = Enrollment::query()
             ->where('user_id', $user->id)
             ->where('program_id', $program->id)
@@ -40,7 +44,7 @@ class InitiatePayment
         $existingPending = Payment::query()
             ->where('user_id', $user->id)
             ->where('program_id', $program->id)
-            ->where('status', 'pending')
+            ->whereIn('status', ['pending', 'waiting_verification'])
             ->first();
 
         if ($existingPending) {

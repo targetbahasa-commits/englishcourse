@@ -65,6 +65,15 @@ class TeacherAttendanceController extends Controller
             'attendance.*.notes'  => 'nullable|string',
         ]);
 
+        $classMeeting = ClassMeeting::with('classPeriod')->findOrFail($validated['class_meeting_id']);
+
+        $user = Auth::user();
+        $isAuthorized = $user && ($user->isAdmin() || ($user->isTeacher() && $classMeeting->classPeriod && $classMeeting->classPeriod->teacher_id === $user->id));
+
+        if (! $isAuthorized) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $this->manageAttendance->saveAttendances(
             (int) $validated['class_meeting_id'],
             $validated['attendance'],

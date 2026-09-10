@@ -76,6 +76,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Email <span class="text-gray-400 font-normal">(opsional)</span></label>
                 <input type="email" name="email" x-model="form.email" placeholder="kamu@email.com"
                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                @error('email')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
             </div>
 
             {{-- Kota & Usia --}}
@@ -641,15 +642,15 @@ function regForm() {
         passwordError: false,
         passwordErrorMsg: '',
         form: {
-            full_name:            '{{ old('full_name', auth()->user()?->name ?? '') }}',
-            whatsapp:             '{{ old('whatsapp', auth()->user()?->phone_number ?? '') }}',
-            email:                '{{ old('email', auth()->user()?->email ?? '') }}',
+            full_name:            '{{ old('full_name', request('full_name', auth()->user()?->name ?? '')) }}',
+            whatsapp:             '{{ old('whatsapp', request('whatsapp', auth()->user()?->phone_number ?? '')) }}',
+            email:                '{{ old('email', request('email', auth()->user()?->email ?? '')) }}',
             city:                 '{{ old('city') }}',
             age:                  '{{ old('age') }}',
             profession:           '{{ old('profession', 'other') }}',
             profession_other:     '{{ old('profession_other') }}',
             program_id:           '{{ old('program_id', request('program_id')) }}',
-            class_period_id:      '{{ old('class_period_id') }}',
+            class_period_id:      '{{ old('class_period_id', request('class_period_id')) }}',
             program_interest:     '{{ old('program_interest') }}',
             mode:                 '{{ old('mode', request('mode', 'flexible')) }}',
             schedule_preference:  '{{ old('schedule_preference', 'flexible') }}',

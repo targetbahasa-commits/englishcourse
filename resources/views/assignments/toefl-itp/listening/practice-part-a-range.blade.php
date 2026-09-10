@@ -52,7 +52,7 @@
                     @foreach($questions as $question)
                         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                             <div class="flex items-start gap-4">
-                                <span class="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 text-blue-700 font-bold flex items-center justify-center">{{ $question->question_number }}</span>
+                                <span class="flex-shrink-0 w-10 h-10 rounded-xl bg-white text-blue-700 font-bold flex items-center justify-center">{{ $question->question_number }}</span>
                                 <div class="w-full">
                                     <p class="text-gray-700 font-semibold mb-4">{{ $question->question_text ?: ('Question ' . $question->question_number) }}</p>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-700">

@@ -22,7 +22,7 @@
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -44,7 +44,7 @@
             </div>
             
             <div class="flex items-center gap-4">
-                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? '19', 'id' => $testId ?? '4']) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all border border-gray-200">
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? '19', 'id' => $testId ?? '4']) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all border border-gray-200">
                     Exit
                 </a>
             </div>
@@ -157,7 +157,7 @@
         </div>
 
         {{-- RIGHT PANEL: QUESTIONS --}}
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar relative" x-data="{ answers: {} }">
+        <div class="h-full overflow-y-auto bg-white custom-scrollbar relative" x-data="{ answers: {} }">
             
             <div class="p-10 pb-32 max-w-4xl mx-auto relative z-20">
                 
@@ -189,7 +189,7 @@
                                 <span class="font-bold w-6 flex-none mt-1">{{ $qNum }}</span>
                                 <div class="flex-1">
                                     <p class="mb-2">{{ $qText }}</p>
-                                    <select x-model="answers.q{{ $qNum }}" class="border border-gray-300 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-gray-50 font-sans text-sm w-40 shadow-sm">
+                                    <select x-model="answers.q{{ $qNum }}" class="border border-gray-300 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white font-sans text-sm w-40 shadow-sm">
                                         <option value="" disabled selected>Select Answer</option>
                                         <option value="TRUE">TRUE</option>
                                         <option value="FALSE">FALSE</option>
@@ -313,7 +313,7 @@
                                 <span class="font-bold w-6 flex-none mt-1">{{ $qNum }}</span>
                                 <div class="flex-1">
                                     <p class="mb-2 leading-tight">{{ $qText }}</p>
-                                    <select x-model="answers.q{{ $qNum }}" class="border border-gray-300 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-gray-50 font-sans text-sm w-24 shadow-sm">
+                                    <select x-model="answers.q{{ $qNum }}" class="border border-gray-300 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white font-sans text-sm w-24 shadow-sm">
                                         <option value="" disabled selected>-</option>
                                         @foreach(['A','B','C','D','E','F'] as $opt)
                                         <option value="{{ $opt }}">{{ $opt }}</option>
@@ -346,7 +346,7 @@
                                 <span class="font-bold w-6 flex-none mt-1">{{ $qNum }}</span>
                                 <div class="flex-1">
                                     <p class="mb-2 leading-tight">{{ $qText }}</p>
-                                    <select x-model="answers.q{{ $qNum }}" class="border border-gray-300 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-gray-50 font-sans text-sm w-24 shadow-sm">
+                                    <select x-model="answers.q{{ $qNum }}" class="border border-gray-300 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white font-sans text-sm w-24 shadow-sm">
                                         <option value="" disabled selected>-</option>
                                         @foreach(['A','B','C','D','E'] as $opt)
                                         <option value="{{ $opt }}">{{ $opt }}</option>
@@ -376,7 +376,7 @@
                         <p class="italic mb-6 text-[15px]">Choose <span class="font-bold text-black uppercase">ONE WORD ONLY</span> from the passage for each answer.</p>
                         <p class="italic mb-6 text-[15px]">Write your answers in boxes 24–26 on your answer sheet.</p>
 
-                        <div class="border border-gray-400 p-8 bg-gray-50 text-[15px] leading-relaxed">
+                        <div class="border border-gray-400 p-8 bg-white text-[15px] leading-relaxed">
                             <h3 class="text-xl font-bold text-center mb-6 text-gray-900">Mining the sea floor</h3>
                             
                             <p class="mb-4">
@@ -478,7 +478,7 @@
                         <p class="italic mb-6 text-[15px]">Choose <span class="font-bold text-black uppercase">ONE WORD ONLY</span> from the passage for each answer.</p>
                         <p class="italic mb-6 text-[15px]">Write your answers in boxes 31–35 on your answer sheet.</p>
 
-                        <div class="border border-gray-400 p-8 bg-gray-50 text-[15px] leading-relaxed">
+                        <div class="border border-gray-400 p-8 bg-white text-[15px] leading-relaxed">
                             <h3 class="text-xl font-bold text-center mb-6 text-gray-900">Contemporary hunter-gatherer societies</h3>
                             
                             <p class="mb-4">
@@ -521,7 +521,7 @@
                                 <span class="font-bold w-6 flex-none mt-1">{{ $qNum }}</span>
                                 <div class="flex-1">
                                     <p class="mb-2">{{ $qText }}</p>
-                                    <select x-model="answers.q{{ $qNum }}" class="border border-gray-300 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-gray-50 font-sans text-sm w-40 shadow-sm">
+                                    <select x-model="answers.q{{ $qNum }}" class="border border-gray-300 rounded-md px-3 py-1.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white font-sans text-sm w-40 shadow-sm">
                                         <option value="" disabled selected>Select Answer</option>
                                         <option value="YES">YES</option>
                                         <option value="NO">NO</option>

@@ -3,9 +3,11 @@
 namespace App\Infrastructure\Score;
 
 use App\Domain\Score\Repositories\ScoreRepository;
+use App\Models\AssignmentDraft;
 use App\Models\MeetingScore;
 use App\Models\Program;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class EloquentScoreRepository implements ScoreRepository
@@ -96,7 +98,20 @@ class EloquentScoreRepository implements ScoreRepository
 
         $totalUsers = \App\Models\User::whereIn('role', ['student', 'guest'])->count();
 
-        return compact('totalAssignments', 'completedAssignments', 'totalUsers', 'usersWithSubmissions');
+        $inProgressQuery = AssignmentDraft::whereNotExists(function ($query) {
+            $query->select(DB::raw(1))
+                ->from('meeting_scores')
+                ->whereColumn('meeting_scores.user_id', 'assignment_drafts.user_id')
+                ->whereColumn('meeting_scores.meeting_number', 'assignment_drafts.meeting_number')
+                ->whereColumn('meeting_scores.program_id', 'assignment_drafts.program_id')
+                ->where('meeting_scores.is_reported', true);
+        });
+        if (!empty($filters['program_id'])) {
+            $inProgressQuery->where('program_id', $filters['program_id']);
+        }
+        $inProgressCount = $inProgressQuery->count();
+
+        return compact('totalAssignments', 'completedAssignments', 'totalUsers', 'usersWithSubmissions', 'inProgressCount');
     }
 
     public function getTopPrograms(): array
@@ -122,7 +137,16 @@ class EloquentScoreRepository implements ScoreRepository
     {
         $program->load([
             'meetingScores' => fn ($query) => $query->where('is_reported', true)->orderByDesc('submitted_at'),
-            'meetingScores.user',
+            // Batch/teacher come from the student's Enrollment for THIS
+            // program specifically (a student can be enrolled in several
+            // programs under different batches) - User::classPeriod() is
+            // the older single-assignment fallback for students who were
+            // never given a proper Enrollment row, kept only as a fallback
+            // (see show.blade.php).
+            'meetingScores.user.enrollments' => fn ($query) => $query->where('program_id', $program->id),
+            'meetingScores.user.enrollments.classPeriod.teacher',
+            'meetingScores.user.classPeriod.teacher',
+            'meetingScores.reviewer',
         ]);
 
         $base = $program->meetingScores()->where('is_reported', true);
@@ -139,15 +163,63 @@ class EloquentScoreRepository implements ScoreRepository
             ->orderBy('meeting_number')
             ->get();
 
-        return compact('program', 'totalSubmissions', 'completedSubmissions', 'averageScore', 'uniqueStudents', 'submissionsByMeeting');
+        $inProgressSubmissions = $this->getInProgressSubmissions($program);
+
+        return compact('program', 'totalSubmissions', 'completedSubmissions', 'averageScore', 'uniqueStudents', 'submissionsByMeeting', 'inProgressSubmissions');
+    }
+
+    /**
+     * Students who have a saved-but-not-submitted draft for this program
+     * (see AssignmentDraft) and don't already have a submitted MeetingScore
+     * for that same meeting - i.e. "currently working on it, hasn't hit
+     * Submit yet."
+     */
+    public function getInProgressSubmissions(mixed $program): mixed
+    {
+        return AssignmentDraft::where('program_id', $program->id)
+            ->whereNotExists(function ($query) use ($program) {
+                $query->select(DB::raw(1))
+                    ->from('meeting_scores')
+                    ->whereColumn('meeting_scores.user_id', 'assignment_drafts.user_id')
+                    ->whereColumn('meeting_scores.meeting_number', 'assignment_drafts.meeting_number')
+                    ->where('meeting_scores.program_id', $program->id)
+                    ->where('meeting_scores.is_reported', true);
+            })
+            ->with([
+                'user.enrollments' => fn ($query) => $query->where('program_id', $program->id),
+                'user.enrollments.classPeriod.teacher',
+                'user.classPeriod.teacher',
+            ])
+            ->orderByDesc('last_saved_at')
+            ->get();
     }
 
     public function getSubmissionDetails(mixed $program, mixed $submission): mixed
     {
-        if ($submission->program_id !== $program->id) {
+        // Route param arrives as a raw ID string, not a bound model (the
+        // controller type-hints this mixed, so Laravel never does implicit
+        // binding here) - resolve it explicitly before touching properties.
+        $submission = $submission instanceof MeetingScore ? $submission : MeetingScore::find($submission);
+
+        if (!$submission || $submission->program_id !== $program->id) {
             return null;
         }
 
-        return $submission->load('user');
+        return $submission->load('user', 'reviewer');
+    }
+
+    public function saveSubmissionReview(mixed $submission, array $review, int $reviewerId): mixed
+    {
+        $submission->update([
+            'teacher_score' => $review['teacher_score'] ?? null,
+            'teacher_feedback' => $review['teacher_feedback'] ?? null,
+            'reviewed_by' => $reviewerId,
+            'reviewed_at' => now(),
+        ]);
+
+        Cache::forget("review_draft_{$submission->id}");
+        Cache::forget("review_draft_time_{$submission->id}");
+
+        return $submission;
     }
 }

@@ -21,12 +21,34 @@ class AdminController extends Controller
     }
 
     /**
-     * JSON endpoint for polling online/active students in realtime dashboard.
-     * Polled every 30 seconds by the frontend.
+     * Standalone "Recently Active Students/Teachers" view - the same
+     * realtime-monitoring widget shown on the Dashboard, but reachable
+     * directly from the sidebar so admins don't have to go back to the
+     * Dashboard first just to check who's online / open a live view.
      */
-    public function activeStudentsJson(): JsonResponse
+    public function livePreview(Request $request)
     {
-        $data = $this->getAdminDashboard->execute();
+        $data = $this->getAdminDashboard->execute($this->resolveActiveWindowHours($request));
+
+        return view('admin.live-preview', $data);
+    }
+
+    /** Only 24 or 48 are offered in the UI; anything else falls back to 24. */
+    private function resolveActiveWindowHours(Request $request): int
+    {
+        $hours = (int) $request->query('hours', 24);
+
+        return $hours === 48 ? 48 : 24;
+    }
+
+    /**
+     * JSON endpoint for polling online/active students in realtime dashboard.
+     * Polled every 30 seconds by the frontend. Accepts ?hours=24|48 to
+     * switch the "recently active" window.
+     */
+    public function activeStudentsJson(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $data = $this->getAdminDashboard->execute($this->resolveActiveWindowHours($request));
         $activeStudents = $data['activeStudents'] ?? [];
 
         // Normalize to plain arrays so json_encode works correctly
@@ -40,6 +62,7 @@ class AdminController extends Controller
                     ? 'Free Test'
                     : ($s->program_name ?? 'No Program Assigned'),
                 'last_activity' => (int) ($s->last_activity ?? 0),
+                'activity_url'  => $s->activity_url ?? null,
             ];
         }, $activeStudents));
 
@@ -49,9 +72,10 @@ class AdminController extends Controller
         ]);
     }
 
-    public function activeTeachersJson(): \Illuminate\Http\JsonResponse
+    /** Accepts ?hours=24|48 to switch the "recently active" window. */
+    public function activeTeachersJson(Request $request): \Illuminate\Http\JsonResponse
     {
-        $data = $this->getAdminDashboard->execute();
+        $data = $this->getAdminDashboard->execute($this->resolveActiveWindowHours($request));
         $activeTeachers = $data['activeTeachers'] ?? [];
 
         $teachers = array_values(array_map(function ($teacher) {

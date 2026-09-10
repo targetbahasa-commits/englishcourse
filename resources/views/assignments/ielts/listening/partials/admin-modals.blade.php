@@ -1,7 +1,7 @@
 {{-- Upload SRT Modal --}}
 <div id="uploadSrtModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onclick="if(event.target === this) this.classList.add('hidden')">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden" onclick="event.stopPropagation()">
-        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
             <h3 class="text-lg font-bold text-gray-800">Upload SRT / Transcript</h3>
             <button onclick="document.getElementById('uploadSrtModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -26,7 +26,7 @@
             </div>
 
             <div class="flex gap-3 pt-4">
-                <button type="button" onclick="document.getElementById('uploadSrtModal').classList.add('hidden')" class="flex-1 py-2 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition">Cancel</button>
+                <button type="button" onclick="document.getElementById('uploadSrtModal').classList.add('hidden')" class="flex-1 py-2 bg-white text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition">Cancel</button>
                 <button type="submit" class="flex-1 py-2 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition">Save Transcripts</button>
             </div>
         </form>
@@ -36,7 +36,7 @@
 {{-- Upload Audio Modal --}}
 <div id="uploadAudioModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onclick="if(event.target === this) this.classList.add('hidden')">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden" onclick="event.stopPropagation()">
-        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
             <h3 class="text-lg font-bold text-gray-800">Upload Audio</h3>
             <button onclick="document.getElementById('uploadAudioModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -46,7 +46,7 @@
         <form action="{{ route('assignments.ielts.listening.upload-audio', ['meeting' => $meeting->id, 'set' => $set ?? 1]) }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
             @csrf
             
-            <div class="p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300 text-center">
+            <div class="p-4 bg-white rounded-lg border border-dashed border-gray-300 text-center">
                 <svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                 <label class="block">
                     <span class="sr-only">Choose file</span>
@@ -62,7 +62,7 @@
             </div>
 
             <div class="flex gap-3 pt-4">
-                <button type="button" onclick="document.getElementById('uploadAudioModal').classList.add('hidden')" class="flex-1 py-2 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition">Cancel</button>
+                <button type="button" onclick="document.getElementById('uploadAudioModal').classList.add('hidden')" class="flex-1 py-2 bg-white text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition">Cancel</button>
                 <button type="submit" class="flex-1 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition">Upload Audio</button>
             </div>
         </form>

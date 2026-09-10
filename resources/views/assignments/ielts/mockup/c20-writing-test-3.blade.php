@@ -15,7 +15,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -26,7 +26,7 @@
         <div class="px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
                 {{-- Mobile menu button --}}
-                <button type="button" class="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500" onclick="document.dispatchEvent(new CustomEvent('toggle-sidebar'))">
+                <button type="button" class="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500" onclick="document.dispatchEvent(new CustomEvent('toggle-sidebar'))">
                     <span class="sr-only">Open sidebar</span>
                     <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -44,7 +44,7 @@
             </div>
             
             <div class="flex items-center gap-3 sm:gap-4">
-                <div class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-indigo-50 text-indigo-700 rounded-lg border border-indigo-100 font-semibold text-sm sm:text-base" id="time-remaining">
+                <div class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white text-indigo-700 rounded-lg border border-indigo-100 font-semibold text-sm sm:text-base" id="time-remaining">
                     <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     60:00
                 </div>
@@ -102,8 +102,8 @@
                                 <table class="w-full max-w-[320px] text-[13px] sm:text-sm border-collapse border-2 border-gray-800 bg-white">
                                     <thead>
                                         <tr>
-                                            <th class="border border-gray-800 p-2 sm:p-2.5 text-left font-bold bg-gray-50/50">Category</th>
-                                            <th class="border border-gray-800 p-2 sm:p-2.5 text-center font-bold bg-gray-50/50">%</th>
+                                            <th class="border border-gray-800 p-2 sm:p-2.5 text-left font-bold bg-white">Category</th>
+                                            <th class="border border-gray-800 p-2 sm:p-2.5 text-center font-bold bg-white">%</th>
                                         </tr>
                                     </thead>
                                     <tbody class="text-gray-800">
@@ -153,13 +153,13 @@
             </div>
 
             {{-- RIGHT: Text editor area --}}
-            <div class="h-1/2 lg:h-full lg:w-1/2 bg-gray-50 custom-scrollbar flex flex-col relative z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] lg:shadow-none">
+            <div class="h-1/2 lg:h-full lg:w-1/2 bg-white custom-scrollbar flex flex-col relative z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] lg:shadow-none">
                 <div class="p-3 sm:p-4 lg:p-6 flex-1 flex flex-col w-full h-full pb-[env(safe-area-inset-bottom)]">
                     
                     <form id="writing-form-1" class="flex-1 flex flex-col bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200">
                         
                         {{-- Editor Toolbar Area / Options --}}
-                        <div class="flex items-center justify-between border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 bg-gray-50/50 rounded-t-xl sm:rounded-t-2xl">
+                        <div class="flex items-center justify-between border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 bg-white rounded-t-xl sm:rounded-t-2xl">
                             <div>
                                 <h3 class="text-xs sm:text-sm font-bold text-gray-800 uppercase tracking-wide">Your Answer (Task 1)</h3>
                             </div>
@@ -180,7 +180,7 @@
                         </div>
 
                         {{-- Footer area (Word Count & Submit) --}}
-                        <div class="border-t border-gray-200 px-4 sm:px-6 py-3 sm:py-4 bg-gray-50/50 rounded-b-xl sm:rounded-b-2xl flex items-center justify-between shrink-0">
+                        <div class="border-t border-gray-200 px-4 sm:px-6 py-3 sm:py-4 bg-white rounded-b-xl sm:rounded-b-2xl flex items-center justify-between shrink-0">
                             <div class="flex flex-col">
                                 <span class="text-xl sm:text-2xl font-bold text-gray-700 font-mono" id="word-count">0</span>
                                 <span class="text-[10px] sm:text-xs text-gray-400 font-medium uppercase tracking-wider">Words</span>
@@ -195,7 +195,7 @@
                     <form id="writing-form-2" class="hidden flex-1 flex-col bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200">
                         
                         {{-- Editor Toolbar Area / Options --}}
-                        <div class="flex items-center justify-between border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 bg-gray-50/50 rounded-t-xl sm:rounded-t-2xl">
+                        <div class="flex items-center justify-between border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 bg-white rounded-t-xl sm:rounded-t-2xl">
                             <div>
                                 <h3 class="text-xs sm:text-sm font-bold text-gray-800 uppercase tracking-wide">Your Answer (Task 2)</h3>
                             </div>
@@ -216,13 +216,13 @@
                         </div>
 
                         {{-- Footer area (Word Count & Submit) --}}
-                        <div class="border-t border-gray-200 px-4 sm:px-6 py-3 sm:py-4 bg-gray-50/50 rounded-b-xl sm:rounded-b-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-0 shrink-0">
+                        <div class="border-t border-gray-200 px-4 sm:px-6 py-3 sm:py-4 bg-white rounded-b-xl sm:rounded-b-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-0 shrink-0">
                             <div class="flex items-center justify-between sm:justify-start sm:gap-6">
                                 <div class="flex flex-col">
                                     <span class="text-xl sm:text-2xl font-bold text-gray-700 font-mono" id="word-count-2">0</span>
                                     <span class="text-[10px] sm:text-xs text-gray-400 font-medium uppercase tracking-wider">Words</span>
                                 </div>
-                                <button type="button" id="btn-go-to-task-1" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all text-xs sm:text-sm border border-gray-200">
+                                <button type="button" id="btn-go-to-task-1" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all text-xs sm:text-sm border border-gray-200">
                                     Back to Task 1
                                 </button>
                             </div>
@@ -353,7 +353,7 @@
                 timerObj.innerHTML = `<svg class="w-4 h-4 sm:w-5 sm:h-5 flex-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 
                 if(timeLeft < 300) { // Under 5 minutes
-                    timerObj.classList.replace('bg-indigo-50', 'bg-red-50');
+                    timerObj.classList.replace('bg-white', 'bg-red-50');
                     timerObj.classList.replace('text-indigo-700', 'text-red-700');
                     timerObj.classList.replace('border-indigo-100', 'border-red-200');
                 }

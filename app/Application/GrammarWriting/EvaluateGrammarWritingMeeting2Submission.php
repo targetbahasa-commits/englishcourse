@@ -11,7 +11,16 @@ class EvaluateGrammarWritingMeeting2Submission
         array $translationSentences,
         array $translationMatrix,
         int $scorePart1,
+        ?string $track = null,
     ): array {
+        // This same evaluator/view (meeting2.blade.php, "Teknik Silang"
+        // tenses matrix) is shared between fast-track's own meeting 1 AND
+        // complexity's meeting 1 - $track (null for fast-track, the
+        // original/unprefixed behavior, kept byte-for-byte identical to
+        // avoid disturbing any in-progress fast-track session) picks which
+        // session-key convention the result gets written under, so the two
+        // tracks' progress/scores never collide.
+        $keyPrefix = $track ? "{$track}_" : '';
         // Evaluate Matrix (Part 1)
         $results = [];
         $part1Score = 0;
@@ -89,12 +98,12 @@ class EvaluateGrammarWritingMeeting2Submission
 
         return [
             'session' => [
-                'meeting2_stage' => 3, // Directly go to result stage
-                'meeting2_results' => $results,
-                'meeting2_score_part1' => $finalScorePart1,
-                'meeting2_trans_results' => $transResults,
-                'meeting2_score_part2' => $finalScorePart2,
-                'meeting2_total_score' => $totalScore,
+                "{$keyPrefix}meeting2_stage" => 3, // Directly go to result stage
+                "{$keyPrefix}meeting2_results" => $results,
+                "{$keyPrefix}meeting2_score_part1" => $finalScorePart1,
+                "{$keyPrefix}meeting2_trans_results" => $transResults,
+                "{$keyPrefix}meeting2_score_part2" => $finalScorePart2,
+                "{$keyPrefix}meeting2_total_score" => $totalScore,
             ],
             'saveScore' => true,
             'totalScore' => $totalScore,

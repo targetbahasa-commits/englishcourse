@@ -45,8 +45,18 @@ class ManageScores
         return $this->repository->getProgramAssignmentDetails($program);
     }
 
+    public function getInProgressSubmissions(mixed $program): mixed
+    {
+        return $this->repository->getInProgressSubmissions($program);
+    }
+
     public function getSubmissionDetails(mixed $program, mixed $submission): mixed
     {
         return $this->repository->getSubmissionDetails($program, $submission);
+    }
+
+    public function saveSubmissionReview(mixed $submission, array $review, int $reviewerId): mixed
+    {
+        return $this->repository->saveSubmissionReview($submission, $review, $reviewerId);
     }
 }

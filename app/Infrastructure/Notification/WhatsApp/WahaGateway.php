@@ -39,7 +39,10 @@ class WahaGateway implements WhatsAppGateway
     public function sendMessage(string $phoneNumber, string $message, ?string $file = null): bool
     {
         if (empty($this->url)) {
-            Log::warning('WAHA URL is missing. Message not sent to ' . $phoneNumber);
+            // production's LOG_LEVEL=error filters out warning() entirely,
+            // which silently hid missing-config failures for a long time -
+            // error() is the level that actually gets written.
+            Log::error('WAHA URL is missing. Message not sent to ' . $phoneNumber);
             return env('APP_ENV') === 'local';
         }
 

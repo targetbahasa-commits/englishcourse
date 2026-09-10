@@ -49,7 +49,18 @@ class ApprovePayment
             ];
         }
 
-        $this->transactions->run(function () use ($verifier, $payment, $paidAmount, $allowUnderpayment, $notes, $netAmount, $receiverName, $classPeriodId) {
+        $result = ['status' => 'approved'];
+
+        $this->transactions->run(function () use ($verifier, $payment, $paidAmount, $allowUnderpayment, $notes, $netAmount, $receiverName, $classPeriodId, &$result) {
+            // Re-fetch with a row lock inside the transaction so two concurrent approve
+            // requests for the same payment can't both pass the "already paid" guard.
+            $payment = Payment::query()->lockForUpdate()->findOrFail($payment->id);
+
+            if ($payment->status === 'paid') {
+                $result = ['status' => 'already_paid'];
+                return;
+            }
+
             $meta                               = $payment->meta ?? [];
             $meta['verified_by']                = $verifier->id;
             $meta['verified_at']                = now()->toDateTimeString();
@@ -92,6 +103,6 @@ class ApprovePayment
             }
         });
 
-        return ['status' => 'approved'];
+        return $result;
     }
 }

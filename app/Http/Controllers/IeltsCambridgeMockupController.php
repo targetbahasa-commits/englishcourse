@@ -270,4 +270,85 @@ class IeltsCambridgeMockupController extends Controller
             ->route('assignments.ielts-academic.mockup.cambridge.edition', ['edition' => $edition])
             ->with('error', "Anda belum memiliki akses ke Test $id. Silakan lakukan pembayaran terlebih dahulu.");
     }
+
+    public function generalSkills(int $edition, int $id)
+    {
+        if (!in_array($edition, self::VALID_EDITIONS, true) || !in_array($id, self::VALID_TEST_IDS, true)) {
+            abort(404);
+        }
+
+        $access = $this->cambridgeAccessPolicy->canAccess(Auth::user(), $edition, $id);
+
+        if ($access === false) {
+            return redirect()
+                ->route('mock-test.ielts-general.cambridge.edition', ['edition' => $edition])
+                ->with('error', "Anda belum memiliki akses ke Test $id. Silakan lakukan pembayaran terlebih dahulu.");
+        }
+
+        $requiresSignup = ($access === \App\Domain\IeltsShared\CambridgeAccessPolicy::NEEDS_SIGNUP);
+
+        return view('assignments.ielts.mockup.cambridge-skills', [
+            'edition'        => $edition,
+            'testId'         => $id,
+            'requiresSignup' => $requiresSignup,
+            'isGeneral'      => true,
+        ]);
+    }
+
+    public function generalTest(int $edition, int $id, string $skill = 'reading')
+    {
+        if (!in_array($edition, self::VALID_EDITIONS, true) || !in_array($id, self::VALID_TEST_IDS, true)) {
+            abort(404);
+        }
+
+        $access = $this->cambridgeAccessPolicy->canAccess(Auth::user(), $edition, $id);
+
+        if ($access === false) {
+            return redirect()
+                ->route('mock-test.ielts-general.cambridge.edition', ['edition' => $edition])
+                ->with('error', "Anda belum memiliki akses ke Test $id. Silakan lakukan pembayaran terlebih dahulu.");
+        }
+
+        if ($skill === 'listening') {
+            return $this->test($edition, $id, 'listening');
+        }
+
+        if ($skill === 'speaking') {
+            return $this->test($edition, $id, 'speaking');
+        }
+
+        if ($skill === 'writing') {
+            return redirect()->route('assignments.ielts-general.writing.index');
+        }
+
+        // Reading for General Training
+        $materialIdMap = [
+            18 => [1 => 101, 2 => 102, 3 => 103, 4 => 104],
+            17 => [1 => 105, 2 => 106, 3 => 107, 4 => 108],
+            16 => [1 => 109, 2 => 110, 3 => 111, 4 => 112],
+            15 => [1 => 113, 2 => 114, 3 => 115, 4 => 116],
+            14 => [1 => 117, 2 => 118, 3 => 119, 4 => 120],
+        ];
+
+        $materialId = $materialIdMap[$edition][$id] ?? 101;
+
+        $material = app(\App\Application\IeltsReading\BuildIeltsReadingMaterialData::class)->material($materialId, Auth::user());
+
+        if ($material instanceof RedirectResponse) {
+            return $material;
+        }
+
+        if ($material !== null) {
+            if (is_array($material)) {
+                $material['isGeneral'] = true;
+                $material['isMockTestView'] = true;
+                $material['edition'] = $edition;
+                $material['testId'] = $id;
+            }
+
+            return view('assignments.ielts.reading.material', $material);
+        }
+
+        abort(404);
+    }
 }

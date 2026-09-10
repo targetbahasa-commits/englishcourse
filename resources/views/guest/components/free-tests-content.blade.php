@@ -236,19 +236,19 @@
                         
                         <h3 class="text-2xl font-bold text-gray-900 mb-3 relative z-10 group-hover:text-orange-600 transition-colors duration-300 tracking-tight">PTE Academic</h3>
                         <div class="flex-1 flex flex-col relative z-10">
-                            <p class="text-gray-500 text-sm leading-relaxed mb-6">Sistem tes integrated skills.</p>
+                            <p class="text-gray-500 text-sm leading-relaxed mb-6">Gratis latihan semua tipe soal PTE (Speaking, Writing, Reading & Listening).</p>
                             <div class="space-y-3 mb-8">
                                 <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-orange-50 group-hover:border-orange-200 transition-colors duration-300">
                                     <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 text-orange-600">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                     </div>
-                                    <span class="text-sm font-semibold text-gray-700">15 Menit</span>
+                                    <span class="text-sm font-semibold text-gray-700">Multi-Section Practice</span>
                                 </div>
                                 <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 group-hover:bg-orange-50 group-hover:border-orange-200 transition-colors duration-300">
                                     <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 text-orange-600">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                     </div>
-                                    <span class="text-sm font-semibold text-gray-700">Computer Based</span>
+                                    <span class="text-sm font-semibold text-gray-700">21+ Tipe Soal Lengkap</span>
                                 </div>
                             </div>
                             <div class="mt-auto relative">

@@ -14,7 +14,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
     <div class="flex min-h-screen">
@@ -43,7 +43,7 @@
                              <p class="text-gray-600 mt-1">Full Listening Test</p>
                         </div>
                     </div>
-                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge.edition', ['edition' => $edition]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge.edition', ['edition' => $edition]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
@@ -73,7 +73,7 @@
                             </div>
                             
                             <!-- Company Name -->
-                            <div class="border-b border-gray-300 p-4 bg-gray-50 font-bold">
+                            <div class="border-b border-gray-300 p-4 bg-white font-bold">
                                 Name of company: Picturerep
                             </div>
 
@@ -87,7 +87,7 @@
                                             Photos must not be in a 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">1</span>
-                                                <input type="text" name="q1" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q1" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             or an album.
                                         </li>
@@ -103,7 +103,7 @@
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <strong class="text-lg">£</strong>
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">2</span>
-                                                <input type="text" name="q2" class="w-32 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q2" class="w-32 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             (including one disk).
                                         </li>
@@ -111,7 +111,7 @@
                                             Before the completed order is sent, 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">3</span>
-                                                <input type="text" name="q3" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q3" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             is required.
                                         </li>
@@ -126,7 +126,7 @@
                                             Photos can be placed in a folder, e.g. with the name 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">4</span>
-                                                <input type="text" name="q4" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q4" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             .
                                         </li>
@@ -134,7 +134,7 @@
                                             The 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">5</span>
-                                                <input type="text" name="q5" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q5" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             and contrast can be improved if necessary.
                                         </li>
@@ -142,7 +142,7 @@
                                             Photos which are very fragile will be scanned by 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">6</span>
-                                                <input type="text" name="q6" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q6" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             .
                                         </li>
@@ -157,7 +157,7 @@
                                             It may be possible to remove an object from a photo, or change the 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">7</span>
-                                                <input type="text" name="q7" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q7" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             .
                                         </li>
@@ -165,7 +165,7 @@
                                             A photo which is not correctly in 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">8</span>
-                                                <input type="text" name="q8" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q8" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             cannot be fixed.
                                         </li>
@@ -180,7 +180,7 @@
                                             Orders are completed within 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">9</span>
-                                                <input type="text" name="q9" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q9" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             .
                                         </li>
@@ -188,7 +188,7 @@
                                             Send the photos in a box (not 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">10</span>
-                                                <input type="text" name="q10" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q10" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             ).
                                         </li>
@@ -221,7 +221,7 @@
                          <!-- Dartfield House School -->
                         <div class="space-y-6">
                             <!-- Q11 -->
-                            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <div class="bg-white rounded-lg p-6 border border-gray-200">
                                 <div class="flex gap-4">
                                     <span class="font-bold text-lg text-gray-800 flex-shrink-0">11</span>
                                     <div class="space-y-4 flex-1">
@@ -245,7 +245,7 @@
                             </div>
                             
                             <!-- Q12 -->
-                            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <div class="bg-white rounded-lg p-6 border border-gray-200">
                                 <div class="flex gap-4">
                                     <span class="font-bold text-lg text-gray-800 flex-shrink-0">12</span>
                                     <div class="space-y-4 flex-1">
@@ -269,7 +269,7 @@
                             </div>
 
                             <!-- Q13 -->
-                            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <div class="bg-white rounded-lg p-6 border border-gray-200">
                                 <div class="flex gap-4">
                                     <span class="font-bold text-lg text-gray-800 flex-shrink-0">13</span>
                                     <div class="space-y-4 flex-1">
@@ -293,7 +293,7 @@
                             </div>
                             
                             <!-- Q14 -->
-                            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <div class="bg-white rounded-lg p-6 border border-gray-200">
                                 <div class="flex gap-4">
                                     <span class="font-bold text-lg text-gray-800 flex-shrink-0">14</span>
                                     <div class="space-y-4 flex-1">
@@ -317,7 +317,7 @@
                             </div>
                             
                             <!-- Q15 -->
-                            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <div class="bg-white rounded-lg p-6 border border-gray-200">
                                 <div class="flex gap-4">
                                     <span class="font-bold text-lg text-gray-800 flex-shrink-0">15</span>
                                     <div class="space-y-4 flex-1">
@@ -347,7 +347,7 @@
                             
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                                 <!-- Options Box -->
-                                <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-sm">
+                                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                                     <h4 class="font-bold text-xl text-center text-gray-800 mb-4 border-b pb-2">Comments</h4>
                                     <div class="space-y-3 text-lg text-gray-700 font-medium">
                                         <div class="flex gap-3"><span class="font-bold w-6">A</span> pupils help to plan menus</div>
@@ -394,7 +394,7 @@
                         <div class="space-y-6 mt-8">
                             <h3 class="font-bold text-lg text-gray-700 italic border-l-4 border-blue-500 pl-3">Questions 19 and 20: Choose TWO letters, A–E.</h3>
                             
-                            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <div class="bg-white rounded-lg p-6 border border-gray-200">
                                 <p class="font-bold text-gray-900 mb-4 h4">Which TWO optional after-school lessons are new?</p>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <label class="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 cursor-pointer shadow-sm">
@@ -448,7 +448,7 @@
                             <h4 class="text-xl font-bold text-center text-gray-800 mb-6">Assignment on sleep and dreams</h4>
 
                             <!-- Q21 -->
-                            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <div class="bg-white rounded-lg p-6 border border-gray-200">
                                 <div class="flex gap-4">
                                     <span class="font-bold text-lg text-gray-800 flex-shrink-0">21</span>
                                     <div class="space-y-4 flex-1">
@@ -472,7 +472,7 @@
                             </div>
 
                             <!-- Q22 -->
-                            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <div class="bg-white rounded-lg p-6 border border-gray-200">
                                 <div class="flex gap-4">
                                     <span class="font-bold text-lg text-gray-800 flex-shrink-0">22</span>
                                     <div class="space-y-4 flex-1">
@@ -496,7 +496,7 @@
                             </div>
 
                             <!-- Q23 -->
-                            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <div class="bg-white rounded-lg p-6 border border-gray-200">
                                 <div class="flex gap-4">
                                     <span class="font-bold text-lg text-gray-800 flex-shrink-0">23</span>
                                     <div class="space-y-4 flex-1">
@@ -520,7 +520,7 @@
                             </div>
 
                             <!-- Q24 -->
-                            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <div class="bg-white rounded-lg p-6 border border-gray-200">
                                 <div class="flex gap-4">
                                     <span class="font-bold text-lg text-gray-800 flex-shrink-0">24</span>
                                     <div class="space-y-4 flex-1">
@@ -706,7 +706,7 @@
                                             An experiment on university students suggested that dance increases 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">31</span>
-                                                <input type="text" name="q31" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q31" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             .
                                         </li>
@@ -714,7 +714,7 @@
                                             For those with mental illness, dance could be used as a form of 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">32</span>
-                                                <input type="text" name="q32" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q32" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             .
                                         </li>
@@ -729,7 +729,7 @@
                                             accessible for people with low levels of 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">33</span>
-                                                <input type="text" name="q33" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q33" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                         </li>
                                         <li>reduces the risk of heart disease</li>
@@ -737,7 +737,7 @@
                                             better 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">34</span>
-                                                <input type="text" name="q34" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q34" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             reduces the risk of accidents
                                         </li>
@@ -745,7 +745,7 @@
                                             improves 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">35</span>
-                                                <input type="text" name="q35" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q35" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             function by making it work faster
                                         </li>
@@ -754,7 +754,7 @@
                                             gives people more 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">36</span>
-                                                <input type="text" name="q36" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q36" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             to take exercise
                                         </li>
@@ -762,7 +762,7 @@
                                             can lessen the feeling of 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">37</span>
-                                                <input type="text" name="q37" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q37" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             , very common in older people
                                         </li>
@@ -777,7 +777,7 @@
                                             A study at The University of Wisconsin showed that doing Zumba for 40 minutes uses up as many 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">38</span>
-                                                <input type="text" name="q38" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                <input type="text" name="q38" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                             </span>
                                             as other quite intense forms of exercise.
                                         </li>
@@ -788,7 +788,7 @@
                                                     women suffering from 
                                                     <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                         <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">39</span>
-                                                        <input type="text" name="q39" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                        <input type="text" name="q39" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                                     </span>
                                                     benefited from doing Zumba.
                                                 </li>
@@ -796,7 +796,7 @@
                                                     Zumba became a 
                                                     <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                         <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">40</span>
-                                                        <input type="text" name="q40" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
+                                                        <input type="text" name="q40" class="w-48 border-b-2 border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-gray-400 transition-colors" placeholder="Answer">
                                                     </span>
                                                     for the participants.
                                                 </li>
@@ -827,7 +827,7 @@
     <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 md:pl-64 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
+                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-purple-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
                 </div>
                 <div>

@@ -41,7 +41,7 @@
                         </div>
                     </div>
                     <a href="{{ route('assignments.grammar-writing.practice') }}"
-                        class="flex items-center gap-2 px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition border border-gray-200">
+                        class="flex items-center gap-2 px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-white font-medium transition border border-gray-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                         </svg>
@@ -50,8 +50,8 @@
                 </div>
 
                 <!-- Tips Section -->
-                <div class="bg-blue-50 border-l-4 border-blue-500 p-6 mb-8 rounded-r-xl shadow-sm">
-                    <h3 class="font-bold text-blue-800 text-lg mb-2">💡 Tips Mengerjakan:</h3>
+                <div class="bg-white border-l-4 border-blue-500 p-6 mb-8 rounded-r-xl shadow-sm">
+                    <h3 class="font-bold text-blue-800 text-lg mb-2"> Tips Mengerjakan:</h3>
                     <ol class="list-decimal list-inside space-y-2 text-blue-700">
                         <li>Cari semua <span class="font-semibold">Verb</span> dalam kalimat.</li>
                         <li>Tentukan mana <span class="font-semibold">Verb Asli</span> (yang menggunakan tenses).</li>
@@ -70,7 +70,7 @@
                 @if($sentences->isEmpty() && !$paragraph)
                     <!-- Empty State -->
                     <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-teal-100 p-12 flex flex-col items-center justify-center min-h-[400px]">
-                        <div class="w-24 h-24 bg-teal-50 rounded-full flex items-center justify-center mb-6">
+                        <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6">
                             <svg class="w-12 h-12 text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                             </svg>
@@ -100,14 +100,14 @@
                             </div>
                             <div class="space-y-6">
                                 @foreach($sentences as $idx => $q)
-                                    <div class="bg-gray-50 p-6 rounded-xl border-l-4 border-teal-500 shadow-sm">
+                                    <div class="bg-white p-6 rounded-xl border-l-4 border-teal-500 shadow-sm">
                                         <div class="flex items-center gap-2 mb-4">
                                             <label class="font-bold text-lg text-gray-800">{{ $idx + 1 }}. {!! $q->question_id !!}</label>
                                             
                                             <!-- Example Helper -->
                                             @if($q->example)
                                             <div x-data="{ open: false }" class="relative inline-block">
-                                                <button @click="open = !open" type="button" class="w-8 h-8 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-600 flex items-center justify-center text-sm font-bold hover:bg-yellow-100 transition-colors focus:outline-none shadow-sm">
+                                                <button @click="open = !open" type="button" class="w-8 h-8 rounded-lg bg-white border border-yellow-200 text-yellow-600 flex items-center justify-center text-sm font-bold hover:bg-white transition-colors focus:outline-none shadow-sm">
                                                     ?
                                                 </button>
                                                 <div x-show="open" @click.outside="open = false" class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 text-center leading-relaxed" style="display: none;">
@@ -145,7 +145,7 @@
                                             <div class="flex justify-end gap-2 mb-2">
                                                 <button type="button" 
                                                     onclick="openQuestionModal('sentence', {{ $q->id }}, '{{ addslashes($q->question_id) }}', '{{ addslashes($q->answer_en) }}', '{{ $q->vocab_helper ? addslashes(json_encode($q->vocab_helper)) : '' }}', '{{ $q->example ? addslashes(json_encode($q->example)) : '' }}')"
-                                                    class="w-8 h-8 flex items-center justify-center bg-yellow-100 hover:bg-yellow-200 text-yellow-600 rounded-lg transition-colors">
+                                                    class="w-8 h-8 flex items-center justify-center bg-white hover:bg-yellow-200 text-yellow-600 rounded-lg transition-colors">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                                 </button>
                                                 <button type="button" onclick="confirmDeleteQuestion({{ $q->id }})" class="w-8 h-8 flex items-center justify-center bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors">
@@ -158,7 +158,7 @@
                                             <input type="text"
                                                    name="userAnswers[sentences][{{ $idx }}]"
                                                    value="{{ old('userAnswers.sentences.'.$idx, $userAnswers['sentences'][$idx] ?? '') }}"
-                                                   class="w-full p-3 border border-gray-300 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                                   class="w-full p-3 border border-gray-300 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 {{ $submitted ? 'bg-white cursor-not-allowed' : '' }}"
                                                    placeholder="Translate to English..."
                                                    {{ $submitted ? 'readonly' : '' }}
                                                    autocomplete="off">
@@ -197,7 +197,7 @@
                                     <div class="flex gap-2">
                                         <button type="button" 
                                             onclick="openQuestionModal('paragraph', {{ $paragraph->id }}, '{{ addslashes($paragraph->question_id) }}', '{{ addslashes($paragraph->answer_en) }}', '{{ $paragraph->vocab_helper ? addslashes(json_encode($paragraph->vocab_helper)) : '' }}')"
-                                            class="w-8 h-8 flex items-center justify-center bg-yellow-100 hover:bg-yellow-200 text-yellow-600 rounded-lg transition-colors">
+                                            class="w-8 h-8 flex items-center justify-center bg-white hover:bg-yellow-200 text-yellow-600 rounded-lg transition-colors">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                         </button>
                                         <button type="button" onclick="confirmDeleteQuestion({{ $paragraph->id }})" class="w-8 h-8 flex items-center justify-center bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors">
@@ -209,7 +209,7 @@
                             </div>
 
                             @if($paragraph)
-                            <div class="bg-gray-50 p-6 rounded-xl border-l-4 border-orange-500 shadow-sm">
+                            <div class="bg-white p-6 rounded-xl border-l-4 border-orange-500 shadow-sm">
                                 <!-- Vocabulary Helper -->
                                 @if($paragraph->vocab_helper)
                                 <div class="flex items-center gap-2 mb-4">
@@ -243,7 +243,7 @@
                                     <textarea
                                         name="userAnswers[paragraph]"
                                         rows="8"
-                                        class="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-1 focus:ring-orange-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                        class="w-full p-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-1 focus:ring-orange-500 {{ $submitted ? 'bg-white cursor-not-allowed' : '' }}"
                                         placeholder="Translate the paragraph to English..."
                                         {{ $submitted ? 'readonly' : '' }}
                                         autocomplete="off">{{ old('userAnswers.paragraph', $userAnswers['paragraph'] ?? '') }}</textarea>
@@ -293,7 +293,7 @@
     <!-- Question Modal -->
     <div id="questionModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
                 <h3 id="questionModalTitle" class="text-xl font-bold text-gray-800">Add Question</h3>
                 <button onclick="closeQuestionModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -331,7 +331,7 @@
                     </div>
 
                     <div class="mt-6 flex justify-end gap-3">
-                        <button type="button" onclick="closeQuestionModal()" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">Cancel</button>
+                        <button type="button" onclick="closeQuestionModal()" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-white transition">Cancel</button>
                         <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition">Save</button>
                     </div>
                 </form>

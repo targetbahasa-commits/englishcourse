@@ -221,7 +221,10 @@
                         <div>
                             <h3 class="font-bold text-gray-900">{{ $item->data['title'] ?? 'Broadcast Announcement' }}</h3>
                             <p class="text-sm text-gray-600 mt-1 whitespace-pre-wrap">{{ $item->data['content'] ?? '' }}</p>
-                            <div class="mt-2 text-xs text-gray-400 font-medium">From: Administrator • {{ $item->created_at->diffForHumans() }}</div>
+                            <div class="mt-2 text-xs text-gray-400 font-medium">From: {{ $item->data['source'] ?? 'Administrator' }} • {{ $item->created_at->diffForHumans() }}</div>
+                            @if(!empty($item->data['action_url']))
+                                <a href="{{ $item->data['action_url'] }}" class="inline-block mt-2 text-xs text-blue-600 hover:underline font-semibold">{{ $item->data['action_label'] ?? 'Lihat Detail' }} &rarr;</a>
+                            @endif
                         </div>
                     </div>
                     @if(is_null($item->read_at))

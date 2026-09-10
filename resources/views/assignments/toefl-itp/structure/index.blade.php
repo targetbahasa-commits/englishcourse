@@ -37,10 +37,10 @@
                 </div>
                 
                 <div class="flex items-center gap-6">
-                    <button class="relative p-2 bg-white rounded-full shadow-sm hover:bg-gray-50">
+                    <button class="relative p-2 bg-white rounded-full shadow-sm hover:bg-white">
                         <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
                     </button>
-                    <button class="relative p-2 bg-white rounded-full shadow-sm hover:bg-gray-50">
+                    <button class="relative p-2 bg-white rounded-full shadow-sm hover:bg-white">
                         <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                         <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
                     </button>
@@ -82,7 +82,7 @@
                     <h2 class="text-2xl font-bold text-gray-800">TOEFL ITP Structure</h2>
                     <p class="text-gray-500 text-sm">Master your grammar structure and written expression.</p>
                     <p class="text-xs mt-2">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-100">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-white text-blue-700 font-semibold border border-blue-100">
                             Active Batch: {{ $selectedClassPeriod->name ?? 'No Batch Active' }}
                         </span>
                     </p>
@@ -94,7 +94,7 @@
                         Add Lesson
                     </button>
                     @endif
-                    <a href="{{ route('assignments.toefl-itp') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+                    <a href="{{ route('assignments.toefl-itp') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
@@ -109,7 +109,7 @@
                         @csrf
                         <input type="hidden" name="program_id" value="{{ $batchProgram?->id }}">
                         <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                        <select name="class_period_id" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
+                        <select name="class_period_id" class="border-none bg-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
                             @if(!$batchProgram)
                                 <option value="" selected>No program found</option>
                             @elseif($batchProgram->classPeriods->isEmpty())
@@ -129,7 +129,7 @@
                 @else
                     <div class="inline-flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
                         <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                        <div class="bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium text-gray-800 min-w-[220px]">
+                        <div class="bg-white px-4 py-2 rounded-lg text-sm font-medium text-gray-800 min-w-[220px]">
                             {{ $selectedClassPeriod->name ?? 'No Batch Active' }}
                         </div>
                     </div>
@@ -140,7 +140,7 @@
                     $calendarBatchName = addslashes($batchProgram->name ?? 'Assignments');
                 @endphp
                 @if($calendarClassPeriodId)
-                    <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 text-sm text-gray-600">
+                    <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-white text-sm text-gray-600">
                         Lihat Kalender
                     </button>
                 @endif
@@ -172,7 +172,7 @@
                                 @endif
                                 <button
                                     type="submit"
-                                    class="inline-flex items-center justify-center p-1.5 rounded-lg border transition {{ $topic->is_locked ? 'bg-gray-100 text-gray-500 border-gray-300 hover:bg-gray-200 hover:text-gray-600' : 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-700' }}"
+                                    class="inline-flex items-center justify-center p-1.5 rounded-lg border transition {{ $topic->is_locked ? 'bg-white text-gray-500 border-gray-300 hover:bg-gray-200 hover:text-gray-600' : 'bg-white text-emerald-600 border-emerald-200 hover:bg-white hover:text-emerald-700' }}"
                                     title="{{ $topic->is_locked ? 'Unlock' : 'Lock' }}"
                                 >
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -203,7 +203,7 @@
                     </div>
                     
                     <!-- Icon -->
-                    <div class="w-12 h-12 {{ $topic->is_locked ? 'bg-gray-100 text-gray-400' : 'bg-green-100 text-green-600' }} rounded-2xl flex items-center justify-center mb-4 transition">
+                    <div class="w-12 h-12 {{ $topic->is_locked ? 'bg-white text-gray-400' : 'bg-green-100 text-green-600' }} rounded-2xl flex items-center justify-center mb-4 transition">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     </div>
                     
@@ -213,7 +213,7 @@
                     @if(!$topic->is_locked || Auth::user()->isAdmin() || Auth::user()->isTeacher())
                         <a href="{{ route('assignments.toefl-itp.structure.meeting', $topic->meeting_number) }}" class="block w-full py-2 text-center rounded-xl font-bold transition {{ $topic->is_locked ? 'bg-gray-300 text-gray-700 hover:bg-gray-400' : 'bg-green-600 text-white hover:bg-green-700' }}">Start</a>
                     @else
-                        <button disabled class="block w-full py-2 bg-gray-100 text-gray-400 text-center rounded-xl font-bold cursor-not-allowed">Locked</button>
+                        <button disabled class="block w-full py-2 bg-white text-gray-400 text-center rounded-xl font-bold cursor-not-allowed">Locked</button>
                     @endif
                     
                     @php

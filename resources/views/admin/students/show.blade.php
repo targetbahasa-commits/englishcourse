@@ -21,12 +21,16 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
             Edit Student
         </a>
+        <button type="button" @click="showPasswordModal = true" class="px-4 py-2 bg-amber-600 text-white font-medium rounded-xl hover:bg-amber-700 shadow-sm transition flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+            Change Password
+        </button>
     </div>
 </div>
 @endsection
 
 @section('content')
-<div class="p-8 max-w-7xl mx-auto space-y-8">
+<div class="p-8 max-w-7xl mx-auto space-y-8" x-data="{ showPasswordModal: false }">
     @if(session('success'))
         <div class="mb-2 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
             {{ session('success') }}
@@ -62,6 +66,9 @@
                                 <span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span> Inactive
                             </span>
                         @endif
+                        <button type="button" @click="showPasswordModal = true" class="px-3 py-1 text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white rounded-lg flex items-center gap-1.5 mt-2 md:mt-0 shadow-sm transition">
+                            🔑 Change Password
+                        </button>
                     </div>
                     <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-gray-500 mt-6 md:mt-0 pb-1">
                         <a href="https://mail.google.com/mail/?view=cm&to={{ urlencode($student->email) }}"
@@ -123,6 +130,16 @@
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Learning Mode</p>
                     <p class="font-semibold text-gray-900 capitalize">{{ $student->learning_mode ?? 'Not Set' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Batch Kelas</p>
+                    <p class="font-semibold text-gray-900">
+                        @if($student->classPeriod)
+                            {{ $student->classPeriod->name }}
+                        @else
+                            <span class="text-gray-400 italic">Belum ditentukan</span>
+                        @endif
+                    </p>
                 </div>
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Assigned Teacher</p>
@@ -377,8 +394,39 @@
                 @endif
             </div>
 
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+                <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    Final Test Certificate
+                </h3>
+
+                @if($latestFinalTest)
+                <div class="flex items-center justify-between p-6 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-100">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-600 mb-2 block">{{ $latestFinalTest->test_label ?: str_replace('_', ' ', $latestFinalTest->test_type) }}</span>
+                        <h4 class="text-2xl font-black text-gray-900">{{ is_numeric($latestFinalTest->score) ? number_format((float) $latestFinalTest->score, 1) : $latestFinalTest->score }}</h4>
+                        <p class="text-sm text-gray-500 mt-1">Completed on {{ optional($latestFinalTest->completed_at ?? $latestFinalTest->created_at)->format('d M Y') }}</p>
+                    </div>
+                    <div class="text-right flex flex-col gap-2 items-end">
+                        <a href="{{ route('final-test.results.show', $latestFinalTest) }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-amber-700 font-medium rounded-xl border border-amber-200 shadow-sm hover:bg-amber-50 transition text-sm">
+                            View Result <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        </a>
+                        <a href="{{ route('final-test.certificate.download', $latestFinalTest) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white font-medium rounded-xl shadow-sm hover:bg-amber-700 transition text-sm">
+                            Download Certificate <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        </a>
+                    </div>
+                </div>
+                @else
+                <div class="text-center py-8 bg-gray-50 rounded-2xl border border-gray-100 border-dashed">
+                    <p class="text-gray-500 font-medium text-sm">Has not completed any Final Test yet.</p>
+                </div>
+                @endif
+            </div>
+
         </div>
-        
+
         <!-- Right Column: Classes and Details -->
         <div class="space-y-8">
             
@@ -481,6 +529,256 @@
                 @endif
             </div>
 
+            <!-- Semua Meeting: full meeting list per program with click-to-view
+                 Q&A, so admin can review/correct without leaving this page. -->
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8" x-data="{ viewingMeeting: null }">
+                <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    Semua Meeting
+                </h3>
+
+                @php
+                    $meetingGroups = collect();
+                    foreach ($programs as $prog) {
+                        $meetingsForProg = \App\Models\Meeting::where('program_id', $prog->id)
+                            ->orderBy('meeting_number')
+                            ->get();
+
+                        if ($meetingsForProg->isEmpty()) {
+                            continue;
+                        }
+
+                        $submittedByMeeting = \App\Models\MeetingScore::where('user_id', $student->id)
+                            ->where('program_id', $prog->id)
+                            ->where('is_reported', true)
+                            ->get()
+                            ->keyBy('meeting_number');
+
+                        $draftsByMeeting = \App\Models\AssignmentDraft::where('user_id', $student->id)
+                            ->where('program_id', $prog->id)
+                            ->get()
+                            ->keyBy('meeting_number');
+
+                        $meetingGroups->push([
+                            'program' => $prog,
+                            'rows' => $meetingsForProg->map(function ($m) use ($submittedByMeeting, $draftsByMeeting) {
+                                $score = $submittedByMeeting->get($m->meeting_number);
+                                $draft = $draftsByMeeting->get($m->meeting_number);
+                                $status = $score ? 'submitted' : ($draft ? 'in_progress' : 'not_started');
+
+                                return ['meeting' => $m, 'status' => $status, 'score' => $score, 'draft' => $draft];
+                            }),
+                        ]);
+                    }
+                @endphp
+
+                @forelse ($meetingGroups as $group)
+                    @php
+                        $groupTotal = $group['rows']->count();
+                        $groupSubmitted = $group['rows']->where('status', 'submitted')->count();
+                        $groupInProgress = $group['rows']->where('status', 'in_progress')->count();
+                        // Only one program to show? Keep it expanded (no behavior
+                        // change from before). Multiple programs collapse by
+                        // default so the page doesn't get flooded with rows.
+                        $groupOpenByDefault = $meetingGroups->count() <= 1 ? 'true' : 'false';
+                    @endphp
+                    <div class="mb-4 last:mb-0 border border-gray-100 rounded-2xl overflow-hidden" x-data="{ open: {{ $groupOpenByDefault }} }">
+                        <button type="button" @click="open = !open" class="w-full flex items-center justify-between gap-3 p-4 bg-gray-50 hover:bg-gray-100 transition text-left">
+                            <div class="min-w-0">
+                                <p class="text-sm font-bold text-gray-800 truncate">{{ $group['program']->name }}</p>
+                                <p class="text-xs text-gray-500 mt-0.5">
+                                    {{ $groupTotal }} meeting &bull; {{ $groupSubmitted }} submitted
+                                    @if($groupInProgress)
+                                        &bull; {{ $groupInProgress }} sedang dikerjakan
+                                    @endif
+                                </p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400 shrink-0 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div x-show="open" x-collapse class="p-4 pt-2 space-y-2">
+                            @foreach ($group['rows'] as $row)
+                                @php
+                                    $m = $row['meeting'];
+                                    $status = $row['status'];
+                                    $score = $row['score'];
+                                    $draft = $row['draft'];
+                                    $answers = $status === 'submitted'
+                                        ? (is_array($score->answers_data) ? $score->answers_data : [])
+                                        : ($status === 'in_progress' ? (is_array($draft->answers) ? $draft->answers : []) : []);
+                                    $questions = \App\Http\Controllers\Admin\AdminGrammarWritingReviewController::resolveQuestionsForMeeting(
+                                        $group['program']->slug ?? '',
+                                        (int) $m->meeting_number
+                                    );
+                                    $savedAt = $status === 'submitted'
+                                        ? $score->submitted_at?->diffForHumans()
+                                        : ($status === 'in_progress' ? $draft->last_saved_at?->diffForHumans() : null);
+                                    // The full-page "Koreksi" editor only knows how to
+                                    // render Grammar Writing content - don't link there
+                                    // for other program types (IELTS, Speaking, etc.).
+                                    $isGrammarWritingTrack = in_array(
+                                        $group['program']->slug ?? '',
+                                        array_column(\App\Http\Controllers\Admin\AdminGrammarWritingReviewController::TRACKS, 'slug'),
+                                        true
+                                    );
+                                @endphp
+                                <button type="button"
+                                    @if($status !== 'not_started')
+                                    @click="viewingMeeting = { programName: @js($group['program']->name), meetingNumber: {{ (int) $m->meeting_number }}, title: @js($m->title), status: @js($status), score: {{ $score->score ?? 'null' }}, meetingScoreId: {{ $isGrammarWritingTrack ? ($score->id ?? 'null') : 'null' }}, savedAt: @js($savedAt), answers: @js($answers), questions: @js($questions) }"
+                                    @endif
+                                    {{ $status === 'not_started' ? 'disabled' : '' }}
+                                    class="w-full flex items-center justify-between gap-3 p-3 rounded-xl border transition text-left
+                                        {{ $status === 'submitted' ? 'border-green-200 bg-green-50 hover:bg-green-100 cursor-pointer' : '' }}
+                                        {{ $status === 'in_progress' ? 'border-amber-200 bg-amber-50 hover:bg-amber-100 cursor-pointer' : '' }}
+                                        {{ $status === 'not_started' ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed' : '' }}">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold shrink-0
+                                            {{ $status === 'submitted' ? 'bg-green-600 text-white' : '' }}
+                                            {{ $status === 'in_progress' ? 'bg-amber-500 text-white' : '' }}
+                                            {{ $status === 'not_started' ? 'bg-gray-300 text-gray-600' : '' }}">
+                                            {{ $m->meeting_number }}
+                                        </span>
+                                        <span class="text-sm font-semibold text-gray-800 truncate">{{ $m->title ?? ('Meeting ' . $m->meeting_number) }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        @if($status === 'submitted')
+                                            <span class="text-sm font-black text-green-700">{{ $score->score }}</span>
+                                            <span class="text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full uppercase">Submitted</span>
+                                        @elseif($status === 'in_progress')
+                                            <span class="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full uppercase">Sedang Dikerjakan</span>
+                                        @else
+                                            <span class="text-[10px] font-bold text-gray-400 bg-gray-200 px-2 py-0.5 rounded-full uppercase">Belum Dikerjakan</span>
+                                        @endif
+                                    </div>
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-sm text-gray-500 italic">Belum ada data meeting untuk program yang diambil.</p>
+                @endforelse
+
+                <!-- Meeting Answers Modal (same rendering pattern as the
+                     "Lihat Jawaban" modal on admin/assignments/results/show) -->
+                <div x-show="viewingMeeting" x-cloak @keydown.escape.window="viewingMeeting = null" @click.self="viewingMeeting = null"
+                     class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+                    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-gray-100" @click.stop>
+                        <div class="flex items-start justify-between p-6 pb-4 border-b border-gray-100 bg-slate-50/50 shrink-0">
+                            <div>
+                                <h3 class="text-lg font-extrabold text-gray-900" x-text="viewingMeeting?.programName"></h3>
+                                <div class="flex items-center gap-2 mt-1 flex-wrap">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-orange-100 text-orange-800"
+                                          x-text="'Meeting ' + viewingMeeting?.meetingNumber + (viewingMeeting?.title ? (' - ' + viewingMeeting.title) : '')"></span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold"
+                                          :class="viewingMeeting?.status === 'submitted' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'"
+                                          x-text="viewingMeeting?.status === 'submitted' ? 'Submitted' : 'Sedang Dikerjakan'"></span>
+                                    <template x-if="viewingMeeting?.score !== null && viewingMeeting?.score !== undefined">
+                                        <span class="text-xs font-black text-gray-700">Score: <span x-text="viewingMeeting?.score"></span></span>
+                                    </template>
+                                    <span class="text-xs text-gray-400" x-show="viewingMeeting?.savedAt">&bull;</span>
+                                    <span class="text-xs text-gray-500 font-medium" x-text="viewingMeeting?.savedAt ? ('Tersimpan ' + viewingMeeting.savedAt) : ''"></span>
+                                </div>
+                            </div>
+                            <button type="button" @click="viewingMeeting = null" class="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-700 hover:bg-gray-100 flex items-center justify-center transition shrink-0 shadow-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+
+                        <div class="p-6 space-y-4 overflow-y-auto max-h-[calc(85vh-100px)]">
+                            <template x-for="(value, key) in (viewingMeeting?.answers || {})" :key="key">
+                                <div class="border border-gray-200/90 rounded-2xl p-4 bg-gray-50/70 hover:bg-gray-50 transition space-y-2.5">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-100 text-indigo-800"
+                                                  x-text="key === 'paragraph_answer' || key === 'userParagraphAnswer' ? 'Latihan Paragraf' : (isNaN(key) ? key : 'Soal ' + key)">
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <template x-if="(viewingMeeting?.questions && viewingMeeting?.questions[key]) || (typeof value === 'object' && value !== null && (value.question || value.question_text))">
+                                        <div class="bg-red-50 border border-red-200 rounded-xl p-3">
+                                            <span class="text-[10px] font-bold text-red-500 uppercase tracking-wider block mb-1">Soal:</span>
+                                            <p class="text-sm font-bold text-red-600 leading-relaxed whitespace-pre-wrap" x-html="(viewingMeeting?.questions && viewingMeeting?.questions[key]) || value.question || value.question_text"></p>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="typeof value === 'object' && value !== null && !Array.isArray(value)">
+                                        <div class="space-y-2.5">
+                                            <template x-if="value.tense">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-xs font-semibold text-gray-500 uppercase">Tense:</span>
+                                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200/80" x-text="value.tense"></span>
+                                                </div>
+                                            </template>
+
+                                            <template x-if="value.trans !== undefined || value.answer !== undefined || value.user_answer !== undefined">
+                                                <div>
+                                                    <span class="text-xs font-semibold text-gray-500 uppercase block mb-1">Terjemahan / Jawaban:</span>
+                                                    <div class="text-sm font-medium text-gray-900 bg-white p-3 rounded-xl border border-gray-200 shadow-2xs whitespace-pre-wrap leading-relaxed"
+                                                         x-text="(value.trans || value.answer || value.user_answer || '(kosong)')">
+                                                    </div>
+                                                </div>
+                                            </template>
+
+                                            <template x-if="value.v2 || value.v3">
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                                                    <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-2xs">
+                                                        <span class="text-[10px] font-bold text-gray-400 block uppercase mb-0.5">V2 (Simple Past)</span>
+                                                        <span class="text-sm font-bold text-gray-800" x-text="value.v2 || '—'"></span>
+                                                    </div>
+                                                    <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-2xs">
+                                                        <span class="text-[10px] font-bold text-gray-400 block uppercase mb-0.5">V3 (Past Participle)</span>
+                                                        <span class="text-sm font-bold text-gray-800" x-text="value.v3 || '—'"></span>
+                                                    </div>
+                                                </div>
+                                            </template>
+
+                                            <template x-for="(subVal, subKey) in value" :key="subKey">
+                                                <template x-if="!['tense', 'trans', 'answer', 'user_answer', 'v2', 'v3'].includes(subKey)">
+                                                    <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-2xs">
+                                                        <span class="text-xs font-bold text-gray-500 uppercase block mb-1" x-text="subKey"></span>
+                                                        <div class="text-sm text-gray-800 whitespace-pre-wrap" x-text="typeof subVal === 'object' ? JSON.stringify(subVal, null, 2) : (subVal || '(kosong)')"></div>
+                                                    </div>
+                                                </template>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="typeof value !== 'object' || value === null">
+                                        <div class="text-sm font-medium text-gray-900 bg-white p-3 rounded-xl border border-gray-200 shadow-2xs whitespace-pre-wrap leading-relaxed"
+                                             x-text="value || '(kosong)'">
+                                        </div>
+                                    </template>
+
+                                    <template x-if="Array.isArray(value)">
+                                        <div class="space-y-2">
+                                            <template x-for="(item, idx) in value" :key="idx">
+                                                <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-2xs text-sm text-gray-800 flex items-start gap-2.5">
+                                                    <span class="text-xs font-bold text-gray-400 shrink-0" x-text="(idx + 1) + '.'"></span>
+                                                    <span class="font-medium" x-text="typeof item === 'object' ? JSON.stringify(item) : (item || '(kosong)')"></span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <p x-show="!viewingMeeting?.answers || Object.keys(viewingMeeting.answers).length === 0" class="text-sm text-gray-400 text-center py-8">
+                                Belum ada jawaban tersimpan.
+                            </p>
+
+                            <div x-show="viewingMeeting?.status === 'submitted'" class="pt-2 border-t border-gray-100 mt-4">
+                                <a :href="'{{ url('/admin/grammar-writing-review') }}/' + viewingMeeting?.meetingScoreId"
+                                   x-show="viewingMeeting?.meetingScoreId"
+                                   class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-800">
+                                    Buka Halaman Koreksi Lengkap
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Notes or Bio -->
             <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
                 <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -497,6 +795,46 @@
                 @endif
             </div>
 
+    {{-- =============================
+         Change Password Modal
+         ============================= --}}
+    <div x-show="showPasswordModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="showPasswordModal = false"></div>
+            <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6 z-10">
+                <form action="{{ route('admin.users.change_password', $student) }}" method="POST">
+                    @csrf
+                    <div class="flex items-start gap-4 mb-5">
+                        <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-amber-100">
+                            <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-gray-900">Change Student Password</h3>
+                            <p class="text-sm text-gray-500 mt-0.5">Set a new password for <span class="font-bold text-gray-900">{{ $student->name }}</span>.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                            <input type="password" name="password" required minlength="6" placeholder="At least 6 characters"
+                                   class="w-full rounded-xl border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                            <input type="password" name="password_confirmation" required minlength="6" placeholder="Repeat new password"
+                                   class="w-full rounded-xl border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2">
+                        <button type="button" @click="showPasswordModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50">Cancel</button>
+                        <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-amber-600 rounded-xl hover:bg-amber-700 transition shadow-sm flex items-center gap-1.5">
+                            🔑 Update Password
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

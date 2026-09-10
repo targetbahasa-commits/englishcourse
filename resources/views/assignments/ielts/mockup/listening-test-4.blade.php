@@ -14,7 +14,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
     <div class="flex min-h-screen">
@@ -43,7 +43,7 @@
                              <p class="text-gray-600 mt-1">Full Listening Test</p>
                         </div>
                     </div>
-                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge.edition', ['edition' => $edition]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge.edition', ['edition' => $edition]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
@@ -68,7 +68,7 @@
 
                         <div class="bg-white border-2 border-gray-800 p-0 rounded-none shadow-none text-gray-900">
                             <!-- Header -->
-                            <div class="border-b-2 border-gray-800 p-4 text-center bg-gray-100">
+                            <div class="border-b-2 border-gray-800 p-4 text-center bg-white">
                                 <h3 class="text-xl font-bold text-center text-gray-800">Holiday rental</h3>
                             </div>
                             
@@ -85,7 +85,7 @@
                                         <li>
                                             available for week beginning 1
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
-                                                <input type="text" name="q1" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q1" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                             May
                                         </li>
@@ -93,7 +93,7 @@
                                             cost for the week: 2
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
                                                 <span class="font-bold text-xl mr-1">£</span>
-                                                <input type="text" name="q2" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q2" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                         </li>
                                     </ul>
@@ -103,7 +103,7 @@
                                 <div>
                                     <div class="flex items-center gap-2 mb-2">
                                         <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
-                                            <input type="text" name="q3" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                            <input type="text" name="q3" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                         </span>
                                         <h4 class="font-bold text-gray-800 text-lg">Cottage</h4>
                                     </div>
@@ -112,19 +112,19 @@
                                         <li>
                                             building was originally a 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
-                                                <input type="text" name="q4" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q4" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                         </li>
                                         <li>
                                             walk through doors from living room into a 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
-                                                <input type="text" name="q5" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q5" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                         </li>
                                         <li>
                                             several 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
-                                                <input type="text" name="q6" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q6" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                             spaces at the front
                                         </li>
@@ -132,20 +132,20 @@
                                         <li>
                                             central heating and stove that burns 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
-                                                <input type="text" name="q7" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q7" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                         </li>
                                         <li>
                                             views of old 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
-                                                <input type="text" name="q8" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q8" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                             from living room
                                         </li>
                                         <li>
                                             view of hilltop 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
-                                                <input type="text" name="q9" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q9" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                             from the bedroom
                                         </li>
@@ -160,7 +160,7 @@
                                         <li>
                                             deadline for final payment: end of 
                                             <span class="inline-flex items-center gap-2 mx-1 align-baseline relative top-1">
-                                                <input type="text" name="q10" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                <input type="text" name="q10" class="w-48 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                             </span>
                                         </li>
                                     </ul>
@@ -192,13 +192,13 @@
                             <div class="space-y-6">
                                 <h3 class="font-bold text-lg text-gray-700 italic border-l-4 border-blue-500 pl-3">Questions 11–14: Choose the correct letter, A, B or C.</h3>
                                 
-                                <div class="bg-blue-50 p-6 rounded-xl border border-blue-100">
+                                <div class="bg-white p-6 rounded-xl border border-blue-100">
                                      <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Local council report on traffic and highways</h2>
                                 </div>
 
                                 <div class="space-y-6">
                                     <!-- Q11 -->
-                                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                    <div class="bg-white rounded-lg p-6 border border-gray-200">
                                         <p class="font-medium text-gray-900 mb-4 text-lg"><span class="font-bold mr-2">11</span> A survey found people's main concern about traffic in the area was</p>
                                         <div class="space-y-2">
                                             <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition cursor-pointer">
@@ -217,7 +217,7 @@
                                     </div>
 
                                     <!-- Q12 -->
-                                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                    <div class="bg-white rounded-lg p-6 border border-gray-200">
                                         <p class="font-medium text-gray-900 mb-4 text-lg"><span class="font-bold mr-2">12</span> Which change will shortly be made to the cycle path next to the river?</p>
                                         <div class="space-y-2">
                                             <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition cursor-pointer">
@@ -236,7 +236,7 @@
                                     </div>
 
                                     <!-- Q13 -->
-                                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                    <div class="bg-white rounded-lg p-6 border border-gray-200">
                                         <p class="font-medium text-gray-900 mb-4 text-lg"><span class="font-bold mr-2">13</span> Plans for a pedestrian crossing have been postponed because</p>
                                         <div class="space-y-2">
                                             <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition cursor-pointer">
@@ -255,7 +255,7 @@
                                     </div>
 
                                     <!-- Q14 -->
-                                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                    <div class="bg-white rounded-lg p-6 border border-gray-200">
                                         <p class="font-medium text-gray-900 mb-4 text-lg"><span class="font-bold mr-2">14</span> On Station Road, notices have been erected</p>
                                         <div class="space-y-2">
                                             <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition cursor-pointer">
@@ -299,7 +299,7 @@
                                                 19 => 'Pavilion',
                                                 20 => 'Notice board'
                                             ] as $num => $label)
-                                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition border border-gray-100">
+                                                <div class="flex items-center justify-between p-3 bg-white rounded-lg hover:bg-white transition border border-gray-100">
                                                     <div class="flex items-center gap-4">
                                                         <span class="font-bold text-gray-700 w-8">{{ $num }}</span>
                                                         <span class="text-base font-medium text-gray-800">{{ $label }}</span>
@@ -343,7 +343,7 @@
                             <div class="space-y-6">
                                 <h3 class="font-bold text-lg text-gray-700 italic border-l-4 border-blue-500 pl-3">Questions 21 and 22: Choose TWO letters, A–E.</h3>
                                 
-                                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                <div class="bg-white rounded-lg p-6 border border-gray-200">
                                     <p class="font-medium text-gray-900 mb-4 text-lg">Which <span class="font-bold">TWO</span> benefits of city bike-sharing schemes do the students agree are the most important?</p>
                                     <div class="space-y-2">
                                         @foreach(['A' => 'reducing noise pollution', 'B' => 'reducing traffic congestion', 'C' => 'improving air quality', 'D' => 'encouraging health and fitness', 'E' => 'making cycling affordable'] as $key => $option)
@@ -360,7 +360,7 @@
                             <div class="space-y-6">
                                 <h3 class="font-bold text-lg text-gray-700 italic border-l-4 border-blue-500 pl-3">Questions 23 and 24: Choose TWO letters, A–E.</h3>
                                 
-                                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                <div class="bg-white rounded-lg p-6 border border-gray-200">
                                     <p class="font-medium text-gray-900 mb-4 text-lg">Which <span class="font-bold">TWO</span> things do the students think are necessary for successful bike-sharing schemes?</p>
                                     <div class="space-y-2">
                                         @foreach(['A' => 'Bikes should have a GPS system.', 'B' => 'The app should be easy to use.', 'C' => 'Public awareness should be raised.', 'D' => 'Only one scheme should be available.', 'E' => 'There should be a large network of cycle lanes.'] as $key => $option)
@@ -380,7 +380,7 @@
 
                                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                                     <!-- Options Box -->
-                                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-sm">
+                                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                                         <h4 class="font-bold text-center text-xl text-gray-800 mb-6 border-b pb-4">Opinion of bike-sharing scheme</h4>
                                         <div class="space-y-4 text-lg text-gray-700 font-medium">
                                             <div class="flex gap-4"><span class="font-bold w-6 text-gray-900">A</span> <span>They agree it has been disappointing.</span></div>
@@ -460,7 +460,7 @@
                                                 1507 – Portuguese ships transporting 
                                                 <span class="inline-flex items-center gap-2 mx-1 align-middle">
                                                     <span class="font-bold text-gray-700">31</span>
-                                                    <input type="text" name="q31" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                    <input type="text" name="q31" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                                 </span>
                                                 stopped at the island to collect food and water.
                                             </li>
@@ -468,7 +468,7 @@
                                                 1638 – The Dutch established a 
                                                 <span class="inline-flex items-center gap-2 mx-1 align-middle">
                                                     <span class="font-bold text-gray-700">32</span>
-                                                    <input type="text" name="q32" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                    <input type="text" name="q32" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                                 </span>
                                                 on the island.
                                             </li>
@@ -486,35 +486,35 @@
                                                 A Dutch painting suggests the dodo was very 
                                                 <span class="inline-flex items-center gap-2 mx-1 align-middle">
                                                     <span class="font-bold text-gray-700">33</span>
-                                                    <input type="text" name="q33" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                    <input type="text" name="q33" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                                 </span>.
                                             </li>
                                             <li>
                                                 The only remaining soft tissue is a dried 
                                                 <span class="inline-flex items-center gap-2 mx-1 align-middle">
                                                     <span class="font-bold text-gray-700">34</span>
-                                                    <input type="text" name="q34" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                    <input type="text" name="q34" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                                 </span>.
                                             </li>
                                             <li>
                                                 Recent studies of a dodo skeleton suggest the birds were capable of rapid 
                                                 <span class="inline-flex items-center gap-2 mx-1 align-middle">
                                                     <span class="font-bold text-gray-700">35</span>
-                                                    <input type="text" name="q35" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                    <input type="text" name="q35" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                                 </span>.
                                             </li>
                                             <li>
                                                 It’s thought they were able to use their small wings to maintain 
                                                 <span class="inline-flex items-center gap-2 mx-1 align-middle">
                                                     <span class="font-bold text-gray-700">36</span>
-                                                    <input type="text" name="q36" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                    <input type="text" name="q36" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                                 </span>.
                                             </li>
                                             <li>
                                                 Their 
                                                 <span class="inline-flex items-center gap-2 mx-1 align-middle">
                                                     <span class="font-bold text-gray-700">37</span>
-                                                    <input type="text" name="q37" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                    <input type="text" name="q37" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                                 </span>
                                                 was of average size.
                                             </li>
@@ -522,7 +522,7 @@
                                                 Their sense of 
                                                 <span class="inline-flex items-center gap-2 mx-1 align-middle">
                                                     <span class="font-bold text-gray-700">38</span>
-                                                    <input type="text" name="q38" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                    <input type="text" name="q38" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                                 </span>
                                                 enabled them to find food.
                                             </li>
@@ -538,7 +538,7 @@
                                             <li>
                                                 <span class="inline-flex items-center gap-2 mx-1 align-middle">
                                                     <span class="font-bold text-gray-700">39</span>
-                                                    <input type="text" name="q39" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                    <input type="text" name="q39" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                                 </span>
                                                 also escaped onto the island and ate the birds’ eggs.
                                             </li>
@@ -546,7 +546,7 @@
                                                 The arrival of farming meant the 
                                                 <span class="inline-flex items-center gap-2 mx-1 align-middle">
                                                     <span class="font-bold text-gray-700">40</span>
-                                                    <input type="text" name="q40" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-yellow-50 px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
+                                                    <input type="text" name="q40" class="w-40 border-b-2 border-dotted border-gray-400 focus:border-red-600 focus:outline-none bg-white px-2 py-0.5 font-bold text-blue-900 placeholder-transparent transition-colors">
                                                 </span>
                                                 was destroyed.
                                             </li>

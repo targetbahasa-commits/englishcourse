@@ -49,8 +49,8 @@ class EloquentAdminReportRepository implements AdminReportRepository
             ->count();
 
         $guestToStudentConvertedThisMonth = User::where('role', 'student')
-            ->whereNotNull('referred_by_id')
-            ->whereBetween('created_at', [$monthStart, $monthEnd])
+            ->whereNotNull('converted_from_guest_at')
+            ->whereBetween('converted_from_guest_at', [$monthStart, $monthEnd])
             ->count();
 
         $financialSummary = [
@@ -162,11 +162,80 @@ class EloquentAdminReportRepository implements AdminReportRepository
             $highestRatedTeachers = [['name' => 'No data yet', 'specialty' => '-', 'rating' => '-', 'students_active' => 0]];
         }
 
+        // Conversion Rate (Guest -> Student), all-time: converted / (converted + still-guest)
+        $everConvertedFromGuest = User::whereNotNull('converted_from_guest_at')->count();
+        $conversionPool = $everConvertedFromGuest + $activeGuests;
+        $conversionRate = $conversionPool > 0 ? round(($everConvertedFromGuest / $conversionPool) * 100, 1) : 0;
+
+        // Retention Rate: enrollments still active/completed out of all enrollments ever created
+        $totalEnrollments = Enrollment::count();
+        $retainedEnrollments = Enrollment::whereIn('status', ['active', 'completed'])->count();
+        $retentionRate = $totalEnrollments > 0 ? round(($retainedEnrollments / $totalEnrollments) * 100, 1) : 0;
+
+        // Average Teacher Rating (there is no real 0-10 NPS survey in this app - only
+        // 1-5 star TeacherEvaluation ratings, so this is labelled honestly, not as NPS).
+        $teacherRatingCount = TeacherEvaluation::count();
+        $avgTeacherRating = $teacherRatingCount > 0 ? round((float) TeacherEvaluation::avg('rating'), 1) : null;
+
+        // Grading time: avg(updated_at - submitted_at) for MeetingScore rows that have
+        // been scored. Imprecise (updated_at can be bumped by any later edit, not only
+        // the initial grading), but it's the only timestamp signal this schema has.
+        $scoredMeetings = MeetingScore::whereNotNull('score')
+            ->whereNotNull('submitted_at')
+            ->get(['submitted_at', 'updated_at']);
+        $avgGradingHours = $scoredMeetings->isNotEmpty()
+            ? $scoredMeetings->avg(fn ($m) => max(0, $m->submitted_at->diffInMinutes($m->updated_at)) / 60)
+            : null;
+        $gradingTimeLabel = $avgGradingHours === null
+            ? 'Belum ada data'
+            : ($avgGradingHours < 24 ? round($avgGradingHours, 1) . ' Jam' : round($avgGradingHours / 24, 1) . ' Hari');
+
+        // Class completion: % of already-past ClassMeetings that have at least one
+        // Attendance row recorded against them.
+        $pastMeetingIds = \App\Models\ClassMeeting::whereNotNull('meeting_date')
+            ->where('meeting_date', '<', $now->toDateString())
+            ->pluck('id');
+        $totalPastMeetings = $pastMeetingIds->count();
+        $meetingsWithAttendance = $totalPastMeetings > 0
+            ? \App\Models\Attendance::whereIn('class_meeting_id', $pastMeetingIds)->distinct('class_meeting_id')->count('class_meeting_id')
+            : 0;
+        $classCompletionRate = $totalPastMeetings > 0 ? round(($meetingsWithAttendance / $totalPastMeetings) * 100, 1) : 0;
+
+        // Peak hours: most common ClassMeeting start_time hour bucket.
+        $peakHourLabel = 'Belum ada data';
+        $peakHourCounts = \App\Models\ClassMeeting::whereNotNull('start_time')->pluck('start_time')
+            ->map(fn ($t) => \Illuminate\Support\Carbon::parse($t)->format('H:00'))
+            ->countBy();
+        if ($peakHourCounts->isNotEmpty()) {
+            $peakHourLabel = $peakHourCounts->sortDesc()->keys()->first() . ' WIB';
+        }
+
+        // Attendance summary: % of student Attendance rows marked "present".
+        // (There is no separate, unambiguous "teacher attendance" signal distinct from
+        // class_completion above, so only the student side is reported here.)
+        $totalAttendanceRecords = \App\Models\Attendance::count();
+        $presentAttendanceRecords = \App\Models\Attendance::where('status', 'present')->count();
+        $studentAttendanceRate = $totalAttendanceRecords > 0
+            ? round(($presentAttendanceRecords / $totalAttendanceRecords) * 100, 1)
+            : 0;
+
         $metrics = [
-            'financial'   => ['conversion_rate' => '42%', 'most_popular_program' => $topProgram->name . ' (' . $topProgramPercentage . '%)'],
-            'academic'    => ['retention_rate' => '65%', 'avg_nps' => '4.8/5.0'],
-            'teacher'     => ['grading_time' => '1.5 Days', 'class_completion' => '98%'],
-            'operational' => ['peak_hours' => '19:00 - 21:00 WIB', 'attendance_summary' => 'Students: 92% | Teachers: 99%'],
+            'financial'   => [
+                'conversion_rate' => $conversionRate . '%',
+                'most_popular_program' => $topProgram->name . ' (' . $topProgramPercentage . '%)',
+            ],
+            'academic'    => [
+                'retention_rate' => $retentionRate . '%',
+                'avg_teacher_rating' => $avgTeacherRating === null ? 'Belum ada data' : $avgTeacherRating . '/5.0',
+            ],
+            'teacher'     => [
+                'grading_time' => $gradingTimeLabel,
+                'class_completion' => $classCompletionRate . '%',
+            ],
+            'operational' => [
+                'peak_hours' => $peakHourLabel,
+                'attendance_summary' => 'Students: ' . $studentAttendanceRate . '%',
+            ],
         ];
 
         return compact(

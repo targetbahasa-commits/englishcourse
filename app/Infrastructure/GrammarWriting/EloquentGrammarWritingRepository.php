@@ -18,17 +18,38 @@ class EloquentGrammarWritingRepository implements GrammarWritingRepository
         
         if (\Illuminate\Support\Facades\Schema::hasColumn('grammar_questions', 'question_type')) {
             $query->where('question_type', '!=', 'paragraph');
-        } else {
-            $query->where('question_number', '!=', 999);
         }
         
-        return $query->get()->all();
+        if (\Illuminate\Support\Facades\Schema::hasColumn('grammar_questions', 'section')) {
+            $query->where(function ($q) {
+                $q->whereNull('section')->orWhere('section', '!=', 'paragraph');
+            });
+        }
+        
+        $query->where('question_number', '!=', 999);
+        
+        return collect($query->get()->all())
+            ->filter(function ($question) {
+                return strlen($question->question_text) < 250;
+            })
+            ->values()
+            ->all();
+    }
+
+    public function getAllQuestionsByMeeting(int $meetingNumber): array
+    {
+        return GrammarQuestion::where('meeting_number', $meetingNumber)
+            ->orderBy('question_number')
+            ->get()->all();
     }
 
     public function getQuestionsByMeetingWithNullSection(int $meetingNumber): array
     {
         $query = GrammarQuestion::where('meeting_number', $meetingNumber)
-            ->whereNull('section');
+            ->where(function ($q) {
+                $q->whereNull('section')
+                  ->orWhere('section', '!=', 'paragraph');
+            });
             
         if (\Illuminate\Support\Facades\Schema::hasColumn('grammar_questions', 'question_type')) {
             $query->where('question_type', '!=', 'paragraph');
@@ -36,7 +57,7 @@ class EloquentGrammarWritingRepository implements GrammarWritingRepository
             $query->where('question_number', '!=', 999);
         }
         
-        return $query->get()->all();
+        return $query->orderBy('question_number')->get()->all();
     }
 
     public function getQuestionsByMeetingAndSection(int $meetingNumber, string $section): array
@@ -121,7 +142,7 @@ class EloquentGrammarWritingRepository implements GrammarWritingRepository
     public function findProgramBySlugWithMeetingsAndClassPeriods(string $slug): mixed
     {
         return Program::where('slug', $slug)
-            ->with(['meetings', 'classPeriods'])
+            ->with(['meetings', 'classPeriods' => fn ($q) => $q->where('status', 'active')])
             ->firstOrFail();
     }
 

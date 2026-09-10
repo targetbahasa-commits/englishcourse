@@ -72,6 +72,7 @@
                 let lastRequestAt = 0;
                 let pollingTimer = null;
                 let signalPollingTimer = null;
+                let audioCallPollingTimer = null;
                 const processedSignalIds = new Set();
                 const config = {
                     iceServers: [
@@ -269,6 +270,11 @@
                             peerConnection.close();
                             peerConnection = null;
                         }
+                        // Peer-initiated close (e.g. admin ended the call) -
+                        // only hides the pill/resets local audio-call state,
+                        // never re-sends CloseSession back (see
+                        // audioCallTeardown()'s own docblock).
+                        audioCallTeardown();
                     }
                 };
 
@@ -566,6 +572,226 @@
                     handleRequest();
                 };
 
+                // ── Audio Call (admin/teacher -> student, WebRTC) ──────────
+                //
+                // Deliberately separate from handleIncomingRequest() above:
+                // a voice call must ring the student wherever they currently
+                // are (no isCurrentTabArmed()/target_path gate - those exist
+                // for screen-share specifically, see requestScreen()'s
+                // docblock on the server side), and needs its own prompt
+                // copy ("Panggilan Masuk", not "Screen Share Request").
+                //
+                // Everything AFTER acceptance deliberately REUSES the
+                // existing shared peerConnection/localStream/config state
+                // and the generic Offer/Answer/IceCandidate/CloseSession
+                // whisper+poll handlers registered below (webrtcChannel.
+                // listenForWhisper('Offer', ...) etc. and
+                // handleFallbackSignal()'s matching branches) - the student
+                // is always the ANSWERER in a call (see current-assignment.
+                // blade.php's docblock: the admin captures its own mic and
+                // creates the Offer only after receiving AudioCallAccepted),
+                // so those already-generic handlers work completely
+                // unchanged for a plain audio call the same way they
+                // already do for screen-share's mic-renegotiation case
+                // ("Teacher sent an offer (e.g. renegotiation for mic
+                // Audio)" a few lines below). Likewise #remoteAudioTeacher
+                // (built by the existing ontrack handler) is reused as-is
+                // for playback - it's already exactly "audio coming from
+                // the teacher/admin side" regardless of which feature sent it.
+                let audioCallActiveWithId = null;
+                let audioCallActiveWithName = null;
+                let audioCallPillEl = null;
+                let audioCallMuted = false;
+
+                const audioCallEnsurePill = () => {
+                    if (audioCallPillEl) {
+                        return audioCallPillEl;
+                    }
+
+                    const pill = document.createElement('div');
+                    pill.id = 'audio-call-active-pill';
+                    pill.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:999999;display:flex;align-items:center;gap:10px;background:#111827;color:#fff;padding:10px 14px;border-radius:9999px;box-shadow:0 10px 30px rgba(0,0,0,0.35);font-family:sans-serif;font-size:13px;';
+
+                    const label = document.createElement('span');
+                    label.id = 'audio-call-pill-label';
+                    label.style.cssText = 'white-space:nowrap;';
+
+                    const muteBtn = document.createElement('button');
+                    muteBtn.type = 'button';
+                    muteBtn.id = 'audio-call-pill-mute';
+                    muteBtn.style.cssText = 'background:#374151;border:none;color:#fff;border-radius:9999px;width:28px;height:28px;cursor:pointer;font-size:14px;line-height:1;';
+                    muteBtn.title = 'Bisukan mikrofon';
+                    muteBtn.textContent = '🎙️';
+                    muteBtn.onclick = () => {
+                        if (!localStream) return;
+                        audioCallMuted = !audioCallMuted;
+                        localStream.getAudioTracks().forEach((track) => { track.enabled = !audioCallMuted; });
+                        muteBtn.textContent = audioCallMuted ? '🔇' : '🎙️';
+                    };
+
+                    const hangupBtn = document.createElement('button');
+                    hangupBtn.type = 'button';
+                    hangupBtn.style.cssText = 'background:#dc2626;border:none;color:#fff;border-radius:9999px;width:28px;height:28px;cursor:pointer;font-size:14px;line-height:1;';
+                    hangupBtn.title = 'Akhiri panggilan';
+                    hangupBtn.textContent = '×';
+                    hangupBtn.onclick = () => {
+                        if (audioCallActiveWithId) {
+                            whisperAndSignal('CloseSession', audioCallActiveWithId, { target: audioCallActiveWithId });
+                        }
+                        audioCallTeardown();
+                    };
+
+                    pill.appendChild(label);
+                    pill.appendChild(muteBtn);
+                    pill.appendChild(hangupBtn);
+                    document.body.appendChild(pill);
+                    audioCallPillEl = pill;
+                    return pill;
+                };
+
+                const audioCallShowPill = (fromName) => {
+                    const pill = audioCallEnsurePill();
+                    const label = document.getElementById('audio-call-pill-label');
+                    if (label) label.textContent = `🔊 Panggilan dengan ${fromName}`;
+                    pill.style.display = 'flex';
+                };
+
+                const audioCallHidePill = () => {
+                    if (audioCallPillEl) {
+                        audioCallPillEl.style.display = 'none';
+                    }
+                };
+
+                // Local-only cleanup (does NOT send CloseSession itself -
+                // callers that are ENDING the call locally, like the hangup
+                // button above, send it separately; callers reacting to the
+                // OTHER side already having closed - the CloseSession
+                // whisper/poll handlers below - must not send it back).
+                const audioCallTeardown = () => {
+                    audioCallActiveWithId = null;
+                    audioCallActiveWithName = null;
+                    audioCallMuted = false;
+                    audioCallHidePill();
+                };
+
+                const handleIncomingAudioCall = (e) => {
+                    const now = Date.now();
+                    if (lastRequestFromId === e.fromId && (now - lastRequestAt) < 1500) {
+                        return;
+                    }
+                    lastRequestFromId = e.fromId;
+                    lastRequestAt = now;
+
+                    if (peerConnection) {
+                        peerConnection.close();
+                        peerConnection = null;
+                    }
+
+                    const showPrompt = () => {
+                        if (typeof Swal === 'undefined') {
+                            setTimeout(showPrompt, 100);
+                            return;
+                        }
+
+                        Swal.fire({
+                            title: '📞 Panggilan Masuk',
+                            html: `<strong>${e.fromName}</strong> (Admin/Teacher) ingin berbicara dengan Anda melalui audio.`,
+                            icon: 'info',
+                            showCancelButton: true,
+                            confirmButtonColor: '#10B981',
+                            cancelButtonColor: '#EF4444',
+                            confirmButtonText: 'Terima',
+                            cancelButtonText: 'Tolak',
+                            backdrop: `rgba(0,0,123,0.4)`,
+                        }).then((result) => {
+                            if (!result.isConfirmed) {
+                                whisperAndSignal('AudioCallRejected', e.fromId, { target: e.fromId });
+                                return;
+                            }
+
+                            if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                                Swal.fire({
+                                    title: 'Mikrofon Tidak Tersedia',
+                                    html: 'Panggilan audio membutuhkan koneksi HTTPS. Silakan buka situs ini melalui HTTPS lalu coba lagi.',
+                                    icon: 'error',
+                                });
+                                whisperAndSignal('AudioCallRejected', e.fromId, { target: e.fromId });
+                                return;
+                            }
+
+                            navigator.mediaDevices.getUserMedia({ audio: true })
+                                .then((stream) => {
+                                    localStream = stream;
+                                    peerConnection = new RTCPeerConnection(config);
+
+                                    stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
+
+                                    peerConnection.onicecandidate = (event) => {
+                                        if (event.candidate) {
+                                            whisperAndSignal('IceCandidate', e.fromId, {
+                                                candidate: serializeCandidate(event.candidate),
+                                                target: e.fromId,
+                                            });
+                                        }
+                                    };
+
+                                    peerConnection.ontrack = (event) => {
+                                        let audioEl = document.getElementById('remoteAudioTeacher');
+                                        if (!audioEl) {
+                                            audioEl = document.createElement('audio');
+                                            audioEl.id = 'remoteAudioTeacher';
+                                            audioEl.autoplay = true;
+                                            document.body.appendChild(audioEl);
+                                        }
+                                        if (audioEl.srcObject !== event.streams[0]) {
+                                            audioEl.srcObject = event.streams[0];
+                                        }
+                                    };
+
+                                    audioCallActiveWithId = e.fromId;
+                                    audioCallActiveWithName = e.fromName;
+                                    audioCallShowPill(e.fromName);
+
+                                    // No createOffer here - the student is
+                                    // always the answerer (see this block's
+                                    // docblock); the admin creates the Offer
+                                    // once it receives this signal.
+                                    whisperAndSignal('AudioCallAccepted', e.fromId, { target: e.fromId });
+                                })
+                                .catch((err) => {
+                                    console.error('Audio call mic access failed: ', err);
+                                    Swal.fire({
+                                        title: 'Akses Mikrofon Gagal',
+                                        html: err.message,
+                                        icon: 'error',
+                                    });
+                                    whisperAndSignal('AudioCallRejected', e.fromId, { target: e.fromId });
+                                });
+                        });
+                    };
+
+                    showPrompt();
+                };
+
+                const pollPendingAudioCallRequest = () => {
+                    window.axios.get('{{ route('audio-call.pending-request') }}')
+                        .then((res) => {
+                            if (!res.data || !res.data.pending || !res.data.request) {
+                                return;
+                            }
+
+                            const req = res.data.request;
+                            handleIncomingAudioCall(req);
+
+                            if (req.request_id) {
+                                window.axios.post('{{ route('audio-call.pending-request.ack') }}', {
+                                    request_id: req.request_id,
+                                }).catch(() => {});
+                            }
+                        })
+                        .catch(() => {});
+                };
+
                 const processDeferredRequest = () => {
                     if (!isCurrentTabArmed()) {
                         return;
@@ -603,6 +829,12 @@
                 })
                 .listen('.RemoteScreenRequested', (e) => {
                     handleIncomingRequest(e);
+                })
+                .listenForWhisper('RequestAudioCall', (e) => {
+                    handleIncomingAudioCall(e);
+                })
+                .listen('.RemoteAudioCallRequested', (e) => {
+                    handleIncomingAudioCall(e);
                 })
                 .listenForWhisper('Answer', (e) => {
                     if (!shouldProcessSignal(e.signal_id)) {
@@ -652,12 +884,18 @@
                          peerConnection.close();
                          peerConnection = null;
                      }
+                     // See the matching comment in handleFallbackSignal()'s
+                     // CloseSession branch above - peer-initiated close only
+                     // ever resets local state, never echoes CloseSession back.
+                     audioCallTeardown();
                 });
 
                 pollPendingRequest();
                 pollingTimer = setInterval(pollPendingRequest, 4000);
                 pollPendingSignals();
                 signalPollingTimer = setInterval(pollPendingSignals, 1200);
+                pollPendingAudioCallRequest();
+                audioCallPollingTimer = setInterval(pollPendingAudioCallRequest, 4000);
 
                 window.addEventListener('beforeunload', () => {
                     if (pollingTimer) {
@@ -665,6 +903,15 @@
                     }
                     if (signalPollingTimer) {
                         clearInterval(signalPollingTimer);
+                    }
+                    if (audioCallPollingTimer) {
+                        clearInterval(audioCallPollingTimer);
+                    }
+                    // Closing/navigating away mid-call must never leave the
+                    // admin's side stuck "connected" with no way to know
+                    // the student is gone.
+                    if (audioCallActiveWithId) {
+                        whisperAndSignal('CloseSession', audioCallActiveWithId, { target: audioCallActiveWithId });
                     }
                 });
 

@@ -277,7 +277,10 @@ class FreeLessonController extends Controller
     {
         $title = 'English Expressions (' . ucfirst($level) . ')';
         $levelLower = strtolower($level);
-        $filePath = storage_path("app/{$levelLower}_expressions.json");
+        $filePath = storage_path("app/vocabularies/{$levelLower}_expressions.json");
+        if (!file_exists($filePath)) {
+            $filePath = storage_path("app/{$levelLower}_expressions.json");
+        }
         if (file_exists($filePath)) {
             $expressions = json_decode(file_get_contents($filePath), true);
         } else {
@@ -304,7 +307,10 @@ class FreeLessonController extends Controller
     {
         $title = 'English Idioms (' . ucfirst($level) . ')';
         $levelLower = strtolower($level);
-        $filePath = storage_path("app/{$levelLower}_idioms.json");
+        $filePath = storage_path("app/vocabularies/{$levelLower}_idioms.json");
+        if (!file_exists($filePath)) {
+            $filePath = storage_path("app/{$levelLower}_idioms.json");
+        }
         if (file_exists($filePath)) {
             $idioms = json_decode(file_get_contents($filePath), true);
         } else {
@@ -331,7 +337,10 @@ class FreeLessonController extends Controller
     {
         $title = 'Phrasal Verbs (' . ucfirst($level) . ')';
         $levelLower = strtolower($level);
-        $filePath = storage_path("app/{$levelLower}_phrasal_verbs.json");
+        $filePath = storage_path("app/vocabularies/{$levelLower}_phrasal_verbs.json");
+        if (!file_exists($filePath)) {
+            $filePath = storage_path("app/{$levelLower}_phrasal_verbs.json");
+        }
         $phrasalVerbs = [];
         if (file_exists($filePath)) {
             $phrasalVerbs = json_decode(file_get_contents($filePath), true);

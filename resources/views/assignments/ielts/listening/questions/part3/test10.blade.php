@@ -11,7 +11,7 @@
     <div class="overflow-x-auto">
         <table class="w-full border-collapse border border-gray-300 text-gray-700">
             <thead>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <th class="border border-gray-300 px-5 py-3 text-left font-bold w-1/2">Topic</th>
                     <th class="border border-gray-300 px-5 py-3 text-left font-bold">Information source</th>
                 </tr>
@@ -34,7 +34,7 @@
                     </td>
                 </tr>
                 {{-- Row 2: Q23, Q24 --}}
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="border border-gray-300 px-5 py-4">
                         <div class="flex items-center gap-2 flex-wrap">
                             <span>Views on</span>
@@ -68,7 +68,7 @@
                     </td>
                 </tr>
                 {{-- Row 4: Q27 --}}
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="border border-gray-300 px-5 py-4">
                         <span class="text-gray-600">How to deliver the plan:</span>
                     </td>
@@ -94,7 +94,7 @@
                     </td>
                 </tr>
                 {{-- Row 6: Q29, Q30 --}}
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="border border-gray-300 px-5 py-4">
                         <span class="text-gray-600">Schedule of items due:</span>
                     </td>

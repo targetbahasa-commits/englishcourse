@@ -8,25 +8,25 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden">
         {{-- Header --}}
-        <div class="grid grid-cols-2 bg-gray-100 border-b border-gray-200">
+        <div class="grid grid-cols-2 bg-white border-b border-gray-200">
             <div class="p-3 font-bold italic">Example</div>
             <div class="p-3 font-bold italic">Answer</div>
         </div>
 
         {{-- Name (example) --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 text-gray-600 italic">Name:</div>
             <div class="p-3 text-gray-600 italic">Robert Goddard</div>
         </div>
 
         {{-- Destination --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Destination:</div>
             <div class="p-3 text-gray-700">Melbourne</div>
         </div>
 
         {{-- Q1: First time visited --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">First time visited Melbourne?</div>
             <div class="p-3">
                 <strong>1</strong>
@@ -37,7 +37,7 @@
         </div>
 
         {{-- Q2: Best thing about city --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Best thing about the city:</div>
             <div class="p-3">
                 <strong>2</strong>
@@ -48,7 +48,7 @@
         </div>
 
         {{-- Q3: Favourite attraction --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Favourite attraction:</div>
             <div class="p-3">
                 <strong>3</strong>
@@ -64,7 +64,7 @@
         </div>
 
         {{-- Q4: dining options --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">the destination's dining options:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <strong>4</strong>
@@ -81,7 +81,7 @@
         </div>
 
         {{-- Q5: to destination --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">to destination:</div>
             <div class="p-3 flex items-center gap-1 flex-wrap">
                 <span class="text-gray-700">by</span>
@@ -93,7 +93,7 @@
         </div>
 
         {{-- Q6: Age group --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Age group:</div>
             <div class="p-3">
                 <strong>6</strong>
@@ -104,7 +104,7 @@
         </div>
 
         {{-- Q7: Income level --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Income level:</div>
             <div class="p-3">
                 <strong>7</strong>
@@ -115,7 +115,7 @@
         </div>
 
         {{-- Q8, Q9: Purpose of visit --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Purpose of visit:</div>
             <div class="p-3 space-y-2">
                 <div class="flex items-center gap-2">
@@ -133,7 +133,7 @@
         </div>
 
         {{-- Q9, Occupation --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Occupation:</div>
             <div class="p-3 space-y-2">
                 <div class="flex items-center gap-2">
@@ -151,7 +151,7 @@
         </div>
 
         {{-- Q10: Opinion about accommodation --}}
-        <div class="grid grid-cols-2 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Opinion about accommodation:</div>
             <div class="p-3">
                 <strong>10</strong>

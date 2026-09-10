@@ -11,10 +11,10 @@
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
 
         {{-- Section: Importance of sleep in animals --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Importance of sleep in animals</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Compared to those without food, animals without sleep are more likely to suffer from</span>
                 <strong class="text-blue-600">31</strong>
@@ -23,7 +23,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Sleep is necessary for all animals, whether they are reptiles,</span>
                 <strong class="text-blue-600">32</strong>
@@ -35,7 +35,7 @@
         </div>
 
         {{-- Section: Differences in animals' sleep --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Differences in animals' sleep and reasons for their ways of resting</p>
         </div>
 
@@ -43,7 +43,7 @@
         <div class="border-b border-gray-200 p-3 pl-4">
             <p class="text-gray-600 font-semibold italic">♦ Dolphins</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• swim to the surface when sleeping, because they need to</span>
                 <strong class="text-blue-600">33</strong>
@@ -54,10 +54,10 @@
         </div>
 
         {{-- Birds --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3 pl-4">
+        <div class="border-b border-gray-200 bg-white p-3 pl-4">
             <p class="text-gray-600 font-semibold italic">♦ Birds</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• are constantly</span>
                 <strong class="text-blue-600">34</strong>
@@ -72,10 +72,10 @@
         <div class="border-b border-gray-200 p-3 pl-4">
             <p class="text-gray-600 font-semibold italic">♦ Horses</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <p class="text-gray-700">• do most of their sleeping standing up.</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• do occasionally take short naps lying down. Lying in one position for a long time could well injure a horse, because their</span>
                 <strong class="text-blue-600">35</strong>
@@ -87,10 +87,10 @@
         </div>
 
         {{-- Potential problems --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Potential problems encountering</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Animals can also have</span>
                 <strong class="text-blue-600">36</strong>
@@ -102,10 +102,10 @@
         </div>
 
         {{-- Section: Importance of sleep in humans --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Importance of sleep in humans</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• It helps us to organise our</span>
                 <strong class="text-blue-600">37</strong>
@@ -115,7 +115,7 @@
                 <span>of the day.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• It plays a key role in</span>
                 <strong class="text-blue-600">38</strong>
@@ -127,7 +127,7 @@
         <div class="border-b border-gray-200 p-3 pl-4">
             <p class="text-gray-500 italic text-sm">e.g.</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Because of the similar sleeping pattern to that in humans,</span>
                 <strong class="text-blue-600">39</strong>
@@ -137,7 +137,7 @@
                 <span>are studied in order to increase our knowledge of human physiology.</span>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Scientists choose to study the</span>
                 <strong class="text-blue-600">40</strong>

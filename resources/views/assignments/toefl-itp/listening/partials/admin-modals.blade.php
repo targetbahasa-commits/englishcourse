@@ -101,7 +101,7 @@
 Start translating here..."></textarea>
                 </div>
 
-                <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                <div class="bg-white p-3 rounded-lg border border-yellow-200">
                     <p class="text-xs text-yellow-800">
                         <strong>Note:</strong> Auto-parsing will remove timestamps (<code>00:00:10 --> ...</code>) and keep only the text dialog.
                     </p>
@@ -149,7 +149,7 @@ Start translating here..."></textarea>
                 </div>
 
                 @if($firstAudioFile)
-                    <div class="p-3 bg-blue-50 rounded-lg border border-blue-200 break-words">
+                    <div class="p-3 bg-white rounded-lg border border-blue-200 break-words">
                         <p class="text-sm text-blue-800">
                             <span class="font-semibold">Current file:</span> 
                             {{ basename($firstAudioFile) }}
@@ -229,7 +229,7 @@ Start translating here..."></textarea>
                 <input type="hidden" name="question_id" id="chooseAudioQuestionId" value="">
 
                 {{-- Breadcrumb Navigation --}}
-                <div class="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div class="mb-4 p-3 bg-white rounded-lg border border-gray-200">
                     <div class="flex items-center gap-2 text-sm font-medium flex-wrap">
                         <button type="button" class="text-blue-600 hover:text-blue-800 flex-shrink-0" onclick="audioFileManager.goToRoot(event)">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2.83-2.83a1 1 0 011.41 0L12 12m0 0l5.76-5.76a1 1 0 011.41 0L21 12"></path></svg>
@@ -247,7 +247,7 @@ Start translating here..."></textarea>
                 </div>
 
                 {{-- Selected File Display --}}
-                <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                <div class="p-3 bg-white rounded-lg border border-emerald-200">
                     <p class="text-sm font-medium text-emerald-800">Selected:</p>
                     <p id="audioSelectedFile" class="text-sm text-emerald-700 mt-1 break-words">
                         <span class="italic text-gray-500">None selected</span>
@@ -415,13 +415,13 @@ Start translating here..."></textarea>
                 const isSelected = isFile && fileValue && this.selectedFile === fileValue;
                 
                 if (isFile) {
-                    html += `<div class="flex items-center p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 ${isSelected ? 'bg-blue-100' : ''}" data-action="select-file" data-path="${fileValue}">
+                    html += `<div class="flex items-center p-3 hover:bg-white cursor-pointer border-b border-gray-100 ${isSelected ? 'bg-white' : ''}" data-action="select-file" data-path="${fileValue}">
                         <svg class="w-5 h-5 text-red-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
                         <span class="text-sm text-gray-800 flex-1 break-words pointer-events-none">${name}</span>
                         ${isSelected ? '<svg class="w-5 h-5 text-green-600 ml-2 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>' : ''}
                     </div>`;
                 } else {
-                    html += `<div class="flex items-center p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100" data-action="goto-folder" data-path="${labelPath}">
+                    html += `<div class="flex items-center p-3 hover:bg-white cursor-pointer border-b border-gray-100" data-action="goto-folder" data-path="${labelPath}">
                         <svg class="w-5 h-5 text-yellow-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"></path></svg>
                         <span class="text-sm font-medium text-gray-800 flex-1 pointer-events-none">${name}</span>
                         <svg class="w-4 h-4 text-gray-400 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>

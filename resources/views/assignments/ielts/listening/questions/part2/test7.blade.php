@@ -8,11 +8,7 @@
 
     {{-- Map Image Placeholder --}}
     <div class="mb-8 text-center">
-        <div class="inline-block p-4 border-2 border-dashed border-gray-300 bg-gray-50 rounded-lg w-full max-w-2xl bg-white relative">
-            <p class="text-gray-500 mb-2 font-medium">Map Insert</p>
-            <p class="text-sm text-gray-400 mb-4">Please upload the map image to: <code>public/images/assignments/ielts/listening/part2/test7-map.png</code></p>
-            <img src="{{ asset('images/assignments/ielts/listening/part2/test7-map.png') }}" onerror="this.style.display='none'" class="max-w-full h-auto mx-auto" alt="Map">
-        </div>
+        <div class="p-3 border border-gray-200 bg-white rounded-xl shadow-sm max-w-2xl mx-auto"><img src="{{ asset('images/assignments/ielts/listening/part2/test7-map.png') }}" class="w-full h-auto rounded-lg" alt="Map"></div>
     </div>
 
     <div class="space-y-4 max-w-sm ml-0 mb-12">
@@ -23,7 +19,7 @@
             14 => 'Shopping Mall',
             15 => 'Primary School'
         ] as $q => $label)
-        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 transition-colors">
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-white transition-colors">
             <div class="flex items-center gap-3">
                 <strong class="text-blue-600">{{ $q }}</strong>
                 <span class="text-gray-700">{{ $label }}</span>
@@ -45,7 +41,7 @@
     <p class="mb-4 text-gray-700">What is the improvement of each main point of interest in the area?</p>
     <p class="mb-6 text-gray-700 italic">Choose <strong>FIVE</strong> answers from the box and write the correct letter, <strong>A-G</strong>, next to questions <strong>16-20</strong>.</p>
 
-    <div class="mb-6 bg-gray-50 p-6 rounded-2xl inline-block min-w-[300px]">
+    <div class="mb-6 bg-white p-6 rounded-2xl inline-block min-w-[300px]">
         <div class="space-y-3">
             @foreach([
                 'A' => 'New entrance',
@@ -72,7 +68,7 @@
             19 => 'National History Museum',
             20 => 'Shopping Mall'
         ] as $q => $label)
-        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 transition-colors">
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-white transition-colors">
             <div class="flex items-center gap-3">
                 <strong class="text-blue-600">{{ $q }}</strong>
                 <span class="text-gray-700">{{ $label }}</span>

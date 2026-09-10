@@ -6,7 +6,7 @@
     <p class="mb-6 text-gray-700">Answer the following questions using <strong>NO MORE THAN ONE WORD OR A DATE</strong> for each answer.</p>
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-12">
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-start gap-3 text-gray-700">
                 <strong class="text-blue-600 w-6 shrink-0">31</strong>
                 <div class="flex-1">
@@ -15,7 +15,7 @@
                 </div>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-start gap-3 text-gray-700">
                 <strong class="text-blue-600 w-6 shrink-0">32</strong>
                 <div class="flex-1">
@@ -24,7 +24,7 @@
                 </div>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-start gap-3 text-gray-700">
                 <strong class="text-blue-600 w-6 shrink-0">33</strong>
                 <div class="flex-1">
@@ -40,7 +40,7 @@
     <p class="mb-6 text-gray-700">Answer the following questions about Hallstatt culture using <strong>NO MORE THAN THREE WORDS OR A NUMBER</strong> for each answer.</p>
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-12">
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-start gap-3 text-gray-700">
                 <strong class="text-blue-600 w-6 shrink-0">34</strong>
                 <div class="flex-1">
@@ -49,7 +49,7 @@
                 </div>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-start gap-3 text-gray-700">
                 <strong class="text-blue-600 w-6 shrink-0">35</strong>
                 <div class="flex-1">
@@ -58,7 +58,7 @@
                 </div>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-start gap-3 text-gray-700">
                 <strong class="text-blue-600 w-6 shrink-0">36</strong>
                 <div class="flex-1">
@@ -67,7 +67,7 @@
                 </div>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-start gap-3 text-gray-700">
                 <strong class="text-blue-600 w-6 shrink-0">37</strong>
                 <div class="flex-1">
@@ -83,7 +83,7 @@
     <p class="mb-6 text-gray-700">Complete the following sentences about La Téne culture using <strong>NO MORE THAN THREE WORDS</strong> for each gap.</p>
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Celtic</span>
                 <strong class="text-blue-600">38</strong>
@@ -93,7 +93,7 @@
                 <span>took place during the La Téne period.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>After 400 B.C., the La Téne culture</span>
                 <strong class="text-blue-600">39</strong>
@@ -102,7 +102,7 @@
                 </span>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Weapons and everyday items can be found in La Tene</span>
                 <strong class="text-blue-600">40</strong>

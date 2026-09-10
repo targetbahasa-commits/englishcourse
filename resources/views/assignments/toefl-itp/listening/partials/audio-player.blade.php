@@ -25,10 +25,10 @@
                     }
                 @endphp
                 <div class="flex items-center gap-1 flex-shrink-0">
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusAudio ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusAudio ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
                         <span class="font-bold">{{ $statusAudio ? '✓' : '✕' }}</span> Audio
                     </span>
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusTranscript ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusTranscript ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
                         <span class="font-bold">{{ $statusTranscript ? '✓' : '✕' }}</span> SRT
                     </span>
                 </div>
@@ -45,7 +45,7 @@
             <div class="flex-1 min-w-[220px] flex items-center gap-1.5 md:gap-3 max-w-3xl">
                 {{-- Backward 10s Button --}}
                 <button type="button" onclick="skipAudio(-10)" 
-                        class="p-1.5 md:p-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Mundur 10 detik">
+                        class="p-1.5 md:p-2 bg-white hover:bg-white border border-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Mundur 10 detik">
                     <svg class="w-4 h-4 md:w-5 md:h-5 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path>
                     </svg>
@@ -71,7 +71,7 @@
                     </div>
                     
                     {{-- Seekable Progress Bar --}}
-                    <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="progressContainer">
+                    <div class="relative h-2 bg-white rounded-full cursor-pointer group" id="progressContainer">
                         <div id="progressBar" class="absolute h-full bg-gradient-to-r from-indigo-600 to-violet-600 rounded-full transition-all" style="width: 0%"></div>
                         <div id="progressHandle" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
                     </div>
@@ -79,7 +79,7 @@
 
                 {{-- Forward 10s Button --}}
                 <button type="button" onclick="skipAudio(10)" 
-                        class="p-1.5 md:p-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Maju 10 detik">
+                        class="p-1.5 md:p-2 bg-white hover:bg-white border border-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Maju 10 detik">
                     <svg class="w-4 h-4 md:w-5 md:h-5 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"></path>
                     </svg>
@@ -87,7 +87,7 @@
 
                 {{-- Transcript Toggle Button --}}
                 <button type="button" onclick="toggleTranscriptDrawer()" 
-                        class="p-1.5 md:p-2 bg-yellow-100 border border-yellow-300 hover:bg-yellow-200 rounded-lg transition-colors flex-shrink-0 flex items-center gap-1.5 md:gap-2 group shadow-sm" title="Lihat/Tutup Transkrip">
+                        class="p-1.5 md:p-2 bg-white border border-yellow-300 hover:bg-yellow-200 rounded-lg transition-colors flex-shrink-0 flex items-center gap-1.5 md:gap-2 group shadow-sm" title="Lihat/Tutup Transkrip">
                     <svg class="w-4 h-4 md:w-5 md:h-5 text-yellow-800 group-hover:text-yellow-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
@@ -137,7 +137,7 @@
 
                     <button type="button"
                             onclick="document.getElementById('chooseAudioModal').classList.remove('hidden'); document.getElementById('chooseAudioModal').classList.add('flex'); setTimeout(function(){ if(typeof audioFileManager !== 'undefined') audioFileManager.init(); }, 100);"
-                            class="px-2 py-1.5 md:px-3 md:py-2 bg-white text-indigo-800 font-semibold rounded-lg hover:bg-indigo-50 border border-indigo-200 transition-colors flex items-center gap-1.5 md:gap-2 shadow-md relative z-10 text-xs md:text-sm">
+                            class="px-2 py-1.5 md:px-3 md:py-2 bg-white text-indigo-800 font-semibold rounded-lg hover:bg-white border border-indigo-200 transition-colors flex items-center gap-1.5 md:gap-2 shadow-md relative z-10 text-xs md:text-sm">
                         <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path>
                         </svg>
@@ -154,7 +154,7 @@
     <div class="flex items-center justify-end mb-2 gap-2">
         {{-- Layout Toggle Button --}}
         <button onclick="toggleTranscriptLayout()" 
-            class="px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-sm font-medium text-indigo-700 hover:bg-indigo-50 transition-colors flex items-center gap-1"
+            class="px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-sm font-medium text-indigo-700 hover:bg-white transition-colors flex items-center gap-1"
                 title="Toggle layout">
             <svg id="layoutIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"></path>
@@ -164,7 +164,7 @@
         
         {{-- Position Toggle Button (appears only in vertical mode) --}}
         <button id="positionToggleBtn" onclick="toggleTranscriptPosition()" 
-            class="hidden px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-sm font-medium text-indigo-700 hover:bg-indigo-50 transition-colors items-center gap-1"
+            class="hidden px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-sm font-medium text-indigo-700 hover:bg-white transition-colors items-center gap-1"
                 title="Toggle position">
             <svg id="positionIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -215,7 +215,7 @@
                                 @foreach($jsonEn as $block)
                                     <button
                                         type="button"
-                                        class="transcript-segment block w-full rounded-xl px-3 py-2 text-left transition-all duration-200 hover:bg-amber-100/80"
+                                        class="transcript-segment block w-full rounded-xl px-3 py-2 text-left transition-all duration-200 hover:bg-white"
                                         data-transcript-group="en"
                                         data-start="{{ $block['start'] }}"
                                         data-end="{{ $block['end'] }}"
@@ -229,7 +229,7 @@
                                 @foreach($plainEnSegments as $segment)
                                     <button
                                         type="button"
-                                        class="transcript-segment block w-full rounded-xl px-3 py-2 text-left transition-all duration-200 hover:bg-amber-100/80"
+                                        class="transcript-segment block w-full rounded-xl px-3 py-2 text-left transition-all duration-200 hover:bg-white"
                                         data-transcript-group="en"
                                         data-approx="true"
                                         onclick="jumpToTranscriptSegment(this)">
@@ -272,7 +272,7 @@
                                 @foreach($jsonId as $block)
                                     <button
                                         type="button"
-                                        class="transcript-segment block w-full rounded-xl px-3 py-2 text-left transition-all duration-200 hover:bg-amber-100/80"
+                                        class="transcript-segment block w-full rounded-xl px-3 py-2 text-left transition-all duration-200 hover:bg-white"
                                         data-transcript-group="id"
                                         data-start="{{ $block['start'] }}"
                                         data-end="{{ $block['end'] }}"
@@ -286,7 +286,7 @@
                                 @foreach($plainIdSegments as $segment)
                                     <button
                                         type="button"
-                                        class="transcript-segment block w-full rounded-xl px-3 py-2 text-left transition-all duration-200 hover:bg-amber-100/80"
+                                        class="transcript-segment block w-full rounded-xl px-3 py-2 text-left transition-all duration-200 hover:bg-white"
                                         data-transcript-group="id"
                                         data-approx="true"
                                         onclick="jumpToTranscriptSegment(this)">

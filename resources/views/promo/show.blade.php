@@ -330,7 +330,7 @@
                             @endif
 
                             <div
-                                class="border-2 border-gray-800 p-5 font-bold italic bg-white shadow-sm mt-5 mb-5 md:mx-4 space-y-4">
+                                class="border border-gray-800 p-5 font-bold italic bg-slate-100 shadow-sm mt-5 mb-5 md:mx-4 space-y-4 text-gray-900">
                                 @if(isset($test->prompt))
                                     {!! nl2br(e($test->prompt)) !!}
                                 @elseif(isset($test->questions) && is_array($test->questions))
@@ -609,6 +609,11 @@
                             class="mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg shrink-0">
                             <p class="font-bold">Error</p>
                             <p x-text="errorMessage"></p>
+                            <button type="button" x-show="retryableSubmissionId" @click="retrySubmission()"
+                                :disabled="isSubmitting"
+                                class="mt-3 px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 disabled:opacity-50">
+                                <span x-text="isSubmitting ? 'Mengirim ulang...' : 'Coba Kirim Ulang'"></span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1184,6 +1189,11 @@
                                         class="mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
                                         <p class="font-bold">Error</p>
                                         <p x-text="errorMessage"></p>
+                                        <button type="button" x-show="retryableSubmissionId" @click="retrySubmission()"
+                                            :disabled="isSubmitting"
+                                            class="mt-3 px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 disabled:opacity-50">
+                                            <span x-text="isSubmitting ? 'Mengirim ulang...' : 'Coba Kirim Ulang'"></span>
+                                        </button>
                                     </div>
                                 </form>
                             </div> <!-- END PRACTICE AREA WRAPPER -->
@@ -1447,6 +1457,7 @@
                 isSubmitting: false,
                 feedback: null,
                 errorMessage: null,
+                retryableSubmissionId: null,
 
                 isCollocationsOpen: false,
                 isIdiomsOpen: false,
@@ -2084,26 +2095,69 @@
                             throw new Error(data.message || 'Server error occurred');
                         }
 
-                        // Set submitted timestamp
-                        const stored = localStorage.getItem(this.storageKey);
-                        let storageData = stored ? JSON.parse(stored) : {};
-                        storageData.submittedAt = Date.now();
-                        localStorage.setItem(this.storageKey, JSON.stringify(storageData));
-
-                        // Redirect to the new result page
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const bParam = urlParams.get('b');
-                        let redirectUrl = `/promo/test/${this.type}/${this.id}/ielts-academic-evaluation/${data.submission_id}`;
-                        if (bParam) {
-                            redirectUrl += `?b=${bParam}`;
+                        if (!data.success) {
+                            // Answer + lead were already saved server-side even though AI
+                            // evaluation failed. Offer a retry instead of losing the answer.
+                            this.errorMessage = data.message || 'Terjadi kesalahan saat evaluasi AI.';
+                            this.retryableSubmissionId = data.retryable ? data.submission_id : null;
+                            return;
                         }
-                        window.location.href = redirectUrl;
+
+                        this.finishSubmission(data.submission_id);
 
                     } catch (error) {
                         this.errorMessage = error.message;
                     } finally {
                         this.isSubmitting = false;
                     }
+                },
+
+                async retrySubmission() {
+                    if (!this.retryableSubmissionId) return;
+                    this.isSubmitting = true;
+                    this.errorMessage = null;
+
+                    try {
+                        const response = await fetch(`/promo/test/${this.type}/${this.id}/submit/retry/${this.retryableSubmissionId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok || !data.success) {
+                            // Still failed - keep the retry button available (submission stays saved).
+                            this.errorMessage = data.message || 'Sistem AI masih bermasalah. Silakan coba lagi.';
+                            return;
+                        }
+
+                        this.finishSubmission(data.submission_id);
+
+                    } catch (error) {
+                        this.errorMessage = error.message;
+                    } finally {
+                        this.isSubmitting = false;
+                    }
+                },
+
+                finishSubmission(submissionId) {
+                    // Set submitted timestamp
+                    const stored = localStorage.getItem(this.storageKey);
+                    let storageData = stored ? JSON.parse(stored) : {};
+                    storageData.submittedAt = Date.now();
+                    localStorage.setItem(this.storageKey, JSON.stringify(storageData));
+
+                    // Redirect to the result page
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const bParam = urlParams.get('b');
+                    let redirectUrl = `/promo/test/${this.type}/${this.id}/ielts-academic-evaluation/${submissionId}`;
+                    if (bParam) {
+                        redirectUrl += `?b=${bParam}`;
+                    }
+                    window.location.href = redirectUrl;
                 }
             }
         }

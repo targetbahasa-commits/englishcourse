@@ -98,6 +98,9 @@
 <script>
 window.addEventListener('view-post', (e) => {
     const appEl = document.querySelector('[x-data]');
-    if (appEl && appEl.__x) appEl.__x.$data.viewPost(e.detail);
+    if (appEl && window.Alpine) {
+        const data = Alpine.$data(appEl);
+        if (data && data.viewPost) data.viewPost(e.detail);
+    }
 });
 </script>

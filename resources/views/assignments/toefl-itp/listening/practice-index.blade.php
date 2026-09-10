@@ -56,7 +56,7 @@
                         @endphp
                         <div class="bg-white rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col hover:-translate-y-1 transform">
                             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 relative">
-                                <span class="absolute top-4 right-4 px-3 py-1 backdrop-blur-sm rounded-full text-xs font-bold uppercase tracking-wide border border-blue-100/40 text-white {{ $isAvailable ? 'bg-blue-100/25' : 'bg-slate-200/25' }}">
+                                <span class="absolute top-4 right-4 px-3 py-1 backdrop-blur-sm rounded-full text-xs font-bold uppercase tracking-wide border border-blue-100/40 text-white {{ $isAvailable ? 'bg-white' : 'bg-slate-200/25' }}">
                                     {{ $isAvailable ? 'AVAILABLE' : 'COMING SOON' }}
                                 </span>
 
@@ -71,7 +71,7 @@
                                 <p class="mt-3 text-white/85 text-sm">{{ $part['description'] }}</p>
                             </div>
 
-                            <div class="p-6 flex flex-col flex-1 bg-blue-50/40 justify-end">
+                            <div class="p-6 flex flex-col flex-1 bg-white justify-end">
                                 @if($isAvailable && ($part['key'] ?? '') === 'A')
                                     <a href="{{ route('assignments.toefl-itp.listening.practice.part-a') }}"
                                        class="block w-full py-3 text-center rounded-xl font-bold shadow bg-red-500 text-white hover:bg-red-600 transition">
@@ -111,7 +111,7 @@
 
                             <div class="p-6 flex flex-col flex-1 bg-white justify-between">
                                 <div>
-                                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm mb-4 bg-sky-100 text-sky-700 border border-sky-200">
+                                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm mb-4 bg-white text-sky-700 border border-sky-200">
                                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h8m-8 4h6M5 5h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"></path>
                                         </svg>

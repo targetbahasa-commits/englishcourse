@@ -525,7 +525,7 @@
                                     <div class="flex flex-wrap items-center gap-2 mt-1">
                                         {{-- Copy Code Button --}}
                                         <div x-data="{ copied: false }">
-                                            <button @click="navigator.clipboard.writeText('{{ $test['active_batch']->code }}'); copied = true; setTimeout(() => copied = false, 2500)"
+                                            <button @click="(window.copyToClipboard ? window.copyToClipboard('{{ $test['active_batch']->code }}') : Promise.reject()).then(() => { copied = true; setTimeout(() => copied = false, 2500); })"
                                                 class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 border
                                                     {{ $test['active_batch']->code_access_enabled
                                                         ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600 shadow-sm shadow-emerald-100'
@@ -541,7 +541,7 @@
                                             $testShareUrl = url('/online-test');
                                         @endphp
                                         <div x-data="{ copiedLink: false }">
-                                            <button @click="navigator.clipboard.writeText('{{ $testShareUrl }}'); copiedLink = true; setTimeout(() => copiedLink = false, 2500)"
+                                            <button @click="(window.copyToClipboard ? window.copyToClipboard('{{ $testShareUrl }}') : Promise.reject()).then(() => { copiedLink = true; setTimeout(() => copiedLink = false, 2500); })"
                                                 class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 border bg-white hover:bg-indigo-50 text-indigo-600 border-indigo-200">
                                                 <svg x-show="!copiedLink" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                                                 <svg x-show="copiedLink" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>

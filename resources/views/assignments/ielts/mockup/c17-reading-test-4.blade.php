@@ -19,7 +19,7 @@
         input[type=text].ans:focus { border-bottom-color: #3b82f6; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -39,7 +39,7 @@
                     <p class="text-sm text-gray-500">Cambridge {{ $edition ?? 17 }} Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? 17, 'id' => $testId ?? 4]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? 17, 'id' => $testId ?? 4]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back
             </a>
@@ -252,7 +252,7 @@
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar">
+        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
 
             {{-- PASSAGE 1 QUESTIONS --}}
             <div>
@@ -266,7 +266,7 @@
                         <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 1?</p>
                         <p class="text-sm italic text-gray-700 mb-4">In boxes 1–6 on your answer sheet, write</p>
 
-                        <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                        <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                             <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                                 <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                                 <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -277,7 +277,7 @@
                         <div class="overflow-x-auto mt-2">
                             <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                                 <thead>
-                                    <tr class="bg-gray-50 border-b border-gray-200">
+                                    <tr class="bg-white border-b border-gray-200">
                                         <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                         <th class="p-3 font-bold text-gray-600">Statement</th>
                                         <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -292,7 +292,7 @@
                                         [5, 'The Malagasy mouse-eared bat is more common than other indigenous bat species in Madagascar.'],
                                         [6, 'Bats may feed on paddy swarming caterpillars and grass webworms.'],
                                     ] as [$num, $statement])
-                                    <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                    <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                         <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                         <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                         <td class="py-3 px-3 text-center">
@@ -322,14 +322,14 @@
                         <p class="text-sm text-gray-800 mb-2">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                         <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 7–13 on your answer sheet.</p>
 
-                        <div class="border border-gray-400 rounded-lg text-sm bg-gray-50 overflow-hidden">
+                        <div class="border border-gray-400 rounded-lg text-sm bg-white overflow-hidden">
                             {{-- Table title --}}
                             <div class="bg-gray-200/50 border-b border-gray-400 text-center py-3 font-bold text-base text-gray-800">
                                 The study carried out by Rocha's team
                             </div>
                             {{-- Aim row --}}
                             <div class="flex border-b border-gray-400">
-                                <div class="font-bold border-r border-gray-400 px-4 py-3 bg-gray-100" style="width:170px; flex-shrink:0;">Aim</div>
+                                <div class="font-bold border-r border-gray-400 px-4 py-3 bg-white" style="width:170px; flex-shrink:0;">Aim</div>
                                 <div class="px-4 py-3">
                                     <ul class="list-disc ml-5 space-y-1 text-gray-800">
                                         <li>to investigate the feeding habits of bats in farmland near the Ranomafana National Park</li>
@@ -338,7 +338,7 @@
                             </div>
                             {{-- Method row --}}
                             <div class="flex border-b border-gray-400">
-                                <div class="font-bold border-r border-gray-400 px-4 py-3 bg-gray-100" style="width:170px; flex-shrink:0;">Method</div>
+                                <div class="font-bold border-r border-gray-400 px-4 py-3 bg-white" style="width:170px; flex-shrink:0;">Method</div>
                                 <div class="px-4 py-3">
                                     <ul class="list-disc ml-5 space-y-2 text-gray-800">
                                         <li>ultrasonic recording to identify favourite feeding spots</li>
@@ -348,7 +348,7 @@
                             </div>
                             {{-- Findings row --}}
                             <div class="flex border-b border-gray-400">
-                                <div class="font-bold border-r border-gray-400 px-4 py-3 bg-gray-100" style="width:170px; flex-shrink:0;">Findings</div>
+                                <div class="font-bold border-r border-gray-400 px-4 py-3 bg-white" style="width:170px; flex-shrink:0;">Findings</div>
                                 <div class="px-4 py-3">
                                     <ul class="list-disc ml-5 space-y-2 mb-2 text-gray-800">
                                         <li>
@@ -372,7 +372,7 @@
                             </div>
                             {{-- Recommendation row --}}
                             <div class="flex">
-                                <div class="font-bold border-r border-gray-400 px-4 py-3 bg-gray-100" style="width:170px; flex-shrink:0;">Recommendation</div>
+                                <div class="font-bold border-r border-gray-400 px-4 py-3 bg-white" style="width:170px; flex-shrink:0;">Recommendation</div>
                                 <div class="px-4 py-3">
                                     <ul class="list-disc ml-5 space-y-1 text-gray-800">
                                         <li>farmers should provide special <strong>13</strong> <input type="text" name="q13" class="border-b border-gray-500 outline-none px-1 w-28 bg-transparent text-sm placeholder-gray-400" placeholder="Answer"> to support the bat population</li>
@@ -399,7 +399,7 @@
                         <div class="overflow-x-auto mt-2">
                             <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                                 <thead>
-                                    <tr class="bg-gray-50 border-b border-gray-200">
+                                    <tr class="bg-white border-b border-gray-200">
                                         <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                         <th class="p-3 font-bold text-gray-600">Information</th>
                                         <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -413,7 +413,7 @@
                                         [17, 'a reference to a region being particularly suited to research into the link between education and economic growth'],
                                         [18, 'examples of the items included in a list of personal possessions'],
                                     ] as [$num, $statement])
-                                    <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                    <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                         <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                         <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                         <td class="py-3 px-3 text-center">
@@ -443,7 +443,7 @@
                         <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD</strong> from the passage for each answer.</p>
                         <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 19–22 on your answer sheet.</p>
 
-                        <div class="border-2 border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                        <div class="border-2 border-gray-400 rounded-lg p-5 bg-white text-sm">
                             <h4 class="text-base font-bold text-center mb-4">Demographic reconstruction of two German communities</h4>
                             <p class="mb-4 text-gray-800 leading-loose">
                                 The database that Ogilvie and her team has compiled sheds light on the lives of a range of individuals, as well as those of their
@@ -476,7 +476,7 @@
                                 ['D', 'England is a good example of how high literacy rates helped a country industrialise.'],
                                 ['E', 'Economic growth can help to improve literacy rates.'],
                             ] as [$letter, $text])
-                            <label class="flex items-start gap-3 cursor-pointer group p-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-colors">
+                            <label class="flex items-start gap-3 cursor-pointer group p-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-white transition-colors">
                                 <div class="relative flex items-center justify-center mt-0.5">
                                     <input type="checkbox" name="q23_24[]" value="{{ $letter }}" class="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 checked:bg-blue-600 checked:border-blue-600 cursor-pointer transition-all">
                                     <svg class="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -505,7 +505,7 @@
                                 ['D', 'They opposed practices that threatened their control over a trade.'],
                                 ['E', 'They predominantly consisted of wealthy merchants.'],
                             ] as [$letter, $text])
-                            <label class="flex items-start gap-3 cursor-pointer group p-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-colors">
+                            <label class="flex items-start gap-3 cursor-pointer group p-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-white transition-colors">
                                 <div class="relative flex items-center justify-center mt-0.5">
                                     <input type="checkbox" name="q25_26[]" value="{{ $letter }}" class="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 checked:bg-blue-600 checked:border-blue-600 cursor-pointer transition-all">
                                     <svg class="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -536,7 +536,7 @@
                         <div class="overflow-x-auto mt-2">
                             <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                                 <thead>
-                                    <tr class="bg-gray-50 border-b border-gray-200">
+                                    <tr class="bg-white border-b border-gray-200">
                                         <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                         <th class="p-3 font-bold text-gray-600">Information</th>
                                         <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -551,7 +551,7 @@
                                         [31, "an outline of Gareyev's priorities"],
                                         [32, 'a reason why the last part of a game may be difficult'],
                                     ] as [$num, $statement])
-                                    <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                    <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                         <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                         <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                         <td class="py-3 px-3 text-center">
@@ -580,7 +580,7 @@
                         <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 3?</p>
                         <p class="text-sm italic text-gray-700 mb-4">In boxes 33–36 on your answer sheet, write</p>
 
-                        <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                        <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                             <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                                 <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                                 <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -591,7 +591,7 @@
                         <div class="overflow-x-auto mt-2">
                             <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                                 <thead>
-                                    <tr class="bg-gray-50 border-b border-gray-200">
+                                    <tr class="bg-white border-b border-gray-200">
                                         <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                         <th class="p-3 font-bold text-gray-600">Statement</th>
                                         <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -604,7 +604,7 @@
                                         [35, 'UCLA is the first university to carry out research into blindfold chess players.'],
                                         [36, 'Good chess players are likely to be able to play blindfold chess.'],
                                     ] as [$num, $statement])
-                                    <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                    <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                         <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                         <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                         <td class="py-3 px-3 text-center">
@@ -634,7 +634,7 @@
                         <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                         <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 37–40 on your answer sheet.</p>
 
-                        <div class="border-2 border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                        <div class="border-2 border-gray-400 rounded-lg p-5 bg-white text-sm">
                             <h4 class="text-base font-bold text-center mb-4">How the research was carried out</h4>
                             <p class="mb-4 text-gray-800 leading-loose">
                                 The researchers started by testing Gareyev's

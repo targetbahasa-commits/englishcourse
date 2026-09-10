@@ -48,7 +48,7 @@
 
     {{-- Diagram image placeholder with overlay labels --}}
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
-        <div class="bg-gray-50 p-4">
+        <div class="bg-white p-4">
             {{-- Diagram description context --}}
             <div class="flex justify-center mb-6">
                 <div class="relative inline-block">

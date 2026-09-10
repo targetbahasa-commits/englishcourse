@@ -80,7 +80,7 @@
             'G' => 'You must be over 18 to buy alcohol.',
             'H' => 'Many people use illegal drugs.'
         ] as $letter => $option)
-        <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit mcma-option-17-20">
+        <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit mcma-option-17-20">
             <input type="checkbox" name="answers[17_20][]" value="{{ $letter }}"
                 class="w-4 h-4 text-blue-600 border-gray-400 rounded focus:ring-blue-500 cursor-pointer mcma-checkbox-17-20"
                 onchange="handleMcmaLimit('mcma-checkbox-17-20', 4)">

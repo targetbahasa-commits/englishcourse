@@ -19,7 +19,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 <div class="flex min-h-screen">
@@ -37,7 +37,7 @@
                         <p class="text-gray-600 mt-1">Cambridge {{ $edition }} Test {{ $testId }}</p>
                     </div>
                 </div>
-                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId ?? 1]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId ?? 1]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
@@ -112,7 +112,7 @@
                         <div class="overflow-x-auto">
                             <table class="w-full border-collapse border border-gray-400">
                                 <thead>
-                                    <tr class="bg-gray-100">
+                                    <tr class="bg-white">
                                         <th class="border border-gray-400 p-3 text-left font-bold">Location</th>
                                         <th class="border border-gray-400 p-3 text-left font-bold">Job title</th>
                                         <th class="border border-gray-400 p-3 text-left font-bold">Responsibilities include</th>
@@ -199,7 +199,7 @@
                                 ['D', 'The land is of little agricultural value.'],
                                 ['E', 'It will be convenient for workers.'],
                             ] as [$letter, $text])
-                            <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                            <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded">
                                 <input type="checkbox" name="q11_12[]" value="{{ $letter }}" class="w-4 h-4 text-purple-600 rounded checkbox-limit">
                                 <span class="font-bold">{{ $letter }}</span>
                                 <span>{{ $text }}</span>
@@ -222,7 +222,7 @@
                                 ['D', 'the low cost of all the accommodation'],
                                 ['E', 'the rural location'],
                             ] as [$letter, $text])
-                            <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                            <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded">
                                 <input type="checkbox" name="q13_14[]" value="{{ $letter }}" class="w-4 h-4 text-purple-600 rounded checkbox-limit">
                                 <span class="font-bold">{{ $letter }}</span>
                                 <span>{{ $text }}</span>
@@ -318,7 +318,7 @@
                             <p class="mb-3"><span class="font-bold">{{ $num }}</span> {{ $question }}</p>
                             <div class="space-y-2 ml-6">
                                 @foreach($options as [$letter, $text])
-                                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-1.5 rounded">
+                                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-1.5 rounded">
                                     <input type="radio" name="q{{ $num }}" value="{{ $letter }}" class="w-4 h-4 text-purple-600">
                                     <span class="font-bold">{{ $letter }}</span>
                                     <span>{{ $text }}</span>
@@ -343,7 +343,7 @@
                                 ['D', 'the speed at which the volcanic ash cloud spread'],
                                 ['E', 'how people ignored the warning signs'],
                             ] as [$letter, $text])
-                            <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                            <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded">
                                 <input type="checkbox" name="q25_26[]" value="{{ $letter }}" class="w-4 h-4 text-purple-600 rounded checkbox-limit">
                                 <span class="font-bold">{{ $letter }}</span>
                                 <span>{{ $text }}</span>

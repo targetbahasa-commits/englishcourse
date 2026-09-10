@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
 class NewRegistrationAdminMail extends Mailable implements ShouldQueue
@@ -23,6 +24,14 @@ class NewRegistrationAdminMail extends Mailable implements ShouldQueue
         return new Envelope(
             subject: 'Pendaftaran Baru: ' . $this->lead->full_name,
         );
+    }
+
+    public function headers(): Headers
+    {
+        return new Headers(text: [
+            'X-Related-Type' => 'registration_lead',
+            'X-Related-Id' => (string) $this->lead->id,
+        ]);
     }
 
     public function content(): Content

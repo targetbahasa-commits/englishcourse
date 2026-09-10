@@ -7,6 +7,8 @@ interface GrammarWritingRepository
     // Question queries
     public function getQuestionsByMeetingExcludingParagraph(int $meetingNumber): array;
 
+    public function getAllQuestionsByMeeting(int $meetingNumber): array;
+
     public function getQuestionsByMeetingWithNullSection(int $meetingNumber): array;
 
     public function getQuestionsByMeetingAndSection(int $meetingNumber, string $section): array;

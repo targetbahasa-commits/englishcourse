@@ -3,6 +3,7 @@
 namespace App\Infrastructure\Admin;
 
 use App\Domain\Admin\Repositories\AdminStudentRepository;
+use App\Models\FinalTestResult;
 use App\Models\FreeTestResult;
 use App\Models\GrammarQuestion;
 use App\Models\MeetingScore;
@@ -19,7 +20,10 @@ class EloquentAdminStudentRepository implements AdminStudentRepository
 {
     public function listStudents(array $filters, int $perPage): mixed
     {
-        $query = User::where('role', 'student')->with(['program', 'teacher', 'enrollments.program']);
+        $query = User::where('role', 'student')
+            ->latest('created_at')
+            ->latest('id')
+            ->with(['program', 'teacher', 'enrollments.program']);
 
         if (!empty($filters['search'])) {
             $query->where(function ($q) use ($filters) {
@@ -35,9 +39,13 @@ class EloquentAdminStudentRepository implements AdminStudentRepository
 
         if (!empty($filters['missing'])) {
             if ($filters['missing'] === 'whatsapp') {
-                $query->whereNull('phone_number')->orWhere('phone_number', '');
+                $query->where(function ($q) {
+                    $q->whereNull('phone_number')->orWhere('phone_number', '');
+                });
             } elseif ($filters['missing'] === 'referral') {
-                $query->whereNull('referral_code')->orWhere('referral_code', '');
+                $query->where(function ($q) {
+                    $q->whereNull('referral_code')->orWhere('referral_code', '');
+                });
             } elseif ($filters['missing'] === 'both') {
                 $query->where(function ($q) {
                     $q->whereNull('phone_number')->orWhere('phone_number', '');
@@ -125,6 +133,11 @@ class EloquentAdminStudentRepository implements AdminStudentRepository
         return FreeTestResult::where('user_id', $userId)->latest()->first();
     }
 
+    public function getLatestFinalTest(int $userId): mixed
+    {
+        return FinalTestResult::where('user_id', $userId)->latest()->first();
+    }
+
     public function assignTeacher(mixed $student, ?int $teacherId): string
     {
         if ($teacherId !== null) {
@@ -182,10 +195,25 @@ class EloquentAdminStudentRepository implements AdminStudentRepository
 
     public function getLatestSessionForStudent(int $userId): mixed
     {
-        return DB::table('sessions')
-            ->where('user_id', $userId)
-            ->orderByDesc('last_activity')
-            ->first();
+        try {
+            return DB::table('sessions')
+                ->where('user_id', $userId)
+                ->orderByDesc('last_activity')
+                ->first();
+        } catch (\Throwable $e) {
+            // The shared host intermittently fails to connect for this
+            // query (SQLSTATE[HY000] [2002] "Operation not permitted").
+            // Treat it the same as "no session row" rather than letting it
+            // 500 the admin Live Preview polling endpoint - the caller
+            // (ManageStudents::generateCurrentAssignmentData) has its own
+            // short-TTL grace fallback for this case.
+            \Illuminate\Support\Facades\Log::warning('getLatestSessionForStudent: sessions query failed', [
+                'user_id' => $userId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     public function getLatestReportedListeningScore(int $userId): mixed

@@ -28,7 +28,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50" x-data="speakingMockup()" x-cloak>
+<body class="font-sans antialiased bg-white" x-data="speakingMockup()" x-cloak>
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -37,7 +37,7 @@
     <!-- Start Test Overlay -->
     <div x-show="!hasStarted" class="fixed inset-0 z-50 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center transition-opacity" x-transition>
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl transform transition-all scale-100">
-            <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div class="w-20 h-20 bg-white text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                 </svg>
@@ -70,7 +70,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <span x-text="formattedGlobalTime">15:00</span>
                 </div>
-                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? '19', 'id' => $testId ?? '3']) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? '19', 'id' => $testId ?? '3']) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
                     Exit
                 </a>
             </div>
@@ -78,7 +78,7 @@
     </div>
 
     {{-- Full screen Layout --}}
-    <div class="flex-1 min-h-[80vh] flex flex-col items-center justify-center relative bg-gray-50">
+    <div class="flex-1 min-h-[80vh] flex flex-col items-center justify-center relative bg-white">
         <div class="bg-white border-l border-gray-200 flex flex-col items-center justify-center p-8 relative shadow-lg rounded-2xl">
             
             <div class="absolute top-8 left-8">
@@ -93,7 +93,7 @@
                 <p class="text-gray-500 mb-12" x-text="currentPart === 1 && introState <= 2 ? 'Listen to the examiner and answer when the mic turns red.' : 'Click record, listen to the prompt, and speak your answer. Once finished, proceed to the next part.'"></p>
 
                 <!-- Visualizer / Status -->
-                <div class="h-32 flex items-center justify-center w-full mb-8 bg-gray-50 rounded-2xl border border-gray-100">
+                <div class="h-32 flex items-center justify-center w-full mb-8 bg-white rounded-2xl border border-gray-100">
                     <template x-if="!recordings[currentPart] && !isRecording && !isPreparing && !isReadingPrompt">
                         <div class="flex flex-col items-center p-4">
                             <svg class="w-8 h-8 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -198,7 +198,7 @@
                 <div class="flex justify-between items-center w-full pt-8 border-t border-gray-100">
                     <button @click="prevPart()" 
                             :class="{'opacity-0 pointer-events-none': currentPart === 1}"
-                            class="px-6 py-2.5 rounded-xl text-gray-500 font-medium hover:bg-gray-100 transition-colors flex items-center gap-2">
+                            class="px-6 py-2.5 rounded-xl text-gray-500 font-medium hover:bg-white transition-colors flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                         Part <span x-text="currentPart - 1"></span>
                     </button>

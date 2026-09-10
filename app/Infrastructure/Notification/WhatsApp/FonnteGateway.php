@@ -18,7 +18,10 @@ class FonnteGateway implements WhatsAppGateway
     public function sendOtp(string $phoneNumber, string $otpCode): bool
     {
         if (empty($this->token)) {
-            Log::warning('Fonnte token is missing. OTP not sent to '.$phoneNumber);
+            // production's LOG_LEVEL=error filters out warning() entirely,
+            // which silently hid missing-config failures for a long time -
+            // error() is the level that actually gets written.
+            Log::error('Fonnte token is missing. OTP not sent to '.$phoneNumber);
             return env('APP_ENV') === 'local';
         }
 
@@ -49,7 +52,7 @@ class FonnteGateway implements WhatsAppGateway
     public function sendMessage(string $phoneNumber, string $message, ?string $file = null): bool
     {
         if (empty($this->token)) {
-            Log::warning('Fonnte token is missing. Message not sent to '.$phoneNumber);
+            Log::error('Fonnte token is missing. Message not sent to '.$phoneNumber);
             return env('APP_ENV') === 'local';
         }
 
@@ -76,7 +79,12 @@ class FonnteGateway implements WhatsAppGateway
                 'Authorization' => $this->token,
             ])->post('https://api.fonnte.com/send', $payload);
 
-            return $response->successful();
+            if ($response->successful()) {
+                return true;
+            }
+
+            Log::error('Fonnte Message Error', ['status' => $response->status(), 'response' => $response->json()]);
+            return false;
         } catch (\Exception $e) {
             Log::error('Fonnte Exception: '.$e->getMessage());
             return false;

@@ -19,7 +19,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
     
@@ -40,7 +40,7 @@
                              <p class="text-gray-600 mt-1">Cambridge {{ $edition ?? 20 }} Listening Practice</p>
                         </div>
                     </div>
-                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? 20, 'id' => $testId ?? 1]) }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2 border border-gray-200">
+                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? 20, 'id' => $testId ?? 1]) }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-white font-medium transition flex items-center gap-2 border border-gray-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         Back
                     </a>
@@ -64,7 +64,7 @@
                         <div class="border border-gray-300">
                             <table class="w-full text-left border-collapse">
                                 <thead>
-                                    <tr class="bg-indigo-50/50">
+                                    <tr class="bg-white">
                                         <th class="border border-gray-300 p-4 font-bold text-center w-1/4">Name of restaurant</th>
                                         <th class="border border-gray-300 p-4 font-bold text-center w-1/4">Location</th>
                                         <th class="border border-gray-300 p-4 font-bold text-center w-1/4">Reason for recommendation</th>

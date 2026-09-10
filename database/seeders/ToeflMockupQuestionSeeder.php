@@ -1155,6 +1155,6 @@ class ToeflMockupQuestionSeeder extends Seeder
             'audio_file' => null,
         ]);
 
-        echo "TOEFL Mock Up Test - Section 1 Listening (50 questions: Part A 30, Part B 7, Part C 13) and Section 2 Structure (30 questions) seeded successfully!\n";
+        echo "TOEFL Mock Up Test - Section 1 Listening (50 questions: Part A 30, Part B 7, Part C 13) and Section 2 Structure (30 questions) seeded successfully! ";
     }
 }

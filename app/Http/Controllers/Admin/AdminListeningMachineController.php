@@ -19,7 +19,7 @@ class AdminListeningMachineController extends Controller
     // ─────────────────────────────────────────────────────────────────────────
 
     private const GROQ_URL  = 'https://api.groq.com/openai/v1/chat/completions';
-    private const GROQ_MODEL = 'llama-3.3-70b-versatile';
+    private const GROQ_MODEL = 'openai/gpt-oss-120b';
 
     private const LEVELS  = ['Band 4', 'Band 5', 'Band 6', 'Band 7', 'Band 8', 'Band 9', 'TOEFL 400', 'TOEFL 500', 'TOEFL 600'];
     private const ACCENTS = ['UK', 'US', 'AUS', 'NZ'];

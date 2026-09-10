@@ -24,14 +24,7 @@
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
     <div class="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-        <div class="flex justify-between items-center mb-8">
-            <a href="{{ $backRoute ?? route('assignments.grammar-writing') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
-    <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-    </svg>
-    Back
-</a>
-        </div>
+        <x-grammar-meeting-actions :meetingNumber="6" track="fast-track" />
 
         <h1 class="text-3xl font-bold text-center text-purple-600 mb-8">To Infinitive & Gerund (Pertemuan 6)</h1>
         <p class="text-center text-gray-600 mb-8">Translate kalimat berikut ke dalam bahasa Inggris.</p>
@@ -54,7 +47,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('assignments.grammar-writing.meeting6.submit') }}">
+        <form method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting6.submit'), PHP_URL_PATH) }}">
             @csrf
             
             <!-- Section 1: Verb Patterns -->
@@ -118,7 +111,7 @@
                                         class="w-8 h-8 flex items-center justify-center bg-yellow-100 hover:bg-yellow-200 text-yellow-600 rounded-lg transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
-                                    <form action="{{ route('admin.grammar.question.destroy', $data['db_id']) }}" method="POST" onsubmit="return confirm('Hapus soal ini?');" class="inline">
+                                    <form action="{{ parse_url(route('admin.grammar.question.destroy', $data['db_id']), PHP_URL_PATH) }}" method="POST" onsubmit="return confirm('Hapus soal ini?');" class="inline">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="w-8 h-8 flex items-center justify-center bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
@@ -220,7 +213,7 @@
                                         class="w-8 h-8 flex items-center justify-center bg-yellow-100 hover:bg-yellow-200 text-yellow-600 rounded-lg transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
-                                    <form action="{{ route('admin.grammar.question.destroy', $data['db_id']) }}" method="POST" onsubmit="return confirm('Hapus soal ini?');" class="inline">
+                                    <form action="{{ parse_url(route('admin.grammar.question.destroy', $data['db_id']), PHP_URL_PATH) }}" method="POST" onsubmit="return confirm('Hapus soal ini?');" class="inline">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="w-8 h-8 flex items-center justify-center bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
@@ -322,7 +315,7 @@
                                         class="w-8 h-8 flex items-center justify-center bg-yellow-100 hover:bg-yellow-200 text-yellow-600 rounded-lg transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
-                                    <form action="{{ route('admin.grammar.question.destroy', $data['db_id']) }}" method="POST" onsubmit="return confirm('Hapus soal ini?');" class="inline">
+                                    <form action="{{ parse_url(route('admin.grammar.question.destroy', $data['db_id']), PHP_URL_PATH) }}" method="POST" onsubmit="return confirm('Hapus soal ini?');" class="inline">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="w-8 h-8 flex items-center justify-center bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
@@ -376,7 +369,7 @@
                             class="w-10 h-10 flex items-center justify-center bg-yellow-100 hover:bg-yellow-200 text-yellow-600 rounded-lg transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         </button>
-                        <form action="{{ route('admin.grammar.question.destroy', $paragraph['db_id']) }}" method="POST" onsubmit="return confirm('Hapus paragraf ini?');" class="inline">
+                        <form action="{{ parse_url(route('admin.grammar.question.destroy', $paragraph['db_id']), PHP_URL_PATH) }}" method="POST" onsubmit="return confirm('Hapus paragraf ini?');" class="inline">
                             @csrf @method('DELETE')
                             <button type="submit" class="w-10 h-10 flex items-center justify-center bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
@@ -454,7 +447,7 @@
         </form>
         
         @if($submitted)
-            <form method="POST" action="{{ route('assignments.grammar-writing.meeting6.reset') }}" class="mt-4">
+            <form method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting6.reset'), PHP_URL_PATH) }}" class="mt-4">
                 @csrf
                 <button type="submit" class="w-full py-4 bg-gray-500 text-white rounded-xl font-bold text-lg hover:bg-gray-600 transition-colors shadow-lg">
                     Coba Lagi
@@ -464,283 +457,6 @@
     </div>
 
     <!-- Verb Patterns Floating Button -->
-    <div x-data="{ verbPatternsOpen: false }" class="fixed bottom-24 right-8 z-40 flex flex-col gap-3">
-        <!-- Verb Patterns Button -->
-        <button @click="verbPatternsOpen = true"
-                class="bg-sky-400 hover:bg-sky-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2">
-            Verb Patterns
-        </button>
-
-        <!-- Verb Patterns Modal Backdrop -->
-        <div x-show="verbPatternsOpen"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-             style="display: none;">
-          
-            <!-- Modal Content -->
-            <div @click.outside="verbPatternsOpen = false"
-                 class="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[80vh] flex flex-col overflow-hidden">
-              
-                <!-- Header -->
-                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-sky-50">
-                    <h3 class="text-xl font-bold text-gray-800">Verb Patterns Guide</h3>
-                    <button @click="verbPatternsOpen = false" class="text-gray-400 hover:text-gray-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-
-                <!-- Content Container -->
-                <div class="overflow-y-auto px-6 pb-6" style="max-height: 60vh;">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
-                        <!-- Verb + Gerund Section -->
-                        <div>
-                            <h2 class="text-lg font-bold text-white bg-green-500 p-3 rounded-t-lg text-center shadow-md">Verb + Gerund (V-ing)</h2>
-                            <div class="border border-green-200 rounded-b-lg overflow-hidden shadow-sm">
-                                <table class="w-full text-sm text-left">
-                                    <thead class="bg-green-50 text-green-800 font-semibold border-b border-green-200">
-                                        <tr>
-                                            <th class="p-3">Verb</th>
-                                            <th class="p-3">Arti</th>
-                                            <th class="p-3">Example</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-green-100">
-                                        @php
-                                            $gerunds = [
-                                                ['admit', 'Mengakui', 'She admitted <strong class="text-green-600">stealing</strong> money.'],
-                                                ['advise', 'Menyarankan', 'Doctor advised <strong class="text-green-600">resting</strong>.'],
-                                                ['allow', 'Mengizinkan', 'Rules don\'t allow <strong class="text-green-600">smoking</strong>.'],
-                                                ['anticipate', 'Mengantisipasi', 'We anticipate <strong class="text-green-600">meeting</strong> you.'],
-                                                ['appreciate', 'Menghargai', 'I appreciate <strong class="text-green-600">helping</strong> me.'],
-                                                ['avoid', 'Menghindari', 'They avoid <strong class="text-green-600">eating</strong> junk.'],
-                                                ['consider', 'Mempertimbangkan', 'He considers <strong class="text-green-600">moving</strong>.'],
-                                                ['can\'t stand', 'Tidak tahan', 'I can\'t stand <strong class="text-green-600">waiting</strong>.'],
-                                                ['celebrate', 'Merayakan', 'They celebrated <strong class="text-green-600">winning</strong>.'],
-                                                ['confess', 'Mengaku', 'He confessed <strong class="text-green-600">cheating</strong>.'],
-                                                ['delay', 'Menunda', 'Don\'t delay <strong class="text-green-600">starting</strong>.'],
-                                                ['deny', 'Menyangkal', 'He denied <strong class="text-green-600">breaking</strong> it.'],
-                                                ['discuss', 'Membahas', 'We discussed <strong class="text-green-600">going</strong> there.'],
-                                                ['dislike', 'Tidak suka', 'She dislikes <strong class="text-green-600">cooking</strong>.'],
-                                                ['enjoy', 'Menikmati', 'I enjoy <strong class="text-green-600">reading</strong>.'],
-                                                ['escape', 'Melarikan diri', 'He escaped <strong class="text-green-600">being caught</strong>.'],
-                                                ['finish', 'Menyelesaikan', 'She finished <strong class="text-green-600">working</strong>.'],
-                                                ['imagine', 'Membayangkan', 'Imagine <strong class="text-green-600">living</strong> there.'],
-                                                ['involve', 'Melibatkan', 'Job involves <strong class="text-green-600">travelling</strong>.'],
-                                                ['justify', 'Membenarkan', 'Can\'t justify <strong class="text-green-600">spending</strong> more.'],
-                                                ['keep', 'Terus/Menjaga', 'Keep <strong class="text-green-600">learning</strong>!'],
-                                                ['mention', 'Menyebutkan', 'He mentioned <strong class="text-green-600">helping</strong>.'],
-                                                ['mind', 'Keberatan', 'Mind <strong class="text-green-600">opening</strong> the door?'],
-                                                ['miss', 'Merindukan', 'I miss <strong class="text-green-600">talking</strong> to you.'],
-                                                ['postpone', 'Menunda', 'Postponed <strong class="text-green-600">meeting</strong> us.'],
-                                                ['practice', 'Berlatih', 'Practices <strong class="text-green-600">speaking</strong>.'],
-                                                ['prevent', 'Mencegah', 'Rain prevented <strong class="text-green-600">playing</strong>.'],
-                                                ['quit', 'Berhenti', 'She quit <strong class="text-green-600">smoking</strong>.'],
-                                                ['recall', 'Mengingat', 'I don\'t recall <strong class="text-green-600">seeing</strong> him.'],
-                                                ['recommend', 'Merekomendasikan', 'Recommend <strong class="text-green-600">studying</strong>.'],
-                                                ['resist', 'Menahan diri', 'Can\'t resist <strong class="text-green-600">eating</strong>.'],
-                                                ['resume', 'Melanjutkan', 'We resumed <strong class="text-green-600">working</strong>.'],
-                                                ['risk', 'Berisiko', 'Risk <strong class="text-green-600">losing</strong> all.'],
-                                                ['suggest', 'Menyarankan', 'Suggest <strong class="text-green-600">taking</strong> break.'],
-                                                ['tolerate', 'Mentolerir', 'Don\'t tolerate <strong class="text-green-600">cheating</strong>.'],
-                                                ['understand', 'Mengerti', 'Understand <strong class="text-green-600">not going</strong>.']
-                                            ];
-                                        @endphp
-                                        @foreach($gerunds as $row)
-                                            <tr class="odd:bg-white even:bg-green-50 hover:bg-green-100 transition-colors">
-                                                <td class="p-2 font-medium text-gray-800 border-r border-green-100">{{ $row[0] }}</td>
-                                                <td class="p-2 text-gray-600 border-r border-green-100">{{ $row[1] }}</td>
-                                                <td class="p-2 text-gray-700">{!! $row[2] !!}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Verb + To-Infinitive Section -->
-                        <div>
-                            <h2 class="text-lg font-bold text-white bg-blue-500 p-3 rounded-t-lg text-center shadow-md">Verb + To-Infinitive (to + V1)</h2>
-                            <div class="border border-blue-200 rounded-b-lg overflow-hidden shadow-sm">
-                                <table class="w-full text-sm text-left">
-                                    <thead class="bg-blue-50 text-blue-800 font-semibold border-b border-blue-200">
-                                        <tr>
-                                            <th class="p-3">Verb</th>
-                                            <th class="p-3">Arti</th>
-                                            <th class="p-3">Example</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-blue-100">
-                                        @php
-                                            $infinitives = [
-                                                ['agree', 'Setuju', 'They agreed <strong class="text-blue-600">to cooperate</strong>.'],
-                                                ['aim', 'Bertujuan', 'We aim <strong class="text-blue-600">to finish</strong> early.'],
-                                                ['allow', 'Mengizinkan', 'Rules allow us <strong class="text-blue-600">to enter</strong>.'],
-                                                ['appear', 'Tampak', 'He appears <strong class="text-blue-600">to be</strong> tired.'],
-                                                ['arrange', 'Mengatur', 'We arranged <strong class="text-blue-600">to meet</strong>.'],
-                                                ['ask', 'Meminta', 'I asked him <strong class="text-blue-600">to stay</strong>.'],
-                                                ['attempt', 'Mencoba', 'He attempted <strong class="text-blue-600">to escape</strong>.'],
-                                                ['cause', 'Menyebabkan', 'Rain caused us <strong class="text-blue-600">to delay</strong>.'],
-                                                ['choose', 'Memilih', 'She chose <strong class="text-blue-600">to stay</strong> home.'],
-                                                ['claim', 'Mengklaim', 'He claims <strong class="text-blue-600">to know</strong> her.'],
-                                                ['convince', 'Meyakinkan', 'I convinced him <strong class="text-blue-600">to join</strong>.'],
-                                                ['decide', 'Memutuskan', 'She decided <strong class="text-blue-600">to leave</strong>.'],
-                                                ['deserve', 'Pantas', 'You deserve <strong class="text-blue-600">to win</strong>.'],
-                                                ['desire', 'Menginginkan', 'I desire <strong class="text-blue-600">to know</strong> more.'],
-                                                ['enable', 'Memungkinkan', 'This enables us <strong class="text-blue-600">to work</strong> faster.'],
-                                                ['expect', 'Mengharapkan', 'I expect <strong class="text-blue-600">to receive</strong> it.'],
-                                                ['fail', 'Gagal', 'He failed <strong class="text-blue-600">to pass</strong>.'],
-                                                ['forget', 'Lupa', 'She forgot <strong class="text-blue-600">to lock</strong> it.'],
-                                                ['hope', 'Berharap', 'We hope <strong class="text-blue-600">to win</strong>.'],
-                                                ['instruct', 'Menginstruksikan', 'Teacher instructed us <strong class="text-blue-600">to read</strong>.'],
-                                                ['intend', 'Berniat', 'I intend <strong class="text-blue-600">to start</strong>.'],
-                                                ['know (how)', 'Tahu (cara)', 'I know <strong class="text-blue-600">how to drive</strong>.'],
-                                                ['learn', 'Belajar', 'I am learning <strong class="text-blue-600">to drive</strong>.'],
-                                                ['learn (how)', 'Belajar (cara)', 'Learn <strong class="text-blue-600">how to swim</strong>.'],
-                                                ['manage', 'Berhasil', 'She managed <strong class="text-blue-600">to finish</strong>.'],
-                                                ['need', 'Perlu', 'You need <strong class="text-blue-600">to study</strong>.'],
-                                                ['offer', 'Menawarkan', 'He offered <strong class="text-blue-600">to help</strong>.'],
-                                                ['permit', 'Mengizinkan', 'Law permits us <strong class="text-blue-600">to vote</strong>.'],
-                                                ['persuade', 'Membujuk', 'She persuaded me <strong class="text-blue-600">to go</strong>.'],
-                                                ['plan', 'Berencana', 'They plan <strong class="text-blue-600">to build</strong> it.'],
-                                                ['prepare', 'Bersiap', 'We prepared <strong class="text-blue-600">to leave</strong>.'],
-                                                ['pretend', 'Pura-pura', 'He pretended <strong class="text-blue-600">to sleep</strong>.'],
-                                                ['promise', 'Berjanji', 'She promised <strong class="text-blue-600">to call</strong>.'],
-                                                ['refuse', 'Menolak', 'She refused <strong class="text-blue-600">to answer</strong>.'],
-                                                ['require', 'Memerlukan', 'Job requires you <strong class="text-blue-600">to travel</strong>.'],
-                                                ['seem', 'Tampaknya', 'They seem <strong class="text-blue-600">to agree</strong>.'],
-                                                ['swear', 'Bersumpah', 'He swore <strong class="text-blue-600">to tell</strong> truth.'],
-                                                ['teach (how)', 'Mengajar (cara)', 'She taught me <strong class="text-blue-600">how to cook</strong>.'],
-                                                ['tell', 'Memberitahu', 'I told him <strong class="text-blue-600">to wait</strong>.'],
-                                                ['tend', 'Cenderung', 'Prices tend <strong class="text-blue-600">to rise</strong>.'],
-                                                ['use', 'Menggunakan', 'We use tools <strong class="text-blue-600">to build</strong>.'],
-                                                ['vote', 'Memilih (voting)', 'They voted <strong class="text-blue-600">to accept</strong> it.'],
-                                                ['want', 'Ingin', 'I want <strong class="text-blue-600">to go</strong> home.'],
-                                                ['warn', 'Memperingatkan', 'I warned him <strong class="text-blue-600">to be</strong> careful.'],
-                                                ['wish', 'Berharap', 'I wish <strong class="text-blue-600">to speak</strong>.'],
-                                                ['would like', 'Ingin', 'I would like <strong class="text-blue-600">to order</strong>.']
-                                            ];
-                                        @endphp
-                                        @foreach($infinitives as $row)
-                                            <tr class="odd:bg-white even:bg-blue-50 hover:bg-blue-100 transition-colors">
-                                                <td class="p-2 font-medium text-gray-800 border-r border-blue-100">{{ $row[0] }}</td>
-                                                <td class="p-2 text-gray-600 border-r border-blue-100">{{ $row[1] }}</td>
-                                                <td class="p-2 text-gray-700">{!! $row[2] !!}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Complex Ditransitive Section -->
-                    <div class="mt-8">
-                        <h2 class="text-lg font-bold text-white bg-purple-500 p-3 rounded-t-lg text-center shadow-md">Complex Ditransitive Verbs</h2>
-                        <div class="border border-purple-200 rounded-b-lg overflow-hidden shadow-sm">
-                            <table class="w-full text-sm text-left">
-                                <thead class="bg-purple-50 text-purple-800 font-semibold border-b border-purple-200">
-                                    <tr>
-                                        <th class="p-3">Verb</th>
-                                        <th class="p-3">Arti</th>
-                                        <th class="p-3">Example</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-purple-100">
-                                    @php
-                                        $complex = [
-                                            ['Call', 'Memanggil/Menyebut', 'They called him a liar.'],
-                                            ['Consider', 'Menganggap', 'I consider him reliable.'],
-                                            ['Elect', 'Memilih (jabatan)', 'We elected her leader.'],
-                                            ['Find', 'Menemukan (keadaan)', 'I found the book boring.'],
-                                            ['Keep', 'Menjaga (kondisi)', 'Please keep the door closed.'],
-                                            ['Make', 'Membuat (menjadi)', 'The news made me sad.'],
-                                            ['Name', 'Menamai', 'They named the baby Leo.'],
-                                            ['Appoint', 'Menunjuk (jabatan)', 'The committee appointed her chair.'],
-                                            ['Declare', 'Menyatakan', 'The judge declared him guilty.'],
-                                            ['Paint', 'Mewarnai', 'She painted the wall blue.'],
-                                            ['Leave', 'Meninggalkan (kondisi)', 'Don\'t leave the lights on.'],
-                                            ['Believe', 'Percaya (menjadi)', 'I believe her innocent.'],
-                                        ];
-                                    @endphp
-                                    @foreach($complex as $row)
-                                        <tr class="odd:bg-white even:bg-purple-50 hover:bg-purple-100 transition-colors">
-                                            <td class="p-2 font-medium text-gray-800 border-r border-purple-100">{{ $row[0] }}</td>
-                                            <td class="p-2 text-gray-600 border-r border-purple-100">{{ $row[1] }}</td>
-                                            <td class="p-2 text-gray-700 italic">{{ $row[2] }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Footer Note -->
-                <div class="p-4 bg-sky-50 border-t border-sky-100 text-center">
-                    <p class="text-sm text-gray-700 font-medium">
-                        💡 Gunakan tabel ini untuk menentukan apakah verb diikuti oleh Gerund atau To-Infinitive
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <x-irregular-verbs-button />
-
-    <!-- Tenses Chart Button -->
-    <div x-data="{ openTenses: false }" class="fixed bottom-40 right-8 z-50">
-       <!-- Floating Button -->
-       <button @click="openTenses = true"
-               class="bg-cyan-400 hover:bg-cyan-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2">
-           Tenses
-       </button>
-
-       <!-- Modal Backdrop -->
-       <div x-show="openTenses"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-            style="display: none;">
-          
-           <!-- Modal Content -->
-           <div @click.outside="openTenses = false"
-                class="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
-              
-               <!-- Header -->
-               <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-cyan-50">
-                   <h3 class="text-xl font-bold text-gray-800">Tenses Chart</h3>
-                   <button @click="openTenses = false" class="text-gray-400 hover:text-gray-600">
-                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                   </button>
-               </div>
-
-               <!-- Image Container -->
-               <div class="overflow-y-auto p-6" style="max-height: 75vh;">
-                   <img src="{{ asset('images/materials/grammar/tenses-chart.png') }}" 
-                        alt="Tenses Chart" 
-                        class="w-full h-auto rounded-lg shadow-md">
-               </div>
-
-               <!-- Footer Note -->
-               <div class="p-4 bg-cyan-50 border-t border-cyan-100 text-center">
-                   <p class="text-sm text-gray-700 font-medium">
-                       💡 Gunakan chart ini sebagai panduan untuk menentukan tenses yang tepat
-                   </p>
-               </div>
-           </div>
-       </div>
-    </div>
-    
-    
     <!-- Auto-Save Script -->
 
     <!-- INLINE AUTO-SAVE SCRIPT -->
@@ -888,13 +604,13 @@
 
         async syncDraftToServer(form) {
             if (!form) {
-                return;
+                return false;
             }
 
             const action = form.getAttribute('action') || '';
             const match = action.match(/\/assignments\/grammar-writing\/meeting(\d+)/);
             if (!match) {
-                return;
+                return false;
             }
 
             const meetingNumber = match[1];
@@ -942,8 +658,10 @@
                     body: JSON.stringify(payload),
                     keepalive: true,
                 });
+                return true;
             } catch (e) {
                 console.error('Failed to sync draft to server:', e);
+                return false;
             }
         },
 
@@ -1006,7 +724,7 @@
             if (!indicator) {
                 indicator = document.createElement('div');
                 indicator.id = 'auto-save-indicator';
-                indicator.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+                indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
                 indicator.style.transition = 'opacity 0.3s';
                 indicator.innerHTML = '✓ Tersimpan otomatis';
                 document.body.appendChild(indicator);
@@ -1043,11 +761,63 @@
 
     // Make AutoSave available globally
     window.AutoSave = AutoSave;
+    AutoSave.showSaveErrorIndicator = function () {
+        const indicator = document.createElement('div');
+        indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+        indicator.style.transition = 'opacity 0.3s';
+        indicator.innerHTML = '✗ Gagal menyimpan, coba lagi';
+        document.body.appendChild(indicator);
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+            setTimeout(() => indicator.remove(), 300);
+        }, 3000);
+    };
+
+    AutoSave.manualSave = async function () {
+        const form = document.querySelector('form[action*="/assignments/grammar-writing/meeting"][method="POST"]');
+        if (!form) {
+            return;
+        }
+
+        const btn = document.getElementById('manual-save-btn');
+        if (btn) {
+            btn.dataset.originalText = btn.dataset.originalText || btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Menyimpan...';
+        }
+
+        try {
+            const inputs = form.querySelectorAll('input[type="text"], textarea');
+            const answers = {};
+            inputs.forEach((input) => {
+                if (input.name && input.value) {
+                    answers[input.name] = input.value;
+                }
+            });
+            localStorage.setItem(this.storageKey, JSON.stringify(answers));
+        } catch (e) {
+            console.error('[ManualSave] Failed to update localStorage:', e);
+        }
+
+        const ok = await this.syncDraftToServer(form);
+
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.originalText;
+        }
+
+        if (ok) {
+            this.showSaveIndicator();
+        } else {
+            this.showSaveErrorIndicator();
+        }
+    };
+
 
     // Initialize auto-save for meeting 6
     document.addEventListener('DOMContentLoaded', function() {
         const userId = {{ Auth::id() ?? 'null' }};
-        if (userId) {
+        if (userId && !window.location.search.includes('live_preview_for')) {
             AutoSave.init('6', userId);
         }
     });
@@ -1094,7 +864,7 @@
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6" @click.outside="isOpen = false">
             
             <!-- ADD/EDIT QUESTION FORM -->
-            <form :action="mode === 'edit_question' ? '/admin/grammar/question/' + qId : '/admin/grammar/question'" method="POST">
+            <form :action="mode === 'edit_question' ? '/admin/assignments/grammar-writing/questions/' + qId : '/admin/assignments/grammar-writing/questions'" method="POST">
                 @csrf
                 <template x-if="mode === 'edit_question'">
                     @method('PUT')
@@ -1124,6 +894,34 @@
     </div>
 
 
+
     <x-live-drawing />
+
+    {{-- Consolidated Floating Helper Buttons (hidden during admin Live
+         Preview - these are student-only interactive tools, not relevant
+         to the admin's read-only observation view) --}}
+    @if(!request()->filled('live_preview_for'))
+    <div class="fixed bottom-4 right-8 z-50 flex flex-col gap-2 items-end">
+        <x-dictionary-button />
+        <x-conjunction-button />
+        <x-preposition-button />
+        <x-pronouns-button />
+        <x-verb-patterns-button />
+        <x-modal-button />
+        <x-tenses-button />
+        <x-irregular-verbs-button />
+    </div>
+    @endif
+
+    @if(!$submitted)
+        <div class="fixed bottom-4 z-50" style="left: 50%; transform: translateX(-50%);">
+            <button type="button" id="manual-save-btn" onclick="AutoSave.manualSave()"
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold shadow-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3M8 7h8"></path></svg>
+                Save
+            </button>
+        </div>
+    @endif
+
 </body>
 </html>

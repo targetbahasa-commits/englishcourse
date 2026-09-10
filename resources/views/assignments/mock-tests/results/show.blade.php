@@ -81,7 +81,7 @@
                 <p class="mt-1 text-sm text-slate-500">Saved from the assignment mock test flow and ready to be extended for IELTS or PTE later.</p>
             </div>
             <div class="flex flex-wrap gap-3">
-                <a href="{{ route('assignments.toefl-itp.mockup.package', ['package' => $result->package_number]) }}" class="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
+                <a href="{{ route('assignments.toefl-itp.mockup.package', ['package' => $result->package_number]) }}" class="inline-flex items-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-white">
                     Reopen Mock Test
                 </a>
                 @if(auth()->check() && auth()->user()->isAdmin())

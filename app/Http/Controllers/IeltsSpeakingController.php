@@ -515,7 +515,7 @@ class IeltsSpeakingController extends Controller
                     'explanation' => '(Saran) ' . $data[1]
                 ];
                 $count++;
-                if ($count >= 5) {
+                if ($count >= 15) {
                     break;
                 }
             }
@@ -523,7 +523,7 @@ class IeltsSpeakingController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'improvements' => array_slice($improvements, 0, 5)
+            'improvements' => array_slice($improvements, 0, 15)
         ]);
     }
 

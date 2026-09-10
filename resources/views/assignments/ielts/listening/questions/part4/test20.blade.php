@@ -11,13 +11,13 @@
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
 
         {{-- Case study --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Case study – TCP Technologies:</p>
         </div>
         <div class="border-b border-gray-200 p-4">
             <p class="text-gray-700">• Manager: Manjeet Khanna</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Main target: to create a</span>
                 <strong class="text-blue-600">31</strong>
@@ -29,10 +29,10 @@
         </div>
 
         {{-- Grading for staff --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Grading for staff:</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Every month grades are published on an</span>
                 <strong class="text-blue-600">32</strong>
@@ -41,10 +41,10 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <p class="text-gray-700">• The cultural openness increased the quantity of incoming contracted opportunities.</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• The cultural openness improved the level of</span>
                 <strong class="text-blue-600">33</strong>
@@ -54,7 +54,7 @@
                 <span>of the company.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• The increased rate of staff satisfaction has led to growth of 32% in the</span>
                 <strong class="text-blue-600">34</strong>
@@ -65,13 +65,13 @@
         </div>
 
         {{-- Recent interview --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Recent interview:</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <p class="text-gray-700">• A company is not one entity comprised of components, but a living organism composed of cells.</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Manjeet's motto is</span>
                 <strong class="text-blue-600">35</strong>
@@ -82,13 +82,13 @@
         </div>
 
         {{-- Benefits --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Benefits of management style:</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <p class="text-gray-700">• The rate of staff turnover has been reduced.</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• A</span>
                 <strong class="text-blue-600">36</strong>
@@ -98,7 +98,7 @@
                 <span>can be from any other company.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Grades are not used for</span>
                 <strong class="text-blue-600">37</strong>
@@ -109,13 +109,13 @@
         </div>
 
         {{-- Features --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Features of managing style:</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <p class="text-gray-700">• Personally, the manager wrote emails to respond to the complaints.</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• The complaint form known as a</span>
                 <strong class="text-blue-600">38</strong>
@@ -125,7 +125,7 @@
                 <span>has access to all employees online.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• The manager can receive any complaints concerning air conditioning, food quality and</span>
                 <strong class="text-blue-600">39</strong>
@@ -135,7 +135,7 @@
                 <span>entitlement.</span>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• A</span>
                 <strong class="text-blue-600">40</strong>

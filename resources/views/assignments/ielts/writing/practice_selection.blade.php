@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', ($meeting->title ?? 'Pilihan Latihan') . ' - IELTS Writing')
+
 @section('content')
 <div class="container mx-auto px-4 py-8" x-data="{
     showModal: false,
@@ -39,7 +41,7 @@
     <div class="mb-8">
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
-                <div class="p-3 bg-blue-100 text-blue-600 rounded-2xl shadow-lg">
+                <div class="p-3 bg-white text-blue-600 rounded-2xl shadow-lg">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
@@ -88,21 +90,21 @@
         @foreach($practices as $practice)
             <div class="group relative overflow-hidden bg-white rounded-2xl shadow-md border border-gray-100 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl flex flex-col h-full">
                 <!-- Card Background Decoration -->
-                <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-12 -mt-12 transition-transform group-hover:scale-110"></div>
+                <div class="absolute top-0 right-0 w-24 h-24 bg-white rounded-bl-full -mr-12 -mt-12 transition-transform group-hover:scale-110"></div>
                 
                 <!-- Main Content Link -->
                 <a href="{{ route('assignments.ielts-academic.writing.meeting', ['task' => 2, 'id' => $practice->id]) }}" class="block p-6 flex-1 relative z-10">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                            <div class="w-10 h-10 bg-white text-blue-600 rounded-lg flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
                                 <span class="font-bold text-sm">{{ $loop->iteration }}</span>
                             </div>
-                            <span class="text-xs font-semibold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-1 rounded">Practice</span>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-blue-600 bg-white px-2 py-1 rounded">Practice</span>
                         </div>
                         
                         <!-- Admin Meeting Number Badge -->
                         @if(Auth::check() && Auth::user()->role === 'admin')
-                        <span class="text-xs font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded" title="Meeting ID">#{{ $practice->meeting_number }}</span>
+                        <span class="text-xs font-mono text-gray-400 bg-white px-1.5 py-0.5 rounded" title="Meeting ID">#{{ $practice->meeting_number }}</span>
                         @endif
                     </div>
                     
@@ -122,7 +124,7 @@
 
                     @if(Auth::check() && Auth::user()->role === 'admin')
                     <div class="flex items-center gap-2">
-                         <button @click.prevent="openEdit({{ $practice }})" class="p-1.5 text-yellow-600 hover:bg-yellow-50 rounded transition-colors" title="Edit">
+                         <button @click.prevent="openEdit({{ $practice }})" class="p-1.5 text-yellow-600 hover:bg-white rounded transition-colors" title="Edit">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         </button>
                         <form id="delete-form-{{ $practice->id }}" action="{{ route('assignments.ielts.writing.destroy', $practice->id) }}" method="POST" class="inline">
@@ -139,7 +141,7 @@
         @endforeach
 
         @if($practices->isEmpty())
-            <div class="col-span-full text-center py-12 bg-gray-50 rounded-2xl border border-gray-200 border-dashed">
+            <div class="col-span-full text-center py-12 bg-white rounded-2xl border border-gray-200 border-dashed">
                 <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                 </svg>
@@ -198,7 +200,7 @@
                     </div>
 
                     <div class="mt-8 flex justify-end gap-3">
-                        <button type="button" @click="showModal = false" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Cancel</button>
+                        <button type="button" @click="showModal = false" class="px-4 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-200">Cancel</button>
                         <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">Save Topic</button>
                     </div>
                 </form>

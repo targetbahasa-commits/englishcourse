@@ -11,10 +11,10 @@
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
 
         {{-- Section: Reasons for nervousness --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Reasons for nervousness</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Lecturers often feel more</span>
                 <strong class="text-blue-600">31</strong>
@@ -24,7 +24,7 @@
                 <span>if the speech is important.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Many think that the ability to make a good public speaking is</span>
                 <strong class="text-blue-600">32</strong>
@@ -36,13 +36,13 @@
         </div>
 
         {{-- Section: How to prepare a quality speech --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Speech preparation guide</p>
         </div>
         <div class="border-b border-gray-200 p-2 pl-4">
             <p class="text-gray-600 italic text-sm">How to prepare a quality speech</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• The audience will only remember the</span>
                 <strong class="text-blue-600">33</strong>
@@ -52,7 +52,7 @@
                 <span>sentence of a speech.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Ensure that your speech is</span>
                 <strong class="text-blue-600">34</strong>
@@ -63,10 +63,10 @@
         </div>
 
         {{-- Section: Do's and Don'ts --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Do's and Don'ts</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Don't start your speech until audience is</span>
                 <strong class="text-blue-600">35</strong>
@@ -75,7 +75,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• You can make your main ideas or notes on cards or a</span>
                 <strong class="text-blue-600">36</strong>
@@ -84,7 +84,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• You do not need to write down the</span>
                 <strong class="text-blue-600">37</strong>
@@ -94,7 +94,7 @@
                 <span>speech.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• You can just write</span>
                 <strong class="text-blue-600">38</strong>
@@ -104,7 +104,7 @@
                 <span>ideas.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Remember to</span>
                 <strong class="text-blue-600">39</strong>
@@ -114,7 +114,7 @@
                 <span>yourself to see how long your speech will be.</span>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Don't just read from</span>
                 <strong class="text-blue-600">40</strong>

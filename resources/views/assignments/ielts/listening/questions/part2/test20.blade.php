@@ -61,7 +61,7 @@
 
     {{-- Map Image Placeholder --}}
     <div class="mb-8 text-center">
-        <div class="inline-block p-4 border-2 border-dashed border-gray-300 bg-gray-50 rounded-lg w-full max-w-2xl relative">
+        <div class="inline-block p-4 border-2 border-dashed border-gray-300 bg-white rounded-lg w-full max-w-2xl relative">
             <p class="text-gray-500 mb-2 font-medium">Map / Plan Insert</p>
             <p class="text-sm text-gray-400 mb-4">Please upload the map image to: <code>public/images/assignments/ielts/listening/part2/test20-map.png</code></p>
             <img src="{{ asset('images/assignments/ielts/listening/part2/test20-map.png') }}" onerror="this.style.display='none'" class="max-w-full h-auto mx-auto" alt="Mount Rushmore Map">
@@ -76,7 +76,7 @@
             19 => 'workshop',
             20 => 'visitor centre'
         ] as $q => $label)
-        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 transition-colors">
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-white transition-colors">
             <div class="flex items-center gap-3">
                 <strong class="text-blue-600">{{ $q }}</strong>
                 <span class="text-gray-700">{{ $label }}</span>

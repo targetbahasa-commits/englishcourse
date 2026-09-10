@@ -1,0 +1,45 @@
+<div class="mb-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 2 - Practice Test 48</h3>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 11-15</h4>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Choose the correct letter, <strong>A</strong>, <strong>B</strong> or <strong>C</strong>.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>11</strong>Why does the speaker recommend the Sky Hotel?</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Mock test simulations</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[11]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>Because it is quite comfortable.</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[11]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>Because it provides ski and snowboard equipment rentals.</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[11]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>Because it has health and sports club.</span></label>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>12</strong>What is new in this year’s exhibition?</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[12]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>photos of top ski resorts worldwide</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[12]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>ski equipment</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[12]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>computer simulation</span></label>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>13</strong>How do people enter the skiing and snowboarding competition?</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[13]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>They can send emails to the committee.</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[13]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>They can fill out the back of the entrance ticket.</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[13]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>They can check out the exhibition newsletter</span></label>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>14</strong>What did the media focus on this year?</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[14]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>not enough snow</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[14]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>reduction in fee</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[14]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>the decline of participants</span></label>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>15</strong>Why does the speaker recommend the ski program?</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[15]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>The instructors are quite friendly and patient.</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[15]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>It includes lessons and sessions that suit only beginners</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[15]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>It provides special offers at the moment.</span></label>
+<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 16-20</h4>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">_Choose <strong>FIVE</strong> answers from the box and write the correct letter, <strong>A-F</strong>, next to Questions <strong>16-20</strong>._</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[15]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>exploring new destinations</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[15]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>how to make the skiing boots comfortable</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[15]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>how to become a ski instructor</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[15]" value="D" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">D</span> <span>how to combine other activities with skiing</span></label>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>E</strong>how to improve the skills of skiing</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>F</strong>information about skiing safety</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Presentation</strong></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>16</strong> Simon’s talk</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>17</strong> Solution</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>18</strong> Film</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>19</strong> Tricks</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>20</strong> Johnson’s talk</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Education</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Psychology</p>
+    </div>
+</div>

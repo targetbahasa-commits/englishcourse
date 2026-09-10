@@ -33,6 +33,11 @@ class DiscountPolicy
             }
         }
 
+        $partnerResult = $this->resolvePartnerDiscount($user, $baseAmount);
+        if ($partnerResult && $partnerResult->amount > $bestAmount) {
+            return $partnerResult;
+        }
+
         if (!$best || $bestAmount <= 0) {
             return DiscountResult::none();
         }
@@ -47,6 +52,38 @@ class DiscountPolicy
                 'discount_type'  => $best->discount_type,
                 'discount_value' => (int) $best->discount_value,
                 'discount_amount' => $bestAmount,
+            ],
+        );
+    }
+
+    /**
+     * A partner's flat corporate rate is a distinct discount source from
+     * the ProgramDiscount rules above (negotiated per-company rather than
+     * a promotional rule), so it's resolved separately and compared by
+     * amount alongside them, same "largest wins" logic.
+     */
+    private function resolvePartnerDiscount(mixed $user, int $baseAmount): ?DiscountResult
+    {
+        $partner = $user->partner ?? null;
+        if (!$partner || !$partner->is_active) {
+            return null;
+        }
+
+        $amount = $partner->discountAmountFor($baseAmount);
+        if ($amount <= 0) {
+            return null;
+        }
+
+        return new DiscountResult(
+            amount: $amount,
+            label: 'Kerjasama Instansi: ' . $partner->name,
+            meta: [
+                'source'          => 'partner',
+                'partner_id'      => $partner->id,
+                'label'           => 'Kerjasama Instansi: ' . $partner->name,
+                'discount_type'   => $partner->discount_type,
+                'discount_value'  => (int) $partner->discount_value,
+                'discount_amount' => $amount,
             ],
         );
     }

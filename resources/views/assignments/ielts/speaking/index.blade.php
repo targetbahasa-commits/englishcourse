@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', 'IELTS Speaking')
+
 @section('content')
 <!-- Force Alpine.js Load -->
 <script src="//unpkg.com/alpinejs" defer></script>
@@ -95,7 +97,7 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 font-semibold border border-orange-100 text-xs">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-white text-orange-700 font-semibold border border-orange-100 text-xs">
                 Active Batch: {{ $selectedClassPeriod->name ?? ($batchProgram->period ?? 'Not selected') }}
             </span>
 
@@ -104,7 +106,7 @@
                     @csrf
                     <input type="hidden" name="program_id" value="{{ $batchProgram?->id }}">
                     <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                    <select name="period" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
+                    <select name="period" class="border-none bg-white rounded-lg text-sm focus:ring-2 focus:ring-orange-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
                         @if(!$batchProgram)
                             <option value="" selected>No program found</option>
                         @elseif($batchProgram->classPeriods->isEmpty())
@@ -124,7 +126,7 @@
             @else
                 <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
                     <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                    <span class="text-sm text-gray-800 px-2 py-1 bg-gray-50 rounded-lg">
+                    <span class="text-sm text-gray-800 px-2 py-1 bg-white rounded-lg">
                         {{ $selectedClassPeriod->name ?? ($batchProgram->period ?? 'Not selected') }}
                     </span>
                 </div>
@@ -135,7 +137,7 @@
                 $calendarBatchName = addslashes($batchProgram->name ?? 'Assignments');
             @endphp
             @if($calendarClassPeriodId)
-                <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 text-sm text-gray-600">
+                <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-white text-sm text-gray-600">
                     Lihat Kalender
                 </button>
             @endif
@@ -192,7 +194,7 @@
                             <div class="absolute top-2 right-2 z-50 flex gap-2 items-center bg-white/80 backdrop-blur-sm rounded-lg p-1 shadow-sm border border-gray-100">
                                 <form action="{{ route('admin.ielts.speaking.topics.toggle-lock', $topic['id']) }}" method="POST" class="inline-block">
                                     @csrf
-                                    <button type="submit" @click.stop class="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer p-1 rounded-md hover:bg-gray-100" title="Toggle Lock">
+                                    <button type="submit" @click.stop class="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer p-1 rounded-md hover:bg-white" title="Toggle Lock">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             @if($isLocked)
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
@@ -204,7 +206,7 @@
                                 </form>
                                 <button type="button" 
                                     @click.stop="edit({{ $topic['id'] }})"
-                                    class="text-gray-400 hover:text-blue-600 transition-colors cursor-pointer p-1 rounded-md hover:bg-blue-50">
+                                    class="text-gray-400 hover:text-blue-600 transition-colors cursor-pointer p-1 rounded-md hover:bg-white">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 </button>
                                 <form action="{{ route('admin.ielts.speaking.topics.delete', $topic['id']) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this topic?');" class="inline-block">
@@ -327,7 +329,7 @@
                         </div>
 
                         <div class="mt-6 flex justify-end gap-3">
-                            <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors" @click="closeModal()">
+                            <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-200 rounded-lg transition-colors" @click="closeModal()">
                                 Cancel
                             </button>
                             <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg shadow-sm transition-colors">

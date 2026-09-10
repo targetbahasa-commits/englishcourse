@@ -19,7 +19,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
     
@@ -40,7 +40,7 @@
                              <p class="text-gray-600 mt-1">Cambridge {{ $edition ?? 20 }} Listening Practice</p>
                         </div>
                     </div>
-                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? 20, 'id' => $testId ?? 2]) }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2 border border-gray-200">
+                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? 20, 'id' => $testId ?? 2]) }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-white font-medium transition flex items-center gap-2 border border-gray-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                         Back
                     </a>
@@ -125,7 +125,7 @@
     </div>
 
     <div class="flex flex-col md:flex-row gap-8 mb-12">
-        <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg md:w-1/2 order-2 md:order-1 self-start shadow-sm">
+        <div class="bg-white border border-blue-200 p-6 rounded-lg md:w-1/2 order-2 md:order-1 self-start shadow-sm">
             <ul class="space-y-3 font-medium">
                 <li class="flex gap-4"><span class="font-bold">A</span> <span>providing entertainment</span></li>
                 <li class="flex gap-4"><span class="font-bold">B</span> <span>providing publicity about a council service</span></li>
@@ -358,7 +358,7 @@
     </div>
 
     <div class="flex flex-col md:flex-row gap-8 mb-12">
-        <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg md:w-1/2 order-2 md:order-1 self-start shadow-sm">
+        <div class="bg-white border border-blue-200 p-6 rounded-lg md:w-1/2 order-2 md:order-1 self-start shadow-sm">
             <ul class="space-y-3 font-medium">
                 <li class="flex gap-4"><span class="font-bold">A</span> <span>The information given about this was too vague.</span></li>
                 <li class="flex gap-4"><span class="font-bold">B</span> <span>This may not be relevant to their course.</span></li>
@@ -584,7 +584,7 @@
         <p class="italic">Write <span class="font-bold">ONE WORD ONLY</span> for each answer.</p>
     </div>
 
-    <div class="p-8 border border-gray-300 bg-gray-50 max-w-4xl mx-auto">
+    <div class="p-8 border border-gray-300 bg-white max-w-4xl mx-auto">
         <h2 class="text-2xl font-bold text-center mb-8">Developing food trends</h2>
         
         <ul class="list-disc list-outside ml-6 space-y-5 mb-8 text-lg">

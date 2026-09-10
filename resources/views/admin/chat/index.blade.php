@@ -22,12 +22,12 @@
         <!-- Sidebar: Conversations List -->
         <div class="w-full md:w-1/3 border-r border-gray-100 flex flex-col" :class="{ 'hidden md:flex': activeUserId }">
             <div class="p-4 border-b border-gray-100">
-                <input type="text" placeholder="Cari pengguna..." class="w-full bg-gray-50 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-100">
+                <input type="text" x-model="searchQuery" placeholder="Cari pengguna..." class="w-full bg-gray-50 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-100">
             </div>
-            
+
             <div class="flex-1 overflow-y-auto">
-                <template x-for="conv in conversations" :key="conv.user_id">
-                    <button @click="selectUser(conv)" 
+                <template x-for="conv in filteredConversations()" :key="conv.user_id">
+                    <button @click="selectUser(conv)"
                             class="w-full text-left p-4 border-b border-gray-50 hover:bg-gray-50 transition flex items-start gap-3"
                             :class="{ 'bg-blue-50 border-l-4 border-l-blue-600': activeUserId === conv.user_id }">
                         <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold flex-shrink-0 text-lg">
@@ -45,6 +45,9 @@
                 </template>
                 <div x-show="conversations.length === 0" class="p-6 text-center text-gray-500 text-sm">
                     Belum ada percakapan.
+                </div>
+                <div x-show="conversations.length > 0 && filteredConversations().length === 0" class="p-6 text-center text-gray-500 text-sm">
+                    Tidak ada pengguna yang cocok dengan pencarian.
                 </div>
             </div>
         </div>
@@ -69,6 +72,7 @@
             <div x-show="activeUserId" class="flex-1 overflow-y-auto p-4 space-y-4" id="admin-chat-body">
                 <template x-for="msg in messages" :key="msg.id">
                     <div class="flex flex-col max-w-[80%]" :class="msg.from_me ? 'self-end items-end' : 'self-start items-start'">
+                        <span x-show="!msg.from_me && msg.sender !== activeUserName" class="text-[11px] font-semibold text-blue-500 mb-0.5" x-text="msg.sender"></span>
                         <div class="px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed shadow-sm"
                              :class="msg.from_me ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white text-gray-800 rounded-bl-none border border-gray-100'"
                              x-html="escapeHtml(msg.content)">
@@ -111,9 +115,18 @@ function chatAdmin() {
         replyText: '',
         sending: false,
         toggling: false,
+        searchQuery: '',
         isLiveChatEnabled: {{ isset($isLiveChatEnabled) && $isLiveChatEnabled ? 'true' : 'false' }},
         pollInterval: null,
         csrf: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+
+        filteredConversations() {
+            const q = this.searchQuery.trim().toLowerCase();
+            if (!q) return this.conversations;
+            return this.conversations.filter(c =>
+                (c.name || '').toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q)
+            );
+        },
 
         init() {
             this.loadConversations();
@@ -160,17 +173,20 @@ function chatAdmin() {
         sendReply() {
             if(!this.replyText.trim() || this.sending || !this.activeUserId) return;
             this.sending = true;
-            
-            // Optimistic update
+
+            // Optimistic update - tagged with a temp id so we can find & flag it if the send fails.
+            const tempId = 'temp-' + Date.now();
+            const sentText = this.replyText;
             this.messages.push({
-                id: Date.now(),
-                content: this.replyText,
+                id: tempId,
+                content: sentText,
                 from_me: true,
+                sender: 'Anda',
                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
             });
             const payload = {
                 receiver_id: this.activeUserId,
-                content: this.replyText
+                content: sentText
             };
             this.replyText = '';
             this.scrollToBottom();
@@ -183,9 +199,20 @@ function chatAdmin() {
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify(payload)
+            }).then(r => {
+                if (!r.ok) throw new Error('Send failed');
+                return r.json();
+            }).then(() => {
+                this.loadConversations(); // refresh to get real ID
+            }).catch(() => {
+                // The optimistic bubble would otherwise be silently wiped by the next
+                // poll's fresh message list without the admin ever knowing it never
+                // actually sent - remove it and restore the text so they can retry.
+                this.messages = this.messages.filter(m => m.id !== tempId);
+                this.replyText = sentText;
+                alert('Gagal mengirim pesan. Silakan coba lagi.');
             }).finally(() => {
                 this.sending = false;
-                this.loadConversations(); // refresh to get real ID
             });
         },
 

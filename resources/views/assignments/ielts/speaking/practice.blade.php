@@ -5,22 +5,22 @@
 
 @php
     $colorMap = [
-        'blue' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-600'],
+        'blue' => ['bg' => 'bg-white', 'text' => 'text-blue-600'],
         'green' => ['bg' => 'bg-green-100', 'text' => 'text-green-600'],
-        'indigo' => ['bg' => 'bg-indigo-100', 'text' => 'text-indigo-600'],
-        'orange' => ['bg' => 'bg-orange-100', 'text' => 'text-orange-600'],
-        'purple' => ['bg' => 'bg-purple-100', 'text' => 'text-purple-600'],
+        'indigo' => ['bg' => 'bg-white', 'text' => 'text-indigo-600'],
+        'orange' => ['bg' => 'bg-white', 'text' => 'text-orange-600'],
+        'purple' => ['bg' => 'bg-white', 'text' => 'text-purple-600'],
         'red' => ['bg' => 'bg-red-100', 'text' => 'text-red-600'],
-        'sky' => ['bg' => 'bg-sky-100', 'text' => 'text-sky-600'],
-        'cyan' => ['bg' => 'bg-cyan-100', 'text' => 'text-cyan-600'],
+        'sky' => ['bg' => 'bg-white', 'text' => 'text-sky-600'],
+        'cyan' => ['bg' => 'bg-white', 'text' => 'text-cyan-600'],
         'pink' => ['bg' => 'bg-pink-100', 'text' => 'text-pink-600'],
-        'teal' => ['bg' => 'bg-teal-100', 'text' => 'text-teal-600'],
-        'emerald' => ['bg' => 'bg-emerald-100', 'text' => 'text-emerald-600'],
-        'slate' => ['bg' => 'bg-gray-100', 'text' => 'text-gray-600'],
-        'amber' => ['bg' => 'bg-amber-100', 'text' => 'text-amber-600'],
+        'teal' => ['bg' => 'bg-white', 'text' => 'text-teal-600'],
+        'emerald' => ['bg' => 'bg-white', 'text' => 'text-emerald-600'],
+        'slate' => ['bg' => 'bg-white', 'text' => 'text-gray-600'],
+        'amber' => ['bg' => 'bg-white', 'text' => 'text-amber-600'],
         'rose' => ['bg' => 'bg-rose-100', 'text' => 'text-rose-600'],
-        'yellow' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-600'],
-        'gray' => ['bg' => 'bg-gray-100', 'text' => 'text-gray-600'],
+        'yellow' => ['bg' => 'bg-white', 'text' => 'text-yellow-600'],
+        'gray' => ['bg' => 'bg-white', 'text' => 'text-gray-600'],
         'violet' => ['bg' => 'bg-violet-100', 'text' => 'text-violet-600'],
         'lime' => ['bg' => 'bg-lime-100', 'text' => 'text-lime-600'],
         'fuchsia' => ['bg' => 'bg-fuchsia-100', 'text' => 'text-fuchsia-600'],
@@ -80,12 +80,12 @@
             <div class="flex items-center gap-3">
             @if((Auth::user()->isAdmin() || Auth::user()->isTeacher()) && isset($topic['id']))
                 @if(Auth::user()->isAdmin())
-                <a href="{{ route('assignments.ielts-academic.speaking.evaluation', ['topic' => $topic['slug']]) }}" class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-semibold shadow-sm">
+                <a href="{{ route('assignments.ielts-academic.speaking.evaluation', ['topic' => $topic['slug']]) }}" class="inline-flex items-center px-4 py-2 bg-white text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-semibold shadow-sm">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                     Review Hasil
                 </a>
                 @endif
-                <button type="button" @click="showEditModal = true; editingQuestions = questions.join('\n');" class="px-4 py-2 bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 font-semibold shadow-sm transition text-sm">
+                <button type="button" @click="showEditModal = true; editingQuestions = questions.join('\n');" class="px-4 py-2 bg-white text-orange-600 rounded-lg hover:bg-orange-200 font-semibold shadow-sm transition text-sm">
                     Edit Soal
                 </button>
             @endif
@@ -119,7 +119,7 @@
                  class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-white rounded-3xl">
                 <div class="flex flex-col items-center gap-6 p-8 text-center max-w-sm">
                     <!-- Speaker icon -->
-                    <div class="w-24 h-24 rounded-full bg-orange-100 flex items-center justify-center shadow-lg">
+                    <div class="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-lg">
                         <svg class="w-12 h-12 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
                         </svg>
@@ -131,7 +131,7 @@
                         <!-- Voice Selection -->
                         <div class="w-full text-left mb-2">
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Examiner Voice</label>
-                            <select x-model="examinerVoice" class="w-full border-gray-300 rounded-xl shadow-sm focus:border-orange-500 focus:ring-orange-500 bg-gray-50 text-gray-700 py-2.5">
+                            <select x-model="examinerVoice" class="w-full border-gray-300 rounded-xl shadow-sm focus:border-orange-500 focus:ring-orange-500 bg-white text-gray-700 py-2.5">
                                 <optgroup label="Female Voices">
                                     <option value="af_heart">American Female (Heart)</option>
                                     <option value="af_nova">American Female (Nova)</option>
@@ -158,7 +158,7 @@
             </div>
 
             <!-- Progress Bar -->
-            <div class="h-2 bg-gray-100">
+            <div class="h-2 bg-white">
                 <div class="h-full bg-orange-500 transition-all duration-300"
                      :style="'width: ' + ((currentIndex + 1) / questions.length * 100) + '%'"></div>
             </div>
@@ -167,7 +167,7 @@
                 
                 <!-- Question Counter & Status -->
                 <div class="flex items-center justify-center gap-3 mb-6">
-                    <div class="text-sm font-bold tracking-wider text-orange-500 uppercase bg-orange-50 px-4 py-1 rounded-full">
+                    <div class="text-sm font-bold tracking-wider text-orange-500 uppercase bg-white px-4 py-1 rounded-full">
                         Question <span x-text="currentIndex + 1"></span> of <span x-text="questions.length"></span>
                     </div>
                     
@@ -214,7 +214,7 @@
                     @if(!(request('topic') == 'lesson-9' && request('subtopic') == 'part-2-challenging-task') && !(request('topic') == 'lesson-8' && request('subtopic') == 'part-2-journey') && !(request('topic') == 'lesson-7' && request('subtopic') == 'part-2-achievement'))
                     <button @click="speakQuestion()" 
                             x-show="!isPracticeTest || showQuestionText"
-                            class="inline-flex items-center justify-center w-10 h-10 ml-3 rounded-full bg-orange-100 text-orange-500 hover:bg-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
+                            class="inline-flex items-center justify-center w-10 h-10 ml-3 rounded-full bg-white text-orange-500 hover:bg-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
                             title="Read question aloud">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
@@ -302,7 +302,7 @@
                     <div class="w-full text-left" x-show="debugLogs.length > 0">
                         <details>
                             <summary class="text-xs text-gray-400 cursor-pointer hover:text-gray-600 text-center">View Debug Logs</summary>
-                            <div class="bg-gray-100 p-2 rounded mt-2 max-h-32 overflow-y-auto text-xs font-mono text-gray-600">
+                            <div class="bg-white p-2 rounded mt-2 max-h-32 overflow-y-auto text-xs font-mono text-gray-600">
                                  <template x-for="log in debugLogs">
                                     <div x-text="log"></div>
                                 </template>
@@ -314,7 +314,7 @@
             </div>
 
             <!-- Card Footer / Navigation -->
-            <div class="bg-gray-50 p-6 flex justify-between items-center border-t border-gray-100">
+            <div class="bg-white p-6 flex justify-between items-center border-t border-gray-100">
                 <button @click="prev()" 
                         :disabled="currentIndex === 0"
                         class="px-6 py-3 rounded-xl text-gray-600 font-medium hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
@@ -325,7 +325,7 @@
                 <div class="flex items-center gap-3">
                     <button @click="isCollocationsOpen = !isCollocationsOpen" 
                             class="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors"
-                            :class="isCollocationsOpen ? 'bg-teal-600 text-white hover:bg-teal-700' : 'bg-teal-100 text-teal-700 hover:bg-teal-200'"
+                            :class="isCollocationsOpen ? 'bg-teal-600 text-white hover:bg-teal-700' : 'bg-white text-teal-700 hover:bg-teal-200'"
                             title="View Collocations">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -335,7 +335,7 @@
 
                     <button @click="isIdiomsOpen = !isIdiomsOpen" 
                             class="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors"
-                            :class="isIdiomsOpen ? 'bg-orange-600 text-white hover:bg-orange-700' : 'bg-orange-100 text-orange-700 hover:bg-orange-200'"
+                            :class="isIdiomsOpen ? 'bg-orange-600 text-white hover:bg-orange-700' : 'bg-white text-orange-700 hover:bg-orange-200'"
                             title="View Idioms">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -349,7 +349,7 @@
                     
                      <button @click="toggleBoard()" 
                             class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                            :class="isBoardOpen ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'"
+                            :class="isBoardOpen ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-white text-indigo-600 hover:bg-indigo-200'"
                             title="Open Whiteboard">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -395,7 +395,7 @@
                  x-transition:leave-end="translate-x-full">
                      
                      <!-- Header -->
-                     <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 w-full flex items-center justify-between bg-orange-50">
+                     <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 w-full flex items-center justify-between bg-white">
                         <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                             Useful Idioms
                         </h2>
@@ -416,7 +416,7 @@
                                          <h3 class="text-lg font-bold text-orange-600 mb-1" x-text="idiom.phrase"></h3>
                                          <p class="text-gray-700 italic mb-1" x-text="idiom.meaning"></p>
                                          <p class="text-sm text-gray-500 italic mb-2" x-text="idiom.meaning_id" x-show="idiom.meaning_id"></p>
-                                         <div class="bg-gray-50 p-2 rounded text-sm text-gray-600 border-l-2 border-gray-300">
+                                         <div class="bg-white p-2 rounded text-sm text-gray-600 border-l-2 border-gray-300">
                                              <span class="font-semibold text-gray-400 text-xs uppercase tracking-wide">Example:</span><br>
                                              <span x-text="idiom.example"></span>
                                          </div>
@@ -450,7 +450,7 @@
                  x-transition:leave-end="-translate-x-full">
                      
                      <!-- Header -->
-                     <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 w-full flex items-center justify-between bg-teal-50">
+                     <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 w-full flex items-center justify-between bg-white">
                         <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                              Useful Collocations
                         </h2>
@@ -471,7 +471,7 @@
                                          <h3 class="text-lg font-bold text-teal-600 mb-1" x-text="collocation.phrase"></h3>
                                          <p class="text-gray-700 italic mb-1" x-text="collocation.meaning"></p>
                                          <p class="text-sm text-gray-500 italic mb-2" x-text="collocation.meaning_id" x-show="collocation.meaning_id"></p>
-                                         <div class="bg-gray-50 p-2 rounded text-sm text-gray-600 border-l-2 border-gray-300">
+                                         <div class="bg-white p-2 rounded text-sm text-gray-600 border-l-2 border-gray-300">
                                              <span class="font-semibold text-gray-400 text-xs uppercase tracking-wide">Example:</span><br>
                                              <span x-text="collocation.example"></span>
                                          </div>
@@ -503,7 +503,7 @@
                  x-transition:leave="transform transition ease-in-out duration-300 sm:duration-500"
                  x-transition:leave-start="translate-x-0"
                  x-transition:leave-end="-translate-x-full">
-                     <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 w-full flex items-center justify-between bg-indigo-50">
+                     <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 w-full flex items-center justify-between bg-white">
                         <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                              <span class="text-2xl">🔥</span> Advanced Verbs
                         </h2>
@@ -521,11 +521,11 @@
                                      <div class="bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border-indigo-100">
                                          <div class="flex justify-between items-start mb-1">
                                              <h3 class="text-lg font-bold text-indigo-600" x-text="item.phrase"></h3>
-                                             <span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-bold rounded" x-text="item.level"></span>
+                                             <span class="px-2 py-0.5 bg-white text-indigo-700 text-xs font-bold rounded" x-text="item.level"></span>
                                          </div>
                                          <p class="text-gray-700 italic mb-1" x-text="item.meaning"></p>
                                          <p class="text-sm text-gray-500 italic mb-2" x-text="item.meaning_id"></p>
-                                         <div class="bg-gray-50 p-2 rounded text-sm text-gray-600 border-l-2 border-gray-300">
+                                         <div class="bg-white p-2 rounded text-sm text-gray-600 border-l-2 border-gray-300">
                                              <span class="font-semibold text-gray-400 text-xs uppercase tracking-wide">Example:</span><br>
                                              <span x-text="item.example"></span>
                                          </div>
@@ -553,9 +553,9 @@
                  x-transition:leave="transform transition ease-in-out duration-300 sm:duration-500"
                  x-transition:leave-start="translate-x-0"
                  x-transition:leave-end="translate-x-full">
-                     <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 w-full flex items-center justify-between bg-purple-50">
+                     <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 w-full flex items-center justify-between bg-white">
                         <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                             <span class="text-2xl">⚡</span> Advanced Adverbs
+                             <span class="text-2xl"></span> Advanced Adverbs
                         </h2>
                         <button @click="isAdvancedAdverbsOpen = false" class="text-gray-400 hover:text-gray-500 focus:outline-none">
                             <span class="sr-only">Close panel</span>
@@ -571,11 +571,11 @@
                                      <div class="bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border-purple-100">
                                          <div class="flex justify-between items-start mb-1">
                                              <h3 class="text-lg font-bold text-purple-600" x-text="item.phrase"></h3>
-                                             <span class="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-bold rounded" x-text="item.level"></span>
+                                             <span class="px-2 py-0.5 bg-white text-purple-700 text-xs font-bold rounded" x-text="item.level"></span>
                                          </div>
                                          <p class="text-gray-700 italic mb-1" x-text="item.meaning"></p>
                                          <p class="text-sm text-gray-500 italic mb-2" x-text="item.meaning_id"></p>
-                                         <div class="bg-gray-50 p-2 rounded text-sm text-gray-600 border-l-2 border-gray-300">
+                                         <div class="bg-white p-2 rounded text-sm text-gray-600 border-l-2 border-gray-300">
                                              <span class="font-semibold text-gray-400 text-xs uppercase tracking-wide">Example:</span><br>
                                              <span x-text="item.example"></span>
                                          </div>
@@ -602,9 +602,9 @@
     <div class="fixed bottom-28 left-1/2 transform -translate-x-1/2 z-[60]">
         <button @click="isGrammarOpen = !isGrammarOpen" 
                 class="flex items-center gap-2 px-6 py-3 rounded-full font-bold shadow-2xl transition-all transform hover:scale-105"
-                :class="isGrammarOpen ? 'bg-blue-600 text-white ring-4 ring-blue-300' : 'bg-white text-blue-600 hover:bg-blue-50'"
+                :class="isGrammarOpen ? 'bg-blue-600 text-white ring-4 ring-blue-300' : 'bg-white text-blue-600 hover:bg-white'"
                 title="View Nominal & Passive Rules">
-            <div class="p-1.5 bg-blue-100 rounded-full text-blue-600" :class="isGrammarOpen ? 'bg-white/20 text-white' : ''">
+            <div class="p-1.5 bg-white rounded-full text-blue-600" :class="isGrammarOpen ? 'bg-white/20 text-white' : ''">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
@@ -619,9 +619,9 @@
     <div class="fixed bottom-28 left-1/2 transform -translate-x-1/2 z-[60]">
         <button @click="isGrammarOpen = !isGrammarOpen" 
                 class="flex items-center gap-2 px-6 py-3 rounded-full font-bold shadow-2xl transition-all transform hover:scale-105"
-                :class="isGrammarOpen ? 'bg-yellow-500 text-white ring-4 ring-yellow-300' : 'bg-white text-yellow-600 hover:bg-yellow-50'"
+                :class="isGrammarOpen ? 'bg-yellow-500 text-white ring-4 ring-yellow-300' : 'bg-white text-yellow-600 hover:bg-white'"
                 title="View Modal Verbs">
-            <div class="p-1.5 bg-yellow-100 rounded-full text-yellow-600" :class="isGrammarOpen ? 'bg-white/20 text-white' : ''">
+            <div class="p-1.5 bg-white rounded-full text-yellow-600" :class="isGrammarOpen ? 'bg-white/20 text-white' : ''">
                 <!-- Lightning icon for quick helpers -->
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -663,7 +663,7 @@
             <!-- Content for Lesson 5 -->
             <div class="p-6 overflow-y-auto max-h-[60vh] text-gray-700">
                 <div class="space-y-4">
-                    <div class="p-4 bg-yellow-50 rounded-xl border border-yellow-100">
+                    <div class="p-4 bg-white rounded-xl border border-yellow-100">
                         <h4 class="font-bold text-yellow-800 mb-3 flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -724,31 +724,31 @@
             </div>
 
             <!-- Body (Scrollable) -->
-            <div class="flex-1 overflow-y-auto bg-gray-50">
+            <div class="flex-1 overflow-y-auto bg-white">
                 <div class="p-6 grid md:grid-cols-2 gap-6">
                     
                     <!-- Nominal Section -->
                     <div class="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden">
-                        <div class="bg-blue-50 px-4 py-3 border-b border-blue-100">
+                        <div class="bg-white px-4 py-3 border-b border-blue-100">
                             <h4 class="font-bold text-blue-800 text-lg">Nominal Sentences</h4>
                             <p class="text-xs text-blue-600">Sentences without an action verb</p>
                         </div>
                         <div class="p-4 space-y-4">
                             <div>
                                 <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Present</span>
-                                <div class="bg-gray-50 p-2 rounded text-gray-700 font-mono text-sm border-l-4 border-blue-400">
+                                <div class="bg-white p-2 rounded text-gray-700 font-mono text-sm border-l-4 border-blue-400">
                                     Subject + <span class="font-bold text-blue-600">is / am / are</span> + ...
                                 </div>
                             </div>
                             <div>
                                 <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Past</span>
-                                <div class="bg-gray-50 p-2 rounded text-gray-700 font-mono text-sm border-l-4 border-blue-400">
+                                <div class="bg-white p-2 rounded text-gray-700 font-mono text-sm border-l-4 border-blue-400">
                                     Subject + <span class="font-bold text-blue-600">was / were</span> + ...
                                 </div>
                             </div>
                             <div>
                                 <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Modal</span>
-                                <div class="bg-gray-50 p-2 rounded text-gray-700 font-mono text-sm border-l-4 border-blue-400">
+                                <div class="bg-white p-2 rounded text-gray-700 font-mono text-sm border-l-4 border-blue-400">
                                     Modal + <span class="font-bold text-blue-600">be</span> + ...
                                 </div>
                             </div>
@@ -757,26 +757,26 @@
 
                     <!-- Passive Section -->
                     <div class="bg-white rounded-xl shadow-sm border border-indigo-100 overflow-hidden">
-                        <div class="bg-indigo-50 px-4 py-3 border-b border-indigo-100">
+                        <div class="bg-white px-4 py-3 border-b border-indigo-100">
                             <h4 class="font-bold text-indigo-800 text-lg">Passive Voice</h4>
                             <p class="text-xs text-indigo-600">Action received by the subject</p>
                         </div>
                         <div class="p-4 space-y-4">
                             <div>
                                 <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Present</span>
-                                <div class="bg-gray-50 p-2 rounded text-gray-700 font-mono text-sm border-l-4 border-indigo-400">
+                                <div class="bg-white p-2 rounded text-gray-700 font-mono text-sm border-l-4 border-indigo-400">
                                     <span class="font-bold text-indigo-600">is/am/are</span> + Verb 3
                                 </div>
                             </div>
                             <div>
                                 <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Past</span>
-                                <div class="bg-gray-50 p-2 rounded text-gray-700 font-mono text-sm border-l-4 border-indigo-400">
+                                <div class="bg-white p-2 rounded text-gray-700 font-mono text-sm border-l-4 border-indigo-400">
                                     <span class="font-bold text-indigo-600">was/were</span> + Verb 3
                                 </div>
                             </div>
                             <div>
                                 <span class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Modal</span>
-                                <div class="bg-gray-50 p-2 rounded text-gray-700 font-mono text-sm border-l-4 border-indigo-400">
+                                <div class="bg-white p-2 rounded text-gray-700 font-mono text-sm border-l-4 border-indigo-400">
                                     Modal + <span class="font-bold text-indigo-600">be</span> + Verb 3
                                 </div>
                             </div>
@@ -786,7 +786,7 @@
                 </div>
                 
                 <!-- Footer Hint -->
-                <div class="bg-gray-100 px-6 py-3 text-center text-xs text-gray-500">
+                <div class="bg-white px-6 py-3 text-center text-xs text-gray-500">
                     Use these structures to add variety and complexity to your speaking answers.
                 </div>
             </div>
@@ -809,7 +809,7 @@
          x-cloak>
          
         <!-- Toolbar (Draggable Handle) -->
-        <div class="bg-gray-100 p-3 flex justify-between items-center cursor-move border-b border-gray-200 select-none"
+        <div class="bg-white p-3 flex justify-between items-center cursor-move border-b border-gray-200 select-none"
              @mousedown="startDragBoard">
             <h3 class="text-sm font-bold text-gray-700 flex items-center pointer-events-none">
                 <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -822,24 +822,24 @@
                 <!-- Tools -->
                 <div class="flex items-center bg-white rounded-lg p-1 border border-gray-200 shadow-sm" @mousedown.stop>
                     <button @click="setTool('pen')" 
-                            class="p-1.5 rounded hover:bg-gray-100 transition-colors"
-                            :class="{'bg-indigo-100 text-indigo-600': currentTool === 'pen', 'text-gray-500': currentTool !== 'pen'}"
+                            class="p-1.5 rounded hover:bg-white transition-colors"
+                            :class="{'bg-white text-indigo-600': currentTool === 'pen', 'text-gray-500': currentTool !== 'pen'}"
                             title="Pen">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
                     </button>
                     <button @click="setTool('text')" 
-                            class="p-1.5 rounded hover:bg-gray-100 transition-colors"
-                            :class="{'bg-indigo-100 text-indigo-600': currentTool === 'text', 'text-gray-500': currentTool !== 'text'}"
+                            class="p-1.5 rounded hover:bg-white transition-colors"
+                            :class="{'bg-white text-indigo-600': currentTool === 'text', 'text-gray-500': currentTool !== 'text'}"
                             title="Text Tool">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M12 6v14" />
                         </svg>
                     </button>
                     <button @click="setTool('eraser')" 
-                            class="p-1.5 rounded hover:bg-gray-100 transition-colors"
-                            :class="{'bg-indigo-100 text-indigo-600': currentTool === 'eraser', 'text-gray-500': currentTool !== 'eraser'}"
+                            class="p-1.5 rounded hover:bg-white transition-colors"
+                            :class="{'bg-white text-indigo-600': currentTool === 'eraser', 'text-gray-500': currentTool !== 'eraser'}"
                             title="Eraser">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -861,7 +861,7 @@
                 
                 <div class="h-6 w-px bg-gray-300 mx-1"></div>
 
-                <button @click="drawGrid()" @mousedown.stop class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors" title="Divide Board (4 Parts)">
+                <button @click="drawGrid()" @mousedown.stop class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-white rounded transition-colors" title="Divide Board (4 Parts)">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12h16M12 4v16" />
                     </svg>
@@ -929,7 +929,7 @@
              x-transition:enter-end="opacity-100">
             <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
                 <!-- ... content ... -->
-                <button @click="gradingResults = null" class="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors z-10">
+                <button @click="gradingResults = null" class="absolute top-4 right-4 p-2 rounded-full hover:bg-white transition-colors z-10">
                     <svg class="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -948,7 +948,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                         <!-- Overall Score -->
                         <div class="col-span-1 md:col-span-1">
-                            <div class="bg-orange-50 rounded-2xl p-6 flex flex-col items-center justify-center h-full text-center border-2 border-orange-100">
+                            <div class="bg-white rounded-2xl p-6 flex flex-col items-center justify-center h-full text-center border-2 border-orange-100">
                                 <span class="text-gray-500 font-medium uppercase tracking-wider text-xs mb-2">Overall Band</span>
                                 <span class="text-6xl font-black text-orange-600" x-text="gradingResults.overall_score"></span>
                                 <div class="mt-4 flex gap-1">
@@ -965,7 +965,7 @@
                                 <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 General Feedback
                              </h4>
-                             <p class="text-gray-600 leading-relaxed bg-gray-50 p-4 rounded-xl" x-text="gradingResults.general_feedback"></p>
+                             <p class="text-gray-600 leading-relaxed bg-white p-4 rounded-xl" x-text="gradingResults.general_feedback"></p>
                         </div>
                     </div>
 
@@ -977,7 +977,7 @@
                         <div class="bg-white border rounded-xl p-4 hover:shadow-md transition-shadow">
                             <div class="flex justify-between items-center mb-2">
                                 <span class="font-bold text-gray-700">Fluency & Coherence</span>
-                                <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-md font-bold text-sm" x-text="gradingResults.categories.fluency_coherence.score"></span>
+                                <span class="bg-white text-blue-700 px-2 py-1 rounded-md font-bold text-sm" x-text="gradingResults.categories.fluency_coherence.score"></span>
                             </div>
                             <p class="text-sm text-gray-500" x-text="gradingResults.categories.fluency_coherence.feedback"></p>
                         </div>
@@ -986,7 +986,7 @@
                         <div class="bg-white border rounded-xl p-4 hover:shadow-md transition-shadow">
                             <div class="flex justify-between items-center mb-2">
                                 <span class="font-bold text-gray-700">Lexical Resource</span>
-                                <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded-md font-bold text-sm" x-text="gradingResults.categories.lexical_resource.score"></span>
+                                <span class="bg-white text-purple-700 px-2 py-1 rounded-md font-bold text-sm" x-text="gradingResults.categories.lexical_resource.score"></span>
                             </div>
                             <p class="text-sm text-gray-500" x-text="gradingResults.categories.lexical_resource.feedback"></p>
                         </div>
@@ -1022,7 +1022,7 @@
                             </h4>
                             <div class="space-y-4">
                                 <template x-for="(item, index) in gradingResults.transcripts">
-                                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                    <div class="bg-white rounded-xl p-4 border border-gray-100">
                                         <p class="text-sm font-semibold text-gray-700 mb-1" x-text="item.question"></p>
                                         <div class="bg-white p-3 rounded-lg text-gray-600 text-sm italic border border-gray-200 shadow-sm">
                                             <span class="text-indigo-400 font-bold mr-1">“</span>
@@ -1095,7 +1095,7 @@
                             <!-- Idioms Tab -->
                             <div x-show="editTab === 'idioms'" class="space-y-4">
                                 <template x-for="(item, index) in editIdioms" :key="index">
-                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                    <div class="bg-white p-4 rounded-lg relative">
                                         <button type="button" @click="editIdioms.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`idioms[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
@@ -1110,7 +1110,7 @@
                             <!-- Collocations Tab -->
                             <div x-show="editTab === 'collocations'" class="space-y-4">
                                 <template x-for="(item, index) in editCollocations" :key="index">
-                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                    <div class="bg-white p-4 rounded-lg relative">
                                         <button type="button" @click="editCollocations.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`collocations[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
@@ -1125,7 +1125,7 @@
                             <!-- Adv Verbs Tab -->
                             <div x-show="editTab === 'adv_verbs'" class="space-y-4">
                                 <template x-for="(item, index) in editAdvVerbs" :key="index">
-                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                    <div class="bg-white p-4 rounded-lg relative">
                                         <button type="button" @click="editAdvVerbs.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`advanced_verbs[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
@@ -1142,7 +1142,7 @@
                             <!-- Adv Adverbs Tab -->
                             <div x-show="editTab === 'adv_adverbs'" class="space-y-4">
                                 <template x-for="(item, index) in editAdvAdverbs" :key="index">
-                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                    <div class="bg-white p-4 rounded-lg relative">
                                         <button type="button" @click="editAdvAdverbs.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`advanced_adverbs[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
@@ -1159,7 +1159,7 @@
                             <!-- Adv Adjectives Tab -->
                             <div x-show="editTab === 'adv_adjectives'" class="space-y-4">
                                 <template x-for="(item, index) in editAdvAdjectives" :key="index">
-                                    <div class="bg-gray-50 p-4 rounded-lg relative">
+                                    <div class="bg-white p-4 rounded-lg relative">
                                         <button type="button" @click="editAdvAdjectives.splice(index, 1)" class="absolute top-2 right-2 text-red-500 hover:text-red-700">Delete</button>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div><label class="text-xs font-bold">Phrase</label><input type="text" x-model="item.phrase" x-bind:name="`advanced_adjectives[${index}][phrase]`" class="w-full rounded border-gray-300 text-sm"></div>
@@ -1175,7 +1175,7 @@
                         </div>
 
                         <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
-                            <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors" @click="showEditModal = false">
+                            <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-200 rounded-lg transition-colors" @click="showEditModal = false">
                                 Cancel
                             </button>
                             <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg shadow-sm transition-colors">

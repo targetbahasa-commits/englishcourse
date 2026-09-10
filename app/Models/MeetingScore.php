@@ -16,12 +16,18 @@ class MeetingScore extends Model
         'meeting_number',
         'score',
         'submitted_at',
-        'answers_data'
+        'answers_data',
+        'teacher_score',
+        'teacher_feedback',
+        'reviewed_by',
+        'reviewed_at',
     ];
 
     protected $casts = [
         'submitted_at' => 'datetime',
         'answers_data' => 'array',
+        'teacher_score' => 'float',
+        'reviewed_at' => 'datetime',
     ];
 
     /**
@@ -38,5 +44,13 @@ class MeetingScore extends Model
     public function program()
     {
         return $this->belongsTo(Program::class);
+    }
+
+    /**
+     * Get the teacher/admin who reviewed this submission.
+     */
+    public function reviewer()
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 }

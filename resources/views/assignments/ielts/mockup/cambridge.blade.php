@@ -8,7 +8,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         {{-- Sidebar --}}
@@ -34,12 +34,12 @@
                             </svg>
                         </div>
                         <div>
-                            <h1 class="text-3xl font-bold text-gray-800">IELTS Mock Tests</h1>
+                            <h1 class="text-3xl font-bold text-gray-800">IELTS {{ request()->routeIs('mock-test.ielts-general*') ? 'General' : 'Academic' }} Mock Tests</h1>
                             <p class="text-gray-600 mt-1">Pilih jenis mock test untuk memulai</p>
                         </div>
                     </div>
                     @if(Auth::user()->active_role === 'guest_quick')
-                    <a href="{{ request()->routeIs('mock-test.ielts-academic.cambridge') ? route('mock-test.ielts-academic') : (request()->has('editions') ? route('assignments.ielts-academic.mockup.cambridge') : route('guest.free-tests')) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+                    <a href="{{ request()->routeIs('mock-test.ielts-general.cambridge') ? route('mock-test.ielts-general') : (request()->routeIs('mock-test.ielts-academic.cambridge') ? route('mock-test.ielts-academic') : (request()->has('editions') ? (request()->routeIs('mock-test.ielts-general*') ? route('mock-test.ielts-general') : route('assignments.ielts-academic.mockup.cambridge')) : route('guest.free-tests'))) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
@@ -57,17 +57,17 @@
                         <svg class="w-5 h-5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/></svg>
                         <span class="font-bold text-yellow-200 text-sm uppercase tracking-wider">Akses Gratis Aktif</span>
                     </div>
-                    <p class="font-bold text-xl mb-1">Kamu sedang mencoba IELTS Mock Test secara gratis!</p>
+                    <p class="font-bold text-xl mb-1">Kamu sedang mencoba IELTS {{ request()->routeIs('mock-test.ielts-general*') ? 'General' : 'Academic' }} Mock Test secara gratis!</p>
                     <p class="text-blue-100 text-sm">Daftar sebagai student untuk mengakses semua edisi Cambridge, British Council, serta materi lengkap lainnya.</p>
                 </div>
-                <a href="{{ route('mock-test.register-or-pay') . '?program=ielts-academic' }}" class="flex-shrink-0 bg-white text-blue-700 font-bold px-6 py-3 rounded-xl hover:bg-blue-50 transition shadow">
-                    🎓 Daftar Sekarang →
+                <a href="{{ route('mock-test.register-or-pay') . '?program=' . (request()->routeIs('mock-test.ielts-general*') ? 'ielts-general' : 'ielts-academic') }}" class="flex-shrink-0 bg-white text-blue-700 font-bold px-6 py-3 rounded-xl hover:bg-white transition shadow">
+                     Daftar Sekarang →
                 </a>
             </div>
             @endif
 
             @php $isGuestQuick = Auth::user()->active_role === 'guest_quick'; @endphp
-            @if(!request()->has('editions') && !request()->routeIs('mock-test.ielts-academic.cambridge'))
+            @if(!request()->has('editions') && !request()->routeIs('mock-test.ielts-academic.cambridge') && !request()->routeIs('mock-test.ielts-general.cambridge'))
                 {{-- View: Cambridge vs British Council --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
                     {{-- Cambridge: Unlocked for everyone --}}
@@ -86,9 +86,9 @@
                                 <span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">✓ Gratis</span>
                             </div>
                             @endif
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">Cambridge IELTS TEST</h3>
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Cambridge IELTS {{ request()->routeIs('mock-test.ielts-general*') ? 'General' : '' }} TEST</h3>
                             <p class="text-gray-500 text-sm mb-6">Full mock exam. @if($isGuestQuick) Cambridge 16–20 tersedia untuk dicoba gratis. @endif</p>
-                            <a href="{{ request()->routeIs('mock-test.ielts-academic') ? route('mock-test.ielts-academic.cambridge') : route('assignments.ielts-academic.mockup.cambridge') . '?editions=1' }}" class="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition">
+                            <a href="{{ request()->routeIs('mock-test.ielts-general*') ? route('mock-test.ielts-general.cambridge') : (request()->routeIs('mock-test.ielts-academic') ? route('mock-test.ielts-academic.cambridge') : route('assignments.ielts-academic.mockup.cambridge') . '?editions=1') }}" class="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition">
                                 Start Test →
                             </a>
                         </div>
@@ -118,17 +118,20 @@
                         <div class="p-6">
                             @if($isGuestQuick)
                             <div class="flex items-center gap-2 mb-1">
-                                <span class="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">🔒 Student Only</span>
+                                <span class="text-xs font-bold text-gray-400 bg-white px-2 py-0.5 rounded-full">🔒 Student Only</span>
                             </div>
                             @endif
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">British Council IELTS TEST</h3>
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">British Council IELTS {{ request()->routeIs('mock-test.ielts-general*') ? 'General' : '' }} TEST</h3>
                             <p class="text-gray-500 text-sm mb-6">Full mock exam. @if($isGuestQuick) Daftar sebagai student untuk mengakses British Council mock test. @endif</p>
                             @if($isGuestQuick)
-                            <a href="{{ route('mock-test.register-or-pay') . '?program=ielts-academic' }}" class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition">
+                            <a href="{{ route('mock-test.register-or-pay') . '?program=' . (request()->routeIs('mock-test.ielts-general*') ? 'ielts-general' : 'ielts-academic') }}" class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition">
                                 Daftar untuk Akses →
                             </a>
                             @else
-                            <a href="{{ route('assignments.ielts-academic.mockup.british-council') }}" class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition shadow-md hover:shadow-lg transform hover:scale-105">
+                            @php
+                                 $bcRoute = request()->routeIs('mock-test.ielts-general*') ? route('mock-test.ielts-general.british-council') : route('assignments.ielts-academic.mockup.british-council');
+                            @endphp
+                            <a href="{{ $bcRoute }}" class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition shadow-md hover:shadow-lg transform hover:scale-105">
                                 Start Test
                                 <svg class="w-4 h-4 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                             </a>
@@ -149,12 +152,13 @@
                         $locked = $isGuestQuick && $edition !== 16;
                         $prog = $editionPrograms->get("cambridge-{$edition}");
                         $priceText = $prog ? 'IDR ' . number_format($prog->price, 0, ',', '.') : '';
+                        $editionRoute = request()->routeIs('mock-test.ielts-general*') ? route('mock-test.ielts-general.cambridge.edition', ['edition' => $edition]) : route('mock-test.ielts-academic.cambridge.edition', ['edition' => $edition]);
                     @endphp
                     <div class="bg-white rounded-2xl shadow-sm border {{ $locked ? 'border-gray-200 opacity-90' : 'border-gray-200 hover:shadow-md' }} overflow-hidden transition relative">
                         @if($locked)
                         {{-- Lock badge --}}
                         <div class="absolute top-4 right-4 z-10">
-                            <span class="bg-gray-100 text-gray-500 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                            <span class="bg-white text-gray-500 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                                 Locked
                             </span>
@@ -162,13 +166,13 @@
                         @endif
                         <div class="p-6">
                             <div class="flex items-center justify-between mb-4">
-                                <span class="px-3 py-1 {{ $locked ? 'bg-gray-100 text-gray-400' : 'bg-purple-100 text-purple-700' }} rounded-full text-xs font-bold uppercase tracking-wide">Edition {{ $edition }}</span>
+                                <span class="px-3 py-1 {{ $locked ? 'bg-white text-gray-400' : 'bg-white text-purple-700' }} rounded-full text-xs font-bold uppercase tracking-wide">Edition {{ $edition }}</span>
                                 <span class="text-gray-400 text-sm flex items-center gap-1">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                     Full Exam
                                 </span>
                             </div>
-                            <a href="{{ route('mock-test.ielts-academic.cambridge.edition', ['edition' => $edition]) }}" class="hover:text-purple-600 transition">
+                            <a href="{{ $editionRoute }}" class="hover:text-purple-600 transition">
                                 <h3 class="text-2xl font-bold {{ $locked ? 'text-gray-400' : 'text-gray-800' }} mb-2">CAMBRIDGE {{ $edition }}</h3>
                             </a>
                             <p class="{{ $locked ? 'text-gray-400' : 'text-gray-600' }} text-sm mb-6">Complete listening, reading, writing, and speaking mock tests from Cambridge {{ $edition }}.</p>
@@ -180,7 +184,7 @@
                                     </a>
                                 </div>
                             @else
-                                <a href="{{ route('mock-test.ielts-academic.cambridge.edition', ['edition' => $edition]) }}" class="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition">
+                                <a href="{{ $editionRoute }}" class="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition">
                                     Start Exam
                                 </a>
                             @endif

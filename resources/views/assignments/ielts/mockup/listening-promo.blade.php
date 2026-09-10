@@ -39,7 +39,7 @@
         .promo-questions-container table th, .promo-questions-container table td { border-bottom: 1px solid black; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.cambridge-guest-signup-modal')
     <div class="flex min-h-screen">

@@ -9,14 +9,15 @@
     $chatUnread = $chatUnread ?? (Auth::check() && method_exists(Auth::user(), 'hasUnreadChat') && Auth::user()->hasUnreadChat());
     $notificationUnread = $notificationUnread ?? (
         Auth::check()
-        && !Auth::user()->isAdmin()
-        && method_exists(Auth::user(), 'hasUnreadAnnouncements')
-        && Auth::user()->hasUnreadAnnouncements()
+        && (
+            (Auth::user()->isAdmin() && method_exists(Auth::user(), 'hasUnreadNotificationBadge') && Auth::user()->hasUnreadNotificationBadge())
+            || (!Auth::user()->isAdmin() && method_exists(Auth::user(), 'hasUnreadAnnouncements') && Auth::user()->hasUnreadAnnouncements())
+        )
     );
 
     if (!$notificationHref) {
-        if (Auth::check() && Auth::user()->isAdmin() && \Illuminate\Support\Facades\Route::has('admin.announcements.index')) {
-            $notificationHref = route('admin.announcements.index');
+        if (Auth::check() && Auth::user()->isAdmin() && \Illuminate\Support\Facades\Route::has('inbox.index')) {
+            $notificationHref = route('inbox.index', ['tab' => 'notifications']);
         } elseif (Auth::check() && \Illuminate\Support\Facades\Route::has('announcements.index')) {
             $notificationHref = route('announcements.index');
         } elseif ($chatHref !== '#') {

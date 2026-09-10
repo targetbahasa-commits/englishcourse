@@ -16,7 +16,7 @@
         .dotted-answer { border-bottom: 1px dotted #000; display: inline-block; min-width: 120px; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -224,7 +224,7 @@
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar">
+        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
             <div class="px-8 py-8 pb-24 max-w-2xl mx-auto border-l border-gray-200 min-h-full">
 
                 {{-- Questions 1–6: Note Completion --}}
@@ -286,7 +286,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 1?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 7–13 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                             <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -297,7 +297,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -313,7 +313,7 @@
                                     [12, "The risk to manatees from entanglement and plastic consumption increased significantly in the period 2009-2020."],
                                     [13, "There is some legislation in place which aims to reduce the likelihood of boat strikes on manatees in Florida."],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -354,10 +354,10 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-blue-100 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-700 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-800 text-center">Column 1</th>
-                                    <th class="p-3 font-bold text-gray-800 w-28 text-center bg-blue-50 border-l border-white">Paragraph</th>
+                                    <th class="p-3 font-bold text-gray-800 w-28 text-center bg-white border-l border-white">Paragraph</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -366,7 +366,7 @@
                                     [15, 'reference to the realisation that others also procrastinate'],
                                     [16, 'neurological evidence of a link between procrastination and emotion'],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center bg-white">{{ $num }}.</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed bg-white">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center bg-white border-l border-gray-100">
@@ -447,7 +447,7 @@
                             'D' => "They don't enjoy their working lives as much.",
                             'E' => "They have poorer relationships with colleagues.",
                         ] as $letter => $text)
-                        <label class="flex items-center gap-3 cursor-pointer group p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all">
+                        <label class="flex items-center gap-3 cursor-pointer group p-3 rounded-xl hover:bg-white border border-transparent hover:border-gray-200 transition-all">
                             <input type="checkbox" name="q23_24[]" value="{{ $letter }}"
                                    class="multi-select-2 w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer flex-none"
                                    data-group="q23-24-group">
@@ -472,7 +472,7 @@
                             'D' => 'prioritising tasks according to their importance',
                             'E' => 'avoiding things that stop us concentrating on our tasks',
                         ] as $letter => $text)
-                        <label class="flex items-center gap-3 cursor-pointer group p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all">
+                        <label class="flex items-center gap-3 cursor-pointer group p-3 rounded-xl hover:bg-white border border-transparent hover:border-gray-200 transition-all">
                             <input type="checkbox" name="q25_26[]" value="{{ $letter }}"
                                    class="multi-select-2 w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer flex-none"
                                    data-group="q25-26-group">
@@ -497,7 +497,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the claims of the writer in Reading Passage 3?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 27–32 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">YES</span></div><div class="italic">if the statement agrees with the claims of the writer</div>
                             <div><span class="font-bold italic">NO</span></div><div class="italic">if the statement contradicts the claims of the writer</div>
@@ -508,7 +508,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -523,7 +523,7 @@
                                     [31, "The differing proposals for alterations to the baseball bat led to fierce debate on Sword's team."],
                                     [32, 'ABS makes changes to the shape of the strike zone feasible.'],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -552,12 +552,12 @@
                     <p class="text-sm text-gray-800 mb-5">Complete the summary using the list of phrases, <strong>A–H</strong>, below.</p>
 
                     {{-- Phrase list --}}
-                    <div class="border border-gray-200 rounded-xl bg-gray-50 p-5 mb-6 text-sm">
+                    <div class="border border-gray-200 rounded-xl bg-white p-5 mb-6 text-sm">
                         <div class="grid grid-cols-2 gap-x-6 gap-y-2">
                             @foreach(['A' => 'pitch boundary', 'B' => 'numerous disputes', 'C' => 'team tactics', 'D' => 'subjective assessment', 'E' => 'widespread approval', 'F' => 'former roles', 'G' => 'total silence', 'H' => 'perceived area'] as $letter => $phrase)
                             <div class="flex items-center gap-2">
                                 <span class="font-bold text-gray-700 w-5 flex-none">{{ $letter }}.</span>
-                                <span class="bg-blue-50 border border-blue-200 text-blue-800 rounded-lg px-3 py-1.5 font-medium text-sm">{{ $phrase }}</span>
+                                <span class="bg-white border border-blue-200 text-blue-800 rounded-lg px-3 py-1.5 font-medium text-sm">{{ $phrase }}</span>
                             </div>
                             @endforeach
                         </div>
@@ -663,7 +663,7 @@
                             <p class="font-semibold text-gray-900 mb-3 text-sm"><span class="font-bold">{{ $num }}.</span> {{ $question }}</p>
                             <div class="space-y-2 pl-5">
                                 @foreach($options as $letter => $text)
-                                <label class="flex items-start gap-3 cursor-pointer group p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <label class="flex items-start gap-3 cursor-pointer group p-2 rounded-lg hover:bg-white transition-colors">
                                     <input type="radio" name="q{{ $num }}" value="{{ $letter }}" class="mt-0.5 flex-none text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer">
                                     <span class="text-sm text-gray-800 group-hover:text-black"><strong class="mr-1.5">{{ $letter }}.</strong>{{ $text }}</span>
                                 </label>

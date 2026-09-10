@@ -23,8 +23,9 @@
     <style>
         html,
         body {
-            height: 100%;
-            overflow: hidden;
+            min-height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         @keyframes avatarPulse {
@@ -50,6 +51,8 @@
 
 <body class="font-sans antialiased bg-gray-50">
     @php
+        $type = $type ?? 'grammar';
+        $test = $test ?? null;
         $textToSpeak = '';
         if (str_starts_with($type, 'speaking')) {
             $textToSpeak .= "Part 1. ";
@@ -57,7 +60,7 @@
                 $textToSpeak .= implode(' ', $test->part1_questions) . ' ';
             }
             $textToSpeak .= "Part 2. ";
-            $questionsArray = is_string($test->questions) ? json_decode($test->questions, true) : $test->questions;
+            $questionsArray = isset($test->questions) ? (is_string($test->questions) ? json_decode($test->questions, true) : $test->questions) : [];
             if (is_array($questionsArray)) {
                 $textToSpeak .= implode(' ', $questionsArray) . ' ';
             }
@@ -94,8 +97,8 @@
         if (is_array($part3Idioms))
             $allIdioms = array_merge($allIdioms, $part3Idioms);
     @endphp
-    <div class="fixed inset-0 z-0 flex flex-col bg-gray-50"
-        x-data="promoTest({ promptText: {{ json_encode($textToSpeak) }}, part1Questions: {{ json_encode($test->part1_questions ?? []) }}, part2Questions: {{ json_encode(is_string($test->questions ?? '[]') ? json_decode($test->questions ?? '[]', true) : ($test->questions ?? [])) }}, part3Questions: {{ json_encode(isset($test->part3_questions) ? (is_string($test->part3_questions) ? json_decode($test->part3_questions, true) : $test->part3_questions) : []) }}, collocations: {{ json_encode($allCollocations) }}, idioms: {{ json_encode($allIdioms) }}, isSpeakingTest: {{ str_starts_with($type, 'speaking') ? 'true' : 'false' }}, isAdmin: {{ (auth()->check() && auth()->user()->isAdmin()) ? 'true' : 'false' }} })">
+    <div class="min-h-screen flex flex-col bg-gray-50"
+        x-data="promoTest({ promptText: {{ json_encode($textToSpeak) }}, part1Questions: {{ json_encode($test?->part1_questions ?? []) }}, part2Questions: {{ json_encode(is_string($test?->questions ?? '[]') ? json_decode($test?->questions ?? '[]', true) : ($test?->questions ?? [])) }}, part3Questions: {{ json_encode(isset($test?->part3_questions) ? (is_string($test->part3_questions) ? json_decode($test->part3_questions, true) : $test->part3_questions) : []) }}, collocations: {{ json_encode($allCollocations) }}, idioms: {{ json_encode($allIdioms) }}, isSpeakingTest: {{ str_starts_with($type ?? 'grammar', 'speaking') ? 'true' : 'false' }}, isAdmin: {{ (auth()->user()?->isAdmin()) ? 'true' : 'false' }} })">
 
         <!-- Header (always visible) -->
         <div class="flex-none bg-white border-b border-gray-200 shadow-sm z-10 w-full pl-0">
@@ -119,13 +122,16 @@
                         </div>
                     @endif
                     <div>
-                        <h1 class="text-xl font-bold text-gray-800">{{ $test->title }}</h1>
+                        <h1 class="text-xl font-bold text-gray-800">{{ $test->title ?? ($trackTitle ?? 'Grammar Practice Test') }}</h1>
                         <p class="text-sm text-gray-500">Free Practice Test</p>
                     </div>
                 </div>
-    <div class="flex-1 overflow-y-auto bg-[#F3F4FF] p-4 sm:p-8 custom-scrollbar">
-        <div class="max-w-4xl mx-auto">
-            <form x-data="{ showReview: {{ ($submitted ?? false) ? 'true' : 'false' }} }" method="POST" action="{{ route(\'promo.test.grammar.submit\', [\'meeting\' => $meetingNumber, \'id\' => $testId]) }}" class="bg-white rounded-3xl shadow-sm border border-orange-100 overflow-visible">
+            </div>
+        </div>
+
+    <div class="flex-1 bg-[#F3F4FF] p-4 sm:p-8 custom-scrollbar">
+        <div class="max-w-3xl mx-auto">
+            <form x-data="{ showReview: {{ ($submitted ?? false) ? 'true' : 'false' }} }" method="POST" action="{{ route('promo.test.grammar.submit', ['meeting' => $meetingNumber ?? 1]) }}" class="bg-white rounded-3xl shadow-sm border border-orange-100 overflow-visible">
                     @csrf
 
                     @if(!($submitted ?? false))
@@ -154,19 +160,9 @@
                         </div>
                     @endif
 
-                    <div class="bg-gradient-to-r from-orange-50 via-amber-50 to-white px-5 py-5 sm:px-8 sm:py-6 border-b border-orange-100">
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <h3 class="text-xl sm:text-2xl font-bold text-gray-800">Soal Meeting {{ $meetingLabel ?? $meetingNumber }}</h3>
-                                <p class="text-gray-600 mt-1 text-sm sm:text-base">Terjemahkan dan isi jawaban untuk setiap soal di bawah ini.</p>
-                            </div>
-                            <span class="inline-flex items-center justify-center rounded-full bg-orange-500 text-white text-xs font-bold px-3 py-1.5 w-fit">
-                                {{ count($questions) }} Soal
-                            </span>
-                        </div>
-
-                        @if(($submitted ?? false) === true)
-                            <div class="mt-4 rounded-2xl bg-orange-500 text-white px-4 py-4 shadow-sm">
+                    @if(($submitted ?? false) === true)
+                        <div class="bg-gradient-to-r from-orange-50 via-amber-50 to-white px-5 py-5 sm:px-8 sm:py-6 border-b border-orange-100">
+                            <div class="rounded-2xl bg-orange-500 text-white px-4 py-4 shadow-sm">
                                 <p class="text-sm opacity-90">Nilai Kamu</p>
                                 <p class="text-2xl font-bold leading-tight">{{ $score }} / 100</p>
                                 <p class="text-sm mt-1 opacity-90">
@@ -184,8 +180,8 @@
                                     <span x-show="showReview">Sembunyikan Pembahasan</span>
                                 </button>
                             </div>
-                        @endif
                     </div>
+                        @endif
 
                     <div class="p-5 sm:p-8 space-y-4 sm:space-y-5">
                         @if(!empty($cheatSheet))
@@ -344,7 +340,21 @@
                                                     {{ $loop->iteration }}
                                                 </div>
                                                 <div class="pt-1 flex-1">
-                                                    <p class="text-gray-800 leading-relaxed">{{ $question }}</p>
+                                                    <p class="text-gray-800 leading-relaxed font-medium">{{ $question }}</p>
+                                                    @if(!empty($helper['vocab']))
+                                                        <div class="flex flex-wrap gap-1 sm:gap-1.5 pt-1.5">
+                                                            @foreach($helper['vocab'] as $enTerm => $vocabData)
+                                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-slate-50 hover:bg-orange-50/70 text-slate-700 text-[11px] sm:text-xs font-medium rounded-lg border border-slate-200/80 transition-colors">
+                                                                    <strong class="text-orange-700">{{ $enTerm }}</strong>
+                                                                    <span class="text-slate-400">=</span>
+                                                                    <span>{{ is_array($vocabData) ? ($vocabData['id'] ?? '') : $vocabData }}</span>
+                                                                    @if(is_array($vocabData) && !empty($vocabData['pos']))
+                                                                        <span class="text-[9px] sm:text-[10px] px-1 py-0.2 bg-slate-200/80 text-slate-600 rounded font-mono">{{ trim($vocabData['pos'], '()') }}</span>
+                                                                    @endif
+                                                                </span>
+                                                            @endforeach
+                                                        </div>
+                                                    @endif
                                                 </div>
                                                 <div class="flex flex-col gap-1 ml-2">
                                                     @if(!empty($helper['example']))
@@ -442,8 +452,22 @@
                                         {{ $index + 1 }}
                                     </div>
                                     <div class="pt-1 flex-1">
-                                        <p class="text-gray-800 leading-relaxed">{{ $question }}</p>
-                                        @if(Auth::user()->isAdmin() && (int) $meetingNumber === 1)
+                                        <p class="text-gray-800 leading-relaxed font-medium">{{ $question }}</p>
+                                        @if(!empty($helper['vocab']))
+                                            <div class="flex flex-wrap gap-1 sm:gap-1.5 pt-1.5">
+                                                @foreach($helper['vocab'] as $enTerm => $vocabData)
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-slate-50 hover:bg-orange-50/70 text-slate-700 text-[11px] sm:text-xs font-medium rounded-lg border border-slate-200/80 transition-colors">
+                                                        <strong class="text-orange-700">{{ $enTerm }}</strong>
+                                                        <span class="text-slate-400">=</span>
+                                                        <span>{{ is_array($vocabData) ? ($vocabData['id'] ?? '') : $vocabData }}</span>
+                                                        @if(is_array($vocabData) && !empty($vocabData['pos']))
+                                                            <span class="text-[9px] sm:text-[10px] px-1 py-0.2 bg-slate-200/80 text-slate-600 rounded font-mono">{{ trim($vocabData['pos'], '()') }}</span>
+                                                        @endif
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                        @if(Auth::user()?->isAdmin() && (int) $meetingNumber === 1)
                                             <div class="mt-2 flex items-center gap-2 text-xs">
                                                 <button type="button"
                                                         class="px-2 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
@@ -558,7 +582,7 @@
                             <div class="mt-8 rounded-2xl border border-green-200 bg-green-50/40 p-4 sm:p-5 space-y-4">
                                 <div class="flex items-center justify-between gap-3">
                                     <h4 class="text-lg font-bold text-gray-800">Latihan Paragraf</h4>
-                                    @if(Auth::user()->isAdmin() && (int) $meetingNumber === 3)
+                                    @if(Auth::user()?->isAdmin() && (int) $meetingNumber === 3)
                                         <button type="button"
                                                 class="px-3 py-1 rounded-md bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 text-xs font-semibold"
                                                 onclick="openIntroParagraphEditor({
@@ -618,13 +642,36 @@
                         @endif
                     </div>
 
+                    @if(!($submitted ?? false))
+                    <div class="pt-6 pb-6 border-t border-gray-100 flex flex-col items-center gap-2">
+                        <a href="{{ url('/brochure/' . (request('b') ?: 'offline')) }}" target="_blank"
+                            class="inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-700 transition-colors group">
+                            <svg class="w-4 h-4 text-red-500 group-hover:text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="font-medium underline decoration-transparent group-hover:decoration-red-300 underline-offset-4 transition-all">Informasi Kelas Grammar Target Bahasa</span>
+                            <svg class="w-3.5 h-3.5 opacity-0 -ml-1 group-hover:opacity-100 group-hover:ml-0 transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                        </a>
+                        <div class="mt-1 text-xs text-gray-500 text-center">
+                            <p>Jalan Brawijaya 64 Pare Kediri - Kampung Inggris Pare</p>
+                            <p class="mt-1 text-green-600 font-bold text-sm">WhatsApp 0857 0661 5607</p>
+                        </div>
+                        <div class="mt-4 cf-turnstile" data-sitekey="{{ env('TURNSTILE_SITE_KEY') }}"
+                            data-action="submit"
+                            data-callback="onTurnstileVerified"
+                            data-expired-callback="onTurnstileExpired"></div>
+                    </div>
+                    @endif
+
                     <div class="px-5 py-6 sm:px-8 border-t border-gray-100 bg-gray-50/60 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <a href="{{ route('assignments.grammar-writing.track', 'introductory') }}"
+                        <a href="{{ route('promo.test.index') }}"
                            class="w-full sm:w-auto justify-center inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 text-gray-600 rounded-xl font-bold hover:bg-gray-50 transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                             </svg>
-                            Kembali ke Daftar Meeting
+                            Kembali ke Daftar Promo Tes
                         </a>
                         @if(($submitted ?? false) === true)
                             <button type="submit"
@@ -671,5 +718,142 @@
         </div>
     </div>
 </div>
+
+@if(Auth::user()?->isAdmin())
+    {{-- Hidden forms for question create/update/delete --}}
+    <form id="intro-question-create-form" method="POST" action="{{ route('admin.grammar.question.store') }}" class="hidden">
+        @csrf
+        <input type="hidden" name="meeting_number" id="intro-create-meeting-number">
+        <input type="hidden" name="question_number" id="intro-create-question-number">
+        <input type="hidden" name="section" id="intro-create-section">
+        <input type="hidden" name="question_text" id="intro-create-question-text">
+        <input type="hidden" name="correct_answer" id="intro-create-correct-answer">
+    </form>
+
+    <form id="intro-question-update-form" method="POST" action="" class="hidden">
+        @csrf
+        @method('PUT')
+        <input type="hidden" name="section" id="intro-update-section">
+        <input type="hidden" name="question_text" id="intro-update-question-text">
+        <input type="hidden" name="correct_answer" id="intro-update-correct-answer">
+    </form>
+
+    <form id="intro-question-delete-form" method="POST" action="" class="hidden">
+        @csrf
+        @method('DELETE')
+    </form>
+
+    {{-- Question Editor Modal --}}
+    <div id="intro-question-editor-modal" class="fixed inset-0 z-[200] hidden" aria-hidden="true">
+        <div id="intro-question-editor-overlay" class="absolute inset-0 bg-black/50"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="w-full max-w-2xl rounded-2xl bg-white shadow-2xl border border-gray-200 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-gray-800">Editor Soal</h3>
+                    <button type="button" id="intro-question-editor-close" class="text-gray-500 hover:text-gray-700 text-sm font-semibold">Tutup</button>
+                </div>
+                <div class="p-5 space-y-4">
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">Nomor Soal</p>
+                        <p id="intro-question-editor-number" class="text-sm font-semibold text-gray-700">-</p>
+                    </div>
+                    <div>
+                        <label for="intro-question-editor-text" class="block text-sm font-semibold text-gray-700 mb-1">Teks Soal (Indonesia)</label>
+                        <textarea id="intro-question-editor-text" rows="4" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"></textarea>
+                    </div>
+                    <div>
+                        <label for="intro-question-editor-answer" class="block text-sm font-semibold text-gray-700 mb-1">Kunci Jawaban (English)</label>
+                        <textarea id="intro-question-editor-answer" rows="4" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"></textarea>
+                    </div>
+                </div>
+                <div class="px-5 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-end gap-2">
+                    <button type="button" id="intro-question-editor-cancel" class="px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 text-sm font-semibold hover:bg-gray-50">Batal</button>
+                    <button type="button" id="intro-question-editor-save" class="px-4 py-2 rounded-lg bg-orange-500 text-white text-sm font-semibold hover:bg-orange-600">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentIntroEditorPayload = null;
+
+        function openIntroQuestionEditor(payload) {
+            currentIntroEditorPayload = payload;
+            document.getElementById('intro-question-editor-number').textContent = `Meeting ${payload.meetingNumber} - Soal ${payload.questionNumber}`;
+            document.getElementById('intro-question-editor-text').value = payload.questionText || '';
+            document.getElementById('intro-question-editor-answer').value = payload.correctAnswer || '';
+            const modal = document.getElementById('intro-question-editor-modal');
+            modal.classList.remove('hidden');
+            modal.setAttribute('aria-hidden', 'false');
+            setTimeout(() => { document.getElementById('intro-question-editor-text').focus(); }, 0);
+        }
+
+        function closeIntroQuestionEditor() {
+            const modal = document.getElementById('intro-question-editor-modal');
+            modal.classList.add('hidden');
+            modal.setAttribute('aria-hidden', 'true');
+            currentIntroEditorPayload = null;
+        }
+
+        function saveIntroQuestionEditor() {
+            if (!currentIntroEditorPayload) return;
+            const trimmedQuestionText = document.getElementById('intro-question-editor-text').value.trim();
+            const trimmedCorrectAnswer = document.getElementById('intro-question-editor-answer').value.trim();
+            if (!trimmedQuestionText || !trimmedCorrectAnswer) {
+                window.alert('Soal dan kunci jawaban wajib diisi.');
+                return;
+            }
+            if (currentIntroEditorPayload.dbId) {
+                const updateForm = document.getElementById('intro-question-update-form');
+                updateForm.action = `/admin/assignments/grammar-writing/questions/${currentIntroEditorPayload.dbId}`;
+                document.getElementById('intro-update-section').value = `introductory_${currentIntroEditorPayload.meetingNumber}`;
+                document.getElementById('intro-update-question-text').value = trimmedQuestionText;
+                document.getElementById('intro-update-correct-answer').value = trimmedCorrectAnswer;
+                updateForm.submit();
+                return;
+            }
+            const createForm = document.getElementById('intro-question-create-form');
+            document.getElementById('intro-create-meeting-number').value = currentIntroEditorPayload.meetingNumber;
+            document.getElementById('intro-create-question-number').value = currentIntroEditorPayload.questionNumber;
+            document.getElementById('intro-create-section').value = `introductory_${currentIntroEditorPayload.meetingNumber}`;
+            document.getElementById('intro-create-question-text').value = trimmedQuestionText;
+            document.getElementById('intro-create-correct-answer').value = trimmedCorrectAnswer;
+            createForm.submit();
+        }
+
+        function deleteIntroQuestionOverride(dbId) {
+            if (!window.confirm('Hapus override soal ini? Soal akan kembali ke default.')) return;
+            const deleteForm = document.getElementById('intro-question-delete-form');
+            deleteForm.action = `/admin/assignments/grammar-writing/questions/${dbId}`;
+            deleteForm.submit();
+        }
+
+        document.getElementById('intro-question-editor-save')?.addEventListener('click', saveIntroQuestionEditor);
+        document.getElementById('intro-question-editor-cancel')?.addEventListener('click', closeIntroQuestionEditor);
+        document.getElementById('intro-question-editor-close')?.addEventListener('click', closeIntroQuestionEditor);
+        document.getElementById('intro-question-editor-overlay')?.addEventListener('click', closeIntroQuestionEditor);
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('intro-question-editor-modal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    closeIntroQuestionEditor();
+                }
+            }
+        });
+    </script>
+@endif
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+@include('assignments.ielts.writing.practice_toolbar', [
+    'meeting' => (object)[
+        'task_type' => 3,
+        'prompt' => $test->title ?? 'Grammar Practice Test'
+    ],
+    'grammarLevel' => 'all'
+])
+
 </body>
+
 </html>

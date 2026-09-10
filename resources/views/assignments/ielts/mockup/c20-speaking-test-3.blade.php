@@ -29,7 +29,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50" x-data="speakingMockup()" x-cloak>
+<body class="font-sans antialiased bg-white" x-data="speakingMockup()" x-cloak>
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -38,7 +38,7 @@
     <!-- Start Test Overlay -->
     <div x-show="!hasStarted" class="fixed inset-0 z-50 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center transition-opacity" x-transition>
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl transform transition-all scale-100">
-            <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div class="w-20 h-20 bg-white text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                 </svg>
@@ -56,7 +56,7 @@
         <div class="px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
                 {{-- Mobile menu button --}}
-                <button type="button" class="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500" onclick="document.dispatchEvent(new CustomEvent('toggle-sidebar'))">
+                <button type="button" class="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500" onclick="document.dispatchEvent(new CustomEvent('toggle-sidebar'))">
                     <span class="sr-only">Open sidebar</span>
                     <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -84,7 +84,7 @@
 
     {{-- Main Content block --}}
     <div class="flex-1 min-h-[80vh] flex flex-col md:pl-64 lg:pl-72 transition-all duration-300" id="main-content">
-        <div class="flex-1 min-h-[80vh] flex flex-col items-center justify-center relative bg-gray-50 p-4 sm:p-0">
+        <div class="flex-1 min-h-[80vh] flex flex-col items-center justify-center relative bg-white p-4 sm:p-0">
             <div class="bg-white rounded-3xl sm:rounded-none sm:border-l border-gray-200 flex flex-col items-center justify-center p-8 relative w-full h-full sm:h-auto max-w-2xl sm:max-w-none shadow-sm sm:shadow-none min-h-[500px]">
                 
                 <div class="absolute top-8 left-8">
@@ -99,7 +99,7 @@
                     <p class="text-sm sm:text-base text-gray-500 mb-8 sm:mb-12 h-10" x-text="currentPart === 1 && introState <= 2 ? 'Listen to the examiner and answer when the mic turns red.' : 'Click record, listen to the prompt, and speak your answer. Once finished, proceed to the next part.'"></p>
 
                     <!-- Visualizer / Status -->
-                    <div class="h-28 sm:h-32 flex items-center justify-center w-full mb-8 lg:mb-12 bg-gray-50 rounded-2xl border border-gray-100 transition-all duration-300">
+                    <div class="h-28 sm:h-32 flex items-center justify-center w-full mb-8 lg:mb-12 bg-white rounded-2xl border border-gray-100 transition-all duration-300">
                         <template x-if="!recordings[currentPart] && !isRecording && !isPreparing && !isReadingPrompt">
                             <div class="flex flex-col items-center p-4">
                                 <svg class="w-7 h-7 sm:w-8 sm:h-8 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -204,7 +204,7 @@
                     <div class="flex flex-row justify-between items-center w-full pt-6 sm:pt-8 border-t border-gray-100 gap-2">
                         <button @click="prevPart()" 
                                 :class="{'opacity-0 pointer-events-none': currentPart === 1}"
-                                class="px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl text-gray-500 font-medium hover:bg-gray-100 transition-colors flex items-center gap-1 sm:gap-2 text-sm sm:text-base flex-1 sm:flex-none justify-center">
+                                class="px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl text-gray-500 font-medium hover:bg-white transition-colors flex items-center gap-1 sm:gap-2 text-sm sm:text-base flex-1 sm:flex-none justify-center">
                             <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                             <span class="hidden sm:inline">Part</span> <span x-text="currentPart - 1"></span>
                         </button>

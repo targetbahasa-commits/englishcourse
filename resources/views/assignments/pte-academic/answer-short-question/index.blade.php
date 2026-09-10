@@ -8,7 +8,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased bg-gray-50 flex flex-col min-h-screen">
+<body class="font-sans antialiased bg-white flex flex-col min-h-screen">
 
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
@@ -29,12 +29,18 @@
         @endif
 
         {{-- Main Content --}}
-        <main class="flex-1 md:ml-64 p-8">
+        <main class="flex-1 md:ml-64 p-4 md:p-8">
             {{-- Header --}}
-            <div class="mb-8">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="p-3 bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl shadow-lg">
+            <div class="mb-6 bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
+                <div class="flex justify-end mb-2">
+                    <a href="{{ route('assignments.pte-academic.speaking-writing.index') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-gray-600 bg-white hover:bg-white border border-gray-200 rounded-full shadow-sm transition-all shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        <span>Back</span>
+                    </a>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="p-3 bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl shadow-lg">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
@@ -48,11 +54,6 @@
                             <h1 class="text-3xl font-bold text-gray-800">300 Answer Short Question Topics</h1>
                             <p class="text-gray-600 mt-1">Pilih topik untuk memulai latihan Answer Short Questions Anda.</p>
                         </div>
-                    </div>
-                    <a href="{{ route('assignments.pte-academic.speaking-writing.index') }}" class="px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                        Back
-                    </a>
                 </div>
             </div>
 
@@ -67,7 +68,7 @@
                         <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 text-white rounded-xl shadow-md flex items-center justify-center font-bold text-lg group-hover:shadow-lg group-hover:from-purple-500 group-hover:to-purple-700 transition-all duration-300">
                             {{ $i }}
                         </div>
-                        <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 group-hover:bg-purple-50 group-hover:text-purple-500 transition-all duration-300">
+                        <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-300 group-hover:bg-white group-hover:text-purple-500 transition-all duration-300">
                             <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                         </div>
                     </div>

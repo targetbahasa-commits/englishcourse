@@ -137,7 +137,6 @@
                 <button type="button"
                         @click.stop="showCheatSheet = false"
                         @mousedown.stop="showCheatSheet = false"
-                        onclick="this.closest('[x-data]').__x.$data.showCheatSheet = false"
                         class="relative z-20 pointer-events-auto bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg border-2 border-red-700 transform transition hover:scale-105 flex items-center justify-center w-9 h-9 md:w-10 md:h-10 cursor-pointer"
                         title="Close">
                     <svg class="w-6 h-6 pointer-events-none font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -297,19 +296,19 @@
 
         <div class="flex items-center gap-2 flex-wrap justify-end">
             @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
-                <button type="button" onclick="openAnswerKeyStatusModal()" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold {{ $isAnswerKeyComplete ? 'bg-emerald-100 text-emerald-700 border border-emerald-200 hover:bg-emerald-200' : 'bg-amber-100 text-amber-700 border border-amber-200 hover:bg-amber-200' }} transition" title="Lihat daftar answer key">
+                <button type="button" onclick="openAnswerKeyStatusModal()" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold {{ $isAnswerKeyComplete ? 'bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-200' : 'bg-white text-amber-700 border border-amber-200 hover:bg-amber-200' }} transition" title="Lihat daftar answer key">
                     <span class="w-2 h-2 rounded-full {{ $isAnswerKeyComplete ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
                     {{ $isAnswerKeyComplete ? 'Answer Key Ditambahkan' : 'Answer Key Belum Lengkap' }}
                 </button>
-                <button type="button" onclick="openAnswerKeyStatusModal()" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition" title="Lihat daftar answer key">
+                <button type="button" onclick="openAnswerKeyStatusModal()" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-200 transition" title="Lihat daftar answer key">
                     {{ $answerKeyFilledCount }}/{{ $totalQuestionCount }} Soal
                 </button>
             @else
-                <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold {{ $isAnswerKeyComplete ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-amber-100 text-amber-700 border border-amber-200' }}">
+                <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold {{ $isAnswerKeyComplete ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-white text-amber-700 border border-amber-200' }}">
                     <span class="w-2 h-2 rounded-full {{ $isAnswerKeyComplete ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
                     {{ $isAnswerKeyComplete ? 'Answer Key Ditambahkan' : 'Answer Key Belum Lengkap' }}
                 </span>
-                <span class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                <span class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold bg-white text-slate-700 border border-slate-200">
                     {{ $answerKeyFilledCount }}/{{ $totalQuestionCount }} Soal
                 </span>
             @endif
@@ -329,7 +328,7 @@
             @endif
 
             @if($hasSavedExplanation)
-                <a href="{{ route('assignments.toefl-itp.structure.meeting.download-explanation', $number) }}" class="px-4 py-2 bg-white text-slate-700 rounded-lg shadow-md hover:bg-slate-50 transition flex items-center gap-2 border border-slate-200">
+                <a href="{{ route('assignments.toefl-itp.structure.meeting.download-explanation', $number) }}" class="px-4 py-2 bg-white text-slate-700 rounded-lg shadow-md hover:bg-white transition flex items-center gap-2 border border-slate-200">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"></path></svg>
                     Download Teacher Notes
                 </a>
@@ -639,10 +638,10 @@
         <!-- Explanation Mode Toggle (Header) -->
         <div class="mb-4 flex justify-end gap-2">
             <div class="px-3 py-2 rounded-lg bg-white/80 border border-gray-200 shadow-sm flex items-center gap-2">
-                <button type="button" @click="zoomQuestionOut()" class="w-7 h-7 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold">-</button>
+                <button type="button" @click="zoomQuestionOut()" class="w-7 h-7 rounded-md bg-white hover:bg-gray-200 text-gray-700 font-bold">-</button>
                 <span class="text-xs font-bold text-gray-600 min-w-[48px] text-center" x-text="Math.round(questionZoom * 100) + '%'">100%</span>
-                <button type="button" @click="zoomQuestionIn()" class="w-7 h-7 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold">+</button>
-                <button type="button" @click="resetQuestionZoom()" class="px-2 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-[11px] font-semibold text-gray-700">Reset</button>
+                <button type="button" @click="zoomQuestionIn()" class="w-7 h-7 rounded-md bg-white hover:bg-gray-200 text-gray-700 font-bold">+</button>
+                <button type="button" @click="resetQuestionZoom()" class="px-2 py-1 rounded-md bg-white hover:bg-gray-200 text-[11px] font-semibold text-gray-700">Reset</button>
             </div>
         </div>
 
@@ -751,7 +750,7 @@
              <template x-for="stamp in stamps" :key="stamp">
                 <button @click="setStamp(stamp)"
                     class="px-3 py-2 rounded-lg text-xs font-bold transition shadow-sm border"
-                    :class="selectedStamp === stamp ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-gray-50 text-gray-600 hover:bg-indigo-50 border-gray-100'"
+                    :class="selectedStamp === stamp ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 hover:bg-white border-gray-100'"
                     x-text="stamp"
                 ></button>
              </template>
@@ -795,26 +794,66 @@
                 </div>
                 <div class="space-y-8">
                     @forelse($questions as $question)
-                    <div class="question-item relative group/item" x-data="{ selected: '{{ $userAnswer ?? '' }}' }">
+                    <div class="question-item relative group/item" x-data="{ selected: '{{ $userAnswer ?? '' }}', menuOpen: false }">
 
                         @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
-                            <div class="absolute top-0 right-0 flex gap-2 transition z-50">
-                                @if(Auth::user()->isAdmin())
-                                <button type="button" onclick="openEditAnswerModal({{ $question->id }}, '{{ $question->correct_answer }}')" class="p-1 bg-yellow-100 text-yellow-600 rounded hover:bg-yellow-200" title="Edit Answer Key">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                            @if(Auth::user()->isAdmin())
+                            <div class="absolute top-0 right-0 z-30" @click.outside="menuOpen = false">
+                                <button type="button" 
+                                        @click.stop="menuOpen = !menuOpen" 
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 border border-transparent hover:border-gray-200 transition-colors focus:outline-none"
+                                        :class="{ 'text-gray-700 bg-gray-100 border-gray-200': menuOpen }"
+                                        title="Menu Aksi Soal">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                                    </svg>
                                 </button>
-                                <button type="button" onclick="openEditQuestionModal({{ $question }})" class="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200" title="Edit">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                </button>
-                                <form action="{{ route('assignments.toefl-itp.structure.question.destroy', $question->id) }}" method="POST" onsubmit="return confirm('Delete this question?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="p-1 bg-red-100 text-red-600 rounded hover:bg-red-200" title="Delete">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                </form>
-                                @endif
+
+                                <div x-show="menuOpen" 
+                                     x-transition:enter="transition ease-out duration-100"
+                                     x-transition:enter-start="opacity-0 scale-95"
+                                     x-transition:enter-end="opacity-100 scale-100"
+                                     x-transition:leave="transition ease-in duration-75"
+                                     x-transition:leave-start="opacity-100 scale-100"
+                                     x-transition:leave-end="opacity-0 scale-95"
+                                     class="absolute right-0 mt-1 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50 divide-y divide-gray-100"
+                                     style="display: none;">
+                                    <div class="py-1">
+                                        <button type="button" 
+                                                @click="menuOpen = false; openEditAnswerModal({{ $question->id }}, '{{ $question->correct_answer }}')" 
+                                                class="w-full px-3 py-2 text-left text-xs font-semibold text-gray-700 hover:bg-yellow-50 hover:text-yellow-800 flex items-center gap-2.5 transition-colors">
+                                            <span class="p-1 rounded bg-yellow-100 text-yellow-700 shrink-0">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                                            </span>
+                                            <span>Kunci Jawaban ({{ $question->correct_answer }})</span>
+                                        </button>
+
+                                        <button type="button" 
+                                                @click="menuOpen = false; openEditQuestionModal(@json($question))" 
+                                                class="w-full px-3 py-2 text-left text-xs font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2.5 transition-colors">
+                                            <span class="p-1 rounded bg-blue-100 text-blue-700 shrink-0">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                            </span>
+                                            <span>Edit Soal</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="py-1">
+                                        <form action="{{ route('assignments.toefl-itp.structure.question.destroy', $question->id) }}" method="POST" onsubmit="return confirm('Hapus soal ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" 
+                                                    class="w-full px-3 py-2 text-left text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2.5 transition-colors">
+                                                <span class="p-1 rounded bg-red-100 text-red-600 shrink-0">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                </span>
+                                                <span>Hapus Soal</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
+                            @endif
                         @endif
 
                         @php
@@ -832,13 +871,13 @@
                         @endphp
 
                         <div class="flex gap-4 items-start">
-                            <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-600 font-bold rounded-lg text-sm {{ $isWrittenExpression ? 'mt-4' : '' }}">
+                            <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-white text-gray-600 font-bold rounded-lg text-sm {{ $isWrittenExpression ? 'mt-4' : '' }}">
                                 {{ $question->question_number }}
                             </span>
                             
 
                             
-                            <div class="flex-1" 
+                            <div class="flex-1 min-w-0 pr-10" 
                                  @click.self="if($root.explanationMode && $root.tool === 'laser') { $root.showLaserPointer($event) }"
                                  x-init="$watch('selected', value => {
                                     $el.querySelectorAll('.error-option').forEach(opt => {
@@ -877,7 +916,7 @@
                                         @php
                                             $optionUpper = strtoupper($option);
                                             // Default class
-                                            $staticClass = 'border-gray-200 hover:bg-gray-50';
+                                            $staticClass = 'border-gray-200 hover:bg-white';
                                             
                                             // PHP-based styling for scored state
                                             if(session('score_data')) {
@@ -893,7 +932,7 @@
                                             @if(session('score_data'))
                                                 class="{{ $staticClass }}"
                                             @else
-                                                :class="showAnswerKey && '{{ $optionUpper }}' === '{{ $question->correct_answer }}' ? 'border-green-500 bg-green-50 ring-1 ring-green-500' : (selected == '{{ $optionUpper }}' ? 'border-gray-300 bg-white' : 'border-gray-200 hover:bg-gray-50')"
+                                                :class="showAnswerKey && '{{ $optionUpper }}' === '{{ $question->correct_answer }}' ? 'border-green-500 bg-green-50 ring-1 ring-green-500' : (selected == '{{ $optionUpper }}' ? 'border-gray-300 bg-white' : 'border-gray-200 hover:bg-white')"
                                             @endif
                                         >
                                             <input type="radio" name="answers[{{ $question->id }}]" value="{{ $optionUpper }}" class="peer sr-only" x-model="selected" {{ session('score_data') ? 'disabled' : '' }}>
@@ -903,9 +942,9 @@
                                                 <!-- Letter Badge -->
                                                 <span class="w-8 h-8 min-w-[2rem] shrink-0 flex items-center justify-center rounded-full text-sm font-bold transition-colors border aspect-square"
                                                     @if(session('score_data'))
-                                                        class="{{ $checked ? ($isCorrect ? 'bg-green-600 text-white border-green-600' : 'bg-red-600 text-white border-red-600') : 'bg-gray-50 text-gray-500 border-gray-200' }}"
+                                                        class="{{ $checked ? ($isCorrect ? 'bg-green-600 text-white border-green-600' : 'bg-red-600 text-white border-red-600') : 'bg-white text-gray-500 border-gray-200' }}"
                                                     @else
-                                                        :class="showAnswerKey && '{{ $optionUpper }}' === '{{ $question->correct_answer }}' ? 'bg-green-600 text-white border-green-600' : (selected == '{{ $optionUpper }}' ? 'bg-red-600 text-white border-red-600' : 'bg-gray-50 text-gray-500 border-gray-200 group-hover:bg-gray-100')"
+                                                        :class="showAnswerKey && '{{ $optionUpper }}' === '{{ $question->correct_answer }}' ? 'bg-green-600 text-white border-green-600' : (selected == '{{ $optionUpper }}' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-500 border-gray-200 group-hover:bg-white')"
                                                     @endif
                                                 >
                                                     {{ $optionUpper }}
@@ -947,10 +986,10 @@
                                     @php
                                         $answerStatus = is_null($userAnswer) ? 'Belum Dijawab' : ($isCorrect ? 'Benar' : 'Salah');
                                         $answerStatusClass = is_null($userAnswer)
-                                            ? 'bg-gray-100 text-gray-700 border-gray-300'
+                                            ? 'bg-white text-gray-700 border-gray-300'
                                             : ($isCorrect ? 'bg-green-100 text-green-700 border-green-300' : 'bg-red-100 text-red-700 border-red-300');
                                     @endphp
-                                    <div class="mt-4 p-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 space-y-3">
+                                    <div class="mt-4 p-4 rounded-xl border border-slate-200 bg-white text-slate-800 space-y-3">
                                         <div class="flex flex-wrap items-center gap-2">
                                             <span class="text-xs font-bold px-2 py-1 rounded-md bg-white border border-slate-300">
                                                 Kunci: {{ $correctAnswer ?? '-' }}
@@ -963,7 +1002,7 @@
                                             </span>
                                         </div>
 
-                                        <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-900">
+                                        <div class="rounded-lg border border-amber-200 bg-white p-3 text-amber-900">
                                             <p class="text-sm font-bold mb-1">Penjelasan Jawaban</p>
                                             <p class="text-sm leading-relaxed">
                                                 {{ $question->explanation ?: 'Penjelasan belum tersedia untuk soal ini.' }}
@@ -976,7 +1015,7 @@
                     </div>
                     @empty
                     <div class="text-center py-12">
-                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
                             <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         </div>
                         <h3 class="text-lg font-bold text-gray-800 mb-1">No Questions Yet</h3>
@@ -1004,7 +1043,7 @@
                     </div>
                     
                     <div class="mt-8 flex justify-center gap-4">
-                        <a href="{{ route('assignments.toefl-itp.structure.meeting', $number) }}" class="px-6 py-2 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition">
+                        <a href="{{ route('assignments.toefl-itp.structure.meeting', $number) }}" class="px-6 py-2 bg-white text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition">
                             Try Again
                         </a>
                         <a href="{{ $backRoute }}" class="px-6 py-2 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition">
@@ -1580,7 +1619,7 @@
 
             <div class="max-h-96 overflow-y-auto border border-gray-100 rounded-lg">
                 <table class="w-full text-sm">
-                    <thead class="sticky top-0 bg-gray-50 border-b border-gray-100">
+                    <thead class="sticky top-0 bg-white border-b border-gray-100">
                         <tr>
                             <th class="text-left px-4 py-2 font-semibold text-gray-600">Nomor</th>
                             <th class="text-left px-4 py-2 font-semibold text-gray-600">Answer Key</th>
@@ -1606,7 +1645,7 @@
                                     </select>
                                 </td>
                                 <td class="px-4 py-2">
-                                    <span id="answer-key-status-{{ $question->id }}" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold {{ $isFilled ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
+                                    <span id="answer-key-status-{{ $question->id }}" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold {{ $isFilled ? 'bg-white text-emerald-700' : 'bg-white text-amber-700' }}">
                                         <span class="w-1.5 h-1.5 rounded-full {{ $isFilled ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
                                         {{ $isFilled ? 'Terisi' : 'Kosong' }}
                                     </span>
@@ -1677,10 +1716,10 @@
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-3">Select Correct Answer:</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <button type="button" class="answer-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-bold text-lg hover:bg-blue-50 transition" data-answer="A">A</button>
-                        <button type="button" class="answer-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-bold text-lg hover:bg-blue-50 transition" data-answer="B">B</button>
-                        <button type="button" class="answer-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-bold text-lg hover:bg-blue-50 transition" data-answer="C">C</button>
-                        <button type="button" class="answer-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-bold text-lg hover:bg-blue-50 transition" data-answer="D">D</button>
+                        <button type="button" class="answer-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-bold text-lg hover:bg-white transition" data-answer="A">A</button>
+                        <button type="button" class="answer-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-bold text-lg hover:bg-white transition" data-answer="B">B</button>
+                        <button type="button" class="answer-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-bold text-lg hover:bg-white transition" data-answer="C">C</button>
+                        <button type="button" class="answer-btn px-4 py-3 border-2 border-gray-300 rounded-lg font-bold text-lg hover:bg-white transition" data-answer="D">D</button>
                     </div>
                     <input type="hidden" name="correct_answer" id="selectedAnswer" value="">
                 </div>
@@ -1773,7 +1812,7 @@
                 }
 
                 if (statusEl) {
-                    statusEl.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700';
+                    statusEl.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-white text-emerald-700';
                     statusEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Terisi';
                 }
 
@@ -1881,5 +1920,6 @@
 @endif
     <!-- Irregular Verbs Button -->
     <x-irregular-verbs-button />
+    <x-live-drawing />
 
 @endsection

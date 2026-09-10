@@ -9,7 +9,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 <div class="flex min-h-screen">
@@ -27,7 +27,7 @@
                         <p class="text-gray-600 mt-1">Cambridge {{ $edition }} Test {{ $testId }}</p>
                     </div>
                 </div>
-                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId ?? 3]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId ?? 3]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
@@ -132,7 +132,7 @@
                         <table class="w-full border-collapse border border-black min-w-[600px] text-sm md:text-base">
                             <thead>
                                 <tr>
-                                    <th colspan="3" class="border border-black p-3 text-center bg-gray-100 font-bold">Shopping</th>
+                                    <th colspan="3" class="border border-black p-3 text-center bg-white font-bold">Shopping</th>
                                 </tr>
                                 <tr>
                                     <th class="border border-black p-3 bg-white w-1/4"></th>
@@ -237,7 +237,7 @@
                                 <div class="flex items-center gap-4 border-b border-gray-100 py-3">
                                     <span class="font-bold w-6 text-lg">{{ $num }}</span>
                                     <span class="flex-1 text-base">{{ $workshop }}</span>
-                                    <select class="appearance-none border border-black rounded-lg bg-white w-20 py-1.5 px-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-bold text-lg cursor-pointer hover:bg-gray-50 transition-colors" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%234b5563%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19.5%208.25l-7.5%207.5-7.5-7.5%22%20%2F%3E%3C%2Fsvg%3E'); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.25rem; padding-right: 1.5rem; text-align: left;">
+                                    <select class="appearance-none border border-black rounded-lg bg-white w-20 py-1.5 px-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 font-bold text-lg cursor-pointer hover:bg-white transition-colors" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke-width%3D%222%22%20stroke%3D%22%234b5563%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19.5%208.25l-7.5%207.5-7.5-7.5%22%20%2F%3E%3C%2Fsvg%3E'); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.25rem; padding-right: 1.5rem; text-align: left;">
                                         <option value=""></option>
                                         @foreach(['A','B','C','D','E','F','G','H'] as $opt)
                                         <option value="{{ $opt }}">{{ $opt }}</option>

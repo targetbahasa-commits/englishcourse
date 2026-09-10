@@ -14,13 +14,13 @@
         </div>
 
         {{-- Example row: Name --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 font-bold text-gray-600 italic">Name:</div>
             <div class="p-3 font-bold text-gray-600 italic">Janet Evans</div>
         </div>
 
         {{-- Q1: Address --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Address:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">49</span>
@@ -33,7 +33,7 @@
         </div>
 
         {{-- Q2: Email --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Email:</div>
             <div class="p-3">
                 <strong>2</strong>
@@ -44,13 +44,13 @@
         </div>
 
         {{-- Telephone (given) --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Telephone number:</div>
             <div class="p-3 text-gray-700">(020) 4251-9443</div>
         </div>
 
         {{-- Q3: Best time to contact --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Best time to contact:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <strong>3</strong>
@@ -67,7 +67,7 @@
         </div>
 
         {{-- Q4: Property size --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Property size:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <strong>4</strong>
@@ -79,7 +79,7 @@
         </div>
 
         {{-- Q5: Material(s) --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Material(s):</div>
             <div class="p-3">
                 <strong>5</strong>
@@ -90,7 +90,7 @@
         </div>
 
         {{-- Q6: Security measures --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Security measures (if any):</div>
             <div class="p-3">
                 <strong>6</strong>
@@ -106,7 +106,7 @@
         </div>
 
         {{-- Q7: Items to cover --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Items to cover:</div>
             <div class="p-3 space-y-2 text-gray-700">
                 <p>• building</p>
@@ -121,7 +121,7 @@
         </div>
 
         {{-- Q8: Quotation --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Quotation:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">£</span>
@@ -133,7 +133,7 @@
         </div>
 
         {{-- Q9: Coverage start date --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Coverage start date:</div>
             <div class="p-3">
                 <strong>9</strong>
@@ -144,7 +144,7 @@
         </div>
 
         {{-- Q10: Reference number --}}
-        <div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Reference number:</div>
             <div class="p-3">
                 <strong>10</strong>

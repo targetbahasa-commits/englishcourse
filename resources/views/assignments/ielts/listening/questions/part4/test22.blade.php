@@ -11,7 +11,7 @@
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
 
         {{-- Intro --}}
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Cases and examples are from practice conducted in</span>
                 <strong class="text-blue-600">31</strong>
@@ -23,16 +23,16 @@
         </div>
 
         {{-- Acid rain --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Acid rain</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <p class="text-gray-700">• The chemicals have devastating effects on the architecture.</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <p class="text-gray-700">• The government try to reduce the negative effects.</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Funds have been received from a</span>
                 <strong class="text-blue-600">32</strong>
@@ -41,7 +41,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <strong class="text-blue-600">33</strong>
                 <span class="inline-block w-36 mx-1">
@@ -50,7 +50,7 @@
                 <span>experience lower levels of acid in damaging pollutants.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• In recent years, Alter Project focuses on the buildings made of</span>
                 <strong class="text-blue-600">34</strong>
@@ -61,13 +61,13 @@
         </div>
 
         {{-- Pollution --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Pollution</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <p class="text-gray-700">• One of the main sources of pollution is from the construction industry.</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <strong class="text-blue-600">35</strong>
                 <span class="inline-block w-36 mx-1">
@@ -76,7 +76,7 @@
                 <span>is used to reduce pollution in Sky Tower.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Construction is affected by the increased</span>
                 <strong class="text-blue-600">36</strong>
@@ -86,7 +86,7 @@
                 <span>in winter.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Humidity affects the</span>
                 <strong class="text-blue-600">37</strong>
@@ -98,10 +98,10 @@
         </div>
 
         {{-- Building & Technology --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Building &amp; Technology</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Ground conditions can be a problem when the density of the</span>
                 <strong class="text-blue-600">38</strong>
@@ -111,7 +111,7 @@
                 <span>is wrong.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Architects can now monitor the</span>
                 <strong class="text-blue-600">39</strong>
@@ -121,7 +121,7 @@
                 <span>of buildings.</span>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• The government should make</span>
                 <strong class="text-blue-600">40</strong>

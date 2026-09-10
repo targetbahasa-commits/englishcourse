@@ -31,7 +31,7 @@ class WhisperTranscriptionService
 {
     // ── Groq ─────────────────────────────────────────────────────────────────
     private const GROQ_URL   = 'https://api.groq.com/openai/v1/chat/completions';
-    private const GROQ_MODEL = 'llama-3.3-70b-versatile';
+    private const GROQ_MODEL = 'openai/gpt-oss-120b';
 
     // ── SambaNova ─────────────────────────────────────────────────────────────
     private const SAMBANOVA_URL   = 'https://api.sambanova.ai/v1/chat/completions';

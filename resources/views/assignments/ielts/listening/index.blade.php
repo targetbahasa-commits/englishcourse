@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', 'IELTS Listening')
+
 @section('content')
 <div class="container mx-auto px-4 py-8" x-data="{ 
     showModal: false, 
@@ -52,7 +54,7 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 font-semibold border border-purple-100 text-xs">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-white text-purple-700 font-semibold border border-purple-100 text-xs">
                 Active Batch: {{ $selectedClassPeriod->name ?? 'No Batch Active' }}
             </span>
 
@@ -61,7 +63,7 @@
                     @csrf
                     <input type="hidden" name="program_id" value="{{ $batchProgram?->id }}">
                     <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                    <select name="class_period_id" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
+                    <select name="class_period_id" class="border-none bg-white rounded-lg text-sm focus:ring-2 focus:ring-purple-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
                         @if(!$batchProgram)
                             <option value="" selected>No program found</option>
                         @elseif($batchProgram->classPeriods->isEmpty())
@@ -81,7 +83,7 @@
             @else
                 <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
                     <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                    <div class="bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium text-gray-800 min-w-[220px]">
+                    <div class="bg-white px-4 py-2 rounded-lg text-sm font-medium text-gray-800 min-w-[220px]">
                         {{ $selectedClassPeriod->name ?? 'No Batch Active' }}
                     </div>
                 </div>
@@ -92,7 +94,7 @@
                 $calendarBatchName = addslashes($batchProgram->name ?? 'Assignments');
             @endphp
             @if($calendarClassPeriodId)
-                <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 text-sm text-gray-600">
+                <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-white text-sm text-gray-600">
                     Lihat Kalender
                 </button>
             @endif
@@ -113,13 +115,13 @@
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
             @php
                 $warmUpPractices = [
-                    'Spelling' => 'text-amber-600 bg-amber-50',
-                    'Times and Dates' => 'text-amber-600 bg-amber-50',
-                    'Addresses' => 'text-amber-600 bg-amber-50',
-                    'Numbers' => 'text-amber-600 bg-amber-50',
-                    'Names' => 'text-amber-600 bg-amber-50',
-                    'Geographical Names' => 'text-amber-600 bg-amber-50',
-                    'Direction' => 'text-amber-600 bg-amber-50',
+                    'Spelling' => 'text-amber-600 bg-white',
+                    'Times and Dates' => 'text-amber-600 bg-white',
+                    'Addresses' => 'text-amber-600 bg-white',
+                    'Numbers' => 'text-amber-600 bg-white',
+                    'Names' => 'text-amber-600 bg-white',
+                    'Geographical Names' => 'text-amber-600 bg-white',
+                    'Direction' => 'text-amber-600 bg-white',
                 ];
             @endphp
 
@@ -214,7 +216,7 @@
                     
                     <div class="flex-1 mb-6">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 {{ $isLocked ? 'bg-gray-100 text-gray-400' : 'bg-blue-50 text-blue-600' }} rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 {{ $isLocked ? 'bg-white text-gray-400' : 'bg-white text-blue-600' }} rounded-2xl flex items-center justify-center flex-shrink-0">
                                 <span class="font-bold text-xl">{{ $number }}</span>
                             </div>
                             <h3 class="font-bold text-lg text-gray-800 leading-tight">{{ $title }}</h3>
@@ -226,7 +228,7 @@
                             Start Practice
                         </a>
                     @else
-                        <button disabled class="block w-full py-3 bg-gray-100 text-gray-400 text-center rounded-xl font-bold cursor-not-allowed">
+                        <button disabled class="block w-full py-3 bg-white text-gray-400 text-center rounded-xl font-bold cursor-not-allowed">
                             Locked
                         </button>
                     @endif

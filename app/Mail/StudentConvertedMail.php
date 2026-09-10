@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
 class StudentConvertedMail extends Mailable
@@ -39,6 +40,15 @@ class StudentConvertedMail extends Mailable
         return new Envelope(
             subject: 'Welcome to Target Bahasa! Your Registration is Confirmed',
         );
+    }
+
+    public function headers(): Headers
+    {
+        return new Headers(text: [
+            'X-Related-Type' => $this->payment ? 'payment' : 'user',
+            'X-Related-Id' => (string) ($this->payment->id ?? $this->user->id),
+            'X-User-Id' => (string) $this->user->id,
+        ]);
     }
 
     /**

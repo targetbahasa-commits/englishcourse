@@ -12,6 +12,7 @@ class GrammarTopicQuestion extends Model
     protected $fillable = [
         'grammar_topic_id',
         'type',
+        'cefr_level',
         'question_id',
         'answer_en',
         'vocab_helper',

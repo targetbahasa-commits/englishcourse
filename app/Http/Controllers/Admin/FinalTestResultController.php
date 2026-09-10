@@ -61,7 +61,14 @@ class FinalTestResultController extends Controller
             }
 
             if ($request->filled('test_type')) {
-                $query->where('test_type', $request->test_type);
+                $type = $request->test_type;
+                $typeUnderscore = str_replace('-', '_', $type);
+                $typeHyphen = str_replace('_', '-', $type);
+                $query->where(function ($q) use ($type, $typeUnderscore, $typeHyphen) {
+                    $q->where('test_type', $type)
+                      ->orWhere('test_type', $typeUnderscore)
+                      ->orWhere('test_type', $typeHyphen);
+                });
             }
 
             if ($request->filled('status')) {
@@ -82,13 +89,13 @@ class FinalTestResultController extends Controller
             (object)['test_slug' => 'ielts_academic', 'test_label' => 'IELTS Academic'],
             (object)['test_slug' => 'ielts_general', 'test_label' => 'IELTS General'],
             (object)['test_slug' => 'pte_academic', 'test_label' => 'PTE Academic'],
-            (object)['test_slug' => 'introductory-grammar-for-writing', 'test_label' => 'Introductory Grammar for Writing'],
-            (object)['test_slug' => 'complexity-grammar-for-writing', 'test_label' => 'Grammar for Writing Complexity'],
-            (object)['test_slug' => 'proficiency-grammar-for-writing', 'test_label' => 'Grammar for Writing Proficiency'],
-            (object)['test_slug' => 'fast-track-grammar-for-writing', 'test_label' => 'Grammar for Writing Fast Track'],
-            (object)['test_slug' => 'introductory-speaking', 'test_label' => 'Introductory Speaking'],
-            (object)['test_slug' => 'intermediate-speaking', 'test_label' => 'Intermediate Speaking'],
-            (object)['test_slug' => 'advanced-speaking', 'test_label' => 'Advanced Speaking'],
+            (object)['test_slug' => 'introductory_grammar_for_writing', 'test_label' => 'Introductory Grammar for Writing'],
+            (object)['test_slug' => 'complexity_grammar_for_writing', 'test_label' => 'Grammar for Writing Complexity'],
+            (object)['test_slug' => 'proficiency_grammar_for_writing', 'test_label' => 'Grammar for Writing Proficiency'],
+            (object)['test_slug' => 'fast_track_grammar_for_writing', 'test_label' => 'Grammar for Writing Fast Track'],
+            (object)['test_slug' => 'introductory_speaking', 'test_label' => 'Introductory Speaking'],
+            (object)['test_slug' => 'intermediate_speaking', 'test_label' => 'Intermediate Speaking'],
+            (object)['test_slug' => 'advanced_speaking', 'test_label' => 'Advanced Speaking'],
         ]);
 
         $statuses = collect();
@@ -115,7 +122,7 @@ class FinalTestResultController extends Controller
             return back()->with('error', 'Sertifikat untuk tipe tes ini belum disiapkan.');
         }
 
-        $date = $result->completed_at ? \Carbon\Carbon::parse($result->completed_at)->format('d M Y') : $result->created_at->format('d M Y');
+        $date = $result->completed_at ? \Carbon\Carbon::parse($result->completed_at)->format('d F Y') : $result->created_at->format('d F Y');
 
         $data = [
             'result'      => $result,
@@ -141,5 +148,189 @@ class FinalTestResultController extends Controller
         }
 
         return view('admin.final-test-results.show', ['result' => $result]);
+    }
+
+    public function updateEvaluation(Request $request, $id)
+    {
+        $result = FinalTestResult::findOrFail($id);
+
+        $validated = $request->validate([
+            'score' => 'required|numeric|min:0|max:100',
+            'grammar_score' => 'nullable|numeric|min:0|max:40',
+            'lexical_score' => 'nullable|numeric|min:0|max:30',
+            'accuracy_score' => 'nullable|numeric|min:0|max:30',
+            'passed' => 'nullable|boolean',
+            'cefr_level' => 'nullable|string|max:100',
+            'ielts_equivalent' => 'nullable|string|max:100',
+            'predicate' => 'nullable|string|max:100',
+            'feedback_overview' => 'nullable|string|max:5000',
+            'feedback_strengths' => 'nullable|string|max:5000',
+            'feedback_improvements' => 'nullable|string|max:5000',
+            'teacher_notes' => 'nullable|string|max:5000',
+            'modules' => 'nullable|array',
+        ]);
+
+        $score = (float) $validated['score'];
+        $answersData = $result->answers_data ?? [];
+
+        $grammarScore = isset($validated['grammar_score']) ? (float) $validated['grammar_score'] : ($answersData['criteria']['grammar_complexity']['score'] ?? null);
+        $lexicalScore = isset($validated['lexical_score']) ? (float) $validated['lexical_score'] : ($answersData['criteria']['lexical_resource']['score'] ?? null);
+        $accuracyScore = isset($validated['accuracy_score']) ? (float) $validated['accuracy_score'] : ($answersData['criteria']['translation_accuracy']['score'] ?? null);
+
+        $answersData['score'] = $score;
+        $answersData['passed'] = $request->has('passed') ? $request->boolean('passed') : ($score >= 70);
+
+        if ($request->filled('cefr_level')) {
+            $answersData['cefr_level'] = $validated['cefr_level'];
+        }
+        if ($request->filled('ielts_equivalent')) {
+            $answersData['ielts_equivalent'] = $validated['ielts_equivalent'];
+        }
+        if ($request->filled('predicate')) {
+            $answersData['predicate'] = $validated['predicate'];
+        }
+
+        // Criteria updates
+        if ($grammarScore !== null) {
+            $answersData['criteria']['grammar_complexity'] = [
+                'label' => 'Grammar & Structural Mastery (10 Modul)',
+                'score' => $grammarScore,
+                'max_score' => 40,
+                'percentage' => round(($grammarScore / 40) * 100),
+            ];
+        }
+        if ($lexicalScore !== null) {
+            $answersData['criteria']['lexical_resource'] = [
+                'label' => 'Lexical Resource & Academic Keywords',
+                'score' => $lexicalScore,
+                'max_score' => 30,
+                'percentage' => round(($lexicalScore / 30) * 100),
+            ];
+        }
+        if ($accuracyScore !== null) {
+            $answersData['criteria']['translation_accuracy'] = [
+                'label' => 'Translation Fidelity & Completeness',
+                'score' => $accuracyScore,
+                'max_score' => 30,
+                'percentage' => round(($accuracyScore / 30) * 100),
+            ];
+        }
+
+        // Feedback updates
+        $feedbackOverview = $request->input('feedback_overview', $answersData['feedback']['overview'] ?? '');
+        $strengthsRaw = $request->input('feedback_strengths');
+        $improvementsRaw = $request->input('feedback_improvements');
+
+        $strengthsList = is_string($strengthsRaw)
+            ? array_values(array_filter(array_map('trim', explode("\n", $strengthsRaw))))
+            : ($answersData['feedback']['strengths'] ?? []);
+
+        $improvementsList = is_string($improvementsRaw)
+            ? array_values(array_filter(array_map('trim', explode("\n", $improvementsRaw))))
+            : ($answersData['feedback']['improvements'] ?? []);
+
+        $answersData['feedback'] = [
+            'overview' => $feedbackOverview,
+            'strengths' => $strengthsList,
+            'improvements' => $improvementsList,
+        ];
+
+        // Modules toggle update
+        if ($request->has('modules_submitted') && isset($answersData['module_diagnostics']) && is_array($answersData['module_diagnostics'])) {
+            $checkedModules = $request->input('modules', []);
+            $masteredCount = 0;
+            foreach ($answersData['module_diagnostics'] as $mIdx => &$m) {
+                $isMastered = !empty($checkedModules[$mIdx]) || !empty($checkedModules[(string) $mIdx]);
+                $m['matched'] = $isMastered;
+                $m['mastered'] = $isMastered;
+                if ($isMastered) {
+                    $masteredCount++;
+                }
+            }
+            unset($m);
+            $answersData['mastered_modules_count'] = $masteredCount;
+            $answersData['review_modules_count'] = count($answersData['module_diagnostics']) - $masteredCount;
+        }
+
+        $result->score = $score;
+        $result->answers_data = $answersData;
+
+        $evalData = $result->evaluation_data ?? [];
+        $evalData['reviewed_by'] = \Illuminate\Support\Facades\Auth::user()?->name ?? 'Admin';
+        $evalData['reviewed_by_id'] = \Illuminate\Support\Facades\Auth::id();
+        $evalData['reviewed_at'] = now()->toDateTimeString();
+        $evalData['cefr'] = $answersData['cefr_level'] ?? ($evalData['cefr'] ?? null);
+        $evalData['predicate'] = $answersData['predicate'] ?? ($evalData['predicate'] ?? null);
+        $evalData['passed'] = $answersData['passed'] ?? ($result->score >= 70);
+        if ($request->filled('teacher_notes')) {
+            $evalData['teacher_notes'] = $validated['teacher_notes'];
+        }
+        $result->evaluation_data = $evalData;
+
+        $result->save();
+
+        return back()->with('success', 'Evaluasi final test berhasil diperbarui dan disimpan.');
+    }
+
+    public function reEvaluate(Request $request, $id)
+    {
+        $result = FinalTestResult::findOrFail($id);
+
+        $answersData = $result->answers_data ?? [];
+        $paragraphAnswers = [];
+
+        if (!empty($answersData['paragraphs']) && is_array($answersData['paragraphs'])) {
+            foreach ($answersData['paragraphs'] as $pNum => $pData) {
+                $paragraphAnswers[$pNum] = $pData['user_answer'] ?? '';
+            }
+        } elseif (!empty($answersData['user_translation'])) {
+            $parts = explode("\n\n", (string) $answersData['user_translation']);
+            foreach ($parts as $idx => $part) {
+                $paragraphAnswers[$idx + 1] = trim($part);
+            }
+        }
+
+        if (empty($paragraphAnswers)) {
+            return back()->with('error', 'Tidak dapat menemukan teks terjemahan peserta untuk dihitung ulang.');
+        }
+
+        $variant = 'fast-track';
+        $testType = (string) ($result->test_type ?? '');
+        if (str_contains($testType, 'introductory')) {
+            $variant = 'introductory';
+        } elseif (str_contains($testType, 'complexity')) {
+            $variant = 'complexity';
+        } elseif (str_contains($testType, 'proficiency')) {
+            $variant = 'proficiency';
+        }
+
+        $testData = (new \App\Application\GrammarWriting\GrammarForWritingFinalTestCatalog())->getData($variant);
+
+        $evaluator = new \App\Application\GrammarWriting\EvaluateGrammarForWritingFinalTest();
+        $newEvaluation = $evaluator->evaluate($paragraphAnswers, $testData);
+
+        $result->score = $newEvaluation['score'];
+        $result->answers_data = $newEvaluation;
+
+        $evalData = $result->evaluation_data ?? [];
+        $evalData['re_evaluated_at'] = now()->toDateTimeString();
+        $evalData['re_evaluated_by'] = \Illuminate\Support\Facades\Auth::user()?->name ?? 'Admin';
+        $evalData['cefr'] = $newEvaluation['cefr_level'];
+        $evalData['predicate'] = $newEvaluation['predicate'];
+        $evalData['passed'] = $newEvaluation['passed'];
+        $result->evaluation_data = $evalData;
+
+        $result->save();
+
+        return back()->with('success', 'Evaluasi otomatis berhasil dihitung ulang secara menyeluruh (Skor baru: ' . $newEvaluation['score'] . ').');
+    }
+
+    public function destroy($id)
+    {
+        $result = FinalTestResult::findOrFail($id);
+        $name = $result->name;
+        $result->delete();
+
+        return redirect()->route('admin.final-test-results.index')->with('success', "Data hasil ujian {$name} berhasil dihapus.");
     }
 }

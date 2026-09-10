@@ -367,7 +367,6 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <a href="{{ route('admin.social-media.all') }}?cal_year={{ $mPrev->year }}&cal_month={{ $mPrev->month }}&view=calendar"
-                           onclick="document.querySelector('[x-data]').__x.$data.activeView='calendar'"
                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                             {{ $mPrev->format('M Y') }}

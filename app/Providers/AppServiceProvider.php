@@ -206,6 +206,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Listeners\LogSentEmail::class
         );
 
+        \Illuminate\Support\Facades\Event::listen(
+            \Illuminate\Auth\Events\Login::class,
+            \App\Listeners\EnforceSingleDeviceSession::class
+        );
+
         RateLimiter::for('auth', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());
         });

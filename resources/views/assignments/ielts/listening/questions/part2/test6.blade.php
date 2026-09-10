@@ -72,7 +72,7 @@
         <p class="text-lg text-gray-800">Which <strong>THREE</strong> pieces of advice does the first-aid officer say are most important?</p>
     </div>
 
-    <div class="bg-gray-50 p-6 rounded-2xl inline-block mt-2 min-w-[300px]">
+    <div class="bg-white p-6 rounded-2xl inline-block mt-2 min-w-[300px]">
         <div class="space-y-3" id="checkbox-group-1">
             @foreach([
                 'A' => 'Have proper equipment',
@@ -83,7 +83,7 @@
                 'F' => 'Have safety meetings',
                 'G' => 'Have first-aid boxes'
             ] as $letter => $option)
-            <label class="flex items-center gap-4 cursor-pointer hover:bg-gray-100 p-1 rounded transition-colors group">
+            <label class="flex items-center gap-4 cursor-pointer hover:bg-white p-1 rounded transition-colors group">
                 <input type="checkbox" name="answers[18_19_20][]" value="{{ $letter }}" class="answer-checkbox w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
                 <strong class="font-bold w-4 text-gray-800 group-hover:text-blue-600">{{ $letter }}</strong>
                 <span class="text-gray-800">{{ $option }}</span>

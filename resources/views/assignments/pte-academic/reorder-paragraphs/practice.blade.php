@@ -40,7 +40,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-100">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         @if(Auth::check())
@@ -64,11 +64,14 @@
             <div class="container mx-auto">
 
                 <!-- Header -->
-                <div class="mb-8">
-                    <a href="{{ route('assignments.pte-academic.reading.reorder-paragraphs.index') }}#topic-{{ $topicId }}" class="inline-flex items-center text-gray-600 hover:text-blue-500 transition-colors mb-4">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                        Back to Selection
-                    </a>
+                <div class="mb-6">
+                    <div class="flex justify-end mb-2">
+                        <a href="{{ route('assignments.pte-academic.reading.reorder-paragraphs.index') }}#topic-{{ $topicId }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-gray-600 bg-white hover:bg-white border border-gray-200 rounded-full shadow-sm transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                            <span>Back</span>
+                        </a>
+                    </div>
+
                     <div class="flex items-center gap-4">
                         <div class="w-14 h-14 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-lg shadow-blue-500/30">
                             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,7 +137,7 @@
                                     <div class="teal-bar text-white font-bold text-center py-3 rounded-t-xl">
                                         Target
                                     </div>
-                                    <div id="targetContainer" class="flex-1 border-2 border-teal-200 border-t-0 rounded-b-xl p-4 min-h-[300px] flex flex-col gap-3 bg-gray-50 transition-colors" ondragover="allowDrop(event)" ondrop="drop(event, 'target')">
+                                    <div id="targetContainer" class="flex-1 border-2 border-teal-200 border-t-0 rounded-b-xl p-4 min-h-[300px] flex flex-col gap-3 bg-white transition-colors" ondragover="allowDrop(event)" ondrop="drop(event, 'target')">
                                         <!-- Dropped items will appear here -->
                                     </div>
                                 </div>
@@ -150,11 +153,11 @@
                                 Practice with AI Scoring
                             </button>
                             <button onclick="restartPractice()"
-                                class="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-bold rounded-full text-sm hover:bg-gray-50 transition">
+                                class="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-bold rounded-full text-sm hover:bg-white transition">
                                 Restart
                             </button>
                             <button onclick="checkAnswers()" id="answerBtn"
-                                class="px-6 py-2.5 bg-white font-bold rounded-full text-sm border-2 transition hover:bg-emerald-50"
+                                class="px-6 py-2.5 bg-white font-bold rounded-full text-sm border-2 transition hover:bg-white"
                                 style="color:#10b981; border-color:#10b981;">
                                 Answer
                             </button>
@@ -166,7 +169,7 @@
                         </div>
 
                         <!-- Submit Result -->
-                        <div id="resultBox" class="hidden bg-gray-50 border-t border-gray-200 p-6 px-8 mx-8 mb-8 rounded-xl">
+                        <div id="resultBox" class="hidden bg-white border-t border-gray-200 p-6 px-8 mx-8 mb-8 rounded-xl">
                             <div class="flex items-start gap-4">
                                 <div id="resultIconBox" class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
                                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="resultIcon"></svg>
@@ -180,9 +183,9 @@
                         </div>
 
                         <!-- Navigation Footer -->
-                        <div class="px-8 md:px-10 py-6 border-t border-gray-100 flex justify-between items-center bg-gray-50/50">
+                        <div class="px-8 md:px-10 py-6 border-t border-gray-100 flex justify-between items-center bg-white">
                             <a href="{{ route('assignments.pte-academic.reading.reorder-paragraphs.practice', ['id' => max(1, $topicId - 1)]) }}"
-                               class="px-8 py-3 rounded-xl bg-white border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition-all hover:shadow flex items-center gap-2 {{ $topicId <= 1 ? 'pointer-events-none opacity-40' : '' }}">
+                               class="px-8 py-3 rounded-xl bg-white border border-gray-200 text-gray-600 font-medium hover:bg-white transition-all hover:shadow flex items-center gap-2 {{ $topicId <= 1 ? 'pointer-events-none opacity-40' : '' }}">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                                 Previous
                             </a>
@@ -199,81 +202,184 @@
 
             </div>
             {{-- Floating Tips Button --}}
-            <div x-data="{ 
-                showTips: false,
-                isDragged: false,
-                dragging: false,
-                x: window.innerWidth / 2 - 50,
-                y: window.innerHeight - 100,
-                startX: 0,
-                startY: 0,
-                start(e) {
-                    this.dragging = true;
-                    this.isDragged = false;
-                    let clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-                    let clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-                    this.startX = clientX - this.x;
-                    this.startY = clientY - this.y;
-                },
-                move(e) {
-                    if (!this.dragging) return;
-                    e.preventDefault();
-                    this.isDragged = true;
-                    let clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-                    let clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-                    this.x = clientX - this.startX;
-                    this.y = clientY - this.startY;
-                    
-                    // Keep within screen bounds
-                    this.x = Math.max(0, Math.min(this.x, window.innerWidth - 60));
-                    this.y = Math.max(0, Math.min(this.y, window.innerHeight - 60));
-                },
-                end() {
-                    this.dragging = false;
-                    // Reset position if dragged out of bounds
-                    if (this.x < 0) this.x = 0;
-                    if (this.y < 0) this.y = 0;
-                    if (this.x > window.innerWidth - 60) this.x = window.innerWidth - 60;
-                    if (this.y > window.innerHeight - 60) this.y = window.innerHeight - 60;
+            <div x-data="{
+        showTips: false,
+        isPinned: false,
+        
+        // Floating button position & drag
+        btnX: 0, btnY: 0,
+        btnDragging: false, btnIsDragged: false,
+        btnStartX: 0, btnStartY: 0,
+
+        // Modal position & dimensions
+        modalX: null, modalY: null,
+        modalW: 920, modalH: 650,
+        modalDragging: false,
+        modalStartX: 0, modalStartY: 0,
+
+        // Modal resizing
+        modalResizing: false,
+        resizeStartX: 0, resizeStartY: 0,
+        resizeStartW: 0, resizeStartH: 0,
+
+        init() {
+            this.btnX = Math.max(12, window.innerWidth - 90);
+            this.btnY = Math.max(60, window.innerHeight - 130);
+            this.modalW = Math.min(920, window.innerWidth - 24);
+            this.modalH = Math.min(650, window.innerHeight - 24);
+        },
+
+        openTips() {
+            if (!this.btnIsDragged) {
+                this.showTips = true;
+                if (this.modalX === null) {
+                    this.modalW = Math.min(920, window.innerWidth - 24);
+                    this.modalH = Math.min(650, window.innerHeight - 24);
+                    this.modalX = Math.max(8, Math.floor((window.innerWidth - this.modalW) / 2));
+                    this.modalY = Math.max(8, Math.floor((window.innerHeight - this.modalH) / 2));
                 }
-            }" 
-            @mousemove.window="move" @mouseup.window="end" @touchmove.window="move" @touchend.window="end">
-                <button @click.prevent="if(!isDragged) showTips = true" 
-                        @mousedown="start" @touchstart="start"
-                        class="fixed z-50 text-white p-4 rounded-full shadow-2xl flex items-center gap-2 select-none"
-                        :style="`left: ${x}px; top: ${y}px; background-color: #eab308; touch-action: none;`"
-                        :class="dragging ? 'cursor-grabbing scale-105' : 'cursor-grab hover:scale-105 transition-transform'"
-                        title="Tips & Strategi">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <span class="font-bold hidden md:inline text-white">Tips</span>
-                </button>
+            }
+        },
+
+        startBtnDrag(e) {
+            this.btnDragging = true;
+            this.btnIsDragged = false;
+            let clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            let clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            this.btnStartX = clientX - this.btnX;
+            this.btnStartY = clientY - this.btnY;
+        },
+
+        startModalDrag(e) {
+            if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input')) return;
+            this.modalDragging = true;
+            let clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            let clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            this.modalStartX = clientX - (this.modalX || 0);
+            this.modalStartY = clientY - (this.modalY || 0);
+        },
+
+        startResize(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            this.modalResizing = true;
+            let clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            let clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            this.resizeStartX = clientX;
+            this.resizeStartY = clientY;
+            this.resizeStartW = this.modalW;
+            this.resizeStartH = this.modalH;
+        },
+
+        onMove(e) {
+            let clientX = e.type.includes('mouse') ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+            let clientY = e.type.includes('mouse') ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+
+            if (this.btnDragging) {
+                this.btnIsDragged = true;
+                let nx = clientX - this.btnStartX;
+                let ny = clientY - this.btnStartY;
+                this.btnX = Math.max(8, Math.min(nx, window.innerWidth - 65));
+                this.btnY = Math.max(8, Math.min(ny, window.innerHeight - 65));
+            }
+
+            if (this.modalDragging) {
+                this.modalX = clientX - this.modalStartX;
+                this.modalY = clientY - this.modalStartY;
+            }
+
+            if (this.modalResizing) {
+                let dx = clientX - this.resizeStartX;
+                let dy = clientY - this.resizeStartY;
+                this.modalW = Math.max(320, Math.min(this.resizeStartW + dx, window.innerWidth - (this.modalX || 0) - 10));
+                this.modalH = Math.max(240, Math.min(this.resizeStartH + dy, window.innerHeight - (this.modalY || 0) - 10));
+            }
+        },
+
+        onEnd() {
+            this.btnDragging = false;
+            this.modalDragging = false;
+            this.modalResizing = false;
+        }
+    }"
+    @mousemove.window="onMove" @mouseup.window="onEnd" @touchmove.window="onMove" @touchend.window="onEnd">
+                <button x-show="!showTips" @click.prevent="openTips()"
+                @mousedown="startBtnDrag" @touchstart="startBtnDrag"
+                class="fixed z-[9999] text-white px-3.5 py-2.5 md:p-4 rounded-full shadow-2xl flex items-center gap-1.5 md:gap-2 select-none"
+                :style="`left: ${btnX}px; top: ${btnY}px; background-color: #eab308; touch-action: none;`"
+                :class="btnDragging ? 'cursor-grabbing scale-105' : 'cursor-grab hover:scale-105 transition-transform'"
+                title="Tips & Strategi">
+            <svg class="w-5 h-5 md:w-6 md:h-6 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span class="font-bold text-xs md:text-sm text-white">Tips</span>
+        </button>
 
                 {{-- Tips Modal --}}
                 <template x-teleport="body">
-                    <div x-show="showTips" style="display: none;" class="fixed inset-0 bg-transparent z-[100] flex items-center justify-center p-4">
-                        <div @click.away="showTips = false" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-gray-200">
-                            <div class="flex items-center justify-between p-6 border-b border-blue-100 bg-blue-50 shrink-0">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h2 class="text-xl font-bold text-blue-900">Tips Re-order Paragraph (RO)</h2>
-                                        <p class="text-blue-600 text-sm">Panduan dan format jawaban Anda.</p>
-                                    </div>
-                                </div>
-                                <button @click="showTips = false" class="text-blue-400 hover:text-blue-600 hover:bg-blue-100 p-2 rounded-full transition">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                </button>
-                            </div>
-                            <div class="p-6 overflow-y-auto bg-gray-50 flex-1">
+            <div x-show="showTips" style="display: none;" class="fixed inset-0 z-[100] pointer-events-none">
+                
+                {{-- Dark Backdrop (Only active when NOT pinned) --}}
+                <div x-show="!isPinned" 
+                     @click="showTips = false"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"
+                     class="absolute inset-0 bg-black/25 pointer-events-auto cursor-pointer">
+                </div>
+
+                <div x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 transform scale-95"
+                     x-transition:enter-end="opacity-100 transform scale-100"
+                     class="fixed bg-white rounded-2xl flex flex-col shadow-2xl border border-gray-300 pointer-events-auto overflow-hidden"
+                     :style="`left: ${modalX ?? 20}px; top: ${modalY ?? 20}px; width: ${modalW}px; height: ${modalH}px; max-width: 95vw; max-height: 90vh; min-width: 320px; min-height: 240px;`">
+                            {{-- Seamless Header Drag Bar (Symbol Controls Only) --}}
+                    <div @mousedown="startModalDrag" @touchstart="startModalDrag"
+                         class="flex items-center justify-between px-4 py-3 select-none cursor-grab active:cursor-grabbing flex-shrink-0 bg-white">
+                        <div class="flex items-center gap-2 text-xs font-semibold text-gray-400">
+                            <span class="w-2 h-2 rounded-full bg-amber-400 inline-block animate-pulse"></span>
+                            <span class="text-[11px] font-medium text-gray-400">Tips & Strategi</span>
+                        </div>
+
+                        {{-- Control Icon Buttons (Pin & Close as symbols only) --}}
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            {{-- Pin Icon Only --}}
+                            <button type="button" @click="isPinned = !isPinned" 
+                                    class="w-8 h-8 rounded-full transition flex items-center justify-center cursor-pointer text-sm"
+                                    :class="isPinned ? 'bg-amber-500 text-white shadow-md ring-2 ring-amber-300' : 'bg-white hover:bg-gray-200 text-gray-600'"
+                                    :title="isPinned ? 'Unpin modal' : 'Pin modal'">
+                                
+                            </button>
+
+                            {{-- Close Icon Only --}}
+                            <button type="button" @click="showTips = false" 
+                                    class="w-8 h-8 rounded-full bg-white hover:bg-gray-200 text-gray-500 hover:text-gray-800 transition flex items-center justify-center cursor-pointer"
+                                    title="Tutup">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                        <div class="flex items-center gap-2">
+                            <button type="button" @click="isPinned = !isPinned" 
+                                    class="px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+                                    :class="isPinned ? 'bg-amber-500 text-white shadow ring-2 ring-amber-300' : 'bg-white text-gray-600 hover:bg-gray-200 border border-gray-300'"
+                                    :title="isPinned ? 'Unpin modal (allow click outside to close)' : 'Pin modal (keep visible while practicing)'">
+                                <svg class="w-3.5 h-3.5" :class="isPinned ? 'rotate-45' : ''" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 2a1 1 0 011 1v1.323l3.954 1.582A1 1 0 0115.5 6.82v4.36l1.382 1.382A1 1 0 0116.172 14H11v3.586l.707.707a1 1 0 01-1.414 1.414l-2-2a1 1 0 010-1.414l.707-.707V14H3.828a1 1 0 01-.707-1.707L4.5 10.918V6.82a1 1 0 01.546-.915L9 4.323V3a1 1 0 011-1z" />
+                                </svg>
+                                <span x-text="isPinned ? 'Pinned ' : 'Pin '">Pin </span>
+                            </button>
+
+                            <button type="button" @click="showTips = false" class="text-gray-400 hover:text-gray-700 hover:bg-gray-200 p-2 rounded-xl transition cursor-pointer">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                            <div class="p-6 overflow-y-auto bg-white flex-1">
 
                                 <div class="bg-white rounded-xl border border-blue-100 shadow-sm overflow-hidden mb-6">
-                                    <div class="bg-blue-50 px-4 py-3 border-b border-blue-100">
+                                    <div class="bg-white px-4 py-3 border-b border-blue-100">
                                         <h4 class="font-bold text-blue-900">1. Mencari Independent Sentence (Kalimat Utama)</h4>
                                     </div>
                                     <ul class="p-4 text-blue-800 leading-relaxed text-sm sm:text-base space-y-4 list-disc ml-4">
@@ -285,7 +391,7 @@
                                 </div>
                                 
                                 <div class="bg-white rounded-xl border border-blue-100 shadow-sm overflow-hidden mb-6">
-                                    <div class="bg-blue-50 px-4 py-3 border-b border-blue-100">
+                                    <div class="bg-white px-4 py-3 border-b border-blue-100">
                                         <h4 class="font-bold text-blue-900">2. Teknik Pairing (Mencari Pasangan)</h4>
                                     </div>
                                     <ul class="p-4 text-blue-800 leading-relaxed text-sm sm:text-base space-y-4 list-disc ml-4">
@@ -297,7 +403,7 @@
                                 </div>
                                 
                                 <div class="bg-white rounded-xl border border-blue-100 shadow-sm overflow-hidden mb-6">
-                                    <div class="bg-blue-50 px-4 py-3 border-b border-blue-100">
+                                    <div class="bg-white px-4 py-3 border-b border-blue-100">
                                         <h4 class="font-bold text-blue-900">3. Strategi Transisi dan Konektor</h4>
                                     </div>
                                     <ul class="p-4 text-blue-800 leading-relaxed text-sm sm:text-base space-y-4 list-disc ml-4">
@@ -506,5 +612,6 @@
     </script>
     @include('components.pte-score-popup')
     @include('components.pte-practice-tracker', ['module' => 'reorder-paragraphs', 'topicId' => $topicId])
+    <x-live-drawing />
 </body>
 </html>

@@ -73,6 +73,7 @@
                                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Teacher</th>
                                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date Range</th>
                                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Mode</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tipe Batch</th>
                                     <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Students</th>
                                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                                     <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
@@ -113,9 +114,21 @@
                                                 {{ ucfirst($period->learning_mode) }}
                                             </span>
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @php
+                                                $batchTypeLabels = ['regular' => 'Reguler', 'semi_private' => 'Semi-Private', 'private' => 'Private'];
+                                                $batchTypeColors = ['regular' => 'bg-blue-100 text-blue-800', 'semi_private' => 'bg-purple-100 text-purple-800', 'private' => 'bg-amber-100 text-amber-800'];
+                                            @endphp
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $batchTypeColors[$period->batch_type] ?? 'bg-gray-100 text-gray-600' }}">
+                                                {{ $batchTypeLabels[$period->batch_type] ?? ucfirst($period->batch_type) }}
+                                            </span>
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-center">
                                             <div class="text-sm font-medium text-gray-900">{{ $period->users_count }}</div>
                                             <div class="text-xs text-gray-500">enrolled</div>
+                                            @if($period->booked_count > 0)
+                                                <div class="text-xs font-bold text-blue-600 mt-0.5">{{ $period->booked_count }} booking sendiri</div>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <form action="{{ route('class-periods.status', $period) }}" method="POST">
@@ -165,7 +178,7 @@
                             @change="fetchBatchNumber($event.target.value)"
                             class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full" required>
                         <option value="">-- Select Program --</option>
-                        @foreach (\App\Models\Program::whereNot('slug', 'like', 'cambridge-%')->whereNot('slug', 'like', 'toefl-itp-mock-package-%')->get()->groupBy('category') as $category => $categoryPrograms)
+                        @foreach (\App\Models\Program::where('is_active', true)->whereNot('slug', 'like', 'cambridge-%')->whereNot('slug', 'like', 'toefl-itp-mock-package-%')->get()->groupBy('category') as $category => $categoryPrograms)
                             <optgroup label="{{ $category }}">
                                 @foreach($categoryPrograms as $program)
                                     <option value="{{ $program->id }}">{{ $program->name }}</option>
@@ -176,8 +189,17 @@
                     <p class="text-xs text-gray-500 mt-1">Pilih program untuk batch ini.</p>
                 </div>
 
-                <input type="hidden" name="batch_type" value="regular">
                 <input type="hidden" name="batch_number" :value="batchNumber">
+
+                <div>
+                    <x-input-label for="batch_type" value="Tipe Batch" />
+                    <select name="batch_type" id="batch_type" x-model="batchType" @change="onBatchTypeChange()" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full" required>
+                        <option value="regular" selected>Reguler (minimal 4 orang)</option>
+                        <option value="semi_private">Semi-Private (minimal 2 orang)</option>
+                        <option value="private">Private (1 orang)</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Tipe batch ini akan terlihat oleh student di halaman Booking Class.</p>
+                </div>
 
                 <div>
                     <x-input-label for="batch_number_preview" value="Batch Number (Auto)" />
@@ -242,6 +264,22 @@
                     </select>
                 </div>
                 
+                <div>
+                    <x-input-label for="min_capacity" value="Min Capacity" />
+                    <x-text-input id="min_capacity" name="min_capacity" type="number"
+                                  x-model="minCapacity" x-bind:min="minCapacityFloorFor(batchType)" x-bind:readonly="batchType === 'private'"
+                                  class="mt-1 block w-full" required />
+                    <p class="text-xs text-gray-500 mt-1">Jumlah siswa minimal agar batch ini bisa dibuka.</p>
+                </div>
+
+                <div>
+                    <x-input-label for="max_capacity" value="Max Capacity" />
+                    <x-text-input id="max_capacity" name="max_capacity" type="number"
+                                  x-model="maxCapacity" x-bind:min="minCapacity || minCapacityFloorFor(batchType)" x-bind:readonly="batchType === 'private'"
+                                  class="mt-1 block w-full" placeholder="Kosongkan jika tidak dibatasi" />
+                    <p class="text-xs text-gray-500 mt-1" x-text="capacityHint(batchType)"></p>
+                </div>
+
                 <div class="flex items-center mt-2">
                     <input id="auto_lock" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" disabled checked>
                     <label for="auto_lock" class="ml-2 block text-sm text-gray-500 opacity-75">
@@ -271,6 +309,38 @@
                 startDate: '',
                 endDate: '',
                 periodName: '',
+                batchType: 'regular',
+                minCapacity: 4,
+                maxCapacity: '',
+
+                minCapacityFloorFor(batchType) {
+                    return { regular: 4, semi_private: 2, private: 1 }[batchType] || 1;
+                },
+
+                capacityHint(batchType) {
+                    if (batchType === 'private') return 'Batch Private selalu 1 orang (tidak bisa diubah).';
+                    if (batchType === 'semi_private') return 'Batch Semi-Private minimal 2 orang.';
+                    return 'Batch Reguler minimal 4 orang. Kosongkan untuk tanpa batas maksimum.';
+                },
+
+                onBatchTypeChange() {
+                    const floor = this.minCapacityFloorFor(this.batchType);
+
+                    if (this.batchType === 'private') {
+                        this.minCapacity = 1;
+                        this.maxCapacity = 1;
+                    } else if (!this.minCapacity || Number(this.minCapacity) < floor) {
+                        this.minCapacity = floor;
+                    }
+
+                    if (this.batchType !== 'private' && this.maxCapacity && Number(this.maxCapacity) < Number(this.minCapacity)) {
+                        this.maxCapacity = this.minCapacity;
+                    } else if (!this.maxCapacity && this.batchType === 'semi_private') {
+                        this.maxCapacity = 2;
+                    } else if (!this.maxCapacity && this.batchType === 'regular') {
+                        this.maxCapacity = '';
+                    }
+                },
 
                 async fetchBatchNumber(programId) {
                     if (!programId) {

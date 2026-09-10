@@ -23,11 +23,7 @@
 
     {{-- Timeline Image Placeholder --}}
     <div class="mb-8 text-center">
-        <div class="inline-block p-4 border-2 border-dashed border-gray-300 bg-gray-50 rounded-lg w-full max-w-3xl bg-white relative">
-            <p class="text-gray-500 mb-2 font-medium">Schedule of Repairs Timeline Insert</p>
-            <p class="text-sm text-gray-400 mb-4">Please upload the timeline image to: <code>public/images/assignments/ielts/listening/part2/test5-timeline.png</code></p>
-            <img src="{{ asset('images/assignments/ielts/listening/part2/test5-timeline.png') }}" onerror="this.style.display='none'" class="max-w-full h-auto mx-auto" alt="Schedule of Repairs Timeline">
-        </div>
+        <div class="p-3 border border-gray-200 bg-white rounded-xl shadow-sm max-w-3xl mx-auto"><img src="{{ asset('images/assignments/ielts/listening/part2/test5-timeline.png') }}" class="w-full h-auto rounded-lg" alt="Schedule of Repairs Timeline"></div>
     </div>
 
     <div class="space-y-4 max-w-sm mb-12">

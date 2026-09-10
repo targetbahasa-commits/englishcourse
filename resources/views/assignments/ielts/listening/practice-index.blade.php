@@ -50,14 +50,14 @@
             @foreach($practiceParts as $partNum => $data)
                 <div class="bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition group relative flex flex-col h-full border border-gray-100">
                     <div class="flex justify-between items-start mb-6">
-                        <span class="px-4 py-1.5 bg-purple-100 text-purple-600 rounded-full text-sm font-bold uppercase tracking-wide">
+                        <span class="px-4 py-1.5 bg-white text-purple-600 rounded-full text-sm font-bold uppercase tracking-wide">
                             PRACTICE
                         </span>
                     </div>
                     
                     <div class="flex-1 mb-6">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-white text-purple-600 rounded-2xl flex items-center justify-center flex-shrink-0">
                                 <span class="font-bold text-xl">{{ $partNum }}</span>
                             </div>
                             <h3 class="font-bold text-lg text-gray-800 leading-tight">{{ $data['title'] }}</h3>

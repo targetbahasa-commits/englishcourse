@@ -16,13 +16,13 @@
         </div>
 
         {{-- Example: Name --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 italic text-gray-500 text-sm">Name:</div>
             <div class="p-3 italic text-gray-500 text-sm">Jack Dawson</div>
         </div>
 
         {{-- Q1: Address --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Address:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <strong>1</strong>
@@ -34,7 +34,7 @@
         </div>
 
         {{-- Q2: Postcode --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Postcode:</div>
             <div class="p-3">
                 <strong>2</strong>
@@ -45,7 +45,7 @@
         </div>
 
         {{-- Q3: Telephone --}}
-        <div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Telephone:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">work:</span>
@@ -67,15 +67,15 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong>4</strong>&nbsp; What aspect of the flight does the man complain about?</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[4]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span><span>punctuality</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[4]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span><span>legroom</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[4]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span><span>temperature</span>
                 </label>
@@ -86,15 +86,15 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong>5</strong>&nbsp; What does the man think about the food served during the flight?</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[5]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span><span>It is not enough to eat.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[5]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span><span>It is expensive.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[5]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span><span>It has a bad taste.</span>
                 </label>
@@ -105,15 +105,15 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong>6</strong>&nbsp; What does the man think of the service of the staff?</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[6]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span><span>satisfied</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[6]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span><span>long wait</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[6]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span><span>bad attitude</span>
                 </label>

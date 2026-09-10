@@ -1,0 +1,33 @@
+<div class="mb-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 2 - Practice Test 33</h3>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">dustbins</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">water</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Education</p>
+<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 11-20</h4>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the form below.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Practice exercises collection</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>ONE WORD AND/OR A NUMBER</strong> for each answer.</p>
+<h4 class="text-xl font-bold mb-4 text-gray-800">Waste sorting, collection, and disposal</h4>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Necessary characteristics of dustbins: Solid and <strong class="text-blue-600 font-bold ml-1 mr-1">11</strong><input type="text" name="answers[11]" value="{{ old('answers.11') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Three kinds:</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Waste sorting</strong>Recyclable garbage (blue or green bin)</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Unrecyclable garbage (yellow bin)</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Toxic waste (red bin)</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Waste collection</strong><strong>Commercial waste collection:</strong></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">It mainly refers to <strong class="text-blue-600 font-bold ml-1 mr-1">12</strong><input type="text" name="answers[12]" value="{{ old('answers.12') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> waste.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Warning signs state not to <strong class="text-blue-600 font-bold ml-1 mr-1">13</strong><input type="text" name="answers[13]" value="{{ old('answers.13') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> blue/green bins.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Those <strong class="text-blue-600 font-bold ml-1 mr-1">14</strong><input type="text" name="answers[14]" value="{{ old('answers.14') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> metals will cause environmental pollution.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Household waste collection:</strong></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">All kitchen garbage should be put into a <strong class="text-blue-600 font-bold ml-1 mr-1">15</strong><input type="text" name="answers[15]" value="{{ old('answers.15') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> bag.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Waste disposal</strong>The garbage disposal plant is situated in an <strong class="text-blue-600 font-bold ml-1 mr-1">16</strong><input type="text" name="answers[16]" value="{{ old('answers.16') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> space or field.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">The waste is disposed of at least once every <strong class="text-blue-600 font-bold ml-1 mr-1">17</strong><input type="text" name="answers[17]" value="{{ old('answers.17') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">The dustbin should be cleared at night because of <strong class="text-blue-600 font-bold ml-1 mr-1">18</strong><input type="text" name="answers[18]" value="{{ old('answers.18') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">The waste is mainly produced by <strong class="text-blue-600 font-bold ml-1 mr-1">19</strong><input type="text" name="answers[19]" value="{{ old('answers.19') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">, industry, retail, and offices.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Please do not dispose of <strong class="text-blue-600 font-bold ml-1 mr-1">20</strong><input type="text" name="answers[20]" value="{{ old('answers.20') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> in any of the bins.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">bedrooms</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Water Supply & Treatment</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Water & Marine Sciences</p>
+    </div>
+</div>

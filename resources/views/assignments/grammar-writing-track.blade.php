@@ -33,7 +33,7 @@
                         </div>
                         <div>
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-gray-600 text-sm font-semibold shadow-sm mb-3">
-                                <span>10 Meetings</span>
+                                <span>{{ count($trackData['meetings']) }} Meetings</span>
                             </div>
                             <h1 class="text-4xl font-bold text-gray-900">{{ $trackData['title'] }}</h1>
                             <p class="text-gray-600 mt-2">{{ $trackData['description'] }}</p>
@@ -43,7 +43,7 @@
                                 $activeBatchLabel = $selectedClassPeriod->name ?? 'No Batch Active';
                             @endphp
                             <div class="mt-4 flex flex-wrap items-center gap-3">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-100 text-xs">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-white text-blue-700 font-semibold border border-blue-100 text-xs">
                                     Active Batch: {{ $activeBatchLabel }}
                                 </span>
 
@@ -52,11 +52,14 @@
                                         @csrf
                                         <input type="hidden" name="program_id" value="{{ $program->id }}">
                                         <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                                        <select name="class_period_id" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 min-w-[220px]">
-                                            @if($program->classPeriods->isEmpty())
-                                                <option value="" disabled selected>No batch available</option>
-                                            @else
-                                                @foreach($program->classPeriods->sortByDesc('start_date') as $classPeriod)
+                                        <select name="class_period_id" class="border-none bg-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 min-w-[220px]">
+                                            @php
+                                        $activeBatches = $program->classPeriods->where('status', 'active');
+                                    @endphp
+                                    @if($activeBatches->isEmpty())
+                                        <option value="" disabled selected>No active batch</option>
+                                    @else
+                                        @foreach($activeBatches->sortByDesc('start_date') as $classPeriod)
                                                     <option value="{{ $classPeriod->id }}" {{ $program->active_class_period_id === $classPeriod->id ? 'selected' : '' }}>
                                                         {{ $classPeriod->name }}
                                                     </option>
@@ -70,11 +73,13 @@
                                 @else
                                     <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
                                         <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                                        <span class="px-3 py-2 bg-gray-50 rounded-lg text-sm text-gray-700">
+                                        <span class="px-3 py-2 bg-white rounded-lg text-sm text-gray-700">
                                             {{ $activeBatchLabel }}
                                         </span>
                                     </div>
                                 @endif
+
+                                <x-assignments.class-meeting-selector :program="$program" :selectedClassPeriod="$selectedClassPeriod ?? null" />
                             </div>
                         </div>
                     </div>
@@ -85,21 +90,21 @@
                     @endphp
                     <div class="flex items-center gap-3">
                         @if($calendarClassPeriodId)
-                            <button type="button" onclick="(function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition border border-gray-200">
+                            <button type="button" onclick="(function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-white font-medium transition border border-gray-200">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
                                 Lihat Kalender
                             </button>
                         @else
-                            <button type="button" onclick="alert('Pilih batch kelas terlebih dahulu untuk melihat kalender.');" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-400 rounded-xl shadow-sm cursor-not-allowed border border-gray-200">
+                            <button type="button" onclick="alert('Pilih batch kelas terlebih dahulu untuk melihat kalender.');" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-400 rounded-xl shadow-sm cursor-not-allowed border border-gray-200">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
                                 Lihat Kalender
                             </button>
                         @endif
-                        <a href="{{ route('assignments.grammar-writing.classes') }}" class="flex items-center gap-2 px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition border border-gray-200">
+                        <a href="{{ route('assignments.grammar-writing.classes') }}" class="flex items-center gap-2 px-4 py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-white font-medium transition border border-gray-200">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                             </svg>
@@ -107,6 +112,46 @@
                         </a>
                     </div>
                 </div>
+
+                @php
+                    if (!isset($allMeetingsUnlocked)) {
+                        $allMeetingsUnlocked = true;
+                        if (isset($program) && $program->meetings->isNotEmpty()) {
+                            foreach ($trackData['meetings'] as $mRow) {
+                                $dbM = $program->meetings->firstWhere('meeting_number', $mRow['source_meeting_number']);
+                                if (!$dbM || $dbM->is_locked || empty($mRow['available'])) {
+                                    $allMeetingsUnlocked = false;
+                                    break;
+                                }
+                            }
+                        } else {
+                            $allMeetingsUnlocked = false;
+                        }
+                    }
+                @endphp
+
+                @if(($hasCompletedAllMeetings ?? false) && $allMeetingsUnlocked)
+                    <div class="mb-6 p-6 rounded-3xl shadow-lg bg-blue-600 border border-blue-500 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-bold text-lg">Semua meeting {{ $trackData['title'] }} sudah selesai!</p>
+                                <p class="text-blue-100 text-sm mt-0.5">Anda sudah bisa mengerjakan Final Test untuk track ini.</p>
+                            </div>
+                        </div>
+                        <a href="{{ route('final-test.show', ['program' => 'grammar-for-writing', 'variant' => $track]) }}"
+                           class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-blue-700 rounded-2xl font-bold shadow-md hover:bg-blue-50 transition shrink-0">
+                            <span>Lanjut ke Final Test</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                            </svg>
+                        </a>
+                    </div>
+                @endif
 
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     @foreach($trackData['meetings'] as $meeting)
@@ -145,19 +190,29 @@
                                                 </form>
                                             @endif
                                         @else
-                                            <span class="px-3 py-1 rounded-full text-xs font-bold {{ $meeting['available'] ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500' }}">
+                                            <span class="px-3 py-1 rounded-full text-xs font-bold {{ $meeting['available'] ? 'bg-green-100 text-green-600' : 'bg-white text-gray-500' }}">
                                                 {{ $meeting['available'] ? 'READY' : 'COMING SOON' }}
                                             </span>
                                         @endif
                                     </div>
                                 </div>
 
+                                @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                                    <div class="mb-3">
+                                        <x-grammar-writing-ai-toggle
+                                            :track="$track"
+                                            :meeting="$meeting['source_meeting_number']"
+                                            :enabled="$aiEnabledByMeeting[$meeting['source_meeting_number']] ?? true"
+                                        />
+                                    </div>
+                                @endif
+
                                 <p class="text-base font-semibold text-gray-700 mb-2">{{ $meeting['topic'] }}</p>
                                 <p class="text-sm text-gray-500 leading-relaxed min-h-[48px]">{{ $meeting['description'] }}</p>
 
                                 @if($meeting['available'] && $meeting['route_name'])
                                     @if(isset($dbMeeting) && $dbMeeting->is_locked)
-                                        <div class="mt-6 inline-flex items-center justify-center w-full rounded-2xl bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-500">
+                                        <div class="mt-6 inline-flex items-center justify-center w-full rounded-2xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-500">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                                             Locked
                                         </div>
@@ -167,7 +222,7 @@
                                         </a>
                                     @endif
                                 @else
-                                    <div class="mt-6 inline-flex items-center justify-center w-full rounded-2xl bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-500">
+                                    <div class="mt-6 inline-flex items-center justify-center w-full rounded-2xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-500">
                                         Coming Soon
                                     </div>
                                 @endif
@@ -194,6 +249,83 @@
                             </div>
                         </div>
                     @endforeach
+
+                    <!-- Final Test Card -->
+                    @if($allMeetingsUnlocked)
+                        <div class="bg-white rounded-3xl shadow-sm hover:shadow-lg transition overflow-hidden border-2 border-blue-600 relative flex flex-col justify-between">
+                            <div class="p-6 flex-1 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-start justify-between mb-4 gap-4">
+                                        <div>
+                                            <p class="text-xs uppercase tracking-[0.2em] text-blue-600 font-bold">Tahap Akhir</p>
+                                            <h2 class="text-xl font-bold text-gray-900 mt-1">Final Test</h2>
+                                        </div>
+                                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200">
+                                            OPEN
+                                        </span>
+                                    </div>
+                                    <p class="text-base font-semibold text-gray-800 mb-2">Final Assessment {{ $trackData['title'] }}</p>
+                                    <p class="text-sm text-gray-500 leading-relaxed min-h-[48px]">
+                                        Ujian evaluasi akhir komprehensif (3 paragraf esai) untuk menguji seluruh materi dan penerbitan sertifikat resmi.
+                                    </p>
+                                </div>
+
+                                <div class="mt-6">
+                                    <a href="{{ route('final-test.show', ['program' => 'grammar-for-writing', 'variant' => $track]) }}" 
+                                       class="inline-flex items-center justify-center w-full rounded-2xl bg-blue-600 hover:bg-blue-700 text-white px-4 py-3.5 text-sm font-bold shadow-sm transition">
+                                        <span>Buka Final Test</span>
+                                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="bg-white rounded-3xl shadow-sm transition overflow-hidden border border-gray-200 relative flex flex-col justify-between">
+                            <div class="p-6 flex-1 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-start justify-between mb-4 gap-4">
+                                        <div>
+                                            <p class="text-xs uppercase tracking-[0.2em] text-gray-400 font-semibold">Tahap Akhir</p>
+                                            <h2 class="text-xl font-bold text-gray-700 mt-1">Final Test</h2>
+                                        </div>
+                                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-600 flex items-center gap-1 border border-red-200">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                            </svg>
+                                            LOCKED
+                                        </span>
+                                    </div>
+                                    <p class="text-base font-semibold text-gray-700 mb-2">Final Assessment {{ $trackData['title'] }}</p>
+                                    <p class="text-sm text-gray-500 leading-relaxed min-h-[48px]">
+                                        Ujian evaluasi akhir komprehensif (3 paragraf esai) untuk menguji seluruh materi dan penerbitan sertifikat resmi.
+                                    </p>
+                                </div>
+
+                                <div class="mt-6">
+                                    <div class="inline-flex items-center justify-center w-full rounded-2xl bg-slate-100 px-4 py-3.5 text-sm font-semibold text-slate-500 cursor-not-allowed">
+                                        <svg class="w-4 h-4 mr-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                        </svg>
+                                        Locked
+                                    </div>
+                                    <p class="text-xs text-center text-gray-400 mt-2">Terbuka otomatis setelah semua {{ count($trackData['meetings']) }} pertemuan terbuka</p>
+
+                                    @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+                                        <div class="mt-3 text-center">
+                                            <a href="{{ route('final-test.show', ['program' => 'grammar-for-writing', 'variant' => $track]) }}" class="text-xs font-semibold text-blue-600 hover:underline inline-flex items-center gap-1">
+                                                <span>Preview Final Test (Admin / Teacher)</span>
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </main>

@@ -10,13 +10,13 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-12">
         {{-- Table Header --}}
-        <div class="grid grid-cols-2 bg-gray-50 border-b border-gray-200">
+        <div class="grid grid-cols-2 bg-white border-b border-gray-200">
             <div class="p-3 font-bold text-center text-gray-800">Detail</div>
             <div class="p-3 font-bold text-center text-gray-800">Another Detail</div>
         </div>
 
         {{-- Row 1 --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-4 flex gap-4 border-r border-gray-200">
                 <strong class="text-gray-800 mt-1">1</strong>
                 <div class="flex items-center gap-1 flex-wrap">
@@ -37,7 +37,7 @@
         </div>
 
         {{-- Row 2 --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-4 flex gap-4 border-r border-gray-200">
                 <strong class="text-gray-800 mt-1">2</strong>
                 <div class="flex flex-col">
@@ -62,7 +62,7 @@
         </div>
 
         {{-- Row 3 --}}
-        <div class="grid grid-cols-2 bg-white hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 bg-white hover:bg-white transition-colors">
             <div class="p-4 flex gap-4 border-r border-gray-200">
                 <strong class="text-gray-800 mt-1">3</strong>
                 <div class="flex items-center gap-1 flex-wrap">
@@ -90,7 +90,7 @@
     <h4 class="text-lg font-bold mb-2">Questions 17-20</h4>
     <p class="mb-4 text-gray-700">Choose the correct letter, <strong>A, B</strong>, or <strong>C</strong>.</p>
     
-    <div class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg inline-block min-w-[300px]">
+    <div class="mb-6 p-4 bg-white border border-gray-200 rounded-lg inline-block min-w-[300px]">
         <p class="font-bold text-gray-800 mb-3 text-sm">NB <span class="italic font-normal">You may use a letter more than once.</span></p>
         <div class="space-y-2 text-gray-800 font-medium ml-4">
             <p><strong>A</strong> &nbsp; Andrea</p>

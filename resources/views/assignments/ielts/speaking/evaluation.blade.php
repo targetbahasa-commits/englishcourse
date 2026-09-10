@@ -8,7 +8,7 @@
         }
     }
 </style>
-<div class="fixed inset-0 bg-gray-100 p-6 pt-8 overflow-hidden transition-all duration-200 dynamic-sidebar-padding" x-data="speakingEvaluation()">
+<div class="fixed inset-0 bg-white p-6 pt-8 overflow-hidden transition-all duration-200 dynamic-sidebar-padding" x-data="speakingEvaluation()">
     <div class="flex flex-col lg:flex-row gap-6 h-full pl-4 lg:pl-8">
         
         <!-- Left Column: Transcripts & Analysis -->
@@ -21,7 +21,7 @@
                         <p class="text-gray-500 mt-1">Part {{ $topic['part'] ?? 1 }} — Topic: <span class="font-medium text-gray-700">{{ $topic['title'] ?? 'Unknown Topic' }}</span></p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <a href="{{ route('assignments.ielts-academic.speaking.index', ['part' => $topic['part'] ?? 1]) }}" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors">
+                        <a href="{{ route('assignments.ielts-academic.speaking.index', ['part' => $topic['part'] ?? 1]) }}" class="px-4 py-2 bg-white text-gray-600 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors">
                             Back to Topic
                         </a>
                     </div>
@@ -50,7 +50,7 @@
                             <p class="text-gray-800 font-medium mb-3 leading-relaxed">{!! $questionHtml !!}</p>
                             
                             <div class="relative pl-4 border-l-4 border-indigo-100 group-hover:border-indigo-300 transition-colors">
-                                <div class="bg-gray-50 rounded-lg p-4 text-gray-700 leading-relaxed italic">
+                                <div class="bg-white rounded-lg p-4 text-gray-700 leading-relaxed italic">
                                     "{{ $item['answer'] }}"
                                     
                                     @if(isset($item['audio_url']))
@@ -98,7 +98,7 @@
                 </div>
 
                 <!-- Tabs Navigation -->
-                <div class="flex border-b border-gray-100 overflow-x-auto bg-gray-50/50 shrink-0">
+                <div class="flex border-b border-gray-100 overflow-x-auto bg-white shrink-0">
                     <button @click="tab = 'general'" :class="{'border-indigo-500 text-indigo-600 bg-white': tab === 'general', 'border-transparent text-gray-500 hover:text-gray-700': tab !== 'general'}" class="flex-1 py-4 px-4 text-center text-sm font-bold border-b-2 transition-all">
                         General
                     </button>
@@ -125,7 +125,7 @@
                     <!-- General Tab -->
                     <div x-show="tab === 'general'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
                         <h3 class="text-lg font-bold text-gray-800 mb-4">Ringkasan Penguji</h3>
-                        <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 mb-6">
+                        <div class="bg-white border border-blue-100 rounded-xl p-5 mb-6">
                             <p class="text-gray-700 leading-relaxed">
                                 {!! $result['general_feedback'] ?? 'Tidak ada umpan balik.' !!}
                             </p>
@@ -143,7 +143,7 @@
 <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3 mt-8">Detail Evaluasi Rubrik</h4>
 <div class="overflow-x-auto mb-8 border border-gray-200 rounded-lg shadow-sm">
     <table class="min-w-full bg-white text-sm text-left border-collapse">
-        <thead class="bg-gray-100 text-gray-700 uppercase font-bold text-xs border-b border-gray-200">
+        <thead class="bg-white text-gray-700 uppercase font-bold text-xs border-b border-gray-200">
             <tr>
                 <th class="py-3 px-4 w-1/4 border-r border-gray-200">Aspects</th>
                 <th class="py-3 px-4 w-1/4 border-r border-gray-200">Does candidate ...</th>
@@ -155,7 +155,7 @@
             <!-- Fluency & Coherence -->
             @if($fc_details && count($fc_details) > 0)
                 @foreach($fc_details as $index => $detail)
-                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                    <tr class="border-b border-gray-200 hover:bg-white">
                         @if($index === 0)
                             <td class="py-3 px-4 font-bold align-bottom uppercase text-gray-800 border-r border-gray-200" rowspan="{{ count($fc_details) }}">FLUENCY AND COHERENCE</td>
                         @endif
@@ -171,7 +171,7 @@
             <!-- Lexical Resource -->
             @if($lr_details && count($lr_details) > 0)
                 @foreach($lr_details as $index => $detail)
-                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                    <tr class="border-b border-gray-200 hover:bg-white">
                         @if($index === 0)
                             <td class="py-3 px-4 font-bold align-bottom uppercase text-gray-800 border-r border-gray-200" rowspan="{{ count($lr_details) }}">LEXICAL RESOURCES</td>
                         @endif
@@ -187,7 +187,7 @@
             <!-- Grammatical Range -->
             @if($gr_details && count($gr_details) > 0)
                 @foreach($gr_details as $index => $detail)
-                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                    <tr class="border-b border-gray-200 hover:bg-white">
                         @if($index === 0)
                             <td class="py-3 px-4 font-bold align-bottom uppercase text-gray-800 border-r border-gray-200" rowspan="{{ count($gr_details) }}">GRAMMATICAL RANGE AND ACCURACY</td>
                         @endif
@@ -203,7 +203,7 @@
             <!-- Pronunciation -->
             @if($pr_details && count($pr_details) > 0)
                 @foreach($pr_details as $index => $detail)
-                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                    <tr class="border-b border-gray-200 hover:bg-white">
                         @if($index === 0)
                             <td class="py-3 px-4 font-bold align-bottom uppercase text-gray-800 border-r border-gray-200" rowspan="{{ count($pr_details) }}">PRONUNCIATION</td>
                         @endif
@@ -216,7 +216,7 @@
                 @endforeach
             @endif
             
-            <tr class="bg-gray-100 border-t-2 border-gray-300">
+            <tr class="bg-white border-t-2 border-gray-300">
                 <td class="py-3 px-4 font-bold uppercase text-gray-800 border-r border-gray-200" colspan="3">OVERALL COMMENTS AND BANDSCORE</td>
                 <td class="py-3 px-4 font-black text-center text-xl text-gray-900">{{ $result['overall_score'] ?? '0.0' }}</td>
             </tr>
@@ -227,19 +227,19 @@
                         
                         <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Rincian Skor</h4>
                         <div class="space-y-3">
-                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <div class="flex justify-between items-center p-3 bg-white rounded-lg">
                                 <span class="text-gray-600">Fluency & Coherence</span>
                                 <span class="font-bold text-gray-800">{{ $result['categories']['fluency_coherence']['score'] ?? '-' }}</span>
                             </div>
-                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <div class="flex justify-between items-center p-3 bg-white rounded-lg">
                                 <span class="text-gray-600">Lexical Resource</span>
                                 <span class="font-bold text-gray-800">{{ $result['categories']['lexical_resource']['score'] ?? '-' }}</span>
                             </div>
-                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <div class="flex justify-between items-center p-3 bg-white rounded-lg">
                                 <span class="text-gray-600">Grammatical Range</span>
                                 <span class="font-bold text-gray-800">{{ $result['categories']['grammatical_range']['score'] ?? '-' }}</span>
                             </div>
-                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <div class="flex justify-between items-center p-3 bg-white rounded-lg">
                                 <span class="text-gray-600">Pronunciation</span>
                                 <span class="font-bold text-gray-800">{{ $result['categories']['pronunciation']['score'] ?? '-' }}</span>
                             </div>
@@ -250,7 +250,7 @@
                     <div x-show="tab === 'fluency'" x-cloak>
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-bold text-gray-800">Fluency & Coherence</h3>
-                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-bold text-sm">{{ $result['categories']['fluency_coherence']['score'] ?? '-' }}</span>
+                            <span class="bg-white text-blue-700 px-3 py-1 rounded-full font-bold text-sm">{{ $result['categories']['fluency_coherence']['score'] ?? '-' }}</span>
                         </div>
                         <div class="prose prose-sm text-gray-600 mb-6">
                              <p>{{ $result['categories']['fluency_coherence']['feedback'] ?? 'Tidak ada umpan balik spesifik.' }}</p>
@@ -278,7 +278,7 @@
                                 <h4 class="font-bold text-gray-800 border-b pb-2 mb-3">Masalah Kelancaran Terdeteksi</h4>
                                 <div class="space-y-3">
                                     <template x-for="(error, index) in fluencyAnalysis?.errors" :key="index">
-                                        <div class="bg-blue-50 rounded-xl p-4 border border-blue-100 flex items-start gap-3">
+                                        <div class="bg-white rounded-xl p-4 border border-blue-100 flex items-start gap-3">
                                             <div class="bg-white p-2 rounded-lg text-blue-600 font-bold text-xs shadow-sm whitespace-nowrap" x-text="error.time"></div>
                                             <div>
                                                 <div class="font-bold text-gray-800 text-sm mb-1" x-text="error.type"></div>
@@ -297,7 +297,7 @@
                                         <div class="p-4 rounded-xl border" 
                                             :class="{
                                                 'bg-green-50 border-green-100': item.status === 'positive',
-                                                'bg-yellow-50 border-yellow-100': item.status === 'mixed',
+                                                'bg-white border-yellow-100': item.status === 'mixed',
                                                 'bg-red-50 border-red-100': item.status === 'negative'
                                             }">
                                             <div class="flex items-center gap-2 mb-2">
@@ -318,7 +318,7 @@
                     <div x-show="tab === 'lexical'" x-cloak>
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-bold text-gray-800">Lexical Resource</h3>
-                            <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-bold text-sm">{{ $result['categories']['lexical_resource']['score'] ?? '-' }}</span>
+                            <span class="bg-white text-purple-700 px-3 py-1 rounded-full font-bold text-sm">{{ $result['categories']['lexical_resource']['score'] ?? '-' }}</span>
                         </div>
                         <div class="prose prose-sm text-gray-600 mb-6">
                              <p>{{ $result['categories']['lexical_resource']['feedback'] ?? 'Tidak ada umpan balik spesifik.' }}</p>
@@ -342,7 +342,7 @@
                         <div x-show="lexicalImprovements" class="mb-8 space-y-4" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
                             <h4 class="font-bold text-gray-800 border-b pb-2">Peningkatan Kosakata</h4>
                             <template x-for="(item, index) in lexicalImprovements" :key="index">
-                                <div class="bg-purple-50 rounded-xl p-4 border border-purple-100">
+                                <div class="bg-white rounded-xl p-4 border border-purple-100">
                                     <div class="flex items-center gap-3 mb-2">
                                         <span class="text-red-400 line-through text-sm" x-text="item.original"></span>
                                         <svg class="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
@@ -355,7 +355,7 @@
 
                         <!-- Collocations Section -->
                         <div class="border-t border-gray-100 pt-6">
-                             <button @click="suggestCollocations()" :disabled="improving || suggestingCollocations" class="w-full py-3 bg-white border-2 border-purple-100 text-purple-600 rounded-xl font-bold hover:bg-purple-50 hover:border-purple-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mb-6">
+                             <button @click="suggestCollocations()" :disabled="improving || suggestingCollocations" class="w-full py-3 bg-white border-2 border-purple-100 text-purple-600 rounded-xl font-bold hover:bg-white hover:border-purple-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mb-6">
                                 <span x-show="!suggestingCollocations" class="flex items-center gap-2">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
                                     Saran Idiom & Collocations
@@ -374,10 +374,10 @@
                                         <div class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:border-purple-300 transition-colors">
                                             <div class="flex justify-between items-start mb-1">
                                                 <span class="font-bold text-purple-700" x-text="item.term"></span>
-                                                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-gray-100 text-gray-500" x-text="item.type"></span>
+                                                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-white text-gray-500" x-text="item.type"></span>
                                             </div>
                                             <p class="text-xs text-gray-600 mb-2" x-text="item.definition"></p>
-                                            <div class="bg-gray-50 p-2 rounded text-xs italic text-gray-700 border-l-2 border-purple-200">
+                                            <div class="bg-white p-2 rounded text-xs italic text-gray-700 border-l-2 border-purple-200">
                                                 <span class="font-bold text-purple-400 mr-1">Ex:</span>
                                                 <span x-html="item.example"></span>
                                             </div>
@@ -448,7 +448,7 @@
                         <!-- Grammar Upgrades List -->
                         <div x-show="grammarUpgrades" class="space-y-4" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
                             <template x-for="(item, index) in grammarUpgrades" :key="index">
-                                <div class="bg-indigo-50 rounded-xl p-4 border border-indigo-100">
+                                <div class="bg-white rounded-xl p-4 border border-indigo-100">
                                     <div class="flex justify-between items-start mb-2">
                                         <span class="px-2 py-0.5 rounded bg-indigo-200 text-indigo-800 text-[10px] font-bold uppercase tracking-wider" x-text="item.type"></span>
                                     </div>
@@ -529,15 +529,15 @@
                                 <h4 class="font-bold text-gray-800 border-b pb-2 mb-3">Analisis Detail</h4>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <template x-for="(cat, index) in pronunciationAnalysis?.categories" :key="index">
-                                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 h-full">
+                                        <div class="bg-white rounded-xl p-4 border border-gray-100 h-full">
                                             <div class="flex justify-between items-center mb-2">
                                                 <h5 class="font-bold text-gray-800 text-sm" x-text="cat.name"></h5>
                                                 <span class="font-bold text-sm px-2 py-0.5 rounded" 
                                                     :class="{
-                                                        'bg-blue-100 text-blue-700': cat.color === 'blue',
-                                                        'bg-indigo-100 text-indigo-700': cat.color === 'indigo',
-                                                        'bg-purple-100 text-purple-700': cat.color === 'purple',
-                                                        'bg-emerald-100 text-emerald-700': cat.color === 'emerald'
+                                                        'bg-white text-blue-700': cat.color === 'blue',
+                                                        'bg-white text-indigo-700': cat.color === 'indigo',
+                                                        'bg-white text-purple-700': cat.color === 'purple',
+                                                        'bg-white text-emerald-700': cat.color === 'emerald'
                                                     }" 
                                                     x-text="cat.score + '/100'"></span>
                                             </div>
@@ -570,7 +570,7 @@
                                  <p class="text-emerald-50 text-sm opacity-90">Lihat bagaimana penutur asli menjawab pertanyaan-pertanyaan ini untuk mendapatkan skor Band 9. Bandingkan jawaban Anda untuk mempelajari kosakata dan struktur baru.</p>
                              </div>
 
-                            <button @click="generateModelAnswers()" :disabled="generatingModelAnswers" class="w-full py-3 bg-white border-2 border-emerald-500 text-emerald-600 rounded-xl font-bold hover:bg-emerald-50 transition-all transform flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                            <button @click="generateModelAnswers()" :disabled="generatingModelAnswers" class="w-full py-3 bg-white border-2 border-emerald-500 text-emerald-600 rounded-xl font-bold hover:bg-white transition-all transform flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
                                 <span x-show="!generatingModelAnswers" class="flex items-center gap-2">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
                                     Buatkan Contoh Jawaban
@@ -583,8 +583,8 @@
 
                             <div x-show="modelAnswers" class="space-y-6" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
                                 <template x-for="(item, index) in modelAnswers" :key="index">
-                                    <div class="bg-emerald-50/50 rounded-xl border border-emerald-100 overflow-hidden">
-                                        <div class="bg-emerald-100/50 px-4 py-3 border-b border-emerald-100">
+                                    <div class="bg-white rounded-xl border border-emerald-100 overflow-hidden">
+                                        <div class="bg-white px-4 py-3 border-b border-emerald-100">
                                             <h4 class="font-bold text-emerald-800 text-sm" x-text="'Q: ' + item.question"></h4>
                                         </div>
                                         <div class="p-5">

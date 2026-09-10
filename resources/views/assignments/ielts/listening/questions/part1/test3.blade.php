@@ -82,39 +82,39 @@
         <p class="text-gray-800 font-medium text-lg">Which <strong>THREE</strong> qualities do employers most value in their staff?</p>
     </div>
 
-    <div class="bg-gray-50 p-6 rounded-2xl inline-block mt-2 min-w-[300px]">
+    <div class="bg-white p-6 rounded-2xl inline-block mt-2 min-w-[300px]">
         <div class="space-y-4 font-medium text-lg" id="checkbox-group-1">
-            <label class="flex items-center gap-4 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors group">
+            <label class="flex items-center gap-4 cursor-pointer hover:bg-white p-2 rounded transition-colors group">
                 <input type="checkbox" name="answers[8_9_10][]" value="A" class="answer-checkbox w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
                 <span class="font-bold w-6 group-hover:text-blue-600">A</span>
                 <span>Problem-solving skills</span>
             </label>
-            <label class="flex items-center gap-4 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors group">
+            <label class="flex items-center gap-4 cursor-pointer hover:bg-white p-2 rounded transition-colors group">
                 <input type="checkbox" name="answers[8_9_10][]" value="B" class="answer-checkbox w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
                 <span class="font-bold w-6 group-hover:text-blue-600">B</span>
                 <span>Diligence</span>
             </label>
-            <label class="flex items-center gap-4 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors group">
+            <label class="flex items-center gap-4 cursor-pointer hover:bg-white p-2 rounded transition-colors group">
                 <input type="checkbox" name="answers[8_9_10][]" value="C" class="answer-checkbox w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
                 <span class="font-bold w-6 group-hover:text-blue-600">C</span>
                 <span>Experience</span>
             </label>
-            <label class="flex items-center gap-4 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors group">
+            <label class="flex items-center gap-4 cursor-pointer hover:bg-white p-2 rounded transition-colors group">
                 <input type="checkbox" name="answers[8_9_10][]" value="D" class="answer-checkbox w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
                 <span class="font-bold w-6 group-hover:text-blue-600">D</span>
                 <span>Flexible hours</span>
             </label>
-            <label class="flex items-center gap-4 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors group">
+            <label class="flex items-center gap-4 cursor-pointer hover:bg-white p-2 rounded transition-colors group">
                 <input type="checkbox" name="answers[8_9_10][]" value="E" class="answer-checkbox w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
                 <span class="font-bold w-6 group-hover:text-blue-600">E</span>
                 <span>Independent thinking</span>
             </label>
-            <label class="flex items-center gap-4 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors group">
+            <label class="flex items-center gap-4 cursor-pointer hover:bg-white p-2 rounded transition-colors group">
                 <input type="checkbox" name="answers[8_9_10][]" value="F" class="answer-checkbox w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
                 <span class="font-bold w-6 group-hover:text-blue-600">F</span>
                 <span>Good personality</span>
             </label>
-            <label class="flex items-center gap-4 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors group">
+            <label class="flex items-center gap-4 cursor-pointer hover:bg-white p-2 rounded transition-colors group">
                 <input type="checkbox" name="answers[8_9_10][]" value="G" class="answer-checkbox w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
                 <span class="font-bold w-6 group-hover:text-blue-600">G</span>
                 <span>Qualifications</span>

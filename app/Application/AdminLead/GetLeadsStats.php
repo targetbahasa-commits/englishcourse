@@ -11,13 +11,13 @@ class GetLeadsStats
     ) {
     }
 
-    public function execute(): array
+    public function execute(array $filters = []): array
     {
         return [
-            'totalLeads' => $this->leadRepository->countAll(),
-            'pendingLeads' => $this->leadRepository->countByStatus('pending'),
-            'contactedLeads' => $this->leadRepository->countByStatus('contacted'),
-            'enrolledLeads' => $this->leadRepository->countByStatus('enrolled'),
+            'totalLeads' => $this->leadRepository->getFilteredCount($filters),
+            'pendingLeads' => $this->leadRepository->getFilteredCount($filters, 'pending'),
+            'contactedLeads' => $this->leadRepository->getFilteredCount($filters, 'contacted'),
+            'enrolledLeads' => $this->leadRepository->getFilteredCount($filters, 'enrolled'),
         ];
     }
 }

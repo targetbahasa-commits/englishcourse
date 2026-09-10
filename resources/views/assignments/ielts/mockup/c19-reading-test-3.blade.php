@@ -16,7 +16,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -36,7 +36,7 @@
                     <p class="text-sm text-gray-500">Cambridge {{ $edition ?? '19' }} Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? '19', 'id' => $testId ?? '3']) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition ?? '19', 'id' => $testId ?? '3']) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back
             </a>
@@ -167,7 +167,7 @@
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar">
+        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
             <div class="px-8 py-8 pb-24 max-w-2xl mx-auto" x-data="{ answers: {} }">
 
                 {{-- Questions 1–7: True/False/Not Given --}}
@@ -461,7 +461,7 @@
                             </div>
                             <div class="ml-10 space-y-2">
                                 @foreach($qData['options'] as $letter => $optionText)
-                                <label class="flex gap-3 items-start cursor-pointer hover:bg-gray-50 p-2 rounded transition">
+                                <label class="flex gap-3 items-start cursor-pointer hover:bg-white p-2 rounded transition">
                                     <input type="radio" x-model="answers.q{{ $qNum }}" name="q{{ $qNum }}" value="{{ $letter }}" class="mt-1 text-blue-600 focus:ring-blue-500">
                                     <span class="font-bold text-gray-700">{{ $letter }}</span>
                                     <span class="text-gray-700">{{ $optionText }}</span>
@@ -504,7 +504,7 @@
                         @endforeach
                     </div>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm max-w-lg mx-auto shadow-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm max-w-lg mx-auto shadow-sm">
                         <div class="space-y-3 text-gray-800">
                             <div class="flex gap-4"><span class="font-bold text-gray-900 w-4 flex-none">A</span> <span>but there are concerns about this.</span></div>
                             <div class="flex gap-4"><span class="font-bold text-gray-900 w-4 flex-none">B</span> <span>as systems do not need to conform to standard practices.</span></div>

@@ -77,7 +77,7 @@
 
     <div class="mb-4 space-y-2 pl-2">
         @foreach(['A' => 'interviewees', 'B' => 'make data clearly', 'C' => 'time arrangement', 'D' => 'reference books', 'E' => 'questionnaire design'] as $letter => $option)
-        <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+        <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
             <input type="checkbox" name="answers_multi[29_30][]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer rounded">
             <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
         </label>

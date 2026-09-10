@@ -19,7 +19,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 <div class="flex min-h-screen">
@@ -37,7 +37,7 @@
                         <p class="text-gray-600 mt-1">Cambridge {{ $edition }} Test {{ $testId }}</p>
                     </div>
                 </div>
-                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId ?? 1]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId ?? 1]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
@@ -182,11 +182,11 @@
                             [13, 'What does the guide say about the entrance fee?', ['A' => 'Visitors decide whether or not they wish to pay.', 'B' => 'Only children and students receive a discount.', 'C' => 'The museum charges extra for special exhibitions.']],
                             [14, 'What are visitors advised to leave in the cloakroom?', ['A' => 'cameras', 'B' => 'coats', 'C' => 'bags']],
                         ] as [$num, $question, $options])
-                        <div class="mb-6 p-4 {{ $loop->even ? 'bg-gray-50' : '' }} rounded-lg">
+                        <div class="mb-6 p-4 {{ $loop->even ? 'bg-white' : '' }} rounded-lg">
                             <p class="mb-3"><strong>{{ $num }}</strong> {{ $question }}</p>
                             <div class="space-y-2 ml-6">
                                 @foreach($options as $letter => $text)
-                                <label class="flex items-start gap-3 cursor-pointer hover:bg-gray-100 p-1.5 rounded">
+                                <label class="flex items-start gap-3 cursor-pointer hover:bg-white p-1.5 rounded">
                                     <input type="radio" name="q{{ $num }}" value="{{ $letter }}" class="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
                                     <span><strong>{{ $letter }}</strong> {{ $text }}</span>
                                 </label>
@@ -202,7 +202,7 @@
                         <p class="mb-1">What information does the speaker give about each of the following areas of the museum?</p>
                         <p class="italic mb-4">Choose <span class="font-bold">SIX</span> answers from the box and write the correct letter, <span class="font-bold">A–H</span>, next to Questions 15–20.</p>
 
-                        <div class="border border-gray-400 p-5 mb-6 bg-gray-50">
+                        <div class="border border-gray-400 p-5 mb-6 bg-white">
                             <p class="text-center font-bold mb-4">Information</p>
                             <div class="space-y-2">
                                 @foreach([
@@ -230,7 +230,7 @@
                                 [19, 'Bees are Magic'],
                                 [20, 'The Pond'],
                             ] as [$num, $area])
-                            <div class="flex items-center gap-4 py-2 {{ $loop->even ? 'bg-gray-50' : '' }} px-3 rounded">
+                            <div class="flex items-center gap-4 py-2 {{ $loop->even ? 'bg-white' : '' }} px-3 rounded">
                                 <span class="font-bold w-8">{{ $num }}</span>
                                 <span class="w-48">{{ $area }}</span>
                                 <select name="q{{ $num }}" class="appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-3 pr-8 rounded font-semibold text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer w-16">
@@ -276,7 +276,7 @@
                                 ['D', 'learning through play'],
                                 ['E', 'developing hand-eye coordination'],
                             ] as [$letter, $text])
-                            <label class="flex items-start gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                            <label class="flex items-start gap-3 cursor-pointer hover:bg-white p-2 rounded">
                                 <input type="checkbox" name="q21_22[]" value="{{ $letter }}" class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                                 <span><strong>{{ $letter }}</strong> {{ $text }}</span>
                             </label>
@@ -290,7 +290,7 @@
                         <p class="mb-1">Which comment do the students make about each of the following children in the video?</p>
                         <p class="italic mb-4">Choose <span class="font-bold">FIVE</span> answers from the box and write the correct letter, <span class="font-bold">A–G</span>, next to Questions 23–27.</p>
 
-                        <div class="border border-gray-400 p-5 mb-6 bg-gray-50">
+                        <div class="border border-gray-400 p-5 mb-6 bg-white">
                             <p class="text-center font-bold mb-4">Comments</p>
                             <div class="space-y-2">
                                 @foreach([
@@ -316,7 +316,7 @@
                                 [26, 'Anya'],
                                 [27, 'Zara'],
                             ] as [$num, $child])
-                            <div class="flex items-center gap-4 py-2 {{ $loop->even ? 'bg-gray-50' : '' }} px-3 rounded">
+                            <div class="flex items-center gap-4 py-2 {{ $loop->even ? 'bg-white' : '' }} px-3 rounded">
                                 <span class="font-bold w-8">{{ $num }}</span>
                                 <span class="w-48">{{ $child }}</span>
                                 <select name="q{{ $num }}" class="appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-3 pr-8 rounded font-semibold text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer w-16">
@@ -340,11 +340,11 @@
                             [29, 'The students agree that some teachers might be unwilling to use origami in class because', ['A' => 'they may not think that crafts are important.', 'B' => 'they may not have the necessary skills.', 'C' => 'they may worry that it will take up too much time.']],
                             [30, 'Why do the students decide to use origami in their maths teaching practice?', ['A' => 'to correct a particular misunderstanding', 'B' => 'to set a challenge', 'C' => 'to introduce a new concept']],
                         ] as [$num, $question, $options])
-                        <div class="mb-6 p-4 {{ $loop->even ? 'bg-gray-50' : '' }} rounded-lg">
+                        <div class="mb-6 p-4 {{ $loop->even ? 'bg-white' : '' }} rounded-lg">
                             <p class="mb-3"><strong>{{ $num }}</strong> {{ $question }}</p>
                             <div class="space-y-2 ml-6">
                                 @foreach($options as $letter => $text)
-                                <label class="flex items-start gap-3 cursor-pointer hover:bg-gray-100 p-1.5 rounded">
+                                <label class="flex items-start gap-3 cursor-pointer hover:bg-white p-1.5 rounded">
                                     <input type="radio" name="q{{ $num }}" value="{{ $letter }}" class="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
                                     <span><strong>{{ $letter }}</strong> {{ $text }}</span>
                                 </label>

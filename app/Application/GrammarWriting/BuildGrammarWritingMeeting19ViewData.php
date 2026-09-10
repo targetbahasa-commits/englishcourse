@@ -22,18 +22,26 @@ class BuildGrammarWritingMeeting19ViewData
         $questions = $this->loadQuestions($fallbackQuestions);
         $paragraph = $this->loadParagraph($fallbackParagraph);
 
+        // Admin Live Preview loads this exact page (with ?live_preview_for=)
+        // under the ADMIN's own authenticated session, not the student being
+        // previewed. Using session() below would prefill the page with the
+        // ADMIN's own session state instead of the real student's - the
+        // correct per-student data is safely injected client-side afterward
+        // by injectSnapshotIntoIframe() in current-assignment.blade.php.
+        $isLivePreview = request()->filled('live_preview_for');
+
         return [
             'questions' => $questions,
             'fullParagraphId' => $paragraph['id'],
             'fullParagraphEn' => $paragraph['en'],
             'paragraphVocab' => $paragraph['vocab'],
             'paragraphDbId' => $paragraph['db_id'],
-            'submitted' => session('meeting19_submitted', false),
-            'results' => session('meeting19_results', []),
-            'paragraphResult' => session('meeting19_paragraph_result', []),
-            'finalScore' => session('meeting19_final_score', 0),
-            'userAnswers' => session('meeting19_user_answers', []),
-            'userParagraphAnswer' => session('meeting19_user_paragraph_answer', ''),
+            'submitted' => $isLivePreview ? false : session('meeting19_submitted', false),
+            'results' => $isLivePreview ? [] : session('meeting19_results', []),
+            'paragraphResult' => $isLivePreview ? [] : session('meeting19_paragraph_result', []),
+            'finalScore' => $isLivePreview ? 0 : session('meeting19_final_score', 0),
+            'userAnswers' => $isLivePreview ? [] : session('meeting19_user_answers', []),
+            'userParagraphAnswer' => $isLivePreview ? '' : session('meeting19_user_paragraph_answer', ''),
         ];
     }
 

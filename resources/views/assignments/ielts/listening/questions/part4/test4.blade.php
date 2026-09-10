@@ -20,13 +20,13 @@
         <table class="w-full border-collapse border border-gray-300 text-gray-700">
             <tbody>
                 <tr>
-                    <td class="border border-gray-300 px-5 py-4 w-1/4 align-middle bg-gray-50">
+                    <td class="border border-gray-300 px-5 py-4 w-1/4 align-middle bg-white">
                         are everywhere
                     </td>
-                    <td class="border border-gray-300 px-5 py-4 w-12 text-center align-middle bg-gray-50">
+                    <td class="border border-gray-300 px-5 py-4 w-12 text-center align-middle bg-white">
                         &rarr;
                     </td>
-                    <td class="border border-gray-300 px-5 py-4 align-middle bg-gray-50" colspan="2">
+                    <td class="border border-gray-300 px-5 py-4 align-middle bg-white" colspan="2">
                         <div class="flex items-center gap-2 flex-wrap">
                             <span>100 to 200</span>
                             <strong class="text-blue-600">31</strong>
@@ -113,7 +113,7 @@
     {{-- Diagram Image Placeholder --}}
     <div class="mb-8 text-center mt-6">
         <h5 class="font-bold text-gray-800 mb-2">Sudbury Installation</h5>
-        <div class="inline-block p-4 border-2 border-dashed border-gray-300 bg-gray-50 rounded-lg w-full max-w-2xl relative">
+        <div class="inline-block p-4 border-2 border-dashed border-gray-300 bg-white rounded-lg w-full max-w-2xl relative">
             <p class="text-gray-500 mb-2 font-medium">Diagram Insert</p>
             <p class="text-sm text-gray-400 mb-4">Please upload the diagram image to: <code>public/images/assignments/ielts/listening/part4/test4-diagram.png</code></p>
             <img src="{{ asset('images/assignments/ielts/listening/part4/test4-diagram.png') }}" onerror="this.style.display='none'" class="max-w-full h-auto mx-auto" alt="Sudbury Installation Diagram">

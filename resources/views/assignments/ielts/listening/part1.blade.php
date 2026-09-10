@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', 'IELTS Listening Part 1')
+
 @section('content')
 <div class="container mx-auto px-4 py-8" x-data="{ 
     showModal: false, 
@@ -108,7 +110,7 @@
                         </div>
                     </a>
                     @else
-                    <div class="block h-full p-6 bg-gray-50 rounded-2xl border border-gray-100 relative overflow-hidden flex flex-col justify-between opacity-75">
+                    <div class="block h-full p-6 bg-white rounded-2xl border border-gray-100 relative overflow-hidden flex flex-col justify-between opacity-75">
                          <div>
                             <div class="flex items-center justify-between mb-4">
                                 <div class="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center">
@@ -116,7 +118,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                                     </svg>
                                 </div>
-                                <span class="bg-gray-100 text-gray-400 text-xs font-bold px-2 py-1 rounded-lg border border-gray-200">LOCKED</span>
+                                <span class="bg-white text-gray-400 text-xs font-bold px-2 py-1 rounded-lg border border-gray-200">LOCKED</span>
                             </div>
                             
                             <h3 class="text-xl font-bold text-gray-400 mb-1">Part {{ $section->section_number }}</h3>

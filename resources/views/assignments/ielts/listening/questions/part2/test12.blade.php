@@ -21,7 +21,7 @@
                             </span>
                         </td>
                     </tr>
-                    <tr class="border-b border-gray-300 bg-gray-50">
+                    <tr class="border-b border-gray-300 bg-white">
                         <td class="p-4 border-r border-gray-300 w-1/2 text-gray-700">Number of viewers:</td>
                         <td class="p-4 w-1/2">
                             <span class="flex items-center gap-2">
@@ -45,7 +45,7 @@
                             </ul>
                         </td>
                     </tr>
-                    <tr class="border-b border-gray-300 bg-gray-50">
+                    <tr class="border-b border-gray-300 bg-white">
                         <td class="p-4 border-r border-gray-300 w-1/2 text-gray-700">Best day to visit:</td>
                         <td class="p-4 w-1/2">
                             <span class="flex items-center gap-2">
@@ -63,7 +63,7 @@
                             </span>
                         </td>
                     </tr>
-                    <tr class="bg-gray-50">
+                    <tr class="bg-white">
                         <td class="p-4 border-r border-gray-300 w-1/2 text-gray-700">Entertainment included:</td>
                         <td class="p-4 w-1/2">
                             <span class="flex items-center gap-2">
@@ -105,7 +105,7 @@
             19 => '4x4 test drive',
             20 => 'Lucky draw for car'
         ] as $q => $label)
-        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 transition-colors">
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-white transition-colors">
             <div class="flex items-center gap-3">
                 <strong class="text-blue-600">{{ $q }}</strong>
                 <span class="text-gray-700">{{ $label }}</span>

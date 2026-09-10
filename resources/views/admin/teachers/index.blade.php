@@ -4,6 +4,7 @@
 <div class="p-8 pb-24 max-w-7xl mx-auto" x-data="{ 
     showAssignModal: false,
     showAssignClassModal: false, 
+    showPasswordModal: false,
     selectedTeacherId: null,
     selectedTeacherName: ''
 }">
@@ -17,6 +18,13 @@
                 <h1 class="text-3xl font-bold text-gray-900">Teacher Management</h1>
                 <p class="text-gray-500 mt-1">Monitor teacher performance, distribute workload, and manage assignments.</p>
             </div>
+        </div>
+
+        <div class="flex gap-3">
+            <a href="{{ route('users.create', ['role' => 'teacher']) }}" class="px-5 py-2.5 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-600/20 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Add Teacher
+            </a>
         </div>
     </div>
 
@@ -237,9 +245,13 @@
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                 </a>
 
-                                <a href="{{ route('users.edit', $teacher) }}" class="p-1.5 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Edit Profile">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                </a>
+                                 <button type="button" @click="selectedTeacherId = {{ $teacher->id }}; selectedTeacherName = '{{ addslashes($teacher->name) }}'; showPasswordModal = true" class="p-1.5 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors border border-transparent hover:border-amber-100" title="Change Password">
+                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                                 </button>
+
+                                 <a href="{{ route('users.edit', $teacher) }}" class="p-1.5 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Edit Profile">
+                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                 </a>
                             </div>
                         </td>
                     </tr>
@@ -364,6 +376,50 @@
             </div>
         </div>
     </div>
+
+    {{-- =============================
+         Change Password Modal
+         ============================= --}}
+    <div x-show="showPasswordModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="showPasswordModal = false"></div>
+            <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6 z-10">
+                <form :action="`{{ url('/admin/users') }}/${selectedTeacherId}/change-password`" method="POST">
+                    @csrf
+                    <div class="flex items-start gap-4 mb-5">
+                        <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-amber-100">
+                            <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-gray-900">Change Teacher Password</h3>
+                            <p class="text-sm text-gray-500 mt-0.5">Set a new password for <span class="font-bold text-gray-900" x-text="selectedTeacherName"></span>.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                            <input type="password" name="password" required minlength="6" placeholder="At least 6 characters"
+                                   class="w-full rounded-xl border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                            <input type="password" name="password_confirmation" required minlength="6" placeholder="Repeat new password"
+                                   class="w-full rounded-xl border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2">
+                        <button type="button" @click="showPasswordModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50">Cancel</button>
+                        <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-amber-600 rounded-xl hover:bg-amber-700 transition shadow-sm flex items-center gap-1.5">
+                            🔑 Update Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>

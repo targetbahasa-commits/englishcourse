@@ -11,7 +11,14 @@ class EloquentIeltsWritingRepository implements IeltsWritingRepository
 {
     public function findMeetingOrFail(int $id): mixed
     {
-        return IeltsWritingMeeting::findOrFail($id);
+        $meeting = IeltsWritingMeeting::find($id);
+        if (!$meeting) {
+            $meeting = IeltsWritingMeeting::where('meeting_number', $id)->first();
+        }
+        if (!$meeting) {
+            abort(404);
+        }
+        return $meeting;
     }
 
     public function createMeeting(array $data): void

@@ -41,7 +41,7 @@
                         </div>
                     </div>
                     <a href="{{ route('assignments.grammar-writing.classes') }}"
-                        class="flex items-center justify-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 font-medium transition border border-gray-200 shrink-0 text-sm md:text-base">
+                        class="flex items-center justify-center gap-2 px-3 py-2 md:px-4 md:py-2 bg-white text-gray-600 rounded-xl shadow-sm hover:bg-white font-medium transition border border-gray-200 shrink-0 text-sm md:text-base">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                         </svg>
@@ -55,7 +55,7 @@
                     <!-- Introductory Practice -->
                     <div class="relative">
                         @if(!$accessIntroductory)
-                            <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl">
+                            <div class="absolute inset-0 bg-white backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl">
                                 <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                                 </div>
@@ -89,7 +89,7 @@
                     <!-- Complexity Practice -->
                     <div class="relative">
                         @if(!$accessComplexity)
-                            <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl">
+                            <div class="absolute inset-0 bg-white backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl">
                                 <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                                 </div>
@@ -123,7 +123,7 @@
                     <!-- Proficiency Practice -->
                     <div class="relative">
                         @if(!$accessProficiency)
-                            <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl">
+                            <div class="absolute inset-0 bg-white backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl">
                                 <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                                 </div>
@@ -159,7 +159,7 @@
                 <!-- All Grammar Practice -->
                 <div class="mt-8 relative">
                     @if(!$accessAll)
-                        <div class="absolute inset-0 bg-gray-50/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
+                        <div class="absolute inset-0 bg-white backdrop-blur-[1px] z-20 flex flex-col items-center justify-center rounded-2xl border border-gray-100">
                             <div class="bg-white p-3 rounded-full shadow-md mb-2 text-gray-500">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                             </div>
@@ -177,7 +177,7 @@
                             <p class="text-gray-600 text-sm">Latihan campuran (Mixed Practice) yang mencakup seluruh topik grammar dari dasar hingga mahir.</p>
                         </div>
                         <div class="w-full md:w-auto shrink-0 mt-2 md:mt-0">
-                            <div class="bg-blue-50 text-blue-600 {{ $accessAll ? 'group-hover:bg-blue-600 group-hover:text-white' : '' }} font-bold py-2.5 px-6 rounded-xl transition-all duration-300 shadow-sm flex items-center justify-center md:justify-start gap-2">
+                            <div class="bg-white text-blue-600 {{ $accessAll ? 'group-hover:bg-blue-600 group-hover:text-white' : '' }} font-bold py-2.5 px-6 rounded-xl transition-all duration-300 shadow-sm flex items-center justify-center md:justify-start gap-2">
                                 Start All Practice
                                 <svg class="w-5 h-5 transition-transform duration-300 {{ $accessAll ? 'group-hover:translate-x-1' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                             </div>

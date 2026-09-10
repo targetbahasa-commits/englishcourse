@@ -1,12 +1,14 @@
 @extends('layouts.admin')
 
+@section('title', ($meeting->title ?? 'Using Prepositions') . ' - IELTS Writing Task ' . ($task ?? 1))
+
 @section('head')
     <script src="{{ asset('js/auto-save.js') }}?v={{ time() }}"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
 @section('content')
-<div class="container mx-auto px-4 py-8" x-data="prepositionExercise({{ $meeting->id }})">
+<div class="container mx-auto px-4 py-8" x-data="prepositionExercise({{ $meeting->id }}, {{ Js::from($savedAnswers ?? []) }})">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
@@ -106,6 +108,7 @@
                                             <input type="text" 
                                                x-model="answers['q' + (index + 1) + '_' + pIndex]"
                                                :name="'q' + (index + 1) + '_' + pIndex"
+                                               @input="queueDraftSync()"
                                                placeholder="..."
                                                :class="getInputClass('q' + (index + 1) + '_' + pIndex)"
                                                :title="showAnswer('q' + (index + 1) + '_' + pIndex)"
@@ -130,8 +133,13 @@
 
 <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('prepositionExercise', (meetingId) => ({
-            answers: {},
+        Alpine.data('prepositionExercise', (meetingId, savedAnswers = {}) => ({
+            // Seeded from the student's last autosaved draft (see
+            // IeltsWritingController::showMeeting()) - previously this
+            // always started empty, so a normal page refresh looked like
+            // it had wiped the student's answers even though they were
+            // already safely saved server-side the whole time.
+            answers: savedAnswers || {},
             loading: false,
             wordBank: ['for', 'at', 'on', 'to', 'in', 'by', 'from', 'between', 'of', 'up', 'down', 'with', 'and', 'during'],
             questions: [
@@ -253,15 +261,78 @@
                // Maybe add a title attibute for correct answer?
                return this.showResults ? (this.correctAnswers[key] || '') : ''; 
             },
-            submit() {
+            draftSyncTimer: null,
+            queueDraftSync() {
+                if (window.showAutosaveIndicator) {
+                    window.showAutosaveIndicator('Menyimpan draft...', 'saving');
+                }
+                clearTimeout(this.draftSyncTimer);
+                this.draftSyncTimer = setTimeout(() => this.syncDraftToServer(), 800);
+            },
+            async syncDraftToServer() {
+                try {
+                    await fetch('/assignments/ielts-academic/writing/meeting/' + meetingId + '/draft', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: JSON.stringify({ userAnswers: this.answers }),
+                        keepalive: true,
+                    });
+                    if (window.showAutosaveIndicator) {
+                        window.showAutosaveIndicator();
+                    }
+                } catch (e) {
+                    console.error('Failed to sync draft to server:', e);
+                    if (window.showAutosaveIndicator) {
+                        window.showAutosaveIndicator('Gagal menyimpan draft', 'error');
+                    }
+                }
+            },
+
+            async submit() {
                 this.loading = true;
                 const key = 'preposition_exercise_v1_' + meetingId;
                 localStorage.setItem(key, JSON.stringify(this.answers));
-                
-                setTimeout(() => {
+
+                const formattedEssay = this.questions.map((question, index) => {
+                    const sentence = question.parts.map((part, pIndex) => {
+                        if (part !== '__GAP__') return part;
+                        const ans = this.answers['q' + (index + 1) + '_' + pIndex];
+                        return ans ? `[${ans}]` : '[___]';
+                    }).join('');
+                    return `${index + 1}. ${sentence}`;
+                }).join("\n");
+
+                try {
+                    const response = await fetch('/assignments/ielts-academic/writing/evaluate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                        },
+                        body: JSON.stringify({ essay: formattedEssay || 'No answers provided', task_type: '1', meeting_id: meetingId })
+                    });
+                    const data = await response.json();
                     this.loading = false;
-                    alert('Practice saved successfully!');
-                }, 1000);
+                    if (data.redirect_url) {
+                        if (data.message) alert(data.message);
+                        window.location.href = data.redirect_url;
+                        return;
+                    }
+                    if (data.submission_id) {
+                        if (confirm('Jawaban berhasil dikirim! Apakah Anda ingin melihat halaman hasil pengerjaan lengkap?')) {
+                            window.open('/assignments/ielts-academic/writing/submission/' + data.submission_id, '_blank');
+                        }
+                    } else {
+                        alert('Jawaban berhasil disimpan!');
+                    }
+                } catch (e) {
+                    this.loading = false;
+                    alert('Jawaban berhasil disimpan secara lokal!');
+                }
             }
         }))
     })

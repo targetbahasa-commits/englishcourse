@@ -410,12 +410,12 @@
         @endif
 
             <main class="p-0 h-full overflow-hidden md:ml-64" x-data="readingPracticePage({{ json_encode((object)$answerKey) }}, {{ $packageData['questions_count'] }})">
-            <div class="flex h-full min-h-0 flex-col bg-slate-100/70">
+            <div class="flex h-full min-h-0 flex-col bg-white">
                 <header class="shrink-0 border-b border-slate-200 bg-white/95 backdrop-blur">
                     <div class="px-3 py-3 md:px-4 md:py-3.5">
                         <div class="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
                             <div class="flex items-start gap-3 md:gap-4">
-                                <a href="{{ route('assignments.toefl-itp.reading.practice') }}" class="mt-1 inline-flex items-center justify-center rounded-lg bg-slate-100 p-2 text-slate-700 transition hover:bg-slate-200">
+                                <a href="{{ route('assignments.toefl-itp.reading.practice') }}" class="mt-1 inline-flex items-center justify-center rounded-lg bg-white p-2 text-slate-700 transition hover:bg-slate-200">
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                                 </a>
                                 <div>
@@ -426,17 +426,17 @@
                             </div>
 
                             <div class="flex flex-wrap items-center gap-2 md:gap-3">
-                                <div class="rounded-xl bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-700">Answered: <span x-text="answeredCount()"></span>/{{ $packageData['questions_count'] }}</div>
-                                <div class="rounded-xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700">Remaining: <span x-text="remainingCount()"></span></div>
-                                <div class="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">Score: <span x-text="submitted ? score() : '-' "></span></div>
-                                <button type="button" @click="resetPractice()" class="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-100">Reset</button>
+                                <div class="rounded-xl bg-white px-3 py-2 text-xs font-bold text-indigo-700">Answered: <span x-text="answeredCount()"></span>/{{ $packageData['questions_count'] }}</div>
+                                <div class="rounded-xl bg-white px-3 py-2 text-xs font-bold text-amber-700">Remaining: <span x-text="remainingCount()"></span></div>
+                                <div class="rounded-xl bg-white px-3 py-2 text-xs font-bold text-emerald-700">Score: <span x-text="submitted ? score() : '-' "></span></div>
+                                <button type="button" @click="resetPractice()" class="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-700 ring-1 ring-slate-200 transition hover:bg-white">Reset</button>
                             </div>
                         </div>
                     </div>
                 </header>
 
                 <div class="toefl-practice-panels">
-                    <section id="passages-panel" class="toefl-passages-panel custom-scrollbar overflow-y-auto border-b border-slate-200 bg-slate-50 md:border-b-0">
+                    <section id="passages-panel" class="toefl-passages-panel custom-scrollbar overflow-y-auto border-b border-slate-200 bg-white md:border-b-0">
                         <div class="space-y-3 p-3 pb-16 md:p-4">
                             @foreach($packageData['passages'] as $index => $passage)
                                 <article class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 md:p-5"
@@ -480,7 +480,7 @@
                                     <div class="mb-3 flex items-center justify-between border-b border-slate-100 pb-3">
                                         <h2 class="text-lg font-bold text-slate-900">{{ $passage['section_title'] }}</h2>
                                         <div class="flex items-center gap-2">
-                                            <span class="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">Passage {{ $index + 1 }}</span>
+                                            <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-700">Passage {{ $index + 1 }}</span>
                                         </div>
                                     </div>
                                     <div class="toefl-passage-shell with-gutter rounded-2xl px-4 py-4 md:px-6 md:py-5">
@@ -599,14 +599,14 @@
                         </div>
                     </section>
 
-                    <section id="questions-panel" class="toefl-questions-panel custom-scrollbar overflow-y-auto bg-gray-50">
+                    <section id="questions-panel" class="toefl-questions-panel custom-scrollbar overflow-y-auto bg-white">
                         <div class="space-y-3 p-3 pb-16 md:p-4">
                             <div :class="submitted ? 'hidden' : 'space-y-3'">
                                     @foreach($packageData['passages'] as $pIndex => $passage)
                                         <article class="question-section-card p-3 md:p-4" data-passage-index="{{ $pIndex }}">
                                             <div class="mb-3 flex items-center justify-between">
                                                 <h3 class="text-lg font-bold text-slate-900">{{ $passage['section_title'] }}</h3>
-                                                <span class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">{{ count($passage['questions']) }} questions</span>
+                                                <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-700">{{ count($passage['questions']) }} questions</span>
                                             </div>
 
                                             <div class="space-y-3">
@@ -629,7 +629,7 @@
                                                                              <div class="listening-option-card flex items-center border border-slate-200/90 bg-white px-3 py-2 transition-all duration-200 hover:border-red-300 hover:bg-red-50"
                                                                                  :class="optionClass('{{ $question['number'] }}', '{{ $letter }}')">
                                                                                 <div class="mr-2 flex flex-none items-center justify-center">
-                                                                                    <div class="listening-option-badge flex aspect-square shrink-0 items-center justify-center rounded-full border-2 border-slate-300 bg-slate-50 transition-all duration-200 group-hover/option:border-red-400">
+                                                                                    <div class="listening-option-badge flex aspect-square shrink-0 items-center justify-center rounded-full border-2 border-slate-300 bg-white transition-all duration-200 group-hover/option:border-red-400">
                                                                                         <span class="text-xs font-bold text-slate-600 transition-colors duration-200">{{ $letter }}</span>
                                                                                     </div>
                                                                                 </div>
@@ -658,7 +658,7 @@
                             </div>
 
                             <div :class="submitted ? 'space-y-3' : 'hidden'">
-                                    <div class="sticky top-0 z-20 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 shadow-sm">
+                                    <div class="sticky top-0 z-20 rounded-xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
                                         <div class="flex items-center justify-between gap-3">
                                             <p class="text-sm font-bold text-emerald-800">Result: <span x-text="score()"></span>/{{ $packageData['questions_count'] }}</p>
                                             <p class="text-sm font-semibold text-emerald-700"><span x-text="percentage()"></span>%</p>
@@ -670,7 +670,7 @@
                                         <article class="question-section-card p-3 md:p-4" data-passage-index="{{ $pIndex }}">
                                             <div class="mb-3 flex items-center justify-between">
                                                 <h3 class="text-lg font-bold text-slate-900">{{ $passage['section_title'] }}</h3>
-                                                <span class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">Review</span>
+                                                <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-700">Review</span>
                                             </div>
 
                                             <div class="space-y-3">
@@ -688,23 +688,23 @@
                                                                 <p class="text-[15px] font-semibold leading-7 text-slate-900">{{ $question['text'] }}</p>
 
                                                                 <div class="mt-2 grid gap-2 text-xs md:grid-cols-2">
-                                                                    <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                                                                    <div class="rounded-lg border border-slate-200 bg-white px-3 py-2">
                                                                         <p class="font-semibold text-slate-700">Jawaban Anda</p>
                                                                         <p class="mt-0.5 text-slate-900" x-text="answers['{{ $question['number'] }}'] ? answers['{{ $question['number'] }}'] : '-' "></p>
                                                                     </div>
-                                                                    <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+                                                                    <div class="rounded-lg border border-emerald-200 bg-white px-3 py-2">
                                                                         <p class="font-semibold text-emerald-700">Jawaban Benar</p>
                                                                         <p class="mt-0.5 text-emerald-900">{{ $question['answer'] }}. {{ $correctOptionText }}</p>
                                                                     </div>
                                                                 </div>
 
                                                                 <div class="mt-2 rounded-lg px-3 py-2 text-xs font-semibold"
-                                                                     :class="answers['{{ $question['number'] }}'] === '{{ $question['answer'] }}' ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800'">
+                                                                     :class="answers['{{ $question['number'] }}'] === '{{ $question['answer'] }}' ? 'bg-white text-emerald-800' : 'bg-rose-50 text-rose-800'">
                                                                     <span x-show="answers['{{ $question['number'] }}'] === '{{ $question['answer'] }}'">Benar</span>
                                                                     <span x-show="answers['{{ $question['number'] }}'] !== '{{ $question['answer'] }}'">Perlu diperbaiki</span>
                                                                 </div>
 
-                                                                <div class="mt-2 rounded-lg border border-indigo-100 bg-indigo-50 px-3 py-2">
+                                                                <div class="mt-2 rounded-lg border border-indigo-100 bg-white px-3 py-2">
                                                                     <p class="text-[11px] font-bold uppercase tracking-wide text-indigo-700">Penjelasan</p>
                                                                     <p class="mt-1 text-[11px] font-bold uppercase tracking-wide text-indigo-700/90">Alasan Jawaban Benar</p>
                                                                     <p class="mt-0.5 text-xs leading-5 text-indigo-900">{{ $explanationText }}</p>
@@ -1403,5 +1403,6 @@
             };
         }
     </script>
+    <x-live-drawing />
 </body>
 </html>

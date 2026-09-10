@@ -46,16 +46,19 @@
             <!-- Tabs Navigation -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-t-lg border-b border-gray-200">
                 <nav class="flex -mb-px">
-                    <button @click="tab = 'overview'" :class="{'border-indigo-500 text-indigo-600': tab === 'overview', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'overview'}" class="w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm">
+                    <button @click="tab = 'overview'" :class="{'border-indigo-500 text-indigo-600': tab === 'overview', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'overview'}" class="w-1/5 py-4 px-1 text-center border-b-2 font-medium text-sm">
                         Overview
                     </button>
-                    <button @click="tab = 'students'" :class="{'border-indigo-500 text-indigo-600': tab === 'students', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'students'}" class="w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm">
+                    <button @click="tab = 'students'" :class="{'border-indigo-500 text-indigo-600': tab === 'students', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'students'}" class="w-1/5 py-4 px-1 text-center border-b-2 font-medium text-sm">
                         Students ({{ $classPeriod->users->count() }})
                     </button>
-                    <button @click="tab = 'meetings'" :class="{'border-indigo-500 text-indigo-600': tab === 'meetings', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'meetings'}" class="w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm">
+                    <button @click="tab = 'meetings'" :class="{'border-indigo-500 text-indigo-600': tab === 'meetings', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'meetings'}" class="w-1/5 py-4 px-1 text-center border-b-2 font-medium text-sm">
                         Meetings
                     </button>
-                    <button @click="tab = 'settings'" :class="{'border-indigo-500 text-indigo-600': tab === 'settings', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'settings'}" class="w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm">
+                    <button @click="tab = 'groups'" :class="{'border-indigo-500 text-indigo-600': tab === 'groups', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'groups'}" class="w-1/5 py-4 px-1 text-center border-b-2 font-medium text-sm">
+                        Kelompok/Pasangan ({{ $studentGroups->count() }})
+                    </button>
+                    <button @click="tab = 'settings'" :class="{'border-indigo-500 text-indigo-600': tab === 'settings', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'settings'}" class="w-1/5 py-4 px-1 text-center border-b-2 font-medium text-sm">
                         Settings
                     </button>
                 </nav>
@@ -68,7 +71,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="bg-indigo-50 rounded-lg p-6">
                             <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Total Students</h3>
-                            <p class="mt-2 text-3xl font-bold text-gray-900">{{ $classPeriod->users->count() }}</p>
+                            <p class="mt-2 text-3xl font-bold text-gray-900">
+                                {{ $classPeriod->users->count() }}@if($classPeriod->max_capacity)<span class="text-lg text-gray-500"> / {{ $classPeriod->max_capacity }}</span>@endif
+                            </p>
+                            @if($classPeriod->max_capacity && $classPeriod->users->count() >= $classPeriod->max_capacity)
+                                <p class="mt-1 text-xs font-semibold text-red-600">Batch penuh</p>
+                            @endif
                         </div>
                         <div class="bg-indigo-50 rounded-lg p-6">
                             <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Program</h3>
@@ -157,6 +165,111 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Students who self-booked via "Booking Class" -->
+                    <div class="mt-8">
+                        <h3 class="text-lg font-medium text-gray-900 mb-1">Booking Sendiri oleh Student</h3>
+                        <p class="text-sm text-gray-500 mb-4">Student yang memilih batch ini sendiri lewat menu "Booking Class". Daftar ini terpisah dari tabel di atas.</p>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu Booking</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach ($bookedEnrollments as $enrollment)
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $enrollment->user->name ?? '-' }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $enrollment->user->email ?? '-' }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $enrollment->class_period_booked_at->format('d M Y, H:i') }}</td>
+                                        </tr>
+                                    @endforeach
+                                    @if($bookedEnrollments->isEmpty())
+                                        <tr>
+                                            <td colspan="3" class="px-6 py-4 text-center text-gray-500">Belum ada student yang booking batch ini secara mandiri.</td>
+                                        </tr>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Groups/Pairs -->
+                <div x-show="tab === 'groups'" style="display: none;">
+                    <div class="flex justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900">Kelompok / Pasangan</h3>
+                            <p class="text-sm text-gray-500 mt-1">Kelompokkan student dalam batch ini untuk kebutuhan pairwork/aktivitas kelompok. Pasangan cukup dibuat sebagai kelompok berisi 2 anggota.</p>
+                        </div>
+                        <button x-data="" x-on:click.prevent="$dispatch('open-modal', 'create-group')" class="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-500 shrink-0 h-fit">
+                            + Buat Kelompok
+                        </button>
+                    </div>
+
+                    @if($studentGroups->isEmpty())
+                        <div class="px-6 py-4 text-center text-gray-500 bg-gray-50 rounded">Belum ada kelompok/pasangan dibuat.</div>
+                    @else
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            @foreach ($studentGroups as $group)
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">{{ $group->name }}</h4>
+                                            @if($group->meeting)
+                                                <span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 text-[10px] font-bold uppercase tracking-wide">
+                                                    Meeting {{ $group->meeting->meeting_number }}: {{ $group->meeting->title }}
+                                                </span>
+                                            @else
+                                                <span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold uppercase tracking-wide">
+                                                    Semua Meeting (Batch)
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <form action="{{ route('class-periods.groups.destroy', [$classPeriod, $group]) }}" method="POST" onsubmit="return confirm('Hapus kelompok ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-900 text-xs font-medium shrink-0">Hapus Kelompok</button>
+                                        </form>
+                                    </div>
+
+                                    <div class="flex flex-wrap gap-2 mb-3">
+                                        @forelse ($group->members as $member)
+                                            <span class="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium">
+                                                {{ $member->name }}
+                                                <form action="{{ route('class-periods.groups.remove-member', [$classPeriod, $group, $member]) }}" method="POST" class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" title="Hapus dari kelompok" class="w-4 h-4 rounded-full bg-indigo-200 hover:bg-indigo-300 text-indigo-700 inline-flex items-center justify-center leading-none">&times;</button>
+                                                </form>
+                                            </span>
+                                        @empty
+                                            <span class="text-xs text-gray-400">Belum ada anggota.</span>
+                                        @endforelse
+                                    </div>
+
+                                    @php
+                                        $availableForGroup = $rosterStudents->whereNotIn('id', $group->members->pluck('id'));
+                                    @endphp
+                                    @if($availableForGroup->isNotEmpty())
+                                        <form action="{{ route('class-periods.groups.add-member', [$classPeriod, $group]) }}" method="POST" class="flex gap-2">
+                                            @csrf
+                                            <select name="user_id" class="text-xs border-gray-300 rounded-md shadow-sm flex-1" required>
+                                                <option value="">+ Tambah anggota...</option>
+                                                @foreach ($availableForGroup as $student)
+                                                    <option value="{{ $student->id }}">{{ $student->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            <button type="submit" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-md">Tambah</button>
+                                        </form>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Tab: Meetings (CORE FEATURE) -->
@@ -171,29 +284,52 @@
                     @else
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             @foreach ($meetings as $meeting)
-                                <div class="border rounded-lg p-4 flex items-center justify-between {{ $meeting->is_open_for_period ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200' }}">
-                                    <div>
-                                        <h4 class="font-bold text-gray-800">Meeting {{ $meeting->meeting_number }}</h4>
-                                        <p class="text-sm text-gray-600 truncate w-48" title="{{ $meeting->title }}">{{ $meeting->title }}</p>
+                                <div class="border rounded-lg p-4 {{ $meeting->is_open_for_period ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200' }}">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h4 class="font-bold text-gray-800">Meeting {{ $meeting->meeting_number }}</h4>
+                                            <p class="text-sm text-gray-600 truncate w-48" title="{{ $meeting->title }}">{{ $meeting->title }}</p>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="mr-2 text-xs font-bold {{ $meeting->is_open_for_period ? 'text-green-600' : 'text-red-600' }}">
+                                                {{ $meeting->is_open_for_period ? 'OPEN' : 'LOCKED' }}
+                                            </span>
+
+                                            <!-- Toggle Form -->
+                                            <form action="{{ route('class-periods.toggle-meeting', [$classPeriod, $meeting]) }}" method="POST">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 {{ $meeting->is_open_for_period ? 'bg-green-600' : 'bg-gray-200' }}"
+                                                    role="switch"
+                                                    aria-checked="{{ $meeting->is_open_for_period ? 'true' : 'false' }}">
+                                                    <span
+                                                        class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition duration-200 ease-in-out {{ $meeting->is_open_for_period ? 'translate-x-5' : 'translate-x-0' }}">
+                                                    </span>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
-                                    <div class="flex items-center">
-                                        <span class="mr-2 text-xs font-bold {{ $meeting->is_open_for_period ? 'text-green-600' : 'text-red-600' }}">
-                                            {{ $meeting->is_open_for_period ? 'OPEN' : 'LOCKED' }}
-                                        </span>
-                                        
-                                        <!-- Toggle Form -->
-                                        <form action="{{ route('class-periods.toggle-meeting', [$classPeriod, $meeting]) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" 
-                                                class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 {{ $meeting->is_open_for_period ? 'bg-green-600' : 'bg-gray-200' }}" 
-                                                role="switch" 
-                                                aria-checked="{{ $meeting->is_open_for_period ? 'true' : 'false' }}">
-                                                <span 
-                                                    class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition duration-200 ease-in-out {{ $meeting->is_open_for_period ? 'translate-x-5' : 'translate-x-0' }}">
-                                                </span>
-                                            </button>
-                                        </form>
-                                    </div>
+
+                                    @if(isset($meeting->games) && count($meeting->games) > 1)
+                                        <div class="mt-3 pt-3 border-t border-gray-200 space-y-2">
+                                            <p class="text-xs font-semibold text-gray-500 uppercase">Game per Subtopik</p>
+                                            @foreach ($meeting->games as $i => $game)
+                                                @php $isGameOpen = !in_array($i, $meeting->hidden_game_indexes, true); @endphp
+                                                <div class="flex items-center justify-between text-sm gap-2">
+                                                    <span class="truncate">{{ $game['title'] ?? ('Game ' . ($i + 1)) }}</span>
+                                                    <form action="{{ route('class-periods.toggle-game', [$classPeriod, $meeting, $i]) }}" method="POST" class="shrink-0">
+                                                        @csrf
+                                                        <button type="submit"
+                                                            class="relative inline-flex flex-shrink-0 h-5 w-9 border-2 border-transparent rounded-full cursor-pointer transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 {{ $isGameOpen ? 'bg-green-600' : 'bg-gray-300' }}"
+                                                            role="switch"
+                                                            aria-checked="{{ $isGameOpen ? 'true' : 'false' }}">
+                                                            <span class="pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transform ring-0 transition duration-200 ease-in-out {{ $isGameOpen ? 'translate-x-4' : 'translate-x-0' }}"></span>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                 </div>
                             @endforeach
                         </div>
@@ -223,20 +359,69 @@
     <x-modal name="edit-class-period" focusable>
         <div class="p-6">
             <h2 class="text-lg font-medium text-gray-900">Edit Class Period</h2>
-            <form method="POST" action="{{ route('class-periods.update', $classPeriod) }}" class="mt-6">
+            <form method="POST" action="{{ route('class-periods.update', $classPeriod) }}" class="mt-6"
+                  x-data="{
+                      batchType: @js($classPeriod->batch_type),
+                      batchNumber: @js($classPeriod->batch_number),
+                      startDate: @js($classPeriod->start_date ? $classPeriod->start_date->format('Y-m-d') : ''),
+                      endDate: @js($classPeriod->end_date ? $classPeriod->end_date->format('Y-m-d') : ''),
+                      periodName: @js($classPeriod->name),
+                      minCapacity: @js($classPeriod->min_capacity ?? (['regular' => 4, 'semi_private' => 2, 'private' => 1][$classPeriod->batch_type] ?? 1)),
+                      maxCapacity: @js($classPeriod->max_capacity),
+                      minCapacityFloorFor(t) { return { regular: 4, semi_private: 2, private: 1 }[t] || 1; },
+                      capacityHint(t) {
+                          if (t === 'private') return 'Batch Private selalu 1 orang (tidak bisa diubah).';
+                          if (t === 'semi_private') return 'Batch Semi-Private minimal 2 orang.';
+                          return 'Batch Reguler minimal 4 orang. Kosongkan untuk tanpa batas maksimum.';
+                      },
+                      onBatchTypeChange() {
+                          const floor = this.minCapacityFloorFor(this.batchType);
+
+                          if (this.batchType === 'private') {
+                              this.minCapacity = 1;
+                              this.maxCapacity = 1;
+                          } else if (!this.minCapacity || Number(this.minCapacity) < floor) {
+                              this.minCapacity = floor;
+                          }
+
+                          if (this.batchType !== 'private' && this.maxCapacity && Number(this.maxCapacity) < Number(this.minCapacity)) {
+                              this.maxCapacity = this.minCapacity;
+                          } else if (!this.maxCapacity && this.batchType === 'semi_private') {
+                              this.maxCapacity = 2;
+                          }
+                      },
+                      syncName() {
+                          if (!this.startDate || !this.endDate) return;
+                          const start = new Date(this.startDate + 'T00:00:00');
+                          const end   = new Date(this.endDate   + 'T00:00:00');
+                          if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return;
+                          const locale     = 'id-ID';
+                          const startLabel = start.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
+                          const endLabel   = end.toLocaleDateString(locale,   { day: '2-digit', month: 'short', year: 'numeric' });
+                          const batchStr  = this.batchNumber ? `Batch ${this.batchNumber} - ` : 'Batch ';
+                          this.periodName = `${batchStr}${startLabel} to ${endLabel}`;
+                      }
+                  }">
                 @csrf
                 @method('PUT')
-                <input type="hidden" name="batch_type" value="{{ $classPeriod->batch_type }}">
+                <div class="mb-4">
+                    <x-input-label for="edit_batch_type" value="Tipe Batch" />
+                    <select name="batch_type" id="edit_batch_type" x-model="batchType" @change="onBatchTypeChange()" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full" required>
+                        <option value="regular" {{ $classPeriod->batch_type == 'regular' ? 'selected' : '' }}>Reguler (minimal 4 orang)</option>
+                        <option value="semi_private" {{ $classPeriod->batch_type == 'semi_private' ? 'selected' : '' }}>Semi-Private (minimal 2 orang)</option>
+                        <option value="private" {{ $classPeriod->batch_type == 'private' ? 'selected' : '' }}>Private (1 orang)</option>
+                    </select>
+                </div>
                 <div class="mb-4">
                     <x-input-label for="edit_name" value="Period Name" />
-                    <x-text-input id="edit_name" name="name" type="text" class="mt-1 block w-full" value="{{ $classPeriod->name }}" required />
+                    <x-text-input id="edit_name" name="name" type="text" class="mt-1 block w-full" x-model="periodName" required />
                 </div>
                 
                 <div class="mb-4">
                     <x-input-label for="edit_program_id" value="Program" />
                     <select name="program_id" id="edit_program_id" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full" required>
                         @foreach (\App\Models\Program::all() as $program)
-                            <option value="{{ $program->id }}" {{ $classPeriod->program_id == $program->id ? 'selected' : '' }}>{{ $program->name }}</option>
+                            <option value="{{ $program->id }}" {{ $classPeriod->program_id == $program->id ? 'selected' : '' }}>{{ $program->name }}{{ !$program->is_active ? ' (Inactive)' : '' }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -244,11 +429,11 @@
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <x-input-label for="edit_start_date" value="Start Date" />
-                        <x-text-input id="edit_start_date" name="start_date" type="date" class="mt-1 block w-full" value="{{ $classPeriod->start_date ? $classPeriod->start_date->format('Y-m-d') : '' }}" />
+                        <x-text-input id="edit_start_date" name="start_date" type="date" class="mt-1 block w-full" x-model="startDate" @change="syncName()" />
                     </div>
                     <div>
                         <x-input-label for="edit_end_date" value="End Date" />
-                        <x-text-input id="edit_end_date" name="end_date" type="date" class="mt-1 block w-full" value="{{ $classPeriod->end_date ? $classPeriod->end_date->format('Y-m-d') : '' }}" />
+                        <x-text-input id="edit_end_date" name="end_date" type="date" class="mt-1 block w-full" x-model="endDate" @change="syncName()" />
                     </div>
                 </div>
                 
@@ -267,6 +452,22 @@
                         <option value="online" {{ $classPeriod->learning_mode == 'online' ? 'selected' : '' }}>Online</option>
                         <option value="offline" {{ $classPeriod->learning_mode == 'offline' ? 'selected' : '' }}>Offline</option>
                     </select>
+                </div>
+
+                <div class="mb-4">
+                    <x-input-label for="edit_min_capacity" value="Min Capacity" />
+                    <x-text-input id="edit_min_capacity" name="min_capacity" type="number"
+                                  x-model="minCapacity" x-bind:min="minCapacityFloorFor(batchType)" x-bind:readonly="batchType === 'private'"
+                                  class="mt-1 block w-full" required />
+                    <p class="text-xs text-gray-500 mt-1">Jumlah siswa minimal agar batch ini bisa dibuka.</p>
+                </div>
+
+                <div class="mb-4">
+                    <x-input-label for="edit_max_capacity" value="Max Capacity" />
+                    <x-text-input id="edit_max_capacity" name="max_capacity" type="number"
+                                  x-model="maxCapacity" x-bind:min="minCapacity || minCapacityFloorFor(batchType)" x-bind:readonly="batchType === 'private'"
+                                  class="mt-1 block w-full" placeholder="Kosongkan jika tidak dibatasi" />
+                    <p class="text-xs text-gray-500 mt-1" x-text="capacityHint(batchType)"></p>
                 </div>
 
                 <div class="mb-4">
@@ -328,6 +529,197 @@
                     </x-primary-button>
                 </div>
             </form>
+        </div>
+    </x-modal>
+
+    <x-modal name="create-group" focusable max-width="2xl">
+        <div class="p-6" x-data="{
+            activeModalTab: 'auto_pair',
+            roster: {{ json_encode($rosterStudents->map(fn($s) => ['id' => $s->id, 'name' => $s->name, 'selected' => true])->values()) }},
+            namePrefix: 'Pair',
+            oddHandling: 'trio',
+            previewPairs: [],
+
+            init() {
+                this.generatePreview();
+            },
+
+            getSelectedCount() {
+                return this.roster.filter(s => s.selected).length;
+            },
+
+            toggleAll(val) {
+                this.roster.forEach(s => s.selected = val);
+                this.generatePreview();
+            },
+
+            generatePreview() {
+                let selected = this.roster.filter(s => s.selected).map(s => ({ id: s.id, name: s.name }));
+                for (let i = selected.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [selected[i], selected[j]] = [selected[j], selected[i]];
+                }
+                
+                let pairs = [];
+                let total = selected.length;
+                if (total === 0) {
+                    this.previewPairs = [];
+                    return;
+                }
+
+                for (let i = 0; i < total; i += 2) {
+                    pairs.push(selected.slice(i, i + 2));
+                }
+
+                if (this.oddHandling === 'trio' && pairs.length > 1 && pairs[pairs.length - 1].length === 1) {
+                    let lastSingle = pairs.pop();
+                    pairs[pairs.length - 1].push(lastSingle[0]);
+                }
+
+                this.previewPairs = pairs;
+            }
+        }">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900">Kelompok & Pasangan Siswa</h2>
+                    <p class="text-xs text-gray-500">Batch: {{ $classPeriod->name }}</p>
+                </div>
+                <button @click="$dispatch('close')" type="button" class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center font-bold">&times;</button>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="flex items-center gap-1.5 p-1 bg-gray-100 rounded-xl mb-5 text-xs font-bold">
+                <button @click="activeModalTab = 'auto_pair'" type="button"
+                    :class="activeModalTab === 'auto_pair' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                    class="px-3.5 py-1.5 rounded-lg transition flex items-center gap-1">
+                    <span>🎲</span> <span>Pasangkan Acak (2 Siswa)</span>
+                </button>
+                <button @click="activeModalTab = 'manual'" type="button"
+                    :class="activeModalTab === 'manual' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                    class="px-3.5 py-1.5 rounded-lg transition flex items-center gap-1">
+                    <span>➕</span> <span>Buat Manual</span>
+                </button>
+            </div>
+
+            <!-- TAB 1: AUTO-PAIR -->
+            <div x-show="activeModalTab === 'auto_pair'" class="space-y-4">
+                <form method="POST" action="{{ route('class-periods.groups.auto-pair', $classPeriod) }}">
+                    @csrf
+                    
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-bold text-gray-700 uppercase">
+                                Pilih Siswa yang Hadir (<span x-text="getSelectedCount()"></span>/{{ $rosterStudents->count() }})
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <button @click="toggleAll(true)" type="button" class="text-xs font-semibold text-indigo-600 hover:underline">Pilih Semua</button>
+                                <span class="text-gray-300">•</span>
+                                <button @click="toggleAll(false)" type="button" class="text-xs font-semibold text-gray-500 hover:underline">Hapus Pilihan</button>
+                            </div>
+                        </div>
+
+                        <div class="max-h-44 overflow-y-auto border border-gray-200 rounded-xl p-2 bg-gray-50/50 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                            <template x-for="(s, idx) in roster" :key="s.id">
+                                <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-gray-200 hover:border-indigo-300 cursor-pointer text-xs font-medium text-gray-800 transition">
+                                    <input type="checkbox" :name="'user_ids[]'" :value="s.id" x-model="s.selected" @change="generatePreview()" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                    <span class="truncate" x-text="s.name"></span>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200 mb-4 text-xs">
+                        <div>
+                            <label class="font-bold text-gray-700 block mb-1">Format Penamaan</label>
+                            <select name="name_prefix" x-model="namePrefix" class="w-full text-xs border-gray-200 rounded-lg shadow-sm">
+                                <option value="Pair">Pair 1, Pair 2, ...</option>
+                                <option value="Pasangan">Pasangan 1, Pasangan 2, ...</option>
+                                <option value="Kelompok">Kelompok 1, Kelompok 2, ...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-bold text-gray-700 block mb-1">Jika Siswa Ganjil (Sisa 1)</label>
+                            <select name="odd_handling" x-model="oddHandling" @change="generatePreview()" class="w-full text-xs border-gray-200 rounded-lg shadow-sm">
+                                <option value="trio">Gabung ke pair terakhir (Trio / 3 orang)</option>
+                                <option value="single">Buat kelompok sendiri (1 orang)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="text-xs font-bold text-gray-700 block mb-1">Berlaku Untuk</label>
+                        <select name="meeting_id" class="text-xs border-gray-200 rounded-lg shadow-sm block w-full">
+                            <option value="">Semua Meeting (Batch)</option>
+                            @foreach ($meetings as $meeting)
+                                <option value="{{ $meeting->id }}">Meeting {{ $meeting->meeting_number }}: {{ $meeting->title }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- PREVIEW -->
+                    <div class="p-3 rounded-xl bg-indigo-50/50 border border-indigo-200 mb-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-indigo-900">Hasil Acakan Pasangan (<span x-text="previewPairs.length"></span>)</span>
+                            <button @click="generatePreview()" type="button" class="px-2 py-0.5 rounded bg-white border border-indigo-200 text-indigo-700 text-xs font-bold hover:bg-indigo-600 hover:text-white transition flex items-center gap-1">
+                                <span>🎲</span> <span>Acak Ulang</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+                            <template x-for="(pair, pIdx) in previewPairs" :key="pIdx">
+                                <div class="p-2 rounded-lg bg-white border border-indigo-100 text-xs font-semibold text-gray-800">
+                                    <span class="text-indigo-700 font-bold block text-[11px]" x-text="namePrefix + ' ' + (pIdx + 1)"></span>
+                                    <span x-text="pair.map(m => m.name).join(' & ')"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2">
+                        <x-secondary-button x-on:click="$dispatch('close')">Batal</x-secondary-button>
+                        <x-primary-button :disabled="getSelectedCount() < 2">Buat Pasangan Acak</x-primary-button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- TAB 2: MANUAL -->
+            <div x-show="activeModalTab === 'manual'" class="space-y-4">
+                <form method="POST" action="{{ route('class-periods.groups.store', $classPeriod) }}">
+                    @csrf
+                    <div class="mb-4">
+                        <x-input-label for="group_name" value="Nama Kelompok (opsional)" />
+                        <x-text-input id="group_name" name="name" type="text" class="mt-1 block w-full text-sm" placeholder="Contoh: Pasangan A, Kelompok 1, dst." />
+                    </div>
+
+                    <div class="mb-4">
+                        <x-input-label for="group_meeting_id" value="Berlaku Untuk" />
+                        <select name="meeting_id" id="group_meeting_id" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full text-sm">
+                            <option value="">Semua Meeting (Batch)</option>
+                            @foreach ($meetings as $meeting)
+                                <option value="{{ $meeting->id }}">Meeting {{ $meeting->meeting_number }}: {{ $meeting->title }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <x-input-label value="Pilih Anggota" />
+                        <div class="mt-1 max-h-48 overflow-y-auto border border-gray-200 rounded-md divide-y divide-gray-100">
+                            @forelse ($rosterStudents as $student)
+                                <label class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer">
+                                    <input type="checkbox" name="user_ids[]" value="{{ $student->id }}" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                    <span>{{ $student->name }}</span>
+                                </label>
+                            @empty
+                                <p class="px-3 py-2 text-sm text-gray-500">Belum ada student di batch ini.</p>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end gap-2">
+                        <x-secondary-button x-on:click="$dispatch('close')">Batal</x-secondary-button>
+                        <x-primary-button>Buat Kelompok</x-primary-button>
+                    </div>
+                </form>
+            </div>
         </div>
     </x-modal>
 @endsection

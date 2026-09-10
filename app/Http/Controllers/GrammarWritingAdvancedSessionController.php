@@ -87,10 +87,19 @@ class GrammarWritingAdvancedSessionController extends Controller
         );
     }
 
-    public function meeting14(BuildGrammarWritingMeeting14ViewData $buildGrammarWritingMeeting14ViewData)
+    public function meeting14(Request $request, BuildGrammarWritingMeeting14ViewData $buildGrammarWritingMeeting14ViewData)
     {
-        return view('assignments.grammar-writing.meeting14', $buildGrammarWritingMeeting14ViewData->handle(
-            $this->data->meeting14Paragraph,
+        $isFastTrack = str_contains($request->path(), 'fast-track');
+        $displayMeetingNumber = $isFastTrack ? 8 : 14;
+
+        return view('assignments.grammar-writing.meeting14', array_merge(
+            $buildGrammarWritingMeeting14ViewData->handle(
+                $this->data->meeting14Paragraph,
+            ),
+            [
+                'displayMeetingNumber' => $displayMeetingNumber,
+                'backRoute' => $isFastTrack ? route('assignments.grammar-writing') : route('assignments.grammar-writing.classes'),
+            ]
         ));
     }
 
@@ -99,6 +108,10 @@ class GrammarWritingAdvancedSessionController extends Controller
         BuildGrammarWritingMeeting14ViewData $buildGrammarWritingMeeting14ViewData,
         EvaluateGrammarWritingMeeting14Submission $evaluateGrammarWritingMeeting14Submission,
     ) {
+        $isFastTrack = str_contains($request->path(), 'fast-track');
+        $redirectRoute = $isFastTrack ? 'assignments.grammar-writing.meeting8' : 'assignments.grammar-writing.meeting14';
+        $meetingNum = $isFastTrack ? 8 : 14;
+
         $userAnswers = $request->input('userAnswers', []);
         $userParagraphAnswer = $request->input('userParagraphAnswer', '');
         $questions = $buildGrammarWritingMeeting14ViewData->loadQuestions();
@@ -112,17 +125,20 @@ class GrammarWritingAdvancedSessionController extends Controller
         );
 
         return $this->completeGrammarWritingMeetingSubmission(
-            14,
-            'assignments.grammar-writing.meeting14',
+            $meetingNum,
+            $redirectRoute,
             $sessionPayload,
             'meeting14_final_score',
         );
     }
 
-    public function meeting14Reset()
+    public function meeting14Reset(Request $request)
     {
+        $isFastTrack = str_contains($request->path(), 'fast-track');
+        $redirectRoute = $isFastTrack ? 'assignments.grammar-writing.meeting8' : 'assignments.grammar-writing.meeting14';
+
         return $this->resetGrammarWritingMeetingSession(
-            'assignments.grammar-writing.meeting14',
+            $redirectRoute,
             [
             'meeting14_submitted',
             'meeting14_results',
@@ -134,10 +150,19 @@ class GrammarWritingAdvancedSessionController extends Controller
         );
     }
 
-    public function meeting15(BuildGrammarWritingMeeting15ViewData $buildGrammarWritingMeeting15ViewData)
+    public function meeting15(Request $request, BuildGrammarWritingMeeting15ViewData $buildGrammarWritingMeeting15ViewData)
     {
-        return view('assignments.grammar-writing.meeting15', $buildGrammarWritingMeeting15ViewData->handle(
-            $this->data->meeting15Paragraph,
+        $isFastTrack = str_contains($request->path(), 'fast-track');
+        $displayMeetingNumber = $isFastTrack ? 9 : 15;
+
+        return view('assignments.grammar-writing.meeting15', array_merge(
+            $buildGrammarWritingMeeting15ViewData->handle(
+                $this->data->meeting15Paragraph,
+            ),
+            [
+                'displayMeetingNumber' => $displayMeetingNumber,
+                'backRoute' => $isFastTrack ? route('assignments.grammar-writing') : route('assignments.grammar-writing.classes'),
+            ]
         ));
     }
 
@@ -146,6 +171,10 @@ class GrammarWritingAdvancedSessionController extends Controller
         BuildGrammarWritingMeeting15ViewData $buildGrammarWritingMeeting15ViewData,
         EvaluateGrammarWritingMeeting15Submission $evaluateGrammarWritingMeeting15Submission,
     ) {
+        $isFastTrack = str_contains($request->path(), 'fast-track');
+        $redirectRoute = $isFastTrack ? 'assignments.grammar-writing.meeting9' : 'assignments.grammar-writing.meeting15';
+        $meetingNum = $isFastTrack ? 9 : 15;
+
         $userAnswers = $request->input('userAnswers', []);
         $userParagraphAnswer = $request->input('userParagraphAnswer', '');
         $questions = $buildGrammarWritingMeeting15ViewData->loadQuestions();
@@ -159,17 +188,20 @@ class GrammarWritingAdvancedSessionController extends Controller
         );
 
         return $this->completeGrammarWritingMeetingSubmission(
-            15,
-            'assignments.grammar-writing.meeting15',
+            $meetingNum,
+            $redirectRoute,
             $sessionPayload,
             'meeting15_final_score',
         );
     }
 
-    public function meeting15Reset()
+    public function meeting15Reset(Request $request)
     {
+        $isFastTrack = str_contains($request->path(), 'fast-track');
+        $redirectRoute = $isFastTrack ? 'assignments.grammar-writing.meeting9' : 'assignments.grammar-writing.meeting15';
+
         return $this->resetGrammarWritingMeetingSession(
-            'assignments.grammar-writing.meeting15',
+            $redirectRoute,
             [
             'meeting15_submitted',
             'meeting15_results',
@@ -224,11 +256,20 @@ class GrammarWritingAdvancedSessionController extends Controller
         );
     }
 
-    public function meeting17(BuildGrammarWritingMeeting17ViewData $buildGrammarWritingMeeting17ViewData)
+    public function meeting17(Request $request, BuildGrammarWritingMeeting17ViewData $buildGrammarWritingMeeting17ViewData)
     {
-        return view('assignments.grammar-writing.meeting17', $buildGrammarWritingMeeting17ViewData->handle(
-            $this->data->meeting17Questions,
-            $this->data->meeting17Paragraph,
+        $isFastTrack = str_contains($request->path(), 'fast-track');
+        $displayMeetingNumber = $isFastTrack ? 10 : 17;
+
+        return view('assignments.grammar-writing.meeting17', array_merge(
+            $buildGrammarWritingMeeting17ViewData->handle(
+                $this->data->meeting17Questions,
+                $this->data->meeting17Paragraph,
+            ),
+            [
+                'displayMeetingNumber' => $displayMeetingNumber,
+                'backRoute' => $isFastTrack ? route('assignments.grammar-writing') : route('assignments.grammar-writing.classes'),
+            ]
         ));
     }
 
@@ -237,6 +278,10 @@ class GrammarWritingAdvancedSessionController extends Controller
         BuildGrammarWritingMeeting17ViewData $buildGrammarWritingMeeting17ViewData,
         EvaluateGrammarWritingMeeting17Submission $evaluateGrammarWritingMeeting17Submission,
     ) {
+        $isFastTrack = str_contains($request->path(), 'fast-track');
+        $redirectRoute = $isFastTrack ? 'assignments.grammar-writing.meeting10' : 'assignments.grammar-writing.meeting17';
+        $meetingNum = $isFastTrack ? 10 : 17;
+
         $userAnswers = $request->input('userAnswers', []);
         $userParagraphAnswer = $request->input('userParagraphAnswer', '');
         $questions = $buildGrammarWritingMeeting17ViewData->loadQuestions($this->data->meeting17Questions);
@@ -250,17 +295,20 @@ class GrammarWritingAdvancedSessionController extends Controller
         );
 
         return $this->completeGrammarWritingMeetingSubmission(
-            17,
-            'assignments.grammar-writing.meeting17',
+            $meetingNum,
+            $redirectRoute,
             $sessionPayload,
             'meeting17_final_score',
         );
     }
 
-    public function meeting17Reset()
+    public function meeting17Reset(Request $request)
     {
+        $isFastTrack = str_contains($request->path(), 'fast-track');
+        $redirectRoute = $isFastTrack ? 'assignments.grammar-writing.meeting10' : 'assignments.grammar-writing.meeting17';
+
         return $this->resetGrammarWritingMeetingSession(
-            'assignments.grammar-writing.meeting17',
+            $redirectRoute,
             [
             'meeting17_submitted',
             'meeting17_results',

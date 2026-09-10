@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Application\Dictionary\ResolveWordTranslation;
 use Illuminate\Http\Request;
 
 class ToeflDictionaryController extends Controller
 {
+    public function __construct(private readonly ResolveWordTranslation $resolveWordTranslation)
+    {
+    }
+
     public function lookup(Request $request)
     {
         $rawWord = $request->query('word');
@@ -25,22 +30,8 @@ class ToeflDictionaryController extends Controller
             return $this->itemResponse($entry->word, $entry->translation, $entry->synonyms);
         }
 
-
-
-        // 2. Fallback Chain
-        $translation = $this->tryGoogleTranslate($cleanWord);
-        
-        if (!$translation) {
-            $translation = $this->tryLibreTranslate($cleanWord);
-        }
-        
-        if (!$translation) {
-            $translation = $this->tryMyMemory($cleanWord);
-        }
-        
-        if (!$translation) {
-            $translation = $this->tryArgosTranslate($cleanWord);
-        }
+        // 2. Fallback chain (see ResolveWordTranslation for provider order/timeouts)
+        $translation = $this->resolveWordTranslation->handle($cleanWord);
 
         // 3. Save if found
         if ($translation) {
@@ -66,113 +57,23 @@ class ToeflDictionaryController extends Controller
         }
 
         $entry = \App\Models\ToeflDictionary::where('word', $cleanWord)->first();
-        
+
         if ($entry) {
             if (!empty($entry->synonyms) && $entry->synonyms !== '-') {
                 return response()->json(['synonyms' => $entry->synonyms]);
             }
 
             // Fetch missing synonyms
-            $synonyms = $this->fetchSynonyms($cleanWord) ?: '-';
+            $synonyms = $this->resolveWordTranslation->fetchSynonyms($cleanWord) ?: '-';
             $entry->update(['synonyms' => $synonyms]);
             return response()->json(['synonyms' => $synonyms]);
         }
-        
+
         // If not in DB, just fetch and return (this shouldn't happen often if lookup is called first)
-        $synonyms = $this->fetchSynonyms($cleanWord) ?: '-';
+        $synonyms = $this->resolveWordTranslation->fetchSynonyms($cleanWord) ?: '-';
         return response()->json(['synonyms' => $synonyms]);
     }
 
-    private function tryGoogleTranslate($word)
-    {
-        try {
-            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'timeout' => 10])
-                ->get('https://translate.googleapis.com/translate_a/single', [
-                    'client' => 'gtx',
-                    'sl' => 'en',
-                    'tl' => 'id',
-                    'dt' => 't',
-                    'q' => $word
-                ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                if (isset($data[0][0][0]) && !empty($data[0][0][0])) {
-                    return $data[0][0][0];
-                }
-            }
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('Google Translate failed: ' . $e->getMessage());
-        }
-        return null;
-    }
-
-    private function tryLibreTranslate($word)
-    {
-        try {
-            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'timeout' => 10])
-                ->post('https://libretranslate.com/translate', [
-                    'q' => $word,
-                    'source' => 'en',
-                    'target' => 'id',
-                    'format' => 'text'
-                ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                if (isset($data['translatedText']) && !empty($data['translatedText'])) {
-                    return $data['translatedText'];
-                }
-            }
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('LibreTranslate failed: ' . $e->getMessage());
-        }
-        return null;
-    }
-
-    private function tryArgosTranslate($word)
-    {
-        try {
-            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'timeout' => 10])
-                ->post('https://translate.argosopentech.com/translate', [
-                    'q' => $word,
-                    'source' => 'en',
-                    'target' => 'id',
-                    'format' => 'text'
-                ]);
-
-            if ($response->successful() && isset($response['translatedText'])) {
-                return $response['translatedText'];
-            }
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('Argos Translate failed: ' . $e->getMessage());
-        }
-        return null;
-    }
-
-    private function tryMyMemory($word)
-    {
-        try {
-            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'timeout' => 10])
-                ->get('https://api.mymemory.translated.net/get', [
-                    'q' => $word,
-                    'langpair' => 'en|id'
-                ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                if (isset($data['responseData']['translatedText'])) {
-                    // MyMemory sometimes returns the input if no translation found, or specific error messages.
-                    // But usually it's okay for single words.
-                    return $data['responseData']['translatedText'];
-                }
-            }
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('MyMemory API failed: ' . $e->getMessage());
-        }
-        return null;
-    }
-    
     private function itemResponse($word, $translation, $synonyms = '-') {
         return response()->json([
             'found' => true,
@@ -188,27 +89,5 @@ class ToeflDictionaryController extends Controller
             'translation' => $translation,
             'synonyms' => $synonyms
         ]);
-    }
-
-    private function fetchSynonyms($word)
-    {
-        try {
-            $response = \Illuminate\Support\Facades\Http::withOptions(['verify' => false, 'timeout' => 5])
-                ->get('https://api.datamuse.com/words', [
-                    'rel_syn' => $word,
-                    'max' => 5
-                ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                if (is_array($data) && count($data) > 0) {
-                    $synonyms = array_column($data, 'word');
-                    return implode(', ', $synonyms);
-                }
-            }
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('Datamuse API failed: ' . $e->getMessage());
-        }
-        return null;
     }
 }

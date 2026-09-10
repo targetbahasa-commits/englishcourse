@@ -59,7 +59,7 @@
                         $successClass = 'border-red-200 bg-red-50 text-red-800';
                         $successTitle = 'Meeting Locked';
                     } elseif ($successState === 'batch') {
-                        $successClass = 'border-blue-200 bg-blue-50 text-blue-800';
+                        $successClass = 'border-blue-200 bg-white text-blue-800';
                         $successTitle = 'Batch Updated';
                     }
                 @endphp
@@ -112,11 +112,11 @@
                     <h2 class="text-2xl font-bold text-gray-800">Grammar for Writing</h2>
                     <p class="text-gray-500 text-sm">Manage meetings and class period.</p>
                     <p class="text-xs mt-2">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-100">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-white text-blue-700 font-semibold border border-blue-100">
                             Active Batch: {{ $selectedClassPeriod->name ?? ($program->period ?: 'Not selected') }}
                         </span>
                         @if(!empty($isClassEnded) && Auth::user()->isStudent())
-                            <span class="ml-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 font-semibold border border-amber-200">
+                            <span class="ml-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white text-amber-700 font-semibold border border-amber-200">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 Practice Mode — Nilai tidak dilaporkan ke guru
                             </span>
@@ -133,11 +133,14 @@
                             @csrf
                             <input type="hidden" name="program_id" value="{{ $program->id }}">
                             <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                            <select name="class_period_id" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 min-w-[220px]">
-                                @if($program->classPeriods->isEmpty())
-                                    <option value="" disabled selected>No batch available</option>
-                                @else
-                                    @foreach($program->classPeriods->sortByDesc('start_date') as $classPeriod)
+                            <select name="class_period_id" class="border-none bg-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 min-w-[220px]">
+                                @php
+                                        $activeBatches = $program->classPeriods->where('status', 'active');
+                                    @endphp
+                                    @if($activeBatches->isEmpty())
+                                        <option value="" disabled selected>No active batch</option>
+                                    @else
+                                        @foreach($activeBatches->sortByDesc('start_date') as $classPeriod)
                                         <option value="{{ $classPeriod->id }}" {{ $program->active_class_period_id === $classPeriod->id ? 'selected' : '' }}>
                                             {{ $classPeriod->name }}
                                         </option>
@@ -151,19 +154,19 @@
                     @else
                         <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
                             <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                            <div class="bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium text-gray-800 min-w-[220px]">
+                            <div class="bg-white px-4 py-2 rounded-lg text-sm font-medium text-gray-800 min-w-[220px]">
                                 {{ $selectedClassPeriod->name ?? 'No Batch Active' }}
                             </div>
                         </div>
                     @endif
                     
                     @if($calendarClassPeriodId)
-                        <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 text-sm text-gray-600">
+                        <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-white text-sm text-gray-600">
                             Lihat Kalender
                         </button>
                     @endif
 
-                    <a href="{{ route('assignments.grammar-writing.classes') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+                    <a href="{{ route('assignments.grammar-writing.classes') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
@@ -222,7 +225,7 @@
                                 $icon = '🥈';
                                 $badge = 'Silver';
                             } elseif ($scoreRounded >= 6.0) {
-                                $icon = '⭐';
+                                $icon = '';
                                 $badge = 'Score 6';
                             } elseif ($scoreRounded >= 5.0) {
                                 $icon = '🌟';
@@ -234,7 +237,7 @@
                                 $icon = '🌠';
                                 $badge = 'Score 3';
                             } elseif ($scoreRounded >= 2.0) {
-                                $icon = '✨';
+                                $icon = '';
                                 $badge = 'Score 2';
                             } elseif ($scoreRounded >= 1.0) {
                                 $icon = '🎖️';
@@ -254,7 +257,7 @@
                         </div>
                     @else
                         <!-- Default Document Icon when no score -->
-                        <div class="w-12 h-12 {{ $meeting->is_locked ? 'bg-gray-100 text-gray-400' : 'bg-blue-100 text-blue-600' }} rounded-2xl flex items-center justify-center mb-4 transition">
+                        <div class="w-12 h-12 {{ $meeting->is_locked ? 'bg-white text-gray-400' : 'bg-white text-blue-600' }} rounded-2xl flex items-center justify-center mb-4 transition">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         </div>
                     @endif
@@ -281,7 +284,7 @@
                             <a href="#" class="block w-full py-2 bg-gray-400 text-white text-center rounded-xl font-bold hover:bg-gray-500 transition cursor-not-allowed">Start</a>
                         @endif
                     @else
-                        <button disabled class="block w-full py-2 bg-gray-100 text-gray-400 text-center rounded-xl font-bold cursor-not-allowed">Locked</button>
+                        <button disabled class="block w-full py-2 bg-white text-gray-400 text-center rounded-xl font-bold cursor-not-allowed">Locked</button>
                     @endif
                     
                     @if(isset($meeting->classMeeting) && $meeting->classMeeting)

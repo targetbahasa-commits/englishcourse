@@ -9,7 +9,7 @@
     <div class="mb-8 overflow-x-auto">
         <table class="w-full border-collapse border border-gray-300 text-gray-700">
             <thead>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <th class="border border-gray-300 px-4 py-3 text-left w-1/3"></th>
                     <th class="border border-gray-300 px-4 py-3 text-center font-bold">Morning</th>
                     <th class="border border-gray-300 px-4 py-3 text-center font-bold">Afternoon</th>
@@ -31,7 +31,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="border border-gray-300 px-4 py-3 font-bold">Tuesday</td>
                     <td class="border border-gray-300 px-4 py-3 text-center">
                         <div class="flex items-center justify-center gap-2">
@@ -61,7 +61,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="border border-gray-300 px-4 py-3 font-bold">Thursday</td>
                     <td class="border border-gray-300 px-4 py-3 text-center text-gray-400">x</td>
                     <td class="border border-gray-300 px-4 py-3 text-center text-gray-400">x</td>
@@ -104,7 +104,7 @@
 
     {{-- Diagram image placeholder --}}
     <div class="mb-8 text-center">
-        <div class="inline-block p-4 border-2 border-dashed border-gray-300 bg-gray-50 rounded-lg w-full max-w-xl">
+        <div class="inline-block p-4 border-2 border-dashed border-gray-300 bg-white rounded-lg w-full max-w-xl">
             <p class="text-gray-500 mb-2 font-medium">University Style Guide Diagram</p>
             <p class="text-sm text-gray-400 mb-4">Please upload the diagram image to: <code>public/images/assignments/ielts/listening/part3/test1-diagram.png</code></p>
             <img src="{{ asset('images/assignments/ielts/listening/part3/test1-diagram.png') }}" onerror="this.style.display='none'" class="max-w-full h-auto mx-auto" alt="University Style Guide Diagram">

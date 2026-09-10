@@ -1,12 +1,14 @@
 @extends('layouts.admin')
 
+@section('title', ($meeting->title ?? 'Parts of Paragraph') . ' - IELTS Writing Task ' . ($task ?? 1))
+
 @section('head')
     <script src="{{ asset('js/auto-save.js') }}?v={{ time() }}"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
 @section('content')
-<div class="container mx-auto px-4 py-8 h-screen flex flex-col">
+<div class="container mx-auto px-4 py-8 h-screen flex flex-col" x-data="partsApp({{ $meeting->id }}, {{ Js::from($savedAnswers ?? []) }})">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
@@ -18,10 +20,14 @@
                 <h1 class="text-2xl font-bold text-gray-800">{{ $meeting->title ?? 'Parts of a Paragraph' }}</h1>
             </div>
         </div>
+        <button type="button" @click.prevent="submit()" :disabled="loading" class="px-6 py-2 bg-orange-600 text-white font-bold rounded-lg shadow-md hover:bg-orange-700 transition-colors flex items-center gap-2">
+            <span x-show="!loading">Submit Answers</span>
+            <span x-show="loading">Saving...</span>
+        </button>
     </div>
 
     <!-- Content Wrapper -->
-    <div class="flex-1 overflow-hidden" x-data="partsApp({{ $meeting->id }})">
+    <div class="flex-1 overflow-hidden">
         <div x-ref="splitContainer" class="w-full h-full flex flex-col lg:flex-row lg:items-stretch gap-6 lg:gap-0">
             <div class="overflow-y-auto pb-8 lg:pr-3" :style="panelStyle('left')">
                 <div class="max-w-4xl w-full space-y-8">
@@ -318,7 +324,7 @@
                                         x-init="$nextTick(() => autoResize($el))"
                                         class="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:ring-2 focus:outline-none {{ $theme['textarea'] }}"
                                         rows="4"
-                                        placeholder="Tulis hasil terjemahan bahasa Inggris untuk Latihan {{ $exercise['id'] }} di sini..."></textarea>
+                                        placeholder="Tulis hasil terjemahan bahasa Inggris untuk Latihan {{ $exercise['id'] }} di sini...">{{ $savedAnswers['translate_' . $exercise['id']] ?? '' }}</textarea>
                                 </div>
                             </div>
                         @endforeach
@@ -370,7 +376,7 @@
                                                 x-init="$nextTick(() => autoResize($el))"
                                                 class="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:ring-2 focus:outline-none {{ $part2Theme['textarea'] }}"
                                                 rows="2"
-                                                placeholder="Write your topic sentence for Topic {{ $topicNumber }}..."></textarea>
+                                                placeholder="Write your topic sentence for Topic {{ $topicNumber }}...">{{ $savedAnswers['part2_' . $topicNumber . '_topic'] ?? '' }}</textarea>
                                         </div>
 
                                         <div>
@@ -381,7 +387,7 @@
                                                 x-init="$nextTick(() => autoResize($el))"
                                                 class="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:ring-2 focus:outline-none {{ $part2Theme['textarea'] }}"
                                                 rows="2"
-                                                placeholder="Write your explanation for Topic {{ $topicNumber }}..."></textarea>
+                                                placeholder="Write your explanation for Topic {{ $topicNumber }}...">{{ $savedAnswers['part2_' . $topicNumber . '_explanation'] ?? '' }}</textarea>
                                         </div>
 
                                         <div>
@@ -392,7 +398,7 @@
                                                 x-init="$nextTick(() => autoResize($el))"
                                                 class="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:ring-2 focus:outline-none {{ $part2Theme['textarea'] }}"
                                                 rows="2"
-                                                placeholder="Write your example for Topic {{ $topicNumber }}..."></textarea>
+                                                placeholder="Write your example for Topic {{ $topicNumber }}...">{{ $savedAnswers['part2_' . $topicNumber . '_example'] ?? '' }}</textarea>
                                         </div>
 
                                         <div>
@@ -403,7 +409,7 @@
                                                 x-init="$nextTick(() => autoResize($el))"
                                                 class="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:ring-2 focus:outline-none {{ $part2Theme['textarea'] }}"
                                                 rows="2"
-                                                placeholder="Write the result for Topic {{ $topicNumber }}..."></textarea>
+                                                placeholder="Write the result for Topic {{ $topicNumber }}...">{{ $savedAnswers['part2_' . $topicNumber . '_result'] ?? '' }}</textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -489,8 +495,15 @@
 @endsection
 <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('partsApp', (meetingId) => ({
-            answers: {},
+        Alpine.data('partsApp', (meetingId, savedAnswers = {}) => ({
+            // Seeded from the student's last autosaved draft (see
+            // IeltsWritingController::showMeeting()) - only covers the
+            // x-model-bound fields (q{id}_*); the translate_*/part2_*
+            // fields aren't Alpine-bound, their saved values are restored
+            // directly into the textarea content server-side instead - see
+            // this file's own savedAnswers Blade interpolations further up.
+            answers: savedAnswers || {},
+            loading: false,
             splitLeftWidth: 56,
             isResizing: false,
             startX: 0,
@@ -581,7 +594,7 @@
                 if (window.AutoSave) {
                     window.AutoSave.init(meetingId, '{{ Auth::id() }}');
                 }
-                
+
                 setTimeout(() => {
                     const textareas = document.querySelectorAll('textarea[name^="q"]');
                     textareas.forEach(el => {
@@ -595,6 +608,90 @@
                     // removing local storage sync to avoid conflict? Or keep it?
                     // AutoSave handles storage.
                 });
+
+                // Delegated listener: many fields on this page (per-topic and
+                // per-exercise textareas) aren't bound via x-model, so collect
+                // answers straight from the DOM at submit/draft-sync time
+                // instead of relying solely on the Alpine `answers` object.
+                this.$root.addEventListener('input', (e) => {
+                    if (e.target.matches('textarea[name], input[type="text"][name]')) {
+                        this.queueDraftSync();
+                    }
+                });
+            },
+            collectAnswers() {
+                const data = {};
+                document.querySelectorAll('textarea[name], input[type="text"][name]').forEach(el => {
+                    if (el.value) {
+                        data[el.name] = el.value;
+                    }
+                });
+                return data;
+            },
+            draftSyncTimer: null,
+            queueDraftSync() {
+                if (window.showAutosaveIndicator) {
+                    window.showAutosaveIndicator('Menyimpan draft...', 'saving');
+                }
+                clearTimeout(this.draftSyncTimer);
+                this.draftSyncTimer = setTimeout(() => this.syncDraftToServer(), 800);
+            },
+            async syncDraftToServer() {
+                try {
+                    await fetch('/assignments/ielts-academic/writing/meeting/' + meetingId + '/draft', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: JSON.stringify({ userAnswers: this.collectAnswers() }),
+                        keepalive: true,
+                    });
+                    if (window.showAutosaveIndicator) {
+                        window.showAutosaveIndicator();
+                    }
+                } catch (e) {
+                    console.error('Failed to sync draft to server:', e);
+                    if (window.showAutosaveIndicator) {
+                        window.showAutosaveIndicator('Gagal menyimpan draft', 'error');
+                    }
+                }
+            },
+            async submit() {
+                this.loading = true;
+                const allAnswers = this.collectAnswers();
+                const formattedEssay = Object.entries(allAnswers)
+                    .map(([name, value]) => `${name}: ${value}`)
+                    .join("\n\n") || 'No answers provided';
+
+                try {
+                    const response = await fetch('/assignments/ielts-academic/writing/evaluate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                        },
+                        body: JSON.stringify({ essay: formattedEssay, task_type: '2', meeting_id: meetingId })
+                    });
+                    const data = await response.json();
+                    this.loading = false;
+                    if (data.redirect_url) {
+                        if (data.message) alert(data.message);
+                        window.location.href = data.redirect_url;
+                        return;
+                    }
+                    if (data.submission_id) {
+                        if (confirm('Jawaban berhasil dikirim! Apakah Anda ingin melihat halaman hasil pengerjaan lengkap?')) {
+                            window.open('/assignments/ielts-academic/writing/submission/' + data.submission_id, '_blank');
+                        }
+                    } else {
+                        alert('Jawaban berhasil disimpan!');
+                    }
+                } catch (e) {
+                    this.loading = false;
+                    alert('Jawaban berhasil disimpan secara lokal!');
+                }
             },
             destroy() {
                 this.stopResize();

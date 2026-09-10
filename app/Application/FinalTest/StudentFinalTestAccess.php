@@ -123,7 +123,7 @@ class StudentFinalTestAccess
             return 'pte-academic';
         }
 
-        if (in_array($slug, ['ielts-academic-listening', 'ielts-academic-reading', 'ielts-academic-full-package', 'ielts-academic-writing', 'ielts-academic-speaking'], true)) {
+        if (in_array($slug, ['ielts-academic-listening', 'ielts-academic-reading', 'ielts-academic-full-package', 'ielts-academic-all-sections', 'ielts-academic-writing', 'ielts-academic-speaking'], true)) {
             return 'ielts-academic';
         }
 

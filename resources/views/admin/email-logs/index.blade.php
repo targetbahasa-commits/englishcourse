@@ -51,6 +51,10 @@
                                     <a href="{{ route('admin.payments.index', ['q' => $log->payment->invoice_number]) }}" class="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline bg-blue-50 px-2 py-1 rounded">
                                         💳 {{ $log->payment->invoice_number }}
                                     </a>
+                                @elseif($log->related_type)
+                                    <span class="inline-flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                                        {{ ucfirst(str_replace('_', ' ', $log->related_type)) }} #{{ $log->related_id }}
+                                    </span>
                                 @else
                                     <span class="text-xs text-gray-400">System</span>
                                 @endif

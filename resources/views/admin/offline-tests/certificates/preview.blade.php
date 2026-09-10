@@ -249,7 +249,7 @@
     }
 
     .cert-footer-line {
-        width: 160px;
+        width: 200px;
         height: 1px;
         background-color: var(--main-color);
         opacity: 0.3;
@@ -457,7 +457,7 @@
                     <div class="cert-bg-pattern"></div>
                     
                     @if($certificate->background_image)
-                        <div style="position:absolute; inset:0; background-image:url('{{ asset('storage/' . $certificate->background_image) }}'); background-size:cover; background-position:center; opacity:0.18; z-index:0; pointer-events:none;"></div>
+                        <div style="position:absolute; inset:0; background-image:url('{{ route('admin.offline-test-certificates.background', $certificate->id) }}'); background-size:cover; background-position:center; opacity:0.18; z-index:0; pointer-events:none;"></div>
                     @endif
 
                     <div class="cert-border-outer">
@@ -534,6 +534,7 @@
                             <div class="cert-footer-layout">
                                 <div class="cert-footer-col">
                                     <span class="cert-footer-label">{{ $footerLeft }}</span>
+                                    <div style="height: {{ (!empty($config['signature_image']) || !empty($config['stamp_image'])) ? '100px' : '20px' }};"></div>
                                     <div class="cert-footer-line"></div>
                                     <span class="cert-footer-value">{{ $certificateDate }}</span>
                                 </div>
@@ -558,6 +559,14 @@
 
                                 <div class="cert-footer-col">
                                     <span class="cert-footer-label">{{ $footerRight }}</span>
+                                    <div class="cert-signature-wrap" style="position: relative; height: {{ (!empty($config['signature_image']) || !empty($config['stamp_image'])) ? '100px' : '20px' }}; width: 230px; display: flex; align-items: center; justify-content: center;">
+                                        @if(!empty($config['stamp_image']))
+                                            <img src="{{ route('offline-test-certificates.stamp', $certificate->id) }}" alt="Stamp" style="position: absolute; left: 10px; bottom: -8px; height: 95px; max-width: 115px; object-fit: contain; opacity: 0.88; transform: rotate(-6deg); pointer-events: none; z-index: 1;">
+                                        @endif
+                                        @if(!empty($config['signature_image']))
+                                            <img src="{{ route('offline-test-certificates.signature', $certificate->id) }}" alt="Signature" style="position: relative; max-height: 95px; max-width: 220px; object-fit: contain; z-index: 2;">
+                                        @endif
+                                    </div>
                                     <div class="cert-footer-line"></div>
                                     <span class="cert-footer-value">{{ $signatureName }}</span>
                                 </div>

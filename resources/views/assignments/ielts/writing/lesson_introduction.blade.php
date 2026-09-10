@@ -1,11 +1,13 @@
 @extends('layouts.admin')
 
+@section('title', ($meeting->title ?? 'Lesson Introduction') . ' - IELTS Writing Task ' . ($task ?? 1))
+
 @section('content')
 <div class="container mx-auto px-4 py-8 h-screen flex flex-col">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
-            <a href="{{ route('assignments.ielts-academic.writing.index', ['task' => $task]) }}" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+            <a href="{{ route('assignments.ielts-academic.writing.index', ['task' => $task]) }}" class="p-2 bg-white rounded-lg hover:bg-gray-200 transition-colors">
                 <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </a>
             <div>
@@ -26,10 +28,10 @@
                 <div class="prose prose-lg max-w-none text-gray-600 space-y-6">
                     <p class="text-xl leading-relaxed">
                         Introduction paragraph pada dasarnya adalah memperkenalkan topik yang sedang dibahas kepada pembaca. 
-                        Anda hanya perlu untuk <span class="font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded">MEM-PARAPHRASE</span> soal yang diberikan.
+                        Anda hanya perlu untuk <span class="font-bold text-orange-600 bg-white px-2 py-1 rounded">MEM-PARAPHRASE</span> soal yang diberikan.
                     </p>
 
-                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-100 my-8">
+                    <div class="bg-white p-6 rounded-xl border border-blue-100 my-8">
                         <h3 class="text-blue-900 font-bold text-lg mb-3">Metode Paraphrasing</h3>
                         <p class="mb-4">Ada beberapa cara yang bisa Anda gunakan untuk membuat paraphrase:</p>
                         <ul class="list-disc pl-5 space-y-2 text-blue-800">
@@ -51,11 +53,11 @@
                     <!-- Example 1 -->
                     <div class="mb-10 p-6 rounded-xl border border-gray-200 hover:border-orange-300 transition-colors">
                         <div class="flex items-center gap-3 mb-4">
-                            <span class="w-8 h-8 flex items-center justify-center bg-orange-100 text-orange-600 font-bold rounded-full">1</span>
+                            <span class="w-8 h-8 flex items-center justify-center bg-white text-orange-600 font-bold rounded-full">1</span>
                             <h3 class="text-xl font-bold text-gray-900">Aktif → Pasif</h3>
                         </div>
                         <div class="pl-11">
-                            <div class="italic text-gray-800 font-medium mb-2 border-l-4 border-orange-500 pl-4 py-1 bg-gray-50 rounded-r">
+                            <div class="italic text-gray-800 font-medium mb-2 border-l-4 border-orange-500 pl-4 py-1 bg-white rounded-r">
                                 "It is believed by some people that university education ought to be directed towards developing job skills, whereas others argue that it should be aimed at gaining knowledge for personal growth."
                             </div>
                              <p class="text-sm text-gray-500">
@@ -68,11 +70,11 @@
                     <!-- Example 2 -->
                      <div class="mb-10 p-6 rounded-xl border border-gray-200 hover:border-teal-300 transition-colors">
                         <div class="flex items-center gap-3 mb-4">
-                            <span class="w-8 h-8 flex items-center justify-center bg-teal-100 text-teal-600 font-bold rounded-full">2</span>
+                            <span class="w-8 h-8 flex items-center justify-center bg-white text-teal-600 font-bold rounded-full">2</span>
                             <h3 class="text-xl font-bold text-gray-900">Verb → Gerund</h3>
                         </div>
                         <div class="pl-11">
-                            <div class="italic text-gray-800 font-medium mb-2 border-l-4 border-teal-500 pl-4 py-1 bg-gray-50 rounded-r">
+                            <div class="italic text-gray-800 font-medium mb-2 border-l-4 border-teal-500 pl-4 py-1 bg-white rounded-r">
                                 "Focusing university education on practical job skills is considered important by some people, while others think providing general knowledge is more valuable."
                             </div>
                              <p class="text-sm text-gray-500">
@@ -85,11 +87,11 @@
                     <!-- Example 3 -->
                      <div class="mb-10 p-6 rounded-xl border border-gray-200 hover:border-purple-300 transition-colors">
                         <div class="flex items-center gap-3 mb-4">
-                            <span class="w-8 h-8 flex items-center justify-center bg-purple-100 text-purple-600 font-bold rounded-full">3</span>
+                            <span class="w-8 h-8 flex items-center justify-center bg-white text-purple-600 font-bold rounded-full">3</span>
                             <h3 class="text-xl font-bold text-gray-900">Keyword → Sinonim</h3>
                         </div>
                         <div class="pl-11">
-                            <div class="italic text-gray-800 font-medium mb-2 border-l-4 border-purple-500 pl-4 py-1 bg-gray-50 rounded-r">
+                            <div class="italic text-gray-800 font-medium mb-2 border-l-4 border-purple-500 pl-4 py-1 bg-white rounded-r">
                                 "Some individuals argue that higher education ought to emphasize professional abilities, whereas others claim it should concentrate on intellectual development."
                             </div>
                             <ul class="text-sm text-gray-500 space-y-1 mt-3">
@@ -126,7 +128,7 @@
                 <div class="space-y-12">
 
                 <!-- Latihan 1 -->
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <div class="bg-white rounded-xl p-6 border border-gray-200">
                     <h3 class="font-bold text-lg text-gray-800 mb-2">Latihan 1 — Pendidikan</h3>
                     <div class="mb-4 text-sm text-gray-600 bg-white p-4 rounded border border-gray-100">
                         <strong class="block text-gray-800 mb-1">Question:</strong>
@@ -138,7 +140,7 @@
                 </div>
 
                 <!-- Latihan 2 -->
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <div class="bg-white rounded-xl p-6 border border-gray-200">
                     <h3 class="font-bold text-lg text-gray-800 mb-2">Latihan 2 — Teknologi dan Pekerjaan</h3>
                     <div class="mb-4 text-sm text-gray-600 bg-white p-4 rounded border border-gray-100">
                         <strong class="block text-gray-800 mb-1">Question:</strong>
@@ -150,7 +152,7 @@
                 </div>
 
                 <!-- Latihan 3 -->
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <div class="bg-white rounded-xl p-6 border border-gray-200">
                     <h3 class="font-bold text-lg text-gray-800 mb-2">Latihan 3 — Lingkungan</h3>
                     <div class="mb-4 text-sm text-gray-600 bg-white p-4 rounded border border-gray-100">
                         <strong class="block text-gray-800 mb-1">Question:</strong>
@@ -162,7 +164,7 @@
                 </div>
 
                 <!-- Latihan 4 -->
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <div class="bg-white rounded-xl p-6 border border-gray-200">
                     <h3 class="font-bold text-lg text-gray-800 mb-2">Latihan 4 — Gaya Hidup</h3>
                     <div class="mb-4 text-sm text-gray-600 bg-white p-4 rounded border border-gray-100">
                         <strong class="block text-gray-800 mb-1">Question:</strong>
@@ -174,7 +176,7 @@
                 </div>
 
                 <!-- Latihan 5 -->
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <div class="bg-white rounded-xl p-6 border border-gray-200">
                     <h3 class="font-bold text-lg text-gray-800 mb-2">Latihan 5 — Media Sosial</h3>
                     <div class="mb-4 text-sm text-gray-600 bg-white p-4 rounded border border-gray-100">
                         <strong class="block text-gray-800 mb-1">Question:</strong>
@@ -186,7 +188,7 @@
                 </div>
 
                 <!-- Latihan 6 -->
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <div class="bg-white rounded-xl p-6 border border-gray-200">
                     <h3 class="font-bold text-lg text-gray-800 mb-2">Latihan 6 — Pendidikan Anak</h3>
                     <div class="mb-4 text-sm text-gray-600 bg-white p-4 rounded border border-gray-100">
                         <strong class="block text-gray-800 mb-1">Question:</strong>
@@ -198,7 +200,7 @@
                 </div>
 
                 <!-- Latihan 7 -->
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <div class="bg-white rounded-xl p-6 border border-gray-200">
                     <h3 class="font-bold text-lg text-gray-800 mb-2">Latihan 7 — Dunia Kerja</h3>
                     <div class="mb-4 text-sm text-gray-600 bg-white p-4 rounded border border-gray-100">
                         <strong class="block text-gray-800 mb-1">Question:</strong>
@@ -210,7 +212,7 @@
                 </div>
 
                 <!-- Latihan 8 -->
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <div class="bg-white rounded-xl p-6 border border-gray-200">
                     <h3 class="font-bold text-lg text-gray-800 mb-2">Latihan 8 — Globalisasi</h3>
                     <div class="mb-4 text-sm text-gray-600 bg-white p-4 rounded border border-gray-100">
                         <strong class="block text-gray-800 mb-1">Question:</strong>
@@ -222,7 +224,7 @@
                 </div>
 
                 <!-- Latihan 9 -->
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <div class="bg-white rounded-xl p-6 border border-gray-200">
                     <h3 class="font-bold text-lg text-gray-800 mb-2">Latihan 9 — Bahasa dan Pendidikan</h3>
                     <div class="mb-4 text-sm text-gray-600 bg-white p-4 rounded border border-gray-100">
                         <strong class="block text-gray-800 mb-1">Question:</strong>
@@ -234,7 +236,7 @@
                 </div>
 
                 <!-- Latihan 10 -->
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200 mb-12">
+                <div class="bg-white rounded-xl p-6 border border-gray-200 mb-12">
                     <h3 class="font-bold text-lg text-gray-800 mb-2">Latihan 10 — Transportasi</h3>
                     <div class="mb-4 text-sm text-gray-600 bg-white p-4 rounded border border-gray-100">
                         <strong class="block text-gray-800 mb-1">Question:</strong>

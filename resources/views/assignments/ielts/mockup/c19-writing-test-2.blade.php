@@ -15,7 +15,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -37,11 +37,11 @@
             </div>
             
             <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg border border-indigo-100 font-semibold" id="time-remaining">
+                <div class="flex items-center gap-2 px-4 py-2 bg-white text-indigo-700 rounded-lg border border-indigo-100 font-semibold" id="time-remaining">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     60:00
                 </div>
-                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
                     Exit
                 </a>
             </div>
@@ -72,7 +72,7 @@
 
                 <div class="space-y-12 pb-8">
                     <div class="text-center">
-                        <div class="border border-gray-300 shadow-sm p-4 rounded-lg bg-gray-50 flex items-center justify-center min-h-[400px]">
+                        <div class="border border-gray-300 shadow-sm p-4 rounded-lg bg-white flex items-center justify-center min-h-[400px]">
                             <p class="text-gray-500 italic">Please put the map image here <br> (e.g., using `&lt;img src="{{ asset('images/assignments/ielts/mockup/cambridge/19/test-2/writing-task-1.png') }}"&gt;`)</p>
                         </div>
                     </div>
@@ -101,11 +101,11 @@
         </div>
 
         {{-- RIGHT: Text editor area --}}
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar flex flex-col">
+        <div class="h-full overflow-y-auto bg-white custom-scrollbar flex flex-col">
             <div class="px-4 py-6 flex-1 flex flex-col w-full">
                 
                 <form id="writing-form-1" class="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-gray-200">
-                    <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 bg-gray-50/50 rounded-t-2xl">
+                    <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 bg-white rounded-t-2xl">
                         <div>
                             <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wide">Your Answer (Task 1)</h3>
                         </div>
@@ -124,7 +124,7 @@
                         ></textarea>
                     </div>
 
-                    <div class="border-t border-gray-200 px-6 py-4 bg-gray-50/50 rounded-b-2xl flex items-center justify-between">
+                    <div class="border-t border-gray-200 px-6 py-4 bg-white rounded-b-2xl flex items-center justify-between">
                         <div class="flex flex-col">
                             <span class="text-2xl font-bold text-gray-700 font-mono" id="word-count">0</span>
                             <span class="text-xs text-gray-400 font-medium uppercase tracking-wider">Words</span>
@@ -136,7 +136,7 @@
                 </form>
 
                 <form id="writing-form-2" class="hidden flex-1 flex-col bg-white rounded-2xl shadow-sm border border-gray-200">
-                    <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 bg-gray-50/50 rounded-t-2xl">
+                    <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 bg-white rounded-t-2xl">
                         <div>
                             <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wide">Your Answer (Task 2)</h3>
                         </div>
@@ -155,13 +155,13 @@
                         ></textarea>
                     </div>
 
-                    <div class="border-t border-gray-200 px-6 py-4 bg-gray-50/50 rounded-b-2xl flex items-center justify-between">
+                    <div class="border-t border-gray-200 px-6 py-4 bg-white rounded-b-2xl flex items-center justify-between">
                         <div class="flex items-center gap-6">
                             <div class="flex flex-col">
                                 <span class="text-2xl font-bold text-gray-700 font-mono" id="word-count-2">0</span>
                                 <span class="text-xs text-gray-400 font-medium uppercase tracking-wider">Words</span>
                             </div>
-                            <button type="button" id="btn-go-to-task-1" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all text-sm">
+                            <button type="button" id="btn-go-to-task-1" class="px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all text-sm">
                                 Back to Task 1
                             </button>
                         </div>
@@ -250,7 +250,7 @@
                 timerObj.innerHTML = `<svg class="w-5 h-5 flex-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 
                 if(timeLeft < 300) {
-                    timerObj.classList.replace('bg-indigo-50', 'bg-red-50');
+                    timerObj.classList.replace('bg-white', 'bg-red-50');
                     timerObj.classList.replace('text-indigo-700', 'text-red-700');
                     timerObj.classList.replace('border-indigo-100', 'border-red-200');
                 }

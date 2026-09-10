@@ -10,7 +10,14 @@ class EloquentClassPeriodRepository implements ClassPeriodRepository
 {
     public function listWithCounts(array $filters): array
     {
-        $query = ClassPeriod::with(['teacher', 'program'])->withCount('users')->latest();
+        $query = ClassPeriod::with(['teacher', 'program'])
+            ->withCount([
+                'users',
+                'enrollments as booked_count' => function ($q) {
+                    $q->where('status', 'active')->whereNotNull('class_period_booked_at');
+                },
+            ])
+            ->latest();
 
         if (!empty($filters['program_id'])) {
             $query->where('program_id', $filters['program_id']);

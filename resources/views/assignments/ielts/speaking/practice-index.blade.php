@@ -33,13 +33,13 @@
             <!-- Part 1 Card -->
             <div class="bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition group relative flex flex-col h-full border border-gray-100">
                 <div class="flex justify-between items-start mb-6">
-                    <span class="px-4 py-1.5 bg-orange-100 text-orange-600 rounded-full text-sm font-bold uppercase tracking-wide">
+                    <span class="px-4 py-1.5 bg-white text-orange-600 rounded-full text-sm font-bold uppercase tracking-wide">
                         Part 1
                     </span>
                 </div>
                 
                 <div class="flex-1 mb-6 text-center">
-                    <div class="w-20 h-20 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-600 group-hover:text-white transition-colors duration-300">
+                    <div class="w-20 h-20 bg-white text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-600 group-hover:text-white transition-colors duration-300">
                         <span class="font-bold text-3xl">1</span>
                     </div>
                     <h3 class="font-bold text-xl text-gray-800 mb-2">Introduction & Interview</h3>
@@ -83,13 +83,13 @@
             <!-- Part 3 Card -->
              <div class="bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition group relative flex flex-col h-full border border-gray-100">
                 <div class="flex justify-between items-start mb-6">
-                    <span class="px-4 py-1.5 bg-purple-100 text-purple-600 rounded-full text-sm font-bold uppercase tracking-wide">
+                    <span class="px-4 py-1.5 bg-white text-purple-600 rounded-full text-sm font-bold uppercase tracking-wide">
                         Part 3
                     </span>
                 </div>
                 
                 <div class="flex-1 mb-6 text-center">
-                    <div class="w-20 h-20 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
+                    <div class="w-20 h-20 bg-white text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
                         <span class="font-bold text-3xl">3</span>
                     </div>
                     <h3 class="font-bold text-xl text-gray-800 mb-2">Discussion</h3>

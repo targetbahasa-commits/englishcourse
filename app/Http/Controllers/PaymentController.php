@@ -12,9 +12,13 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\View\View;
 use App\Mail\PaymentProofUploadedMail;
+use App\Mail\PaymentQueuedMail;
+use App\Notifications\PaymentProofUploadedNotification;
+use App\Notifications\PaymentQueuedNotification;
 
 class PaymentController extends Controller
 {
@@ -30,7 +34,7 @@ class PaymentController extends Controller
     {
         $viewData = $this->buildStudentPaymentIndexData->handle(
             $request->user(),
-            (int) $request->session()->get('registration_prefill_program_id', 0),
+            (int) $request->query('program_id', $request->session()->get('registration_prefill_program_id', 0)),
             (string) $request->session()->get('registration_prefill_payment_channel', 'bank_transfer')
         );
         $viewData['prefillClassType'] = $request->session()->get('registration_prefill_class_type', 'regular');
@@ -57,10 +61,16 @@ class PaymentController extends Controller
             return back()->with('error', 'Kamu sudah terdaftar di program ini.');
         }
 
+        if ($result['status'] === 'program_inactive') {
+            return back()->with('error', 'Program ini sudah tidak tersedia untuk pendaftaran baru.');
+        }
+
         if ($result['status'] === 'pending_exists') {
             return redirect()->route('student.payments.show', $result['payment'])
                 ->with('success', 'Pembayaran pending sebelumnya ditemukan. Silakan lanjutkan.');
         }
+
+        $this->notifyAdminsOfNewPayment($result['payment']);
 
         $discountMessage = $result['discountAmount'] > 0
             ? ' Diskon ' . $result['discountLabel'] . ' diterapkan: Rp' . number_format($result['discountAmount'], 0, ',', '.') . '.'
@@ -68,6 +78,38 @@ class PaymentController extends Controller
 
         return redirect()->route('student.payments.show', $result['payment'])
             ->with('success', 'Invoice berhasil dibuat. Total tagihan: Rp' . number_format($result['netAmount'], 0, ',', '.') . '.' . $discountMessage);
+    }
+
+    private function notifyAdminsOfNewPayment(Payment $payment): void
+    {
+        try {
+            $admins = \App\Models\User::where('role', 'admin')->get();
+            if ($admins->isNotEmpty()) {
+                Notification::send($admins, new PaymentQueuedNotification($payment));
+            }
+
+            $notificationEmails = setting('notification_emails');
+            if (!empty($notificationEmails)) {
+                $emails = array_filter(array_map('trim', explode(',', $notificationEmails)));
+                if (count($emails) > 0) {
+                    Mail::to($emails)->send(new PaymentQueuedMail($payment));
+                }
+            }
+
+            $notificationWhatsapps = setting('notification_whatsapps');
+            if (!empty($notificationWhatsapps)) {
+                $whatsapps = array_filter(array_map('trim', explode(',', $notificationWhatsapps)));
+                if (count($whatsapps) > 0) {
+                    $waMessage = "Pendaftaran baru dari " . ($payment->user->name ?? 'Student') . " untuk Invoice {$payment->invoice_number}. Silakan cek Payment Queue di dashboard admin.";
+                    $waGateway = app(\App\Domain\Notification\Contracts\WhatsAppGateway::class);
+                    foreach ($whatsapps as $waNumber) {
+                        $waGateway->sendMessage($waNumber, $waMessage);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send new payment notifications: ' . $e->getMessage());
+        }
     }
 
     public function studentShow(Request $request, Payment $payment): View
@@ -109,6 +151,11 @@ class PaymentController extends Controller
         ]);
 
         try {
+            $admins = \App\Models\User::where('role', 'admin')->get();
+            if ($admins->isNotEmpty()) {
+                Notification::send($admins, new PaymentProofUploadedNotification($payment));
+            }
+
             $notificationEmails = setting('notification_emails');
             if (!empty($notificationEmails)) {
                 $emails = array_filter(array_map('trim', explode(',', $notificationEmails)));
@@ -116,7 +163,7 @@ class PaymentController extends Controller
                     Mail::to($emails)->send(new PaymentProofUploadedMail($payment));
                 }
             }
-            
+
             $notificationWhatsapps = setting('notification_whatsapps');
             if (!empty($notificationWhatsapps)) {
                 $whatsapps = array_filter(array_map('trim', explode(',', $notificationWhatsapps)));
@@ -402,7 +449,34 @@ class PaymentController extends Controller
             return back()->withErrors($result['errors'])->withInput();
         }
 
+        $this->notifyStudentOfApproval($payment);
+
         return back()->with('success', 'Pembayaran disetujui dan enrollment diaktifkan.');
+    }
+
+    private function notifyStudentOfApproval(Payment $payment): void
+    {
+        try {
+            $student = $payment->user;
+            if (!$student) {
+                return;
+            }
+
+            $student->notify(new \App\Notifications\PaymentApprovedNotification($payment));
+
+            if ($student->email) {
+                Mail::to($student->email)->send(new \App\Mail\PaymentApprovedMail($payment));
+            }
+
+            if ($student->phone_number) {
+                $programName = $payment->program->name ?? 'program';
+                $waMessage = "Halo {$student->name}, pembayaran Anda untuk {$programName} (Invoice {$payment->invoice_number}) telah diverifikasi dan enrollment Anda sudah aktif. Silakan login ke Student Dashboard untuk mulai belajar.";
+                $waGateway = app(\App\Domain\Notification\Contracts\WhatsAppGateway::class);
+                $waGateway->sendMessage($student->phone_number, $waMessage);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send payment approved notifications: ' . $e->getMessage());
+        }
     }
 
     public function reject(Request $request, Payment $payment): RedirectResponse

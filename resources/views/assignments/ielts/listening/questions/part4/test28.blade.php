@@ -11,10 +11,10 @@
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-12">
 
         {{-- Source --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Source</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>There are some man-made materials like</span>
                 <strong class="text-blue-600">31</strong>
@@ -23,7 +23,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Before being used, material undergoes</span>
                 <strong class="text-blue-600">32</strong>
@@ -32,7 +32,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Wood should be cut and</span>
                 <strong class="text-blue-600">33</strong>
@@ -41,7 +41,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Stone should be cut and</span>
                 <strong class="text-blue-600">34</strong>
@@ -52,10 +52,10 @@
         </div>
 
         {{-- Selection --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Selection</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Aside from environmental factors, one should take</span>
                 <strong class="text-blue-600">35</strong>
@@ -65,7 +65,7 @@
                 <span>into account during construction.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Some properties of materials affect mood, such as</span>
                 <strong class="text-blue-600">36</strong>
@@ -75,7 +75,7 @@
                 <span>, texture, and colour.</span>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Use a mathematical formula to choose the type of wood, because</span>
                 <strong class="text-blue-600">37</strong>
@@ -94,19 +94,19 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
         {{-- Header --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 font-bold text-gray-800 border-r border-gray-200">Material</div>
             <div class="p-3 font-bold text-gray-800">Reflectance Rate</div>
         </div>
 
         {{-- Row 1: Polished silver --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 border-r border-gray-200">Polished silver</div>
             <div class="p-3 text-gray-700">Almost 1.0</div>
         </div>
 
         {{-- Row 2: White-painted plastic, Q38 --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 border-r border-gray-200">White-painted plastic</div>
             <div class="p-3 text-gray-700 flex items-center gap-1">
                 <span>Approximately</span>
@@ -118,7 +118,7 @@
         </div>
 
         {{-- Row 3: Quarry tile, Q39 --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 border-r border-gray-200">Quarry tile</div>
             <div class="p-3 text-gray-700 flex items-center gap-1">
                 <span>Approximately</span>
@@ -130,7 +130,7 @@
         </div>
 
         {{-- Row 4: Q40, Almost 0.0 --}}
-        <div class="grid grid-cols-2 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 border-r border-gray-200 flex items-center gap-1">
                 <strong class="text-blue-600">40</strong>
                 <span class="inline-block w-28 mx-1">

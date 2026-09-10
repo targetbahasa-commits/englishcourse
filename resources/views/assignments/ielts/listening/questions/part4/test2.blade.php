@@ -100,7 +100,7 @@
                         </td>
                     </tr>
                     {{-- Other scientists --}}
-                    <tr class="bg-gray-50">
+                    <tr class="bg-white">
                         <td class="border border-gray-300 px-5 py-4 w-1/3 align-top font-bold">
                             Other scientists
                         </td>

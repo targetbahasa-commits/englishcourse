@@ -22,7 +22,7 @@
                                 <option value="waiting_verification" {{ request('status', 'waiting_verification') === 'waiting_verification' ? 'selected' : '' }}>Waiting Verification</option>
                                 <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
                                 <option value="paid" {{ request('status') === 'paid' ? 'selected' : '' }}>Paid</option>
-                                <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }}>Rejected</option>
                             </select>
                         </div>
                     </form>
@@ -54,7 +54,7 @@
                                     <div class="absolute top-2 right-2 flex flex-col gap-1">
                                         @if($payment->status === 'paid')
                                             <span class="bg-green-100 text-green-800 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">PAID</span>
-                                        @elseif($payment->status === 'rejected')
+                                        @elseif($payment->status === 'failed')
                                             <span class="bg-red-100 text-red-800 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">REJECTED</span>
                                         @elseif(in_array($payment->status, ['pending', 'waiting_verification']))
                                             <span class="bg-yellow-100 text-yellow-800 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">WAITING</span>

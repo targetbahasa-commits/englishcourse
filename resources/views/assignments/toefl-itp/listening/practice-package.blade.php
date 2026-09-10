@@ -175,17 +175,17 @@
                             @foreach($questions16_40 as $q)
                             <div class="rounded-xl border border-gray-200 p-6 mb-4 group relative" x-data="{ selected: '' }">
                                 <div class="flex gap-4 items-start">
-                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-600 font-bold rounded-lg text-sm mt-4">{{ $q[0] }}</span>
+                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-white text-gray-600 font-bold rounded-lg text-sm mt-4">{{ $q[0] }}</span>
                                     <div class="flex-1">
                                         <p class="text-gray-800 font-medium mb-4 text-lg select-none">{!! $q[1] !!}</p>
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             @foreach(['A','B','C','D'] as $idx => $opt)
-                                            <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition group relative border-gray-200 hover:bg-gray-50"
-                                                :class="selected === '{{ $opt }}' ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : ''">
+                                            <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition group relative border-gray-200 hover:bg-white"
+                                                :class="selected === '{{ $opt }}' ? 'border-blue-500 bg-white ring-1 ring-blue-500' : ''">
                                                 <input type="radio" name="answers[{{ $q[0] }}]" value="{{ $opt }}" class="peer sr-only" x-model="selected">
                                                 <div class="flex items-center gap-3 w-full p-1">
                                                     <span class="w-8 h-8 min-w-[2rem] shrink-0 flex items-center justify-center rounded-full text-sm font-bold transition-colors border aspect-square"
-                                                        :class="selected === '{{ $opt }}' ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-500 border-gray-200 group-hover:bg-gray-100'">
+                                                        :class="selected === '{{ $opt }}' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-500 border-gray-200 group-hover:bg-white'">
                                                         {{ $opt }}
                                                     </span>
                                                     <span class="font-medium transition-colors select-none text-gray-600 group-hover:text-gray-900">{{ $q[$idx+2] }}</span>
@@ -198,7 +198,7 @@
                                         </div>
                                         @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
                                         <div class="flex gap-2 mt-3">
-                                            <button class="p-2 bg-yellow-100 text-yellow-600 rounded hover:bg-yellow-200" title="Edit">
+                                            <button class="p-2 bg-white text-yellow-600 rounded hover:bg-yellow-200" title="Edit">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                             </button>
                                             <button class="p-2 bg-red-100 text-red-600 rounded hover:bg-red-200" title="Delete">
@@ -215,6 +215,7 @@
             </div>
         </main>
     </div>
+    <x-live-drawing />
 </body>
 
 <!-- Script untuk handle klik tombol Structure -->
@@ -228,12 +229,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Ambil jawaban dari Alpine.js readingPracticePage
             let answers = {};
             try {
-                if (window.Alpine && Alpine && Alpine.raw && Alpine.raw(document.body)) {
+                if (window.Alpine) {
                     // Cari komponen Alpine readingPracticePage
                     const comps = document.querySelectorAll('[x-data]');
                     for (let comp of comps) {
-                        if (comp.__x && comp.__x.$data && comp.__x.$data.answers) {
-                            answers = comp.__x.$data.answers;
+                        const data = Alpine.$data(comp);
+                        if (data && data.answers) {
+                            answers = data.answers;
                             break;
                         }
                     }

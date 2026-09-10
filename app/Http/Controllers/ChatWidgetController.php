@@ -41,6 +41,27 @@ class ChatWidgetController extends Controller
      * Fetch conversations list for the current user.
      * Includes 1-on-1 chats and Class Period groups.
      */
+    /**
+     * Whether the given user is allowed to read/post in a class period's group chat:
+     * admins always, teachers who teach it, students enrolled in it.
+     */
+    private function userCanAccessClassPeriodChat(User $user, int $classPeriodId): bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        if ($user->isTeacher()) {
+            return ClassPeriod::where('id', $classPeriodId)->where('teacher_id', $user->id)->exists();
+        }
+
+        if ($user->isStudent()) {
+            return $user->enrollments()->where('class_period_id', $classPeriodId)->exists();
+        }
+
+        return false;
+    }
+
     public function conversations()
     {
         $user = Auth::user();
@@ -90,7 +111,7 @@ class ChatWidgetController extends Controller
                 'name' => $cls->name . ' (' . $cls->batch_type . ')',
                 'email' => 'Group Chat',
                 'unread' => 0,
-                'last_at' => now(),
+                'last_at' => DirectMessage::where('class_period_id', $cls->id)->max('created_at'),
             ];
         }
 
@@ -109,6 +130,14 @@ class ChatWidgetController extends Controller
                 ->whereNull('read_at')
                 ->count();
 
+            $lastAt = DirectMessage::where(function ($q) use ($user, $cu) {
+                    $q->where('sender_id', $user->id)->where('receiver_id', $cu->id);
+                })
+                ->orWhere(function ($q) use ($user, $cu) {
+                    $q->where('sender_id', $cu->id)->where('receiver_id', $user->id);
+                })
+                ->max('created_at');
+
             $conversations[] = [
                 'id' => $cu->id,
                 'user_id' => $cu->id,
@@ -116,7 +145,7 @@ class ChatWidgetController extends Controller
                 'name' => $cu->name,
                 'email' => $cu->email,
                 'unread' => $unread,
-                'last_at' => now(), // Can be improved by getting actual max(created_at)
+                'last_at' => $lastAt,
             ];
         }
 
@@ -174,13 +203,17 @@ class ChatWidgetController extends Controller
 
         if ($type === 'admin') {
             if ($user->isAdmin() && $targetId) {
-                // Admin viewing a student's ticket
-                $query->where(function ($q) use ($targetId, $user) {
+                // Admin viewing a student's ticket - include replies from ANY admin,
+                // not just the currently logged-in one, so a shared support inbox
+                // shows the full thread (otherwise a second admin can't see the
+                // first admin's replies and risks sending a duplicate/conflicting one).
+                $adminIds = User::where('role', 'admin')->pluck('id');
+                $query->where(function ($q) use ($targetId, $adminIds) {
                     // Messages from student to admin (null receiver)
                     $q->where('sender_id', $targetId)->whereNull('receiver_id')
-                      // Or replies from this admin to the student
-                      ->orWhere(function ($q2) use ($targetId, $user) {
-                          $q2->where('sender_id', $user->id)->where('receiver_id', $targetId);
+                      // Or replies from any admin to this student
+                      ->orWhere(function ($q2) use ($targetId, $adminIds) {
+                          $q2->whereIn('sender_id', $adminIds)->where('receiver_id', $targetId);
                       });
                 });
                 // Mark read
@@ -208,6 +241,9 @@ class ChatWidgetController extends Controller
             // Mark read
             DirectMessage::where('sender_id', $targetId)->where('receiver_id', $user->id)->whereNull('read_at')->update(['read_at' => now()]);
         } elseif ($type === 'group' && $targetId) {
+            if (!$this->userCanAccessClassPeriodChat($user, (int) $targetId)) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
             // Group chat
             $query->where('class_period_id', $targetId);
         } else {
@@ -261,6 +297,9 @@ class ChatWidgetController extends Controller
             $msgData['receiver_id'] = $targetId;
         } elseif ($type === 'group') {
             if (!$targetId) return response()->json(['error' => 'Missing target'], 400);
+            if (!$this->userCanAccessClassPeriodChat($user, (int) $targetId)) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
             $msgData['class_period_id'] = $targetId;
         }
 

@@ -51,14 +51,26 @@ class LiveDraftController extends Controller
             $targetUser->id
         );
 
-        $wsUrl = env('CRDT_WS_URL', 'wss://demos.yjs.dev');
+        // No fallback to the public Yjs demo server (wss://demos.yjs.dev) -
+        // that sent real student essay content to an unauthenticated
+        // third-party server with no SLA. Null here means "not configured
+        // yet" - the view shows a clear message instead of connecting.
+        $wsUrl = env('CRDT_WS_URL');
+        $relaySecret = env('CRDT_RELAY_SECRET');
+
+        // Our own relay rejects any connection whose token doesn't match
+        // this HMAC - see the relay's server.js. Without it, knowing/
+        // guessing a room name (predictable: meeting/task/user IDs) would
+        // be enough for anyone to read a student's essay in real time.
+        $token = $relaySecret ? hash_hmac('sha256', $roomId, $relaySecret) : null;
 
         return view('live-draft.ielts-writing-monitor', [
             'targetUser' => $targetUser,
             'meeting' => $meeting,
             'task' => $task,
             'roomId' => $roomId,
-            'wsUrl' => $wsUrl,
+            'wsUrl' => $wsUrl && $token ? $wsUrl : null,
+            'token' => $token,
             'isAdmin' => $isAdmin,
         ]);
     }

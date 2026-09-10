@@ -16,7 +16,7 @@
         .dotted-answer { border-bottom: 1px dotted #000; display: inline-block; min-width: 120px; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -35,7 +35,7 @@
                     <p class="text-sm text-gray-500">Cambridge IELTS 20 Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back
             </a>
@@ -185,7 +185,7 @@
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar">
+        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
             <div class="px-8 py-8 pb-24 max-w-2xl mx-auto">
 
                 {{-- Questions 1–7: Note Completion --}}
@@ -195,7 +195,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 1–7 on your answer sheet.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <h4 class="text-base font-bold text-center mb-4">The history of frozen food</h4>
                         
                         <p class="font-bold text-gray-800 mb-2">2,000 years ago, South America</p>
@@ -259,7 +259,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 1?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 8–13 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                             <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -270,7 +270,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -285,7 +285,7 @@
                                     [12, "Swanson Foods developed a new style of container for the launch of the TV Dinner."],
                                     [13, "The US frozen food industry is currently the largest in the world."],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -322,7 +322,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose the correct heading for each section from the list of headings below.</p>
                     <p class="text-sm italic text-gray-700 mb-4">Write the correct number, <strong><em>i–vii</em></strong>, in boxes 14–19 on your answer sheet.</p>
 
-                    <div class="border border-gray-400 p-4 rounded-lg mb-6 bg-gray-50 text-sm">
+                    <div class="border border-gray-400 p-4 rounded-lg mb-6 bg-white text-sm">
                         <p class="text-center font-bold mb-3">List of Headings</p>
                         @foreach([
                             ['i',    'Tried and tested solutions'],
@@ -343,7 +343,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Section</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -353,7 +353,7 @@
                                 @foreach([
                                     [14, 'A'], [15, 'B'], [16, 'C'], [17, 'D'], [18, 'E'], [19, 'F']
                                 ] as [$num, $para])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm font-medium">Paragraph <strong>{{ $para }}</strong></td>
                                     <td class="py-3 px-3 text-center">
@@ -439,7 +439,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 24–26 on your answer sheet.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm space-y-4">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm space-y-4">
                         <div class="flex items-start gap-2">
                             <span class="font-bold text-gray-800 flex-none w-5 text-right mt-1">24</span>
                             <p class="text-gray-800 leading-loose">
@@ -482,7 +482,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Write the correct letter, <strong>A, B or C</strong>, in boxes 27–33 on your answer sheet.</p>
                     <p class="text-sm font-bold text-gray-800 mb-4"><em>NB You may use any letter more than once.</em></p>
 
-                    <div class="border border-gray-400 p-4 rounded-lg mb-6 bg-gray-50 text-sm">
+                    <div class="border border-gray-400 p-4 rounded-lg mb-6 bg-white text-sm">
                         <p class="text-center font-bold mb-3">List of Experts</p>
                         @foreach([
                             ['A', 'Martin Rees'],
@@ -499,7 +499,7 @@
                     <div class="overflow-x-auto mt-4">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-32 text-center">Expert</th>
@@ -515,7 +515,7 @@
                                     [32, 'The ideas in high-quality science fiction may prove to be just as accurate as those found in the work of mediocre scientists.'],
                                     [33, 'There are those who look forward to robots developing greater intelligence.']
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center w-36">
@@ -544,7 +544,7 @@
                     <p class="text-sm text-gray-800 mb-1">Complete each sentence with the correct ending, <strong>A–D</strong>, below.</p>
                     <p class="text-sm italic text-gray-700 mb-4">Write the correct letter, <strong>A–D</strong>, in boxes 34–36 on your answer sheet.</p>
 
-                    <div class="border border-gray-400 p-4 rounded-lg mb-6 bg-gray-50 text-sm">
+                    <div class="border border-gray-400 p-4 rounded-lg mb-6 bg-white text-sm">
                         @foreach([
                             ['A', 'robots to explore outer space.'],
                             ['B', 'advances made in machine intelligence so far.'],
@@ -564,7 +564,7 @@
                             [35, 'Rees and Wolpert share an opinion about the extent of'],
                             [36, 'Wolpert disagrees with Richardson on the question of'],
                         ] as [$num, $sentence])
-                        <div class="flex items-start gap-3 bg-gray-50 p-4 border border-gray-100 rounded-lg">
+                        <div class="flex items-start gap-3 bg-white p-4 border border-gray-100 rounded-lg">
                             <span class="font-bold text-gray-800 w-5 flex-none mt-1">{{ $num }}</span>
                             <div class="flex-1 flex flex-col xl:flex-row xl:items-center gap-3">
                                 <span class="text-gray-800 text-sm leading-relaxed">{{ $sentence }}</span>
@@ -639,7 +639,7 @@
                         @endphp
 
                         @foreach($mcqs as $mcq)
-                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-5">
+                        <div class="bg-white border border-gray-200 rounded-xl p-5">
                             <div class="flex items-start gap-3 mb-4">
                                 <span class="font-bold text-lg text-gray-900 flex-none">{{ $mcq['num'] }}</span>
                                 <p class="text-base text-gray-900 font-medium">{{ $mcq['q'] }}</p>

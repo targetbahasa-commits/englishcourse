@@ -12,7 +12,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">21</strong>&nbsp; Nicole received the best information from the</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'staff.', 'B' => 'students.', 'C' => 'cleaners.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[21]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -25,7 +25,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">22</strong>&nbsp; The product used most wastefully was</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'copying paper.', 'B' => 'plastic.', 'C' => 'paper plates and cups.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[22]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -38,7 +38,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">23</strong>&nbsp; The proportion of interviewed people who expressed concern over waste was</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => '30%.', 'B' => '45%.', 'C' => '55%.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[23]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -51,7 +51,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">24</strong>&nbsp; The proportion who claim they take action over this problem was</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => '10%.', 'B' => 'one third', 'C' => 'one half.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[24]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -64,7 +64,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">25</strong>&nbsp; Nicole thinks many people do nothing because they are</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'lazy.', 'B' => 'uncaring.', 'C' => 'uninformed.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[25]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>

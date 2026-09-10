@@ -1,0 +1,30 @@
+<div class="mb-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 1 - Practice Test 35</h3>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 1-6</h4>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the notes.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>NO MORE THAN THREE WORDS OR A NUMBER</strong> for each answer.</p>
+<h4 class="text-xl font-bold mb-4 text-gray-800">School</h4><strong>Excursion</strong>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Day</strong>: _Wednesday (Example)_</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Destination</strong>: <strong class="text-blue-600 font-bold ml-1 mr-1">1</strong><input type="text" name="answers[1]" value="{{ old('answers.1') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Weather</strong>: <strong class="text-blue-600 font-bold ml-1 mr-1">2</strong><input type="text" name="answers[2]" value="{{ old('answers.2') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Arrival</strong><strong>time</strong>: <strong class="text-blue-600 font-bold ml-1 mr-1">3</strong><input type="text" name="answers[3]" value="{{ old('answers.3') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Activities</strong><strong>Planned</strong></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>See</strong>: <strong class="text-blue-600 font-bold ml-1 mr-1">4</strong><input type="text" name="answers[4]" value="{{ old('answers.4') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Eat</strong>: Catered lunch</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Attend</strong>: <strong class="text-blue-600 font-bold ml-1 mr-1">5</strong><input type="text" name="answers[5]" value="{{ old('answers.5') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Return</strong><strong>time</strong>: <strong class="text-blue-600 font-bold ml-1 mr-1">6</strong><input type="text" name="answers[6]" value="{{ old('answers.6') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"></p>
+<h4 class="text-xl font-bold mb-4 text-gray-800">Questions</h4><strong>7-10</strong>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the table.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>ONE WORD ONLY</strong> for each answer.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Nationality</strong><strong>%</strong></p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong class="text-blue-600 font-bold ml-1 mr-1">7</strong><input type="text" name="answers[7]" value="{{ old('answers.7') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">26</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong class="text-blue-600 font-bold ml-1 mr-1">8</strong><input type="text" name="answers[8]" value="{{ old('answers.8') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">25</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong class="text-blue-600 font-bold ml-1 mr-1">9</strong><input type="text" name="answers[9]" value="{{ old('answers.9') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">16</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Indonesian 15</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong class="text-blue-600 font-bold ml-1 mr-1">10</strong><input type="text" name="answers[10]" value="{{ old('answers.10') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off">8</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Saudi 7</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Other 3</p>
+    </div>
+</div>

@@ -3,17 +3,17 @@
 @section('content')
 @php
     $colorMap = [
-        'blue' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-600', 'border' => 'border-blue-100', 'bg_hover' => 'group-hover:bg-blue-50', 'text_hover' => 'group-hover:text-blue-700', 'icon_bg' => 'bg-blue-500'],
+        'blue' => ['bg' => 'bg-white', 'text' => 'text-blue-600', 'border' => 'border-blue-100', 'bg_hover' => 'group-hover:bg-white', 'text_hover' => 'group-hover:text-blue-700', 'icon_bg' => 'bg-blue-500'],
         'green' => ['bg' => 'bg-green-100', 'text' => 'text-green-600', 'border' => 'border-green-100', 'bg_hover' => 'group-hover:bg-green-50', 'text_hover' => 'group-hover:text-green-700', 'icon_bg' => 'bg-green-500'],
-        'indigo' => ['bg' => 'bg-indigo-100', 'text' => 'text-indigo-600', 'border' => 'border-indigo-100', 'bg_hover' => 'group-hover:bg-indigo-50', 'text_hover' => 'group-hover:text-indigo-700', 'icon_bg' => 'bg-indigo-500'],
-        'orange' => ['bg' => 'bg-orange-100', 'text' => 'text-orange-600', 'border' => 'border-orange-100', 'bg_hover' => 'group-hover:bg-orange-50', 'text_hover' => 'group-hover:text-orange-700', 'icon_bg' => 'bg-orange-500'],
-        'purple' => ['bg' => 'bg-purple-100', 'text' => 'text-purple-600', 'border' => 'border-purple-100', 'bg_hover' => 'group-hover:bg-purple-50', 'text_hover' => 'group-hover:text-purple-700', 'icon_bg' => 'bg-purple-500'],
+        'indigo' => ['bg' => 'bg-white', 'text' => 'text-indigo-600', 'border' => 'border-indigo-100', 'bg_hover' => 'group-hover:bg-white', 'text_hover' => 'group-hover:text-indigo-700', 'icon_bg' => 'bg-indigo-500'],
+        'orange' => ['bg' => 'bg-white', 'text' => 'text-orange-600', 'border' => 'border-orange-100', 'bg_hover' => 'group-hover:bg-white', 'text_hover' => 'group-hover:text-orange-700', 'icon_bg' => 'bg-orange-500'],
+        'purple' => ['bg' => 'bg-white', 'text' => 'text-purple-600', 'border' => 'border-purple-100', 'bg_hover' => 'group-hover:bg-white', 'text_hover' => 'group-hover:text-purple-700', 'icon_bg' => 'bg-purple-500'],
         'red' => ['bg' => 'bg-red-100', 'text' => 'text-red-600', 'border' => 'border-red-100', 'bg_hover' => 'group-hover:bg-red-50', 'text_hover' => 'group-hover:text-red-700', 'icon_bg' => 'bg-red-500'],
         'pink' => ['bg' => 'bg-pink-100', 'text' => 'text-pink-600', 'border' => 'border-pink-100', 'bg_hover' => 'group-hover:bg-pink-50', 'text_hover' => 'group-hover:text-pink-700', 'icon_bg' => 'bg-pink-500'],
-        'yellow' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-600', 'border' => 'border-yellow-100', 'bg_hover' => 'group-hover:bg-yellow-50', 'text_hover' => 'group-hover:text-yellow-700', 'icon_bg' => 'bg-yellow-500'],
-        'teal' => ['bg' => 'bg-teal-100', 'text' => 'text-teal-600', 'border' => 'border-teal-100', 'bg_hover' => 'group-hover:bg-teal-50', 'text_hover' => 'group-hover:text-teal-700', 'icon_bg' => 'bg-teal-500'],
-        'cyan' => ['bg' => 'bg-cyan-100', 'text' => 'text-cyan-600', 'border' => 'border-cyan-100', 'bg_hover' => 'group-hover:bg-cyan-50', 'text_hover' => 'group-hover:text-cyan-700', 'icon_bg' => 'bg-cyan-500'],
-        'emerald' => ['bg' => 'bg-emerald-100', 'text' => 'text-emerald-600', 'border' => 'border-emerald-100', 'bg_hover' => 'group-hover:bg-emerald-50', 'text_hover' => 'group-hover:text-emerald-700', 'icon_bg' => 'bg-emerald-500'],
+        'yellow' => ['bg' => 'bg-white', 'text' => 'text-yellow-600', 'border' => 'border-yellow-100', 'bg_hover' => 'group-hover:bg-white', 'text_hover' => 'group-hover:text-yellow-700', 'icon_bg' => 'bg-yellow-500'],
+        'teal' => ['bg' => 'bg-white', 'text' => 'text-teal-600', 'border' => 'border-teal-100', 'bg_hover' => 'group-hover:bg-white', 'text_hover' => 'group-hover:text-teal-700', 'icon_bg' => 'bg-teal-500'],
+        'cyan' => ['bg' => 'bg-white', 'text' => 'text-cyan-600', 'border' => 'border-cyan-100', 'bg_hover' => 'group-hover:bg-white', 'text_hover' => 'group-hover:text-cyan-700', 'icon_bg' => 'bg-cyan-500'],
+        'emerald' => ['bg' => 'bg-white', 'text' => 'text-emerald-600', 'border' => 'border-emerald-100', 'bg_hover' => 'group-hover:bg-white', 'text_hover' => 'group-hover:text-emerald-700', 'icon_bg' => 'bg-emerald-500'],
     ]; // Simplified map, can be expanded or shared
 @endphp
 
@@ -26,7 +26,7 @@
         </a>
         
         <div class="flex items-center gap-4">
-            <div class="p-4 bg-orange-100 text-orange-600 rounded-2xl">
+            <div class="p-4 bg-white text-orange-600 rounded-2xl">
                  <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $topic['icon'] }}"></path>
                 </svg>

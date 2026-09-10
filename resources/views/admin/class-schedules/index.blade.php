@@ -101,6 +101,46 @@
         </div>
     </div>
 
+    <!-- Jam Kelas: Pending Change Requests -->
+    @if($pendingClassMeetingChangeRequests->isNotEmpty())
+        <div class="bg-white rounded-2xl shadow-sm border border-amber-200 overflow-hidden mb-4">
+            <div class="px-5 py-4 sm:px-8 sm:py-5 border-b border-amber-100 bg-amber-50 flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <h3 class="text-sm font-bold text-amber-900">Menunggu Konfirmasi: Perubahan Jam Kelas ({{ $pendingClassMeetingChangeRequests->count() }})</h3>
+            </div>
+            <div class="divide-y divide-gray-100">
+                @foreach($pendingClassMeetingChangeRequests as $changeRequest)
+                    <div class="px-5 py-4 sm:px-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="text-sm">
+                            <p class="font-semibold text-gray-800">
+                                {{ $changeRequest->requester->name ?? 'Unknown' }}
+                                <span class="font-normal text-gray-500">memilih</span>
+                                Meeting {{ $changeRequest->classMeeting->meeting_number ?? '?' }}
+                                <span class="font-normal text-gray-500">({{ $changeRequest->program->name ?? 'Program' }})</span>
+                                <span class="font-normal text-gray-500">sebagai jam kelas hari ini</span>
+                            </p>
+                            <p class="text-xs text-gray-400 mt-1">
+                                Jadwal sistem: {{ optional($changeRequest->classMeeting->meeting_date)->translatedFormat('l, d M Y') ?? '—' }}
+                                &nbsp;→&nbsp;
+                                Diajukan: {{ $changeRequest->requested_date->translatedFormat('l, d M Y') }}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <form method="POST" action="{{ route('admin.class-schedules.change-requests.reject', $changeRequest) }}">
+                                @csrf
+                                <button type="submit" class="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Tolak</button>
+                            </form>
+                            <form method="POST" action="{{ route('admin.class-schedules.change-requests.approve', $changeRequest) }}">
+                                @csrf
+                                <button type="submit" class="px-3 py-1.5 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition">Konfirmasi</button>
+                            </form>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     <!-- Calendar Card -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div id="calendar" class="px-5 py-5 sm:px-8 sm:py-6"></div>

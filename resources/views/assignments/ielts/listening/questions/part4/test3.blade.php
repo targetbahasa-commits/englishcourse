@@ -77,7 +77,7 @@
         <div class="overflow-x-auto">
             <table class="w-full border-collapse border border-gray-300 text-gray-700 text-sm">
                 <thead>
-                    <tr class="bg-gray-50">
+                    <tr class="bg-white">
                         <th class="border border-gray-300 px-5 py-3 text-center font-bold text-gray-800 w-1/3">Dissolution</th>
                         <th class="border border-gray-300 px-5 py-3 text-center font-bold text-gray-800 w-1/3">Volcanic Lava Tubes</th>
                         <th class="border border-gray-300 px-5 py-3 text-center font-bold text-gray-800 w-1/3">Action of Waves</th>
@@ -115,7 +115,7 @@
                         </td>
                     </tr>
                     {{-- Row 2 --}}
-                    <tr class="bg-gray-50">
+                    <tr class="bg-white">
                         <td class="border border-gray-300 px-5 py-4 align-top">
                             Limestone caves
                         </td>

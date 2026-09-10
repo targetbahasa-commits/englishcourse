@@ -29,7 +29,7 @@
         <p class="text-sm italic text-gray-600 mb-1"><strong>Questions 1–7</strong></p>
         <p class="text-sm text-gray-800 mb-3">Complete the notes below.</p>
         <p class="text-sm italic text-gray-700 mb-4">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
-        <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+        <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
             <h4 class="text-base font-bold text-center mb-4">The history of frozen food</h4>
             <div class="space-y-4">
                 <div><span class="font-semibold">2,000 years ago, South America</span><br>
@@ -61,7 +61,7 @@
         <p class="text-sm italic text-gray-600 mb-1"><strong>Questions 8–13</strong></p>
         <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 1?</p>
         <p class="text-sm italic text-gray-700 mb-4">In boxes 8–13 on your answer sheet, write</p>
-        <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+        <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
             <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                 <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                 <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -71,14 +71,14 @@
         <div class="overflow-x-auto mt-2">
             <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                 <thead>
-                    <tr class="bg-gray-50 border-b border-gray-200">
+                    <tr class="bg-white border-b border-gray-200">
                         <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                         <th class="p-3 font-bold text-gray-600">Statement</th>
                         <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                    <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                         <td class="py-3 px-3 font-bold text-blue-600 text-center">8</td>
                         <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">The ice transportation business made some Boston ship owners very wealthy in the early 1800s.</td>
                         <td class="py-3 px-3 text-center">
@@ -95,7 +95,7 @@
                             </div>
                         </td>
                     </tr>
-                    <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                    <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                         <td class="py-3 px-3 font-bold text-blue-600 text-center">9</td>
                         <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">A disadvantage of the freezing process invented in Australia was that it affected the taste of food.</td>
                         <td class="py-3 px-3 text-center">
@@ -112,7 +112,7 @@
                             </div>
                         </td>
                     </tr>
-                    <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                    <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                         <td class="py-3 px-3 font-bold text-blue-600 text-center">10</td>
                         <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">Clarence Birdseye travelled to Labrador in order to learn how the Inuit people froze fish.</td>
                         <td class="py-3 px-3 text-center">
@@ -129,7 +129,7 @@
                             </div>
                         </td>
                     </tr>
-                    <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                    <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                         <td class="py-3 px-3 font-bold text-blue-600 text-center">11</td>
                         <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">Swanson Foods invested a great deal of money in the promotion of the TV Dinner.</td>
                         <td class="py-3 px-3 text-center">
@@ -146,7 +146,7 @@
                             </div>
                         </td>
                     </tr>
-                    <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                    <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                         <td class="py-3 px-3 font-bold text-blue-600 text-center">12</td>
                         <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">Swanson Foods developed a new style of container for the launch of the TV Dinner.</td>
                         <td class="py-3 px-3 text-center">
@@ -163,7 +163,7 @@
                             </div>
                         </td>
                     </tr>
-                    <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                    <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                         <td class="py-3 px-3 font-bold text-blue-600 text-center">13</td>
                         <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">The US frozen food industry is currently the largest in the world.</td>
                         <td class="py-3 px-3 text-center">

@@ -131,7 +131,7 @@
                                     }
                                 }
                             @endphp
-                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $statusAnswerKey ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $statusAnswerKey ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
                                 <span class="font-bold">{{ $statusAnswerKey ? '✓' : '✕' }}</span> Kunci
                             </span>
                         @endif
@@ -157,7 +157,7 @@
 
     <!-- Existing Score Display -->
     @if($existingScore)
-        <div class="mb-6 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+        <div class="mb-6 p-6 bg-white border border-blue-200 rounded-lg">
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-bold text-blue-900">Previous Score</h3>
@@ -300,7 +300,7 @@
             @endphp
 
             @if($instructionPanel)
-                <div class="bg-amber-50 border border-amber-200 rounded-lg p-5">
+                <div class="bg-white border border-amber-200 rounded-lg p-5">
                     @if($instructionPanel['focus'] !== '')
                         <p class="text-amber-900"><span class="font-semibold">Focus:</span> {{ $instructionPanel['focus'] }}</p>
                     @endif
@@ -444,7 +444,7 @@
                 @endif
             
             <div class="flex justify-end gap-4">
-            <a href="{{ route('assignments.toefl-itp.listening.meeting', $number) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+            <a href="{{ route('assignments.toefl-itp.listening.meeting', $number) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
@@ -501,7 +501,7 @@
                 <!-- Modal Header -->
                 <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
                     <h2 class="text-2xl font-bold text-gray-800" x-text="editingQuestion ? 'Edit Question' : 'New Question'"></h2>
-                    <button @click="sidebarOpen = false" class="text-gray-400 hover:text-gray-600 transition p-2 hover:bg-gray-100 rounded-full">
+                    <button @click="sidebarOpen = false" class="text-gray-400 hover:text-gray-600 transition p-2 hover:bg-white rounded-full">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -518,13 +518,13 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Question Number</label>
-                                <input type="number" name="question_number" x-model="formData.question_number" class="w-full px-4 py-3 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all duration-200" required>
+                                <input type="number" name="question_number" x-model="formData.question_number" class="w-full px-4 py-3 rounded-xl border-gray-200 bg-white focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all duration-200" required>
                             </div>
 
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Audio File (MP3/WAV)</label>
                                 <div class="relative">
-                                    <input type="file" name="audio_file" class="w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer border border-gray-200 rounded-xl">
+                                    <input type="file" name="audio_file" class="w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-white file:text-blue-700 hover:file:bg-white transition-all cursor-pointer border border-gray-200 rounded-xl">
                                 </div>
                                 <p class="mt-2 text-xs text-green-600 font-medium flex items-center gap-1" x-show="editingQuestion && editingQuestion.audio_file">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -536,7 +536,7 @@
                         <!-- Question Text -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Question Text</label>
-                            <textarea name="question_text" x-model="formData.question_text" rows="4" class="w-full px-4 py-3 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all duration-200 font-medium" required placeholder="Type the question content here..."></textarea>
+                            <textarea name="question_text" x-model="formData.question_text" rows="4" class="w-full px-4 py-3 rounded-xl border-gray-200 bg-white focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all duration-200 font-medium" required placeholder="Type the question content here..."></textarea>
                         </div>
 
                         <!-- Options Grid -->
@@ -544,28 +544,28 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Option A</label>
                                 <div class="flex items-center">
-                                    <span class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 font-bold rounded-l-xl border-y border-l border-gray-200">A</span>
+                                    <span class="w-10 h-10 flex items-center justify-center bg-white text-gray-500 font-bold rounded-l-xl border-y border-l border-gray-200">A</span>
                                     <input type="text" name="option_a" x-model="formData.option_a" class="w-full px-4 py-3 rounded-r-xl border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all duration-200" required>
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Option B</label>
                                 <div class="flex items-center">
-                                    <span class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 font-bold rounded-l-xl border-y border-l border-gray-200">B</span>
+                                    <span class="w-10 h-10 flex items-center justify-center bg-white text-gray-500 font-bold rounded-l-xl border-y border-l border-gray-200">B</span>
                                     <input type="text" name="option_b" x-model="formData.option_b" class="w-full px-4 py-3 rounded-r-xl border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all duration-200" required>
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Option C</label>
                                 <div class="flex items-center">
-                                    <span class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 font-bold rounded-l-xl border-y border-l border-gray-200">C</span>
+                                    <span class="w-10 h-10 flex items-center justify-center bg-white text-gray-500 font-bold rounded-l-xl border-y border-l border-gray-200">C</span>
                                     <input type="text" name="option_c" x-model="formData.option_c" class="w-full px-4 py-3 rounded-r-xl border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all duration-200" required>
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Option D</label>
                                 <div class="flex items-center">
-                                    <span class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 font-bold rounded-l-xl border-y border-l border-gray-200">D</span>
+                                    <span class="w-10 h-10 flex items-center justify-center bg-white text-gray-500 font-bold rounded-l-xl border-y border-l border-gray-200">D</span>
                                     <input type="text" name="option_d" x-model="formData.option_d" class="w-full px-4 py-3 rounded-r-xl border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all duration-200" required>
                                 </div>
                             </div>
@@ -578,7 +578,7 @@
                                 @foreach(['A', 'B', 'C', 'D'] as $option)
                                 <label class="cursor-pointer relative">
                                     <input type="radio" name="correct_answer" value="{{ $option }}" x-model="formData.correct_answer" class="peer sr-only">
-                                    <div class="h-12 flex items-center justify-center rounded-xl border-2 border-gray-100 bg-white font-bold text-gray-500 hover:bg-gray-50 hover:border-blue-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-600 transition-all duration-200">
+                                    <div class="h-12 flex items-center justify-center rounded-xl border-2 border-gray-100 bg-white font-bold text-gray-500 hover:bg-white hover:border-blue-200 peer-checked:border-blue-500 peer-checked:bg-white peer-checked:text-blue-600 transition-all duration-200">
                                         {{ $option }}
                                     </div>
                                 </label>
@@ -588,7 +588,7 @@
 
                         <!-- Footer Actions -->
                         <div class="flex gap-4 pt-6 mt-6 border-t border-gray-100">
-                            <button type="button" @click="sidebarOpen = false" class="px-8 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors duration-200">
+                            <button type="button" @click="sidebarOpen = false" class="px-8 py-3 bg-white text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors duration-200">
                                 Cancel
                             </button>
                             <button type="submit" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg shadow-blue-200 hover:shadow-blue-300 transform hover:-translate-y-0.5">

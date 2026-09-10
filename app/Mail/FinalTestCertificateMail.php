@@ -8,6 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
 class FinalTestCertificateMail extends Mailable
@@ -25,6 +26,15 @@ class FinalTestCertificateMail extends Mailable
         return new Envelope(
             subject: 'Your Final Test Certificate - Target Bahasa',
         );
+    }
+
+    public function headers(): Headers
+    {
+        return new Headers(text: [
+            'X-Related-Type' => 'final_test_result',
+            'X-Related-Id' => (string) $this->result->id,
+            'X-User-Id' => (string) $this->result->user_id,
+        ]);
     }
 
     public function content(): Content

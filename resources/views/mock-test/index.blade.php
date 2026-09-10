@@ -74,14 +74,14 @@
                         </a>
                     </div>
 
-                    <!-- Cambridge IELTS Card -->
+                    <!-- Cambridge IELTS Academic Card -->
                     <div class="group bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 p-6 flex flex-col relative overflow-hidden">
                         <div class="flex gap-5 relative z-10">
                             <div class="w-20 h-20 shrink-0 rounded-2xl flex items-center justify-center font-black text-lg text-center border shadow-sm leading-none tracking-tight bg-gradient-to-br from-purple-50 to-fuchsia-50 border-purple-100 text-purple-600">
                                 IELTS<br>ACAD
                             </div>
                             <div class="flex-1 pt-1">
-                                <h3 class="text-xl font-bold text-slate-800 mb-1.5">Cambridge IELTS</h3>
+                                <h3 class="text-xl font-bold text-slate-800 mb-1.5">Cambridge IELTS Academic</h3>
                                 <p class="text-slate-500 text-sm leading-relaxed max-w-xs">Full Mock Tests from Cambridge IELTS series editions 1-20.</p>
                             </div>
                         </div>
@@ -105,6 +105,36 @@
                         </a>
                     </div>
 
+                    <!-- Cambridge IELTS General Card -->
+                    <div class="group bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 p-6 flex flex-col relative overflow-hidden">
+                        <div class="flex gap-5 relative z-10">
+                            <div class="w-20 h-20 shrink-0 rounded-2xl flex items-center justify-center font-black text-lg text-center border shadow-sm leading-none tracking-tight bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-100 text-emerald-600">
+                                IELTS<br>GEN
+                            </div>
+                            <div class="flex-1 pt-1">
+                                <h3 class="text-xl font-bold text-slate-800 mb-1.5">Cambridge IELTS General</h3>
+                                <p class="text-slate-500 text-sm leading-relaxed max-w-xs">Full Mock Tests & Practice for Cambridge IELTS General Training.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-3 mt-6 mb-8 relative z-10 pl-2">
+                            <div class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 bg-slate-100/80 border border-slate-200/60 px-3 py-1.5 rounded-lg">
+                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                170 min
+                            </div>
+                            <div class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 bg-slate-100/80 border border-slate-200/60 px-3 py-1.5 rounded-lg">
+                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                4 sections
+                            </div>
+                        </div>
+
+                        <a href="{{ route('mock-test.ielts-general') }}" class="mt-auto relative z-10 w-full flex items-center justify-center text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 shadow-lg group-hover:-translate-y-0.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-emerald-500/30">
+                            Access Module
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </a>
+                    </div>
                 </div>
             </div>
         </main>

@@ -16,322 +16,272 @@
 </head>
 <body class="font-sans antialiased bg-[#F3F4FF] p-8">
     @include('components.impersonation-banner')
-    @include('components.program-sidebar')
-    <div class="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-        <div class="flex justify-between items-center mb-8">
-            <a href="{{ $backRoute ?? route('assignments.grammar-writing') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
-    <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-    </svg>
-    Back
-</a>
-        </div>
-
-        <h1 class="text-3xl font-bold text-center text-indigo-600 mb-8">Comparative, Superlative, Positive Degree (Pertemuan 10)</h1>
-        
-        <!-- Tips Box -->
-        <div class="bg-indigo-50 border border-indigo-200 text-indigo-900 p-6 rounded-xl mb-8">
-            <strong class="block mb-2 text-lg">💡 Tips:</strong>
-            <p class="text-sm">Tentukan apakah kalimat menggunakan <strong>Comparative</strong>, <strong>Superlative</strong>, atau <strong>Positive Degree</strong> terlebih dahulu sebelum menerjemahkan!</p>
-            <div class="mt-3 text-xs space-y-1">
-                <p>• <strong>Superlative</strong>: terbesar, tertinggi, paling... (the biggest, the highest, the most...)</p>
-                <p>• <strong>Comparative</strong>: lebih... daripada (bigger than, more... than)</p>
-                <p>• <strong>Positive</strong>: sebesar, setinggi, sepenting (as big as, as high as, as important as)</p>
+    @include('components.program-sidebar', ['programSidebarAlwaysVisible' => true])
+    <div class="w-full max-w-[1920px] mx-auto flex flex-col min-h-screen">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <span class="text-sm font-semibold text-indigo-600 tracking-wider uppercase">{{ ($displayMeetingNumber ?? 10) == 6 ? 'Fast-track Grammar for Writing' : 'Grammar for Writing' }}</span>
+                <h1 class="text-2xl font-bold text-gray-800">{{ ($displayMeetingNumber ?? 10) == 6 ? 'Noun Phrase, Comparative, Superlative, & Positive Degree (Pertemuan 6)' : 'Noun Phrase, Comparative, Superlative, & Positive Degree (Pertemuan 10)' }}</h1>
             </div>
+            <x-grammar-meeting-actions :meetingNumber="$displayMeetingNumber ?? 10" track="fast-track" />
         </div>
-
-
 
         @if($submitted)
-            <div class="bg-indigo-600 text-white p-6 rounded-xl text-center mb-8 shadow-md">
+            <div class="bg-indigo-600 text-white p-6 rounded-xl text-center mb-6 shadow-md">
                 <h2 class="text-2xl font-bold mb-2">Nilai Kamu: {{ $finalScore }} / 100</h2>
                 <p class="text-indigo-100">{{ $finalScore >= 80 ? 'Luar biasa!' : 'Terus berlatih!' }}</p>
             </div>
         @endif
 
-        <form method="POST" action="{{ route('assignments.grammar-writing.meeting10.submit') }}">
+        <form method="POST" action="{{ ($displayMeetingNumber ?? 10) == 6 ? parse_url(route('assignments.grammar-writing.meeting6.submit'), PHP_URL_PATH) : parse_url(route('assignments.grammar-writing.meeting10.submit'), PHP_URL_PATH) }}" id="meetingAnswerForm">
             @csrf
-            
-            <!-- Section 1: Sentence Translation -->
-            <div class="mb-12">
-                <div class="flex justify-between items-center mb-6 border-b pb-2">
-                    <h3 class="text-2xl font-bold text-gray-800">A. Translate Kalimat</h3>
-                    @if(auth()->check() && auth()->user()->isAdmin())
-                        <button type="button"
-                                @click="$dispatch('open-add-modal')"
-                                class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold py-2 px-4 rounded shadow-sm transition-colors">
-                            + Add Question
-                        </button>
-                    @endif
-                </div>
-                <div class="space-y-6">
-                    @foreach($questions as $idx => $data)
-                        <div class="bg-gray-50 p-6 rounded-xl border-l-4 
-                            {{ $data['type'] == 'Superlative' ? 'border-red-500' : ($data['type'] == 'Comparative' ? 'border-blue-500' : 'border-green-500') }} 
-                            shadow-sm">
-                            <div class="flex items-start justify-between mb-3">
-                                <div class="flex flex-col sm:flex-row sm:items-center flex-1 gap-2">
-                                    <label class="block font-bold text-lg text-gray-800">{{ $idx }}. {{ $data['id'] }}</label>
-                                    
-                                    <div class="flex gap-1">
-                                        <!-- Example Helper -->
-                                        @if(isset($data['example']))
-                                        <div x-data="{ open: false }" class="relative inline-block">
-                                            <button type="button" @click="open = !open" @click.outside="open = false" class="text-yellow-600 hover:text-yellow-700 focus:outline-none transition-colors cursor-pointer text-xs font-bold bg-yellow-50 px-2 py-0.5 rounded border border-yellow-100 w-6 h-6 flex items-center justify-center shadow-sm">
-                                                ?
-                                            </button>
-                                            <div x-show="open"
-                                                 x-transition:enter="transition ease-out duration-200"
-                                                 x-transition:enter-start="opacity-0 translate-y-2"
-                                                 x-transition:enter-end="opacity-100 translate-y-0"
-                                                 x-transition:leave="transition ease-in duration-150"
-                                                 x-transition:leave-start="opacity-100 translate-y-0"
-                                                 x-transition:leave-end="opacity-0 translate-y-2"
-                                                 style="display: none;"
-                                                 class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 text-center leading-relaxed">
-                                                <strong class="block mb-1 text-yellow-300">Contoh ({{ $data['type'] }}):</strong>
-                                                {{ $data['example']['id'] }}<br>
-                                                <em class="text-gray-300">{{ $data['example']['en'] }}</em>
-                                                <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
-                                            </div>
-                                        </div>
-                                        @elseif(isset($examples[$data['type']]))
-                                        <div x-data="{ open: false }" class="relative inline-block">
-                                            <button type="button" @click="open = !open" @click.outside="open = false" class="text-yellow-600 hover:text-yellow-700 focus:outline-none transition-colors cursor-pointer text-xs font-bold bg-yellow-50 px-2 py-0.5 rounded border border-yellow-100 w-6 h-6 flex items-center justify-center shadow-sm">
-                                                ?
-                                            </button>
-                                            <div x-show="open"
-                                                 x-transition:enter="transition ease-out duration-200"
-                                                 x-transition:enter-start="opacity-0 translate-y-2"
-                                                 x-transition:enter-end="opacity-100 translate-y-0"
-                                                 x-transition:leave="transition ease-in duration-150"
-                                                 x-transition:leave-start="opacity-100 translate-y-0"
-                                                 x-transition:leave-end="opacity-0 translate-y-2"
-                                                 style="display: none;"
-                                                 class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 text-center leading-relaxed">
-                                                <strong class="block mb-1 text-yellow-300">Contoh ({{ $data['type'] }}):</strong>
-                                                {{ $examples[$data['type']]['id'] }}<br>
-                                                <em class="text-gray-300">{{ $examples[$data['type']]['en'] }}</em>
-                                                <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
-                                            </div>
-                                        </div>
-                                        @endif
 
-                                        <!-- Vocabulary Helper -->
-                                        @if(isset($data['vocab']))
-                                        <div x-data="{ open: false }" class="relative inline-block">
-                                            <button type="button" @click="open = !open" @click.outside="open = false" class="text-green-600 hover:text-green-700 focus:outline-none transition-colors cursor-pointer text-xs font-bold bg-green-50 px-2 py-0.5 rounded border border-green-100 w-6 h-6 flex items-center justify-center shadow-sm">
-                                                v
-                                            </button>
-                                            <div x-show="open"
-                                                 x-transition:enter="transition ease-out duration-200"
-                                                 x-transition:enter-start="opacity-0 translate-y-2"
-                                                 x-transition:enter-end="opacity-100 translate-y-0"
-                                                 x-transition:leave="transition ease-in duration-150"
-                                                 x-transition:leave-start="opacity-100 translate-y-0"
-                                                 x-transition:leave-end="opacity-0 translate-y-2"
-                                                 style="display: none;"
-                                                 class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 text-left leading-relaxed">
-                                                <strong class="block mb-2 text-green-300 border-b border-gray-600 pb-1">Vocabulary Helper:</strong>
-                                                <ul class="space-y-1">
-                                                    @foreach($data['vocab'] as $en => $vocabData)
-                                                        <li class="flex justify-between">
-                                                            <span class="text-green-300 font-mono">{{ $en }} <span class="text-gray-400 text-xs">{{ $vocabData['pos'] }}</span></span>
-                                                            <span>{{ $vocabData['id'] }}</span>
-                                                        </li>
-                                                    @endforeach
-                                                </ul>
-                                                <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start pb-8">
+                <!-- Left Column: Materi (Sticky) -->
+                @if(!empty($cheatSheet['__html__']))
+                <div class="lg:col-span-5 sticky top-6 self-start max-h-[calc(100vh-2rem)] overflow-y-auto pr-2">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sm:p-6">
+                        {!! $cheatSheet['__html__'] !!}
+                    </div>
+                </div>
+                @endif
+
+                <!-- Right Column: Exercise -->
+                <div class="{{ !empty($cheatSheet['__html__']) ? 'lg:col-span-7' : 'lg:col-span-12' }}">
+                    <div class="bg-white rounded-3xl shadow-sm border border-indigo-100 overflow-visible mb-6">
+                        <div class="bg-gradient-to-r from-indigo-50 via-blue-50 to-white px-5 py-5 sm:px-8 sm:py-6 border-b border-indigo-100">
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <h3 class="text-xl sm:text-2xl font-bold text-gray-800">A. Translate Kalimat</h3>
+                                <div class="flex items-center gap-3">
+                                    <span class="inline-flex items-center justify-center rounded-full bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 w-fit">
+                                        {{ count($questions) }} Soal
+                                    </span>
+                                    @if(auth()->check() && auth()->user()->isAdmin())
+                                        <button type="button" @click="$dispatch('open-add-modal')" class="text-xs text-indigo-700 hover:text-indigo-900 underline font-semibold">+ Add Question</button>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-5 sm:p-8 space-y-4 sm:space-y-5">
+                            <ol class="space-y-4 sm:space-y-5">
+                                @foreach($questions as $idx => $data)
+                                    <li class="group rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 transition hover:shadow-md hover:border-indigo-200 space-y-3 overflow-visible">
+                                        <div class="flex items-start gap-3 sm:gap-4">
+                                            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-bold shrink-0">
+                                                {{ $loop->iteration }}
+                                            </div>
+                                            <div class="pt-1 flex-1">
+                                                <p class="text-gray-800 leading-relaxed">{{ $data['id'] }}</p>
+                                                <span class="inline-block mt-2 px-3 py-1 text-xs font-bold rounded-full
+                                                    {{ $data['type'] == 'Superlative' ? 'bg-red-100 text-red-700' : ($data['type'] == 'Comparative' ? 'bg-blue-100 text-blue-700' : ($data['type'] == 'Positive' || $data['type'] == 'Positive Degree' ? 'bg-emerald-100 text-emerald-700' : 'bg-purple-100 text-purple-700')) }}">
+                                                    {{ $data['type'] }}
+                                                </span>
+                                            </div>
+                                            <div class="flex flex-row items-center gap-1 ml-2">
+                                                @if(isset($data['example']))
+                                                    <div x-data="{ open: false }" class="relative inline-block">
+                                                        <button type="button" @click="open = !open" @click.outside="open = false" class="w-6 h-6 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-600 flex items-center justify-center text-xs font-bold hover:bg-yellow-100 transition-colors focus:outline-none shadow-sm">
+                                                            ?
+                                                        </button>
+                                                        <div x-show="open" x-transition style="display: none;" class="absolute bottom-full right-0 mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 text-left leading-relaxed">
+                                                            <strong class="block mb-1 text-yellow-300">Contoh ({{ $data['type'] }}):</strong>
+                                                            {{ $data['example']['id'] }}<br>
+                                                            <em class="text-gray-300">{{ $data['example']['en'] }}</em>
+                                                            <div class="absolute top-full right-2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
+                                                        </div>
+                                                    </div>
+                                                @elseif(isset($examples[$data['type']]))
+                                                    <div x-data="{ open: false }" class="relative inline-block">
+                                                        <button type="button" @click="open = !open" @click.outside="open = false" class="w-6 h-6 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-600 flex items-center justify-center text-xs font-bold hover:bg-yellow-100 transition-colors focus:outline-none shadow-sm">
+                                                            ?
+                                                        </button>
+                                                        <div x-show="open" x-transition style="display: none;" class="absolute bottom-full right-0 mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 text-left leading-relaxed">
+                                                            <strong class="block mb-1 text-yellow-300">Contoh ({{ $data['type'] }}):</strong>
+                                                            {{ $examples[$data['type']]['id'] }}<br>
+                                                            <em class="text-gray-300">{{ $examples[$data['type']]['en'] }}</em>
+                                                            <div class="absolute top-full right-2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
+                                                        </div>
+                                                    </div>
+                                                @endif
+
+                                                @if(isset($data['vocab']))
+                                                    <div x-data="{ open: false }" class="relative inline-block">
+                                                        <button type="button" @click="open = !open" @click.outside="open = false" class="w-6 h-6 rounded-md bg-green-50 border border-green-200 text-green-600 flex items-center justify-center text-xs font-bold hover:bg-green-100 transition-colors focus:outline-none shadow-sm">
+                                                            v
+                                                        </button>
+                                                        <div x-show="open" x-transition style="display: none;" class="absolute bottom-full right-0 mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 text-left leading-relaxed">
+                                                            <strong class="block mb-2 text-green-300 border-b border-gray-600 pb-1">Vocabulary Helper:</strong>
+                                                            <ul class="space-y-1">
+                                                                @foreach($data['vocab'] as $en => $vocabData)
+                                                                    <li class="flex justify-between gap-3">
+                                                                        <span class="text-green-300 font-mono">{{ $en }} <span class="text-gray-400 text-xs">{{ $vocabData['pos'] }}</span></span>
+                                                                        <span>{{ $vocabData['id'] }}</span>
+                                                                    </li>
+                                                                @endforeach
+                                                            </ul>
+                                                            <div class="absolute top-full right-2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
+                                                        </div>
+                                                    </div>
+                                                @endif
+
+                                                @if(auth()->check() && auth()->user()->isAdmin())
+                                                    <button type="button"
+                                                            data-payload="{{ json_encode([
+                                                                'id' => $data['db_id'],
+                                                                'question_text' => $data['id'],
+                                                                'correct_answer' => $data['en'],
+                                                                'type' => $data['type'],
+                                                                'example_id' => $data['example']['id'] ?? '',
+                                                                'example_en' => $data['example']['en'] ?? '',
+                                                                'vocab' => json_encode($data['vocab'] ?? [])
+                                                            ]) }}"
+                                                            onclick="openEditModal(this)"
+                                                            class="w-6 h-6 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-600 flex items-center justify-center text-xs font-bold hover:bg-yellow-100 transition-colors focus:outline-none shadow-sm" title="Edit soal">
+                                                        e
+                                                    </button>
+                                                    <button type="button"
+                                                            onclick="confirmDelete('{{ $data['db_id'] }}')"
+                                                            class="w-6 h-6 rounded-md bg-red-50 border border-red-200 text-red-600 flex items-center justify-center text-xs font-bold hover:bg-red-100 transition-colors focus:outline-none shadow-sm" title="Hapus">
+                                                        x
+                                                    </button>
+                                                @endif
                                             </div>
                                         </div>
-                                        @endif
-                                    </div>
-                                </div>
-                                
+
+                                        <div class="ml-11 sm:ml-13">
+                                            <input type="text"
+                                                   name="userAnswers[{{ $idx }}]"
+                                                   value="{{ old('userAnswers.'.$idx, $userAnswers[$idx] ?? '') }}"
+                                                   class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                                   placeholder="Translate to English..."
+                                                   {{ $submitted ? 'readonly' : '' }}
+                                                   autocomplete="off">
+
+                                            @if($submitted)
+                                                @if($results[$idx]['score'] == 10)
+                                                    <div class="mt-2 text-sm font-bold text-green-600 bg-green-50 p-2 rounded border border-green-100">
+                                                        ✓ Sempurna! (10/10)
+                                                    </div>
+                                                @else
+                                                    <div class="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded border border-red-100">
+                                                        <strong>Nilai: {{ $results[$idx]['score'] }}/10</strong><br>
+                                                        Koreksi: {!! $results[$idx]['formatted_answer'] !!}<br>
+                                                        <small class="text-gray-600">Jawaban Benar: {{ $data['en'] }}</small>
+                                                    </div>
+                                                @endif
+                                            @endif
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Section B: Paragraph -->
+                    <div class="bg-white rounded-3xl shadow-sm border border-indigo-100 overflow-visible mb-6">
+                        <div class="bg-gradient-to-r from-indigo-50 via-blue-50 to-white px-5 py-5 sm:px-8 sm:py-6 border-b border-indigo-100">
+                            <div class="flex items-start justify-between gap-3">
+                                <h3 class="text-xl sm:text-2xl font-bold text-gray-800">B. Translate Paragraf</h3>
                                 @if(auth()->check() && auth()->user()->isAdmin())
-                                    <div class="flex gap-2 ml-4">
-                                        <button type="button" 
-                                                data-payload="{{ json_encode([
-                                                    'id' => $data['db_id'], 
-                                                    'question_text' => $data['id'], 
-                                                    'correct_answer' => $data['en'],
-                                                    'type' => $data['type'],
-                                                    'example_id' => $data['example']['id'] ?? '',
-                                                    'example_en' => $data['example']['en'] ?? '',
-                                                    'vocab' => json_encode($data['vocab'] ?? [])
-                                                ]) }}"
-                                                onclick="openEditModal(this)"
-                                                class="w-8 h-8 flex items-center justify-center bg-yellow-100 hover:bg-yellow-200 text-yellow-600 rounded-lg transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                        </button>
-                                        <button type="button" 
-                                                onclick="confirmDelete('{{ $data['db_id'] }}')"
-                                                class="w-8 h-8 flex items-center justify-center bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </button>
+                                    <div class="flex gap-2 shrink-0">
+                                        <button type="button"
+                                            onclick="openMeeting10ParagraphEditModal(
+                                                {{ $paragraph['db_id'] ?? 0 }},
+                                                '{{ addslashes($paragraph['id'] ?? '') }}',
+                                                '{{ addslashes($paragraph['en'] ?? '') }}'
+                                            )"
+                                            class="text-xs text-indigo-700 hover:text-indigo-900 underline font-semibold">Edit</button>
+                                        @if(isset($paragraph['db_id']))
+                                            <button type="button"
+                                                    onclick="confirmDelete('{{ $paragraph['db_id'] }}')"
+                                                    class="text-xs text-red-600 hover:text-red-800 underline font-semibold">Hapus</button>
+                                        @endif
                                     </div>
                                 @endif
-
-                                <span class="ml-3 px-3 py-1 text-xs font-bold rounded-full
-                                    {{ $data['type'] == 'Superlative' ? 'bg-red-100 text-red-700' : ($data['type'] == 'Comparative' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700') }}">
-                                    {{ $data['type'] }}
-                                </span>
                             </div>
-                            
-                            <div class="mb-2">
-                                <input type="text"
-                                       name="userAnswers[{{ $idx }}]"
-                                       value="{{ old('userAnswers.'.$idx, $userAnswers[$idx] ?? '') }}"
-                                       class="w-full p-3 border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                                       placeholder="Translate to English..."
-                                       {{ $submitted ? 'readonly' : '' }}
-                                       autocomplete="off">
-                                
-                                @if($submitted)
-                                    @if($results[$idx]['score'] == 10)
-                                        <div class="mt-2 text-sm font-bold text-green-600 bg-green-50 p-2 rounded border border-green-100">
-                                            ✓ Sempurna! (10/10)
+                        </div>
+
+                        <div class="p-5 sm:p-8 space-y-4">
+                            <p class="text-gray-700 leading-relaxed">{{ $fullParagraphId }}</p>
+
+                            <div x-data="{ showVocab: false }">
+                                <button type="button" @click="showVocab = !showVocab" class="w-full px-4 py-3 bg-yellow-50 border border-yellow-200 hover:bg-yellow-100 text-yellow-800 font-bold rounded-lg transition-colors flex items-center justify-between text-sm">
+                                    <span>📚 Vocabulary Bantuan</span>
+                                    <svg :class="showVocab ? 'rotate-180' : ''" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div x-show="showVocab" x-transition style="display:none;" class="mt-3 bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                        @foreach($paragraphVocab as $en => $data)
+                                            <span class="bg-white px-3 py-1.5 rounded border border-yellow-200 text-xs text-gray-700 shadow-sm">
+                                                <strong class="text-indigo-600">{{ $en }}</strong>:
+                                                @if(is_array($data))
+                                                    {{ $data['id'] }} <span class="text-gray-400 text-[10px]">{{ $data['pos'] ?? '' }}</span>
+                                                @else
+                                                    {{ $data }}
+                                                @endif
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Jawaban Anda:</label>
+                                <textarea
+                                    name="userParagraphAnswer"
+                                    rows="10"
+                                    class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition bg-white hover:border-gray-400 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                    placeholder="Tulis terjemahan paragraf di sini..."
+                                    {{ $submitted ? 'readonly' : '' }}>{{ old('userParagraphAnswer', $userParagraphAnswer) }}</textarea>
+                            </div>
+
+                            @if($submitted)
+                                <div>
+                                    @if($paragraphResult['score'] >= $paragraphResult['max_score'] * 0.8)
+                                        <div class="text-sm font-bold text-green-600 bg-green-50 p-3 rounded border border-green-100 mb-2">
+                                            ✓ Luar Biasa! Skor Paragraf: {{ $paragraphResult['score'] }} / {{ $paragraphResult['max_score'] }}
                                         </div>
                                     @else
-                                        <div class="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded border border-red-100">
-                                            <strong>Nilai: {{ $results[$idx]['score'] }}/10</strong><br>
-                                            Koreksi: {!! $results[$idx]['formatted_answer'] !!}<br>
-                                            <small class="text-gray-600">Jawaban Benar: {{ $data['en'] }}</small>
+                                        <div class="text-sm font-bold text-red-600 bg-red-50 p-3 rounded border border-red-100 mb-2">
+                                            Skor Paragraf: {{ $paragraphResult['score'] }} / {{ $paragraphResult['max_score'] }}
                                         </div>
                                     @endif
-                                @endif
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
 
-            <!-- Section 2: Paragraph Translation -->
-            <div class="mb-12">
-                <div class="flex justify-between items-center mb-6 border-b pb-2">
-                    <h3 class="text-2xl font-bold text-gray-800">B. Translate Paragraf</h3>
-                    @if(auth()->check() && auth()->user()->isAdmin())
-                    <div class="flex gap-2">
-                        <button type="button" 
-                            onclick="openMeeting10ParagraphEditModal(
-                                {{ $paragraph['db_id'] ?? 0 }}, 
-                                '{{ addslashes($paragraph['id'] ?? '') }}', 
-                                '{{ addslashes($paragraph['en'] ?? '') }}'
-                            )"
-                            class="w-10 h-10 flex items-center justify-center bg-yellow-100 hover:bg-yellow-200 text-yellow-600 rounded-lg transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        </button>
-                        @if(isset($paragraph['db_id']))
-                        <button type="button" 
-                                onclick="confirmDelete('{{ $paragraph['db_id'] }}')"
-                                class="w-10 h-10 flex items-center justify-center bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
-                        @endif
-                    </div>
-                    @endif
-                </div>
-                
-                <div class="bg-gray-50 p-6 rounded-xl border-l-4 border-indigo-500 shadow-sm">
-                    <div class="mb-4">
-                        <strong class="block text-lg text-gray-800 mb-2">Terjemahkan paragraf berikut ke dalam Bahasa Inggris:</strong>
-                        <p class="text-gray-700 leading-relaxed p-4 bg-white rounded border border-gray-200">
-                            {{ $fullParagraphId }}
-                        </p>
-                    </div>
+                                    <div class="bg-gray-50 p-4 rounded border border-gray-200 text-sm leading-relaxed">
+                                        <strong class="block mb-2 text-gray-700">Analisis Perbedaan:</strong>
+                                        <div class="prose max-w-none">
+                                            {!! $paragraphResult['formatted_answer'] !!}
+                                        </div>
+                                    </div>
 
-                    <!-- Vocabulary Button -->
-                    <div class="mb-4" x-data="{ showVocab: false }">
-                        <button 
-                            type="button"
-                            @click="showVocab = !showVocab"
-                            class="w-full px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-lg transition-colors flex items-center justify-between shadow-sm">
-                            <span>📚 Vocabulary Bantuan</span>
-                            <svg 
-                                :class="showVocab ? 'rotate-180' : ''" 
-                                class="w-5 h-5 transition-transform" 
-                                fill="none" 
-                                stroke="currentColor" 
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        
-                        <div 
-                            x-show="showVocab" 
-                            x-transition:enter="transition ease-out duration-200"
-                            x-transition:enter-start="opacity-0 transform -translate-y-2"
-                            x-transition:enter-end="opacity-100 transform translate-y-0"
-                            x-transition:leave="transition ease-in duration-150"
-                            x-transition:leave-start="opacity-100 transform translate-y-0"
-                            x-transition:leave-end="opacity-0 transform -translate-y-2"
-                            class="mt-3 bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                @foreach($paragraphVocab as $en => $data)
-                                    <span class="bg-white px-3 py-1.5 rounded border border-yellow-200 text-xs text-gray-700 shadow-sm">
-                                        <strong class="text-indigo-600">{{ $en }}</strong>: 
-                                        @if(is_array($data))
-                                            {{ $data['id'] }} <span class="text-gray-400 text-[10px]">{{ $data['pos'] ?? '' }}</span>
-                                        @else
-                                            {{ $data }}
-                                        @endif
-                                    </span>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Jawaban Anda:</label>
-                        <textarea
-                            name="userParagraphAnswer"
-                            rows="6"
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 {{ $submitted ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                            placeholder="Tulis terjemahan paragraf di sini..."
-                            {{ $submitted ? 'readonly' : '' }}>{{ old('userParagraphAnswer', $userParagraphAnswer) }}</textarea>
-                    </div>
-
-                    @if($submitted)
-                        <div class="mt-4">
-                            @if($paragraphResult['score'] >= $paragraphResult['max_score'] * 0.8)
-                                <div class="text-sm font-bold text-green-600 bg-green-50 p-3 rounded border border-green-100 mb-2">
-                                    ✓ Luar Biasa! Skor Paragraf: {{ $paragraphResult['score'] }} / {{ $paragraphResult['max_score'] }}
-                                </div>
-                            @else
-                                <div class="text-sm font-bold text-red-600 bg-red-50 p-3 rounded border border-red-100 mb-2">
-                                    Skor Paragraf: {{ $paragraphResult['score'] }} / {{ $paragraphResult['max_score'] }}
+                                    <div class="mt-4">
+                                        <strong class="block mb-1 text-gray-700">Jawaban Lengkap:</strong>
+                                        <p class="text-gray-600 italic">{{ $fullParagraphEn }}</p>
+                                    </div>
                                 </div>
                             @endif
-
-                            <div class="bg-white p-4 rounded border border-gray-200 text-sm leading-relaxed">
-                                <strong class="block mb-2 text-gray-700">Analisis Perbedaan:</strong>
-                                <div class="prose max-w-none">
-                                    {!! $paragraphResult['formatted_answer'] !!}
-                                </div>
-                            </div>
-                            
-                            <div class="mt-4">
-                                <strong class="block mb-1 text-gray-700">Jawaban Lengkap:</strong>
-                                <p class="text-gray-600 italic">{{ $fullParagraphEn }}</p>
-                            </div>
                         </div>
-                    @endif
+                    </div>
+
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        @if(!$submitted)
+                            <button type="submit" class="w-full sm:w-auto justify-center inline-flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-md">
+                                Cek Jawaban
+                            </button>
+                        @endif
+                    </div>
                 </div>
             </div>
-
-            <div class="mt-8">
-                @if(!$submitted)
-                    <button type="submit" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold text-lg hover:bg-indigo-700 transition-colors shadow-lg">
-                        Cek Jawaban
-                    </button>
-                @endif
-            </div>
         </form>
-        
+
         @if($submitted)
-            <form method="POST" action="{{ route('assignments.grammar-writing.meeting10.reset') }}" class="mt-4">
+            <form method="POST" action="{{ ($displayMeetingNumber ?? 10) == 6 ? parse_url(route('assignments.grammar-writing.meeting6.reset'), PHP_URL_PATH) : parse_url(route('assignments.grammar-writing.meeting10.reset'), PHP_URL_PATH) }}" class="mt-4">
                 @csrf
-                <button type="submit" class="w-full py-4 bg-gray-500 text-white rounded-xl font-bold text-lg hover:bg-gray-600 transition-colors shadow-lg">
+                <button type="submit" class="w-full sm:w-auto px-8 py-3 bg-gray-500 text-white rounded-xl font-bold hover:bg-gray-600 transition-colors shadow-md">
                     Coba Lagi
                 </button>
             </form>
@@ -344,239 +294,7 @@
         .word-missing { color: #3b82f6; font-weight: bold; }
         .word-extra { color: #f59e0b; text-decoration: line-through; }
     </style>
-    <x-irregular-verbs-button />
 
-    <!-- Lesson Chart Button -->
-    <div x-data="{ openLesson: false }" class="fixed bottom-48 right-8 z-50">
-       <!-- Floating Button -->
-       <button @click="openLesson = true"
-               class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2">
-           <span>📖</span> Lesson Chart
-       </button>
-
-       <!-- Modal Backdrop -->
-       <div x-show="openLesson"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-            style="display: none;">
-          
-           <!-- Modal Content -->
-           <div @click.outside="openLesson = false"
-                class="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden">
-              
-               <!-- Header -->
-               <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-indigo-50">
-                   <h3 class="text-xl font-bold text-gray-800">Materi Meeting 10: Perubahan Adjective/Adverb</h3>
-                   <button @click="openLesson = false" class="text-gray-400 hover:text-gray-600">
-                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                   </button>
-               </div>
-
-               <!-- Content Container -->
-               <div class="overflow-y-auto p-8 space-y-8" style="max-height: 75vh;">
-                   
-                   <p class="mb-3 font-semibold text-gray-700">Regular comparative & superlative sebagai berikut :</p>
-                   <div class="overflow-x-auto mb-6">
-                       <table class="w-full text-sm text-left border-collapse border border-gray-200">
-                           <thead>
-                               <tr class="bg-indigo-50 text-indigo-900">
-                                   <th class="p-3 border border-gray-200 w-1/6 text-center">Syllable/<br>Suku kata</th>
-                                   <th class="p-3 border border-gray-200 w-1/4">Positive</th>
-                                   <th class="p-3 border border-gray-200 w-1/3">Comparative<br><span class="font-normal text-xs">(Lebih... daripada ...)</span></th>
-                                   <th class="p-3 border border-gray-200 w-1/3">Superlative<br><span class="font-normal text-xs">(Ter... / paling...)</span></th>
-                               </tr>
-                           </thead>
-                           <tbody class="text-gray-700">
-                               <!-- Row 1 -->
-                               <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                   <td class="p-3 border border-gray-200 text-center font-bold bg-gray-50">1</td>
-                                   <td class="p-3 border border-gray-200">
-                                       <ul class="list-disc list-inside space-y-1">
-                                           <li>Tall</li>
-                                           <li>Smart</li>
-                                           <li>Short</li>
-                                       </ul>
-                                   </td>
-                                   <td class="p-3 border border-gray-200">
-                                       <ul class="list-disc list-inside space-y-1">
-                                           <li>Taller</li>
-                                           <li>Smarter</li>
-                                           <li>Shorter</li>
-                                       </ul>
-                                   </td>
-                                   <td class="p-3 border border-gray-200">
-                                       <ul class="list-disc list-inside space-y-1">
-                                           <li>Tallest</li>
-                                           <li>Smartest</li>
-                                           <li>Shortest</li>
-                                       </ul>
-                                   </td>
-                               </tr>
-                               <!-- Row 2 -->
-                               <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                   <td class="p-3 border border-gray-200 text-center font-bold bg-gray-50">2</td>
-                                   <td class="p-3 border border-gray-200">
-                                       <ul class="list-disc list-inside space-y-1">
-                                           <li>Clever</li>
-                                       </ul>
-                                   </td>
-                                   <td class="p-3 border border-gray-200">
-                                       <ul class="list-disc list-inside space-y-1">
-                                           <li>Cleverer / more clever</li>
-                                       </ul>
-                                   </td>
-                                   <td class="p-3 border border-gray-200">
-                                       <ul class="list-disc list-inside space-y-1">
-                                           <li>Cleverest / most clever</li>
-                                       </ul>
-                                   </td>
-                               </tr>
-                               <!-- Row > 2 -->
-                               <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                   <td class="p-3 border border-gray-200 text-center font-bold bg-gray-50">> 2</td>
-                                   <td class="p-3 border border-gray-200">
-                                       <ul class="list-disc list-inside space-y-1">
-                                           <li>Beautiful</li>
-                                           <li>Diligent</li>
-                                       </ul>
-                                   </td>
-                                   <td class="p-3 border border-gray-200">
-                                       <ul class="list-disc list-inside space-y-1">
-                                           <li><strong>More</strong> beautiful</li>
-                                           <li><strong>More</strong> diligent</li>
-                                       </ul>
-                                   </td>
-                                   <td class="p-3 border border-gray-200">
-                                       <ul class="list-disc list-inside space-y-1">
-                                           <li><strong>Most</strong> beautiful</li>
-                                           <li><strong>Most</strong> diligent</li>
-                                       </ul>
-                                   </td>
-                               </tr>
-                               <!-- Row PCP -->
-                               <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                   <td class="p-3 border border-gray-200 text-center font-bold bg-gray-50">PCP</td>
-                                   <td class="p-3 border border-gray-200">
-                                       <ul class="list-disc list-inside space-y-1">
-                                           <li>Broken</li>
-                                           <li>Tiring</li>
-                                       </ul>
-                                   </td>
-                                   <td class="p-3 border border-gray-200">
-                                       <ul class="list-disc list-inside space-y-1">
-                                           <li><strong>More</strong> broken</li>
-                                           <li><strong>More</strong> tiring</li>
-                                       </ul>
-                                   </td>
-                                   <td class="p-3 border border-gray-200">
-                                       <ul class="list-disc list-inside space-y-1">
-                                           <li><strong>Most</strong> broken</li>
-                                           <li><strong>Most</strong> tiring</li>
-                                       </ul>
-                                   </td>
-                               </tr>
-                           </tbody>
-                       </table>
-                   </div>
-
-                   <p class="mb-3 font-semibold text-gray-700">Irregular comparative and superlative sebagai berikut :</p>
-                   <div class="overflow-x-auto mb-6">
-                       <table class="w-full text-sm text-left border-collapse border border-gray-200">
-                           <thead>
-                               <tr class="bg-indigo-50 text-indigo-900">
-                                   <th class="p-3 border border-gray-200 w-1/3 text-center">Kata</th>
-                                   <th class="p-3 border border-gray-200 w-1/3">Comparative</th>
-                                   <th class="p-3 border border-gray-200 w-1/3">Superlative</th>
-                               </tr>
-                           </thead>
-                           <tbody class="text-gray-700">
-                               <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="p-3 border border-gray-200">- Good</td><td class="p-3 border border-gray-200">- Better</td><td class="p-3 border border-gray-200">- Best</td></tr>
-                               <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="p-3 border border-gray-200">- Well</td><td class="p-3 border border-gray-200">- Better</td><td class="p-3 border border-gray-200">- Best</td></tr>
-                               <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="p-3 border border-gray-200">- Far</td><td class="p-3 border border-gray-200">- Farther / further</td><td class="p-3 border border-gray-200">- Farthest / furthest</td></tr>
-                               <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="p-3 border border-gray-200">- Bad</td><td class="p-3 border border-gray-200">- Worse</td><td class="p-3 border border-gray-200">- Worst</td></tr>
-                               <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="p-3 border border-gray-200">- Old</td><td class="p-3 border border-gray-200">- Older / elder</td><td class="p-3 border border-gray-200">- Oldest / eldest</td></tr>
-                               <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="p-3 border border-gray-200">- Little</td><td class="p-3 border border-gray-200">- Less</td><td class="p-3 border border-gray-200">- Least</td></tr>
-                               <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="p-3 border border-gray-200">- Many</td><td class="p-3 border border-gray-200">- More</td><td class="p-3 border border-gray-200">- More</td></tr>
-                               <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="p-3 border border-gray-200">- Much</td><td class="p-3 border border-gray-200">- More</td><td class="p-3 border border-gray-200">- More</td></tr>
-                               <tr class="border-b border-gray-100 hover:bg-gray-50"><td class="p-3 border border-gray-200">- Late</td><td class="p-3 border border-gray-200">- Later</td><td class="p-3 border border-gray-200">- Latest / Last</td></tr>
-                           </tbody>
-                       </table>
-                   </div>
-                   
-                   <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 text-sm text-yellow-800 font-medium">
-                       <p class="mb-1">📌 Catatan:</p>
-                       <ul class="list-disc list-inside ml-2">
-                           <li>Superlative seringkali didahului article "the"</li>
-                           <li>Comparative diikuti "than"</li>
-                       </ul>
-                   </div>
-
-               </div>
-
-               <!-- Footer Note -->
-               <div class="p-4 bg-indigo-50 border-t border-indigo-100 text-center">
-                   <p class="text-sm text-gray-700 font-medium">
-                       💡 Pelajari tabel ini untuk memahami perubahan Adjective/Adverb.
-                   </p>
-               </div>
-           </div>
-       </div>
-    </div>
-
-    <!-- Tenses Chart Button -->
-    <div x-data="{ openTenses: false }" class="fixed bottom-28 right-8 z-50">
-       <!-- Floating Button -->
-       <button @click="openTenses = true"
-               class="bg-cyan-400 hover:bg-cyan-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2">
-           <span>💡</span> Tenses
-       </button>
-
-       <!-- Modal Backdrop -->
-       <div x-show="openTenses"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-            style="display: none;">
-          
-           <!-- Modal Content -->
-           <div @click.outside="openTenses = false"
-                class="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
-              
-               <!-- Header -->
-               <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-cyan-50">
-                   <h3 class="text-xl font-bold text-gray-800">Tenses Chart</h3>
-                   <button @click="openTenses = false" class="text-gray-400 hover:text-gray-600">
-                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                   </button>
-               </div>
-
-               <!-- Image Container -->
-               <div class="overflow-y-auto p-6" style="max-height: 75vh;">
-                   <img src="{{ asset('images/materials/grammar/tenses-chart.png') }}" 
-                        alt="Tenses Chart" 
-                        class="w-full h-auto rounded-lg shadow-md">
-               </div>
-
-               <!-- Footer Note -->
-               <div class="p-4 bg-cyan-50 border-t border-cyan-100 text-center">
-                   <p class="text-sm text-gray-700 font-medium">
-                       💡 Gunakan chart ini sebagai panduan untuk menentukan tenses yang tepat
-                   </p>
-               </div>
-           </div>
-       </div>
-    </div>
-    
-    
     <!-- Auto-Save Script -->
 
     <!-- INLINE AUTO-SAVE SCRIPT -->
@@ -639,7 +357,7 @@
         checkIfSubmitted() {
             // Check if inputs are readonly (server renders them readonly when submitted)
             // We strictly check for readonly attribute on text inputs to avoid false positives
-            const isReadonly = document.querySelector('input[type="text"][readonly]');
+            const isReadonly = document.querySelector('#meetingAnswerForm input[type="text"][readonly]');
             
             return !!isReadonly;
         },
@@ -649,7 +367,7 @@
          */
         setupAutoSave() {
             // Find all input and textarea elements in the form
-            const form = document.querySelector('form[action*="/assignments/grammar-writing/meeting"][method="POST"]');
+            const form = document.getElementById('meetingAnswerForm');
             if (!form) {
                 console.log('No form found for auto-save');
                 return;
@@ -680,6 +398,40 @@
                 });
             });
 
+            // Flush pending drafts immediately on tab close, hide, or app switch
+            const flushSync = () => {
+                const form = document.getElementById('meetingAnswerForm');
+                if (form) {
+                    clearTimeout(this.draftSyncTimer);
+                    this.syncDraftToServer(form);
+                }
+            };
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') {
+                    flushSync();
+                }
+            });
+
+            window.addEventListener('beforeunload', flushSync);
+            window.addEventListener('pagehide', flushSync);
+
+            // Auto re-sync when network connection is restored
+            window.addEventListener('online', () => {
+                console.log('Internet reconnected. Re-syncing draft to server...');
+                const form = document.getElementById('meetingAnswerForm');
+                if (form) {
+                    this.saveAnswers();
+                }
+            });
+
+            // Session keep-alive heartbeat every 10 minutes to prevent CSRF / session expiration (419)
+            setInterval(() => {
+                if (!this.isSubmitted) {
+                    fetch(window.location.href, { method: 'HEAD', cache: 'no-store' }).catch(() => {});
+                }
+            }, 10 * 60 * 1000);
+
             console.log(`Auto-save listeners attached to ${inputs.length} fields`);
         },
 
@@ -692,24 +444,39 @@
                 return;
             }
 
-            const form = document.querySelector('form[action*="/assignments/grammar-writing/meeting"][method="POST"]');
+            const form = document.getElementById('meetingAnswerForm');
             if (!form) {
                 console.log('No form found');
                 return;
             }
 
+            // Read existing localStorage data to prevent accidental blank overwrites (multi-tab protection)
+            let existingAnswers = {};
+            try {
+                const stored = localStorage.getItem(this.storageKey);
+                if (stored) {
+                    existingAnswers = JSON.parse(stored) || {};
+                }
+            } catch (e) {}
+
             const inputs = form.querySelectorAll('input[type="text"], textarea');
             const answers = {};
 
             inputs.forEach(input => {
-                if (input.name && input.value) {
-                    answers[input.name] = input.value;
+                if (input.name) {
+                    if (input.value && input.value.trim() !== '') {
+                        answers[input.name] = input.value;
+                    } else if (existingAnswers[input.name] && document.activeElement !== input) {
+                        // Preserve previous answer if this field wasn't actively cleared by user
+                        answers[input.name] = existingAnswers[input.name];
+                    }
                 }
             });
 
             try {
                 localStorage.setItem(this.storageKey, JSON.stringify(answers));
                 this.showSaveIndicator();
+                this.queueDraftSync(form);
             } catch (e) {
                 console.error('Failed to save to localStorage:', e);
             }
@@ -724,17 +491,20 @@
 
         async syncDraftToServer(form) {
             if (!form) {
-                return;
+                return false;
             }
 
             const action = form.getAttribute('action') || '';
-            const match = action.match(/\/assignments\/grammar-writing\/meeting(\d+)/);
+            const isFastTrack = action.includes('/fast-track/');
+            const match = action.match(/meeting(\d+)/);
             if (!match) {
-                return;
+                return false;
             }
 
             const meetingNumber = match[1];
-            const draftEndpoint = '/assignments/grammar-writing/fast-track/meeting' + meetingNumber + '/draft';
+            const draftEndpoint = isFastTrack
+                ? '/assignments/grammar-writing/fast-track/meeting' + meetingNumber + '/draft'
+                : '/assignments/grammar-writing/meeting' + meetingNumber + '/draft';
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
             const payload = {};
@@ -768,7 +538,7 @@
             });
 
             try {
-                await fetch(draftEndpoint, {
+                const res = await fetch(draftEndpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -778,8 +548,17 @@
                     body: JSON.stringify(payload),
                     keepalive: true,
                 });
+
+                if (!res.ok) {
+                    if (res.status === 419) {
+                        console.warn('Session expired (HTTP 419). Answers safely kept in localStorage.');
+                    }
+                    return false;
+                }
+                return true;
             } catch (e) {
                 console.error('Failed to sync draft to server:', e);
+                return false;
             }
         },
 
@@ -788,7 +567,13 @@
          */
         restoreAnswers() {
             try {
-                const savedData = localStorage.getItem(this.storageKey);
+                let savedData = localStorage.getItem(this.storageKey);
+                if (!savedData && this.userId) {
+                    savedData = localStorage.getItem(`grammar_writing_meeting10_user_${this.userId}`)
+                        || localStorage.getItem(`grammar_writing_meeting6_user_${this.userId}`)
+                        || localStorage.getItem(`grammar_writing_meeting_10_user_${this.userId}`)
+                        || localStorage.getItem(`grammar_writing_meeting_6_user_${this.userId}`);
+                }
                 
                 if (!savedData) {
                     console.log('No saved data to restore');
@@ -799,7 +584,10 @@
                 let restoredCount = 0;
 
                 Object.keys(answers).forEach(name => {
-                    const input = document.querySelector(`input[name="${name}"], textarea[name="${name}"]`);
+                    let input = document.querySelector(`input[name="${name}"], textarea[name="${name}"]`);
+                    if (!input) {
+                        input = document.querySelector(`input[name="userAnswers[${name}]"]`);
+                    }
                     
                     if (input && !input.value && !input.readOnly) {
                         input.value = answers[name];
@@ -810,6 +598,12 @@
                 if (restoredCount > 0) {
                     console.log(`✓ Restored ${restoredCount} saved answers from localStorage`);
                     this.showRestoreIndicator(restoredCount);
+
+                    // Sync restored answers to server immediately
+                    const form = document.getElementById('meetingAnswerForm');
+                    if (form) {
+                        this.queueDraftSync(form);
+                    }
                 }
             } catch (e) {
                 console.error('Failed to restore from localStorage:', e);
@@ -842,7 +636,7 @@
             if (!indicator) {
                 indicator = document.createElement('div');
                 indicator.id = 'auto-save-indicator';
-                indicator.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+                indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
                 indicator.style.transition = 'opacity 0.3s';
                 indicator.innerHTML = '✓ Tersimpan otomatis';
                 document.body.appendChild(indicator);
@@ -879,12 +673,64 @@
 
     // Make AutoSave available globally
     window.AutoSave = AutoSave;
+    AutoSave.showSaveErrorIndicator = function () {
+        const indicator = document.createElement('div');
+        indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+        indicator.style.transition = 'opacity 0.3s';
+        indicator.innerHTML = '✗ Gagal menyimpan, coba lagi';
+        document.body.appendChild(indicator);
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+            setTimeout(() => indicator.remove(), 300);
+        }, 3000);
+    };
 
-    // Initialize auto-save for meeting 10
+    AutoSave.manualSave = async function () {
+        const form = document.getElementById('meetingAnswerForm');
+        if (!form) {
+            return;
+        }
+
+        const btn = document.getElementById('manual-save-btn');
+        if (btn) {
+            btn.dataset.originalText = btn.dataset.originalText || btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Menyimpan...';
+        }
+
+        try {
+            const inputs = form.querySelectorAll('input[type="text"], textarea');
+            const answers = {};
+            inputs.forEach((input) => {
+                if (input.name && input.value) {
+                    answers[input.name] = input.value;
+                }
+            });
+            localStorage.setItem(this.storageKey, JSON.stringify(answers));
+        } catch (e) {
+            console.error('[ManualSave] Failed to update localStorage:', e);
+        }
+
+        const ok = await this.syncDraftToServer(form);
+
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.originalText;
+        }
+
+        if (ok) {
+            this.showSaveIndicator();
+        } else {
+            this.showSaveErrorIndicator();
+        }
+    };
+
+
+    // Initialize auto-save for meeting
     document.addEventListener('DOMContentLoaded', function() {
         const userId = {{ Auth::id() ?? 'null' }};
-        if (userId) {
-            AutoSave.init('10', userId);
+        if (userId && !window.location.search.includes('live_preview_for')) {
+            AutoSave.init('{{ $displayMeetingNumber ?? 10 }}', userId);
         }
     });
     </script>
@@ -904,7 +750,7 @@
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                 <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                    <form action="{{ route('admin.grammar.question.store') }}" method="POST" class="p-6">
+                    <form action="{{ parse_url(route('admin.grammar.question.store'), PHP_URL_PATH) }}" method="POST" class="p-6">
                         @csrf
                         <input type="hidden" name="meeting_number" value="10">
                         <!-- Use max ID + 1 logic or just auto-increment if DB handles it. DB has question_number, we should probably let user input it or auto-calc? 
@@ -968,7 +814,7 @@
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                 <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                    <form :action="'/admin/grammar/question/' + data.id" method="POST" class="p-6">
+                    <form :action="'/admin/assignments/grammar-writing/questions/' + data.id" method="POST" class="p-6">
                         @csrf
                         @method('PUT')
                         
@@ -1031,7 +877,7 @@
         function confirmDelete(id) {
             if (confirm('Are you sure you want to delete this content?')) {
                 const form = document.getElementById('delete-question-form');
-                form.action = `/admin/grammar/question/${id}`;
+                form.action = `/admin/assignments/grammar-writing/questions/${id}`;
                 form.submit();
             }
         }
@@ -1069,7 +915,7 @@
          class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50 p-4"
     >
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6" @click.outside="isOpen = false">
-            <form :action="'/admin/grammar/question/' + pId" method="POST">
+            <form :action="'/admin/assignments/grammar-writing/questions/' + pId" method="POST">
                 @csrf
                 @method('PUT')
                 
@@ -1096,6 +942,35 @@
         </div>
     </div>
 
+
     <x-live-drawing />
+    @include('components.student-broadcaster')
+
+    {{-- Consolidated Floating Helper Buttons (hidden during admin Live
+         Preview - these are student-only interactive tools, not relevant
+         to the admin's read-only observation view) --}}
+    @if(!request()->filled('live_preview_for'))
+    <div class="fixed bottom-4 right-8 z-50 flex flex-col gap-2 items-end">
+        <x-dictionary-button />
+        <x-conjunction-button />
+        <x-preposition-button />
+        <x-pronouns-button />
+        <x-verb-patterns-button />
+        <x-modal-button />
+        <x-tenses-button />
+        <x-irregular-verbs-button />
+    </div>
+    @endif
+
+    @if(!$submitted)
+        <div class="fixed bottom-4 z-50" style="left: 50%; transform: translateX(-50%);">
+            <button type="button" id="manual-save-btn" onclick="AutoSave.manualSave()"
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold shadow-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3M8 7h8"></path></svg>
+                Save
+            </button>
+        </div>
+    @endif
+
 </body>
 </html>

@@ -18,9 +18,10 @@ class ManageUsers
     public function formOptions(): array
     {
         return [
-            'teachers' => $this->repository->getTeacherOptions(),
-            'programs' => $this->repository->getProgramOptions(),
-            'camps'    => \App\Models\Camp::with('rooms')->get(),
+            'teachers'     => $this->repository->getTeacherOptions(),
+            'programs'     => $this->repository->getProgramOptions(),
+            'camps'        => \App\Models\Camp::with('rooms')->get(),
+            'classPeriods' => \App\Models\ClassPeriod::with('program')->latest()->get(),
         ];
     }
 

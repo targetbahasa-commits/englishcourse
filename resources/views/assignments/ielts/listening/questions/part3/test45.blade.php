@@ -1,0 +1,43 @@
+<div class="mb-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 3 - Practice Test 45</h3>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 21-25</h4>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Choose the correct letter, <strong>A</strong>, <strong>B</strong> or <strong>C</strong>.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>21</strong>Which part has the tutor already read?</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[21]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>the introductory chapter</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[21]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>the procedure section</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[21]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>the results and discussion section</span></label>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>22</strong>Which part of the paper did the tutor like?</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[22]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>introduction</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[22]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>layout</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[22]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>background information</span></label>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>23</strong>Kathy and the tutor both agree to continue to</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[23]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>refer a lot to the example received in class.</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[23]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>copy the information.</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[23]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>conduct further research in the library.</span></label>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>24</strong> Kathy asks the tutor for help with the ………….. section.</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[24]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>abstract</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[24]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>bibliography</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[24]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>appendix</span></label>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>25</strong>What will Kathy do next?</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[25]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>try out software</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[25]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>work on the bibliography</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[25]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>make an animation</span></label>
+<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 26-30</h4>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">What is the desired outcome to each of the following course of action?</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">_Choose <strong>FIVE</strong> answers from the box and write the correct letter, <strong>A-F</strong>, next to questions <strong>26-30</strong>._</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>Desired outcomes</strong></p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[25]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>practical experience</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[25]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>publish the work</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[25]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>join Machine Engineer Society</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[25]" value="D" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">D</span> <span>give suggestions</span></label>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>E</strong>stay up to date</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>F</strong>make important contacts</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>26</strong> Make a good grade</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>27</strong> Meet engineering professionals</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>28</strong> Visit the factory</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>29</strong> Seek summer internships</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>30</strong> Present dissertation</p>
+    </div>
+</div>

@@ -42,7 +42,7 @@ class DummyStudentSeeder extends Seeder
             }
 
             if (!$program) {
-                echo "Program not found for slug: {$data['program_slug']}\n";
+                echo "Program not found for slug: {$data['program_slug']} ";
                 continue;
             }
 
@@ -62,10 +62,10 @@ class DummyStudentSeeder extends Seeder
             try {
                 $result = $initiatePayment->handle($user, $program->id, $data['channel'], $data['class_type']);
                 if (isset($result['payment'])) {
-                    echo "Created student {$data['name']} with payment {$result['payment']->invoice_number}\n";
+                    echo "Created student {$data['name']} with payment {$result['payment']->invoice_number} ";
                 }
             } catch (\Exception $e) {
-                echo "Failed to create payment for {$data['name']}: " . $e->getMessage() . "\n";
+                echo "Failed to create payment for {$data['name']}: " . $e->getMessage() . " ";
             }
         }
     }

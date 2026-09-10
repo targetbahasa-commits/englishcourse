@@ -11,13 +11,13 @@
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
 
         {{-- Section: Cities now --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Cities now:</p>
         </div>
         <div class="border-b border-gray-200 p-4">
             <p class="text-gray-700">• account for 3% of the planet's land areas</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• consume more</span>
                 <strong class="text-blue-600">31</strong>
@@ -29,10 +29,10 @@
         </div>
 
         {{-- Section: Advantages --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Advantages for moving into the city:</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• good for some</span>
                 <strong class="text-blue-600">32</strong>
@@ -42,7 +42,7 @@
                 <span>to recover</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• poor</span>
                 <strong class="text-blue-600">33</strong>
@@ -52,7 +52,7 @@
                 <span>in the countryside</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• clean energy: recycling of methane gas produced from</span>
                 <strong class="text-blue-600">34</strong>
@@ -63,13 +63,13 @@
         </div>
 
         {{-- Section: For women --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">For women:</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <p class="text-gray-700">• more likely to have late marriages</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• better chance of getting a</span>
                 <strong class="text-blue-600">35</strong>
@@ -81,10 +81,10 @@
         </div>
 
         {{-- Section: Downsides --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Downsides of moving into the city:</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• possible to lose</span>
                 <strong class="text-blue-600">36</strong>
@@ -94,7 +94,7 @@
                 <span>because it is difficult to maintain previous lifestyle</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• higher rates of</span>
                 <strong class="text-blue-600">37</strong>
@@ -104,7 +104,7 @@
                 <span>in the city than in the country</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• poor quality of</span>
                 <strong class="text-blue-600">38</strong>
@@ -116,10 +116,10 @@
         </div>
 
         {{-- Section: Economic factors --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Economic factors:</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• Increased</span>
                 <strong class="text-blue-600">39</strong>
@@ -129,7 +129,7 @@
                 <span>in population results in increase in energy consumption.</span>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• People find the heavy</span>
                 <strong class="text-blue-600">40</strong>

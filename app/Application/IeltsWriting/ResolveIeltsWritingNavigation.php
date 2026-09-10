@@ -15,7 +15,33 @@ class ResolveIeltsWritingNavigation
         $items = collect();
         $task2Meetings = collect();
 
-        if ($task == '1' && $type && isset($this->practiceRanges()[$type])) {
+        if ($task == '1' && $type === 'flowchart') {
+            // 1110-1129 is a second, older flowchart range in addition to
+            // 1500-1549; both are shown together without dropping either.
+            $items = collect($this->repository->getMeetingsBetweenNumbers(1110, 1129, 'practice_item', 1))
+                ->merge($this->repository->getMeetingsBetweenNumbers(1500, 1549, 'practice_item', 1))
+                ->sortBy('meeting_number')
+                ->values()
+                ->all();
+        } elseif ($task == '1' && $type === 'mapping') {
+            // 1130-1139 is a second, older map range (10 legacy images —
+            // Paradise Island, Felixstone, etc.) in addition to 1600-1649;
+            // both are shown together without dropping either.
+            $items = collect($this->repository->getMeetingsBetweenNumbers(1130, 1139, 'practice_item', 1))
+                ->merge($this->repository->getMeetingsBetweenNumbers(1600, 1649, 'practice_item', 1))
+                ->sortBy('meeting_number')
+                ->values()
+                ->all();
+        } elseif ($task == '1' && $type === 'bar') {
+            // 1110-1129 belongs to the flowchart range and 1130-1139 to the
+            // mapping range above, not bar, so both are excluded here to
+            // avoid the same meetings appearing in more than one listing.
+            $items = collect($this->repository->getMeetingsBetweenNumbers(1100, 1109, 'practice_item', 1))
+                ->merge($this->repository->getMeetingsBetweenNumbers(1140, 1149, 'practice_item', 1))
+                ->sortBy('meeting_number')
+                ->values()
+                ->all();
+        } elseif ($task == '1' && $type && isset($this->practiceRanges()[$type])) {
             [$min, $max] = $this->practiceRanges()[$type];
             $items = $this->repository->getMeetingsBetweenNumbers($min, $max, 'practice_item', 1);
         }
@@ -31,10 +57,24 @@ class ResolveIeltsWritingNavigation
         ];
     }
 
-    public function determineBackUrl(int $task, IeltsWritingMeeting $meeting): string
+    public function determineBackUrl(int $task, IeltsWritingMeeting $meeting, bool $isGeneral = false): string
     {
+        // $isGeneral reflects which of the two identical routes (ielts-academic
+        // vs ielts-general, both pointing at showMeeting) was actually used to
+        // reach this page, so the back button returns to the same section
+        // instead of always assuming academic.
+        $practiceIndexRoute = $isGeneral
+            ? 'assignments.ielts-general.writing.practice.index'
+            : 'assignments.ielts-academic.writing.practice.index';
+        $meetingRoute = $isGeneral
+            ? 'assignments.ielts-general.writing.meeting'
+            : 'assignments.ielts-academic.writing.meeting';
+        $indexRoute = $isGeneral
+            ? 'assignments.ielts-general.writing.index'
+            : 'assignments.ielts-academic.writing.index';
+
         if ($meeting->category === 'practice' && (int) $meeting->task_type === 2) {
-            return route('assignments.ielts-academic.writing.practice.index', [
+            return route($practiceIndexRoute, [
                 'task' => 2,
                 'type' => $meeting->view_type,
             ]);
@@ -43,7 +83,7 @@ class ResolveIeltsWritingNavigation
         if ($meeting->category === 'practice_item') {
             $practiceType = $this->practiceItemType($meeting->meeting_number);
             if ($practiceType !== null) {
-                return route('assignments.ielts-academic.writing.practice.index', [
+                return route($practiceIndexRoute, [
                     'task' => $task,
                     'type' => $practiceType,
                 ]);
@@ -51,11 +91,11 @@ class ResolveIeltsWritingNavigation
 
             $parent = $this->resolvePracticeItemParent($meeting->meeting_number);
             if ($parent) {
-                return route('assignments.ielts-academic.writing.meeting', ['task' => $task, 'id' => $parent->id]);
+                return route($meetingRoute, ['task' => $task, 'id' => $parent->id]);
             }
         }
 
-        return route('assignments.ielts-academic.writing.index', ['task' => $task]);
+        return route($indexRoute, ['task' => $task]);
     }
 
     public function practiceSelectionRange(int $meetingNumber): array
@@ -91,10 +131,20 @@ class ResolveIeltsWritingNavigation
             'numbers_percentages' => 'assignments.ielts.writing.numbers_percentages',
             'comparison_structures' => 'assignments.ielts.writing.comparison_structures',
             'reducing_clauses' => 'assignments.ielts.writing.reducing_clauses',
-            'writing_introduction' => 'assignments.ielts.writing.introduction',
+            // 'introduction'/'body_paragraph' (no 'writing_' prefix) are
+            // what's actually stored for some existing meetings - without
+            // these, they silently fell through to the generic essay page
+            // (`default` below) instead of their intended guided-exercise
+            // template. Kept alongside the prefixed values rather than
+            // renamed, since it's safer to accept both spellings here than
+            // to update the meeting rows themselves.
+            'writing_introduction', 'introduction' => 'assignments.ielts.writing.introduction',
             'writing_overview' => 'assignments.ielts.writing.overview',
-            'writing_body' => 'assignments.ielts.writing.body_paragraph',
-            'writing_practice' => 'assignments.ielts.writing.practice_view',
+            'writing_body', 'body_paragraph' => 'assignments.ielts.writing.body_paragraph',
+            // Same bare-vs-'writing_'-prefixed mismatch as above - at least
+            // one real lesson ("Review & Practice: Discuss Both Views")
+            // has the bare value and was falling through to the essay page.
+            'writing_practice', 'practice_view' => 'assignments.ielts.writing.practice_view',
             default => 'assignments.ielts.writing.meeting',
         };
     }
@@ -102,26 +152,32 @@ class ResolveIeltsWritingNavigation
     public function practiceRanges(): array
     {
         return [
-            'line' => [1010, 1029],
-            'bar' => [1030, 1049],
-            'pie' => [1050, 1069],
-            'table' => [1070, 1089],
-            'mixed' => [1090, 1109],
-            'flowchart' => [1110, 1129],
-            'mapping' => [1130, 1149],
+            'line' => [1010, 1059],
+            'bar' => [1100, 1149],
+            'pie' => [1200, 1249],
+            'table' => [1300, 1349],
+            'mixed' => [1400, 1449],
+            'flowchart' => [1500, 1549],
+            'mapping' => [1600, 1649],
+            'formal' => [2001, 2050],
+            'informal' => [2051, 2100],
         ];
     }
 
     public function practiceItemType(int $meetingNumber): ?string
     {
         return match (true) {
-            $meetingNumber >= 1010 && $meetingNumber <= 1029 => 'line',
-            $meetingNumber >= 1030 && $meetingNumber <= 1049 => 'bar',
-            $meetingNumber >= 1050 && $meetingNumber <= 1069 => 'pie',
-            $meetingNumber >= 1070 && $meetingNumber <= 1089 => 'table',
-            $meetingNumber >= 1090 && $meetingNumber <= 1109 => 'mixed',
+            $meetingNumber >= 1010 && $meetingNumber <= 1059 => 'line',
             $meetingNumber >= 1110 && $meetingNumber <= 1129 => 'flowchart',
-            $meetingNumber >= 1130 && $meetingNumber <= 1149 => 'mapping',
+            $meetingNumber >= 1130 && $meetingNumber <= 1139 => 'mapping',
+            ($meetingNumber >= 1100 && $meetingNumber <= 1109) || ($meetingNumber >= 1140 && $meetingNumber <= 1149) => 'bar',
+            $meetingNumber >= 1200 && $meetingNumber <= 1249 => 'pie',
+            $meetingNumber >= 1300 && $meetingNumber <= 1349 => 'table',
+            $meetingNumber >= 1400 && $meetingNumber <= 1449 => 'mixed',
+            $meetingNumber >= 1500 && $meetingNumber <= 1549 => 'flowchart',
+            $meetingNumber >= 1600 && $meetingNumber <= 1649 => 'mapping',
+            $meetingNumber >= 2001 && $meetingNumber <= 2050 => 'formal',
+            $meetingNumber >= 2051 && $meetingNumber <= 2100 => 'informal',
             default => null,
         };
     }

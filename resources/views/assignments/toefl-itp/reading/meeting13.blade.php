@@ -39,7 +39,7 @@
             <!-- Header for navigation back -->
             <div class="bg-white shadow-sm p-4 flex justify-between items-center z-20 shrink-0 border-b border-gray-100">
                 <div class="flex items-center gap-4">
-                    <a href="{{ route('assignments.toefl-itp.reading') }}" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition text-gray-600">
+                    <a href="{{ route('assignments.toefl-itp.reading') }}" class="p-2 bg-white rounded-lg hover:bg-gray-200 transition text-gray-600">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     </a>
                     <div>
@@ -67,13 +67,13 @@
                         @php
                             $scoreData = App\Models\ToeflReadingScore::where('user_id', Auth::id())->where('meeting_number', $meeting->meeting_number)->latest()->first();
                         @endphp
-                        <div class="bg-gray-50 rounded-2xl p-6 mb-6 border border-gray-100">
+                        <div class="bg-white rounded-2xl p-6 mb-6 border border-gray-100">
                             <p class="text-sm text-gray-500 font-medium uppercase tracking-wider mb-2">Your TOEFL Score</p>
                             <div class="text-5xl font-extrabold text-blue-600 mb-2">{{ number_format($scoreData->score, 0) }}</div>
                             <p class="text-gray-600">{{ $scoreData->correct_count }} of {{ $scoreData->total_questions }} correct</p>
                         </div>
                     @else
-                        <div class="p-4 bg-blue-50 text-blue-700 rounded-xl mb-6">
+                        <div class="p-4 bg-white text-blue-700 rounded-xl mb-6">
                             {{ session('success') }}
                         </div>
                     @endif
@@ -95,13 +95,13 @@
                         <!-- Actions Header -->
                         <div class="flex flex-col gap-4 mb-6">
                             <!-- Directions -->
-                            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                            <div class="bg-white border-l-4 border-yellow-400 p-4">
                                 <p class="font-bold text-sm">Directions:</p>
                                 <p class="text-sm">Read the passages. Then choose the correct answer for each question.</p>
                             </div>
 
                             <!-- Skimming Controls -->
-                            <div class="bg-blue-50 p-3 rounded-lg border border-blue-100" 
+                            <div class="bg-white p-3 rounded-lg border border-blue-100" 
                                  x-data="{ 
                                     speed: 'normal', 
                                     isRunning: false,
@@ -341,7 +341,7 @@
                                     <!-- Admin Controls -->
                                     @if(Auth::user() && Auth::user()->isAdmin())
                                     <div class="absolute top-2 right-2 z-20">
-                                        <button type="button" onclick='openEditQuestionModal(@json($question))' class="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition shadow-sm" title="Edit Question">
+                                        <button type="button" onclick='openEditQuestionModal(@json($question))' class="p-2 bg-white text-blue-600 rounded-lg hover:bg-white transition shadow-sm" title="Edit Question">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                         </button>
                                     </div>
@@ -349,14 +349,14 @@
 
     
                                 <div class="flex flex-col gap-2 items-center">
-                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-600 font-bold rounded-lg text-sm">
+                                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-white text-gray-600 font-bold rounded-lg text-sm">
                                         {{ $question->question_number }}
                                     </span>
                                     
                                     @if(!empty($question->keywords) && !empty($question->keywords['keywords']))
                                     <button 
                                         type="button"
-                                        class="absolute right-0 top-0 text-[10px] bg-purple-100 text-purple-700 px-2 py-1 rounded hover:bg-purple-200 transition-all duration-300 font-bold uppercase tracking-wider flex items-center gap-1 opacity-30 hover:opacity-100"
+                                        class="absolute right-0 top-0 text-[10px] bg-white text-purple-700 px-2 py-1 rounded hover:bg-purple-200 transition-all duration-300 font-bold uppercase tracking-wider flex items-center gap-1 opacity-30 hover:opacity-100"
                                         @click="$dispatch('scan-keywords', { matches: {{ json_encode($question->keywords['matches'] ?? []) }} }); $dispatch('highlight-question', { id: {{ $question->id }}, keywords: {{ json_encode($question->keywords['keywords'] ?? []) }} })"
                                         title="Scan for Keywords"
                                     >
@@ -407,7 +407,7 @@
                                         @foreach(['a', 'b', 'c', 'd'] as $opt)
                                             @php $optionText = $question->{'option_'.$opt}; @endphp
                                             @if($optionText)
-                                            <label class="flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group bg-white shadow-sm hover:bg-gray-50"
+                                            <label class="flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group bg-white shadow-sm hover:bg-white"
                                                 :class="selected === '{{ strtoupper($opt) }}' ? 'border-red-500 bg-red-50 ring-1 ring-red-200' : 'border-gray-100 hover:border-gray-200'"
                                             >
                                                 <input type="radio" 
@@ -419,7 +419,7 @@
                                                 
                                                 <!-- Circle Indicator -->
                                                 <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mr-4 transition-all duration-200 shrink-0"
-                                                    :class="selected === '{{ strtoupper($opt) }}' ? 'bg-red-600 text-white shadow-md scale-110' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200'"
+                                                    :class="selected === '{{ strtoupper($opt) }}' ? 'bg-red-600 text-white shadow-md scale-110' : 'bg-white text-gray-400 group-hover:bg-gray-200'"
                                                 >
                                                     {{ strtoupper($opt) }}
                                                 </div>
@@ -452,7 +452,7 @@
                                     @click="currentPassage--" 
                                     :disabled="currentPassage === 0"
                                     class="flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all"
-                                    :class="currentPassage === 0 ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-white text-gray-700 shadow-sm hover:bg-gray-50 border border-gray-200'"
+                                    :class="currentPassage === 0 ? 'bg-white text-gray-300 cursor-not-allowed' : 'bg-white text-gray-700 shadow-sm hover:bg-white border border-gray-200'"
                                 >
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                                     Previous
@@ -723,5 +723,6 @@
             }
         }
     </script>
+    <x-live-drawing />
 </body>
 </html>

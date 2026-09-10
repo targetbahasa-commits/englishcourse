@@ -8,7 +8,7 @@ class EvaluateGrammarWritingMeeting5Submission
 {
     use ScoresWordMatchAnswers;
 
-    public function handle(array $userAnswers, array $gerundInfinitiveComplex, array $toInfinitive, array $gerund, array $paragraph): array
+    public function handle(array $userAnswers, mixed $gerundInfinitiveComplex = [], mixed $toInfinitive = [], mixed $gerund = [], mixed $paragraph = []): array
     {
         $results = [];
         $totalScore = 0;

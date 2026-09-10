@@ -49,13 +49,13 @@ if (!function_exists('srtTimeToSeconds')) {
     {{-- Transcript Drawer --}}
     <div id="transcriptDrawer" style="height: 384px; max-height: 80vh; min-height: 200px;"
          class="hidden border border-gray-300 rounded-t-2xl mx-auto max-w-7xl mb-0 rounded-b-none border-b-0 pointer-events-auto bg-white overflow-hidden flex flex-col shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)]">
-        <div id="transcriptResizer" class="w-full h-3 cursor-ns-resize bg-gray-100 hover:bg-indigo-100 flex items-center justify-center border-b border-gray-300 flex-shrink-0 z-20" style="touch-action: none;">
+        <div id="transcriptResizer" class="w-full h-3 cursor-ns-resize bg-white hover:bg-white flex items-center justify-center border-b border-gray-300 flex-shrink-0 z-20" style="touch-action: none;">
             <div class="w-12 h-1 bg-indigo-300 rounded-full"></div>
         </div>
         <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
             {{-- English Column --}}
-            <div class="flex flex-col h-full bg-slate-50">
-                <div class="flex-none px-4 py-2 bg-indigo-50 border-b border-indigo-100 font-semibold text-indigo-900 flex items-center justify-between z-10">
+            <div class="flex flex-col h-full bg-white">
+                <div class="flex-none px-4 py-2 bg-white border-b border-indigo-100 font-semibold text-indigo-900 flex items-center justify-between z-10">
                     <div class="flex items-center gap-2">
                         <img src="https://flagcdn.com/w20/us.png" alt="US" class="rounded-sm"> English Script
                     </div>
@@ -94,8 +94,8 @@ if (!function_exists('srtTimeToSeconds')) {
             </div>
 
             {{-- Indonesian Column --}}
-            <div class="flex flex-col h-full bg-gray-50">
-                <div class="flex-none px-4 py-2 bg-purple-50 border-b border-purple-100 font-semibold text-purple-900 flex items-center justify-between z-10">
+            <div class="flex flex-col h-full bg-white">
+                <div class="flex-none px-4 py-2 bg-white border-b border-purple-100 font-semibold text-purple-900 flex items-center justify-between z-10">
                     <div class="flex items-center gap-2">
                         <img src="https://flagcdn.com/w20/id.png" alt="ID" class="rounded-sm"> Terjemahan Indonesia
                     </div>
@@ -152,13 +152,13 @@ if (!function_exists('srtTimeToSeconds')) {
                 {{-- Status Badges (Admin Only) --}}
                 @if(auth()->check() && strtolower(auth()->user()->role) === 'admin')
                 <div class="flex items-center gap-1 flex-shrink-0">
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $_hasAudio ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $_hasAudio ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
                         <span class="font-bold">{{ $_hasAudio ? '✓' : '✕' }}</span> Audio
                     </span>
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $_hasTranscript ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $_hasTranscript ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
                         <span class="font-bold">{{ $_hasTranscript ? '✓' : '✕' }}</span> SRT
                     </span>
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $_hasKey ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $_hasKey ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
                         <span class="font-bold">{{ $_hasKey ? '✓' : '✕' }}</span> Key
                     </span>
                 </div>
@@ -174,7 +174,7 @@ if (!function_exists('srtTimeToSeconds')) {
 
                 {{-- Backward --}}
                 <button type="button" onclick="skipAudio(-10)"
-                        class="p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors flex-shrink-0 border border-indigo-200" title="Mundur 10 detik">
+                        class="p-2 bg-white hover:bg-white rounded-lg transition-colors flex-shrink-0 border border-indigo-200" title="Mundur 10 detik">
                     <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path>
                     </svg>
@@ -193,7 +193,7 @@ if (!function_exists('srtTimeToSeconds')) {
                         <span id="currentTime">0:00</span>
                         <span id="duration">0:00</span>
                     </div>
-                    <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="progressContainer">
+                    <div class="relative h-2 bg-white rounded-full cursor-pointer group" id="progressContainer">
                         <div id="progressBar" class="absolute h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all" style="width: 0%"></div>
                         <div id="progressHandle" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-indigo-500 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
                     </div>
@@ -201,7 +201,7 @@ if (!function_exists('srtTimeToSeconds')) {
 
                 {{-- Forward --}}
                 <button type="button" onclick="skipAudio(10)"
-                        class="p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors flex-shrink-0 border border-indigo-200" title="Maju 10 detik">
+                        class="p-2 bg-white hover:bg-white rounded-lg transition-colors flex-shrink-0 border border-indigo-200" title="Maju 10 detik">
                     <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"></path>
                     </svg>
@@ -272,14 +272,14 @@ if (!function_exists('srtTimeToSeconds')) {
         </div>
         <form action="{{ route('assignments.ielts-academic.listening.material.upload-audio', ['id' => $material->material_type_id]) }}" method="POST" enctype="multipart/form-data" class="space-y-4" x-data="{ loading: false }" @submit="loading = true">
             @csrf
-            <div class="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 text-center">
+            <div class="p-4 bg-white rounded-lg border-2 border-dashed border-gray-300 text-center">
                 <svg class="w-10 h-10 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                <input type="file" name="audio_file" accept=".mp3,.wav,.m4a,audio/*" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                <input type="file" name="audio_file" accept=".mp3,.wav,.m4a,audio/*" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white file:text-indigo-700 hover:file:bg-white">
                 <p class="mt-2 text-xs text-gray-500">MP3, WAV atau M4A • Max 50MB</p>
             </div>
-            <p class="text-xs text-indigo-700 bg-indigo-50 p-3 rounded-lg">🤖 Auto-transcribe & translate dengan Whisper AI</p>
+            <p class="text-xs text-indigo-700 bg-white p-3 rounded-lg">🤖 Auto-transcribe & translate dengan Whisper AI</p>
             <div class="flex gap-3 pt-2">
-                <button type="button" onclick="document.getElementById('uploadAudioModal').classList.add('hidden')" class="flex-1 py-2 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition" :disabled="loading">Cancel</button>
+                <button type="button" onclick="document.getElementById('uploadAudioModal').classList.add('hidden')" class="flex-1 py-2 bg-white text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition" :disabled="loading">Cancel</button>
                 <button type="submit" class="flex-1 py-2 bg-rose-600 text-white font-bold rounded-lg hover:bg-rose-700 transition disabled:opacity-70" :disabled="loading">
                     <span x-show="!loading">Upload Audio</span>
                     <span x-show="loading">Uploading...</span>
@@ -294,7 +294,7 @@ if (!function_exists('srtTimeToSeconds')) {
     <div class="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-auto relative overflow-y-auto max-h-[90vh]" onclick="event.stopPropagation()">
         <div class="flex items-center justify-between mb-5">
             <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <span class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg></span>
+                <span class="w-8 h-8 bg-white rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg></span>
                 Upload / Edit Transcript
             </h3>
             <button type="button" onclick="document.getElementById('uploadSrtModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
@@ -312,14 +312,14 @@ if (!function_exists('srtTimeToSeconds')) {
             </div>
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">SRT File (.srt)</label>
-                <input type="file" name="srt_file" accept=".srt" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                <input type="file" name="srt_file" accept=".srt" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-white file:text-purple-700 hover:file:bg-white">
             </div>
             <div class="relative py-1"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-200"></div></div><div class="relative flex justify-center"><span class="px-2 bg-white text-xs text-gray-400 uppercase">Or Paste Text</span></div></div>
             <div>
                 <textarea name="srt_content" rows="4" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none text-sm font-mono placeholder-gray-400" placeholder="Paste transcript text here..."></textarea>
             </div>
             <div class="flex gap-3 pt-2">
-                <button type="button" onclick="document.getElementById('uploadSrtModal').classList.add('hidden')" class="flex-1 py-2 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition" :disabled="loading">Cancel</button>
+                <button type="button" onclick="document.getElementById('uploadSrtModal').classList.add('hidden')" class="flex-1 py-2 bg-white text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition" :disabled="loading">Cancel</button>
                 <button type="submit" class="flex-1 py-2 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition disabled:opacity-70" :disabled="loading">
                     <span x-show="!loading">Save Transcript</span>
                     <span x-show="loading">Saving...</span>
@@ -334,7 +334,7 @@ if (!function_exists('srtTimeToSeconds')) {
     <div class="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-auto relative overflow-y-auto max-h-[90vh]" onclick="event.stopPropagation()">
         <div class="flex items-center justify-between mb-5">
             <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <span class="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>
+                <span class="w-8 h-8 bg-white rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>
                 Kunci Jawaban
             </h3>
             <button type="button" onclick="document.getElementById('uploadAnswerKeyModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
@@ -349,7 +349,7 @@ if (!function_exists('srtTimeToSeconds')) {
                 <textarea name="answer_key" rows="8" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-sm font-mono placeholder-gray-400" placeholder="1. A&#10;2. B&#10;3. technology&#10;...">{{ $material->{$_answerKeyField} ?? '' }}</textarea>
             </div>
             <div class="flex gap-3 pt-2">
-                <button type="button" onclick="document.getElementById('uploadAnswerKeyModal').classList.add('hidden')" class="flex-1 py-2 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition" :disabled="loading">Cancel</button>
+                <button type="button" onclick="document.getElementById('uploadAnswerKeyModal').classList.add('hidden')" class="flex-1 py-2 bg-white text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition" :disabled="loading">Cancel</button>
                 <button type="submit" class="flex-1 py-2 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-700 transition disabled:opacity-70" :disabled="loading">
                     <span x-show="!loading">Save Key</span>
                     <span x-show="loading">Saving...</span>
@@ -445,10 +445,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.transcript-line').forEach(el => {
             const s = parseFloat(el.dataset.start), e = parseFloat(el.dataset.end);
             if (currentTime >= s && currentTime <= e) {
-                el.classList.add('bg-indigo-50', 'text-indigo-900');
+                el.classList.add('bg-white', 'text-indigo-900');
                 if (isAutoscrollEnabled) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             } else {
-                el.classList.remove('bg-indigo-50', 'text-indigo-900');
+                el.classList.remove('bg-white', 'text-indigo-900');
             }
         });
     }

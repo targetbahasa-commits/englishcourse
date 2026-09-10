@@ -1,0 +1,46 @@
+<div class="mb-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">SECTION 3 - Practice Test 40</h3>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 21-25</h4>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Choose the correct letter, <strong>A</strong>, <strong>B</strong>, or <strong>C</strong>.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>21</strong> Nicole received the best information from the</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Books & Literature</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[21]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>staff.</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[21]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>students.</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[21]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>cleaners.</span></label>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>22</strong> The product used most wastefully was</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[22]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>copying paper.</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[22]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>plastic.</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[22]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>paper plates and cups.</span></label>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>23</strong> The proportion of interviewed people who expressed concern over waste was</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[23]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>30%.</span></label>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Health</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[23]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>45%.</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[23]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>55%.</span></label>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>24</strong>The proportion who claim they take action over this problem was</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[24]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>10%.</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[24]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>one third</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[24]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>one half.</span></label>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong>25</strong> Nicole thinks many people do nothing because they are</p>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[25]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">A</span> <span>lazy.</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[25]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">B</span> <span>uncaring.</span></label>
+    <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit"><input type="radio" name="answers[25]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer"> <span class="font-bold">C</span> <span>uninformed.</span></label>
+<h4 class="text-xl font-bold mb-4 text-gray-800">Questions 26-30</h4>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Complete the flowchart.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Write <strong>ONE WORD ONLY</strong> for each answer.</p>
+<h4 class="text-xl font-bold mb-4 text-gray-800">Procedure to Reduce Copying Waste</h4>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong class="text-blue-600 font-bold ml-1 mr-1">26</strong><input type="text" name="answers[26]" value="{{ old('answers.26') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> that the staff do double-sided copying.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">↓</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Unwanted copies are <strong class="text-blue-600 font-bold ml-1 mr-1">27</strong><input type="text" name="answers[27]" value="{{ old('answers.27') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> into a special recycling tray.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">↓</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong class="text-blue-600 font-bold ml-1 mr-1">28</strong><input type="text" name="answers[28]" value="{{ old('answers.28') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> these clearly, for easy reuse.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">↓</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Stack them in a special copying tray each morning.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">↓</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1"><strong class="text-blue-600 font-bold ml-1 mr-1">29</strong><input type="text" name="answers[29]" value="{{ old('answers.29') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> codes which allow each user to access this tray.</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Books & Literature</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">↓</p>
+<p class="mb-3 text-gray-800 text-base flex flex-wrap items-center gap-1">Give highest users a <strong class="text-blue-600 font-bold ml-1 mr-1">30</strong><input type="text" name="answers[30]" value="{{ old('answers.30') }}" class="border-b border-black outline-none px-2 w-48 bg-transparent focus:border-blue-500 transition-colors placeholder-gray-400 text-center inline-block" placeholder="Answer" autocomplete="off"> (e.g. cinema tickets).</p>
+    </div>
+</div>

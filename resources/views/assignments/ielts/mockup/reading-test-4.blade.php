@@ -16,7 +16,7 @@
         .dotted-answer { border-bottom: 1px dotted #000; display: inline-block; min-width: 120px; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -37,7 +37,7 @@
                     <p class="text-sm text-gray-500">Cambridge IELTS Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back
             </a>
@@ -224,7 +224,7 @@
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar">
+        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
             <div class="px-8 py-8 pb-24 max-w-2xl mx-auto">
 
                 {{-- Questions 1–6: Diagram Labelling --}}
@@ -234,7 +234,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 1–6 on your answer sheet.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <h4 class="text-base font-bold text-center mb-6 text-gray-900">The Persian Qanat Method</h4>
                         
                         <!-- Diagram Image Placeholder -->
@@ -294,7 +294,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 1?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 7–10 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                             <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -305,7 +305,7 @@
                     <div class="overflow-x-auto mt-2">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -318,7 +318,7 @@
                                     [9, "The information about a problem that occurred during the construction of the Saldae aqueduct system was found in an ancient book."],
                                     [10, "The mistake made by the builders of the Saldae aqueduct system was that the two parts of the tunnel failed to meet."],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{!! $statement !!}</td>
                                     <td class="py-3 px-3 text-center">
@@ -348,7 +348,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>NO MORE THAN TWO WORDS</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 11–13 on your answer sheet.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <div class="space-y-6">
                             <div class="flex flex-col gap-2">
                                 <div class="flex gap-2">
@@ -429,8 +429,8 @@
                             </div>
                             <div class="space-y-2 pl-6">
                                 @foreach($options as $letter => $text)
-                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors">
-                                    <input type="radio" name="q{{ $num }}" value="{{ $letter }}" class="mt-0.5 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
+                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors">
+                                    <input type="radio" name="q{{ $num }}" value="{{ $letter }}" class="mt-0.5 w-4 h-4 text-blue-600 bg-white border-gray-300 focus:ring-blue-500">
                                     <div class="flex-1 text-sm text-gray-800"><span class="font-bold mr-2">{{ $letter }}</span> {{ $text }}</div>
                                 </label>
                                 @endforeach
@@ -446,7 +446,7 @@
                     <p class="text-sm text-gray-800 mb-1">Complete the summary using the list of words, <strong>A–H</strong>, below.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write the correct letter, <strong>A–H</strong>, in boxes 18–22 on your answer sheet.</p>
 
-                    <div class="border border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <h4 class="text-lg font-bold text-center mb-4 text-gray-900">Studies on digital screen use</h4>
 
                         <p class="mb-4 text-gray-800 leading-loose">
@@ -537,7 +537,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the views of the writer in Reading Passage 2?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 23–26 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic uppercase">YES</span></div><div class="italic">if the statement agrees with the views of the writer</div>
                             <div><span class="font-bold italic uppercase">NO</span></div><div class="italic">if the statement contradicts the views of the writer</div>
@@ -586,7 +586,7 @@
                     <p class="text-sm text-gray-800 mb-3">Choose the correct heading for each section from the list of headings below.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write the correct number, <strong><em>i–viii</em></strong>, in boxes 27–32 on your answer sheet.</p>
 
-                    <div class="border border-gray-300 bg-gray-50 p-5 rounded-lg mb-6">
+                    <div class="border border-gray-300 bg-white p-5 rounded-lg mb-6">
                         <p class="font-bold text-center text-gray-900 mb-3">List of Headings</p>
                         <div class="space-y-1.5 text-sm text-gray-800">
                             @foreach([
@@ -672,8 +672,8 @@
                             </div>
                             <div class="space-y-2 pl-6">
                                 @foreach($options as $letter => $text)
-                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors">
-                                    <input type="radio" name="q{{ $num }}" value="{{ $letter }}" class="mt-0.5 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
+                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:bg-white cursor-pointer transition-colors">
+                                    <input type="radio" name="q{{ $num }}" value="{{ $letter }}" class="mt-0.5 w-4 h-4 text-blue-600 bg-white border-gray-300 focus:ring-blue-500">
                                     <div class="flex-1 text-sm text-gray-800"><span class="font-bold mr-2">{{ $letter }}</span> {{ $text }}</div>
                                 </label>
                                 @endforeach
@@ -689,7 +689,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the claims of the writer in Reading Passage 3?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 36–40 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic uppercase">YES</span></div><div class="italic">if the statement agrees with the claims of the writer</div>
                             <div><span class="font-bold italic uppercase">NO</span></div><div class="italic">if the statement contradicts the claims of the writer</div>

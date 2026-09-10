@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', ($meeting->title ?? 'Writing Overview') . ' - IELTS Writing Task ' . ($task ?? 1))
+
 @section('head')
     <script src="{{ asset('js/auto-save.js') }}?v={{ time() }}"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -10,7 +12,7 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
-            <a href="{{ route('assignments.ielts-academic.writing.index', ['task' => 1]) }}" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+            <a href="{{ route('assignments.ielts-academic.writing.index', ['task' => 1]) }}" class="p-2 bg-white rounded-lg hover:bg-gray-200 transition-colors">
                 <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </a>
             <div>
@@ -26,7 +28,7 @@
         <div class="lg:col-span-5 sticky top-6 self-start space-y-6 max-h-[calc(100vh-2rem)] overflow-y-auto pr-2 custom-scrollbar">
             <!-- Theory Box -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-indigo-50 px-6 py-4 border-b border-indigo-100">
+                <div class="bg-white px-6 py-4 border-b border-indigo-100">
                     <h2 class="text-lg font-bold text-indigo-900">How to Write a General Overview</h2>
                 </div>
                 <div class="p-6 text-gray-700 space-y-4 text-sm leading-relaxed">
@@ -60,7 +62,7 @@
                     </div>
                 </div>
                 <!-- Reference Image -->
-                <div class="border-t border-gray-100 p-4 bg-gray-50 flex flex-col gap-4">
+                <div class="border-t border-gray-100 p-4 bg-white flex flex-col gap-4">
                     <p class="text-sm font-bold text-gray-700 mb-2">Example Chart:</p>
                     <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson9_example_chart.png') }}" class="w-full h-auto rounded shadow-sm" alt="Example Chart: Marriages">
                     
@@ -75,7 +77,7 @@
             
             <!-- Exercise 1: Line Graph -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-blue-50 px-6 py-4 border-b border-blue-100">
+                <div class="bg-white px-6 py-4 border-b border-blue-100">
                     <h3 class="text-lg font-bold text-blue-800">Exercise 1: Line Graph</h3>
                     <p class="text-sm text-blue-600 mt-1">Topic: Fast food consumption by teenagers in Australia (1975-2000).</p>
                 </div>
@@ -98,7 +100,7 @@
                 </div>
                 <div class="p-6 border-b border-gray-100 overflow-x-auto">
                     <table class="min-w-full text-sm text-left text-gray-700">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <thead class="text-xs text-gray-700 uppercase bg-white">
                             <tr>
                                 <th class="px-6 py-3">Country</th>
                                 <th class="px-6 py-3">Food/Drinks/Tobacco</th>
@@ -107,31 +109,31 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="bg-white border-b hover:bg-gray-50">
+                            <tr class="bg-white border-b hover:bg-white">
                                 <td class="px-6 py-4 font-medium text-gray-900">Ireland</td>
                                 <td class="px-6 py-4">28.91%</td>
                                 <td class="px-6 py-4">6.43%</td>
                                 <td class="px-6 py-4">2.21%</td>
                             </tr>
-                            <tr class="bg-white border-b hover:bg-gray-50">
+                            <tr class="bg-white border-b hover:bg-white">
                                 <td class="px-6 py-4 font-medium text-gray-900">Italy</td>
                                 <td class="px-6 py-4">16.36%</td>
                                 <td class="px-6 py-4">9.00%</td>
                                 <td class="px-6 py-4">3.20%</td>
                             </tr>
-                            <tr class="bg-white border-b hover:bg-gray-50">
+                            <tr class="bg-white border-b hover:bg-white">
                                 <td class="px-6 py-4 font-medium text-gray-900">Spain</td>
                                 <td class="px-6 py-4">18.80%</td>
                                 <td class="px-6 py-4">6.51%</td>
                                 <td class="px-6 py-4">1.98%</td>
                             </tr>
-                            <tr class="bg-white border-b hover:bg-gray-50">
+                            <tr class="bg-white border-b hover:bg-white">
                                 <td class="px-6 py-4 font-medium text-gray-900">Sweden</td>
                                 <td class="px-6 py-4">15.77%</td>
                                 <td class="px-6 py-4">5.40%</td>
                                 <td class="px-6 py-4">3.22%</td>
                             </tr>
-                            <tr class="bg-white border-b hover:bg-gray-50">
+                            <tr class="bg-white border-b hover:bg-white">
                                 <td class="px-6 py-4 font-medium text-gray-900">Turkey</td>
                                 <td class="px-6 py-4">32.14%</td>
                                 <td class="px-6 py-4">6.63%</td>
@@ -148,7 +150,7 @@
 
             <!-- Exercise 3: Bar Chart -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-purple-50 px-6 py-4 border-b border-purple-100">
+                <div class="bg-white px-6 py-4 border-b border-purple-100">
                     <h3 class="text-lg font-bold text-purple-800">Exercise 3: Bar Chart</h3>
                     <p class="text-sm text-purple-600 mt-1">Topic: Global Water Use by Sector (1900-2000).</p>
                 </div>
@@ -165,7 +167,7 @@
 
             <!-- Exercise 4: Pie Chart -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-orange-50 px-6 py-4 border-b border-orange-100">
+                <div class="bg-white px-6 py-4 border-b border-orange-100">
                     <h3 class="text-lg font-bold text-orange-800">Exercise 4: Pie Chart</h3>
                     <p class="text-sm text-orange-600 mt-1">Topic: Energy Production in France (1995 vs 2005).</p>
                 </div>

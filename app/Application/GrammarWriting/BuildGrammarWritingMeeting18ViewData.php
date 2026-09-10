@@ -22,6 +22,14 @@ class BuildGrammarWritingMeeting18ViewData
         $questions = $this->loadQuestions($fallbackQuestions);
         $paragraph = $this->loadParagraph($fallbackParagraph);
 
+        // Admin Live Preview loads this exact page (with ?live_preview_for=)
+        // under the ADMIN's own authenticated session, not the student being
+        // previewed. Using session() below would prefill the page with the
+        // ADMIN's own session state instead of the real student's - the
+        // correct per-student data is safely injected client-side afterward
+        // by injectSnapshotIntoIframe() in current-assignment.blade.php.
+        $isLivePreview = request()->filled('live_preview_for');
+
         return [
             'questions' => $questions,
             'fullParagraphId' => $paragraph['id'],
@@ -32,12 +40,12 @@ class BuildGrammarWritingMeeting18ViewData
                 'id' => 'Orang yang sedang berjalan di taman adalah guru saya.',
                 'en' => 'The person walking in the park is my teacher.',
             ],
-            'submitted' => session('meeting18_submitted', false),
-            'results' => session('meeting18_results', []),
-            'paragraphResult' => session('meeting18_paragraph_result', []),
-            'finalScore' => session('meeting18_final_score', 0),
-            'userAnswers' => session('meeting18_user_answers', []),
-            'userParagraphAnswer' => session('meeting18_user_paragraph_answer', ''),
+            'submitted' => $isLivePreview ? false : session('meeting18_submitted', false),
+            'results' => $isLivePreview ? [] : session('meeting18_results', []),
+            'paragraphResult' => $isLivePreview ? [] : session('meeting18_paragraph_result', []),
+            'finalScore' => $isLivePreview ? 0 : session('meeting18_final_score', 0),
+            'userAnswers' => $isLivePreview ? [] : session('meeting18_user_answers', []),
+            'userParagraphAnswer' => $isLivePreview ? '' : session('meeting18_user_paragraph_answer', ''),
         ];
     }
 

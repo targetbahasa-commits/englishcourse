@@ -42,7 +42,30 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $remember = $this->boolean('remember');
+
+        // Students are limited to one active device (see EnforceSingleDeviceSession,
+        // which clears other session rows on the Login event). That alone wouldn't
+        // stop an old device with a "remember me" cookie from silently regaining a
+        // session, since Laravel reuses an existing remember_token rather than
+        // rotating it on every login. Clearing it here - before Auth::attempt() - so
+        // Laravel's own login() flow mints a fresh token (and cookie) for THIS
+        // device, invalidating any other device's stale cookie without disturbing
+        // this login.
+        $candidate = \App\Models\User::where('email', $this->string('email'))->first();
+        if ($candidate && $candidate->role === 'student' && $candidate->getRememberToken()) {
+            $candidate->setRememberToken(null);
+            $candidate->save();
+        }
+
+        if ($remember) {
+            if (method_exists(Auth::guard(), 'setRememberDuration')) {
+                Auth::guard()->setRememberDuration(43200); // 30 days in minutes (30 * 24 * 60)
+            }
+            config(['session.lifetime' => 43200]);
+        }
+
+        if (! Auth::attempt($this->only('email', 'password'), $remember)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

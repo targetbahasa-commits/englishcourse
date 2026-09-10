@@ -7,11 +7,7 @@
 
     {{-- Map Image Placeholder --}}
     <div class="mb-8 mt-6 text-center">
-        <div class="inline-block p-4 border-2 border-dashed border-gray-300 bg-gray-50 rounded-lg w-full max-w-2xl">
-            <p class="text-gray-500 mb-2 font-medium">Map / Plan Insert</p>
-            <p class="text-sm text-gray-400 mb-4">Please upload the map image to: <code>public/images/assignments/ielts/listening/part2/test30-map.png</code></p>
-            <img src="{{ asset('images/assignments/ielts/listening/part2/test30-map.png') }}" onerror="this.style.display='none'" class="max-w-full h-auto mx-auto" alt="Campus Map">
-        </div>
+        <div class="p-3 border border-gray-200 bg-white rounded-xl shadow-sm max-w-2xl mx-auto"><img src="{{ asset('images/assignments/ielts/listening/part2/test30-map.png') }}" class="w-full h-auto rounded-lg" alt="Campus Map"></div>
     </div>
 
     <div class="space-y-4 max-w-sm mb-12">
@@ -22,7 +18,7 @@
             14 => 'Complaint Office',
             15 => 'Cafe'
         ] as $q => $label)
-        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-gray-50 transition-colors">
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2 hover:bg-white transition-colors">
             <div class="flex items-center gap-3">
                 <strong class="text-blue-600">{{ $q }}</strong>
                 <span class="text-gray-700">{{ $label }}</span>

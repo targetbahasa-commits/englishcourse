@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'SchoolHub') }} - Meeting 2</title>
+    <title>{{ config('app.name', 'SchoolHub') }} - Meeting {{ $displayMeetingNumber ?? ($meetingNumber ?? 1) }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/brand/icon.png') }}">
 
     <!-- Fonts -->
@@ -24,14 +24,7 @@
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
     <div x-data="{ editMode: false, editId: null, editSection: '', editQ: '', editA: '', editTense: '', editStructure: '', matrixAnswers: {} }" class="max-w-7xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-        <div class="flex justify-between items-center mb-8">
-            <a href="{{ $backRoute ?? route('assignments.grammar-writing') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
-    <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-    </svg>
-    Back
-</a>
-        </div>
+        <x-grammar-meeting-actions :meetingNumber="1" :track="$track ?? 'fast-track'" />
 
         @if($stage === 3)
             <div class="bg-yellow-500 text-white p-6 rounded-xl text-center mb-8 shadow-md">
@@ -46,7 +39,14 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('assignments.grammar-writing.meeting2.submit') }}">
+        {{-- This view is shared with Complexity's own meeting 1 (see
+             GrammarWritingAdminController::grammarWritingComplexityMeeting()) -
+             $track (null for fast-track, the page this was originally
+             built for) picks the right submit route so each track's
+             submission reaches its own evaluator/session keys instead of
+             both landing on fast-track's regardless of which one the
+             student was actually doing. --}}
+        <form method="POST" action="{{ $track === 'complexity' ? parse_url(route('assignments.grammar-writing.complexity.meeting.submit', 1), PHP_URL_PATH) : parse_url(route('assignments.grammar-writing.meeting1.submit'), PHP_URL_PATH) }}" id="meetingAnswerForm" data-meeting="1">
             @csrf
             
             <div x-data="{ tab: '{{ $stage === 3 ? 'translate' : 'matrix' }}' }">
@@ -69,7 +69,7 @@
                 <!-- Part 1: Tenses Matrix -->
                 <div x-show="tab === 'matrix'" x-transition>
                     @if(true)
-                    <h1 class="text-3xl font-bold text-center text-yellow-500 mb-2">Pertemuan 2 - Tenses (Rumus)</h1>
+                    <h1 class="text-3xl font-bold text-center text-yellow-500 mb-2">Pertemuan {{ $displayMeetingNumber ?? ($meetingNumber ?? 1) }} - Tenses (Rumus)</h1>
                     <p class="text-center text-gray-600 mb-8 text-lg font-medium">Latihan Rumus Tenses Matrix</p>
                
 
@@ -208,7 +208,7 @@
                                     @if(auth()->check() && auth()->user()->isAdmin())
                                         <div class="inline-flex gap-2 ml-2 text-xs font-normal">
                                             <button type="button" @click="editMode = true; editSection = 'sentences'; editId = {{ $item['original_id'] ?? 0 }}; editQ = '{{ addslashes($item['id']) }}'; editA = '{{ addslashes($item['en']) }}'; editTense = '{{ $item['tense'] }}'; editStructure = '{{ $item['type'] }}'" class="text-blue-600 hover:text-blue-800 underline">Edit</button>
-                                            <form action="{{ route('admin.grammar.question.destroy', $item['original_id'] ?? 0) }}" method="POST" onsubmit="return confirm('Hapus soal ini?');" class="inline">
+                                            <form action="{{ parse_url(route('admin.grammar.question.destroy', $item['original_id'] ?? 0), PHP_URL_PATH) }}" method="POST" onsubmit="return confirm('Hapus soal ini?');" class="inline">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="text-red-600 hover:text-red-800 underline">Delete</button>
                                             </form>
@@ -237,31 +237,34 @@
                                     </div>
 
                                     <!-- Vocabulary Helper -->
-                                    @if(isset($vocabularies[$item['tense']][$item['type']]))
+                                    @php
+                                        $sentenceVocab = !empty($item['vocab']) ? $item['vocab'] : ($vocabularies[$item['tense']][$item['type']] ?? null);
+                                    @endphp
+                                    @if(!empty($sentenceVocab))
                                     <div x-data="{ open: false }" class="relative inline-block">
                                         <button type="button" @click="open = !open" @click.outside="open = false" class="text-green-600 hover:text-green-700 focus:outline-none transition-colors cursor-pointer text-xs font-bold bg-green-50 px-2 py-0.5 rounded border border-green-100 w-6 h-6 flex items-center justify-center">
                                             v
                                         </button>
                                         <div x-show="open"
-                                             x-transition:enter="transition ease-out duration-200"
-                                             x-transition:enter-start="opacity-0 translate-y-2"
-                                             x-transition:enter-end="opacity-100 translate-y-0"
-                                             x-transition:leave="transition ease-in duration-150"
-                                             x-transition:leave-start="opacity-100 translate-y-0"
-                                             x-transition:leave-end="opacity-0 translate-y-2"
-                                             style="display: none;"
-                                             class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 text-left leading-relaxed">
-                                            <strong class="block mb-2 text-green-300 border-b border-gray-600 pb-1">Vocabulary Helper:</strong>
-                                            <ul class="space-y-1">
-                                                @foreach($vocabularies[$item['tense']][$item['type']] as $en => $vocabData)
-                                                    <li class="flex justify-between">
-                                                        <span class="text-green-300 font-mono">{{ $en }} <span class="text-gray-400 text-xs">{{ $vocabData['pos'] }}</span></span>
-                                                        <span>{{ $vocabData['id'] }}</span>
-                                                    </li>
-                                                @endforeach
-                                            </ul>
-                                            <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
-                                        </div>
+                                              x-transition:enter="transition ease-out duration-200"
+                                              x-transition:enter-start="opacity-0 translate-y-2"
+                                              x-transition:enter-end="opacity-100 translate-y-0"
+                                              x-transition:leave="transition ease-in duration-150"
+                                              x-transition:leave-start="opacity-100 translate-y-0"
+                                              x-transition:leave-end="opacity-0 translate-y-2"
+                                              style="display: none;"
+                                              class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 shadow-lg z-10 text-left leading-relaxed">
+                                             <strong class="block mb-2 text-green-300 border-b border-gray-600 pb-1">Vocabulary Helper:</strong>
+                                             <ul class="space-y-1">
+                                                 @foreach($sentenceVocab as $en => $vocabData)
+                                                     <li class="flex justify-between">
+                                                         <span class="text-green-300 font-mono">{{ $en }} <span class="text-gray-400 text-xs">{{ is_array($vocabData) ? ($vocabData['pos'] ?? '') : '' }}</span></span>
+                                                         <span>{{ is_array($vocabData) ? ($vocabData['id'] ?? '') : $vocabData }}</span>
+                                                     </li>
+                                                 @endforeach
+                                             </ul>
+                                             <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
+                                         </div>
                                     </div>
                                     @endif
                                 </div>
@@ -274,7 +277,7 @@
                             </div>
                             <input type="text"
                                    name="trans_sent[{{ $idx }}]"
-                                   value="{{ old('trans_sent.'.$idx, isset($transResults['sentences'][$idx]['user_answer']) ? $transResults['sentences'][$idx]['user_answer'] : '') }}"
+                                   value="{{ old('trans_sent.'.$idx, $transResults['sentences'][$idx]['user_answer'] ?? ($draftAnswers['trans_sent'][$idx] ?? '')) }}"
                                    class="w-full p-2 border border-gray-300 rounded focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 {{ $stage === 3 ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                                    placeholder="Translate to English..."
                                    {{ $stage === 3 ? 'readonly' : '' }}
@@ -301,7 +304,7 @@
                     <!-- ADD QUESTION FORM (SENTENCES) -->
                     <div class="bg-blue-50 p-6 rounded-xl mb-8 border-l-4 border-blue-500 shadow-sm">
                         <h3 class="text-lg font-bold text-blue-700 mb-4">Admin: Tambah Soal Baru (Kalimat)</h3>
-                        <form action="{{ route('admin.grammar.question.store') }}" method="POST">
+                        <form action="{{ parse_url(route('admin.grammar.question.store'), PHP_URL_PATH) }}" method="POST">
                             @csrf
                             <input type="hidden" name="meeting_number" value="2">
                             <input type="hidden" name="section" value="sentences">
@@ -418,7 +421,7 @@
                                             </div>
                                             <input type="text"
                                                    name="trans_matrix[{{ $key }}]"
-                                                   value="{{ old('trans_matrix.'.$key, isset($transResults['matrix'][$tenseName][$type]['user_answer']) ? $transResults['matrix'][$tenseName][$type]['user_answer'] : '') }}"
+                                                   value="{{ old('trans_matrix.'.$key, $transResults['matrix'][$tenseName][$type]['user_answer'] ?? ($draftAnswers['trans_matrix'][$key] ?? '')) }}"
                                                    class="w-full p-2 border border-gray-300 rounded focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 text-sm {{ $stage === 3 ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                                                    placeholder="Translate..."
                                                    {{ $stage === 3 ? 'readonly' : '' }}
@@ -458,7 +461,7 @@
         </form>
         
         @if($stage === 3)
-            <form method="POST" action="{{ route('assignments.grammar-writing.meeting2.reset') }}" class="mt-4">
+            <form method="POST" action="{{ $track === 'complexity' ? parse_url(route('assignments.grammar-writing.complexity.meeting.reset', 1), PHP_URL_PATH) : parse_url(route('assignments.grammar-writing.meeting1.reset'), PHP_URL_PATH) }}" class="mt-4">
                 @csrf
                 <button type="submit" class="w-full py-4 bg-gray-500 text-white rounded-xl font-bold text-lg hover:bg-gray-600 transition-colors shadow-lg">
                     Ulangi Latihan
@@ -506,7 +509,6 @@
         </div>
     </div>
     <!-- Irregular Verbs Button -->
-    <x-irregular-verbs-button />
 
 
 
@@ -570,7 +572,7 @@
         checkIfSubmitted() {
             // Check if inputs are readonly (server renders them readonly when submitted)
             // We strictly check for readonly attribute on text inputs to avoid false positives
-            const isReadonly = document.querySelector('input[type="text"][readonly]');
+            const isReadonly = document.querySelector('#meetingAnswerForm input[type="text"][readonly]');
             
             return !!isReadonly;
         },
@@ -580,7 +582,7 @@
          */
         setupAutoSave() {
             // Find all input and textarea elements in the form
-            const form = document.querySelector('form[action*="/assignments/grammar-writing/meeting"][method="POST"]');
+            const form = document.getElementById('meetingAnswerForm');
             if (!form) {
                 console.log('No form found for auto-save');
                 return;
@@ -611,6 +613,29 @@
                 });
             });
 
+            // Periodic heartbeat sync every 45 seconds
+            setInterval(() => {
+                this.saveAnswers();
+            }, 45000);
+
+            // Lifecycle listeners for mobile / tab switching / reconnecting / focus
+            document.addEventListener('visibilitychange', () => {
+                this.saveAnswers();
+            });
+            window.addEventListener('focus', () => {
+                this.saveAnswers();
+            });
+            window.addEventListener('online', () => {
+                this.saveAnswers();
+            });
+            window.addEventListener('pageshow', () => {
+                this.restoreAnswers();
+                this.saveAnswers();
+            });
+            window.addEventListener('beforeunload', () => {
+                this.saveAnswers();
+            });
+
             console.log(`Auto-save listeners attached to ${inputs.length} fields`);
         },
 
@@ -623,7 +648,7 @@
                 return;
             }
 
-            const form = document.querySelector('form[action*="/assignments/grammar-writing/meeting"][method="POST"]');
+            const form = document.getElementById('meetingAnswerForm');
             if (!form) {
                 console.log('No form found');
                 return;
@@ -641,6 +666,7 @@
             try {
                 localStorage.setItem(this.storageKey, JSON.stringify(answers));
                 this.showSaveIndicator();
+                this.queueDraftSync(form);
             } catch (e) {
                 console.error('Failed to save to localStorage:', e);
             }
@@ -655,17 +681,9 @@
 
         async syncDraftToServer(form) {
             if (!form) {
-                return;
+                return false;
             }
 
-            const action = form.getAttribute('action') || '';
-            const match = action.match(/\/assignments\/grammar-writing\/meeting(\d+)/);
-            if (!match) {
-                return;
-            }
-
-            const meetingNumber = match[1];
-            const draftEndpoint = '/assignments/grammar-writing/fast-track/meeting' + meetingNumber + '/draft';
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
             const payload = {};
@@ -698,19 +716,69 @@
                 assignNestedValue(payload, key, value);
             });
 
+            // This view is shared with Complexity's own meeting 1 (see the
+            // submit/reset form actions above) - fast-track keeps its
+            // original draft endpoint/payload shape untouched (parsed from
+            // the form's own action, which only ever looked like
+            // "/fast-track/meeting{N}/..." before this was shared), while
+            // Complexity routes through the already-track-qualified
+            // grammarWritingMeetingDraft() endpoint instead, wrapping the
+            // same {tenses, trans_sent, trans_matrix} payload under
+            // "answers" (matching what BuildGrammarWritingMeeting2ViewData
+            // reads back for the Complexity case).
+            const track = {{ Js::from($track) }};
+            let draftEndpoint;
+            let body;
+
+            if (track === 'complexity') {
+                draftEndpoint = {{ Js::from(route('assignments.grammar-writing.track-meeting.draft', ['track' => 'complexity', 'meeting' => 1])) }};
+                body = JSON.stringify({ answers: payload });
+            } else {
+                // Prefer explicit data-meeting attr (action URL says 'meeting1' even here)
+                const action = form.getAttribute('action') || '';
+                const meetingNumber = form.dataset.meeting || (() => {
+                    const m = action.match(/\/assignments\/grammar-writing\/fast-track\/meeting(\d+)/);
+                    return m ? m[1] : null;
+                })();
+                if (!meetingNumber) {
+                    return false;
+                }
+                draftEndpoint = '/assignments/grammar-writing/fast-track/meeting' + meetingNumber + '/draft';
+                body = JSON.stringify(payload);
+            }
+
             try {
-                await fetch(draftEndpoint, {
+                let response = await fetch(draftEndpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': csrfToken,
                         'X-Requested-With': 'XMLHttpRequest',
                     },
-                    body: JSON.stringify(payload),
+                    body: body,
                     keepalive: true,
                 });
+
+                if (response.status === 419) {
+                    const fresh = await fetch('/refresh-csrf').then(r => r.json()).catch(() => null);
+                    if (fresh && fresh.token) {
+                        response = await fetch(draftEndpoint, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': fresh.token,
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                            body: body,
+                            keepalive: true,
+                        });
+                    }
+                }
+
+                return response.ok;
             } catch (e) {
                 console.error('Failed to sync draft to server:', e);
+                return false;
             }
         },
 
@@ -773,7 +841,7 @@
             if (!indicator) {
                 indicator = document.createElement('div');
                 indicator.id = 'auto-save-indicator';
-                indicator.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+                indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
                 indicator.style.transition = 'opacity 0.3s';
                 indicator.innerHTML = '✓ Tersimpan otomatis';
                 document.body.appendChild(indicator);
@@ -810,17 +878,97 @@
 
     // Make AutoSave available globally
     window.AutoSave = AutoSave;
+    AutoSave.showSaveErrorIndicator = function () {
+        const indicator = document.createElement('div');
+        indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+        indicator.style.transition = 'opacity 0.3s';
+        indicator.innerHTML = '✗ Gagal menyimpan, coba lagi';
+        document.body.appendChild(indicator);
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+            setTimeout(() => indicator.remove(), 300);
+        }, 3000);
+    };
+
+    AutoSave.manualSave = async function () {
+        const form = document.getElementById('meetingAnswerForm');
+        if (!form) {
+            return;
+        }
+
+        const btn = document.getElementById('manual-save-btn');
+        if (btn) {
+            btn.dataset.originalText = btn.dataset.originalText || btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Menyimpan...';
+        }
+
+        try {
+            const inputs = form.querySelectorAll('input[type="text"], textarea');
+            const answers = {};
+            inputs.forEach((input) => {
+                if (input.name && input.value) {
+                    answers[input.name] = input.value;
+                }
+            });
+            localStorage.setItem(this.storageKey, JSON.stringify(answers));
+        } catch (e) {
+            console.error('[ManualSave] Failed to update localStorage:', e);
+        }
+
+        const ok = await this.syncDraftToServer(form);
+
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.originalText;
+        }
+
+        if (ok) {
+            this.showSaveIndicator();
+        } else {
+            this.showSaveErrorIndicator();
+        }
+    };
+
 
     // Initialize auto-save for meeting 2
     document.addEventListener('DOMContentLoaded', function() {
         const userId = {{ Auth::id() ?? 'null' }};
-        if (userId) {
-            AutoSave.init('2', userId);
+        if (userId && !window.location.search.includes('live_preview_for')) {
+            AutoSave.init('1', userId);
         }
     });
     </script>
 
 
+
     <x-live-drawing />
+
+    {{-- Consolidated Floating Helper Buttons (hidden during admin Live
+         Preview - these are student-only interactive tools, not relevant
+         to the admin's read-only observation view) --}}
+    @if(!request()->filled('live_preview_for'))
+    <div class="fixed bottom-4 right-8 z-50 flex flex-col gap-2 items-end">
+        <x-dictionary-button />
+        <x-conjunction-button />
+        <x-preposition-button />
+        <x-pronouns-button />
+        <x-verb-patterns-button />
+        <x-modal-button />
+        <x-tenses-button />
+        <x-irregular-verbs-button />
+    </div>
+    @endif
+
+    @if($stage !== 3)
+        <div class="fixed bottom-4 z-50" style="left: 50%; transform: translateX(-50%);">
+            <button type="button" id="manual-save-btn" onclick="AutoSave.manualSave()"
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold shadow-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3M8 7h8"></path></svg>
+                Save
+            </button>
+        </div>
+    @endif
+
 </body>
 </html>

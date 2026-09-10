@@ -131,21 +131,26 @@ class VocabularyDataProvider
         }
 
         $jsonKey = strtolower($level) . '_vocabulary';
-        $jsonPath = storage_path("app/{$jsonKey}.json");
+        $jsonPath = storage_path("app/vocabularies/{$jsonKey}.json");
+        if (!file_exists($jsonPath)) {
+            $jsonPath = storage_path("app/{$jsonKey}.json");
+        }
         $topicsMeta = $this->getTopicsMeta($level);
+        $paddedId = str_pad($id, 2, '0', STR_PAD_LEFT);
 
         if (file_exists($jsonPath)) {
             $json = json_decode(file_get_contents($jsonPath), true);
-            if (isset($json[$id])) {
+            $key = isset($json[$paddedId]) ? $paddedId : (isset($json[$id]) ? $id : null);
+            if ($key !== null) {
                 return [
-                    'title' => $topicsMeta[$id] ?? "Topic $id ($level)",
-                    'vocabularies' => $json[$id],
+                    'title' => $topicsMeta[$paddedId] ?? $topicsMeta[$id] ?? "Topic $id ($level)",
+                    'vocabularies' => $json[$key],
                 ];
             }
         }
 
         return [
-            'title' => $topicsMeta[$id] ?? "Topic $id ($level)",
+            'title' => $topicsMeta[$paddedId] ?? $topicsMeta[$id] ?? "Topic $id ($level)",
             'vocabularies' => $this->getMockVocabularies($level, $id),
         ];
     }
@@ -154,12 +159,32 @@ class VocabularyDataProvider
     {
         $levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
         $data = [];
+        $pluralType = match (strtolower($type)) {
+            'verb' => 'verbs',
+            'adjective' => 'adjectives',
+            'adverb' => 'adverbs',
+            default => strtolower($type) . 's',
+        };
+
         foreach ($levels as $lvl) {
+            $lvlLower = strtolower($lvl);
+            $count = 50;
+            $filePath = storage_path("app/vocabularies/{$lvlLower}_{$pluralType}.json");
+            if (!file_exists($filePath)) {
+                $filePath = storage_path("app/{$lvlLower}_{$pluralType}.json");
+            }
+            if (file_exists($filePath)) {
+                $items = json_decode(file_get_contents($filePath), true);
+                if (is_array($items)) {
+                    $count = count($items);
+                }
+            }
+
             $data[] = [
                 'level' => $lvl,
                 'title' => ucfirst($type) . " $lvl",
                 'description' => "Essential $type for $lvl level learners.",
-                'count' => 50,
+                'count' => $count,
                 'image' => "https://via.placeholder.com/150?text=$lvl",
             ];
         }
@@ -181,7 +206,10 @@ class VocabularyDataProvider
             };
 
             if ($fileSuffix) {
-                $filePath = storage_path("app/{$levelLower}_{$fileSuffix}.json");
+                $filePath = storage_path("app/vocabularies/{$levelLower}_{$fileSuffix}.json");
+                if (!file_exists($filePath)) {
+                    $filePath = storage_path("app/{$levelLower}_{$fileSuffix}.json");
+                }
                 if (file_exists($filePath)) {
                     $items = json_decode(file_get_contents($filePath), true);
                     if (is_array($items)) {
@@ -375,18 +403,23 @@ class VocabularyDataProvider
 
         // For other A1 IDs, load from JSON
         $jsonPath = storage_path('app/vocabularies/a1_vocabulary.json');
+        if (!file_exists($jsonPath)) {
+            $jsonPath = storage_path('app/a1_vocabulary.json');
+        }
+        $paddedId = str_pad($id, 2, '0', STR_PAD_LEFT);
         if (file_exists($jsonPath)) {
             $json = json_decode(file_get_contents($jsonPath), true);
-            if (isset($json[$id])) {
+            $key = isset($json[$paddedId]) ? $paddedId : (isset($json[$id]) ? $id : null);
+            if ($key !== null) {
                 return [
-                    'title' => $topicsMeta[$id] ?? "Topic $id",
-                    'vocabularies' => $json[$id],
+                    'title' => $topicsMeta[$paddedId] ?? $topicsMeta[$id] ?? "Topic $id",
+                    'vocabularies' => $json[$key],
                 ];
             }
         }
 
         return [
-            'title' => $topicsMeta[$id] ?? "Topic $id",
+            'title' => $topicsMeta[$paddedId] ?? $topicsMeta[$id] ?? "Topic $id",
             'vocabularies' => $this->getMockVocabularies('A1', $id),
         ];
     }

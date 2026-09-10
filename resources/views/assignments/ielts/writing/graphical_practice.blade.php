@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', ($meeting->title ?? 'Graphical Practice') . ' - IELTS Writing Task ' . ($task ?? 1))
+
 @section('head')
     <script src="{{ asset('js/auto-save.js') }}?v={{ time() }}"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -10,7 +12,7 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
-            <a href="{{ route('assignments.ielts-academic.writing.index', ['task' => $task]) }}" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+            <a href="{{ route('assignments.ielts-academic.writing.index', ['task' => $task]) }}" class="p-2 bg-white rounded-lg hover:bg-gray-200 transition-colors">
                 <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </a>
             <div>
@@ -50,7 +52,7 @@
                     
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
                         <!-- Graph Image Slice -->
-                        <div class="relative w-full bg-gray-50 border-b border-gray-100 overflow-hidden group" style="aspect-ratio: 276/256;">
+                        <div class="relative w-full bg-white border-b border-gray-100 overflow-hidden group" style="aspect-ratio: 276/256;">
                            <div class="absolute inset-0 bg-no-repeat bg-cover transform transition-transform duration-500 group-hover:scale-110"
                                 :style="`
                                     background-image: url('{{ asset('assets/images/ielts/graphs_composite.png') }}');

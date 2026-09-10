@@ -10,7 +10,7 @@
     <div class="overflow-x-auto w-full max-w-3xl mb-12">
         <table class="w-full text-left border-collapse border border-gray-300">
             <thead>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <th class="p-3 border border-gray-300 font-bold">Joining Library</th>
                     <th class="p-3 border border-gray-300 font-bold" colspan="2">You will need: A completed application form.</th>
                 </tr>
@@ -24,7 +24,7 @@
                         </span>
                     </td>
                 </tr>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="p-3 border border-gray-300" colspan="3">
                         <span class="flex items-center gap-2">
                             <strong class="text-blue-600">12</strong>
@@ -37,7 +37,7 @@
                         Two passport photos.
                     </td>
                 </tr>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="p-3 border border-gray-300 align-middle">Opening Hours</td>
                     <td class="p-3 border border-gray-300 align-middle">Library Reception</td>
                     <td class="p-3 border border-gray-300">
@@ -94,7 +94,7 @@
     <div class="overflow-x-auto w-full max-w-2xl mb-8">
         <table class="w-full text-left border-collapse border border-gray-300">
             <tbody class="align-middle text-gray-800">
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="p-3 border border-gray-300 font-bold w-1/3">Ground Floor</td>
                     <td class="p-3 border border-gray-300">
                         <div class="flex items-center gap-2 flex-wrap">
@@ -117,7 +117,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="p-3 border border-gray-300 w-1/3">Second Floor</td>
                     <td class="p-3 border border-gray-300">Science Section</td>
                 </tr>

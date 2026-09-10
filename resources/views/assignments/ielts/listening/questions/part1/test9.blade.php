@@ -14,13 +14,13 @@
         </div>
 
         {{-- Example row --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 text-gray-600 italic font-semibold">Type of crime reported:</div>
             <div class="p-3 text-gray-600 italic">robbery</div>
         </div>
 
         {{-- Q1: Name --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Name:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">Anna</span>
@@ -32,7 +32,7 @@
         </div>
 
         {{-- Q2: Date of Birth --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Date of Birth (<strong>dd/mm/yyyy</strong>):</div>
             <div class="p-3">
                 <strong>2</strong>
@@ -43,7 +43,7 @@
         </div>
 
         {{-- Q3: Address --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Address:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">4</span>
@@ -56,7 +56,7 @@
         </div>
 
         {{-- Q4: Post code --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Post code:</div>
             <div class="p-3">
                 <strong>4</strong>
@@ -67,13 +67,13 @@
         </div>
 
         {{-- Nationality (given, no input) --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Nationality:</div>
             <div class="p-3 text-gray-700">Grenadian</div>
         </div>
 
         {{-- Q5: Number of previous burglaries --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Number of previous burglaries:</div>
             <div class="p-3">
                 <strong>5</strong>
@@ -84,7 +84,7 @@
         </div>
 
         {{-- Q6: Time of apartment tenancy --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Time of apartment tenancy:</div>
             <div class="p-3">
                 <strong>6</strong>
@@ -95,7 +95,7 @@
         </div>
 
         {{-- Q7: Number of occupants --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Number of occupants:</div>
             <div class="p-3">
                 <strong>7</strong>
@@ -106,7 +106,7 @@
         </div>
 
         {{-- Q8: Entry point of burglar --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Entry point of burglar:</div>
             <div class="p-3">
                 <strong>8</strong>
@@ -122,7 +122,7 @@
         </div>
 
         {{-- Q9: Serial number of lost computer --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 pl-6">• Serial number of lost computer:</div>
             <div class="p-3">
                 <strong>9</strong>
@@ -133,7 +133,7 @@
         </div>
 
         {{-- Q10: Material of stolen purse --}}
-        <div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 pl-6">• Material of stolen purse:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <strong>10</strong>

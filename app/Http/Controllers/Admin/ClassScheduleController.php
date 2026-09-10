@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ClassMeeting;
+use App\Models\ClassMeetingChangeRequest;
 use App\Models\ClassPeriod;
 use App\Models\Meeting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class ClassScheduleController extends Controller
@@ -24,7 +27,59 @@ class ClassScheduleController extends Controller
             ],
         ];
 
-        return view('admin.class-schedules.index', compact('stats'));
+        $pendingClassMeetingChangeRequests = ClassMeetingChangeRequest::where('status', 'pending')
+            ->with(['program', 'classMeeting', 'requester'])
+            ->latest()
+            ->get();
+
+        return view('admin.class-schedules.index', compact('stats', 'pendingClassMeetingChangeRequests'));
+    }
+
+    /**
+     * "Jam Kelas" confirmation: a teacher/admin on an assignment track page
+     * designated a meeting as happening today whose scheduled date didn't
+     * match (see ManageGrammarWritingMeetings::updateActiveClassMeeting()).
+     * Approving moves that meeting's real calendar date and makes it the
+     * program's active meeting for auto-attendance purposes.
+     */
+    public function approveClassMeetingChangeRequest(ClassMeetingChangeRequest $classMeetingChangeRequest)
+    {
+        if ($classMeetingChangeRequest->status !== 'pending') {
+            return back()->with('error', 'Permintaan ini sudah diproses sebelumnya.');
+        }
+
+        DB::transaction(function () use ($classMeetingChangeRequest) {
+            $classMeetingChangeRequest->classMeeting->update([
+                'meeting_date' => $classMeetingChangeRequest->requested_date,
+            ]);
+
+            $classMeetingChangeRequest->program->update([
+                'active_class_meeting_id' => $classMeetingChangeRequest->class_meeting_id,
+            ]);
+
+            $classMeetingChangeRequest->update([
+                'status' => 'approved',
+                'reviewed_by' => Auth::id(),
+                'reviewed_at' => now(),
+            ]);
+        });
+
+        return back()->with('success', 'Perubahan jadwal jam kelas dikonfirmasi.');
+    }
+
+    public function rejectClassMeetingChangeRequest(ClassMeetingChangeRequest $classMeetingChangeRequest)
+    {
+        if ($classMeetingChangeRequest->status !== 'pending') {
+            return back()->with('error', 'Permintaan ini sudah diproses sebelumnya.');
+        }
+
+        $classMeetingChangeRequest->update([
+            'status' => 'rejected',
+            'reviewed_by' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        return back()->with('success', 'Permintaan perubahan jadwal ditolak.');
     }
 
     public function apiEvents(Request $request)
@@ -241,6 +296,29 @@ class ClassScheduleController extends Controller
         }
         if (array_key_exists('meeting_link', $validated)) {
             $meeting->meeting_link = $validated['meeting_link'];
+        }
+
+        // Guard: reject the reschedule if it overlaps another meeting taught by the same teacher.
+        if ($meeting->start_time && $meeting->end_time) {
+            $teacherId = $meeting->classPeriod ? $meeting->classPeriod->teacher_id : null;
+
+            if ($teacherId) {
+                $conflict = ClassMeeting::whereHas('classPeriod', function ($query) use ($teacherId) {
+                        $query->where('teacher_id', $teacherId);
+                    })
+                    ->where('id', '!=', $meeting->id)
+                    ->whereNotNull('start_time')
+                    ->whereNotNull('end_time')
+                    ->where('start_time', '<', $meeting->end_time)
+                    ->where('end_time', '>', $meeting->start_time)
+                    ->exists();
+
+                if ($conflict) {
+                    return response()->json([
+                        'message' => 'Jadwal ini bentrok dengan jadwal mengajar guru yang sama pada waktu tersebut.',
+                    ], 422);
+                }
+            }
         }
 
         $meeting->save();

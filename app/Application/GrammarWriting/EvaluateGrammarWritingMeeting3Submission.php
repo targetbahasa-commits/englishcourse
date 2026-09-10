@@ -3,39 +3,82 @@
 namespace App\Application\GrammarWriting;
 
 use App\Application\GrammarWriting\Concerns\ScoresWordMatchAnswers;
-use Illuminate\Support\Collection;
 
 class EvaluateGrammarWritingMeeting3Submission
 {
     use ScoresWordMatchAnswers;
 
-    public function handle(Collection $questions, string $paragraphAnswer, array $userAnswers, string $correctParagraph): array
+    public function handle(mixed $questions, string $paragraphAnswer, array $userAnswers, string $correctParagraph): array
     {
         $results = [];
         $totalScore = 0;
-        $maxScore = ($questions->count() * 10) + 20;
+        $answeredCount = 0;
+        $questionArray = is_array($questions) ? $questions : (method_exists($questions, 'toArray') ? $questions->toArray() : (array) $questions);
 
-        foreach ($questions as $question) {
-            $questionNumber = (int) $question->question_number;
-            $userTense = trim((string) ($userAnswers[$questionNumber]['tense'] ?? ''));
-            $userTranslation = trim((string) ($userAnswers[$questionNumber]['trans'] ?? ''));
+        foreach ($questionArray as $question) {
+            // Keyed by the question's own question_number, NOT the loop
+            // position - the form posts userAnswers[<question_number>][trans]
+            // (see meeting3.blade.php's `name="userAnswers[{{ $data['q_num'] }}]..."`)
+            // and question_number is 1-based, so using the 0-based loop
+            // index here silently read every answer shifted by one question
+            // (and dropped the last question's answer entirely) for as long
+            // as this existed - only ever invisible before because the old
+            // "must answer all 20" gate meant the misaligned score still
+            // landed somewhere.
+            $questionNumber = is_array($question) ? (int) ($question['q_num'] ?? $question['question_number'] ?? 0) : (int) ($question->question_number ?? 0);
+            $rawAnswer = $userAnswers[$questionNumber] ?? '';
+            $userTranslation = is_array($rawAnswer)
+                ? trim((string) ($rawAnswer['trans'] ?? ''))
+                : trim((string) $rawAnswer);
 
-            $tenseScore = strtolower($userTense) === strtolower((string) $question->tense) ? 5 : 0;
-            [$translationScore, $formattedAnswer] = $this->evaluateTranslation($userTranslation, (string) $question->correct_answer);
+            // Not attempted - excluded from scoring entirely (never counted
+            // toward maxScore below), not marked wrong. "Cek Jawaban" can
+            // be used on a partial attempt, so an unanswered question isn't
+            // the student's fault the way a wrong answer is.
+            if ($userTranslation === '') {
+                $results[$questionNumber] = [
+                    'user_trans' => '',
+                    'trans_score' => null,
+                    'formatted_answer' => null,
+                    'answered' => false,
+                ];
+                continue;
+            }
 
-            $totalScore += ($tenseScore + $translationScore);
+            // 'correct_answer' is the real column/property name on both
+            // shapes $question can take here - DB-sourced GrammarQuestion
+            // models come through as plain arrays via the Collection
+            // ->toArray() above (Eloquent models implement Arrayable), and
+            // the fallback-question path already normalizes to that same
+            // property in loadLegacyQuestionModels()'s mapper. Checking
+            // 'en' first (as this used to) never matches anything on
+            // either shape, so it silently scored every translation
+            // against an empty string - 0/10, every word marked wrong,
+            // regardless of what the student typed.
+            $correctEn = is_array($question) ? ($question['correct_answer'] ?? '') : ($question->correct_answer ?? '');
+            $translationResult = $this->scoreWordMatchAnswer($userTranslation, (string) $correctEn, 10);
 
             $results[$questionNumber] = [
-                'tense_score' => $tenseScore,
-                'trans_score' => $translationScore,
-                'user_tense' => $userTense,
                 'user_trans' => $userTranslation,
-                'formatted_answer' => $formattedAnswer,
+                'trans_score' => $translationResult['score'],
+                'formatted_answer' => $translationResult['formatted_answer'],
+                'answered' => true,
             ];
+
+            $totalScore += $translationResult['score'];
+            $answeredCount++;
         }
 
-        $paragraphResult = $this->evaluateParagraph($paragraphAnswer, $correctParagraph);
-        $totalScore += $paragraphResult['score'];
+        $paragraphAnswered = trim($paragraphAnswer) !== '';
+        $paragraphResult = $paragraphAnswered
+            ? $this->evaluateParagraph($paragraphAnswer, $correctParagraph)
+            : ['score' => null, 'max_score' => 20, 'formatted_answer' => null, 'answered' => false];
+
+        if ($paragraphAnswered) {
+            $totalScore += $paragraphResult['score'];
+        }
+
+        $maxScore = ($answeredCount * 10) + ($paragraphAnswered ? 20 : 0);
 
         return [
             'meeting3_submitted' => true,
@@ -47,84 +90,15 @@ class EvaluateGrammarWritingMeeting3Submission
         ];
     }
 
-    private function evaluateTranslation(string $userTranslation, string $correctAnswer): array
-    {
-        $variants = explode('|', $correctAnswer);
-        $bestScore = -1;
-        $bestFormatted = '';
-
-        foreach ($variants as $variant) {
-            $variant = trim($variant);
-            $correctWords = preg_split('/\s+/', $variant, -1, PREG_SPLIT_NO_EMPTY);
-            $userWords = preg_split('/\s+/', $userTranslation, -1, PREG_SPLIT_NO_EMPTY);
-
-            $matchCount = 0;
-            foreach ($userWords as $userWord) {
-                foreach ($correctWords as $correctWord) {
-                    if (strtolower(rtrim($userWord, '.!,')) === strtolower(rtrim($correctWord, '.!,'))) {
-                        $matchCount++;
-                        break;
-                    }
-                }
-            }
-
-            $currentScore = 0;
-            if (count($correctWords) > 0) {
-                $ratio = $matchCount / count($correctWords);
-                if ($ratio == 1) {
-                    $currentScore = 5;
-                } elseif ($ratio >= 0.8) {
-                    $currentScore = 4;
-                } elseif ($ratio >= 0.6) {
-                    $currentScore = 3;
-                } elseif ($ratio >= 0.4) {
-                    $currentScore = 2;
-                } elseif ($ratio > 0) {
-                    $currentScore = 1;
-                }
-            }
-
-            if ($currentScore > $bestScore) {
-                $bestScore = $currentScore;
-                $bestFormatted = $this->formatWordMatchDiff($userWords, $correctWords);
-            }
-        }
-
-        if ($bestFormatted === '') {
-            $bestScore = 0;
-            $bestFormatted = $this->formatWordMatchDiff(
-                preg_split('/\s+/', $userTranslation, -1, PREG_SPLIT_NO_EMPTY),
-                preg_split('/\s+/', trim($variants[0] ?? ''), -1, PREG_SPLIT_NO_EMPTY),
-            );
-        }
-
-        return [max(0, $bestScore), $bestFormatted];
-    }
-
     private function evaluateParagraph(string $paragraphAnswer, string $correctParagraph): array
     {
-        $correctWords = preg_split('/\s+/', $correctParagraph, -1, PREG_SPLIT_NO_EMPTY);
-        $userWords = preg_split('/\s+/', $paragraphAnswer, -1, PREG_SPLIT_NO_EMPTY);
-
-        $matchCount = 0;
-        foreach ($userWords as $userWord) {
-            foreach ($correctWords as $correctWord) {
-                if (strtolower(rtrim($userWord, '.!,')) === strtolower(rtrim($correctWord, '.!,'))) {
-                    $matchCount++;
-                    break;
-                }
-            }
-        }
-
-        $score = 0;
-        if (count($correctWords) > 0) {
-            $score = round(($matchCount / count($correctWords)) * 20);
-        }
+        $paragraphResult = $this->scoreWordMatchAnswer($paragraphAnswer, $correctParagraph, 20);
 
         return [
-            'score' => $score,
+            'score' => $paragraphResult['score'],
             'max_score' => 20,
-            'formatted_answer' => $this->formatWordMatchDiff($userWords, $correctWords),
+            'formatted_answer' => $paragraphResult['formatted_answer'],
+            'answered' => true,
         ];
     }
 }

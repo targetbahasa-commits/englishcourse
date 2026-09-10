@@ -22,7 +22,12 @@
     <div class="flex min-h-screen">
         <!-- Sidebar - Automatically selected based on user role -->
         @auth
-            <?php $sidebarRole = strtolower(Auth::user()->active_role ?? 'student'); ?>
+            <?php 
+                $sidebarRole = strtolower(Auth::user()->active_role ?? 'student'); 
+                if (request()->query('live_preview_for')) {
+                    $sidebarRole = 'student';
+                }
+            ?>
 
             @if($sidebarRole === 'admin')
                 @include('components.sidebar-admin')

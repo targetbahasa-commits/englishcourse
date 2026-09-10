@@ -10,9 +10,9 @@
              x-transition:leave-end="-translate-x-full">
                  
                  <!-- Header -->
-                 <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 w-full flex items-center justify-between bg-orange-50">
+                 <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 w-full flex items-center justify-between bg-white">
                     <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                         <span class="text-2xl">💡</span> Useful Idioms
+                         <span class="text-2xl"></span> Useful Idioms
                     </h2>
                     <button @click="isIdiomsOpen = false" class="text-gray-400 hover:text-gray-500 focus:outline-none">
                         <span class="sr-only">Close panel</span>
@@ -30,7 +30,7 @@
                                  <div class="bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border-orange-100">
                                      <h3 class="text-lg font-bold text-orange-600 mb-1" x-text="idiom.phrase"></h3>
                                      <p class="text-gray-700 italic mb-1" x-text="idiom.meaning"></p>
-                                     <div class="bg-gray-50 p-2 rounded text-sm text-gray-600 border-l-2 border-gray-300">
+                                     <div class="bg-white p-2 rounded text-sm text-gray-600 border-l-2 border-gray-300">
                                          <span class="font-semibold text-gray-400 text-xs uppercase tracking-wide">Example:</span><br>
                                          <span x-text="idiom.example"></span>
                                      </div>
@@ -63,7 +63,7 @@
              x-transition:leave-end="-translate-x-full">
                  
                  <!-- Header -->
-                 <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 w-full flex items-center justify-between bg-teal-50">
+                 <div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 w-full flex items-center justify-between bg-white">
                     <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                          <span class="text-2xl">🔗</span> Useful Collocations
                     </h2>
@@ -85,10 +85,10 @@
                                  <div class="bg-white border rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow border-teal-100 group">
                                      <!-- Category badge -->
                                      <span x-show="collocation.category" x-text="collocation.category"
-                                           class="inline-block text-[10px] font-bold text-teal-600 uppercase tracking-wider bg-teal-50 px-2 py-0.5 rounded mb-1"></span>
+                                           class="inline-block text-[10px] font-bold text-teal-600 uppercase tracking-wider bg-white px-2 py-0.5 rounded mb-1"></span>
                                      <h4 class="text-base font-bold text-teal-700 mb-1 group-hover:text-teal-600 transition-colors" x-text="collocation.phrase || collocation.word"></h4>
                                      <p class="text-sm text-gray-600 mb-2 leading-relaxed" x-text="collocation.meaning"></p>
-                                     <div class="bg-teal-50/50 p-2 rounded-lg text-xs text-gray-600 italic border-l-2 border-teal-400">
+                                     <div class="bg-white p-2 rounded-lg text-xs text-gray-600 italic border-l-2 border-teal-400">
                                          <span x-text="collocation.example"></span>
                                      </div>
                                  </div>

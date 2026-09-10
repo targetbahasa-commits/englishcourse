@@ -7,7 +7,7 @@
     <p class="mb-6 text-gray-700">According to Betty, which lines describe the sales of both <strong>cheese and oil</strong> in <strong>New Zealand</strong> and <strong>Colombia</strong>?</p>
 
     <!-- Placeholder for the graph image -->
-    <div class="mb-8 p-4 bg-gray-50 border border-gray-300 rounded max-w-2xl mx-auto flex flex-col items-center justify-center min-h-[300px]">
+    <div class="mb-8 p-4 bg-white border border-gray-300 rounded max-w-2xl mx-auto flex flex-col items-center justify-center min-h-[300px]">
         <svg class="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
         <span class="text-gray-500 font-medium">Sales Volume Graph (Lines A, B, C) Placeholder</span>
     </div>
@@ -40,7 +40,7 @@
 
     <div class="mb-12 space-y-2 pl-2">
         @foreach(['A' => 'Locate near a children’s school', 'B' => 'Change the location of the product on shelves', 'C' => 'Give a free gift', 'D' => 'Make it the cheapest brand', 'E' => 'Make Schmutzig the second cheapest brand'] as $letter => $option)
-        <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+        <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
             <input type="checkbox" name="answers_multi[23_24][]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer rounded">
             <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
         </label>
@@ -53,7 +53,7 @@
     <p class="mb-2 text-gray-700">Complete the table below.</p>
     <p class="mb-6 text-gray-700">Write <strong>NO MORE THAN TWO WORDS</strong> for each answer.</p>
 
-    <div class="max-w-4xl text-gray-700 bg-gray-50 border border-gray-300 rounded-lg p-6 mb-12">
+    <div class="max-w-4xl text-gray-700 bg-white border border-gray-300 rounded-lg p-6 mb-12">
         <h5 class="text-xl font-bold text-center mb-8 text-gray-800">Research plan</h5>
 
         <div class="space-y-8">

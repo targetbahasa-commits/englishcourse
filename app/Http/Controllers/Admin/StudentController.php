@@ -38,17 +38,18 @@ class StudentController extends Controller
         }
 
         [
-            'student'              => $student,
-            'recentActivity'       => $recentActivity,
-            'progressPercentage'   => $progressPercentage,
+            'student' => $student,
+            'recentActivity' => $recentActivity,
+            'progressPercentage' => $progressPercentage,
             'completedAssignments' => $completedAssignments,
-            'totalAssignments'     => $totalAssignments,
-            'averageScore'         => $averageScore,
-            'latestTest'           => $latestTest,
-            'allAssignmentScores'  => $allAssignmentScores,
+            'totalAssignments' => $totalAssignments,
+            'averageScore' => $averageScore,
+            'latestTest' => $latestTest,
+            'latestFinalTest' => $latestFinalTest,
+            'allAssignmentScores' => $allAssignmentScores,
         ] = $this->manageStudents->show($student);
 
-        return view('admin.students.show', compact('student', 'recentActivity', 'progressPercentage', 'completedAssignments', 'totalAssignments', 'averageScore', 'latestTest', 'allAssignmentScores'));
+        return view('admin.students.show', compact('student', 'recentActivity', 'progressPercentage', 'completedAssignments', 'totalAssignments', 'averageScore', 'latestTest', 'latestFinalTest', 'allAssignmentScores'));
     }
 
     /**

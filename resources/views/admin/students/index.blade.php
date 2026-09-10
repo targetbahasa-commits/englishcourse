@@ -18,6 +18,7 @@
 <div class="p-8 pb-24 max-w-7xl mx-auto" x-data="{
     showAssignModal: false,
     showQuickEditModal: false,
+    showPasswordModal: false,
     selectedStudentId: null,
     selectedStudentName: '',
     selectedStudentPhone: '',
@@ -28,6 +29,11 @@
         this.selectedStudentPhone = phone || '';
         this.selectedStudentReferral = referral || '';
         this.showQuickEditModal = true;
+    },
+    openChangePassword(id, name) {
+        this.selectedStudentId = id;
+        this.selectedStudentName = name;
+        this.showPasswordModal = true;
     }
 }">
 
@@ -390,6 +396,10 @@
                                                     <svg class="mr-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                                     Edit Full Profile
                                                 </a>
+                                                <button type="button" @click="openChangePassword({{ $student->id }}, '{{ addslashes($student->name) }}'); openDropdown = false" class="w-full flex items-center px-4 py-2 text-sm text-amber-700 hover:bg-amber-50">
+                                                    <svg class="mr-3 w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                                                    Change Password
+                                                </button>
                                             </div>
                                             <div class="py-1">
                                                 <form method="POST" action="{{ route('users.toggle-status', $student) }}">
@@ -514,6 +524,49 @@
                     <div class="flex justify-end gap-2">
                         <button type="button" @click="showAssignModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50">Cancel</button>
                         <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition shadow-sm">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- =============================
+         Change Password Modal
+         ============================= --}}
+    <div x-show="showPasswordModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="showPasswordModal = false"></div>
+            <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6 z-10">
+                <form :action="`{{ url('/admin/users') }}/${selectedStudentId}/change-password`" method="POST">
+                    @csrf
+                    <div class="flex items-start gap-4 mb-5">
+                        <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-amber-100">
+                            <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-gray-900">Change Student Password</h3>
+                            <p class="text-sm text-gray-500 mt-0.5">Set a new password for <span class="font-bold text-gray-900" x-text="selectedStudentName"></span>.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                            <input type="password" name="password" required minlength="6" placeholder="At least 6 characters"
+                                   class="w-full rounded-xl border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                            <input type="password" name="password_confirmation" required minlength="6" placeholder="Repeat new password"
+                                   class="w-full rounded-xl border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2">
+                        <button type="button" @click="showPasswordModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50">Cancel</button>
+                        <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-amber-600 rounded-xl hover:bg-amber-700 transition shadow-sm flex items-center gap-1.5">
+                            🔑 Update Password
+                        </button>
                     </div>
                 </form>
             </div>

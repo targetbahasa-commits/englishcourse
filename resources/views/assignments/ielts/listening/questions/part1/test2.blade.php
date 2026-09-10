@@ -6,7 +6,7 @@
         Write <strong>NO MORE THAN TWO WORDS</strong> for each answer.
     </p>
 
-    <div class="mb-6 p-4 bg-gray-50 border border-gray-200 italic">
+    <div class="mb-6 p-4 bg-white border border-gray-200 italic">
         <strong>Example</strong><br>
         Peter consumes far too much <strong><u>soft drink</u></strong>
     </div>
@@ -64,7 +64,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
-                    <tr class="bg-gray-100 hover:bg-gray-200 transition-colors">
+                    <tr class="bg-white hover:bg-gray-200 transition-colors">
                         <td class="py-4 px-6 font-medium">Tuesdays</td>
                         <td class="py-4 px-6 text-center font-bold">B</td>
                         <td class="py-4 px-6 text-center">
@@ -74,7 +74,7 @@
                             </div>
                         </td>
                     </tr>
-                    <tr class="bg-white hover:bg-gray-50 transition-colors">
+                    <tr class="bg-white hover:bg-white transition-colors">
                         <td class="py-4 px-6 font-medium">Thursdays</td>
                         <td class="py-4 px-6 text-center">
                             <div class="flex items-center justify-center gap-2">
@@ -89,7 +89,7 @@
                             </div>
                         </td>
                     </tr>
-                    <tr class="bg-gray-100 hover:bg-gray-200 transition-colors">
+                    <tr class="bg-white hover:bg-gray-200 transition-colors">
                         <td class="py-4 px-6 font-medium">Sundays</td>
                         <td class="py-4 px-6 text-center">
                             <div class="flex items-center justify-center gap-2">
@@ -109,7 +109,7 @@
         </div>
     </div>
 
-    <div class="bg-gray-100 p-6 rounded-xl inline-block mt-4">
+    <div class="bg-white p-6 rounded-xl inline-block mt-4">
         <div class="space-y-4 font-medium text-lg">
             <div class="flex gap-4">
                 <span class="font-bold w-6">C</span>

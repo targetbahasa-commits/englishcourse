@@ -59,7 +59,7 @@
         <p class="text-lg text-gray-800">Which <strong>THREE</strong> factors are typical of modern farming?</p>
     </div>
 
-    <div class="bg-gray-50 p-6 rounded-2xl inline-block mt-2 min-w-[300px] mb-12">
+    <div class="bg-white p-6 rounded-2xl inline-block mt-2 min-w-[300px] mb-12">
         <div class="space-y-3" id="checkbox-group-t5">
             @foreach([
                 'A' => 'Many overheads',
@@ -69,7 +69,7 @@
                 'E' => 'Greater numbers of products',
                 'F' => 'More factories'
             ] as $letter => $option)
-            <label class="flex items-center gap-4 cursor-pointer hover:bg-gray-100 p-1 rounded transition-colors group">
+            <label class="flex items-center gap-4 cursor-pointer hover:bg-white p-1 rounded transition-colors group">
                 <input type="checkbox" name="answers[33_34_35][]" value="{{ $letter }}" class="answer-checkbox-t5 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
                 <strong class="font-bold w-4 text-gray-800 group-hover:text-blue-600">{{ $letter }}</strong>
                 <span class="text-gray-800">{{ $option }}</span>
@@ -86,7 +86,7 @@
     <div class="overflow-x-auto">
         <table class="w-full border-collapse border border-gray-300 text-gray-700">
             <thead>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <th class="border border-gray-300 px-5 py-3 font-bold text-center w-1/4">Possible Solution</th>
                     <th class="border border-gray-300 px-5 py-3 font-bold text-center w-5/12">Important Factor</th>
                     <th class="border border-gray-300 px-5 py-3 font-bold text-center w-1/3">Examples</th>
@@ -116,7 +116,7 @@
                     </td>
                 </tr>
                 {{-- Row 2: using the... --}}
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="border border-gray-300 px-5 py-4 align-top">
                         <div class="flex items-center gap-2 flex-wrap mb-2">
                             <span>using the</span>

@@ -40,6 +40,16 @@ class AiProviderKeyManager
             }
         }
 
+        // Randomize the starting order per call. Callers always try keys in
+        // returned order starting from index 0, so with a fixed order every
+        // concurrent request piles onto key #1 first and only spills to the
+        // rest once it's exhausted - defeating the point of having a pool
+        // when many students submit around the same time. Shuffling spreads
+        // concurrent load across all configured keys instead.
+        if (count($keys) > 1) {
+            shuffle($keys);
+        }
+
         return $keys;
     }
 

@@ -18,5 +18,9 @@ interface ScoreRepository
 
     public function getProgramAssignmentDetails(mixed $program): array;
 
+    public function getInProgressSubmissions(mixed $program): mixed;
+
     public function getSubmissionDetails(mixed $program, mixed $submission): mixed;
+
+    public function saveSubmissionReview(mixed $submission, array $review, int $reviewerId): mixed;
 }

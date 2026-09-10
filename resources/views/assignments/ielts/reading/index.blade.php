@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', 'IELTS Reading')
+
 @section('content')
 <div class="container mx-auto px-4 py-8" x-data="{
     showModal: false,
@@ -59,7 +61,7 @@
                     @csrf
                     <input type="hidden" name="program_id" value="{{ $batchProgram?->id }}">
                     <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                    <select name="class_period_id" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-pink-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
+                    <select name="class_period_id" class="border-none bg-white rounded-lg text-sm focus:ring-2 focus:ring-pink-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
                         @if(!$batchProgram)
                             <option value="" selected>No program found</option>
                         @elseif($batchProgram->classPeriods->isEmpty())
@@ -79,7 +81,7 @@
             @else
                 <div class="inline-flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
                     <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                    <div class="bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium text-gray-800 min-w-[220px]">
+                    <div class="bg-white px-4 py-2 rounded-lg text-sm font-medium text-gray-800 min-w-[220px]">
                         {{ $selectedClassPeriod->name ?? 'No Batch Active' }}
                     </div>
                 </div>
@@ -90,7 +92,7 @@
                 $calendarBatchName = addslashes($batchProgram->name ?? 'Assignments');
             @endphp
             @if($calendarClassPeriodId)
-                <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 text-sm text-gray-600">
+                <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-white text-sm text-gray-600">
                     Lihat Kalender
                 </button>
             @endif
@@ -119,31 +121,31 @@
             @php
                 $meetingsMap = $meetings->keyBy('meeting_number');
                 $materials = [
-                    1  => ['title' => 'Matching Headings',           'color' => 'pink'],
-                    2  => ['title' => 'Multiple Choice',              'color' => 'rose'],
-                    3  => ['title' => 'Short Answer',                 'color' => 'fuchsia'],
-                    4  => ['title' => 'Name Matching',                'color' => 'purple'],
-                    5  => ['title' => 'True / False / Not Given',     'color' => 'violet'],
-                    6  => ['title' => 'Yes / No / Not Given',         'color' => 'indigo'],
-                    7  => ['title' => 'Summary Completion',           'color' => 'blue'],
-                    8  => ['title' => 'Matching Sentence Endings',    'color' => 'cyan'],
-                    9  => ['title' => 'Sentence Completion',          'color' => 'teal'],
-                    10 => ['title' => 'Matching Paragraph Info',      'color' => 'emerald'],
-                    11 => ['title' => 'Table Completion',             'color' => 'green'],
-                    12 => ['title' => 'Diagram Labelling',            'color' => 'lime'],
+                    1  => ['title' => 'Matching Headings',           'color' => 'pink',    'slug' => 'matching-headings'],
+                    2  => ['title' => 'Multiple Choice',              'color' => 'rose',    'slug' => 'multiple-choice'],
+                    3  => ['title' => 'Short Answer',                 'color' => 'fuchsia', 'slug' => 'short-answer'],
+                    4  => ['title' => 'Name Matching',                'color' => 'purple',  'slug' => 'name-matching'],
+                    5  => ['title' => 'True / False / Not Given',     'color' => 'violet',  'slug' => 'true-false-not-given'],
+                    6  => ['title' => 'Yes / No / Not Given',         'color' => 'indigo',  'slug' => 'yes-no-not-given'],
+                    7  => ['title' => 'Summary Completion',           'color' => 'blue',    'slug' => 'summary-completion'],
+                    8  => ['title' => 'Matching Sentence Endings',    'color' => 'cyan',    'slug' => 'matching-sentence-endings'],
+                    9  => ['title' => 'Sentence Completion',          'color' => 'teal',    'slug' => 'sentence-completion'],
+                    10 => ['title' => 'Matching Paragraph Info',      'color' => 'emerald', 'slug' => 'matching-paragraph-info'],
+                    11 => ['title' => 'Table Completion',             'color' => 'green',   'slug' => 'table-completion'],
+                    12 => ['title' => 'Diagram Labelling',            'color' => 'lime',    'slug' => 'diagram-labelling'],
                 ];
 
                 $colorMap = [
                     'pink'    => ['bg' => 'bg-pink-50',    'text' => 'text-pink-600',    'btn' => 'bg-pink-600 hover:bg-pink-700',    'badge' => 'bg-pink-100 text-pink-600'],
                     'rose'    => ['bg' => 'bg-rose-50',    'text' => 'text-rose-600',    'btn' => 'bg-rose-600 hover:bg-rose-700',    'badge' => 'bg-rose-100 text-rose-600'],
                     'fuchsia' => ['bg' => 'bg-fuchsia-50', 'text' => 'text-fuchsia-600', 'btn' => 'bg-fuchsia-600 hover:bg-fuchsia-700', 'badge' => 'bg-fuchsia-100 text-fuchsia-600'],
-                    'purple'  => ['bg' => 'bg-purple-50',  'text' => 'text-purple-600',  'btn' => 'bg-purple-600 hover:bg-purple-700',  'badge' => 'bg-purple-100 text-purple-600'],
+                    'purple'  => ['bg' => 'bg-white',  'text' => 'text-purple-600',  'btn' => 'bg-purple-600 hover:bg-purple-700',  'badge' => 'bg-white text-purple-600'],
                     'violet'  => ['bg' => 'bg-violet-50',  'text' => 'text-violet-600',  'btn' => 'bg-violet-600 hover:bg-violet-700',  'badge' => 'bg-violet-100 text-violet-600'],
-                    'indigo'  => ['bg' => 'bg-indigo-50',  'text' => 'text-indigo-600',  'btn' => 'bg-indigo-600 hover:bg-indigo-700',  'badge' => 'bg-indigo-100 text-indigo-600'],
-                    'blue'    => ['bg' => 'bg-blue-50',    'text' => 'text-blue-600',    'btn' => 'bg-blue-600 hover:bg-blue-700',    'badge' => 'bg-blue-100 text-blue-600'],
-                    'cyan'    => ['bg' => 'bg-cyan-50',    'text' => 'text-cyan-600',    'btn' => 'bg-cyan-600 hover:bg-cyan-700',    'badge' => 'bg-cyan-100 text-cyan-600'],
-                    'teal'    => ['bg' => 'bg-teal-50',    'text' => 'text-teal-600',    'btn' => 'bg-teal-600 hover:bg-teal-700',    'badge' => 'bg-teal-100 text-teal-600'],
-                    'emerald' => ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-600', 'btn' => 'bg-emerald-600 hover:bg-emerald-700', 'badge' => 'bg-emerald-100 text-emerald-600'],
+                    'indigo'  => ['bg' => 'bg-white',  'text' => 'text-indigo-600',  'btn' => 'bg-indigo-600 hover:bg-indigo-700',  'badge' => 'bg-white text-indigo-600'],
+                    'blue'    => ['bg' => 'bg-white',    'text' => 'text-blue-600',    'btn' => 'bg-blue-600 hover:bg-blue-700',    'badge' => 'bg-white text-blue-600'],
+                    'cyan'    => ['bg' => 'bg-white',    'text' => 'text-cyan-600',    'btn' => 'bg-cyan-600 hover:bg-cyan-700',    'badge' => 'bg-white text-cyan-600'],
+                    'teal'    => ['bg' => 'bg-white',    'text' => 'text-teal-600',    'btn' => 'bg-teal-600 hover:bg-teal-700',    'badge' => 'bg-white text-teal-600'],
+                    'emerald' => ['bg' => 'bg-white', 'text' => 'text-emerald-600', 'btn' => 'bg-emerald-600 hover:bg-emerald-700', 'badge' => 'bg-white text-emerald-600'],
                     'green'   => ['bg' => 'bg-green-50',   'text' => 'text-green-600',   'btn' => 'bg-green-600 hover:bg-green-700',   'badge' => 'bg-green-100 text-green-600'],
                     'lime'    => ['bg' => 'bg-lime-50',    'text' => 'text-lime-600',    'btn' => 'bg-lime-600 hover:bg-lime-700',    'badge' => 'bg-lime-100 text-lime-600'],
                 ];
@@ -179,7 +181,7 @@
 
                     <div class="flex-1 mb-6">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 {{ $isLocked ? 'bg-gray-100 text-gray-400' : $c['bg'] . ' ' . $c['text'] }} rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 {{ $isLocked ? 'bg-white text-gray-400' : $c['bg'] . ' ' . $c['text'] }} rounded-2xl flex items-center justify-center flex-shrink-0">
                                 <span class="font-bold text-xl">{{ $id }}</span>
                             </div>
                             <h3 class="font-bold text-lg text-gray-800 leading-tight">{{ $mat['title'] }}</h3>
@@ -187,7 +189,7 @@
                     </div>
 
                     @if($canAccess)
-                        <a href="{{ route('assignments.ielts-academic.reading.material', $id) }}"
+                        <a href="{{ route('assignments.ielts-academic.reading.skill', $mat['slug']) }}"
                            class="block w-full py-3 {{ $c['btn'] }} text-white text-center rounded-xl font-bold transition shadow-sm hover:shadow active:scale-95">
                             @if(!empty($isClassEnded) && Auth::user()->isStudent())
                                 Kerjakan Ulang ↺
@@ -196,7 +198,7 @@
                             @endif
                         </a>
                     @else
-                        <button disabled class="block w-full py-3 bg-gray-100 text-gray-400 text-center rounded-xl font-bold cursor-not-allowed">
+                        <button disabled class="block w-full py-3 bg-white text-gray-400 text-center rounded-xl font-bold cursor-not-allowed">
                             Locked
                         </button>
                     @endif
@@ -255,7 +257,7 @@
                     <button type="submit" class="flex-1 py-2 bg-pink-600 text-white rounded-lg font-bold hover:bg-pink-700 transition">
                         Save
                     </button>
-                    <button type="button" @click="showModal = false" class="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg font-bold hover:bg-gray-200 transition">
+                    <button type="button" @click="showModal = false" class="flex-1 py-2 bg-white text-gray-700 rounded-lg font-bold hover:bg-gray-200 transition">
                         Cancel
                     </button>
                 </div>

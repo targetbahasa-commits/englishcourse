@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 // Public Kokoro TTS stream route (accessible without login - just serves/generates audio)
 Route::get('/tts/stream', [App\Http\Controllers\OnlineTestController::class, 'streamKokoroSpeech'])->name('tts.stream');
 
+
+
 Route::get('/guest/quick-access/{testType}', [App\Http\Controllers\GuestQuickAccessController::class, 'quickAccess'])->name('guest.quick-access');
 Route::get('/guest/quick-access-toefl/{type}/{number}', [App\Http\Controllers\GuestQuickAccessController::class, 'quickAccessToeflPromo'])->name('guest.quick-access-toefl');
 Route::get('/guest/dashboard', [App\Http\Controllers\GuestController::class, 'dashboard'])->name('guest.dashboard');
@@ -37,10 +39,31 @@ Route::prefix('promo/test')->name('promo.test.')->group(function () {
     Route::get('/toeflitplistening/{number}', [App\Http\Controllers\ToeflListeningController::class, 'showMeeting'])->name('toeflitplistening.meeting');
     Route::get('/toeflitpstructure/{number}', [App\Http\Controllers\ToeflStructureController::class, 'showMeeting'])->name('toeflitpstructure.meeting');
     Route::get('/toeflitpreading/{number}', [App\Http\Controllers\ToeflReadingController::class, 'showMeeting'])->name('toeflitpreading.meeting');
-    Route::get('/grammar/{meeting}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingIntroductoryMeeting'])->name('grammar.meeting');
+    Route::get('/grammar-admin/{meeting}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingIntroductoryMeeting'])->name('grammar.meeting');
+
+    // PTE Academic Promo Test Routes (public, no auth - isolated from the real assignments.pte-academic.* system)
+    Route::prefix('pte')->name('pte.')->group(function () {
+        Route::get('/speaking-writing/{id}', [App\Http\Controllers\PtePromoTestController::class, 'showSpeakingWriting'])->name('speaking-writing.show');
+        Route::post('/speaking-writing/{id}/submit', [App\Http\Controllers\PtePromoTestController::class, 'submitSpeakingWriting'])->name('speaking-writing.submit');
+        Route::get('/reading/{id}', [App\Http\Controllers\PtePromoTestController::class, 'showReading'])->name('reading.show');
+        Route::post('/reading/{id}/submit', [App\Http\Controllers\PtePromoTestController::class, 'submitReading'])->name('reading.submit');
+        Route::get('/listening/{id}', [App\Http\Controllers\PtePromoTestController::class, 'showListening'])->name('listening.show');
+        Route::post('/listening/{id}/submit', [App\Http\Controllers\PtePromoTestController::class, 'submitListening'])->name('listening.submit');
+        Route::get('/thank-you/{submission_id}', [App\Http\Controllers\PtePromoTestController::class, 'thankYou'])->name('thank-you');
+    });
+
+    // Grammar Practice Promo Test Routes (public, no auth - isolated GrammarTopic/GrammarTopicQuestion pool)
+    Route::prefix('grammar-practice')->name('grammar-practice.')->group(function () {
+        Route::post('/explain', [App\Http\Controllers\GrammarPromoTestController::class, 'explainAnswer'])->name('explain');
+        Route::post('/explain-lesson', [App\Http\Controllers\GrammarPromoTestController::class, 'explainLesson'])->name('explain-lesson');
+        Route::get('/thank-you/{submission_id}', [App\Http\Controllers\GrammarPromoTestController::class, 'thankYou'])->name('thank-you');
+        Route::get('/{topicId}', [App\Http\Controllers\GrammarPromoTestController::class, 'show'])->name('show');
+        Route::post('/{topicId}/submit', [App\Http\Controllers\GrammarPromoTestController::class, 'submit'])->name('submit');
+    });
 
     Route::get('/{type}/{id}', [App\Http\Controllers\PromoTestController::class, 'show'])->name('show');
     Route::post('/{type}/{id}/submit', [App\Http\Controllers\PromoTestController::class, 'submit'])->name('submit');
+    Route::post('/{type}/{id}/submit/retry/{submission_id}', [App\Http\Controllers\PromoTestController::class, 'retryEvaluation'])->name('submit.retry');
     Route::get('/{type}/{id}/ielts-academic-evaluation/{submission_id}', [App\Http\Controllers\PromoTestController::class, 'result'])->name('result');
     Route::post('/{type}/{id}/ielts-academic-evaluation/{submission_id}/send-wa', [App\Http\Controllers\PromoTestController::class, 'sendWaResult'])->name('send-wa-result');
     Route::post('/{type}/{id}/update-admin', [App\Http\Controllers\PromoTestController::class, 'updateAdmin'])->name('update.admin');
@@ -111,24 +134,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/brochure/{type?}', function ($type = 'offline') {
-    if (!in_array($type, ['online', 'offline'])) {
-        abort(404);
-    }
-
-    $query = \App\Models\Program::where('is_active', true)
-        ->where('slug', 'not like', 'cambridge-%')
-        ->where('slug', 'not like', 'toefl-itp-mock-package-%')
-        ->with('classPeriods');
-
-    // if ($type === 'offline') {
-    //     $query->where('price_offline', '>', 0);
-    // }
-
-    $programs = $query->get();
-
-    return view('brochure', compact('programs', 'type'));
-})->name('brochure');
+Route::get('/brochure/pdf/{slug}', [App\Http\Controllers\BrochureController::class, 'pdf'])->name('brochure.pdf');
+Route::get('/brochure/{type?}', [App\Http\Controllers\BrochureController::class, 'index'])->name('brochure');
 
 Route::get('/debug-reading-test', function() {
     return view('assignments.ielts.mockup.c20-reading-test-4', ['testId' => 4, 'edition' => 20]);
@@ -199,6 +206,11 @@ Route::post('/free-lesson/progress', [App\Http\Controllers\FreeLessonController:
 Route::get('/free-test/register/{type}', [App\Http\Controllers\GuestFreeTestController::class, 'showRegistrationForm'])->name('free-test.register.show');
 Route::post('/free-test/register/{type}', [App\Http\Controllers\GuestFreeTestController::class, 'registerAndStart'])->name('free-test.register.submit');
 
+// Placement Test (Tes Kompetensi) - guest-accessible entry, section runner is auth-only below
+Route::get('/placement-test', [App\Http\Controllers\PlacementTestController::class, 'intro'])->name('placement-test.intro');
+Route::get('/placement-test/register', [App\Http\Controllers\PlacementTestController::class, 'showRegistrationForm'])->name('placement-test.register.show');
+Route::post('/placement-test/register', [App\Http\Controllers\PlacementTestController::class, 'registerAndStart'])->name('placement-test.register.submit');
+
 // Public: Calendar Events API (accessible to guests and students)
 Route::get('/api/scholarships/calendar-events', [App\Http\Controllers\ScholarshipSearchController::class, 'getCalendarEvents'])->name('api.scholarships.calendar-events');
 
@@ -233,6 +245,11 @@ Route::post('/api/ollama/translate-sentence', [App\Http\Controllers\AiController
 Route::post('/api/ollama/academic-words', [App\Http\Controllers\AiController::class, 'academicWords'])->name('api.ollama.academicWords');
 Route::post('/api/lmstudio/chat', [App\Http\Controllers\AiController::class, 'chat'])->name('api.lmstudio.chat');
 Route::post('/api/groq/grammar-eval', [App\Http\Controllers\AiController::class, 'evaluateGrammar'])->name('api.groq.grammarEval');
+
+// Booking Class: Public student/guest registration & booking into an available Class Period batch (No login or signup required)
+Route::get('/booking-class', [App\Http\Controllers\BookingClassController::class, 'index'])->name('student.booking-class.index');
+Route::post('/booking-class', [App\Http\Controllers\BookingClassController::class, 'submit'])->name('student.booking-class.submit');
+Route::post('/booking-class/{classPeriod}', [App\Http\Controllers\BookingClassController::class, 'book'])->name('student.booking-class.book');
 
 Route::middleware([
     'auth',
@@ -316,9 +333,17 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{slug}/end-session', [App\Http\Controllers\OnlineTestController::class, 'endSession'])->name('end-session');
     });
 
+    Route::prefix('placement-test')->name('placement-test.')->group(function () {
+        Route::get('/result/{result}', [App\Http\Controllers\PlacementTestController::class, 'result'])->name('result');
+        Route::get('/{section}', [App\Http\Controllers\PlacementTestController::class, 'section'])->whereIn('section', ['reading', 'listening', 'writing', 'speaking'])->name('section');
+        Route::post('/{section}/submit', [App\Http\Controllers\PlacementTestController::class, 'submitSection'])->whereIn('section', ['reading', 'listening', 'writing', 'speaking'])->name('section.submit');
+    });
+
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/leads', [App\Http\Controllers\AdminLeadController::class, 'index'])->name('leads.index');
+        Route::post('/leads/reevaluate-failed', [App\Http\Controllers\AdminLeadController::class, 'reevaluateAllFailed'])->name('leads.reevaluate-failed');
         Route::post('/leads/{id}/status', [App\Http\Controllers\AdminLeadController::class, 'updateStatus'])->name('leads.status.update');
+        Route::post('/leads/{id}/reevaluate', [App\Http\Controllers\AdminLeadController::class, 'reevaluate'])->name('leads.reevaluate');
         
         // ── Listening Machine (full AI pipeline) ─────────────────────────────
         Route::prefix('listening-machine')->name('listening-machine.')->group(function () {
@@ -337,12 +362,53 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{bank}',    [App\Http\Controllers\Admin\AdminListeningMachineController::class, 'show'])->name('show');
             Route::delete('/{bank}', [App\Http\Controllers\Admin\AdminListeningMachineController::class, 'destroy'])->name('destroy');
         });
+        // ── Placement Test (Tes Kompetensi) ─────────────────────────────
+        Route::prefix('placement-test')->name('placement-test.')->group(function () {
+            Route::get('/packages', [App\Http\Controllers\Admin\AdminPlacementTestPackageController::class, 'index'])->name('packages.index');
+            Route::post('/packages', [App\Http\Controllers\Admin\AdminPlacementTestPackageController::class, 'store'])->name('packages.store');
+            Route::put('/packages/{package}', [App\Http\Controllers\Admin\AdminPlacementTestPackageController::class, 'update'])->name('packages.update');
+            Route::delete('/packages/{package}', [App\Http\Controllers\Admin\AdminPlacementTestPackageController::class, 'destroy'])->name('packages.destroy');
+            Route::post('/packages/{package}/activate', [App\Http\Controllers\Admin\AdminPlacementTestPackageController::class, 'activate'])->name('packages.activate');
+            Route::post('/packages/{package}/deactivate', [App\Http\Controllers\Admin\AdminPlacementTestPackageController::class, 'deactivate'])->name('packages.deactivate');
+
+            Route::get('/reading', [App\Http\Controllers\Admin\AdminPlacementReadingController::class, 'index'])->name('reading.index');
+            Route::post('/reading', [App\Http\Controllers\Admin\AdminPlacementReadingController::class, 'store'])->name('reading.store');
+            Route::get('/reading/{reading}', [App\Http\Controllers\Admin\AdminPlacementReadingController::class, 'show'])->name('reading.show');
+            Route::put('/reading/{reading}', [App\Http\Controllers\Admin\AdminPlacementReadingController::class, 'update'])->name('reading.update');
+            Route::delete('/reading/{reading}', [App\Http\Controllers\Admin\AdminPlacementReadingController::class, 'destroy'])->name('reading.destroy');
+            Route::post('/reading/{reading}/questions', [App\Http\Controllers\Admin\AdminPlacementReadingController::class, 'storeQuestion'])->name('reading.questions.store');
+            Route::put('/reading/{reading}/questions/{question}', [App\Http\Controllers\Admin\AdminPlacementReadingController::class, 'updateQuestion'])->name('reading.questions.update');
+            Route::delete('/reading/{reading}/questions/{question}', [App\Http\Controllers\Admin\AdminPlacementReadingController::class, 'destroyQuestion'])->name('reading.questions.destroy');
+
+            Route::get('/listening', [App\Http\Controllers\Admin\AdminPlacementListeningController::class, 'index'])->name('listening.index');
+            Route::post('/listening', [App\Http\Controllers\Admin\AdminPlacementListeningController::class, 'store'])->name('listening.store');
+            Route::get('/listening/{listening}', [App\Http\Controllers\Admin\AdminPlacementListeningController::class, 'show'])->name('listening.show');
+            Route::put('/listening/{listening}', [App\Http\Controllers\Admin\AdminPlacementListeningController::class, 'update'])->name('listening.update');
+            Route::delete('/listening/{listening}', [App\Http\Controllers\Admin\AdminPlacementListeningController::class, 'destroy'])->name('listening.destroy');
+            Route::post('/listening/{listening}/questions', [App\Http\Controllers\Admin\AdminPlacementListeningController::class, 'storeQuestion'])->name('listening.questions.store');
+            Route::put('/listening/{listening}/questions/{question}', [App\Http\Controllers\Admin\AdminPlacementListeningController::class, 'updateQuestion'])->name('listening.questions.update');
+            Route::delete('/listening/{listening}/questions/{question}', [App\Http\Controllers\Admin\AdminPlacementListeningController::class, 'destroyQuestion'])->name('listening.questions.destroy');
+
+            Route::get('/writing', [App\Http\Controllers\Admin\AdminPlacementWritingController::class, 'index'])->name('writing.index');
+            Route::post('/writing', [App\Http\Controllers\Admin\AdminPlacementWritingController::class, 'store'])->name('writing.store');
+            Route::put('/writing/{writing}', [App\Http\Controllers\Admin\AdminPlacementWritingController::class, 'update'])->name('writing.update');
+            Route::delete('/writing/{writing}', [App\Http\Controllers\Admin\AdminPlacementWritingController::class, 'destroy'])->name('writing.destroy');
+
+            Route::get('/speaking', [App\Http\Controllers\Admin\AdminPlacementSpeakingController::class, 'index'])->name('speaking.index');
+            Route::post('/speaking', [App\Http\Controllers\Admin\AdminPlacementSpeakingController::class, 'store'])->name('speaking.store');
+            Route::put('/speaking/{speaking}', [App\Http\Controllers\Admin\AdminPlacementSpeakingController::class, 'update'])->name('speaking.update');
+            Route::delete('/speaking/{speaking}', [App\Http\Controllers\Admin\AdminPlacementSpeakingController::class, 'destroy'])->name('speaking.destroy');
+
+            Route::get('/results', [App\Http\Controllers\Admin\AdminPlacementTestResultController::class, 'index'])->name('results.index');
+            Route::get('/results/{result}', [App\Http\Controllers\Admin\AdminPlacementTestResultController::class, 'show'])->name('results.show');
+        });
         // ── Audio / Media Library Manager ─────────────────────────────
         Route::prefix('audio-library')->name('audio-library.')->group(function () {
             Route::get('/', [App\Http\Controllers\Admin\AdminAudioLibraryController::class, 'index'])->name('index');
             Route::delete('/delete', [App\Http\Controllers\Admin\AdminAudioLibraryController::class, 'destroy'])->name('destroy');
             Route::get('/stats', [App\Http\Controllers\Admin\AdminAudioLibraryController::class, 'stats'])->name('stats');
         });
+
 
 
         Route::get('/promo-tests', [App\Http\Controllers\AdminPromoTestController::class, 'index'])->name('promo-tests.index');
@@ -357,6 +423,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/ai-management/toggle-local-api', [App\Http\Controllers\Admin\AiManagementController::class, 'toggleLocalApi'])->name('ai-management.toggle-local-api');
         Route::get('/ai-management/tts-server-status', [App\Http\Controllers\Admin\AiManagementController::class, 'ttsServerStatus'])->name('ai-management.tts-server-status');
         Route::post('/promo-tests/colab', [App\Http\Controllers\AdminPromoTestController::class, 'updateColab'])->name('promo-tests.update-colab');
+        Route::post('/promo-tests/pte/{category}/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'updatePteTestSettings'])->name('promo-tests.pte.update');
+        Route::post('/promo-tests/pte-create/speaking-writing', [App\Http\Controllers\AdminPromoTestController::class, 'storePteSpeakingWriting'])->name('promo-tests.pte.speaking-writing.store');
+        Route::post('/promo-tests/pte-create/reading', [App\Http\Controllers\AdminPromoTestController::class, 'storePteReading'])->name('promo-tests.pte.reading.store');
+        Route::post('/promo-tests/pte-create/listening', [App\Http\Controllers\AdminPromoTestController::class, 'storePteListening'])->name('promo-tests.pte.listening.store');
         Route::post('/promo-tests/bulk', [App\Http\Controllers\AdminPromoTestController::class, 'bulkUpdate'])->name('promo-tests.bulk-update');
         Route::post('/promo-tests/writing', [App\Http\Controllers\AdminPromoTestController::class, 'storeWriting'])->name('promo-tests.writing.store');
         Route::delete('/promo-tests/writing/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'destroyWriting'])->name('promo-tests.writing.destroy');
@@ -367,6 +437,19 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/promo-tests/speaking/{id}/render', [App\Http\Controllers\AdminPromoTestController::class, 'renderSpeaking'])->name('promo-tests.speaking.render');
         Route::post('/promo-tests/listening/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'updateListening'])->name('promo-tests.listening.update');
         Route::post('/promo-tests/grammar/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'updateGrammar'])->name('promo-tests.grammar.update');
+        Route::post('/promo-tests/grammar-practice', [App\Http\Controllers\AdminPromoTestController::class, 'storeGrammarPracticeTopic'])->name('promo-tests.grammar-practice.store');
+        Route::post('/promo-tests/grammar-practice/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'updateGrammarPracticeTopic'])->name('promo-tests.grammar-practice.update');
+        // Standalone question editor for Promo Test grammar topics - deliberately kept
+        // outside the /assignments/... route group (and its auth/verified/role:student
+        // middleware for the real paid course) so managing promo content here can never
+        // interfere with the real assignment access system for students/guests.
+        Route::get('/promo-tests/grammar-practice/{topic}/questions', [App\Http\Controllers\AdminPromoTestController::class, 'grammarQuestionsEditor'])->name('promo-tests.grammar-practice.questions.index');
+        Route::post('/promo-tests/grammar-practice/{topic}/questions', [App\Http\Controllers\AdminPromoTestController::class, 'storeGrammarQuestion'])->name('promo-tests.grammar-practice.questions.store');
+        Route::put('/promo-tests/grammar-practice/questions/{question}', [App\Http\Controllers\AdminPromoTestController::class, 'updateGrammarQuestion'])->name('promo-tests.grammar-practice.questions.update');
+        Route::delete('/promo-tests/grammar-practice/questions/{question}', [App\Http\Controllers\AdminPromoTestController::class, 'destroyGrammarQuestion'])->name('promo-tests.grammar-practice.questions.destroy');
+        Route::post('/promo-tests/grammar-practice/{topic}/questions/generate', [App\Http\Controllers\AdminPromoTestController::class, 'generateGrammarQuestions'])->name('promo-tests.grammar-practice.questions.generate');
+        Route::post('/promo-tests/grammar-practice/{topic}/questions/bulk-store', [App\Http\Controllers\AdminPromoTestController::class, 'bulkStoreGrammarQuestions'])->name('promo-tests.grammar-practice.questions.bulk-store');
+        Route::delete('/promo-tests/grammar-practice/{topic}/questions/clear-all', [App\Http\Controllers\AdminPromoTestController::class, 'clearGrammarQuestions'])->name('promo-tests.grammar-practice.questions.clear-all');
         Route::post('/promo-tests/reading-general/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'updateReadingGeneral'])->name('promo-tests.reading-general.update');
         Route::post('/promo-tests/reading-academic/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'updateReadingAcademic'])->name('promo-tests.reading-academic.update');
         Route::post('/promo-tests/toefl-listening/{id}', [App\Http\Controllers\AdminPromoTestController::class, 'updateToeflListening'])->name('promo-tests.toefl-listening.update');
@@ -406,6 +489,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/offline-test-certificates', [App\Http\Controllers\Admin\OfflineTestCertificateController::class, 'update'])->name('offline-test-certificates.update');
         Route::get('/offline-test-certificates/preview', [App\Http\Controllers\Admin\OfflineTestCertificateController::class, 'preview'])->name('offline-test-certificates.preview');
         Route::post('/offline-test-certificates/upload-background', [App\Http\Controllers\Admin\OfflineTestCertificateController::class, 'uploadBackground'])->name('offline-test-certificates.upload-background');
+        Route::get('/offline-test-certificates/{id}/background', [App\Http\Controllers\Admin\OfflineTestCertificateController::class, 'backgroundImage'])->name('offline-test-certificates.background');
+        Route::get('/offline-test-certificates/{id}/signature', [App\Http\Controllers\Admin\OfflineTestCertificateController::class, 'signatureImage'])->name('offline-test-certificates.signature');
+        Route::get('/offline-test-certificates/{id}/stamp', [App\Http\Controllers\Admin\OfflineTestCertificateController::class, 'stampImage'])->name('offline-test-certificates.stamp');
 
         Route::get('/online-test-results', [App\Http\Controllers\Admin\OnlineTestResultController::class, 'index'])->name('online-test-results.index');
         Route::get('/online-test-results/{id}', [App\Http\Controllers\Admin\OnlineTestResultController::class, 'show'])->whereNumber('id')->name('online-test-results.show');
@@ -414,6 +500,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/final-test-results', [App\Http\Controllers\Admin\FinalTestResultController::class, 'index'])->name('final-test-results.index');
         Route::get('/final-test-results/{id}', [App\Http\Controllers\Admin\FinalTestResultController::class, 'show'])->whereNumber('id')->name('final-test-results.show');
         Route::patch('/final-test-results/{id}/status', [App\Http\Controllers\Admin\FinalTestResultController::class, 'updateStatus'])->whereNumber('id')->name('final-test-results.update-status');
+        Route::put('/final-test-results/{id}/evaluation', [App\Http\Controllers\Admin\FinalTestResultController::class, 'updateEvaluation'])->whereNumber('id')->name('final-test-results.update-evaluation');
+        Route::post('/final-test-results/{id}/re-evaluate', [App\Http\Controllers\Admin\FinalTestResultController::class, 'reEvaluate'])->whereNumber('id')->name('final-test-results.re-evaluate');
+        Route::delete('/final-test-results/{id}', [App\Http\Controllers\Admin\FinalTestResultController::class, 'destroy'])->whereNumber('id')->name('final-test-results.destroy');
         Route::get('/final-test-results/{id}/certificate', [App\Http\Controllers\Admin\FinalTestResultController::class, 'certificate'])->whereNumber('id')->name('final-test-results.certificate');
         // Admin: fetch class period meetings (returns JSON)
         Route::get('/class-periods/{classPeriod}/meetings', [App\Http\Controllers\TeacherAttendanceController::class, 'getMeetings'])
@@ -433,6 +522,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/mock-test/ielts-academic', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'index'])->name('mock-test.ielts-academic');
     Route::get('/mock-test/ielts-academic/cambridge', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'index'])->name('mock-test.ielts-academic.cambridge');
     Route::get('/mock-test/ielts-academic/cambridge/{edition}', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'edition'])->name('mock-test.ielts-academic.cambridge.edition');
+    Route::get('/mock-test/ielts-general', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'index'])->name('mock-test.ielts-general');
+    Route::get('/mock-test/ielts-general/cambridge', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'index'])->name('mock-test.ielts-general.cambridge');
+    Route::get('/mock-test/ielts-general/cambridge/{edition}', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'edition'])->name('mock-test.ielts-general.cambridge.edition');
+    Route::get('/mock-test/ielts-general/cambridge/{edition}/test-{id}', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'generalSkills'])->name('mock-test.ielts-general.cambridge.skills');
+    Route::get('/mock-test/ielts-general/cambridge/{edition}/test-{id}/{skill}', [App\Http\Controllers\IeltsCambridgeMockupController::class, 'generalTest'])->name('mock-test.ielts-general.cambridge.test');
+    Route::get('/mock-test/ielts-general/british-council', function () {
+        return view('assignments.ielts.mockup.british-council', ['isGeneral' => true]);
+    })->name('mock-test.ielts-general.british-council');
 
     Route::get('/assignments', [App\Http\Controllers\AssignmentController::class, 'index'])
         ->name('assignments.index')
@@ -472,6 +569,12 @@ Route::middleware(['auth'])->group(function () {
         ->where('program', 'grammar-for-writing|toefl-itp|ielts-academic|pte-academic|ielts-general|speaking')
         ->where('variant', 'introductory|complexity|proficiency|fast-track|intermediate|advanced')
         ->name('final-test.complete')
+        ;
+
+    Route::post('/final-test/{program}/{variant?}/draft', [App\Http\Controllers\AssignmentController::class, 'saveFinalTestDraft'])
+        ->where('program', 'grammar-for-writing|toefl-itp|ielts-academic|pte-academic|ielts-general|speaking')
+        ->where('variant', 'introductory|complexity|proficiency|fast-track|intermediate|advanced')
+        ->name('final-test.draft.save')
         ;
 
     Route::get('/final-test/{program}/{variant?}', [App\Http\Controllers\AssignmentController::class, 'finalTestProgram'])
@@ -1051,6 +1154,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/assignments/ielts-academic/reading', [App\Http\Controllers\IeltsReadingController::class, 'index'])->name('assignments.ielts-academic.reading.index');
     Route::get('/assignments/ielts-academic/reading/material/{id}', [App\Http\Controllers\IeltsReadingController::class, 'material'])->name('assignments.ielts-academic.reading.material');
     Route::get('/assignments/ielts-academic/reading/practice-index', [App\Http\Controllers\IeltsReadingController::class, 'practiceIndex'])->name('assignments.ielts-academic.reading.practice-index');
+    Route::post('/assignments/ielts-academic/reading/practice-submit', [App\Http\Controllers\IeltsReadingController::class, 'submitPractice'])->name('assignments.ielts-academic.reading.practice-submit');
+    Route::get('/assignments/ielts-academic/reading/skill/{skill}', [App\Http\Controllers\IeltsReadingController::class, 'skill'])->name('assignments.ielts-academic.reading.skill');
     Route::post('/assignments/ielts-academic/reading/reorder', [App\Http\Controllers\IeltsReadingAdminController::class, 'reorderMeetings'])->name('assignments.ielts.reading.reorder');
     Route::post('/assignments/ielts-academic/reading/meeting', [App\Http\Controllers\IeltsReadingAdminController::class, 'storeMeeting'])->name('assignments.ielts.reading.meeting.store');
     
@@ -1067,6 +1172,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/ielts-reading/question', [App\Http\Controllers\IeltsReadingAdminController::class, 'storeQuestion'])->name('admin.ielts.reading.question.store');
     Route::put('/admin/ielts-reading/question/{id}', [App\Http\Controllers\IeltsReadingAdminController::class, 'updateQuestion'])->name('admin.ielts.reading.question.update');
     Route::delete('/admin/ielts-reading/question/{id}', [App\Http\Controllers\IeltsReadingAdminController::class, 'destroyQuestion'])->name('admin.ielts.reading.question.delete');
+    Route::post('/admin/ielts-reading/upload-diagram', [App\Http\Controllers\IeltsReadingAdminController::class, 'uploadDiagram'])->name('admin.ielts.reading.diagram.upload');
 
 
 
@@ -1089,11 +1195,18 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/assignments/ielts-academic/writing/task-response', [App\Http\Controllers\IeltsWritingController::class, 'taskResponse'])->name('assignments.ielts.writing.task_response');
     Route::post('/assignments/ielts-academic/writing/grammar', [App\Http\Controllers\IeltsWritingController::class, 'grammar'])->name('assignments.ielts.writing.grammar');
     Route::post('/assignments/ielts-academic/writing/improve', [App\Http\Controllers\IeltsWritingController::class, 'improve'])->name('assignments.ielts.writing.improve');
+    Route::post('/assignments/ielts-academic/writing/submission/{submission}/retry', [App\Http\Controllers\IeltsWritingController::class, 'retryEvaluate'])->name('assignments.ielts.writing.submission.retry');
     Route::get('/assignments/ielts-academic/writing', [App\Http\Controllers\IeltsWritingController::class, 'index'])->name('assignments.ielts-academic.writing.index');
     Route::get('/assignments/ielts-general/writing', [App\Http\Controllers\IeltsWritingController::class, 'generalIndex'])->name('assignments.ielts-general.writing.index');
+    Route::get('/assignments/ielts-general/writing/practice-index', [App\Http\Controllers\IeltsWritingController::class, 'practiceIndex'])->name('assignments.ielts-general.writing.practice.index');
     Route::get('/assignments/ielts-general/reading', [App\Http\Controllers\IeltsReadingController::class, 'generalIndex'])->name('assignments.ielts-general.reading.index');
+    Route::get('/assignments/ielts-general/reading/practice-index', [App\Http\Controllers\IeltsReadingController::class, 'generalPracticeIndex'])->name('assignments.ielts-general.reading.practice-index');
+    Route::get('/assignments/ielts-general/reading/material/{id}', [App\Http\Controllers\IeltsReadingController::class, 'generalMaterial'])->name('assignments.ielts-general.reading.material');
     Route::get('/assignments/ielts-academic/writing/{task}/meeting/{id}', [App\Http\Controllers\IeltsWritingController::class, 'showMeeting'])->name('assignments.ielts-academic.writing.meeting');
+    Route::post('/assignments/ielts-academic/writing/meeting/{id}/draft', [App\Http\Controllers\IeltsWritingController::class, 'saveMeetingDraft'])->name('assignments.ielts-academic.writing.meeting.draft');
+    Route::get('/assignments/ielts-academic/writing/{task}/meeting/{id}/evaluation-preview', [App\Http\Controllers\IeltsWritingController::class, 'evaluationPreview'])->name('assignments.ielts-academic.writing.evaluation-preview');
     Route::get('/assignments/ielts-general/writing/{task}/meeting/{id}', [App\Http\Controllers\IeltsWritingController::class, 'showMeeting'])->name('assignments.ielts-general.writing.meeting');
+    Route::get('/assignments/ielts-general/writing/{task}/meeting/{id}/evaluation-preview', [App\Http\Controllers\IeltsWritingController::class, 'evaluationPreview'])->name('assignments.ielts-general.writing.evaluation-preview');
     Route::post('/assignments/ielts-academic/writing', [App\Http\Controllers\IeltsWritingAdminController::class, 'storeMeeting'])->name('assignments.ielts.writing.store');
     Route::put('/assignments/ielts-academic/writing/{id}', [App\Http\Controllers\IeltsWritingAdminController::class, 'updateMeeting'])->name('assignments.ielts.writing.update');
     Route::delete('/assignments/ielts-academic/writing/{id}', [App\Http\Controllers\IeltsWritingAdminController::class, 'destroyMeeting'])->name('assignments.ielts.writing.destroy');
@@ -1233,6 +1346,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/assignments/grammar-writing/practice/topic/{topic}/submit', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingPracticeTopicSubmit'])->name('assignments.grammar-writing.practice.topic.submit');
     Route::post('/assignments/grammar-writing/practice/topic/{topic}/reset', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingPracticeTopicReset'])->name('assignments.grammar-writing.practice.topic.reset');
     Route::get('/assignments/grammar-writing/practice/level/{level}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingPracticeLevel'])->name('assignments.grammar-writing.practice.level');
+    Route::post('/assignments/grammar-writing/ai-proxy', [App\Http\Controllers\GrammarWritingAdminController::class, 'aiProxy'])->name('assignments.grammar-writing.ai-proxy');
+    Route::post('/assignments/grammar-writing/explain-lesson', [App\Http\Controllers\GrammarWritingAdminController::class, 'explainLessonTopic'])->name('assignments.grammar-writing.explain-lesson');
     // Admin CRUD for Introductory Topics
     Route::get('/assignments/grammar-writing/intro-topics', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingIntroTopics'])->name('assignments.grammar-writing.intro-topics')->middleware('role:admin');
     Route::post('/assignments/grammar-writing/intro-topics', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingIntroTopicStore'])->name('assignments.grammar-writing.intro-topics.store')->middleware('role:admin');
@@ -1260,6 +1375,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/assignments/grammar-writing/complexity/meeting/{meeting}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingComplexityMeeting'])
         ->whereNumber('meeting')
         ->name('assignments.grammar-writing.complexity.meeting');
+    Route::post('/assignments/grammar-writing/complexity/meeting/{meeting}/submit', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingComplexityMeetingSubmit'])
+        ->whereNumber('meeting')
+        ->name('assignments.grammar-writing.complexity.meeting.submit');
+    Route::post('/assignments/grammar-writing/complexity/meeting/{meeting}/reset', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingComplexityMeetingReset'])
+        ->whereNumber('meeting')
+        ->name('assignments.grammar-writing.complexity.meeting.reset');
     Route::get('/assignments/grammar-writing/proficiency/meeting/{meeting}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingProficiencyMeeting'])
         ->whereNumber('meeting')
         ->name('assignments.grammar-writing.proficiency.meeting');
@@ -1269,19 +1390,62 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/assignments/grammar-writing/proficiency/meeting/{meeting}/reset', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingProficiencyMeetingReset'])
         ->whereNumber('meeting')
         ->name('assignments.grammar-writing.proficiency.meeting.reset');
+    Route::get('/refresh-csrf', fn() => response()->json(['token' => csrf_token()]))->name('refresh-csrf');
+    Route::post('/assignments/grammar-writing/{track}/meeting/{meeting}/draft', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingMeetingDraft'])
+        ->where('track', 'introductory|complexity|proficiency|fast-track')
+        ->whereNumber('meeting')
+        ->name('assignments.grammar-writing.track-meeting.draft');
+    Route::get('/assignments/grammar-writing/download-material-pdf/{track}/{meeting}', [App\Http\Controllers\GrammarWritingAdminController::class, 'downloadMaterialPdf'])
+        ->whereNumber('meeting')
+        ->name('assignments.grammar-writing.download-material-pdf');
     Route::get('/assignments/grammar-writing/{track}', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWritingTrack'])
         ->whereIn('track', ['introductory', 'complexity', 'proficiency'])
         ->name('assignments.grammar-writing.track');
+    
+    Route::post('/assignments/grammar-writing/ai-variation', [App\Http\Controllers\GrammarWritingAiPracticeController::class, 'generateVariation'])->name('assignments.grammar-writing.ai-variation');
+    Route::post('/assignments/grammar-writing/switch-mode', [App\Http\Controllers\GrammarWritingAiPracticeController::class, 'switchMode'])->name('assignments.grammar-writing.switch-mode');
     Route::get('/assignments/grammar-writing/fast-track', [App\Http\Controllers\GrammarWritingAdminController::class, 'grammarWriting'])->name('assignments.grammar-writing');
     Route::post('/assignments/grammar-writing/period', [App\Http\Controllers\GrammarWritingAdminController::class, 'updatePeriod'])->name('assignments.grammar-writing.period');
     Route::post('/assignments/batch-period', [App\Http\Controllers\GrammarWritingAdminController::class, 'updateBatchPeriod'])->name('assignments.batch-period');
+    Route::post('/assignments/class-meeting', [App\Http\Controllers\GrammarWritingAdminController::class, 'updateActiveClassMeeting'])->name('assignments.class-meeting');
 
     Route::get('/assignments/speaking', [App\Http\Controllers\SpeakingAdminController::class, 'speakingClasses'])->name('assignments.speaking.classes');
     Route::get('/assignments/speaking/{level}', [App\Http\Controllers\SpeakingAdminController::class, 'speakingLevel'])
-        ->whereIn('level', ['introductory', 'intermediate', 'advanced'])
+        ->whereIn('level', ['introductory', 'intermediate', 'advanced', 'proficiency', 'super'])
         ->name('assignments.speaking.level');
+    Route::get('/assignments/speaking/{level}/meeting/{meeting}', [App\Http\Controllers\SpeakingAdminController::class, 'speakingMeeting'])
+        ->whereIn('level', ['introductory', 'intermediate', 'advanced', 'proficiency', 'super'])
+        ->whereNumber('meeting')
+        ->name('assignments.speaking.meeting');
     Route::get('/assignments/speaking/fast-track', [App\Http\Controllers\SpeakingAdminController::class, 'speaking'])->name('assignments.speaking');
+
+    Route::post('/assignments/speaking/{level}/meeting/{meeting}/draft', [App\Http\Controllers\SpeakingAdminController::class, 'saveMeetingDraft'])
+        ->whereIn('level', ['introductory', 'intermediate', 'advanced', 'proficiency', 'super'])
+        ->whereNumber('meeting')
+        ->name('assignments.speaking.meeting.draft');
+    Route::get('/assignments/speaking/{level}/meeting/{meeting}/draft', [App\Http\Controllers\SpeakingAdminController::class, 'getMeetingDraft'])
+        ->whereIn('level', ['introductory', 'intermediate', 'advanced', 'proficiency', 'super'])
+        ->whereNumber('meeting')
+        ->name('assignments.speaking.meeting.draft.get');
+
+    // Admin-only editing of a Speaking meeting's "AI Interview" tab
+    // questions - see SpeakingAdminController::speakingMeeting()'s
+    // SpeakingAiInterviewOverride lookup for how these take effect.
+    Route::put('/admin/speaking/{level}/meeting/{meeting}/ai-interview', [App\Http\Controllers\SpeakingAdminController::class, 'updateAiInterviewQuestions'])
+        ->whereIn('level', ['introductory', 'intermediate', 'advanced', 'proficiency', 'super'])
+        ->whereNumber('meeting')
+        ->name('admin.speaking.ai-interview.update')
+        ->middleware('role:admin');
+    Route::delete('/admin/speaking/{level}/meeting/{meeting}/ai-interview', [App\Http\Controllers\SpeakingAdminController::class, 'resetAiInterviewQuestions'])
+        ->whereIn('level', ['introductory', 'intermediate', 'advanced', 'proficiency', 'super'])
+        ->whereNumber('meeting')
+        ->name('admin.speaking.ai-interview.reset')
+        ->middleware('role:admin');
+
     Route::post('/assignments/meeting/{meeting}/toggle-lock', [App\Http\Controllers\GrammarWritingAdminController::class, 'toggleLock'])->name('assignments.meeting.toggle-lock');
+    Route::get('/assignments/grammar-writing/my-scores', [App\Http\Controllers\GrammarWritingScoreController::class, 'myScores'])->name('assignments.grammar-writing.my-scores');
+    Route::get('/assignments/grammar-writing/my-scores/{meetingScore}', [App\Http\Controllers\GrammarWritingScoreController::class, 'myScoreShow'])->name('assignments.grammar-writing.my-scores.show');
+    Route::get('/assignments/grammar-writing/my-scores/{meetingScore}/download-pdf', [App\Http\Controllers\GrammarWritingScoreController::class, 'downloadEvaluationPdf'])->name('assignments.grammar-writing.download-evaluation-pdf');
     Route::get('/assignments/grammar-writing/fast-track/meeting1', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting2'])->name('assignments.grammar-writing.meeting1');
     Route::post('/assignments/grammar-writing/fast-track/meeting1', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting2Submit'])->name('assignments.grammar-writing.meeting1.submit');
     Route::post('/assignments/grammar-writing/fast-track/meeting1/reset', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting2Reset'])->name('assignments.grammar-writing.meeting1.reset');
@@ -1291,50 +1455,35 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/assignments/grammar-writing/fast-track/meeting3', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting3'])->name('assignments.grammar-writing.meeting3');
     Route::post('/assignments/grammar-writing/fast-track/meeting3', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting3Submit'])->name('assignments.grammar-writing.meeting3.submit');
     Route::post('/assignments/grammar-writing/fast-track/meeting{meeting}/draft', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meetingDraft'])->whereNumber('meeting')->name('assignments.grammar-writing.meeting.draft');
+    Route::get('/assignments/grammar-writing/fast-track/meeting{meeting}/draft', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meetingDraftShow'])->whereNumber('meeting')->name('assignments.grammar-writing.meeting.draft.show');
+    Route::get('/assignments/grammar-writing/fast-track/meeting3/materi/pdf', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting3MaterialPdf'])->name('assignments.grammar-writing.meeting3.materi-pdf');
+    Route::get('/assignments/grammar-writing/fast-track/meeting3/hasil/pdf', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting3ResultPdf'])->name('assignments.grammar-writing.meeting3.hasil-pdf');
     Route::post('/assignments/grammar-writing/fast-track/meeting3/reset', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting3Reset'])->name('assignments.grammar-writing.meeting3.reset');
     Route::post('/assignments/grammar-writing/fast-track/meeting3/admin-reset', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting3AdminReset'])->name('assignments.grammar-writing.meeting3.admin-reset');
     Route::get('/assignments/grammar-writing/fast-track/meeting4', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting4'])->name('assignments.grammar-writing.meeting4');
     Route::post('/assignments/grammar-writing/fast-track/meeting4', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting4Submit'])->name('assignments.grammar-writing.meeting4.submit');
     Route::post('/assignments/grammar-writing/fast-track/meeting4/reset', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting4Reset'])->name('assignments.grammar-writing.meeting4.reset');
+    Route::post('/assignments/grammar-writing/fast-track/meeting4/generate-ai-variation', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting4GenerateAiVariation'])->name('assignments.grammar-writing.meeting4.ai-variation');
+    Route::post('/assignments/grammar-writing/fast-track/meeting4/switch-mode', [App\Http\Controllers\LegacyGrammarWritingController::class, 'meeting4SwitchMode'])->name('assignments.grammar-writing.meeting4.switch-mode');
     Route::get('/assignments/grammar-writing/fast-track/meeting5', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting5'])->name('assignments.grammar-writing.meeting5');
     Route::post('/assignments/grammar-writing/fast-track/meeting5', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting5Submit'])->name('assignments.grammar-writing.meeting5.submit');
     Route::post('/assignments/grammar-writing/fast-track/meeting5/reset', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting5Reset'])->name('assignments.grammar-writing.meeting5.reset');
-    Route::get('/assignments/grammar-writing/fast-track/meeting6', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting6'])->name('assignments.grammar-writing.meeting6');
-    Route::post('/assignments/grammar-writing/fast-track/meeting6', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting6Submit'])->name('assignments.grammar-writing.meeting6.submit');
-    Route::post('/assignments/grammar-writing/fast-track/meeting6/reset', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting6Reset'])->name('assignments.grammar-writing.meeting6.reset');
-    Route::get('/assignments/grammar-writing/fast-track/meeting7', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting7'])->name('assignments.grammar-writing.meeting7');
-    Route::post('/assignments/grammar-writing/fast-track/meeting7', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting7Submit'])->name('assignments.grammar-writing.meeting7.submit');
-    Route::post('/assignments/grammar-writing/fast-track/meeting7/reset', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting7Reset'])->name('assignments.grammar-writing.meeting7.reset');
-    Route::get('/assignments/grammar-writing/fast-track/meeting8', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting8'])->name('assignments.grammar-writing.meeting8');
-    Route::post('/assignments/grammar-writing/fast-track/meeting8', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting8Submit'])->name('assignments.grammar-writing.meeting8.submit');
-    Route::post('/assignments/grammar-writing/fast-track/meeting8/reset', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting8Reset'])->name('assignments.grammar-writing.meeting8.reset');
-    Route::get('/assignments/grammar-writing/fast-track/meeting9', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting9'])->name('assignments.grammar-writing.meeting9');
-    Route::post('/assignments/grammar-writing/fast-track/meeting9', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting9Submit'])->name('assignments.grammar-writing.meeting9.submit');
-    Route::post('/assignments/grammar-writing/fast-track/meeting9/reset', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting9Reset'])->name('assignments.grammar-writing.meeting9.reset');
-    Route::get('/assignments/grammar-writing/fast-track/meeting10', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting10'])->name('assignments.grammar-writing.meeting10');
-    Route::post('/assignments/grammar-writing/fast-track/meeting10', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting10Submit'])->name('assignments.grammar-writing.meeting10.submit');
-    Route::post('/assignments/grammar-writing/fast-track/meeting10/reset', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting10Reset'])->name('assignments.grammar-writing.meeting10.reset');
-    Route::get('/assignments/grammar-writing/fast-track/meeting11', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting11'])->name('assignments.grammar-writing.meeting11');
-    Route::post('/assignments/grammar-writing/fast-track/meeting11', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting11Submit'])->name('assignments.grammar-writing.meeting11.submit');
-    Route::post('/assignments/grammar-writing/fast-track/meeting11/reset', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting11Reset'])->name('assignments.grammar-writing.meeting11.reset');
-    Route::get('/assignments/grammar-writing/fast-track/meeting12', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting12'])->name('assignments.grammar-writing.meeting12');
-    Route::post('/assignments/grammar-writing/fast-track/meeting12', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting12Submit'])->name('assignments.grammar-writing.meeting12.submit');
-    Route::post('/assignments/grammar-writing/fast-track/meeting12/reset', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting12Reset'])->name('assignments.grammar-writing.meeting12.reset');
-    Route::get('/assignments/grammar-writing/fast-track/meeting13', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting13'])->name('assignments.grammar-writing.meeting13');
-    Route::post('/assignments/grammar-writing/fast-track/meeting13', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting13Submit'])->name('assignments.grammar-writing.meeting13.submit');
-    Route::post('/assignments/grammar-writing/fast-track/meeting13/reset', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting13Reset'])->name('assignments.grammar-writing.meeting13.reset');
-    Route::get('/assignments/grammar-writing/fast-track/meeting14', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting14'])->name('assignments.grammar-writing.meeting14');
-    Route::post('/assignments/grammar-writing/fast-track/meeting14', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting14Submit'])->name('assignments.grammar-writing.meeting14.submit');
-    Route::post('/assignments/grammar-writing/fast-track/meeting14/reset', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting14Reset'])->name('assignments.grammar-writing.meeting14.reset');
-    Route::get('/assignments/grammar-writing/fast-track/meeting15', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting15'])->name('assignments.grammar-writing.meeting15');
-    Route::post('/assignments/grammar-writing/fast-track/meeting15', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting15Submit'])->name('assignments.grammar-writing.meeting15.submit');
-    Route::post('/assignments/grammar-writing/fast-track/meeting15/reset', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting15Reset'])->name('assignments.grammar-writing.meeting15.reset');
-    Route::get('/assignments/grammar-writing/fast-track/meeting16', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting16'])->name('assignments.grammar-writing.meeting16');
-    Route::post('/assignments/grammar-writing/fast-track/meeting16', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting16Submit'])->name('assignments.grammar-writing.meeting16.submit');
-    Route::post('/assignments/grammar-writing/fast-track/meeting16/reset', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting16Reset'])->name('assignments.grammar-writing.meeting16.reset');
-    Route::get('/assignments/grammar-writing/fast-track/meeting17', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting17'])->name('assignments.grammar-writing.meeting17');
-    Route::post('/assignments/grammar-writing/fast-track/meeting17', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting17Submit'])->name('assignments.grammar-writing.meeting17.submit');
-    Route::post('/assignments/grammar-writing/fast-track/meeting17/reset', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting17Reset'])->name('assignments.grammar-writing.meeting17.reset');
+    Route::get('/assignments/grammar-writing/fast-track/meeting6', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting10'])->name('assignments.grammar-writing.meeting6');
+    Route::post('/assignments/grammar-writing/fast-track/meeting6', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting10Submit'])->name('assignments.grammar-writing.meeting6.submit');
+    Route::post('/assignments/grammar-writing/fast-track/meeting6/reset', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting10Reset'])->name('assignments.grammar-writing.meeting6.reset');
+    Route::get('/assignments/grammar-writing/fast-track/meeting7', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting12'])->name('assignments.grammar-writing.meeting7');
+    Route::post('/assignments/grammar-writing/fast-track/meeting7', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting12Submit'])->name('assignments.grammar-writing.meeting7.submit');
+    Route::post('/assignments/grammar-writing/fast-track/meeting7/reset', [App\Http\Controllers\GrammarWritingSessionController::class, 'meeting12Reset'])->name('assignments.grammar-writing.meeting7.reset');
+    Route::get('/assignments/grammar-writing/fast-track/meeting8', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting14'])->name('assignments.grammar-writing.meeting8');
+    Route::post('/assignments/grammar-writing/fast-track/meeting8', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting14Submit'])->name('assignments.grammar-writing.meeting8.submit');
+    Route::post('/assignments/grammar-writing/fast-track/meeting8/reset', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting14Reset'])->name('assignments.grammar-writing.meeting8.reset');
+    Route::get('/assignments/grammar-writing/fast-track/meeting9', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting15'])->name('assignments.grammar-writing.meeting9');
+    Route::post('/assignments/grammar-writing/fast-track/meeting9', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting15Submit'])->name('assignments.grammar-writing.meeting9.submit');
+    Route::post('/assignments/grammar-writing/fast-track/meeting9/reset', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting15Reset'])->name('assignments.grammar-writing.meeting9.reset');
+    Route::get('/assignments/grammar-writing/fast-track/meeting10', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting17'])->name('assignments.grammar-writing.meeting10');
+    Route::post('/assignments/grammar-writing/fast-track/meeting10', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting17Submit'])->name('assignments.grammar-writing.meeting10.submit');
+    Route::post('/assignments/grammar-writing/fast-track/meeting10/reset', [App\Http\Controllers\GrammarWritingAdvancedSessionController::class, 'meeting17Reset'])->name('assignments.grammar-writing.meeting10.reset');
+    
     
     // Grammar Writing Admin Content Routes (generic CRUD)
     Route::post('/admin/assignments/grammar-writing/vocab', [App\Http\Controllers\GrammarWritingAdminController::class, 'storeGrammarVocabulary'])->name('admin.grammar.vocab.store');
@@ -1367,13 +1516,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/users/bulk-update-status', [App\Http\Controllers\Admin\UserController::class, 'bulkUpdateStatus'])->name('admin.users.bulk_update_status')->middleware('role:admin');
     Route::post('/admin/users/{user}/convert', [App\Http\Controllers\Admin\UserController::class, 'convertGuest'])->name('users.convertGuest')->middleware('role:admin');
     Route::post('/admin/users/{user}/toggle-status', [App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.toggle-status')->middleware('role:admin');
+    Route::post('/admin/users/{user}/change-password', [App\Http\Controllers\Admin\UserController::class, 'changePassword'])->name('admin.users.change_password')->middleware('role:admin');
     Route::resource('admin/users', App\Http\Controllers\Admin\UserController::class)->names('users')->middleware('role:admin');
     Route::post('/admin/users/{user}/intern-permissions', [App\Http\Controllers\Admin\InternPermissionController::class, 'update'])->name('users.intern-permissions.update')->middleware('role:admin');
     
     // Admin Teachers Management
     Route::post('/admin/teachers/assign-student', [App\Http\Controllers\TeacherController::class, 'assignStudent'])->name('admin.teachers.assign_student')->middleware('role:admin');
     Route::post('/admin/teachers/assign-class', [App\Http\Controllers\TeacherController::class, 'assignClass'])->name('admin.teachers.assign_class')->middleware('role:admin');
-    Route::resource('admin/teachers', App\Http\Controllers\TeacherController::class)->names('teachers')->middleware('role:admin');
+    Route::resource('admin/teachers', App\Http\Controllers\TeacherController::class)->only(['index', 'show'])->names('teachers')->middleware('role:admin');
 
     // Admin Students Management
     Route::post('/admin/students/{student}/assign-teacher', [App\Http\Controllers\Admin\StudentController::class, 'assignTeacher'])->name('admin.students.assign_teacher')->middleware('role:admin');
@@ -1381,9 +1531,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/students/bulk-generate-referral-codes', [App\Http\Controllers\Admin\StudentController::class, 'bulkGenerateReferralCodes'])->name('admin.students.bulk_generate_referral')->middleware('role:admin');
     Route::get('/admin/students/{student}/current-assignment', [App\Http\Controllers\Admin\StudentController::class, 'currentAssignment'])->name('admin.students.current_assignment')->middleware('role:admin');
     Route::get('/admin/students/{student}/current-assignment-json', [App\Http\Controllers\Admin\StudentController::class, 'currentAssignmentJson'])->name('admin.students.current_assignment_json')->middleware('role:admin');
-    Route::resource('admin/students', App\Http\Controllers\Admin\StudentController::class)->names('students')->middleware('role:admin');
+    Route::resource('admin/students', App\Http\Controllers\Admin\StudentController::class)->only(['index', 'show'])->names('students')->middleware('role:admin');
+
+    Route::get('/admin/partners/search-users', [App\Http\Controllers\Admin\PartnerController::class, 'searchUsers'])->name('admin.partners.search-users')->middleware('role:admin');
+    Route::post('/admin/partners/{partner}/attach-user', [App\Http\Controllers\Admin\PartnerController::class, 'attachUser'])->name('admin.partners.attach-user')->middleware('role:admin');
+    Route::delete('/admin/partners/{partner}/detach-user/{user}', [App\Http\Controllers\Admin\PartnerController::class, 'detachUser'])->name('admin.partners.detach-user')->middleware('role:admin');
+    Route::get('/admin/partners/{partner}/export-score-sheet', [App\Http\Controllers\Admin\PartnerController::class, 'exportScoreSheet'])->name('admin.partners.export-score-sheet')->middleware('role:admin');
+    Route::resource('admin/partners', App\Http\Controllers\Admin\PartnerController::class)->names('admin.partners')->middleware('role:admin');
 
     Route::get('/admin', [App\Http\Controllers\AdminController::class, 'index'])->name('admin.dashboard')->middleware('role:admin');
+    Route::get('/admin/live-preview', [App\Http\Controllers\AdminController::class, 'livePreview'])->name('admin.live-preview')->middleware('role:admin');
     Route::get('/admin/api/active-students', [App\Http\Controllers\AdminController::class, 'activeStudentsJson'])->name('admin.api.active-students')->middleware('role:admin');
     Route::get('/admin/api/active-teachers', [App\Http\Controllers\AdminController::class, 'activeTeachersJson'])->name('admin.api.active-teachers')->middleware('role:admin');
     Route::get('/admin/chat', function () { 
@@ -1409,11 +1566,21 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/class-periods/{classPeriod}/assign-student', [App\Http\Controllers\Admin\ClassPeriodController::class, 'assignStudent'])->name('class-periods.assign-student');
     Route::delete('/admin/class-periods/{classPeriod}/remove-student/{user}', [App\Http\Controllers\Admin\ClassPeriodController::class, 'removeStudent'])->name('class-periods.remove-student');
     Route::post('/admin/class-periods/{classPeriod}/toggle-meeting/{meeting}', [App\Http\Controllers\Admin\ClassPeriodController::class, 'toggleMeeting'])->name('class-periods.toggle-meeting');
+    Route::post('/admin/class-periods/{classPeriod}/toggle-game/{meeting}/{gameIndex}', [App\Http\Controllers\Admin\ClassPeriodController::class, 'toggleGame'])->name('class-periods.toggle-game');
+    Route::post('/admin/class-periods/{classPeriod}/groups', [App\Http\Controllers\Admin\ClassPeriodController::class, 'storeGroup'])->name('class-periods.groups.store')->middleware('role:admin');
+    Route::post('/admin/class-periods/{classPeriod}/groups/bulk', [App\Http\Controllers\Admin\ClassPeriodController::class, 'bulkStoreGroups'])->name('class-periods.groups.bulk-store')->middleware('role:admin');
+    Route::post('/admin/class-periods/{classPeriod}/groups/auto-pair', [App\Http\Controllers\Admin\ClassPeriodController::class, 'autoPairGroups'])->name('class-periods.groups.auto-pair')->middleware('role:admin');
+    Route::delete('/admin/class-periods/{classPeriod}/groups-all', [App\Http\Controllers\Admin\ClassPeriodController::class, 'destroyAllGroups'])->name('class-periods.groups.destroy-all')->middleware('role:admin');
+    Route::delete('/admin/class-periods/{classPeriod}/groups/{studentGroup}', [App\Http\Controllers\Admin\ClassPeriodController::class, 'destroyGroup'])->name('class-periods.groups.destroy')->middleware('role:admin');
+    Route::post('/admin/class-periods/{classPeriod}/groups/{studentGroup}/members', [App\Http\Controllers\Admin\ClassPeriodController::class, 'addGroupMember'])->name('class-periods.groups.add-member')->middleware('role:admin');
+    Route::delete('/admin/class-periods/{classPeriod}/groups/{studentGroup}/members/{user}', [App\Http\Controllers\Admin\ClassPeriodController::class, 'removeGroupMember'])->name('class-periods.groups.remove-member')->middleware('role:admin');
     Route::resource('admin/class-periods', App\Http\Controllers\Admin\ClassPeriodController::class)->names('class-periods')->middleware('role:admin');
 
     Route::get('/admin/class-schedules', [App\Http\Controllers\Admin\ClassScheduleController::class, 'index'])->name('admin.class-schedules.index')->middleware('role:admin');
     Route::get('/api/admin/class-schedules/events', [App\Http\Controllers\Admin\ClassScheduleController::class, 'apiEvents'])->name('admin.class-schedules.events')->middleware('role:admin');
     Route::patch('/admin/class-schedules/{meeting}', [App\Http\Controllers\Admin\ClassScheduleController::class, 'update'])->name('admin.class-schedules.update')->middleware('role:admin');
+    Route::post('/admin/class-schedules/change-requests/{classMeetingChangeRequest}/approve', [App\Http\Controllers\Admin\ClassScheduleController::class, 'approveClassMeetingChangeRequest'])->name('admin.class-schedules.change-requests.approve')->middleware('role:admin');
+    Route::post('/admin/class-schedules/change-requests/{classMeetingChangeRequest}/reject', [App\Http\Controllers\Admin\ClassScheduleController::class, 'rejectClassMeetingChangeRequest'])->name('admin.class-schedules.change-requests.reject')->middleware('role:admin');
     
     // Admin Impersonation Routes
     Route::get('/admin/impersonate/{role}', [App\Http\Controllers\AdminController::class, 'impersonate'])->name('admin.impersonate');
@@ -1443,7 +1610,17 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/remote-view/pending-request/ack', [App\Http\Controllers\RemoteViewController::class, 'acknowledgePendingRequest'])->name('remote-view.pending-request.ack');
     Route::post('/remote-view/signal', [App\Http\Controllers\RemoteViewController::class, 'sendSignal'])->name('remote-view.signal');
     Route::get('/remote-view/pending-signals', [App\Http\Controllers\RemoteViewController::class, 'pendingSignals'])->name('remote-view.pending-signals');
-    
+
+    // Audio call (admin/teacher <-> student) - own "ring" endpoints, see
+    // AudioCallController's docblock for why this isn't reusing
+    // remote-view.request-screen (IELTS-writing-only path regex + tab-
+    // arming requirement, neither of which should apply to a voice call).
+    // The actual Offer/Answer/IceCandidate/Log/CloseSession handshake once
+    // a call is accepted reuses remote-view.signal/pending-signals above.
+    Route::post('/audio-call/request', [App\Http\Controllers\AudioCallController::class, 'requestCall'])->name('audio-call.request');
+    Route::get('/audio-call/pending-request', [App\Http\Controllers\AudioCallController::class, 'pendingRequest'])->name('audio-call.pending-request');
+    Route::post('/audio-call/pending-request/ack', [App\Http\Controllers\AudioCallController::class, 'acknowledgePendingRequest'])->name('audio-call.pending-request.ack');
+
     // Admin Mock Tests Management (subset of programs)
     Route::get('admin/mock-tests', [App\Http\Controllers\Admin\ProgramController::class, 'mockTestsIndex'])->name('programs.mock-tests')->middleware('role:admin');
 
@@ -1505,6 +1682,28 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/payments/proofs', [App\Http\Controllers\PaymentController::class, 'proofsIndex'])
         ->name('admin.payments.proofs')
         ->middleware('role:admin');
+    // Consolidated view of all students who self-booked a class batch (Booking Class feature)
+    Route::get('/admin/bookings', [App\Http\Controllers\Admin\BookingController::class, 'index'])
+        ->name('admin.bookings.index')
+        ->middleware('role:admin');
+    Route::post('/admin/bookings', [App\Http\Controllers\Admin\BookingController::class, 'store'])
+        ->name('admin.bookings.store')
+        ->middleware('role:admin');
+    Route::put('/admin/bookings/{enrollment}', [App\Http\Controllers\Admin\BookingController::class, 'update'])
+        ->name('admin.bookings.update')
+        ->middleware('role:admin');
+    Route::delete('/admin/bookings/{enrollment}', [App\Http\Controllers\Admin\BookingController::class, 'destroy'])
+        ->name('admin.bookings.destroy')
+        ->middleware('role:admin');
+    Route::get('/admin/bookings/export', [App\Http\Controllers\Admin\BookingController::class, 'exportContacts'])
+        ->name('admin.bookings.export')
+        ->middleware('role:admin');
+    Route::post('/admin/bookings/quota/{classPeriod}/send', [App\Http\Controllers\Admin\BookingController::class, 'sendQuota'])
+        ->name('admin.bookings.quota.send')
+        ->middleware('role:admin');
+    Route::post('/admin/bookings/quota/{classPeriod}/reject', [App\Http\Controllers\Admin\BookingController::class, 'rejectQuota'])
+        ->name('admin.bookings.quota.reject')
+        ->middleware('role:admin');
     Route::get('/admin/payments/export-csv', [App\Http\Controllers\PaymentController::class, 'adminExportCsv'])
         ->name('admin.payments.export-csv')
         ->middleware('role:admin');
@@ -1517,10 +1716,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/payments/{payment}/reject', [App\Http\Controllers\PaymentController::class, 'reject'])
         ->name('admin.payments.reject')
         ->middleware('role:admin');
-    Route::post('/admin/payments/purge-proofs', [App\Http\Controllers\PaymentController::class, 'purgeProofs'])
-        ->name('admin.payments.purge-proofs')
-        ->middleware('role:admin');
-    
     // Teacher Evaluations (Admin)
     Route::get('/admin/teacher-evaluations', [App\Http\Controllers\Admin\TeacherEvaluationController::class, 'index'])->name('admin.evaluations.index')->middleware('role:admin');
     
@@ -1555,9 +1750,30 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/admin/referrals/social/{id}', [App\Http\Controllers\Admin\ReferralController::class, 'updateSocialMedia'])->name('admin.referrals.social.update')->middleware('role:admin');
     
     // Admin Assignment Results
-    Route::get('/admin/assignment-results', [App\Http\Controllers\Admin\AssignmentResultController::class, 'index'])->name('admin.assignment-results.index')->middleware('role:admin');
-    Route::get('/admin/assignment-results/{program}', [App\Http\Controllers\Admin\AssignmentResultController::class, 'show'])->name('admin.assignment-results.show')->middleware('role:admin');
-    Route::get('/admin/assignment-results/{program}/submissions/{submission}', [App\Http\Controllers\Admin\AssignmentResultController::class, 'showSubmission'])->name('admin.assignment-results.submission')->middleware('role:admin');
+    Route::get('/admin/assignment-results', [App\Http\Controllers\Admin\AssignmentResultController::class, 'index'])->name('admin.assignment-results.index')->middleware('role:teacher');
+    Route::get('/admin/assignment-results/{program}', [App\Http\Controllers\Admin\AssignmentResultController::class, 'show'])->name('admin.assignment-results.show')->middleware('role:teacher');
+    Route::get('/admin/assignment-results/{program}/submissions/{submission}', [App\Http\Controllers\Admin\AssignmentResultController::class, 'showSubmission'])->name('admin.assignment-results.submission')->middleware('role:teacher');
+    Route::post('/admin/assignment-results/{program}/submissions/{submission}/review', [App\Http\Controllers\Admin\AssignmentResultController::class, 'saveReview'])->name('admin.assignment-results.submission.review')->middleware('role:teacher');
+
+    // Admin/Teacher: IELTS Writing Practice submissions & detail examination.
+    Route::get('/admin/writing-practice-submissions', [App\Http\Controllers\Admin\WritingPracticeSubmissionController::class, 'index'])->name('admin.writing-practice-submissions.index')->middleware('role:teacher');
+    Route::post('/admin/writing-practice-submissions/toggle-ai', [App\Http\Controllers\Admin\WritingPracticeSubmissionController::class, 'toggleAi'])->name('admin.writing-practice-submissions.toggle-ai')->middleware('role:teacher');
+    Route::get('/admin/writing-practice-submissions/{submission}', [App\Http\Controllers\Admin\WritingPracticeSubmissionController::class, 'show'])->name('admin.writing-practice-submissions.show')->middleware('role:teacher');
+    Route::post('/admin/writing-practice-submissions/{submission}/review', [App\Http\Controllers\Admin\WritingPracticeSubmissionController::class, 'saveReview'])->name('admin.writing-practice-submissions.review')->middleware('role:teacher');
+
+    // Admin/Teacher: Grammar Writing (fast-track meeting) submissions review.
+    Route::get('/admin/grammar-writing-review', [App\Http\Controllers\Admin\AdminGrammarWritingReviewController::class, 'index'])->name('admin.grammar-writing-review.index')->middleware('role:teacher');
+    Route::post('/admin/grammar-writing-review/toggle-ai', [App\Http\Controllers\Admin\AdminGrammarWritingReviewController::class, 'toggleAi'])->name('admin.grammar-writing-review.toggle-ai')->middleware('role:teacher');
+    Route::post('/admin/grammar-writing-review/save-evaluation-canvas', [App\Http\Controllers\Admin\AdminGrammarWritingReviewController::class, 'saveEvaluationCanvas'])->name('admin.grammar-writing-review.save-canvas')->middleware('role:teacher');
+    Route::get('/admin/grammar-writing-review/{meetingScore}', [App\Http\Controllers\Admin\AdminGrammarWritingReviewController::class, 'show'])->name('admin.grammar-writing-review.show')->middleware('role:teacher');
+    Route::post('/admin/grammar-writing-review/{meetingScore}/review', [App\Http\Controllers\Admin\AdminGrammarWritingReviewController::class, 'saveReview'])->name('admin.grammar-writing-review.review')->middleware('role:teacher');
+
+    // Admin/Teacher: per-question AI grading toggle on IELTS Writing practice cards.
+    Route::post('/admin/ielts-writing-meetings/{meeting}/toggle-ai', [App\Http\Controllers\IeltsWritingController::class, 'toggleMeetingAi'])->name('admin.ielts-writing-meetings.toggle-ai')->middleware('role:teacher');
+
+    // Student & Admin/Teacher: Show Writing Submission Result Page
+    Route::get('/assignments/ielts-academic/writing/submission/{submission}', [App\Http\Controllers\IeltsWritingController::class, 'showSubmission'])->name('assignments.ielts-academic.writing.submission.show');
+    Route::post('/assignments/ielts-academic/writing/submission/{submission}/save-feedback', [App\Http\Controllers\IeltsWritingController::class, 'saveFullFeedback'])->name('assignments.ielts-academic.writing.submission.save-feedback');
 
     // Admin Free Test Certificates
     // Camp Management
@@ -1570,6 +1786,8 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/admin/free-test-certificates/{id}', [App\Http\Controllers\Admin\FreeTestCertificateController::class, 'update'])->name('admin.free-tests.certificates.update')->middleware('role:admin');
     Route::get('/admin/free-test-certificates/{id}/preview/{resultId?}', [App\Http\Controllers\Admin\FreeTestCertificateController::class, 'preview'])->name('admin.free-tests.certificates.preview')->middleware('role:admin');
     Route::get('/admin/free-test-certificates/{id}/background', [App\Http\Controllers\Admin\FreeTestCertificateController::class, 'backgroundImage'])->name('admin.free-tests.certificates.background')->middleware('role:admin');
+    Route::get('/admin/free-test-certificates/{id}/signature', [App\Http\Controllers\Admin\FreeTestCertificateController::class, 'signatureImage'])->name('admin.free-tests.certificates.signature')->middleware('role:admin');
+    Route::get('/admin/free-test-certificates/{id}/stamp', [App\Http\Controllers\Admin\FreeTestCertificateController::class, 'stampImage'])->name('admin.free-tests.certificates.stamp')->middleware('role:admin');
     
     // System Settings
     Route::get('/admin/settings', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('admin.settings.index')->middleware('role:admin');
@@ -1653,6 +1871,7 @@ Route::middleware(['auth'])->group(function () {
 // Public Registration Form
 Route::get('/daftar', [App\Http\Controllers\RegistrationController::class, 'show'])->name('registration.show');
 Route::post('/daftar', [App\Http\Controllers\RegistrationController::class, 'store'])->name('registration.store')->middleware('throttle:5,10');
+Route::get('/registration/continue/{enrollment}', [App\Http\Controllers\RegistrationController::class, 'continueFromBooking'])->name('registration.continue')->middleware('signed');
 Route::get('/daftar/success', [App\Http\Controllers\RegistrationController::class, 'success'])->name('registration.success');
 Route::post('/api/verify-referral', [App\Http\Controllers\ReferralController::class, 'verify'])->name('api.verify-referral');
 
@@ -1713,4 +1932,27 @@ Route::middleware(['auth', config('jetstream.auth_session'), 'verified', 'role:a
 // API routes for Live Drawing sync fallback
 Route::post('/api/live-drawing/sync', [App\Http\Controllers\LiveDrawingController::class, 'sync'])->name('api.live-drawing.sync')->middleware('auth');
 Route::get('/api/live-drawing/fetch/{targetUserId}', [App\Http\Controllers\LiveDrawingController::class, 'fetch'])->name('api.live-drawing.fetch')->middleware('auth');
+Route::post('/api/live-drawing/presence', [App\Http\Controllers\LiveDrawingController::class, 'presence'])->name('api.live-drawing.presence')->middleware('auth');
+Route::post('/api/submission-review/{meetingScore}/sync', [App\Http\Controllers\SubmissionReviewSyncController::class, 'sync'])->name('api.submission-review.sync')->middleware(['auth', 'role:teacher']);
+Route::get('/api/submission-review/{meetingScore}/fetch', [App\Http\Controllers\SubmissionReviewSyncController::class, 'fetch'])->name('api.submission-review.fetch')->middleware('auth');
+Route::post('/api/live-drawing/pdf', [App\Http\Controllers\LiveDrawingController::class, 'exportPdf'])->name('api.live-drawing.pdf')->middleware('auth');
+Route::post('/api/live-drawing/archive', [App\Http\Controllers\LiveDrawingController::class, 'archive'])->name('api.live-drawing.archive')->middleware('auth');
+Route::get('/api/live-drawing/archives/{targetUserId}', [App\Http\Controllers\LiveDrawingController::class, 'archives'])->name('api.live-drawing.archives')->middleware('auth');
+Route::get('/api/live-drawing/archives/{targetUserId}/{archive}', [App\Http\Controllers\LiveDrawingController::class, 'showArchive'])->name('api.live-drawing.archives.show')->middleware('auth');
+Route::delete('/api/live-drawing/archives/{targetUserId}/{archive}', [App\Http\Controllers\LiveDrawingController::class, 'destroyArchive'])->name('api.live-drawing.archives.destroy')->middleware('auth');
+Route::post('/api/live-drawing/checkpoint', [App\Http\Controllers\LiveDrawingController::class, 'checkpoint'])->name('api.live-drawing.checkpoint')->middleware('auth');
+Route::get('/api/live-drawing/checkpoints/{targetUserId}', [App\Http\Controllers\LiveDrawingController::class, 'checkpoints'])->name('api.live-drawing.checkpoints')->middleware('auth');
+Route::get('/api/live-drawing/checkpoints/{targetUserId}/{checkpoint}', [App\Http\Controllers\LiveDrawingController::class, 'showCheckpoint'])->name('api.live-drawing.checkpoints.show')->middleware('auth');
+Route::delete('/api/live-drawing/checkpoints/{targetUserId}', [App\Http\Controllers\LiveDrawingController::class, 'destroyCheckpoints'])->name('api.live-drawing.checkpoints.destroy')->middleware('auth');
+Route::post('/api/live-drawing/batch/targets', [App\Http\Controllers\LiveDrawingController::class, 'presenceTargets'])->name('api.live-drawing.batch.targets')->middleware('auth');
+Route::get('/api/live-drawing/batch/my-status', [App\Http\Controllers\LiveDrawingController::class, 'myBatchStatus'])->name('api.live-drawing.batch.my-status')->middleware('auth');
+Route::get('/api/live-drawing/students/search', [App\Http\Controllers\LiveDrawingController::class, 'searchStudents'])->name('api.live-drawing.students.search')->middleware('auth');
+
+// Dynamic CSRF Token Fetch for bfcache & long session refresh
+Route::get('/csrf-token', function () {
+    return response()->json([
+        'token' => csrf_token(),
+    ]);
+})->name('csrf.token');
+
 

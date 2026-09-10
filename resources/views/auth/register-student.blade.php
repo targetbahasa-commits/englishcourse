@@ -89,6 +89,14 @@
                 @endif
 
                 <input type="hidden" name="referral_code" value="{{ request()->query('ref') }}">
+                <input type="hidden" name="partner_code" value="{{ $partner->registration_code ?? '' }}">
+
+                @if(!empty($partner))
+                    <div class="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+                        Mendaftar sebagai karyawan <strong>{{ $partner->name }}</strong>.
+                    </div>
+                @endif
+
                 <input type="hidden" id="program_choice" name="program_choice"
                     value="{{ old('program_choice', $preselectedProgramSlug ?? '') }}">
                 <input type="hidden" id="payment_channel_choice" name="payment_channel_choice"

@@ -32,11 +32,13 @@
             <div class="container mx-auto">
 
                 <!-- Header with Back Button -->
-                <div class="mb-8">
-                    <a href="{{ route('assignments.pte-academic.speaking-writing.index') }}#topic-{{ $topicId ?? '' }}" class="inline-flex items-center text-gray-600 hover:text-blue-500 transition-colors mb-4">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                        Back to Selection
-                    </a>
+                <div class="mb-6">
+                    <div class="flex justify-end mb-2">
+                        <a href="{{ route('assignments.pte-academic.speaking-writing.index') }}#topic-{{ $topicId ?? '' }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-gray-600 bg-white hover:bg-white border border-gray-200 rounded-full shadow-sm transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                            <span>Back</span>
+                        </a>
+                    </div>
 
                     <div class="flex items-center gap-4">
                         <div class="w-14 h-14 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-lg shadow-blue-500/30">
@@ -58,11 +60,11 @@
                         <div class="p-8 md:p-12 flex-1 flex flex-col items-center text-center">
 
                             <!-- Instruction Box -->
-                            <div class="w-full border border-gray-300 rounded-xl p-5 mb-8 text-left text-gray-700 text-base leading-relaxed bg-gray-50">
+                            <div class="w-full border border-gray-300 rounded-xl p-5 mb-8 text-left text-gray-700 text-base leading-relaxed bg-white">
                                 Read the prompt below. In <strong>25 seconds</strong>, you must reply in your own words, as naturally and clearly as possible. You have <strong>30 seconds</strong> to record your response. Your response will be sent together with your score report to the institutions selected by you. This item is not scored.
                             </div>
 
-                            <div class="w-full border border-blue-200 rounded-xl p-5 mb-8 text-left text-gray-800 font-medium text-lg leading-relaxed shadow-sm bg-blue-50">
+                            <div class="w-full border border-blue-200 rounded-xl p-5 mb-8 text-left text-gray-800 font-medium text-lg leading-relaxed shadow-sm bg-white">
                                 Please introduce yourself. For example, you could talk about one or more of the following:
                                 <ul class="list-disc ml-6 mt-3 space-y-1 text-gray-600 text-base font-normal">
                                     <li>Your interests</li>
@@ -85,7 +87,7 @@
                             </div>
 
                             <!-- Recording Controls -->
-                            <div id="recordingBox" class="hidden w-full max-w-lg bg-blue-50 rounded-2xl p-5 border border-blue-100 shadow-sm mb-6">
+                            <div id="recordingBox" class="hidden w-full max-w-lg bg-white rounded-2xl p-5 border border-blue-100 shadow-sm mb-6">
                                 <p class="text-center text-blue-700 font-semibold text-sm mb-4">Recording... Please speak now</p>
                                 <div class="flex items-center gap-4">
                                     <div id="micCircle"
@@ -155,6 +157,24 @@
         var prepLeft   = 25; // 25 seconds prep
         var mediaRecorder = null;
         var audioChunks   = [];
+        var recordedMimeType = '';
+
+        function pteGetSupportedMimeType() {
+            var candidates = [
+                'audio/webm;codecs=opus',
+                'audio/webm',
+                'audio/mp4',
+                'audio/mp4;codecs=mp4a.40.2',
+                'audio/aac',
+                'audio/ogg;codecs=opus'
+            ];
+            for (var i = 0; i < candidates.length; i++) {
+                if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(candidates[i])) {
+                    return candidates[i];
+                }
+            }
+            return '';
+        }
         var answerUrl     = null;
 
         function fmt(s) {
@@ -176,7 +196,7 @@
             prepLeft = 25;
             prepBox.classList.remove('hidden');
             prepCountdown.textContent = prepLeft;
-            setStatus('Prepare your response...', '#3b82f6');
+            setStatus('Prepare your response...', '#ea580c');
 
             prepTimer = setInterval(function () {
                 prepLeft--;
@@ -198,13 +218,19 @@
 
             navigator.mediaDevices.getUserMedia({ audio: true })
                 .then(function (stream) {
-                    mediaRecorder = new MediaRecorder(stream);
+                    var mimeType = pteGetSupportedMimeType();
+                    try {
+                        mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType: mimeType }) : new MediaRecorder(stream);
+                    } catch (e) {
+                        mediaRecorder = new MediaRecorder(stream);
+                    }
+                    recordedMimeType = mediaRecorder.mimeType || mimeType || 'audio/webm';
                     audioChunks = [];
                     mediaRecorder.ondataavailable = function (e) {
                         if (e.data.size > 0) audioChunks.push(e.data);
                     };
                     mediaRecorder.onstop = function () {
-                        var blob = new Blob(audioChunks, { type: 'audio/webm' });
+                        var blob = new Blob(audioChunks, { type: recordedMimeType });
                         answerUrl = URL.createObjectURL(blob);
                         answerAudio.src = answerUrl;
                         stream.getTracks().forEach(function (t) { t.stop(); });
@@ -223,7 +249,11 @@
                     }, 1000);
                 })
                 .catch(function () {
-                    alert('Microphone access is required. Please allow microphone access and try again.');
+                    if (!window.MediaRecorder) {
+                        alert('Your browser does not support audio recording. Please try a recent version of Chrome, Firefox, or Safari.');
+                    } else {
+                        alert('Microphone access is required. Please allow microphone access and try again.');
+                    }
                     restartSession();
                 });
         }
@@ -274,5 +304,6 @@
             restartBtn.style.display  = 'none';
         }
     </script>
+    <x-live-drawing />
 </body>
 </html>

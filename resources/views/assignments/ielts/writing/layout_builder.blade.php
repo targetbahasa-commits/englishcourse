@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', ($meeting->title ?? 'Layout Builder') . ' - IELTS Writing Task ' . ($task ?? 1))
+
 @push('scripts')
     <script src="{{ asset('js/auto-save.js') }}?v={{ time() }}"></script>
     <script>
@@ -49,6 +51,7 @@
         result: null,
         error: null,
         showResults: false,
+        correctionFailed: false,
         feedbackLoading: false,
         vocabLoading: false,
             showTopicVocab: false,
@@ -65,6 +68,7 @@
         grammarError: null,
 
         extraParagraphs: [],
+        draftSyncTimer: null,
         time: {{ isset($meeting) && $meeting->category === 'practice_item' ? 300 : 0 }},
         timerType: '{{ isset($meeting) && $meeting->category === 'practice_item' ? 'countdown' : 'countup' }}',
         interval: null,
@@ -105,9 +109,13 @@
 
         init() {
             const key = 'ielts_task2_autosave_' + {{ $meeting->id }};
-            
-            // Restore
+
+            // Restore - localStorage first (same-device, no network round
+            // trip), falling back to the server-synced copy only when this
+            // browser has never saved a local draft (new device, or
+            // localStorage was cleared) - see restoreFromServerAnswers().
             const saved = localStorage.getItem(key);
+            let restoredLocally = false;
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
@@ -115,17 +123,22 @@
                     if (data.form) this.form = { ...this.form, ...data.form };
                     if (data.extraParagraphs) this.extraParagraphs = data.extraParagraphs;
                     if (data.essay) this.essay = data.essay;
+                    restoredLocally = true;
                 } catch (e) {
                     console.error('Autosave Restore Error:', e);
                 }
             }
-            
+
+            if (!restoredLocally) {
+                this.restoreFromServerAnswers();
+            }
+
             // Start Timer
-            this.interval = setInterval(() => { 
+            this.interval = setInterval(() => {
                 if (this.timerType === 'countdown') {
                     this.time--;
                 } else {
-                    this.time++; 
+                    this.time++;
                 }
             }, 1000);
 
@@ -136,11 +149,98 @@
                     extraParagraphs: this.extraParagraphs,
                     essay: this.essay
                 }));
+                this.queueDraftSync();
             };
 
-            this.$watch('form', saver); 
+            this.$watch('form', saver);
             this.$watch('extraParagraphs', saver);
             this.$watch('essay', saver);
+        },
+
+        // Rebuilds form/essay/extraParagraphs from the flat
+        // 'form_intro'/'essay'/'extra_{id}_a1' shape saveMeetingDraft()
+        // stores server-side (see buildDraftPayload() below - it's the
+        // exact inverse of this) - only used when localStorage has nothing
+        // for this browser, so a student switching devices (or clearing
+        // storage) doesn't lose an in-progress draft that was already
+        // synced from elsewhere.
+        restoreFromServerAnswers() {
+            const flat = {{ Js::from($savedAnswers ?? []) }};
+            if (!flat || typeof flat !== 'object' || Array.isArray(flat) || Object.keys(flat).length === 0) {
+                return;
+            }
+
+            Object.keys(this.form).forEach((key) => {
+                const flatKey = 'form_' + key;
+                if (flat[flatKey] !== undefined) {
+                    this.form[key] = flat[flatKey];
+                }
+            });
+
+            if (flat.essay !== undefined) {
+                this.essay = flat.essay;
+            }
+
+            const extrasById = {};
+            Object.keys(flat).forEach((flatKey) => {
+                const match = flatKey.match(/^extra_(\d+)_(a1_supp|a1_ex|a1|a2_supp|a2_ex|a2)$/);
+                if (!match) return;
+                const id = match[1];
+                const field = match[2];
+                if (!extrasById[id]) {
+                    extrasById[id] = { id: Number(id), a1: '', a1_supp: '', a1_ex: '', a2: '', a2_supp: '', a2_ex: '' };
+                }
+                extrasById[id][field] = flat[flatKey];
+            });
+            const extras = Object.values(extrasById).sort((a, b) => a.id - b.id);
+            if (extras.length > 0) {
+                this.extraParagraphs = extras;
+            }
+        },
+
+        // Inverse of restoreFromServerAnswers() - flattens form/essay/
+        // extraParagraphs into the same 'form_intro'/'essay'/
+        // 'extra_{id}_a1' names the fields themselves carry (see their
+        // name/:name attributes below), so the admin live-preview's
+        // flatten()-and-match-by-name injection works with no
+        // server-side reshaping needed.
+        buildDraftPayload() {
+            const payload = {};
+            Object.keys(this.form).forEach((key) => {
+                payload['form_' + key] = this.form[key];
+            });
+            payload.essay = this.essay;
+            this.extraParagraphs.forEach((para) => {
+                payload['extra_' + para.id + '_a1'] = para.a1;
+                payload['extra_' + para.id + '_a1_supp'] = para.a1_supp;
+                payload['extra_' + para.id + '_a1_ex'] = para.a1_ex;
+                payload['extra_' + para.id + '_a2'] = para.a2;
+                payload['extra_' + para.id + '_a2_supp'] = para.a2_supp;
+                payload['extra_' + para.id + '_a2_ex'] = para.a2_ex;
+            });
+            return payload;
+        },
+
+        queueDraftSync() {
+            clearTimeout(this.draftSyncTimer);
+            this.draftSyncTimer = setTimeout(() => this.syncDraftToServer(), 800);
+        },
+
+        async syncDraftToServer() {
+            try {
+                await fetch('/assignments/ielts-academic/writing/meeting/{{ $meeting->id }}/draft', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({ userAnswers: this.buildDraftPayload() }),
+                    keepalive: true,
+                });
+            } catch (e) {
+                console.error('Failed to sync draft to server:', e);
+            }
         },
 
         addParagraph() {
@@ -275,9 +375,9 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    
+
                     let finalHtml = data.correction_html;
-                    
+
                     // Sanitize 'undefined' string
                     if (!finalHtml || finalHtml === 'undefined' || (typeof finalHtml === 'string' && finalHtml.includes('undefined'))) {
                          finalHtml = '';
@@ -286,18 +386,28 @@
                     // Fallback to original essay if valid correction is missing
                     if (!finalHtml || finalHtml.length < 20) {
                         finalHtml = '<p>' + this.essay.replace(/\n/g, '<br>') + '</p>';
+                        this.correctionFailed = true;
+                    } else {
+                        this.correctionFailed = false;
                     }
 
                     // Merge into result
                     this.result = { ...this.result, correction_html: finalHtml };
+                } else {
+                    this.correctionFailed = true;
+                    this.result = {
+                        ...this.result,
+                        correction_html: '<p>' + this.essay.replace(/\n/g, '<br>') + '</p>'
+                    };
                 }
             } catch (e) {
                 console.error('Correction failed:', e);
                 this.error = 'Correction Error: ' + e.message;
+                this.correctionFailed = true;
                 // Fallback on error
-                this.result = { 
-                    ...this.result, 
-                    correction_html: '<p>' + this.essay.replace(/\n/g, '<br>') + '</p>' 
+                this.result = {
+                    ...this.result,
+                    correction_html: '<p>' + this.essay.replace(/\n/g, '<br>') + '</p>'
                 };
             }
         },
@@ -749,7 +859,7 @@
                     <div class="space-y-4">
                         <div class="bg-gray-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Introduction Text</label>
-                            <textarea x-model="form.intro" class="w-full p-3 bg-white rounded border-gray-200 focus:border-gray-300 focus:ring-0 text-sm resize-none" rows="4" placeholder="Tuliskan pendahuluan Anda di sini (Paraphrase Topic + Thesis Statement)..."></textarea>
+                            <textarea name="form_intro" x-model="form.intro" class="w-full p-3 bg-white rounded border-gray-200 focus:border-gray-300 focus:ring-0 text-sm resize-none" rows="4" placeholder="Tuliskan pendahuluan Anda di sini (Paraphrase Topic + Thesis Statement)..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -766,17 +876,17 @@
                         <!-- Argument 1 -->
                         <div class="bg-blue-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-blue-600 uppercase mb-1">Argumen 1</label>
-                            <input x-model="form.b1_a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-blue-500 text-sm" placeholder="Poin utama pertama...">
-                            <textarea x-model="form.b1_a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
-                            <textarea x-model="form.b1_a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh untuk Argumen 1..."></textarea>
+                            <input name="form_b1_a1" x-model="form.b1_a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-blue-500 text-sm" placeholder="Poin utama pertama...">
+                            <textarea name="form_b1_a1_supp" x-model="form.b1_a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
+                            <textarea name="form_b1_a1_ex" x-model="form.b1_a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh untuk Argumen 1..."></textarea>
                         </div>
 
                         <!-- Argument 2 -->
                         <div class="bg-blue-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-blue-600 uppercase mb-1">Argumen 2</label>
-                            <input x-model="form.b1_a2" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-blue-500 text-sm" placeholder="Poin utama kedua...">
-                            <textarea x-model="form.b1_a2_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
-                            <textarea x-model="form.b1_a2_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh untuk Argumen 2..."></textarea>
+                            <input name="form_b1_a2" x-model="form.b1_a2" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-blue-500 text-sm" placeholder="Poin utama kedua...">
+                            <textarea name="form_b1_a2_supp" x-model="form.b1_a2_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
+                            <textarea name="form_b1_a2_ex" x-model="form.b1_a2_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-blue-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh untuk Argumen 2..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -792,17 +902,17 @@
                         <!-- Argument 1 -->
                         <div class="bg-orange-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-orange-600 uppercase mb-1">Argumen 1</label>
-                            <input x-model="form.b2_a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-orange-500 text-sm" placeholder="Poin utama pertama...">
-                            <textarea x-model="form.b2_a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
-                            <textarea x-model="form.b2_a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh untuk Argumen 1..."></textarea>
+                            <input name="form_b2_a1" x-model="form.b2_a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-orange-500 text-sm" placeholder="Poin utama pertama...">
+                            <textarea name="form_b2_a1_supp" x-model="form.b2_a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
+                            <textarea name="form_b2_a1_ex" x-model="form.b2_a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh untuk Argumen 1..."></textarea>
                         </div>
 
                         <!-- Argument 2 -->
                         <div class="bg-orange-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-orange-600 uppercase mb-1">Argumen 2</label>
-                            <input x-model="form.b2_a2" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-orange-500 text-sm" placeholder="Poin utama kedua...">
-                            <textarea x-model="form.b2_a2_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
-                            <textarea x-model="form.b2_a2_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh untuk Argumen 2..."></textarea>
+                            <input name="form_b2_a2" x-model="form.b2_a2" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-orange-500 text-sm" placeholder="Poin utama kedua...">
+                            <textarea name="form_b2_a2_supp" x-model="form.b2_a2_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung (Penjelasan)..."></textarea>
+                            <textarea name="form_b2_a2_ex" x-model="form.b2_a2_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-orange-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh untuk Argumen 2..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -819,17 +929,17 @@
                             <!-- Argument 1 -->
                             <div class="bg-green-50 p-3 rounded-lg">
                                 <label class="block text-xs font-bold text-green-600 uppercase mb-1">Argumen 1</label>
-                                <input x-model="para.a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-green-500 text-sm" placeholder="Poin utama...">
-                                <textarea x-model="para.a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-green-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung..."></textarea>
-                                <textarea x-model="para.a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-green-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh..."></textarea>
+                                <input :name="'extra_' + para.id + '_a1'" x-model="para.a1" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-green-500 text-sm" placeholder="Poin utama...">
+                                <textarea :name="'extra_' + para.id + '_a1_supp'" x-model="para.a1_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-green-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung..."></textarea>
+                                <textarea :name="'extra_' + para.id + '_a1_ex'" x-model="para.a1_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-green-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh..."></textarea>
                             </div>
 
                             <!-- Argument 2 -->
                             <div class="bg-green-50 p-3 rounded-lg">
                                 <label class="block text-xs font-bold text-green-600 uppercase mb-1">Argumen 2</label>
-                                <input x-model="para.a2" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-green-500 text-sm" placeholder="Poin utama kedua...">
-                                <textarea x-model="para.a2_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-green-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung..."></textarea>
-                                <textarea x-model="para.a2_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-green-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh..."></textarea>
+                                <input :name="'extra_' + para.id + '_a2'" x-model="para.a2" type="text" class="w-full mb-2 p-2 rounded border-gray-200 focus:border-green-500 text-sm" placeholder="Poin utama kedua...">
+                                <textarea :name="'extra_' + para.id + '_a2_supp'" x-model="para.a2_supp" class="w-full mb-2 p-2 bg-white rounded border-gray-200 focus:border-green-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Ide Pendukung..."></textarea>
+                                <textarea :name="'extra_' + para.id + '_a2_ex'" x-model="para.a2_ex" class="w-full p-2 bg-white rounded border-gray-200 focus:border-green-300 focus:ring-0 text-sm resize-none" rows="2" placeholder="Contoh..."></textarea>
                             </div>
                         </div>
                     </div>
@@ -855,7 +965,7 @@
                     <div class="space-y-4">
                         <div class="bg-gray-50 p-3 rounded-lg">
                             <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Conclusion Text</label>
-                            <textarea x-model="form.conclusion" class="w-full p-3 bg-white rounded border-gray-200 focus:border-gray-300 focus:ring-0 text-sm resize-none" rows="4" placeholder="Tuliskan kesimpulan Anda di sini (Restate Thesis + Summary)..."></textarea>
+                            <textarea name="form_conclusion" x-model="form.conclusion" class="w-full p-3 bg-white rounded border-gray-200 focus:border-gray-300 focus:ring-0 text-sm resize-none" rows="4" placeholder="Tuliskan kesimpulan Anda di sini (Restate Thesis + Summary)..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -879,7 +989,7 @@
                     
                     <!-- Scrollable Textarea Container -->
                     <div class="flex-1 relative min-h-0 overflow-y-auto custom-scrollbar">
-                        <textarea x-model="essay" 
+                        <textarea name="essay" x-model="essay"
                                   x-ref="writingArea"
                                   @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
                                   x-init="$watch('essay', () => { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px' }); $nextTick(() => { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px' })"
@@ -935,10 +1045,24 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0">
             <!-- Left Column: Topic & Detailed Analysis -->
             <div class="flex flex-col gap-4 min-h-0 h-full">
-                <!-- Topic Card -->
+                <!-- Topic Card & Chart -->
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex-shrink-0">
                     <h5 class="font-bold text-gray-800 mb-2">Topic</h5>
                     <div class="text-gray-600 text-sm leading-relaxed">{!! $meeting->prompt !!}</div>
+                    @if(!empty($meeting->image))
+                        <div class="mt-4 p-2 bg-gray-50 rounded-xl border border-gray-100 flex justify-center">
+                            <img src="{{ asset('storage/' . $meeting->image) }}" class="max-h-80 object-contain rounded-lg shadow-sm" alt="Task Diagram" />
+                        </div>
+                    @elseif(class_exists('\App\Support\IeltsTask1ChartResolver') && isset($meeting))
+                        @php
+                            $chart = \App\Support\IeltsTask1ChartResolver::resolve($meeting);
+                        @endphp
+                        @if(!empty($chart['publicUrl']))
+                            <div class="mt-4 p-2 bg-gray-50 rounded-xl border border-gray-100 flex justify-center">
+                                <img src="{{ asset($chart['publicUrl']) }}" class="max-h-80 object-contain rounded-lg shadow-sm" alt="Task Diagram" />
+                            </div>
+                        @endif
+                    @endif
                 </div>
 
                 <!-- Analysis Card -->
@@ -953,23 +1077,24 @@
                     </div>
                     <!-- Correction Content -->
                     <div class="p-6 overflow-y-auto flex-1 prose max-w-none leading-loose text-lg text-gray-800 selection:bg-blue-100">
+                        <div x-show="loading" class="mb-4 text-orange-500 flex items-center gap-2 animate-pulse">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            <span class="text-sm font-semibold">AI is analyzing your text...</span>
+                        </div>
+                        <div x-show="!loading && correctionFailed" class="mb-4 bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-lg flex items-center justify-between gap-4 not-prose">
+                            <span class="text-sm">The detailed markup is taking longer than usual. Showing your original essay below.</span>
+                            <button type="button" @click="getCorrection()" class="text-sm font-semibold text-orange-600 hover:text-orange-700 whitespace-nowrap flex-shrink-0">Try again</button>
+                        </div>
                         <div x-html="(() => {
                             try {
                                 const html = result?.correction_html;
-                                let isBad = false;
-                                
-                                if (!html) isBad = true;
-                                if (html === 'undefined') isBad = true;
-                                if (typeof html === 'string' && html.indexOf('undefined') !== -1) isBad = true;
-                                if (html && html.length < 15) isBad = true;
-
-                                if (isBad) {
+                                if (!html || html === 'undefined' || (typeof html === 'string' && html.indexOf('undefined') !== -1) || html.length < 15) {
                                     let content = essay;
-                                    if (!content || content === 'undefined') content = 'Waiting for content...';
-                                    return '<div class=\'bg-red-50 border-2 border-red-500 p-4 rounded\'><strong>FALLBACK TRIGGERED:</strong><br>' + content.replace(/\n/g, '<br>') + '</div>';
+                                    if (!content) return '';
+                                    return '<p>' + content.replace(/\n/g, '<br>') + '</p>';
                                 }
                                 return html;
-                            } catch (e) { return 'JS ERROR'; }
+                            } catch (e) { return ''; }
                         })()"></div>
                     </div>
                 </div>

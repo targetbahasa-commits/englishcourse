@@ -38,7 +38,7 @@
 
     <div class="mb-12 space-y-2 pl-2">
         @foreach(['A' => 'Parasites.', 'B' => 'Air pollution.', 'C' => 'Hunting.', 'D' => 'Farm chemicals.'] as $letter => $option)
-        <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+        <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
             <input type="checkbox" name="answers_multi[24_25][]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer rounded">
             <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
         </label>
@@ -91,7 +91,7 @@
         <p class="text-lg font-medium mb-3"><strong class="text-blue-600">30</strong>&nbsp; What can be done to protect pollinators?</p>
         <div class="space-y-2 pl-6">
             @foreach(['A' => 'Beekeeping needs to focus on honey production.', 'B' => 'People should use more organic approach of cultivation.', 'C' => 'Scientists should exploit more wild plants.'] as $letter => $option)
-            <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+            <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                 <input type="radio" name="answers[30]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                 <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
             </label>

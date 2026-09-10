@@ -136,40 +136,188 @@
                     </div>
                 @endif
 
-                <!-- Tabs -->
-                <div class="border-b border-gray-200 mb-6 overflow-x-auto">
-                    <nav class="-mb-px flex space-x-8 min-w-max px-2">
-                        <button @click="tab = 'writing'" :class="tab === 'writing' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm">
-                            IELTS Writing
+                <!-- Grouped Program Tabs -->
+                <div class="border-b border-gray-200 mb-6 pb-4 flex flex-wrap items-center gap-3">
+                    
+                    <!-- 1. IELTS Academic Dropdown -->
+                    <div x-data="{ openDropdown: false }" class="relative inline-block text-left">
+                        <button @click="openDropdown = !openDropdown" @click.away="openDropdown = false" 
+                                :class="['writing', 'ielts_reading_academic', 'ielts_listening', 'speaking'].includes(tab) ? 'bg-indigo-600 text-white shadow-md' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'"
+                                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all focus:outline-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            <span>IELTS Academic</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full font-semibold"
+                                  :class="['writing', 'ielts_reading_academic', 'ielts_listening', 'speaking'].includes(tab) ? 'bg-indigo-700 text-white' : 'bg-gray-100 text-gray-600'"
+                                  x-text="tab === 'writing' ? 'Writing' : (tab === 'ielts_reading_academic' ? 'Reading' : (tab === 'ielts_listening' ? 'Listening' : (tab === 'speaking' ? 'Speaking' : 'Select')))"></span>
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': openDropdown}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
-                        <button @click="tab = 'writing_general'" :class="tab === 'writing_general' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm">
-                            IELTS Writing General
+
+                        <div x-show="openDropdown" x-transition style="display: none;" class="absolute left-0 mt-2 w-60 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50 p-1.5 border border-gray-100">
+                            <div class="px-3 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">IELTS Academic Modules</div>
+                            <a href="#" @click.prevent="tab = 'writing'; openDropdown = false" 
+                               :class="tab === 'writing' ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-gray-700 hover:bg-gray-50'"
+                               class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm transition-colors">
+                               <div class="flex items-center gap-2">
+                                   <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                   <span>Writing Academic</span>
+                               </div>
+                               <span x-show="tab === 'writing'" class="w-2 h-2 rounded-full bg-indigo-600"></span>
+                            </a>
+                            <a href="#" @click.prevent="tab = 'ielts_reading_academic'; openDropdown = false" 
+                               :class="tab === 'ielts_reading_academic' ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-gray-700 hover:bg-gray-50'"
+                               class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm transition-colors">
+                               <div class="flex items-center gap-2">
+                                   <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                   <span>Reading Academic</span>
+                               </div>
+                               <span x-show="tab === 'ielts_reading_academic'" class="w-2 h-2 rounded-full bg-indigo-600"></span>
+                            </a>
+                            <a href="#" @click.prevent="tab = 'ielts_listening'; openDropdown = false" 
+                               :class="tab === 'ielts_listening' ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-gray-700 hover:bg-gray-50'"
+                               class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm transition-colors">
+                               <div class="flex items-center gap-2">
+                                   <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 0112.728 0M12 12h.01"></path></svg>
+                                   <span>Listening</span>
+                               </div>
+                               <span x-show="tab === 'ielts_listening'" class="w-2 h-2 rounded-full bg-indigo-600"></span>
+                            </a>
+                            <a href="#" @click.prevent="tab = 'speaking'; openDropdown = false" 
+                               :class="tab === 'speaking' ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-gray-700 hover:bg-gray-50'"
+                               class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm transition-colors">
+                               <div class="flex items-center gap-2">
+                                   <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
+                                   <span>Speaking</span>
+                               </div>
+                               <span x-show="tab === 'speaking'" class="w-2 h-2 rounded-full bg-indigo-600"></span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 2. IELTS General Training Dropdown -->
+                    <div x-data="{ openDropdown: false }" class="relative inline-block text-left">
+                        <button @click="openDropdown = !openDropdown" @click.away="openDropdown = false" 
+                                :class="['writing_general', 'ielts_reading_general'].includes(tab) ? 'bg-emerald-600 text-white shadow-md' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'"
+                                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all focus:outline-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            <span>IELTS General</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full font-semibold"
+                                  :class="['writing_general', 'ielts_reading_general'].includes(tab) ? 'bg-emerald-700 text-white' : 'bg-gray-100 text-gray-600'"
+                                  x-text="tab === 'writing_general' ? 'Writing' : (tab === 'ielts_reading_general' ? 'Reading' : 'Select')"></span>
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': openDropdown}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
-                        <button @click="tab = 'speaking'" :class="tab === 'speaking' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm">
-                            IELTS Speaking
+
+                        <div x-show="openDropdown" x-transition style="display: none;" class="absolute left-0 mt-2 w-56 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50 p-1.5 border border-gray-100">
+                            <div class="px-3 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">IELTS General Modules</div>
+                            <a href="#" @click.prevent="tab = 'writing_general'; openDropdown = false" 
+                               :class="tab === 'writing_general' ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-gray-700 hover:bg-gray-50'"
+                               class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm transition-colors">
+                               <div class="flex items-center gap-2">
+                                   <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                   <span>Writing General</span>
+                               </div>
+                               <span x-show="tab === 'writing_general'" class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                            </a>
+                            <a href="#" @click.prevent="tab = 'ielts_reading_general'; openDropdown = false" 
+                               :class="tab === 'ielts_reading_general' ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-gray-700 hover:bg-gray-50'"
+                               class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm transition-colors">
+                               <div class="flex items-center gap-2">
+                                   <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                   <span>Reading General</span>
+                               </div>
+                               <span x-show="tab === 'ielts_reading_general'" class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 3. TOEFL ITP Dropdown -->
+                    <div x-data="{ openDropdown: false }" class="relative inline-block text-left">
+                        <button @click="openDropdown = !openDropdown" @click.away="openDropdown = false" 
+                                :class="['toefl_listening', 'toefl_structure', 'toefl_reading'].includes(tab) ? 'bg-purple-600 text-white shadow-md' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'"
+                                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all focus:outline-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span>TOEFL ITP</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full font-semibold"
+                                  :class="['toefl_listening', 'toefl_structure', 'toefl_reading'].includes(tab) ? 'bg-purple-700 text-white' : 'bg-gray-100 text-gray-600'"
+                                  x-text="tab === 'toefl_listening' ? 'Listening' : (tab === 'toefl_structure' ? 'Structure' : (tab === 'toefl_reading' ? 'Reading' : 'Select'))"></span>
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': openDropdown}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
-                        <button @click="tab = 'ielts_listening'" :class="tab === 'ielts_listening' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm">
-                            IELTS Listening
+
+                        <div x-show="openDropdown" x-transition style="display: none;" class="absolute left-0 mt-2 w-56 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50 p-1.5 border border-gray-100">
+                            <div class="px-3 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">TOEFL ITP Modules</div>
+                            <a href="#" @click.prevent="tab = 'toefl_listening'; openDropdown = false" 
+                               :class="tab === 'toefl_listening' ? 'bg-purple-50 text-purple-700 font-bold' : 'text-gray-700 hover:bg-gray-50'"
+                               class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm transition-colors">
+                               <span>Listening ITP</span>
+                               <span x-show="tab === 'toefl_listening'" class="w-2 h-2 rounded-full bg-purple-600"></span>
+                            </a>
+                            <a href="#" @click.prevent="tab = 'toefl_structure'; openDropdown = false" 
+                               :class="tab === 'toefl_structure' ? 'bg-purple-50 text-purple-700 font-bold' : 'text-gray-700 hover:bg-gray-50'"
+                               class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm transition-colors">
+                               <span>Structure ITP</span>
+                               <span x-show="tab === 'toefl_structure'" class="w-2 h-2 rounded-full bg-purple-600"></span>
+                            </a>
+                            <a href="#" @click.prevent="tab = 'toefl_reading'; openDropdown = false" 
+                               :class="tab === 'toefl_reading' ? 'bg-purple-50 text-purple-700 font-bold' : 'text-gray-700 hover:bg-gray-50'"
+                               class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm transition-colors">
+                               <span>Reading ITP</span>
+                               <span x-show="tab === 'toefl_reading'" class="w-2 h-2 rounded-full bg-purple-600"></span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 4. Grammar Practice Button -->
+                    <button @click="tab = 'grammar'" 
+                            :class="tab === 'grammar' ? 'bg-teal-600 text-white shadow-md' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all focus:outline-none">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        <span>Grammar</span>
+                    </button>
+
+                    <!-- 5. PTE Academic Dropdown -->
+                    <div x-data="{ openDropdown: false }" class="relative inline-block text-left">
+                        <button @click="openDropdown = !openDropdown" @click.away="openDropdown = false" 
+                                :class="['pte_speaking_writing', 'pte_reading', 'pte_listening'].includes(tab) ? 'bg-orange-600 text-white shadow-md' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'"
+                                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all focus:outline-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            <span>PTE Academic</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full font-semibold"
+                                  :class="['pte_speaking_writing', 'pte_reading', 'pte_listening'].includes(tab) ? 'bg-orange-700 text-white' : 'bg-gray-100 text-gray-600'"
+                                  x-text="tab === 'pte_speaking_writing' ? 'Speaking & Writing' : (tab === 'pte_reading' ? 'Reading' : (tab === 'pte_listening' ? 'Listening' : 'Select'))"></span>
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': openDropdown}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
-                        <button @click="tab = 'ielts_reading_general'" :class="tab === 'ielts_reading_general' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm">
-                            IELTS Reading General
-                        </button>
-                        <button @click="tab = 'ielts_reading_academic'" :class="tab === 'ielts_reading_academic' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm">
-                            IELTS Reading Academic
-                        </button>
-                        <button @click="tab = 'toefl_listening'" :class="tab === 'toefl_listening' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm">
-                            Listening ITP
-                        </button>
-                        <button @click="tab = 'toefl_structure'" :class="tab === 'toefl_structure' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm">
-                            Structure ITP
-                        </button>
-                        <button @click="tab = 'toefl_reading'" :class="tab === 'toefl_reading' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm">
-                            Reading ITP
-                        </button>
-                        <button @click="tab = 'grammar'" :class="tab === 'grammar' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm">
-                            Grammar
-                        </button>
-                    </nav>
+
+                        <div x-show="openDropdown" x-transition style="display: none;" class="absolute left-0 mt-2 w-64 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50 p-1.5 border border-gray-100">
+                            <div class="px-3 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">PTE Academic Modules</div>
+                            <a href="#" @click.prevent="tab = 'pte_speaking_writing'; openDropdown = false" 
+                               :class="tab === 'pte_speaking_writing' ? 'bg-orange-50 text-orange-700 font-bold' : 'text-gray-700 hover:bg-gray-50'"
+                               class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm transition-colors">
+                               <div class="flex items-center gap-2">
+                                   <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                   <span>Speaking & Writing</span>
+                               </div>
+                               <span x-show="tab === 'pte_speaking_writing'" class="w-2 h-2 rounded-full bg-orange-600"></span>
+                            </a>
+                            <a href="#" @click.prevent="tab = 'pte_reading'; openDropdown = false" 
+                               :class="tab === 'pte_reading' ? 'bg-orange-50 text-orange-700 font-bold' : 'text-gray-700 hover:bg-gray-50'"
+                               class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm transition-colors">
+                               <div class="flex items-center gap-2">
+                                   <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                   <span>Reading</span>
+                               </div>
+                               <span x-show="tab === 'pte_reading'" class="w-2 h-2 rounded-full bg-orange-600"></span>
+                            </a>
+                            <a href="#" @click.prevent="tab = 'pte_listening'; openDropdown = false" 
+                               :class="tab === 'pte_listening' ? 'bg-orange-50 text-orange-700 font-bold' : 'text-gray-700 hover:bg-gray-50'"
+                               class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm transition-colors">
+                               <div class="flex items-center gap-2">
+                                   <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 0112.728 0M12 12h.01"></path></svg>
+                                   <span>Listening</span>
+                               </div>
+                               <span x-show="tab === 'pte_listening'" class="w-2 h-2 rounded-full bg-orange-600"></span>
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Writing Tests Tab -->
@@ -953,7 +1101,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div x-data="{ testData: {{ \Illuminate\Support\Js::from($test) }}, linkCopiedOnline: false, linkCopiedOffline: false }" class="flex justify-end gap-3 items-center">
-                                                @if($test->is_free_tier && (!$test->promo_start || \Carbon\Carbon::parse($test->promo_start)->isPast()) && (!$test->promo_deadline || \Carbon\Carbon::parse($test->promo_deadline)->isFuture()))
+                                                @if($test->is_free_tier)
                                                     <button @click="copyPromoLink(getGrammarPromoLink(testData, 'online'))" class="text-blue-600 hover:text-blue-900 mr-3 flex items-center inline-flex gap-1" title="Copy Online Link">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                                                         Copy Online
@@ -965,6 +1113,246 @@
                                                 @endif
                                                 <a href="{{ route('promo.test.grammar.meeting', ['meeting' => $test->meeting_number]) }}" target="_blank" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit Soal</a>
                                                 <button @click="editGrammarModal = testData" class="text-blue-600 hover:text-blue-900">Manage Settings</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-10 mb-4 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-gray-800">Grammar Practice Topics</h3>
+                            <p class="text-xs text-gray-500">Isolated from real class curriculum &mdash; safe to flag as promo or create new here.</p>
+                        </div>
+                        <button type="button" @click="createGrammarPracticeModal = true" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm font-medium shadow-sm">
+                            + Create New Grammar Test
+                        </button>
+                    </div>
+                    <div class="bg-white shadow-sm overflow-hidden border border-gray-200 sm:rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Topic</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Promo Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($grammarPracticeTopics as $topic)
+                                    <tr>
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm font-medium text-gray-900">{{ $topic->title }}</div>
+                                            @if($topic->desc)
+                                                <div class="text-xs text-gray-500">{{ $topic->desc }}</div>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if($topic->is_free_tier)
+                                                @if($topic->promo_deadline && \Carbon\Carbon::parse($topic->promo_deadline)->isPast())
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Expired Promo</span>
+                                                @elseif($topic->promo_start && \Carbon\Carbon::parse($topic->promo_start)->isFuture())
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Scheduled Promo</span>
+                                                @else
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Free Tier</span>
+                                                @endif
+                                            @else
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Standard</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $topic->questions_count }} questions
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            @php
+                                                $topicPromoUrl = url('/promo/test/grammar-practice/' . $topic->id);
+                                            @endphp
+                                            <div x-data="{ linkCopiedOnline: false, linkCopiedOffline: false }" class="flex justify-end gap-3 items-center">
+                                                @if($topic->is_free_tier)
+                                                    <button @click="window.copyLink('{{ $topicPromoUrl }}?b=online'); linkCopiedOnline = true; setTimeout(() => linkCopiedOnline = false, 2000)" class="text-blue-600 hover:text-blue-900 flex items-center inline-flex gap-1" title="Copy Online Link">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                                        <span x-text="linkCopiedOnline ? 'Copied!' : 'Copy Online'"></span>
+                                                    </button>
+                                                    <button @click="window.copyLink('{{ $topicPromoUrl }}?b=offline'); linkCopiedOffline = true; setTimeout(() => linkCopiedOffline = false, 2000)" class="text-green-600 hover:text-green-900 flex items-center inline-flex gap-1" title="Copy Offline Link">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                                        <span x-text="linkCopiedOffline ? 'Copied!' : 'Copy Offline'"></span>
+                                                    </button>
+                                                @endif
+                                                <a href="{{ route('admin.promo-tests.grammar-practice.questions.index', $topic->id) }}" target="_blank" class="text-indigo-600 hover:text-indigo-900">Edit Questions</a>
+                                                <button @click="editGrammarPracticeModal = {{ \Illuminate\Support\Js::from($topic) }}" class="text-blue-600 hover:text-blue-900">Manage Settings</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- PTE Speaking & Writing Tab -->
+                <div x-show="tab === 'pte_speaking_writing'" style="display: none;">
+                    <div class="mb-4 flex justify-end">
+                        <button type="button" @click="createPteSpeakingWritingModal = true" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm font-medium shadow-sm">
+                            + Create New Speaking & Writing Test
+                        </button>
+                    </div>
+                    <div class="bg-white shadow-sm overflow-hidden border border-gray-200 sm:rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LESSON / PERIOD</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PROMO STATUS</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TEST TYPE</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($pteSpeakingWritingTypes as $item)
+                                    <tr>
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm font-bold text-gray-900">{{ $item['title'] }}</div>
+                                            <div class="text-xs text-gray-500 mt-0.5">{{ $item['count'] }} Topics Available</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                Free Tier
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            pte_{{ $item['slug'] }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div x-data="{ testData: {{ \Illuminate\Support\Js::from($item) }}, linkCopiedOnline: false, linkCopiedOffline: false }" class="flex justify-end gap-3 items-center">
+                                                <button @click="window.copyLink('{{ $item['route'] }}?b=online'); linkCopiedOnline = true; setTimeout(() => linkCopiedOnline = false, 2000)" 
+                                                        class="text-blue-600 hover:text-blue-900 flex items-center inline-flex gap-1"
+                                                        title="Copy Online Link">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                                    <span x-text="linkCopiedOnline ? 'Copied!' : 'Copy Online'"></span>
+                                                </button>
+                                                <button @click="window.copyLink('{{ $item['route'] }}?b=offline'); linkCopiedOffline = true; setTimeout(() => linkCopiedOffline = false, 2000)" 
+                                                        class="text-green-600 hover:text-green-900 flex items-center inline-flex gap-1"
+                                                        title="Copy Offline Link">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                                    <span x-text="linkCopiedOffline ? 'Copied!' : 'Copy Offline'"></span>
+                                                </button>
+                                                <!-- No content editor exists yet for these config-driven PTE questions; link opens a live preview of the public promo page instead --><a href="{{ $item['route'] }}" target="_blank" class="text-indigo-600 hover:text-indigo-900 mr-3">Preview</a>
+                                                <button @click="editPteModal = testData" class="text-blue-600 hover:text-blue-900">Manage Settings</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- PTE Reading Tab -->
+                <div x-show="tab === 'pte_reading'" style="display: none;">
+                    <div class="mb-4 flex justify-end">
+                        <button type="button" @click="createPteReadingModal = true" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm font-medium shadow-sm">
+                            + Create New Reading Test
+                        </button>
+                    </div>
+                    <div class="bg-white shadow-sm overflow-hidden border border-gray-200 sm:rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LESSON / PERIOD</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PROMO STATUS</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TEST TYPE</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($pteReadingTypes as $item)
+                                    <tr>
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm font-bold text-gray-900">{{ $item['title'] }}</div>
+                                            <div class="text-xs text-gray-500 mt-0.5">{{ $item['count'] }} Passages Available</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                Free Tier
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            pte_{{ $item['slug'] }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div x-data="{ testData: {{ \Illuminate\Support\Js::from($item) }}, linkCopiedOnline: false, linkCopiedOffline: false }" class="flex justify-end gap-3 items-center">
+                                                <button @click="window.copyLink('{{ $item['route'] }}?b=online'); linkCopiedOnline = true; setTimeout(() => linkCopiedOnline = false, 2000)" 
+                                                        class="text-blue-600 hover:text-blue-900 flex items-center inline-flex gap-1"
+                                                        title="Copy Online Link">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                                    <span x-text="linkCopiedOnline ? 'Copied!' : 'Copy Online'"></span>
+                                                </button>
+                                                <button @click="window.copyLink('{{ $item['route'] }}?b=offline'); linkCopiedOffline = true; setTimeout(() => linkCopiedOffline = false, 2000)" 
+                                                        class="text-green-600 hover:text-green-900 flex items-center inline-flex gap-1"
+                                                        title="Copy Offline Link">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                                    <span x-text="linkCopiedOffline ? 'Copied!' : 'Copy Offline'"></span>
+                                                </button>
+                                                <!-- No content editor exists yet for these config-driven PTE questions; link opens a live preview of the public promo page instead --><a href="{{ $item['route'] }}" target="_blank" class="text-indigo-600 hover:text-indigo-900 mr-3">Preview</a>
+                                                <button @click="editPteModal = testData" class="text-blue-600 hover:text-blue-900">Manage Settings</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- PTE Listening Tab -->
+                <div x-show="tab === 'pte_listening'" style="display: none;">
+                    <div class="mb-4 flex justify-end">
+                        <button type="button" @click="createPteListeningModal = true" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm font-medium shadow-sm">
+                            + Create New Listening Test
+                        </button>
+                    </div>
+                    <div class="bg-white shadow-sm overflow-hidden border border-gray-200 sm:rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LESSON / PERIOD</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PROMO STATUS</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TEST TYPE</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($pteListeningTypes as $item)
+                                    <tr>
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm font-bold text-gray-900">{{ $item['title'] }}</div>
+                                            <div class="text-xs text-gray-500 mt-0.5">{{ $item['count'] }} Audios Available</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                Free Tier
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            pte_{{ $item['slug'] }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div x-data="{ testData: {{ \Illuminate\Support\Js::from($item) }}, linkCopiedOnline: false, linkCopiedOffline: false }" class="flex justify-end gap-3 items-center">
+                                                <button @click="window.copyLink('{{ $item['route'] }}?b=online'); linkCopiedOnline = true; setTimeout(() => linkCopiedOnline = false, 2000)" 
+                                                        class="text-blue-600 hover:text-blue-900 flex items-center inline-flex gap-1"
+                                                        title="Copy Online Link">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                                    <span x-text="linkCopiedOnline ? 'Copied!' : 'Copy Online'"></span>
+                                                </button>
+                                                <button @click="window.copyLink('{{ $item['route'] }}?b=offline'); linkCopiedOffline = true; setTimeout(() => linkCopiedOffline = false, 2000)" 
+                                                        class="text-green-600 hover:text-green-900 flex items-center inline-flex gap-1"
+                                                        title="Copy Offline Link">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                                    <span x-text="linkCopiedOffline ? 'Copied!' : 'Copy Offline'"></span>
+                                                </button>
+                                                <!-- No content editor exists yet for these config-driven PTE questions; link opens a live preview of the public promo page instead --><a href="{{ $item['route'] }}" target="_blank" class="text-indigo-600 hover:text-indigo-900 mr-3">Preview</a>
+                                                <button @click="editPteModal = testData" class="text-blue-600 hover:text-blue-900">Manage Settings</button>
                                             </div>
                                         </td>
                                     </tr>
@@ -1455,6 +1843,366 @@
                     </div>
                 </div>
 
+                <!-- Edit PTE Test Modal -->
+                <div x-show="editPteModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div x-show="editPteModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div x-show="editPteModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <form method="POST" :action="`/admin/promo-tests/pte/${editPteModal?.category}/${editPteModal?.id}`">
+                                @csrf
+                                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                    <div class="sm:flex sm:items-start">
+                                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                            <h3 class="text-lg leading-6 font-semibold text-gray-900 mb-4" id="modal-title">
+                                                Manage Settings: <span class="text-orange-600" x-text="editPteModal ? editPteModal.title : ''"></span>
+                                            </h3>
+
+                                            <div class="space-y-4">
+                                                <div class="flex items-center gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                                    <input type="checkbox" id="pte_is_free_tier" name="is_free_tier" value="1" :checked="editPteModal?.is_free_tier" class="rounded border-gray-300 text-orange-600 focus:ring-orange-500 h-4 w-4">
+                                                    <label for="pte_is_free_tier" class="text-sm font-semibold text-orange-900">Enable as Free Tier Promo Test</label>
+                                                </div>
+
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-1">Question Type</label>
+                                                    <input type="text" :value="editPteModal ? editPteModal.title : ''" readonly class="block w-full rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm sm:text-sm font-medium">
+                                                </div>
+
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Promo Start Date (Optional)</label>
+                                                        <input type="datetime-local" name="promo_start" :value="editPteModal?.promo_start ? editPteModal.promo_start.replace(' ', 'T').substring(0, 16) : ''" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Promo End Date (Optional)</label>
+                                                        <input type="datetime-local" name="promo_deadline" :value="editPteModal?.promo_deadline ? editPteModal.promo_deadline.replace(' ', 'T').substring(0, 16) : ''" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                                                    </div>
+                                                </div>
+                                                <p class="text-xs text-gray-500">Controls whether the public "Copy Online"/"Copy Offline" link for this test is accessible to guests.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-orange-600 text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Save Changes
+                                    </button>
+                                    <button type="button" @click="editPteModal = null" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create PTE Speaking & Writing Modal -->
+                <div x-show="createPteSpeakingWritingModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="createPteSpeakingWritingModal = false"></div>
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                            <form method="POST" action="{{ route('admin.promo-tests.pte.speaking-writing.store') }}">
+                                @csrf
+                                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 max-h-[75vh] overflow-y-auto">
+                                    <h3 class="text-lg leading-6 font-semibold text-gray-900 mb-4">Create New PTE Speaking &amp; Writing Promo Test</h3>
+                                    <p class="text-xs text-gray-500 mb-4">All 6 tasks are required &mdash; the public promo page always shows this fixed sequence.</p>
+
+                                    <div class="space-y-4">
+                                        <div class="flex items-center gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                            <input type="checkbox" id="psw_is_free_tier" name="is_free_tier" value="1" checked class="rounded border-gray-300 text-orange-600 focus:ring-orange-500 h-4 w-4">
+                                            <label for="psw_is_free_tier" class="text-sm font-semibold text-orange-900">Enable as Free Tier Promo Test</label>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                                            <input type="text" name="title" required placeholder="PTE Speaking & Writing Promo Test 3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm">
+                                        </div>
+
+                                        <fieldset class="border border-gray-200 rounded-lg p-3">
+                                            <legend class="text-xs font-bold text-gray-500 uppercase px-1">1. Read Aloud</legend>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Text to read aloud</label>
+                                            <textarea name="read_aloud_text" rows="2" required class="w-full rounded-md border-gray-300 shadow-sm text-sm mb-2"></textarea>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div><label class="block text-xs text-gray-500 mb-1">Prep (sec)</label><input type="number" name="read_aloud_prep" value="35" class="w-full rounded-md border-gray-300 shadow-sm text-sm"></div>
+                                                <div><label class="block text-xs text-gray-500 mb-1">Record (sec)</label><input type="number" name="read_aloud_record" value="40" class="w-full rounded-md border-gray-300 shadow-sm text-sm"></div>
+                                            </div>
+                                        </fieldset>
+
+                                        <fieldset class="border border-gray-200 rounded-lg p-3">
+                                            <legend class="text-xs font-bold text-gray-500 uppercase px-1">2. Repeat Sentence</legend>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Sentence to repeat</label>
+                                            <textarea name="repeat_sentence_text" rows="2" required class="w-full rounded-md border-gray-300 shadow-sm text-sm"></textarea>
+                                        </fieldset>
+
+                                        <fieldset class="border border-gray-200 rounded-lg p-3">
+                                            <legend class="text-xs font-bold text-gray-500 uppercase px-1">3. Describe Image</legend>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Image title</label>
+                                            <input type="text" name="describe_image_title" required class="w-full rounded-md border-gray-300 shadow-sm text-sm mb-2">
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Image path/URL</label>
+                                            <input type="text" name="describe_image_image" required placeholder="/images/practice/example.png" class="w-full rounded-md border-gray-300 shadow-sm text-sm mb-2">
+                                            <div class="grid grid-cols-3 gap-2">
+                                                <div>
+                                                    <label class="block text-xs text-gray-500 mb-1">Type</label>
+                                                    <select name="describe_image_type" class="w-full rounded-md border-gray-300 shadow-sm text-sm">
+                                                        <option value="chart">chart</option>
+                                                        <option value="graph">graph</option>
+                                                        <option value="flowchart">flowchart</option>
+                                                        <option value="table">table</option>
+                                                        <option value="map">map</option>
+                                                        <option value="diagram">diagram</option>
+                                                    </select>
+                                                </div>
+                                                <div><label class="block text-xs text-gray-500 mb-1">Prep (sec)</label><input type="number" name="describe_image_prep" value="25" class="w-full rounded-md border-gray-300 shadow-sm text-sm"></div>
+                                                <div><label class="block text-xs text-gray-500 mb-1">Record (sec)</label><input type="number" name="describe_image_record" value="40" class="w-full rounded-md border-gray-300 shadow-sm text-sm"></div>
+                                            </div>
+                                        </fieldset>
+
+                                        <fieldset class="border border-gray-200 rounded-lg p-3">
+                                            <legend class="text-xs font-bold text-gray-500 uppercase px-1">4. Re-tell Lecture</legend>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Lecture title</label>
+                                            <input type="text" name="retell_lecture_title" required class="w-full rounded-md border-gray-300 shadow-sm text-sm mb-2">
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Lecture transcript</label>
+                                            <textarea name="retell_lecture_transcript" rows="2" required class="w-full rounded-md border-gray-300 shadow-sm text-sm mb-2"></textarea>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div><label class="block text-xs text-gray-500 mb-1">Prep (sec)</label><input type="number" name="retell_lecture_prep" value="10" class="w-full rounded-md border-gray-300 shadow-sm text-sm"></div>
+                                                <div><label class="block text-xs text-gray-500 mb-1">Record (sec)</label><input type="number" name="retell_lecture_record" value="40" class="w-full rounded-md border-gray-300 shadow-sm text-sm"></div>
+                                            </div>
+                                        </fieldset>
+
+                                        <fieldset class="border border-gray-200 rounded-lg p-3">
+                                            <legend class="text-xs font-bold text-gray-500 uppercase px-1">5. Summarize Written Text</legend>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Passage</label>
+                                            <textarea name="summarize_written_text_passage" rows="3" required class="w-full rounded-md border-gray-300 shadow-sm text-sm mb-2"></textarea>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div><label class="block text-xs text-gray-500 mb-1">Word limit</label><input type="text" name="summarize_written_text_word_limit" value="5-75 words" class="w-full rounded-md border-gray-300 shadow-sm text-sm"></div>
+                                                <div><label class="block text-xs text-gray-500 mb-1">Time limit (sec)</label><input type="number" name="summarize_written_text_time_limit" value="600" class="w-full rounded-md border-gray-300 shadow-sm text-sm"></div>
+                                            </div>
+                                        </fieldset>
+
+                                        <fieldset class="border border-gray-200 rounded-lg p-3">
+                                            <legend class="text-xs font-bold text-gray-500 uppercase px-1">6. Write Essay</legend>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Essay topic</label>
+                                            <textarea name="write_essay_topic" rows="3" required class="w-full rounded-md border-gray-300 shadow-sm text-sm mb-2"></textarea>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div><label class="block text-xs text-gray-500 mb-1">Word limit</label><input type="text" name="write_essay_word_limit" value="200-300 words" class="w-full rounded-md border-gray-300 shadow-sm text-sm"></div>
+                                                <div><label class="block text-xs text-gray-500 mb-1">Time limit (sec)</label><input type="number" name="write_essay_time_limit" value="1200" class="w-full rounded-md border-gray-300 shadow-sm text-sm"></div>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-orange-600 text-base font-medium text-white hover:bg-orange-700 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Create Test
+                                    </button>
+                                    <button type="button" @click="createPteSpeakingWritingModal = false" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create PTE Reading Modal -->
+                <div x-show="createPteReadingModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="createPteReadingModal = false"></div>
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                            <form method="POST" action="{{ route('admin.promo-tests.pte.reading.store') }}">
+                                @csrf
+                                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 max-h-[75vh] overflow-y-auto">
+                                    <h3 class="text-lg leading-6 font-semibold text-gray-900 mb-4">Create New PTE Reading Promo Test</h3>
+
+                                    <div class="space-y-4">
+                                        <div class="flex items-center gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                            <input type="checkbox" id="pr_is_free_tier" name="is_free_tier" value="1" checked class="rounded border-gray-300 text-orange-600 focus:ring-orange-500 h-4 w-4">
+                                            <label for="pr_is_free_tier" class="text-sm font-semibold text-orange-900">Enable as Free Tier Promo Test</label>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                                            <input type="text" name="title" required placeholder="PTE Reading Promo Test 3" class="w-full rounded-md border-gray-300 shadow-sm text-sm">
+                                        </div>
+
+                                        <fieldset class="border border-gray-200 rounded-lg p-3">
+                                            <legend class="text-xs font-bold text-gray-500 uppercase px-1">1. Reading &amp; Writing: Fill in the Blanks</legend>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Passage &mdash; wrap each correct blank word in [brackets]</label>
+                                            <textarea name="rw_fib_passage" rows="3" required placeholder="Historians believe these were [urban] settlements..." class="w-full rounded-md border-gray-300 shadow-sm text-sm mb-2"></textarea>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Options &mdash; one line per blank, comma-separated, in the SAME order as the blanks above. Include the bracketed word as one of the choices.</label>
+                                            <textarea name="rw_fib_options" rows="3" required placeholder="urban, rural, coastal, isolated&#10;interconnected, separated, isolated, fragmented" class="w-full rounded-md border-gray-300 shadow-sm text-sm font-mono"></textarea>
+                                        </fieldset>
+
+                                        <fieldset class="border border-gray-200 rounded-lg p-3">
+                                            <legend class="text-xs font-bold text-gray-500 uppercase px-1">2. Re-order Paragraphs</legend>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Paragraphs &mdash; one per line, in the CORRECT reading order (they'll be shuffled automatically for the student)</label>
+                                            <textarea name="reorder_paragraphs" rows="4" required class="w-full rounded-md border-gray-300 shadow-sm text-sm"></textarea>
+                                        </fieldset>
+
+                                        <fieldset class="border border-gray-200 rounded-lg p-3">
+                                            <legend class="text-xs font-bold text-gray-500 uppercase px-1">3. Reading: Fill in the Blanks</legend>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Passage &mdash; wrap each correct blank word in [brackets]</label>
+                                            <textarea name="reading_fib_passage" rows="3" required placeholder="Memory [retention] is enhanced by..." class="w-full rounded-md border-gray-300 shadow-sm text-sm mb-2"></textarea>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Extra distractor words (comma-separated, optional)</label>
+                                            <input type="text" name="reading_fib_distractors" placeholder="distraction, suppression" class="w-full rounded-md border-gray-300 shadow-sm text-sm">
+                                        </fieldset>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-orange-600 text-base font-medium text-white hover:bg-orange-700 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Create Test
+                                    </button>
+                                    <button type="button" @click="createPteReadingModal = false" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create PTE Listening Modal -->
+                <div x-show="createPteListeningModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="createPteListeningModal = false"></div>
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                            <form method="POST" action="{{ route('admin.promo-tests.pte.listening.store') }}">
+                                @csrf
+                                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 max-h-[75vh] overflow-y-auto">
+                                    <h3 class="text-lg leading-6 font-semibold text-gray-900 mb-4">Create New PTE Listening Promo Test</h3>
+
+                                    <div class="space-y-4">
+                                        <div class="flex items-center gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                            <input type="checkbox" id="pl_is_free_tier" name="is_free_tier" value="1" checked class="rounded border-gray-300 text-orange-600 focus:ring-orange-500 h-4 w-4">
+                                            <label for="pl_is_free_tier" class="text-sm font-semibold text-orange-900">Enable as Free Tier Promo Test</label>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                                            <input type="text" name="title" required placeholder="PTE Listening Promo Test 3" class="w-full rounded-md border-gray-300 shadow-sm text-sm">
+                                        </div>
+
+                                        <fieldset class="border border-gray-200 rounded-lg p-3">
+                                            <legend class="text-xs font-bold text-gray-500 uppercase px-1">Summarize Spoken Text</legend>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Transcript (played to the student via text-to-speech)</label>
+                                            <textarea name="sst_transcript" rows="3" required class="w-full rounded-md border-gray-300 shadow-sm text-sm mb-2"></textarea>
+                                            <div class="grid grid-cols-3 gap-2">
+                                                <div class="col-span-1"><label class="block text-xs text-gray-500 mb-1">Prompt</label><input type="text" name="sst_prompt" value="Summarize the spoken text in 50-70 words." class="w-full rounded-md border-gray-300 shadow-sm text-sm"></div>
+                                                <div><label class="block text-xs text-gray-500 mb-1">Word limit</label><input type="text" name="sst_word_limit" value="50-70 words" class="w-full rounded-md border-gray-300 shadow-sm text-sm"></div>
+                                                <div><label class="block text-xs text-gray-500 mb-1">Time limit (sec)</label><input type="number" name="sst_time_limit" value="600" class="w-full rounded-md border-gray-300 shadow-sm text-sm"></div>
+                                            </div>
+                                        </fieldset>
+
+                                        <fieldset class="border border-gray-200 rounded-lg p-3">
+                                            <legend class="text-xs font-bold text-gray-500 uppercase px-1">Write From Dictation</legend>
+                                            <label class="block text-xs font-medium text-gray-700 mb-1">Sentences &mdash; one per line, each played via text-to-speech</label>
+                                            <textarea name="wfd_sentences" rows="4" required class="w-full rounded-md border-gray-300 shadow-sm text-sm"></textarea>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-orange-600 text-base font-medium text-white hover:bg-orange-700 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Create Test
+                                    </button>
+                                    <button type="button" @click="createPteListeningModal = false" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create Grammar Practice Topic Modal -->
+                <div x-show="createGrammarPracticeModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="createGrammarPracticeModal = false"></div>
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <form method="POST" action="{{ route('admin.promo-tests.grammar-practice.store') }}">
+                                @csrf
+                                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                    <h3 class="text-lg leading-6 font-semibold text-gray-900 mb-4">Create New Grammar Test</h3>
+                                    <p class="text-xs text-gray-500 mb-4">Creates a new Grammar Practice topic, fully separate from real class curriculum. Add its questions afterward from the Grammar Practice admin page.</p>
+
+                                    <div class="space-y-4">
+                                        <div class="flex items-center gap-2 p-3 bg-teal-50 border border-teal-200 rounded-lg">
+                                            <input type="checkbox" id="gp_is_free_tier" name="is_free_tier" value="1" checked class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 h-4 w-4">
+                                            <label for="gp_is_free_tier" class="text-sm font-semibold text-teal-900">Enable as Free Tier Promo Test</label>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Topic Title</label>
+                                            <input type="text" name="title" required placeholder="e.g. Conditional Sentences" class="w-full rounded-md border-gray-300 shadow-sm text-sm">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+                                            <textarea name="desc" rows="2" class="w-full rounded-md border-gray-300 shadow-sm text-sm"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-teal-600 text-base font-medium text-white hover:bg-teal-700 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Create Topic
+                                    </button>
+                                    <button type="button" @click="createGrammarPracticeModal = false" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manage Grammar Practice Topic Settings Modal -->
+                <div x-show="editGrammarPracticeModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="editGrammarPracticeModal = null"></div>
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <form method="POST" :action="`/admin/promo-tests/grammar-practice/${editGrammarPracticeModal?.id}`">
+                                @csrf
+                                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                    <h3 class="text-lg leading-6 font-semibold text-gray-900 mb-4">
+                                        Manage Settings: <span class="text-teal-600" x-text="editGrammarPracticeModal ? editGrammarPracticeModal.title : ''"></span>
+                                    </h3>
+
+                                    <div class="space-y-4">
+                                        <div class="flex items-center gap-2 p-3 bg-teal-50 border border-teal-200 rounded-lg">
+                                            <input type="checkbox" id="gpe_is_free_tier" name="is_free_tier" value="1" :checked="editGrammarPracticeModal?.is_free_tier" class="rounded border-gray-300 text-teal-600 focus:ring-teal-500 h-4 w-4">
+                                            <label for="gpe_is_free_tier" class="text-sm font-semibold text-teal-900">Enable as Free Tier Promo Test</label>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Promo Start Date (Optional)</label>
+                                                <input type="datetime-local" name="promo_start" :value="editGrammarPracticeModal?.promo_start ? editGrammarPracticeModal.promo_start.replace(' ', 'T').substring(0, 16) : ''" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Promo End Date (Optional)</label>
+                                                <input type="datetime-local" name="promo_deadline" :value="editGrammarPracticeModal?.promo_deadline ? editGrammarPracticeModal.promo_deadline.replace(' ', 'T').substring(0, 16) : ''" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm">
+                                            </div>
+                                        </div>
+                                        <p class="text-xs text-gray-500">This topic has <span x-text="editGrammarPracticeModal?.questions_count ?? 0"></span> question(s). The public promo link uses the first 5.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-teal-600 text-base font-medium text-white hover:bg-teal-700 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Save Changes
+                                    </button>
+                                    <button type="button" @click="editGrammarPracticeModal = null" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </main>
     </div>
@@ -1472,6 +2220,12 @@
                 editReadingAcademicModal: null,
                 editToeflModal: null,
                 editGrammarModal: null,
+                editPteModal: null,
+                createPteSpeakingWritingModal: false,
+                createPteReadingModal: false,
+                createPteListeningModal: false,
+                createGrammarPracticeModal: false,
+                editGrammarPracticeModal: null,
                 selectedTests: [],
                 init() {
                     this.$watch('tab', value => sessionStorage.setItem('adminPromoTab', value));

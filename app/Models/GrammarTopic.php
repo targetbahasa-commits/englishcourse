@@ -9,7 +9,7 @@ class GrammarTopic extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'desc', 'order'];
+    protected $fillable = ['title', 'desc', 'order', 'is_free_tier', 'promo_start', 'promo_deadline'];
 
     public function questions()
     {

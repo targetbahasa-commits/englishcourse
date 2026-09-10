@@ -130,7 +130,7 @@
     </div>
     <div class="marquee-container">
         <div class="marquee-content">
-            {!! setting('header_running_text', '🚀 <strong>PROMO SPESIAL!</strong> Dapatkan Diskon 20% untuk Pendaftaran Kelas IELTS & TOEFL Bulan Ini! | 📝 <strong>IKUTI MOCKUP TEST!</strong> Uji Kemampuan Bahasa Inggrismu dengan Standar Internasional Sekarang Juga! | 🎓 Tingkatkan Karirmu dengan Sertifikat Target Bahasa!') !!}
+            {!! setting('header_running_text', '🌟 <strong>Dari Kampung Inggris Pare, untuk Indonesia, menuju Dunia</strong> | 🚀 <strong>PROMO SPESIAL!</strong> Dapatkan Diskon 20% untuk Pendaftaran Kelas IELTS & TOEFL Bulan Ini! | 📝 <strong>IKUTI MOCKUP TEST!</strong> Uji Kemampuan Bahasa Inggrismu dengan Standar Internasional Sekarang Juga! | 🎓 Tingkatkan Karirmu dengan Sertifikat Target Bahasa!') !!}
         </div>
     </div>
 
@@ -145,6 +145,13 @@
 <section class="landing-hero" style="background: linear-gradient(rgba(13,71,161,0.50), rgba(13,71,161,0.50)), url('/images/hero/hero-background.png') center center / cover no-repeat; color:#fff; padding:130px 0 60px 0; position: relative;">
     <div class="container" style="max-width:900px; margin:0 auto; text-align:center; position:relative; z-index:10;">
         
+        <!-- Jargon / Slogan Tagline -->
+        <div style="margin-bottom: 20px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50px; padding: 8px 26px; box-shadow: 0 4px 15px rgba(0,0,0,0.25);">
+            <span style="font-size: 1.05rem; font-weight: 700; color: #ffffff; letter-spacing: 0.3px; text-shadow: 0 2px 4px rgba(0,0,0,0.6);">
+                <span style="color: #FFB800;">📍</span> <em>Dari Kampung Inggris Pare, untuk Indonesia, menuju Dunia</em>
+            </span>
+        </div>
+
         <div style="display:flex; justify-content:center; gap:16px; flex-wrap:wrap; margin-bottom:24px;">
             <span style="background: rgba(0,0,0,0.45); backdrop-filter:blur(6px); border: 1px solid rgba(255,255,255,0.2); border-radius:50px; padding:8px 24px; font-size:1rem; font-weight:600; display:flex; align-items:center; gap:8px; text-shadow:0 1px 4px rgba(0,0,0,0.6);"><span style="color:#FFB800;">⭐</span> 4.9/5 dari 1000+ peserta</span>
             <span style="background: rgba(0,0,0,0.45); backdrop-filter:blur(6px); border: 1px solid rgba(255,255,255,0.2); border-radius:50px; padding:8px 24px; font-size:1rem; font-weight:600; display:flex; align-items:center; gap:8px; text-shadow:0 1px 4px rgba(0,0,0,0.6);"><span style="color:#fff;">🎓</span> Dipakai pelamar WHV & Beasiswa</span>
@@ -357,6 +364,119 @@
     .ft-sparkle { display: none; }
 }
 </style>
+
+@php
+    $now = now();
+    $activePromos = collect();
+
+    // 1. Active Grammar Practice Topics
+    $activeGrammarTopics = \App\Models\GrammarTopic::where('is_free_tier', true)
+        ->where(function($q) use ($now) { $q->whereNull('promo_start')->orWhere('promo_start', '<=', $now); })
+        ->where(function($q) use ($now) { $q->whereNull('promo_deadline')->orWhere('promo_deadline', '>=', $now); })
+        ->orderBy('order')
+        ->get();
+    foreach ($activeGrammarTopics as $gt) {
+        $activePromos->push((object)[
+            'badge' => '🔥 PROMO EVENT',
+            'title' => 'Grammar: ' . $gt->title,
+            'desc' => $gt->desc ? \Illuminate\Support\Str::limit($gt->desc, 70) : 'Latihan grammar kalimat & evaluasi terjemahan real-time dengan AI.',
+            'duration' => '10 Soal Interaktif',
+            'icon' => 'fas fa-spell-check',
+            'icon_gradient' => 'linear-gradient(135deg, #0d9488, #14b8a6)',
+            'url' => url('/promo/test/grammar-practice/' . $gt->id . '?b=online'),
+            'btn_text' => '🎯 Mulai Test Grammar Promo',
+            'btn_gradient' => 'linear-gradient(135deg, #0d9488, #0f766e)',
+            'btn_shadow' => 'rgba(13,148,136,0.35)',
+        ]);
+    }
+
+    // 2. Active IELTS Writing Promos
+    $activeWritingPromos = \App\Models\IeltsWritingMeeting::where('is_free_tier', true)
+        ->where(function($q) use ($now) { $q->whereNull('promo_start')->orWhere('promo_start', '<=', $now); })
+        ->where(function($q) use ($now) { $q->whereNull('promo_deadline')->orWhere('promo_deadline', '>=', $now); })
+        ->orderBy('id', 'desc')
+        ->take(2)
+        ->get();
+    foreach ($activeWritingPromos as $wm) {
+        $activePromos->push((object)[
+            'badge' => '🔥 PROMO EVENT',
+            'title' => 'Writing: ' . ($wm->task_type == 1 ? 'Task 1 Academic' : 'Task 2 Essay'),
+            'desc' => \Illuminate\Support\Str::limit($wm->title, 70),
+            'duration' => 'Real-Time AI Evaluasi',
+            'icon' => 'fas fa-pen-nib',
+            'icon_gradient' => 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+            'url' => url('/promo/test/writing/' . $wm->id),
+            'btn_text' => '🎯 Ambil Test Writing Promo',
+            'btn_gradient' => 'linear-gradient(135deg, #4f46e5, #4338ca)',
+            'btn_shadow' => 'rgba(79,70,229,0.35)',
+        ]);
+    }
+
+    // 3. Active IELTS Speaking Promos
+    $activeSpeakingPromos = \App\Models\IeltsSpeakingTopic::where('is_free_tier', true)
+        ->where(function($q) use ($now) { $q->whereNull('promo_start')->orWhere('promo_start', '<=', $now); })
+        ->where(function($q) use ($now) { $q->whereNull('promo_deadline')->orWhere('promo_deadline', '>=', $now); })
+        ->orderBy('id', 'desc')
+        ->take(2)
+        ->get();
+    foreach ($activeSpeakingPromos as $st) {
+        $activePromos->push((object)[
+            'badge' => '🔥 PROMO EVENT',
+            'title' => 'Speaking: ' . $st->title,
+            'desc' => 'Simulasi interview berbicara Part 1 & Part 2 dengan AI Avatar & scoring instan.',
+            'duration' => 'Simulasi AI Examiner',
+            'icon' => 'fas fa-microphone-alt',
+            'icon_gradient' => 'linear-gradient(135deg, #ea580c, #f97316)',
+            'url' => url('/promo/test/speaking/' . $st->id),
+            'btn_text' => '🎯 Ambil Test Speaking Promo',
+            'btn_gradient' => 'linear-gradient(135deg, #ea580c, #c2410c)',
+            'btn_shadow' => 'rgba(234,88,12,0.35)',
+        ]);
+    }
+@endphp
+
+@if($activePromos->count() > 0)
+<!-- DEDICATED PROMO TEST CONTAINER -->
+<section class="promo-test-section" style="background: linear-gradient(145deg, #091235 0%, #0c235c 40%, #0d3873 100%); padding: 36px 20px 42px; position: relative; border-bottom: 1px solid rgba(255,255,255,0.1); overflow: hidden;">
+    <div style="max-width: 1100px; margin: 0 auto; text-align: center; position: relative; z-index: 2;">
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(239,68,68,0.2); border: 1.5px solid rgba(239,68,68,0.55); color: #fca5a5; padding: 5px 16px; border-radius: 50px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px;">
+            🔥 Event Promo Aktif
+        </div>
+        <h2 style="font-size: 2.1rem; font-weight: 900; color: #fff; margin-bottom: 8px; text-shadow: 0 4px 20px rgba(0,0,0,0.4);">
+            Latihan &amp; Promo Test <span style="background: linear-gradient(135deg, #f97316, #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Spesial</span>
+        </h2>
+        <p style="color: rgba(255,255,255,0.8); font-size: 0.98rem; margin-bottom: 24px; max-width: 650px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+            Uji kemampuan spesifikmu dengan AI Real-Time Feedback sebelum event promo berakhir!
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1050px; margin: 0 auto;">
+            @foreach($activePromos as $promo)
+            <div class="hover-lift" style="background: rgba(255,255,255,0.96); border-radius: 18px; padding: 28px 20px; display: flex; flex-direction: column; align-items: center; position: relative; border: 2px solid rgba(245,158,11,0.6); box-shadow: 0 10px 30px rgba(0,0,0,0.25); text-align: center;">
+                <div style="position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg,#ef4444,#f97316); color: #fff; font-size: 0.72rem; font-weight: 900; border-radius: 50px; padding: 4px 14px; letter-spacing: 1.5px; text-transform: uppercase; box-shadow: 0 4px 12px rgba(239,68,68,0.5); white-space: nowrap;">
+                    {{ $promo->badge }}
+                </div>
+                <div style="font-size: 2.2rem; margin-bottom: 10px; background: {{ $promo->icon_gradient }}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    <i class="{{ $promo->icon }}"></i>
+                </div>
+                <div style="font-weight: 800; font-size: 1.12rem; margin-bottom: 6px; color: #1e293b;">
+                    {{ $promo->title }}
+                    <span style="background: linear-gradient(135deg,#16a34a,#22c55e); color: #fff; font-size: 0.72rem; font-weight: 800; border-radius: 50px; padding: 3px 10px; margin-left: 4px;">GRATIS</span>
+                </div>
+                <div style="color: #64748B; font-size: 0.9rem; margin-bottom: 10px; line-height: 1.45; flex-grow: 1;">
+                    {{ $promo->desc }}
+                </div>
+                <div style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 14px;">
+                    <i class="fas fa-bolt" style="color: #f59e0b;"></i> {{ $promo->duration }}
+                </div>
+                <a href="{{ $promo->url }}" style="display: block; width: 100%; background: {{ $promo->btn_gradient }}; color: #fff; font-weight: 700; border-radius: 10px; padding: 11px 0; text-decoration: none; font-size: 0.92rem; box-shadow: 0 4px 14px {{ $promo->btn_shadow }}; transition: all 0.3s;">
+                    {{ $promo->btn_text }}
+                </a>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
 
 <section class="free-test-section">
     <!-- Glassmorphism floating orbs -->
@@ -2012,7 +2132,12 @@
         <div id="brochure-desc" style="color:#475569; font-size:1rem; line-height:1.75; margin-bottom:2rem; text-align:left; white-space: pre-line;">
             Description goes here.
         </div>
-        <a href="{{ route('registration.show') }}" class="btn-pricing" style="text-align:center;">Daftar Kelas Sekarang</a>
+        <div style="display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap;">
+            <a id="brochure-pdf-btn" href="#" target="_blank" class="btn-outline" style="flex: 1; min-width: 140px; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; border: 1.5px solid #cbd5e1; color: #334155; text-decoration: none; background: #f8fafc;">
+                <i class="fas fa-file-pdf" style="color: #ef4444;"></i> Brosur PDF
+            </a>
+            <a href="{{ route('registration.show') }}" class="btn-pricing" style="flex: 1.2; min-width: 160px; text-align:center; margin: 0;">Daftar Kelas Sekarang</a>
+        </div>
     </div>
 </div>
 
@@ -2021,42 +2146,52 @@
     const brochureData = {
         'speaking_basic': {
             title: 'Speaking Basic',
+            slug: 'introductory-speaking',
             desc: 'Program Speaking Basic didesain khusus untuk pemula (Beginner) yang ingin membangun rasa percaya diri dalam berbicara bahasa Inggris. Anda akan belajar kosakata dasar, pelafalan yang benar, dan percakapan sehari-hari. Cocok untuk Anda yang masih terbata-bata atau takut salah saat berbicara.'
         },
         'speaking_intermediate': {
             title: 'Speaking Intermediate',
+            slug: 'intermediate-speaking',
             desc: 'Program Speaking Intermediate ditujukan bagi Anda yang sudah memiliki dasar namun ingin memperlancar percakapan. Fokus pada perbaikan tata bahasa (grammar) saat berbicara secara spontan, memperluas kosakata, dan berlatih diskusi interaktif dalam berbagai konteks sosial maupun profesional.'
         },
         'speaking_advanced': {
             title: 'Speaking Advanced',
+            slug: 'advanced-speaking',
             desc: 'Program Speaking Advanced adalah kelas mahir (Advanced) untuk menyempurnakan kefasihan bahasa Inggris Anda. Sangat cocok bagi profesional atau mahasiswa yang membutuhkan kemampuan presentasi tingkat lanjut, negosiasi, debat, dan public speaking dengan tingkat akurasi tinggi.'
         },
         'toefl_itp': {
             title: 'TOEFL ITP Preparation',
+            slug: 'toefl-itp',
             desc: 'Kelas intensif yang dirancang untuk mendongkrak skor TOEFL ITP Anda hingga 550+. Kami menyediakan strategi khusus untuk menaklukkan sesi Listening, Structure and Written Expression, serta Reading Comprehension secara efektif dan efisien.'
         },
         'ielts_prep': {
             title: 'IELTS Preparation',
+            slug: 'ielts-academic-full-package',
             desc: 'Program persiapan komprehensif untuk mencapai skor ideal (Band 7.0+). Anda akan dibimbing menguasai keempat skill IELTS: Listening, Reading, Writing, dan Speaking dengan format tes terbaru dan simulasi rutin.'
         },
         'marlins': {
             title: 'Marlins Test Preparation',
+            slug: 'speaking',
             desc: 'Program bimbingan khusus bagi pelaut dan kru kapal pesiar. Membekali Anda dengan kemampuan bahasa Inggris maritim spesifik untuk lulus tes Marlins dengan skor tinggi, memperbesar peluang kerja di perusahaan pelayaran internasional.'
         },
         'ielts_writing': {
             title: 'IELTS Writing Academic',
+            slug: 'ielts-academic-writing',
             desc: `Kelas intensif khusus IELTS Academic Writing yang mencakup:\n\n✏️ Task 1 Academic — Mendeskripsikan grafik (line, bar, pie chart), diagram proses, dan peta dengan struktur overview & detail yang tepat.\n\n📝 Task 2 Essay — Menguasai jenis soal Discussion, Opinion, Problem & Solution, dan Advantages/Disadvantages dengan framework paragraf yang terbukti mencapai Band 7–8.\n\nAnda akan mendapatkan koreksi tulisan dari pengajar berpengalaman, latihan timed writing setiap sesi, dan feedback terperinci untuk setiap submission.`
         },
         'ielts_listening': {
             title: 'IELTS Listening Academic',
+            slug: 'ielts-academic-full-package',
             desc: `Kelas intensif IELTS Listening Academic yang membekali Anda dengan kemampuan memahami audio berbagai aksen native speaker:\n\n🎧 Section 1 & 2 — Percakapan sehari-hari dan monolog sosial (form filling, maps, multiple choice).\n\n🎓 Section 3 & 4 — Diskusi akademik dan kuliah universitas yang lebih kompleks.\n\nLatihan dengan audio asli IELTS, teknik prediksi jawaban, dan strategi menghadapi distractor. Target skor 7.5–8.5 dalam waktu singkat.`
         },
         'ielts_reading': {
             title: 'IELTS Reading Academic',
+            slug: 'ielts-academic-reading',
             desc: `Kelas strategi IELTS Reading Academic untuk menjawab 40 soal dalam 60 menit secara akurat:\n\n📖 3 passage teks ilmiah panjang — dari jurnal, majalah, dan teks akademik internasional.\n\n🔍 Teknik skim & scan, matching headings, True/False/Not Given, Summary Completion, dan sentence matching.\n\nAnda akan berlatih dengan soal IELTS Cambridge authentic, membangun kecepatan baca, dan mempelajari strategi eliminasi yang efektif untuk meraih Band 7.0+.`
         },
         'ielts_speaking_ac': {
             title: 'IELTS Speaking Academic',
+            slug: 'ielts-speaking',
             desc: `Kelas simulasi IELTS Speaking dengan format persis seperti ujian resmi (face-to-face examiner):\n\n🗣️ Part 1 — Pertanyaan personal singkat tentang kehidupan sehari-hari (2 menit).\n\n💬 Part 2 — Long turn: berbicara 2 menit dari cue card tanpa persiapan panjang.\n\n🔄 Part 3 — Diskusi mendalam & analitis dengan examiner (4–5 menit).\n\nFokus pada Fluency, Coherence, Lexical Resource, Grammar Range, dan Pronunciation. Setiap sesi direkam dan dievaluasi untuk mencapai skor Speaking 7.0+.`
         }
     };
@@ -2065,6 +2200,10 @@
         const data = brochureData[id];
         if(data) {
             document.getElementById('brochure-title').innerText = data.title;
+            const pdfBtn = document.getElementById('brochure-pdf-btn');
+            if (pdfBtn && data.slug) {
+                pdfBtn.href = '/brochure/pdf/' + data.slug;
+            }
             // Render \n as real line breaks
             document.getElementById('brochure-desc').innerHTML = data.desc
                 .replace(/&/g, '&amp;')

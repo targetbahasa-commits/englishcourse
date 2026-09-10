@@ -86,18 +86,18 @@
                                 }
                             }
                         @endphp
-                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $statusAnswerKey ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $statusAnswerKey ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
                             <span class="font-bold">{{ $statusAnswerKey ? '✓' : '✕' }}</span> Kunci
                         </span>
                     @endif
                 </div>
-                <div class="flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-semibold">
+                <div class="flex items-center gap-2 px-4 py-1.5 bg-white text-blue-700 rounded-full text-sm font-semibold">
                     <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                     TOEFL Listening
                 </div>
             </div>
             
-            <div class="bg-gray-50 rounded-lg p-6 border border-gray-100">
+            <div class="bg-white rounded-lg p-6 border border-gray-100">
                 <p class="mb-3 text-gray-700 leading-relaxed"><strong class="text-gray-900">Focus:</strong> listening to dialogs that involve agreement and disagreement, and answering questions about them.</p>
                 <p class="mb-0 text-gray-700 leading-relaxed"><strong class="text-gray-900">Directions:</strong> listen to the following dialogs. Decide which choice <span class="bg-white px-2 py-0.5 rounded border border-gray-200 text-sm font-mono">(A)</span>, <span class="bg-white px-2 py-0.5 rounded border border-gray-200 text-sm font-mono">(B)</span>, or <span class="bg-white px-2 py-0.5 rounded border border-gray-200 text-sm font-mono">(C)</span> best answers the question and mark the appropriate answer. The first one is done as an example.</p>
             </div>
@@ -210,7 +210,7 @@
                 </div>
             </div>     {{-- Back Button --}}
                 <div class="mt-8 flex justify-start">
-                    <a href="{{ route('assignments.toefl-itp.listening') }}" class="px-8 py-3 bg-white border-2 border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center gap-2">
+                    <a href="{{ route('assignments.toefl-itp.listening') }}" class="px-8 py-3 bg-white border-2 border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-white hover:border-gray-300 transition-all duration-200 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                         </svg>
@@ -220,7 +220,7 @@
             </div>
         @else
             {{-- Questions Section - Only show when a set is selected --}}
-            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div class="mb-6 p-4 bg-white rounded-lg border border-blue-200">
                 <p class="text-blue-800 font-semibold">
                     <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -240,10 +240,10 @@
                                     $statusTranscript = filled($questions->first()->transcript_en ?? null) || filled($questions->first()->transcript_id ?? null);
                                 @endphp
                                 <div class="flex items-center gap-1 flex-shrink-0">
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusAudio ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusAudio ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
                                         <span class="font-bold">{{ $statusAudio ? '✓' : '✕' }}</span> Audio
                                     </span>
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusTranscript ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold {{ $statusTranscript ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
                                         <span class="font-bold">{{ $statusTranscript ? '✓' : '✕' }}</span> SRT
                                     </span>
                                 </div>
@@ -258,7 +258,7 @@
                         <div class="flex-1 min-w-[220px] flex items-center gap-1.5 md:gap-3 max-w-3xl">
                             {{-- Backward 10s Button --}}
                             <button type="button" onclick="skipAudio(-10)" 
-                                    class="p-1.5 md:p-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Mundur 10 detik">
+                                    class="p-1.5 md:p-2 bg-white hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Mundur 10 detik">
                                 <svg class="w-4 h-4 md:w-5 md:h-5 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path>
                                 </svg>
@@ -284,7 +284,7 @@
                                 </div>
                                 
                                 {{-- Seekable Progress Bar --}}
-                                <div class="relative h-2 bg-indigo-100 rounded-full cursor-pointer group" id="progressContainer">
+                                <div class="relative h-2 bg-white rounded-full cursor-pointer group" id="progressContainer">
                                     <div id="progressBar" class="absolute h-full bg-indigo-600 rounded-full transition-all" style="width: 0%"></div>
                                     <div id="progressHandle" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-indigo-600 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%"></div>
                                 </div>
@@ -292,7 +292,7 @@
 
                             {{-- Forward 10s Button --}}
                             <button type="button" onclick="skipAudio(10)" 
-                                    class="p-1.5 md:p-2 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Maju 10 detik">
+                                    class="p-1.5 md:p-2 bg-white hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Maju 10 detik">
                                 <svg class="w-4 h-4 md:w-5 md:h-5 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"></path>
                                 </svg>
@@ -348,9 +348,9 @@
                         <div id="transcriptDrawer" class="hidden border border-gray-300 rounded-lg mx-4 mb-4 bg-white h-80 overflow-hidden flex-col transition-all duration-300 ease-in-out shadow-md">
                             <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                                 {{-- English Column --}}
-                                <div class="flex flex-col h-full bg-slate-50">
+                                <div class="flex flex-col h-full bg-white">
                                     {{-- Header --}}
-                                    <div class="flex-none px-4 py-2 bg-slate-100 border-b border-slate-200 font-semibold text-slate-700 flex items-center justify-between z-10">
+                                    <div class="flex-none px-4 py-2 bg-white border-b border-slate-200 font-semibold text-slate-700 flex items-center justify-between z-10">
                                         <div class="flex items-center gap-2">
                                             <img src="https://flagcdn.com/w20/us.png" alt="US" class="rounded-sm"> English Script
                                         </div>
@@ -363,14 +363,14 @@
                                                 </label>
                                                 
                                                 <div class="flex items-center rounded-md bg-white border border-gray-300 shadow-sm overflow-hidden" title="Adjust Sync">
-                                                    <button onclick="adjustSync(-0.5)" class="px-2 py-0.5 hover:bg-gray-100 text-xs text-gray-600 border-r border-gray-200 font-mono transition-colors">&laquo;</button>
+                                                    <button onclick="adjustSync(-0.5)" class="px-2 py-0.5 hover:bg-white text-xs text-gray-600 border-r border-gray-200 font-mono transition-colors">&laquo;</button>
                                                     <span id="syncOffsetDisplay" class="px-2 py-0.5 text-xs text-gray-500 font-mono min-w-[40px] text-center">0s</span>
-                                                    <button onclick="adjustSync(0.5)" class="px-2 py-0.5 hover:bg-gray-100 text-xs text-gray-600 border-l border-gray-200 font-mono transition-colors">&raquo;</button>
+                                                    <button onclick="adjustSync(0.5)" class="px-2 py-0.5 hover:bg-white text-xs text-gray-600 border-l border-gray-200 font-mono transition-colors">&raquo;</button>
                                                 </div>
                                             </div>
 
                                             @if(Auth::user()->isAdmin())
-                                                <button onclick="document.getElementById('editTranscriptModal').classList.remove('hidden')" class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded hover:bg-blue-200">Edit</button>
+                                                <button onclick="document.getElementById('editTranscriptModal').classList.remove('hidden')" class="px-2 py-0.5 bg-white text-blue-700 text-xs rounded hover:bg-blue-200">Edit</button>
                                             @endif
                                         </div>
                                     </div>
@@ -404,7 +404,7 @@
                                                                         $wordStart = $startTime + ($index * $durationPerWord);
                                                                         $wordEnd = $startTime + (($index + 1) * $durationPerWord);
                                                                     @endphp
-                                                                    <span class="transcript-word cursor-pointer hover:bg-yellow-100 transition-colors duration-200 rounded px-0.5 inline-block"
+                                                                    <span class="transcript-word cursor-pointer hover:bg-white transition-colors duration-200 rounded px-0.5 inline-block"
                                                                           data-start="{{ $wordStart }}"
                                                                           data-end="{{ $wordEnd }}"
                                                                           onclick="seekAudio({{ $wordStart }})">
@@ -425,9 +425,9 @@
                                 </div>
                                 
                                 {{-- Indonesian Column --}}
-                                <div class="flex flex-col h-full bg-indigo-50">
+                                <div class="flex flex-col h-full bg-white">
                                     {{-- Header --}}
-                                    <div class="flex-none px-4 py-2 bg-indigo-100 border-b border-indigo-200 font-semibold text-indigo-800 flex items-center justify-between z-10">
+                                    <div class="flex-none px-4 py-2 bg-white border-b border-indigo-200 font-semibold text-indigo-800 flex items-center justify-between z-10">
                                           <div class="flex items-center gap-2">
                                             <img src="https://flagcdn.com/w20/id.png" alt="ID" class="rounded-sm"> Terjemahan Indonesia
                                           </div>
@@ -465,7 +465,7 @@
                                                                         $wordStart = $startTime + ($index * $durationPerWord);
                                                                         $wordEnd = $startTime + (($index + 1) * $durationPerWord);
                                                                     @endphp
-                                                                    <span class="transcript-word-id cursor-pointer hover:bg-yellow-100 transition-colors duration-200 rounded px-0.5 inline-block"
+                                                                    <span class="transcript-word-id cursor-pointer hover:bg-white transition-colors duration-200 rounded px-0.5 inline-block"
                                                                           data-start="{{ $wordStart }}"
                                                                           data-end="{{ $wordEnd }}"
                                                                           onclick="seekAudio({{ $wordStart }})">
@@ -487,7 +487,7 @@
                             </div>
                             
                             {{-- Bottom Collapse Bar --}}
-                            <div class="bg-gray-50 border-t border-gray-200 py-1 flex justify-center hover:bg-gray-100 transition-colors cursor-pointer group" onclick="toggleTranscriptDrawer()" title="Tutup Transkrip">
+                            <div class="bg-white border-t border-gray-200 py-1 flex justify-center hover:bg-white transition-colors cursor-pointer group" onclick="toggleTranscriptDrawer()" title="Tutup Transkrip">
                                 <svg class="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" transform="rotate(-90 12 12)"></path>
                                 </svg>
@@ -964,7 +964,7 @@
             {{-- Column 1: Questions 1-{{ $splitIndex }} --}}
             <div class="space-y-0 divide-y divide-gray-100">
                 @foreach($questions->take($splitIndex) as $question)
-                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+                    <div class="py-3 group transition-colors hover:bg-white rounded-lg px-2 -mx-2 relative">
                         <div class="flex items-baseline gap-3">
                             <div class="flex-none flex items-center justify-end gap-2 w-8">
                                 <span class="font-bold text-gray-500 text-xl">{{ $question->question_number }}.</span>
@@ -972,7 +972,7 @@
                             @if(auth()->check() && auth()->user()->isAdmin())
                                 <button type="button" 
                                         onclick="openEditQuestionModal({{ $question }})" 
-                                        class="absolute top-3 right-10 w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                                        class="absolute top-3 right-10 w-6 h-6 rounded-full bg-white text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
                                         title="Edit Question">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -981,7 +981,7 @@
                             @endif
                                 <button type="button" 
                                         onclick="jumpToTime({{ $questionTimestamps[$question->id] ?? 'null' }})" 
-                                        class="absolute top-3 right-2 w-6 h-6 rounded-full bg-purple-100 text-purple-600 hover:bg-purple-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                                        class="absolute top-3 right-2 w-6 h-6 rounded-full bg-white text-purple-600 hover:bg-purple-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
                                         title="Lihat Transkrip & Dengar Audio">
                                     ?
                                 </button>
@@ -1008,7 +1008,7 @@
                                             }
                                         }
                                     @endphp
-                                    <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all {{ $studentClass }}"
+                                    <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-white rounded-lg px-3 transition-all {{ $studentClass }}"
                                            @if($canSeeKey) data-is-correct="{{ $isCorrectVal }}" @endif>
                                             {{-- Hidden Radio Input --}}
                                             <input type="radio" 
@@ -1039,7 +1039,7 @@
             {{-- Column 2: Questions {{ $splitIndex + 1 }}-End --}}
             <div class="space-y-0 divide-y divide-gray-100">
                 @foreach($questions->skip($splitIndex) as $question)
-                    <div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+                    <div class="py-3 group transition-colors hover:bg-white rounded-lg px-2 -mx-2 relative">
                         <div class="flex items-baseline gap-3">
                             <div class="flex-none flex items-center justify-end gap-2 w-8">
                                 <span class="font-bold text-gray-500 text-xl">{{ $question->question_number }}.</span>
@@ -1047,7 +1047,7 @@
                             @if(auth()->check() && auth()->user()->isAdmin())
                                 <button type="button" 
                                         onclick="openEditQuestionModal({{ $question }})" 
-                                        class="absolute top-3 right-10 w-6 h-6 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                                        class="absolute top-3 right-10 w-6 h-6 rounded-full bg-white text-blue-600 hover:bg-blue-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
                                         title="Edit Question">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -1056,7 +1056,7 @@
                             @endif
                                 <button type="button" 
                                         onclick="jumpToTime({{ $questionTimestamps[$question->id] ?? 'null' }})" 
-                                        class="absolute top-3 right-2 w-6 h-6 rounded-full bg-purple-100 text-purple-600 hover:bg-purple-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                                        class="absolute top-3 right-2 w-6 h-6 rounded-full bg-white text-purple-600 hover:bg-purple-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
                                         title="Lihat Transkrip & Dengar Audio">
                                     ?
                                 </button>
@@ -1083,7 +1083,7 @@
                                             }
                                         }
                                     @endphp
-                                    <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-gray-50 rounded-lg px-3 transition-all {{ $studentClass }}"
+                                    <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-white rounded-lg px-3 transition-all {{ $studentClass }}"
                                            @if($canSeeKey) data-is-correct="{{ $isCorrectVal }}" @endif>
                                             {{-- Hidden Radio Input --}}
                                             <input type="radio" 
@@ -1188,7 +1188,7 @@
                 @endif
             
             <div class="flex justify-end gap-4">
-                 <a href="{{ route('assignments.toefl-itp.listening.meeting', $number) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+                 <a href="{{ route('assignments.toefl-itp.listening.meeting', $number) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
@@ -1271,7 +1271,7 @@
 Start translating here..."></textarea>
                     </div>
 
-                    <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                    <div class="bg-white p-3 rounded-lg border border-yellow-200">
                         <p class="text-xs text-yellow-800">
                             <strong>Note:</strong> Auto-parsing will remove timestamps (<code>00:00:10 --> ...</code>) and keep only the text dialog.
                         </p>
@@ -1319,7 +1319,7 @@ Start translating here..."></textarea>
                     </div>
 
                     @if(isset($questions) && $questions->first() && $questions->first()->audio_file)
-                        <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <div class="p-3 bg-white rounded-lg border border-blue-200">
                             <p class="text-sm text-blue-800">
                                 <span class="font-semibold">Current file:</span> 
                                 {{ basename($questions->first()->audio_file) }}
@@ -1363,7 +1363,7 @@ Start translating here..."></textarea>
                 @csrf
 
                 {{-- Breadcrumb Navigation --}}
-                <div class="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div class="mb-4 p-3 bg-white rounded-lg border border-gray-200">
                     <div class="flex items-center gap-2 text-sm font-medium flex-wrap">
                         <button type="button" class="text-blue-600 hover:text-blue-800 flex-shrink-0" onclick="audioFileManager.goToRoot(event)">
                             <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2.83-2.83a1 1 0 011.41 0L12 12m0 0l5.76-5.76a1 1 0 011.41 0L21 12"></path></svg>
@@ -1381,7 +1381,7 @@ Start translating here..."></textarea>
                 </div>
 
                 {{-- Selected File Display --}}
-                <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                <div class="p-3 bg-white rounded-lg border border-emerald-200">
                     <p class="text-sm font-medium text-emerald-800">Selected:</p>
                     <p id="audioSelectedFile" class="text-sm text-emerald-700 mt-1 break-words">
                         <span class="italic text-gray-500">None selected</span>
@@ -1508,13 +1508,13 @@ Start translating here..."></textarea>
                 const isSelected = isFile && fileValue && this.selectedFile === fileValue;
                 
                 if (isFile) {
-                    html += `<div class="flex items-center p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 ${isSelected ? 'bg-blue-100' : ''}" data-action="select-file" data-path="${fileValue}">
+                    html += `<div class="flex items-center p-3 hover:bg-white cursor-pointer border-b border-gray-100 ${isSelected ? 'bg-white' : ''}" data-action="select-file" data-path="${fileValue}">
                             <svg class="w-5 h-5 text-red-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
                             <span class="text-sm text-gray-800 flex-1 break-words pointer-events-none">${name}</span>
                             ${isSelected ? '<svg class="w-5 h-5 text-green-600 ml-2 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>' : ''}
                         </div>`;
                 } else {
-                    html += `<div class="flex items-center p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100" data-action="goto-folder" data-path="${labelPath}">
+                    html += `<div class="flex items-center p-3 hover:bg-white cursor-pointer border-b border-gray-100" data-action="goto-folder" data-path="${labelPath}">
                             <svg class="w-5 h-5 text-yellow-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"></path></svg>
                             <span class="text-sm font-medium text-gray-800 flex-1 pointer-events-none">${name}</span>
                             <svg class="w-4 h-4 text-gray-400 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
@@ -1620,7 +1620,7 @@ Start translating here..."></textarea>
                                                      @foreach(['A','B','C','D'] as $opt)
                                                         <button type="button" onclick="selectAnswer('{{ $opt }}')" 
                                                                 id="btn_answer_{{ $opt }}"
-                                                                class="flex-1 py-1 px-2 border rounded-md text-sm font-semibold transition-colors hover:bg-gray-50 focus:outline-none answer-btn">
+                                                                class="flex-1 py-1 px-2 border rounded-md text-sm font-semibold transition-colors hover:bg-white focus:outline-none answer-btn">
                                                             {{ $opt }}
                                                         </button>
                                                      @endforeach
@@ -1632,7 +1632,7 @@ Start translating here..."></textarea>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Audio File (MP3/WAV)</label>
                                         <div class="mt-1 flex rounded-md shadow-sm">
-                                            <label class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-l-md text-gray-700 bg-gray-50 hover:bg-gray-100">
+                                            <label class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-l-md text-gray-700 bg-white hover:bg-white">
                                                 Choose File
                                                 <input type="file" name="audio_file" accept=".mp3,.wav" class="hidden" onchange="document.getElementById('audio_file_name').textContent = this.files[0] ? this.files[0].name : 'No file chosen'">
                                             </label>
@@ -1652,7 +1652,7 @@ Start translating here..."></textarea>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700">Option {{ $opt }}</label>
                                                 <div class="flex">
-                                                    <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm font-bold">
+                                                    <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-white text-gray-500 text-sm font-bold">
                                                         {{ $opt }}
                                                     </span>
                                                     <input type="text" name="option_{{ strtolower($opt) }}" id="option_{{ strtolower($opt) }}" required class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
@@ -1664,11 +1664,11 @@ Start translating here..."></textarea>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <div class="bg-white px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                         <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
                             Save Question
                         </button>
-                        <button type="button" onclick="closeQuestionModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        <button type="button" onclick="closeQuestionModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                             Cancel
                         </button>
                     </div>

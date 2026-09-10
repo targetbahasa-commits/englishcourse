@@ -19,7 +19,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
     <div class="flex min-h-screen">
@@ -39,7 +39,7 @@
                              <p class="text-gray-600 mt-1">Full Listening Test</p>
                         </div>
                     </div>
-                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId ?? 1]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId ?? 1]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
@@ -525,7 +525,7 @@
                                 <p class="italic mb-6">Choose <span class="font-bold">FOUR</span> answers from the box and write the correct letter, <span class="font-bold">A–F</span>, next to questions 27–30.</p>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div class="border border-gray-400 p-6 rounded-lg bg-gray-50">
+                                    <div class="border border-gray-400 p-6 rounded-lg bg-white">
                                         <h5 class="font-bold text-center mb-4 text-lg border-b border-gray-300 pb-2">Opinions</h5>
                                         <div class="space-y-3">
                                             <div class="flex gap-4"><span class="font-bold w-4">A</span> <span>Tim found this easier than expected.</span></div>

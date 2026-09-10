@@ -21,6 +21,11 @@ class RoleMiddleware
             abort(403, 'Unauthorized access.');
         }
 
+        // Admins have full access across all routes
+        if ($user->role === 'admin') {
+            return $next($request);
+        }
+
         // For admin routes: check actual DB role, not active_role.
         // This lets admins access admin pages even while impersonating.
         // Interns are also allowed into admin routes, but their access
@@ -38,9 +43,9 @@ class RoleMiddleware
                     $permissionMap = [
                         'manage_payments' => ['admin.payments.', 'admin.payment-queue', 'admin.transfer-proofs'],
                         'manage_announcements' => ['admin.announcements.', 'admin.broadcast-messages.', 'admin.outreach-messages.', 'admin.leads.'],
-                        'manage_users' => ['users.', 'students.', 'teachers.', 'admin.guest-users.', 'admin.api.active-students', 'admin.api.active-teachers', 'admin.chat.'],
+                        'manage_users' => ['users.', 'students.', 'teachers.', 'admin.users.', 'admin.students.', 'admin.teachers.', 'admin.guest-users.', 'admin.api.active-students', 'admin.api.active-teachers', 'admin.chat.'],
                         'view_reports' => ['admin.reports.', 'admin.attendance.', 'admin.assignment-results.', 'admin.evaluations.', 'admin.class-evaluations.', 'admin.toefl-mockup-results.', 'admin.final-test-results.', 'admin.online-test-results.'],
-                        'manage_programs' => ['programs.', 'admin.camps.', 'class-periods.', 'admin.class-schedules.', 'assignments.', 'final-test', 'admin.manage-final-test', 'online-test.', 'admin.online-tests.', 'mock-test', 'admin.free-tests.certificates.', 'free-lesson', 'admin.chat.'],
+                        'manage_programs' => ['programs.', 'admin.camps.', 'admin.camp-management.', 'admin.rooms.', 'admin.camp-reviews.', 'class-periods.', 'admin.class-schedules.', 'assignments.', 'final-test', 'admin.manage-final-test', 'online-test.', 'admin.online-tests.', 'mock-test', 'admin.free-tests.certificates.', 'free-lesson', 'admin.chat.'],
                     ];
 
                     foreach ($permissionMap as $permission => $prefixes) {

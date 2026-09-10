@@ -10,7 +10,7 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
         {{-- Q1: Full Name --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 font-bold uppercase text-sm text-gray-700">Full Name</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">Peter Adrien</span>
@@ -22,7 +22,7 @@
         </div>
 
         {{-- Q2: Address --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 font-bold uppercase text-sm text-gray-700">Address</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">Flat 5 53</span>
@@ -35,7 +35,7 @@
         </div>
 
         {{-- Q3: Postcode --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 font-bold uppercase text-sm text-gray-700">Postcode</div>
             <div class="p-3">
                 <strong>3</strong>
@@ -46,7 +46,7 @@
         </div>
 
         {{-- Q4: Date of Birth --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 font-bold uppercase text-sm text-gray-700">Date of Birth</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">8th July</span>
@@ -58,13 +58,13 @@
         </div>
 
         {{-- Home Tel (given) --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 font-bold uppercase text-sm text-gray-700">Home Tel</div>
             <div class="p-3 text-gray-600 italic">none</div>
         </div>
 
         {{-- Q5: Mobile Tel --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 font-bold uppercase text-sm text-gray-700">Mobile Tel</div>
             <div class="p-3">
                 <strong>5</strong>
@@ -75,7 +75,7 @@
         </div>
 
         {{-- Proof of Residence (given) --}}
-        <div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 hover:bg-white transition-colors">
             <div class="p-3 font-bold uppercase text-sm text-gray-700">Proof of Residence Provided</div>
             <div class="p-3 text-gray-600 italic">a letter</div>
         </div>
@@ -86,7 +86,7 @@
     <p class="mb-1 text-gray-700 italic">Circle <strong>THREE</strong> letters <strong>A-F</strong>.</p>
     <p class="mb-4 text-gray-700">What type of books does Peter like?</p>
 
-    <div class="bg-gray-50 p-6 rounded-2xl inline-block mt-2 min-w-[300px] mb-8">
+    <div class="bg-white p-6 rounded-2xl inline-block mt-2 min-w-[300px] mb-8">
         <div class="space-y-4 font-medium text-lg" id="checkbox-group-books">
             @foreach([
                 ['A', 'Wildlife books'],
@@ -96,7 +96,7 @@
                 ['E', 'Science Fiction novels'],
                 ['F', 'Mystery books'],
             ] as [$letter, $label])
-            <label class="flex items-center gap-4 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors group">
+            <label class="flex items-center gap-4 cursor-pointer hover:bg-white p-2 rounded transition-colors group">
                 <input type="checkbox" name="answers[6_7_8][]" value="{{ $letter }}" class="books-checkbox w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
                 <span class="font-bold w-6 group-hover:text-blue-600">{{ $letter }}</span>
                 <span>{{ $label }}</span>

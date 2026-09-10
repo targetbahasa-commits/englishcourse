@@ -1,12 +1,14 @@
 @extends('layouts.admin')
 
+@section('title', ($meeting->title ?? 'Labeling Trends') . ' - IELTS Writing Task ' . ($task ?? 1))
+
 @section('head')
     <script src="{{ asset('js/auto-save.js') }}?v={{ time() }}"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
 @section('content')
-<div class="container mx-auto px-4 py-8 h-screen flex flex-col" x-data="labelingTrends({{ $meeting->id }})">
+<div class="container mx-auto px-4 py-8 h-screen flex flex-col" x-data="labelingTrends({{ $meeting->id }}, {{ Js::from($savedAnswers ?? []) }})">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
@@ -76,7 +78,7 @@
                                         :id="'label_' + item.id"
                                         :name="'label_' + item.id"
                                         x-model="answers['label_' + item.id]"
-                                        @input="autoResize($event.target)"
+                                        @input="autoResize($event.target); queueDraftSync()"
                                         x-init="$nextTick(() => autoResize($el))"
                                         placeholder="e.g. 1960"
                                         class="w-full min-h-[2.75rem] px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-shadow text-sm resize-none overflow-hidden leading-relaxed"
@@ -96,7 +98,7 @@
                             placeholder="Describe the changes shown in the graph and connect the trends..."
                             x-model="answers.essay"
                             name="essay"
-                            @input="autoResize($event.target)"
+                            @input="autoResize($event.target); queueDraftSync()"
                             x-init="$nextTick(() => autoResize($el))"
                         ></textarea>
                     </div>
@@ -112,8 +114,13 @@
 <!-- Alpine Data -->
 <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('labelingTrends', (meetingId) => ({
-            answers: { essay: '' },
+        Alpine.data('labelingTrends', (meetingId, savedAnswers = {}) => ({
+            // Seeded from the student's last autosaved draft (see
+            // IeltsWritingController::showMeeting()) - previously this
+            // always started empty, so a normal page refresh looked like
+            // it had wiped the student's answers even though they were
+            // already safely saved server-side the whole time.
+            answers: { essay: '', ...(savedAnswers || {}) },
             loading: false,
             labels: [
                 { id: 1, text: 'mild fluctuations' },
@@ -164,15 +171,74 @@
                 }, 500);
             },
 
-            submit() {
+            draftSyncTimer: null,
+            queueDraftSync() {
+                if (window.showAutosaveIndicator) {
+                    window.showAutosaveIndicator('Menyimpan draft...', 'saving');
+                }
+                clearTimeout(this.draftSyncTimer);
+                this.draftSyncTimer = setTimeout(() => this.syncDraftToServer(), 800);
+            },
+            async syncDraftToServer() {
+                try {
+                    await fetch('/assignments/ielts-academic/writing/meeting/' + meetingId + '/draft', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: JSON.stringify({ userAnswers: this.answers }),
+                        keepalive: true,
+                    });
+                    if (window.showAutosaveIndicator) {
+                        window.showAutosaveIndicator();
+                    }
+                } catch (e) {
+                    console.error('Failed to sync draft to server:', e);
+                    if (window.showAutosaveIndicator) {
+                        window.showAutosaveIndicator('Gagal menyimpan draft', 'error');
+                    }
+                }
+            },
+
+            async submit() {
                 this.loading = true;
                 const key = 'labeling_trends_autosave_v3_' + meetingId;
                 localStorage.setItem(key, JSON.stringify(this.answers));
-                
-                setTimeout(() => {
+
+                const labelLines = this.labels
+                    .map(item => `${item.id}. ${item.text}: ${this.answers['label_' + item.id] || '-'}`)
+                    .join("\n");
+                const formattedEssay = `${labelLines}\n\nDescription:\n${this.answers.essay || 'No answer provided'}`;
+
+                try {
+                    const response = await fetch('/assignments/ielts-academic/writing/evaluate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                        },
+                        body: JSON.stringify({ essay: formattedEssay, task_type: '1', meeting_id: meetingId })
+                    });
+                    const data = await response.json();
                     this.loading = false;
-                    alert('Practice saved successfully!');
-                }, 1000);
+                    if (data.redirect_url) {
+                        if (data.message) alert(data.message);
+                        window.location.href = data.redirect_url;
+                        return;
+                    }
+                    if (data.submission_id) {
+                        if (confirm('Jawaban berhasil dikirim! Apakah Anda ingin melihat halaman hasil pengerjaan lengkap?')) {
+                            window.open('/assignments/ielts-academic/writing/submission/' + data.submission_id, '_blank');
+                        }
+                    } else {
+                        alert('Jawaban berhasil disimpan!');
+                    }
+                } catch (e) {
+                    this.loading = false;
+                    alert('Jawaban berhasil disimpan secara lokal!');
+                }
             }
         }))
     })

@@ -24,14 +24,7 @@
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
     <div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-        <div class="flex justify-between items-center mb-8">
-            <a href="{{ route('assignments.grammar-writing') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
-    <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-    </svg>
-    Back
-</a>
-        </div>
+        <x-grammar-meeting-actions :meetingNumber="1" track="fast-track" />
 
         <h1 class="text-3xl font-bold text-center text-yellow-500 mb-8">Pertemuan 1 - PRONOUN (Kata Ganti)</h1>
         <h3 class="text-3xl font-bold text-center text-yellow-500 mb-8">Latihan Translate (Indo -> Inggris)</h3>
@@ -81,7 +74,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('assignments.grammar-writing.meeting1.submit') }}">
+        <form method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting1.submit'), PHP_URL_PATH) }}">
             @csrf
             @foreach($questions as $index => $data)
                 <div class="bg-gray-50 p-6 rounded-xl mb-6 border-l-4 border-yellow-400 shadow-sm">
@@ -100,7 +93,7 @@
                                                 {{ \Illuminate\Support\Js::from($data['vocab'] ?? []) }}
                                             )"
                                             class="text-blue-600 hover:text-blue-800 underline">Edit</button>
-                                    <form action="{{ route('admin.grammar.question.destroy', $data['db_id'] ?? 0) }}" method="POST" onsubmit="return confirm('Hapus soal ini?');" class="inline">
+                                    <form action="{{ parse_url(route('admin.grammar.question.destroy', $data['db_id'] ?? 0), PHP_URL_PATH) }}" method="POST" onsubmit="return confirm('Hapus soal ini?');" class="inline">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="text-red-600 hover:text-red-800 underline">Delete</button>
                                     </form>
@@ -187,7 +180,7 @@
                 <!-- ADD QUESTION FORM -->
                 <div class="bg-blue-50 p-6 rounded-xl mb-8 border-l-4 border-blue-500 shadow-sm">
                     <h3 class="text-lg font-bold text-blue-700 mb-4">Admin: Tambah Soal Baru</h3>
-                    <form action="{{ route('admin.grammar.question.store') }}" method="POST">
+                    <form action="{{ parse_url(route('admin.grammar.question.store'), PHP_URL_PATH) }}" method="POST">
                         @csrf
                         <input type="hidden" name="meeting_number" value="1">
                         <input type="hidden" name="question_number" value="{{ count($questions) + 1 }}">
@@ -228,7 +221,7 @@
                                                     {{ \Illuminate\Support\Js::from($vocabData['pos']) }}
                                                 )"
                                                 class="text-blue-500 hover:text-blue-700 text-xs px-1 font-bold">E</button>
-                                        <form action="{{ route('admin.grammar.vocab.destroy', $vocabData['db_id'] ?? 0) }}" method="POST" onsubmit="return confirm('Hapus vocab ini?');" class="inline">
+                                        <form action="{{ parse_url(route('admin.grammar.vocab.destroy', $vocabData['db_id'] ?? 0), PHP_URL_PATH) }}" method="POST" onsubmit="return confirm('Hapus vocab ini?');" class="inline">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="text-red-500 hover:text-red-700 text-xs px-1 font-bold">X</button>
                                         </form>
@@ -240,7 +233,7 @@
                     @if(auth()->check() && auth()->user()->isAdmin())
                         <div class="mt-4 pt-4 border-t border-yellow-200">
                             <h4 class="text-sm font-bold text-yellow-800 mb-2">Admin: Tambah Keyword</h4>
-                            <form action="{{ route('admin.grammar.vocab.store') }}" method="POST" class="flex gap-2 flex-wrap items-end">
+                            <form action="{{ parse_url(route('admin.grammar.vocab.store'), PHP_URL_PATH) }}" method="POST" class="flex gap-2 flex-wrap items-end">
                                 @csrf
                                 <input type="hidden" name="meeting_number" value="1">
                                 <div>
@@ -286,7 +279,7 @@
                     Cek Jawaban
                 </button>
             @else
-                <form method="POST" action="{{ route('assignments.grammar-writing.meeting1.reset') }}">
+                <form method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting1.reset'), PHP_URL_PATH) }}">
                     @csrf
                     <button type="submit" class="block w-full py-4 bg-gray-500 text-white rounded-xl font-bold text-lg hover:bg-gray-600 transition-colors shadow-lg text-center">
                         Coba Lagi
@@ -634,13 +627,13 @@
 
         async syncDraftToServer(form) {
             if (!form) {
-                return;
+                return false;
             }
 
             const action = form.getAttribute('action') || '';
             const match = action.match(/\/assignments\/grammar-writing\/meeting(\d+)/);
             if (!match) {
-                return;
+                return false;
             }
 
             const meetingNumber = match[1];
@@ -688,8 +681,10 @@
                     body: JSON.stringify(payload),
                     keepalive: true,
                 });
+                return true;
             } catch (e) {
                 console.error('Failed to sync draft to server:', e);
+                return false;
             }
         },
 
@@ -759,7 +754,7 @@
             if (!indicator) {
                 indicator = document.createElement('div');
                 indicator.id = 'auto-save-indicator';
-                indicator.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+                indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
                 indicator.style.transition = 'opacity 0.3s';
                 indicator.innerHTML = '✓ Tersimpan otomatis';
                 document.body.appendChild(indicator);
@@ -796,11 +791,63 @@
 
     // Make AutoSave available globally
     window.AutoSave = AutoSave;
+    AutoSave.showSaveErrorIndicator = function () {
+        const indicator = document.createElement('div');
+        indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+        indicator.style.transition = 'opacity 0.3s';
+        indicator.innerHTML = '✗ Gagal menyimpan, coba lagi';
+        document.body.appendChild(indicator);
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+            setTimeout(() => indicator.remove(), 300);
+        }, 3000);
+    };
+
+    AutoSave.manualSave = async function () {
+        const form = document.querySelector('form[action*="/assignments/grammar-writing/meeting"][method="POST"]');
+        if (!form) {
+            return;
+        }
+
+        const btn = document.getElementById('manual-save-btn');
+        if (btn) {
+            btn.dataset.originalText = btn.dataset.originalText || btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Menyimpan...';
+        }
+
+        try {
+            const inputs = form.querySelectorAll('input[type="text"], textarea');
+            const answers = {};
+            inputs.forEach((input) => {
+                if (input.name && input.value) {
+                    answers[input.name] = input.value;
+                }
+            });
+            localStorage.setItem(this.storageKey, JSON.stringify(answers));
+        } catch (e) {
+            console.error('[ManualSave] Failed to update localStorage:', e);
+        }
+
+        const ok = await this.syncDraftToServer(form);
+
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.originalText;
+        }
+
+        if (ok) {
+            this.showSaveIndicator();
+        } else {
+            this.showSaveErrorIndicator();
+        }
+    };
+
 
     // Initialize auto-save for meeting 1
     document.addEventListener('DOMContentLoaded', function() {
         const userId = {{ Auth::id() ?? 'null' }};
-        if (userId) {
+        if (userId && !window.location.search.includes('live_preview_for')) {
             AutoSave.init('1', userId);
         }
     });
@@ -835,7 +882,7 @@
             <h3 class="text-xl font-bold mb-4">Edit Item</h3>
             
             <!-- Question Edit Form -->
-            <form x-show="editType === 'question'" :action="'/admin/grammar/question/' + editId" method="POST">
+            <form x-show="editType === 'question'" :action="'/admin/assignments/grammar-writing/questions/' + editId" method="POST">
                 @csrf @method('PUT')
                 <div class="mb-4">
                     <label class="block text-sm font-bold mb-1">Soal</label>
@@ -857,7 +904,7 @@
             </form>
 
             <!-- Vocab Edit Form -->
-            <form x-show="editType === 'vocab'" :action="'/admin/grammar/vocab/' + editId" method="POST">
+            <form x-show="editType === 'vocab'" :action="'/admin/assignments/grammar-writing/vocab/' + editId" method="POST">
                 @csrf @method('PUT')
                 <div class="mb-4">
                     <label class="block text-sm font-bold mb-1">Word</label>
@@ -879,7 +926,34 @@
         </div>
     </div>
 
-    <x-irregular-verbs-button />
+
     <x-live-drawing />
+
+    {{-- Consolidated Floating Helper Buttons (hidden during admin Live
+         Preview - these are student-only interactive tools, not relevant
+         to the admin's read-only observation view) --}}
+    @if(!request()->filled('live_preview_for'))
+    <div class="fixed bottom-4 right-8 z-50 flex flex-col gap-2 items-end">
+        <x-dictionary-button />
+        <x-conjunction-button />
+        <x-preposition-button />
+        <x-pronouns-button />
+        <x-verb-patterns-button />
+        <x-modal-button />
+        <x-tenses-button />
+        <x-irregular-verbs-button />
+    </div>
+    @endif
+
+    @if(!$submitted)
+        <div class="fixed bottom-4 z-50" style="left: 50%; transform: translateX(-50%);">
+            <button type="button" id="manual-save-btn" onclick="AutoSave.manualSave()"
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold shadow-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3M8 7h8"></path></svg>
+                Save
+            </button>
+        </div>
+    @endif
+
 </body>
 </html>

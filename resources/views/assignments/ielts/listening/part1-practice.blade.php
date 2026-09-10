@@ -1,7 +1,9 @@
 @extends('layouts.admin')
 
+@section('title', 'IELTS Listening Part 1 Practice')
+
 @section('content')
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-white">
     <div class="container mx-auto px-4 py-8">
 
         <!-- Header -->
@@ -70,6 +72,26 @@
                     28 => ['Table Completion', 'Multiple Choice'],
                     29 => ['Form Completion', 'Notes Completion'],
                     30 => ['Notes Completion', 'Multiple Choice'],
+                    31 => ['Form Completion', 'Notes Completion'],
+                    32 => ['Form Completion', 'Multiple Choice'],
+                    33 => ['Notes Completion', 'Multiple Choice'],
+                    34 => ['Form Completion', 'Sentence Completion'],
+                    35 => ['Form Completion', 'Notes Completion'],
+                    36 => ['Table Completion', 'Multiple Choice'],
+                    37 => ['Notes Completion', 'Sentence Completion'],
+                    38 => ['Form Completion', 'Notes Completion'],
+                    39 => ['Form Completion', 'Multiple Choice'],
+                    40 => ['Form Completion', 'Table Completion'],
+                    41 => ['Form Completion', 'Notes Completion'],
+                    42 => ['Form Completion', 'Multiple Choice'],
+                    43 => ['Notes Completion', 'Multiple Choice'],
+                    44 => ['Form Completion', 'Sentence Completion'],
+                    45 => ['Form Completion', 'Notes Completion'],
+                    46 => ['Table Completion', 'Notes Completion'],
+                    47 => ['Form Completion', 'Multiple Choice'],
+                    48 => ['Table Completion', 'Multiple Choice'],
+                    49 => ['Form Completion', 'Notes Completion'],
+                    50 => ['Notes Completion', 'Sentence Completion'],
                 ],
                 // PART 2
                 2 => [
@@ -103,6 +125,26 @@
                     28 => ['Matching Features', 'Sentence Completion'],
                     29 => ['Multiple Choice', 'Notes Completion'],
                     30 => ['Multiple Choice', 'Map Labeling'],
+                    31 => ['Multiple Choice', 'Sentence Completion'],
+                    32 => ['Matching Features', 'Table Completion'],
+                    33 => ['Multiple Choice', 'Flow-chart Completion'],
+                    34 => ['Multiple Choice', 'Map Labeling'],
+                    35 => ['Matching Features', 'Notes Completion'],
+                    36 => ['Multiple Choice', 'Table Completion'],
+                    37 => ['Multiple Choice', 'Map Labeling'],
+                    38 => ['Matching Features', 'Sentence Completion'],
+                    39 => ['Multiple Choice', 'Notes Completion'],
+                    40 => ['Multiple Choice', 'Map Labeling'],
+                    41 => ['Multiple Choice', 'Sentence Completion'],
+                    42 => ['Matching Features', 'Table Completion'],
+                    43 => ['Multiple Choice', 'Flow-chart Completion'],
+                    44 => ['Multiple Choice', 'Map Labeling'],
+                    45 => ['Matching Features', 'Notes Completion'],
+                    46 => ['Multiple Choice', 'Table Completion'],
+                    47 => ['Multiple Choice', 'Map Labeling'],
+                    48 => ['Matching Features', 'Sentence Completion'],
+                    49 => ['Multiple Choice', 'Notes Completion'],
+                    50 => ['Multiple Choice', 'Map Labeling'],
                 ],
                 // PART 3
                 3 => [
@@ -136,6 +178,26 @@
                     28 => ['Multiple Choice', 'Matching Features'],
                     29 => ['Choose TWO', 'Sentence Completion'],
                     30 => ['Multiple Choice', 'Table Completion'],
+                    31 => ['Choose TWO', 'Table Completion'],
+                    32 => ['Multiple Choice', 'Sentence Completion'],
+                    33 => ['Choose TWO', 'Notes Completion'],
+                    34 => ['Multiple Choice', 'Matching Features'],
+                    35 => ['Choose TWO', 'Sentence Completion'],
+                    36 => ['Multiple Choice', 'Table Completion'],
+                    37 => ['Choose TWO', 'Notes Completion'],
+                    38 => ['Multiple Choice', 'Matching Features'],
+                    39 => ['Choose TWO', 'Sentence Completion'],
+                    40 => ['Multiple Choice', 'Table Completion'],
+                    41 => ['Choose TWO', 'Table Completion'],
+                    42 => ['Multiple Choice', 'Sentence Completion'],
+                    43 => ['Choose TWO', 'Notes Completion'],
+                    44 => ['Multiple Choice', 'Matching Features'],
+                    45 => ['Choose TWO', 'Sentence Completion'],
+                    46 => ['Multiple Choice', 'Table Completion'],
+                    47 => ['Choose TWO', 'Notes Completion'],
+                    48 => ['Multiple Choice', 'Matching Features'],
+                    49 => ['Choose TWO', 'Sentence Completion'],
+                    50 => ['Multiple Choice', 'Table Completion'],
                 ],
                 // PART 4
                 4 => [
@@ -169,6 +231,26 @@
                     28 => ['Notes Completion', 'Table Completion'],
                     29 => ['Sentence Completion', 'Notes Completion'],
                     30 => ['Table Completion', 'Choose THREE'],
+                    31 => ['Notes Completion'],
+                    32 => ['Notes Completion'],
+                    33 => ['Notes Completion'],
+                    34 => ['Notes Completion'],
+                    35 => ['Notes Completion', 'Choose TWO'],
+                    36 => ['Notes Completion', 'Table Completion'],
+                    37 => ['Notes Completion'],
+                    38 => ['Notes Completion'],
+                    39 => ['Multiple Choice', 'Table Completion'],
+                    40 => ['Notes Completion'],
+                    41 => ['Notes Completion'],
+                    42 => ['Notes Completion'],
+                    43 => ['Notes Completion'],
+                    44 => ['Notes Completion'],
+                    45 => ['Notes Completion'],
+                    46 => ['Notes Completion', 'Table Completion'],
+                    47 => ['Multiple Choice', 'Short Answer', 'Table Completion'],
+                    48 => ['Table Completion', 'Sentence Completion'],
+                    49 => ['Notes Completion', 'Choose TWO'],
+                    50 => ['Notes Completion'],
                 ],
             ];
 
@@ -199,11 +281,11 @@
         <!-- Tests Grid -->
         <div class="mb-8">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">Available Tests (30)</h2>
+                <h2 class="text-2xl font-bold text-gray-800">Available Tests (50)</h2>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @for ($i = 1; $i <= 30; $i++)
+                @for ($i = 1; $i <= 50; $i++)
                     @php
                         $idx       = ($i - 1) % 10;
                         $gradient  = $gradients[$idx];
@@ -245,7 +327,7 @@
                             <ul class="space-y-2 mb-4 flex-1">
                                 @foreach($types as $typeLabel)
                                     <li class="flex items-center gap-2 text-sm text-gray-600">
-                                        <span class="flex-none w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-bold text-gray-500">✎</span>
+                                        <span class="flex-none w-6 h-6 bg-white rounded-full flex items-center justify-center text-xs font-bold text-gray-500">✎</span>
                                         {{ $typeLabel }}
                                     </li>
                                 @endforeach
@@ -255,20 +337,33 @@
                                 @php
                                     $hasQuestions = view()->exists('assignments.ielts.listening.questions.part' . $set . '.test' . $i);
                                     $hasAnswerKey = view()->exists('assignments.ielts.listening.answers.part' . $set . '.test' . $i);
-                                    $hasAudio = file_exists(public_path('assets/audio/ielts/listening/practice/part' . $set . '/test' . $i . '.mp3'));
-                                    $hasSrt = file_exists(public_path('assets/audio/ielts/listening/practice/part' . $set . '/test' . $i . '.srt'));
+
+                                    $relAudio = 'assets/audio/ielts/listening/practice/part' . $set . '/test' . $i . '.mp3';
+                                    $pathA = public_path($relAudio);
+                                    $pathB = public_path('public/' . $relAudio);
+                                    $pathC = base_path('public/' . $relAudio);
+                                    $pathD = ($_SERVER['DOCUMENT_ROOT'] ?? '') . '/' . $relAudio;
+                                    $hasAudio = (file_exists($pathA) && filesize($pathA) > 1000) ||
+                                                (file_exists($pathB) && filesize($pathB) > 1000) ||
+                                                (file_exists($pathC) && filesize($pathC) > 1000) ||
+                                                (file_exists($pathD) && filesize($pathD) > 1000);
+
+                                    $relSrt = 'assets/audio/ielts/listening/practice/part' . $set . '/test' . $i . '.srt';
+                                    $hasSrt = file_exists(public_path($relSrt)) ||
+                                              file_exists(public_path('public/' . $relSrt)) ||
+                                              file_exists(($_SERVER['DOCUMENT_ROOT'] ?? '') . '/' . $relSrt);
                                 @endphp
                                 <div class="flex flex-wrap gap-1.5 mb-5 mt-auto">
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold {{ $hasQuestions ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}" title="Soal">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold {{ $hasQuestions ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}" title="Soal">
                                         {{ $hasQuestions ? '✓' : '✕' }} Soal
                                     </span>
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold {{ $hasAnswerKey ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}" title="Kunci Jawaban">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold {{ $hasAnswerKey ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}" title="Kunci Jawaban">
                                         {{ $hasAnswerKey ? '✓' : '✕' }} Kunci
                                     </span>
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold {{ $hasAudio ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}" title="Audio">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold {{ $hasAudio ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}" title="Audio">
                                         {{ $hasAudio ? '✓' : '✕' }} Audio
                                     </span>
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold {{ $hasSrt ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}" title="SRT (Subtitle)">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold {{ $hasSrt ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}" title="SRT (Subtitle)">
                                         {{ $hasSrt ? '✓' : '✕' }} SRT
                                     </span>
                                 </div>

@@ -78,10 +78,10 @@
     <p class="mb-6 text-gray-700">Write <strong>NO MORE THAN THREE WORDS</strong> for each answer.</p>
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
-        <div class="border-b border-gray-200 bg-gray-50 p-4">
+        <div class="border-b border-gray-200 bg-white p-4">
             <p class="text-gray-700">List the two ways which the National Oceanic and Atmospheric Administration has set up to detect tsunami.</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center gap-3 text-gray-700">
                 <strong class="text-blue-600 w-6">34</strong>
                 <span class="inline-block w-64">
@@ -89,7 +89,7 @@
                 </span>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-center gap-3 text-gray-700">
                 <strong class="text-blue-600 w-6">35</strong>
                 <span class="inline-block w-64">
@@ -105,7 +105,7 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
         {{-- Header --}}
-        <div class="grid grid-cols-4 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-4 border-b border-gray-200 bg-white">
             <div class="p-3 font-bold text-gray-800 border-r border-gray-200">When Happened</div>
             <div class="p-3 font-bold text-gray-800 border-r border-gray-200">Cause</div>
             <div class="p-3 font-bold text-gray-800 border-r border-gray-200">Deaths Caused</div>
@@ -113,7 +113,7 @@
         </div>
 
         {{-- Row 1: 1992, Q36 --}}
-        <div class="grid grid-cols-4 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-4 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 border-r border-gray-200">1992</div>
             <div class="p-3 text-gray-700 border-r border-gray-200 flex items-center gap-1">
                 <strong class="text-blue-600">36</strong>
@@ -126,7 +126,7 @@
         </div>
 
         {{-- Row 2: 1992, Q37 --}}
-        <div class="grid grid-cols-4 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-4 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 border-r border-gray-200">1992</div>
             <div class="p-3 text-gray-700 border-r border-gray-200">Underwater earthquake</div>
             <div class="p-3 text-gray-700 border-r border-gray-200">none</div>
@@ -139,7 +139,7 @@
         </div>
 
         {{-- Row 3: 1998, Q38 --}}
-        <div class="grid grid-cols-4 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-4 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 border-r border-gray-200">1998</div>
             <div class="p-3 text-gray-700 border-r border-gray-200 flex items-center gap-1">
                 <strong class="text-blue-600">38</strong>
@@ -152,7 +152,7 @@
         </div>
 
         {{-- Row 4: 1998, no answer --}}
-        <div class="grid grid-cols-4 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-4 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 border-r border-gray-200">1998</div>
             <div class="p-3 text-gray-700 border-r border-gray-200">Underwater volcanic eruption</div>
             <div class="p-3 text-gray-700 border-r border-gray-200">3000</div>
@@ -160,7 +160,7 @@
         </div>
 
         {{-- Row 5: 1896, Q39 --}}
-        <div class="grid grid-cols-4 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-4 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 border-r border-gray-200">1896</div>
             <div class="p-3 text-gray-700 border-r border-gray-200">Underwater earthquake</div>
             <div class="p-3 text-gray-700 border-r border-gray-200 flex items-center gap-1">
@@ -173,7 +173,7 @@
         </div>
 
         {{-- Row 6: 8000 years ago, Q40 --}}
-        <div class="grid grid-cols-4 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-4 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 border-r border-gray-200">8000 years ago</div>
             <div class="p-3 text-gray-700 border-r border-gray-200">Underwater landslide</div>
             <div class="p-3 text-gray-700 border-r border-gray-200 flex items-center gap-1">

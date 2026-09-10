@@ -8,14 +8,14 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
         {{-- Table header --}}
-        <div class="grid grid-cols-3 bg-gray-100 border-b border-gray-200">
+        <div class="grid grid-cols-3 bg-white border-b border-gray-200">
             <div class="p-3 font-bold text-gray-800">Position</div>
             <div class="p-3 font-bold text-gray-800">Place</div>
             <div class="p-3 font-bold text-gray-800">Notes</div>
         </div>
 
         {{-- Row 1: Q1, Q2, Q3 --}}
-        <div class="grid grid-cols-3 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-3 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 flex items-start">
                 <strong>1</strong>
                 <span class="inline-block w-28 ml-1 mt-0.5">
@@ -43,7 +43,7 @@
         </div>
 
         {{-- Row 2: Q4, Q5 --}}
-        <div class="grid grid-cols-3 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-3 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 text-sm">General Assistant</div>
             <div class="p-3 text-gray-700 text-sm">Lakeside Hotel</div>
             <div class="p-3 space-y-2 text-gray-700 text-sm">
@@ -66,7 +66,7 @@
         </div>
 
         {{-- Row 3: Q6 --}}
-        <div class="grid grid-cols-3 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-3 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 text-sm">Catering Assistant</div>
             <div class="p-3 text-gray-700 text-sm">Hotel 98</div>
             <div class="p-3 space-y-2 text-gray-700 text-sm">
@@ -92,7 +92,7 @@
 
     <div class="space-y-2 max-w-md mx-auto">
         {{-- Step One --}}
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <div class="bg-white border border-blue-200 rounded-xl p-4">
             <p class="text-xs font-bold uppercase text-blue-500 mb-2 tracking-widest">Step One</p>
             <p class="flex items-center flex-wrap gap-1 text-gray-800">
                 Complete a
@@ -106,7 +106,7 @@
         <div class="flex justify-center text-gray-400 text-2xl">↓</div>
 
         {{-- Step Two --}}
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <div class="bg-white border border-blue-200 rounded-xl p-4">
             <p class="text-xs font-bold uppercase text-blue-500 mb-2 tracking-widest">Step Two</p>
             <p class="flex items-center flex-wrap gap-1 text-gray-800">
                 Do a
@@ -121,7 +121,7 @@
         <div class="flex justify-center text-gray-400 text-2xl">↓</div>
 
         {{-- Step Three --}}
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <div class="bg-white border border-blue-200 rounded-xl p-4">
             <p class="text-xs font-bold uppercase text-blue-500 mb-2 tracking-widest">Step Three</p>
             <p class="flex items-center flex-wrap gap-1 text-gray-800">
                 Participate a training course involving
@@ -135,7 +135,7 @@
         <div class="flex justify-center text-gray-400 text-2xl">↓</div>
 
         {{-- Step Four --}}
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <div class="bg-white border border-blue-200 rounded-xl p-4">
             <p class="text-xs font-bold uppercase text-blue-500 mb-2 tracking-widest">Step Four</p>
             <p class="flex items-center flex-wrap gap-1 text-gray-800">
                 Get a

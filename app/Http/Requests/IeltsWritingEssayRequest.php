@@ -16,6 +16,7 @@ class IeltsWritingEssayRequest extends FormRequest
         return [
             'essay' => 'required|string|min:50',
             'task_type' => 'required|in:1,2',
+            'meeting_id' => 'nullable|integer',
         ];
     }
 
@@ -27,5 +28,10 @@ class IeltsWritingEssayRequest extends FormRequest
     public function taskType(): string
     {
         return (string) $this->validated('task_type');
+    }
+
+    public function meetingId(): ?int
+    {
+        return $this->input('meeting_id') ? (int) $this->input('meeting_id') : null;
     }
 }

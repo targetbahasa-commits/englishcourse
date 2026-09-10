@@ -18,13 +18,13 @@ class WablasGateway implements WhatsAppGateway
 
     public function sendOtp(string $phoneNumber, string $otpCode): bool
     {
-        Log::info('Wablas gateway is configured as a placeholder. Implement in app/Infrastructure/Notification/WhatsApp/WablasGateway.php');
-        return true;
+        Log::error('Wablas gateway is configured as a placeholder - not actually implemented. OTP not sent to ' . $phoneNumber);
+        return env('APP_ENV') === 'local';
     }
 
     public function sendMessage(string $phoneNumber, string $message, ?string $file = null): bool
     {
-        Log::info('Wablas gateway sendMessage is a placeholder. Add implementation.');
+        Log::error('Wablas gateway is configured as a placeholder - not actually implemented. Message not sent to ' . $phoneNumber);
         return env('APP_ENV') === 'local';
     }
 }

@@ -1,4 +1,4 @@
-<div class="py-3 group transition-colors hover:bg-gray-50/50 rounded-lg px-2 -mx-2 relative">
+<div class="py-3 group transition-colors hover:bg-white rounded-lg px-2 -mx-2 relative">
     <div class="flex items-baseline gap-3">
         <div class="flex-none flex items-center justify-end gap-2 w-8">
             <span class="font-bold text-gray-500 text-xl">{{ $question->question_number }}.</span>
@@ -20,7 +20,7 @@
         @if(isset($transcript_enabled) && $transcript_enabled)
             <button type="button" 
                     onclick="jumpToTime({{ $questionTimestamps[$question->id] ?? 'null' }})" 
-                    class="absolute top-3 right-2 w-6 h-6 rounded-full bg-purple-100 text-purple-600 hover:bg-purple-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
+                    class="absolute top-3 right-2 w-6 h-6 rounded-full bg-white text-purple-600 hover:bg-purple-200 flex items-center justify-center text-xs font-bold transition-all shadow-sm hover:scale-110" 
                     title="Lihat Transkrip & Dengar Audio">
                 ?
             </button>
@@ -41,7 +41,7 @@
                 <div class="flex justify-end mb-1">
                     <button type="button"
                             onclick="openEditQuestionById({{ $question->id }})"
-                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-100 text-amber-700 hover:bg-amber-200 text-xs font-semibold transition-colors"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white text-amber-700 hover:bg-amber-200 text-xs font-semibold transition-colors"
                             title="Edit Text Soal">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -79,7 +79,7 @@
                             }
                         }
                     @endphp
-                    <label class="answer-label flex items-center cursor-pointer group/option w-full py-1 hover:bg-blue-50 rounded-lg px-2 transition-colors has-[:checked]:bg-blue-100 has-[:checked]:shadow-sm has-[:checked]:border-blue-200 border border-transparent {{ $studentClass }}"
+                    <label class="answer-label flex items-center cursor-pointer group/option w-full py-1 hover:bg-white rounded-lg px-2 transition-colors has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:checked]:border-blue-200 border border-transparent {{ $studentClass }}"
                            @if($canSeeKey) data-is-correct="{{ $isCorrectVal }}" @endif>
                         {{-- Hidden Radio Input --}}
                         <input type="radio" 

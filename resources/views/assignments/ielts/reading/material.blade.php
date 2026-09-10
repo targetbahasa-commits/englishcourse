@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', ($meeting->title ?? 'Reading Material') . ' - IELTS Reading')
+
 @section('content')
 @php
     $isSingle = isset($content['passage_title']);
@@ -30,7 +32,7 @@
 
 <!-- Full-screen reading layout — fixed to viewport, bypasses admin layout chain -->
 <!-- Full-screen reading layout — fixed to viewport, bypasses admin layout chain -->
-<div id="mat-outer" class="fixed inset-0 z-0 grid grid-rows-[auto_1fr] bg-gray-50 transition-[padding] duration-200 ease-in-out">
+<div id="mat-outer" class="fixed inset-0 z-0 grid grid-rows-[auto_1fr] bg-white transition-[padding] duration-200 ease-in-out">
     <!-- Header (fixed height) -->
     <div id="mat-header" class="flex-none bg-white border-b border-gray-200 shadow-sm z-10">
         <div class="px-6 py-4">
@@ -41,22 +43,34 @@
                     </div>
                     <div>
                         <h1 class="text-xl md:text-2xl font-bold text-gray-800 leading-tight">{{ $title }}</h1>
-                        <p class="text-gray-500 text-xs md:text-sm font-medium">IELTS Academic Reading</p>
+                        <p class="text-gray-500 text-xs md:text-sm font-medium">{{ (!empty($isGeneral) || request()->routeIs('assignments.ielts-general*')) ? 'IELTS General Reading' : 'IELTS Academic Reading' }}</p>
                     </div>
                 </div>
                 
                 <div class="flex items-center gap-3">
                     @if(auth()->check() && auth()->user()->isAdmin())
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border {{ $hasAnswerKey ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200' }}">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border {{ $hasAnswerKey ? 'bg-white text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200' }}">
                             <span>{{ $hasAnswerKey ? '✓' : '✕' }}</span>
                             <span>{{ $hasAnswerKey ? 'Answer Key Ditambahkan' : 'Answer Key Belum Ada' }}</span>
                         </span>
                     @endif
 
-                    <a href="{{ route('assignments.ielts-academic.reading.practice-index') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                        <span class="hidden md:inline">Back</span>
-                    </a>
+                    @if(!empty($isMockTestView) && isset($edition) && isset($testId))
+                        <a href="{{ route('mock-test.ielts-general.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                            <span class="hidden md:inline">Back to Test Hub</span>
+                        </a>
+                    @elseif(!empty($isGeneral) || request()->routeIs('assignments.ielts-general*'))
+                        <a href="{{ route('assignments.ielts-general.reading.index') }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                            <span class="hidden md:inline">Back</span>
+                        </a>
+                    @else
+                        <a href="{{ route('assignments.ielts-academic.reading.practice-index') }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                            <span class="hidden md:inline">Back</span>
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>
@@ -67,19 +81,49 @@
 
             
             <!-- LEFT PANEL: Passages -->
-            <div class="h-full overflow-y-auto bg-gray-50 border-r border-gray-200 custom-scrollbar relative">
+            <div class="h-full overflow-y-auto bg-white border-r border-gray-200 custom-scrollbar relative">
                 <div class="pl-6 pr-3 md:pl-8 md:pr-4 pt-6 md:pt-8 pb-32">
+                    @if(($isSkillView ?? false) && empty($sections))
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center text-gray-500">
+                            <p class="font-medium">Belum ada soal tipe ini yang tersedia.</p>
+                            <p class="text-sm mt-1">Silakan coba tipe soal lain, atau kembali lagi nanti setelah konten ditambahkan.</p>
+                        </div>
+                    @elseif(!($isSkillView ?? false) && empty($sections))
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center text-gray-500">
+                            <p class="font-medium">Test ini belum punya passage sama sekali.</p>
+                            @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher()))
+                                <p class="text-sm mt-1 mb-4">Tambahkan passage pertama untuk mulai mengisi konten test ini.</p>
+                                <button onclick="openPassageModal()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors">+ Add Passage</button>
+                            @else
+                                <p class="text-sm mt-1">Silakan kembali lagi nanti setelah konten ditambahkan.</p>
+                            @endif
+                        </div>
+                    @endif
                     @if($sections)
                         @foreach($sections as $index => $section)
                             <!-- Passage Card -->
                             <div id="passage-{{ $index }}" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8 relative group">
                                 <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
                                     <div class="flex items-center gap-3">
-                                        <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">Passage {{ $index + 1 }}</span>
-                                        <h2 class="text-xl md::text-2xl font-bold text-gray-900">{{ $section['passage_title'] ?? 'Passage' }}</h2>
+                                        @php
+                                            $totalSections = count($sections);
+                                            if ($totalSections === 5) {
+                                                $sectionLabels = [
+                                                    0 => 'Section 1 · Passage 1',
+                                                    1 => 'Section 1 · Passage 2',
+                                                    2 => 'Section 2 · Passage 1 (Passage 3)',
+                                                    3 => 'Section 2 · Passage 2 (Passage 4)',
+                                                    4 => 'Section 3 · Passage 5',
+                                                ];
+                                                $passageBadge = $sectionLabels[$index] ?? "Passage " . ($index + 1);
+                                            } else {
+                                                $passageBadge = "Passage " . ($index + 1);
+                                            }
+                                        @endphp
+                                        <span class="bg-pink-50 text-pink-600 font-bold px-3 py-1 rounded-lg text-sm tracking-wide uppercase">{{ $passageBadge }}</span>
                                     </div>
                                     <div class="flex gap-2">
-                                        @if(isset($section['id']))
+                                        @if(isset($section['id']) && !($isSkillView ?? false))
                                             <button onclick="openPassageModal({{ $index }})" class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors">Edit</button>
                                             <button onclick="deletePassage({{ $section['id'] }})" class="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg transition-colors">Delete</button>
                                         @endif
@@ -120,8 +164,19 @@
                                             :class="(pencilMode || eraserMode) ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none'"
                                     ></canvas>
 
-                                    <div class="passage-content prose prose-lg max-w-none text-gray-700 leading-loose pr-2 sm:pr-0 pb-12"
+                                    <div class="passage-content max-w-none text-gray-900 leading-relaxed pr-2 sm:pr-0 pb-12"
                                          @mouseup="if(highlightMode) window.applyAnnotation('highlight', highlightColor);">
+                                        <style>
+                                            .passage-content h2,
+                                            .passage-content p:first-child {
+                                                text-align: center !important;
+                                                font-weight: 700 !important;
+                                                font-size: 1.5rem !important;
+                                                margin-top: 0.5rem !important;
+                                                margin-bottom: 1.5rem !important;
+                                                color: #111827 !important;
+                                            }
+                                        </style>
                                         {!! $section['passage_text'] !!}
                                     </div>
 
@@ -232,7 +287,7 @@
             </div>
 
                 <!-- RIGHT PANEL: Questions -->
-            <div id="questions-panel" class="h-full overflow-y-auto bg-gray-50 custom-scrollbar relative">
+            <div id="questions-panel" class="h-full overflow-y-auto bg-white custom-scrollbar relative">
                 
                 <div class="p-1 md:p-2 pb-32">
                      @if($sections)
@@ -241,68 +296,159 @@
                             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 mb-4" data-passage-index="{{ $index }}">
                                 <div class="flex items-center justify-between mb-4">
                                     <div class="flex items-center gap-2">
-                                        <span class="text-xs font-bold text-red-500 uppercase tracking-wider">Questions for Passage {{ $index + 1 }}</span>
+                                        @php
+                                            if ($totalSections === 5) {
+                                                $qSectionLabels = [
+                                                    0 => 'Questions for Section 1 (Passage 1)',
+                                                    1 => 'Questions for Section 1 (Passage 2)',
+                                                    2 => 'Questions for Section 2 (Passage 3)',
+                                                    3 => 'Questions for Section 2 (Passage 4)',
+                                                    4 => 'Questions for Section 3 (Passage 5)',
+                                                ];
+                                                $qBadge = $qSectionLabels[$index] ?? "Questions for Passage " . ($index + 1);
+                                            } else {
+                                                $qBadge = "Questions for Passage " . ($index + 1);
+                                            }
+                                        @endphp
+                                        <span class="text-xs font-bold text-red-500 uppercase tracking-wider">{{ $qBadge }}</span>
                                         <div class="h-px bg-gray-200 flex-1"></div>
                                     </div>
-                                    <button onclick="openQuestionModal({{ $index }})" class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded-lg transition-colors">+ Add Question</button>
+                                    @if(!($isSkillView ?? false))
+                                        <button onclick="openQuestionModal({{ $index }})" class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded-lg transition-colors">+ Add Question</button>
+                                    @endif
                                 </div>
 
                                 @foreach($section['questions'] as $qIndex => $question)
+                                    @php
+                                        $maxSelect = 1;
+                                        if (isset($question['type']) && in_array($question['type'], ['checkbox', 'multiple_choice_multiple'])) {
+                                            if (isset($question['correct_answer']) && is_array($question['correct_answer'])) {
+                                                $maxSelect = count($question['correct_answer']);
+                                            } else {
+                                                $qTxtUpper = strtoupper($question['text'] ?? '');
+                                                if (str_contains($qTxtUpper, 'FIVE')) $maxSelect = 5;
+                                                elseif (str_contains($qTxtUpper, 'FOUR')) $maxSelect = 4;
+                                                elseif (str_contains($qTxtUpper, 'THREE')) $maxSelect = 3;
+                                                elseif (str_contains($qTxtUpper, 'TWO')) $maxSelect = 2;
+                                                else $maxSelect = 2;
+                                            }
+                                        }
+                                    @endphp
                                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200/60 p-6 hover:border-blue-300 transition-colors duration-200"
                                          x-data="{ 
-                                            selected: {{ isset($question['sub_questions']) ? '{' . collect($question['sub_questions'])->map(function($sq) { return "'".$sq['id']."': ''"; })->implode(',') . '}' : (isset($question['type']) && $question['type'] === 'checkbox' ? '[]' : 'null') }} 
+                                            selected: {{ isset($question['sub_questions']) ? '{' . collect($question['sub_questions'])->map(function($sq) { return "'".$sq['id']."': ''"; })->implode(',') . '}' : (isset($question['type']) && $question['type'] === 'checkbox' ? '[]' : 'null') }},
+                                            maxSelect: {{ $maxSelect }},
+                                            toggleOption(optKey) {
+                                                if (!Array.isArray(this.selected)) {
+                                                    this.selected = this.selected ? [this.selected] : [];
+                                                }
+                                                const idx = this.selected.indexOf(optKey);
+                                                if (idx > -1) {
+                                                    this.selected.splice(idx, 1);
+                                                } else {
+                                                    if (this.selected.length >= this.maxSelect) {
+                                                        this.selected.shift();
+                                                    }
+                                                    this.selected.push(optKey);
+                                                }
+                                            }
                                          }"
                                     >
                                         <div class="flex items-start justify-between mb-2">
                                             <div class="flex-1 flex gap-3">
                                                 @php
-                                                    $isGroup = isset($question['sub_questions']) || in_array($question['type'] ?? '', ['summary_completion', 'sentence_completion', 'table_completion', 'diagram_labelling', 'matching_headings', 'matching_features', 'matching_sentence_endings', 'true_false', 'true_false_not_given', 'yes_no_not_given', 'matching_paragraph_information', 'short_answer_group']);
+                                                    $isGroup = isset($question['sub_questions']) || in_array($question['type'] ?? '', ['summary_completion', 'sentence_completion', 'table_completion', 'diagram_labelling', 'matching_headings', 'matching_features', 'matching_sentence_endings', 'true_false', 'true_false_not_given', 'yes_no_not_given', 'matching_paragraph_information', 'short_answer_group', 'checkbox', 'multiple_choice_multiple']);
                                                     
                                                     $count = 1;
-                                                    if (isset($question['sub_questions'])) {
+                                                    if (isset($question['sub_questions']) && is_array($question['sub_questions']) && count($question['sub_questions']) > 0) {
                                                         $count = count($question['sub_questions']);
-                                                    } elseif (isset($question['blanks'])) {
+                                                    } elseif (isset($question['type']) && in_array($question['type'], ['checkbox', 'multiple_choice_multiple']) && isset($question['correct_answer']) && is_array($question['correct_answer'])) {
+                                                        $count = count($question['correct_answer']);
+                                                    } elseif (isset($question['blanks']) && is_array($question['blanks']) && count($question['blanks']) > 0) {
                                                         $count = count($question['blanks']);
-                                                    } elseif (isset($question['placeholders'])) {
+                                                    } elseif (isset($question['placeholders']) && is_array($question['placeholders']) && count($question['placeholders']) > 0) {
                                                         $count = count($question['placeholders']);
+                                                    } elseif (isset($question['points']) && is_numeric($question['points']) && $question['points'] > 0) {
+                                                        $count = (int)$question['points'];
                                                     }
                                                     
+                                                    $explicitNum = null;
+                                                    if (isset($question['sub_questions'][0]['id']) && is_numeric($question['sub_questions'][0]['id'])) {
+                                                        $explicitNum = (int)$question['sub_questions'][0]['id'];
+                                                    } elseif (isset($question['id']) && is_numeric($question['id'])) {
+                                                        $explicitNum = (int)$question['id'];
+                                                    }
+
                                                     // Always track globally so question numbers are sequential (1-40) across all passages
-                                                    $currentBadgeNum = $globalQIndex + 1;
+                                                    $currentBadgeNum = $explicitNum ?? ($globalQIndex + 1);
                                                     $globalQIndex = $globalQIndex + $count;
                                                     $question['start_number'] = $currentBadgeNum - 1;
                                                 @endphp
                                                 
                                                 @if(!$isGroup)
                                                 <div class="flex-none pt-0.5">
-                                                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-blue-50 text-blue-600 font-bold text-xs ring-1 ring-blue-100">
+                                                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-white text-blue-600 font-bold text-xs ring-1 ring-blue-100">
                                                         {{ $currentBadgeNum }}
                                                     </span>
                                                 </div>
                                                 @endif
                                                 <div class="flex-1 group">
-                                                    <div class="question-text-content text-base md:text-lg font-semibold text-gray-800 leading-relaxed cursor-text hover:cursor-pointer transition-colors" title="Click any word to find it in the passage">
+                                                    <div class="question-text-content text-base md:text-lg text-gray-800 leading-relaxed cursor-text hover:cursor-pointer transition-colors" title="Click any word to find it in the passage">
                                                         @php
                                                             $isTfNg = in_array($question['type'] ?? '', ['true_false', 'true_false_not_given'])
                                                                 || (($question['type'] ?? '') === 'matching_features' && isset($question['options']['TRUE']));
                                                             $isYnNg = in_array($question['type'] ?? '', ['yes_no_not_given'])
                                                                 || (($question['type'] ?? '') === 'matching_features' && isset($question['options']['YES']));
-                                                            $formattedText = $question['text'] ?? '';
-                                                            
+                                                            $rawText = $question['text'] ?? '';
+
+                                                            // Scalar (non-grouped) short_answer questions store the whole
+                                                            // fill-in-the-blank sentence as $question['text'], with the blank
+                                                            // marked by a run of dots/ellipsis - same convention used by
+                                                            // short_answer_group's per-sub-question labels. Convert it to an
+                                                            // inline input here so it renders like every other fill-in-the-blank
+                                                            // question on this page, instead of a disconnected generic box.
+                                                            $hasInlineBlank = false;
+                                                            if (($question['type'] ?? '') === 'short_answer' && empty($question['sub_questions'])) {
+                                                                $dotPattern = '/([.\x{2026}]{3,})/u';
+                                                                if (preg_match($dotPattern, $rawText)) {
+                                                                    $hasInlineBlank = true;
+                                                                    $numMatch = preg_replace('/\D/', '', $question['id'] ?? '');
+                                                                    $qNumVal = $numMatch ? $numMatch : $currentBadgeNum;
+                                                                    $inputHtml = '<span class="inline-inline-flex items-baseline mx-1 align-middle">' .
+                                                                                 '<span class="text-blue-600 font-bold text-sm md:text-base mr-1 select-none pointer-events-none">' . $qNumVal . '</span>' .
+                                                                                 '<input type="text" data-qid="' . $question['id'] . '" x-model="selected" placeholder="......" class="user-answer border-0 border-b-2 border-gray-400 focus:border-blue-600 rounded-none outline-none bg-transparent px-1 py-0.5 w-32 text-gray-900 font-medium transition-all focus:ring-0 placeholder-gray-400 text-sm md:text-base">' .
+                                                                                 '</span>';
+                                                                    $rawText = preg_replace($dotPattern, $inputHtml, $rawText, 1);
+                                                                }
+                                                            }
+
                                                             if ($isTfNg || $isYnNg) {
-                                                                // Strip existing instruction blocks
-                                                                $formattedText = preg_replace('/(<br\s*\/?>)?\s*In boxes.*?write:?\s*(<br\s*\/?>)?\s*(<b>)?(TRUE|YES).*/si', '', $formattedText);
-                                                                $formattedText = preg_replace('/(<br\s*\/?>)?\s*Write\s+(YES|TRUE)\s+if.*/si', '', $formattedText);
-                                                                $formattedText = preg_replace('/Write\s+(TRUE|YES)\s+if\s+the\s+statement.*?,?.*?or\s+NOT\s+GIVEN.*?(passage|this)\.?/si', '', $formattedText);
-                                                                $formattedText = preg_replace('/Write\s+(?:<b>|<strong>)?(TRUE|YES)(?:<\/b>|<\/strong>)?\s+if\s+the\s+statement.*?(?:<b>|<strong>)?(FALSE|NO)(?:<\/b>|<\/strong>)?\s+if\s+the\s+statement.*?(?:,?\s*or\s+)?(?:<b>|<strong>)?NOT\s+GIVEN(?:<\/b>|<\/strong>)?\s+if.*/si', '', $formattedText);
-                                                                
-                                                                // Remove potential "Questions 1-5" header from the string
-                                                                $formattedText = preg_replace('/^Questions?\s*\d+(–|-)\d+\s*(<br\s*\/?>)?/i', '', $formattedText);
+                                                                $rawText = preg_replace('/(<br\s*\/?>)?\s*In boxes.*?write:?\s*(<br\s*\/?>)?\s*(<b>)?(TRUE|YES).*/si', '', $rawText);
+                                                                $rawText = preg_replace('/(<br\s*\/?>)?\s*Write\s+(YES|TRUE)\s+if.*/si', '', $rawText);
+                                                                $rawText = preg_replace('/Write\s+(TRUE|YES)\s+if\s+the\s+statement.*?,?.*?or\s+NOT\s+GIVEN.*?(passage|this)\.?/si', '', $rawText);
+                                                                $rawText = preg_replace('/^Questions?\s*\d+(–|-)\d+\s*(<br\s*\/?>)?/i', '', $rawText);
                                                             }
                                                             
-                                                            $formattedText = preg_replace('/(NB\s*:?\s*You may use any letter more than once\.?)/i', '<i class="font-normal text-gray-600">$1</i>', $formattedText);
+                                                            // Split lines by <br> or newline
+                                                            $lines = array_filter(array_map('trim', preg_split('/<br\s*\/?>|\n/i', $rawText)));
+                                                            $outputHtml = '';
+                                                            
+                                                            foreach ($lines as $lIndex => $lText) {
+                                                                if (preg_match('/^Questions?\s+\d+/i', $lText)) {
+                                                                    $outputHtml .= '<h3 class="text-lg md:text-xl font-bold font-serif text-gray-900 mb-2">' . $lText . '</h3>';
+                                                                } elseif (preg_match('/^(Choose|Write|Do the following|Look at)/i', $lText)) {
+                                                                    $lTextFormatted = preg_replace('/(TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|A–[A-Z]|A-[A-Z])/i', '<strong class="font-bold">$1</strong>', $lText);
+                                                                    $outputHtml .= '<p class="text-base md:text-lg italic text-gray-700 mb-1">' . $lTextFormatted . '</p>';
+                                                                } else {
+                                                                    $lTextFormatted = preg_replace('/Which\s+(TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT)/i', 'Which <strong class="font-bold">$1</strong>', $lText);
+                                                                    $outputHtml .= '<p class="font-semibold text-gray-900 text-base md:text-lg mt-3 mb-2 leading-relaxed">' . $lTextFormatted . '</p>';
+                                                                }
+                                                            }
+                                                            if (empty($outputHtml)) {
+                                                                $outputHtml = $rawText;
+                                                            }
                                                         @endphp
-                                                        {!! $formattedText !!}
+                                                        {!! $outputHtml !!}
                                                     </div>
                                                     @if($isTfNg || $isYnNg)
                                                         <div class="mt-6 mb-4">
@@ -329,13 +475,13 @@
                                                                 </div>
                                                             </div>
                                                         @endif
-                                                    @if(isset($question['type']) && $question['type'] === 'checkbox')
+                                                    @if(isset($question['type']) && in_array($question['type'], ['checkbox', 'multiple_choice_multiple']))
                                                         <p class="text-xs text-blue-500 font-medium mt-1.5 uppercase tracking-wide">Select {{ is_array($question['correct_answer']) ? count($question['correct_answer']) : 'multiple' }} answers</p>
                                                     @endif
                                                 </div>
                                             </div>
                                             <div class="flex gap-2 flex-shrink-0 items-start">
-                                                    @if(isset($question['db_id']))
+                                                    @if(isset($question['db_id']) && !($isSkillView ?? false))
                                                         <button onclick="openQuestionModal({{ $index }}, {{ $qIndex }})" class="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded transition-colors">Edit</button>
                                                         <button onclick="deleteQuestion({{ $question['db_id'] }})" class="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded transition-colors">Delete</button>
                                                     @endif
@@ -343,371 +489,19 @@
                                         </div>
 
                                         <div class="pl-0 md:pl-2">
-                                            @if(isset($question['type']) && (in_array($question['type'], ['matching_headings', 'matching_features', 'matching_sentence_endings', 'true_false', 'true_false_not_given', 'yes_no_not_given', 'matching_paragraph_information'])))
-                                                @php
-                                                    $usesMatchingOptionsLayout = in_array($question['type'], ['matching_headings', 'matching_features', 'matching_sentence_endings']);
-                                                @endphp
-                                                
-                                                <!-- List of Headings/Features Box (Top) -->
-                                                @if($usesMatchingOptionsLayout && !empty($question['options']) && !empty($question['box_title']) && in_array($question['type'], ['matching_headings', 'matching_features']))
-                                                <div class="mb-8 border-2 border-gray-300 p-4 rounded-none bg-white">
-                                                    <h4 class="text-center font-bold text-gray-800 mb-4 text-lg">{{ $question['box_title'] ?? 'List of Headings' }}</h4>
-                                                    <ul class="space-y-2">
-                                                        @foreach($question['options'] as $optKey => $optText)
-                                                            <li class="text-gray-700 text-sm md:text-base leading-relaxed pl-8 -indent-8 flex gap-2">
-                                                                <span class="font-bold min-w-[25px] inline-block">{{ $optKey }}</span>
-                                                                <span>{{ $optText }}</span>
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                                @endif
-
-                                                @if($usesMatchingOptionsLayout)
-                                                <!-- Questions List with Dropdowns (Existing Layout) -->
-                                                <div class="space-y-4 max-w-2xl mx-auto">
-                                                    @foreach($question['sub_questions'] as $subIndex => $subQuestion)
-                                                        <div class="flex items-center justify-between gap-4 py-2 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors px-2 rounded-lg">
-                                                            <div class="flex items-start gap-3 w-3/4 pt-1">
-                                                                <span class="text-gray-500 font-bold text-base md:text-lg mt-0.5">{{ $subIndex + 1 + ($question['start_number'] ?? 0) }}</span>
-                                                                <span class="font-normal text-gray-900 text-base md:text-lg leading-relaxed block">{{ $subQuestion['label'] }}</span>
-                                                            </div>
-                                                            
-                                                            <div class="relative w-1/4 max-w-[140px]">
-                                                                <select 
-                                                                    data-qid="{{ $subQuestion['id'] }}" x-model="selected['{{ $subQuestion['id'] }}']"
-                                                                    class="appearance-none w-full bg-white border-2 border-gray-300 text-gray-700 py-2.5 px-3 pr-8 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-bold text-center cursor-pointer text-base md:text-lg shadow-sm transition-colors"
-                                                                >
-                                                                    <option value="" disabled selected>-</option>
-                                                                    @foreach($question['options'] ?? [] as $optKey => $optText)
-                                                                        <option value="{{ $optKey }}">{{ $optKey }}</option>
-                                                                    @endforeach
-                                                                </select>
-                                                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                                @else
-                                                <!-- Table Layout for T/F/NG (No Box) -->
-                                                <div class="overflow-x-auto mt-6">
-                                                    <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
-                                                        <thead>
-                                                            <tr class="bg-gray-50 border-b border-gray-200">
-                                                                <th class="p-4 font-bold text-gray-600 w-12 text-center">#</th>
-                                                                <th class="p-4 font-bold text-gray-600">Question Statement</th>
-                                                                <th class="p-4 font-bold text-gray-600 w-48 text-center">Answer</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach($question['sub_questions'] ?? [] as $subIndex => $subQuestion)
-                                                                <tr class="group/row border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                                                                    <td class="py-2 px-4 font-bold text-blue-600 text-center">
-                                                                        {{ $subIndex + 1 + ($question['start_number'] ?? 0) }}
-                                                                    </td>
-                                                                    <td class="py-2 px-4 text-sm text-gray-800 font-medium leading-relaxed cursor-text transition-colors relative" title="Click any word to find it in the passage">
-                                                                        <span class="block">{{ $subQuestion['label'] }}</span>
-                                                                    </td>
-                                                                    <td class="py-2 px-4 text-center">
-                                                                        <div class="relative inline-block w-full">
-                                                                            <select 
-                                                                                data-qid="{{ $subQuestion['id'] }}" x-model="selected['{{ $subQuestion['id'] }}']"
-                                                                                class="appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-3 pr-8 rounded font-semibold focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer"
-                                                                                :class="{'text-blue-600 border-blue-500': selected['{{ $subQuestion['id'] }}']}"
-                                                                            >
-                                                                                <option value="" disabled selected>-</option>
-                                                                                @foreach($question['options'] ?? [] as $optKey => $optText)
-                                                                                    <option value="{{ $optKey }}">{{ $optKey }}</option>
-                                                                                @endforeach
-                                                                            </select>
-                                                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-600">
-                                                                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                                                                            </div>
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                                @endif
-
-                                                <!-- List of Endings Box (Bottom) -->
-                                                @if($usesMatchingOptionsLayout && !empty($question['options']) && $question['type'] === 'matching_sentence_endings')
-                                                <div class="mt-8 border-2 border-gray-300 p-4 rounded-none bg-white">
-                                                    <h4 class="text-center font-bold text-gray-800 mb-4 text-lg">{{ $question['box_title'] ?? 'List of Endings' }}</h4>
-                                                    <ul class="space-y-2">
-                                                        @foreach($question['options'] ?? [] as $optKey => $optText)
-                                                            <li class="text-gray-700 text-sm md:text-base leading-relaxed pl-8 -indent-8 flex gap-2">
-                                                                <span class="font-bold min-w-[25px] inline-block">{{ $optKey }}</span>
-                                                                <span>{{ $optText }}</span>
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                                @endif
-                                            @elseif(isset($question['type']) && $question['type'] === 'table_completion')
-                                                <!-- Table Completion -->
-                                                <div class="overflow-x-auto mt-6 mb-8">
-                                                    @if(!empty($question['instruction']))
-                                                        <p class="mb-4 italic text-gray-700">{!! $question['instruction'] !!}</p>
-                                                    @endif
-                                                    
-                                                    <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200 text-sm md:text-base">
-                                                        <thead>
-                                                            <tr class="bg-gray-100 border-b-2 border-gray-300">
-                                                                @foreach($question['columns'] ?? [] as $col)
-                                                                    <th class="p-3 font-bold text-gray-800 border-r border-gray-300 last:border-0 align-top {{ $loop->last ? 'min-w-[200px]' : '' }}">{{ $col }}</th>
-                                                                @endforeach
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach($question['rows'] ?? [] as $rowIndex => $row)
-                                                                <tr class="border-b border-gray-200 last:border-0 hover:bg-gray-50 transition-colors">
-                                                                    @foreach($row as $cellIndex => $cellContent)
-                                                                        <td class="p-3 border-r border-gray-300 last:border-0 align-top text-gray-700 leading-relaxed">
-                                                                            @php
-                                                                                $cellText = $cellContent;
-                                                                                // Check if placeholders exist in this cell
-                                                                                if (isset($question['placeholders'])) {
-                                                                                    foreach(($question['placeholders'] ?? []) as $key => $qNum) {
-                                                                                        if (str_contains($cellText, "[$key]")) {
-                                                                                            $inputHtml = '<div class="inline-block relative mx-1 align-baseline">' . 
-                                                                                                         '<span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-600 font-bold text-xs select-none">' . $qNum . '</span>' .
-                                                                                                         '<input type="text" data-qid="\' . $key . \'" placeholder=" _______ " class="border border-gray-300 focus:border-blue-500 rounded outline-none bg-white pl-10 pr-2 py-1 w-28 md:w-36 text-gray-900 font-medium shadow-sm transition-all focus:ring-1 focus:ring-blue-200 text-sm">' .
-                                                                                                         '</div>';
-                                                                                            $cellText = str_replace("[$key]", $inputHtml, $cellText);
-                                                                                        }
-                                                                                    }
-                                                                                }
-                                                                            @endphp
-                                                                            {!! $cellText !!}
-                                                                        </td>
-                                                                    @endforeach
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-
-                                            @elseif(isset($question['type']) && $question['type'] === 'diagram_labelling')
-                                                <!-- Diagram Labelling -->
-                                                <div class="mt-6 mb-8 overflow-x-auto">
-                                                    @if(!empty($question['instruction']))
-                                                        <p class="mb-4 italic text-gray-700">{!! $question['instruction'] !!}</p>
-                                                    @endif
-                                                    
-                                                    <div class="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50 mx-auto" style="min-width: 900px !important;">
-                                                        <img src="{{ asset($question['image'] ?? '') }}" alt="Diagram for Question {{ $question['question_number'] ?? $question['id'] }}" class="w-full h-auto object-contain">
-                                                        
-                                                        @foreach($question['sub_questions'] ?? [] as $subQuestion)
-                                                            <div class="absolute transform -translate-y-1/2" style="top: {{ $subQuestion['y'] ?? 0 }}%; left: {{ $subQuestion['x'] ?? 0 }}%;">
-                                                                <div class="flex items-center border border-gray-400 rounded-md px-2 py-1 transition-all focus-within:border-blue-500 bg-white hover:border-blue-400 shadow-sm">
-                                                                    <span class="font-bold text-blue-700 mr-2 text-sm select-none">{{ $subQuestion['label'] }}</span>
-                                                                    <input type="text" 
-                                                                           data-qid="{{ $subQuestion['id'] }}" x-model="selected['{{ $subQuestion['id'] }}']"
-                                                                           class="bg-transparent border-none p-0 w-24 focus:ring-0 text-sm text-gray-900 placeholder-gray-600 font-bold"
-                                                                           placeholder="Answer...">
-                                                                </div>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                </div>
-
-                                            @elseif(isset($question['type']) && in_array($question['type'], ['summary_completion', 'sentence_completion']))
-                                                <!-- Summary Completion -->
-                                                <div class="border-2 border-gray-800 p-6 rounded-none mb-6">
-                                                    @if(!empty($question['box_title']))
-                                                        <h3 class="text-xl font-bold text-gray-900 mb-4">{{ $question['box_title'] }}</h3>
-                                                    @endif
-                                                    
-                                                    @if(!empty($question['instruction']))
-                                                        <p class="mb-4 italic text-gray-700">{!! $question['instruction'] !!}</p>
-                                                    @endif
-
-
-
-                                                    <div class="text-gray-800 leading-loose text-lg font-medium">
-                                                        @php
-                                                            $summaryText = $question['summary_text'] ?? $question['text'] ?? '';
-
-                                                            // Format 1: legacy 'placeholders' → ['q10' => 10, ...]
-                                                            $placeholderMap = [];
-                                                            if (!empty($question['placeholders'])) {
-                                                                foreach ($question['placeholders'] as $key => $qNum) {
-                                                                    $placeholderMap[$key] = $qNum;
-                                                                }
-                                                            }
-
-                                                            // Format 2: 'blanks' → [['id'=>'q10','blank_number'=>10], ...]
-                                                            if (!empty($question['blanks'])) {
-                                                                foreach ($question['blanks'] as $blank) {
-                                                                    $placeholderMap[$blank['id']] = $blank['blank_number'];
-                                                                }
-                                                            }
-
-                                                            foreach ($placeholderMap as $key => $qNum) {
-                                                                $inputHtml = '<span class="inline-block relative mx-1 align-middle">' .
-                                                                             '<span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-600 font-bold text-xs select-none">' . $qNum . '</span>' .
-                                                                             '<input type="text" data-qid="\' . $key . \'" class="user-answer border-2 border-gray-300 focus:border-blue-500 rounded-md outline-none bg-white pl-8 pr-3 py-1.5 w-48 text-gray-800 font-medium shadow-sm transition-all focus:ring-2 focus:ring-blue-100">' .
-                                                                             '</span>';
-                                                                // Match [N] bracket style (e.g. [10]) in summary_text
-                                                                $summaryText = str_replace('[' . $qNum . ']', $inputHtml, $summaryText);
-                                                                // Also match [key] style (e.g. [q10])
-                                                                $summaryText = str_replace('[' . $key . ']', $inputHtml, $summaryText);
-                                                            }
-                                                        @endphp
-                                                        {!! $summaryText !!}
-                                                    </div>
-
-                                                    @if(isset($question['box_options']))
-                                                        <div class="bg-gray-100 p-4 rounded-lg border border-gray-200 mt-6">
-                                                            <strong class="block text-gray-700 mb-2 uppercase text-sm tracking-wide">List of Words</strong>
-                                                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                                                @foreach($question['box_options'] ?? [] as $key => $option)
-                                                                    <div class="text-sm">
-                                                                        <span class="font-bold text-gray-900 mr-1">{{ $key }}</span> 
-                                                                        <span class="text-gray-700">{{ $option }}</span>
-                                                                    </div>
-                                                                @endforeach
-                                                            </div>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                            @elseif(isset($question['type']) && in_array($question['type'], ['short_answer_group', 'short_answer']) && isset($question['sub_questions']))
-                                                {{-- Short Answer Group: numbered questions with text inputs below --}}
-                                                <div class="space-y-5 mt-4">
-                                                    @foreach($question['sub_questions'] ?? [] as $subIndex => $subQuestion)
-                                                        <div class="flex flex-col gap-2 py-3 border-b border-gray-100 last:border-0">
-                                                            <div class="flex items-start gap-3">
-                                                                <span class="flex-none w-7 h-7 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center font-bold text-sm border border-blue-100">
-                                                                    {{ $subIndex + 1 + ($question['start_number'] ?? 0) }}
-                                                                </span>
-                                                                <span class="font-normal text-gray-700 leading-relaxed block pt-0.5">{{ $subQuestion['label'] }}</span>
-                                                            </div>
-                                                            <div class="pl-10">
-                                                                <input type="text"
-                                                                       data-qid="{{ $subQuestion['id'] }}" x-model="selected['{{ $subQuestion['id'] }}']"
-                                                                       class="w-full max-w-sm px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 text-gray-800 font-medium text-sm placeholder-gray-300 transition-all shadow-sm"
-                                                                       placeholder="Type answer here...">
-                                                            </div>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                            @elseif(isset($question['sub_questions']))
-                                                <!-- Fallback for other sub-question types (like Matching Features) -->
-                                                <div class="space-y-6 pl-10">
-                                                    @foreach($question['sub_questions'] ?? [] as $subIndex => $subQuestion)
-                                                        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                                                            <div class="mb-4 flex items-start gap-4">
-                                                                <span class="flex-none w-8 h-8 rounded-full bg-white border-2 border-blue-100 text-sm font-bold text-gray-600 flex items-center justify-center shadow-sm relative top-0.5">
-                                                                    {{ $subIndex + 1 + ($question['start_number'] ?? 0) }}
-                                                                </span>
-                                                                <p class="font-medium text-gray-900 text-base md:text-lg leading-relaxed mt-0 mb-0">{{ $subQuestion['label'] }}</p>
-                                                            </div>
-                                                            <div class="space-y-3">
-                                                                @foreach($question['options'] ?? [] as $optKey => $optText)
-                                                                    <label class="group flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 cursor-pointer hover:bg-white hover:border-blue-300 transition-all duration-200"
-                                                                           :class="{ 
-                                                                                'bg-white border-blue-500 ring-1 ring-blue-500 shadow-sm': selected['{{ $subQuestion['id'] }}'] === '{{ $optKey }}',
-                                                                                'bg-gray-50/50': selected['{{ $subQuestion['id'] }}'] !== '{{ $optKey }}'
-                                                                           }">
-                                                                        
-                                                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-200 border"
-                                                                             :class="{ 
-                                                                                'bg-blue-600 text-white border-blue-600': selected['{{ $subQuestion['id'] }}'] === '{{ $optKey }}', 
-                                                                                'bg-white text-gray-600 border-gray-300 group-hover:border-blue-400': selected['{{ $subQuestion['id'] }}'] !== '{{ $optKey }}' 
-                                                                             }">
-                                                                            {{ $optKey }}
-                                                                        </div>
-
-                                                                        <span class="text-base md:text-lg text-gray-700 font-medium group-hover:text-gray-900 transition-colors"
-                                                                                :class="{ 'text-blue-900 font-bold': selected['{{ $subQuestion['id'] }}'] === '{{ $optKey }}' }">
-                                                                            {{ $optText }}
-                                                                        </span>
-                                                                        
-                                                                        <input type="radio" 
-                                                                               name="question_{{ $qIndex }}_{{ $subQuestion['id'] }}" 
-                                                                               value="{{ $optKey }}" 
-                                                                               class="hidden" 
-                                                                               x-model="selected['{{ $subQuestion['id'] }}']">
-                                                                    </label>
-                                                                @endforeach
-                                                            </div>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-
-                                            @elseif(isset($question['type']) && $question['type'] === 'short_answer')
-                                                <!-- Short Answer Input -->
-                                                <div class="pl-10">
-                                                    <input type="text"
-                                                           x-model="selected"
-                                                           class="w-full md:w-2/3 p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors text-gray-700 font-medium"
-                                                           placeholder="Type your answer here..."
-                                                    >
-                                                </div>
-                                            @else
-                                                <div class="space-y-3 pl-10">
-                                                    @foreach($question['options'] ?? [] as $optKey => $optText)
-                                                        <label class="group flex items-center gap-3 p-3 rounded-xl border border-gray-200 cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
-                                                               :class="{ 
-                                                                    'bg-blue-50 border-blue-500 ring-1 ring-blue-500 shadow-sm': Array.isArray(selected) ? selected.includes('{{ $optKey }}') : selected === '{{ $optKey }}',
-                                                                    'bg-white': !(Array.isArray(selected) ? selected.includes('{{ $optKey }}') : selected === '{{ $optKey }}')
-                                                               }">
-                                                            
-                                                            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors duration-200 border"
-                                                                 :class="{ 
-                                                                    'bg-blue-600 text-white border-blue-600': Array.isArray(selected) ? selected.includes('{{ $optKey }}') : selected === '{{ $optKey }}', 
-                                                                    'bg-gray-50 text-gray-500 border-gray-200 group-hover:bg-white group-hover:border-blue-400': !(Array.isArray(selected) ? selected.includes('{{ $optKey }}') : selected === '{{ $optKey }}') 
-                                                                 }">
-                                                                {{ $optKey }}
-                                                            </div>
-
-                                                                <span class="text-base md:text-lg text-gray-700 font-medium group-hover:text-gray-900 transition-colors"
-                                                                        :class="{ 'text-blue-900 font-bold': Array.isArray(selected) ? selected.includes('{{ $optKey }}') : selected === '{{ $optKey }}' }">
-                                                                    {{ $optText }}
-                                                                </span>
-                                                            
-                                                            @if(isset($question['type']) && $question['type'] === 'checkbox')
-                                                                <input type="checkbox" name="question_{{ $qIndex }}[]" value="{{ $optKey }}" class="hidden" x-model="selected" data-qid="{{ $question['id'] }}">
-                                                            @else
-                                                                <input type="radio" name="question_{{ $qIndex }}" value="{{ $optKey }}" class="hidden" x-model="selected" data-qid="{{ $question['id'] }}">
-                                                          @endif
-
-                                                    @if(isset($question['box_options']))
-                                                        <div class="bg-gray-100 p-4 rounded-lg border border-gray-200 mb-6">
-                                                            <strong class="block text-gray-700 mb-2 uppercase text-sm tracking-wide">List of Words</strong>
-                                                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                                                @foreach($question['box_options'] ?? [] as $key => $option)
-                                                                    <div class="text-sm">
-                                                                        <span class="font-bold text-gray-900 mr-1">{{ $key }}</span> 
-                                                                        <span class="text-gray-700">{{ $option }}</span>
-                                                                    </div>
-                                                                @endforeach
-                                                            </div>
-                                                        </div>
-                                                    @endif
-
-                                                    @if(isset($question['box_options']))
-                                                        <div class="bg-gray-100 p-4 rounded-lg border border-gray-200 mb-6">
-                                                            <strong class="block text-gray-700 mb-2 uppercase text-sm tracking-wide">List of Words</strong>
-                                                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                                                @foreach($question['box_options'] ?? [] as $key => $option)
-                                                                    <div class="text-sm">
-                                                                        <span class="font-bold text-gray-900 mr-1">{{ $key }}</span> 
-                                                                        <span class="text-gray-700">{{ $option }}</span>
-                                                                    </div>
-                                                                @endforeach
-                                                            </div>
-                                                        </div>
-                                                    @endif
-                                                        </label>
-                                                    @endforeach
-                                                </div>
-                                            @endif
+                                            @php
+                                                $questionPartial = match(true) {
+                                                    isset($question['type']) && in_array($question['type'], ['matching_headings', 'matching_features', 'matching_sentence_endings', 'true_false', 'true_false_not_given', 'yes_no_not_given', 'matching_paragraph_information']) => 'matching-and-tf-ng',
+                                                    isset($question['type']) && $question['type'] === 'table_completion' => 'table-completion',
+                                                    isset($question['type']) && $question['type'] === 'diagram_labelling' => 'diagram-labelling',
+                                                    isset($question['type']) && in_array($question['type'], ['sentence_completion', 'summary_completion']) => 'summary-sentence-completion',
+                                                    isset($question['type']) && in_array($question['type'], ['short_answer_group', 'short_answer']) && isset($question['sub_questions']) => 'short-answer-group',
+                                                    isset($question['sub_questions']) => 'sub-questions-fallback',
+                                                    isset($question['type']) && $question['type'] === 'short_answer' => 'scalar-short-answer',
+                                                    default => 'scalar-choice',
+                                                };
+                                            @endphp
+                                            @include('assignments.ielts.reading.partials.questions.' . $questionPartial)
                                         </div>
                                     </div>
                                 @endforeach
@@ -743,7 +537,7 @@
                                     <div class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Salah/Kosong</div>
                                 </div>
                             </div>
-                            <div class="bg-blue-50 rounded-xl p-4 text-center">
+                            <div class="bg-white rounded-xl p-4 text-center">
                                 <p class="text-blue-800 font-medium">Scroll ke atas untuk melihat penjelasan dan perbaikan pada setiap pertanyaan.</p>
                             </div>
                             <div class="mt-6 text-center">
@@ -752,7 +546,7 @@
                         </div>
                     @else
                         <div class="mt-8 mb-12 flex justify-center">
-                            <div class="px-8 py-3 bg-gray-100 text-gray-500 font-bold rounded-xl border border-gray-200 text-lg flex items-center gap-3">
+                            <div class="px-8 py-3 bg-white text-gray-500 font-bold rounded-xl border border-gray-200 text-lg flex items-center gap-3">
                                 <svg class="w-6 h-6 animate-spin text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 Menunggu Kunci Jawaban & Pembahasan Diupload...
                             </div>
@@ -783,10 +577,65 @@
         }
     }
 
+    /* Authentic Cambridge IELTS Typography */
+    .passage-content {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        color: #111827 !important;
+        font-size: 1.05rem !important;
+        line-height: 1.65 !important;
+    }
+
     .passage-content p {
-        margin-bottom: 1.25rem;
+        margin-bottom: 1.25rem !important;
+        font-size: 1.05rem !important;
+        line-height: 1.65 !important;
+        color: #111827 !important;
+    }
+
+    .passage-section-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #0056b3;
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.25rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .passage-section-banner .section-title {
+        color: #0056b3;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 800;
+        font-size: 1.35rem;
+    }
+
+    .passage-section-banner .section-questions {
+        color: #0056b3;
+        font-style: italic;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .passage-instruction {
+        font-style: italic;
+        color: #374151;
         font-size: 1.05rem;
-        line-height: 2;
+        margin-bottom: 1.25rem;
+    }
+
+    .passage-content h2, 
+    .passage-content h3, 
+    .passage-main-title {
+        color: #0056b3 !important;
+        font-weight: 800 !important;
+        font-size: 1.65rem !important;
+        line-height: 1.35 !important;
+        margin-top: 0.5rem !important;
+        margin-bottom: 1.5rem !important;
+        letter-spacing: -0.01em !important;
     }
     .custom-scrollbar::-webkit-scrollbar {
         width: 8px;
@@ -922,719 +771,153 @@
         }
     }
 
-    // Admin CRUD Functions
-    const materialContent = @json($sections);
-
-    function openPassageModal(index = null) {
-        const modal = document.getElementById('passageModal');
-        const form = document.getElementById('passageForm');
-        
-        if (index !== null) {
-            const passage = materialContent[index];
-            document.getElementById('passage_id').value = passage.id;
-            document.getElementById('passage_title').value = passage.passage_title;
-            document.getElementById('passage_content').value = passage.passage_text;
-            document.getElementById('passageModalTitle').innerText = 'Edit Passage';
-            form.action = `/admin/ielts-reading/passage/${passage.id}`;
-            document.getElementById('passage_method').value = 'PUT';
-        } else {
-            // New Passage
-            document.getElementById('passage_id').value = '';
-            document.getElementById('passage_title').value = '';
-            document.getElementById('passage_content').value = '';
-            document.getElementById('passageModalTitle').innerText = 'Add Passage';
-            form.action = `{{ route('admin.ielts.reading.passage.store') }}`;
-            document.getElementById('passage_method').value = 'POST';
-        }
-        
-        modal.classList.remove('hidden');
-    }
-
-    function closePassageModal() {
-        document.getElementById('passageModal').classList.add('hidden');
-    }
-
-    function deletePassage(id) {
-        if (!confirm('Are you sure you want to delete this passage? This will delete all associated questions.')) return;
-        
-        fetch(`/admin/ielts-reading/passage/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Error: ' + data.message);
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    function openQuestionModal(passageIndex, questionIndex = null) {
-        const modal = document.getElementById('questionModal');
-        const form = document.getElementById('questionForm');
-        const passage = materialContent[passageIndex];
-        
-        document.getElementById('q_passage_id').value = passage.id; 
-        
-        if (questionIndex !== null) {
-            const question = passage.questions[questionIndex];
-            document.getElementById('question_id').value = question.db_id;
-            document.getElementById('question_number').value = question.id;
-            document.getElementById('question_text').value = question.text || '';
-            document.getElementById('question_explanation').value = question.explanation || '';
-            document.getElementById('question_type').value = question.type;
-            
-            console.log('Opened Question:', question); // DEBUG: Check if data is present
-            console.log('Question Data:', question.data); // DEBUG: Check if data object exists
-
-            // Reconstruct data object for JSON field
-            // Use existing data as base to preserve fields like 'image'
-            const dataObj = question.data ? JSON.parse(JSON.stringify(question.data)) : {};
-            
-            // Ensure core fields are synced if they differ (though usually they are in data too or handled separately)
-            if(question.options) dataObj.options = question.options;
-            if(question.correct_answer) dataObj.correct_answer = question.correct_answer;
-
-            // We don't need to manually check for sub_questions etc if we copy data
-            // But let's keep the explicit checks just in case data was null but sub_questions existed on top level (unlikely)
-            if(question.sub_questions && !dataObj.sub_questions) dataObj.sub_questions = question.sub_questions;
-            if(question.box_title && !dataObj.box_title) dataObj.box_title = question.box_title;
-            if(question.summary_text && !dataObj.summary_text) dataObj.summary_text = question.summary_text;
-            if(question.placeholders && !dataObj.placeholders) dataObj.placeholders = question.placeholders;
-            if(question.box_options && !dataObj.box_options) dataObj.box_options = question.box_options;
-
-            document.getElementById('question_data').value = JSON.stringify(dataObj, null, 2);
-            
-            // Visual Editor Handling
-            const editorContainer = document.getElementById('diagramEditor');
-            const editorImage = document.getElementById('diagramImage');
-            
-            if (question.type === 'diagram_labelling') {
-                editorContainer.classList.remove('hidden');
-                editorContainer.style.display = 'block'; 
-
-                const imgSrc = question.image || (question.data && question.data.image) || '';
-                const errorMsg = document.getElementById('diagramError');
-                const toolbar = document.getElementById('editorToolbar');
-                const canvas = document.getElementById('diagramCanvas');
-
-                if(imgSrc) {
-                    // Success Case
-                    if(errorMsg) errorMsg.classList.add('hidden');
-                    if(toolbar) toolbar.classList.remove('hidden');
-                    if(canvas) canvas.classList.remove('hidden');
-
-                    if(editorImage) {
-                         editorImage.src = imgSrc;
-                         if (editorImage.complete && editorImage.naturalHeight !== 0) {
-                             initDiagramEditor(dataObj);
-                         } else {
-                             editorImage.onload = () => initDiagramEditor(dataObj);
-                         }
-                    }
-                } else {
-                    // Error Case
-                    if(errorMsg) errorMsg.classList.remove('hidden');
-                    if(toolbar) toolbar.classList.add('hidden');
-                    if(canvas) canvas.classList.add('hidden');
-                }
-            } else {
-                editorContainer.classList.add('hidden');
-                editorContainer.style.display = 'none';
-            }
-            
-            document.getElementById('questionModalTitle').innerText = 'Edit Question';
-            form.action = `/admin/ielts-reading/question/${question.db_id}`;
-            document.getElementById('question_method').value = 'PUT';
-        } else {
-            // New Question
-            document.getElementById('question_id').value = '';
-            document.getElementById('question_number').value = (passage.questions.length + 1);
-            document.getElementById('question_text').value = '';
-            document.getElementById('question_explanation').value = '';
-            document.getElementById('question_type').value = 'matching_headings';
-            document.getElementById('question_data').value = '{\n  "options": [],\n  "correct_answer": [],\n  "sub_questions": []\n}';
-            
-            document.getElementById('questionModalTitle').innerText = 'Add Question';
-            form.action = `{{ route('admin.ielts.reading.question.store') }}`;
-            document.getElementById('question_method').value = 'POST';
-        }
-        
-        modal.classList.remove('hidden');
-    }
-
-    function closeQuestionModal() {
-        document.getElementById('questionModal').classList.add('hidden');
-    }
-
-    function deleteQuestion(id) {
-        if (!confirm('Are you sure you want to delete this question block?')) return;
-        
-        fetch(`/admin/ielts-reading/question/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Error: ' + data.message);
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    // Form Submissions
-    // Form Submissions
-    document.addEventListener('DOMContentLoaded', function() {
-        const passageForm = document.getElementById('passageForm');
-        if (passageForm) {
-            passageForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const form = e.target;
-                const formData = new FormData(form);
-                const data = Object.fromEntries(formData.entries());
-                data.material_id = {{ $id }}; // Current Material ID
-
-                fetch(form.action, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                        'X-HTTP-Method-Override': data._method || 'POST'
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if(data.success) location.reload();
-                    else alert(data.message);
-                });
-            });
-        }
-
-        const questionForm = document.getElementById('questionForm');
-        if (questionForm) {
-            questionForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const form = e.target;
-                const formData = new FormData(form);
-                const data = Object.fromEntries(formData.entries());
-                
-                function appendFormData(formData, data, parentKey) {
-                    if (data && typeof data === 'object' && !(data instanceof Date) && !(data instanceof File)) {
-                        Object.keys(data).forEach(key => {
-                            appendFormData(formData, data[key], parentKey ? `${parentKey}[${key}]` : key);
-                        });
-                    } else {
-                        const value = data == null ? '' : data;
-                        formData.append(parentKey, value);
-                    }
-                }
-
-                const finalFormData = new FormData(form);
-                
-                // Parse "data" field from JSON string to object and flatten it for FormData
-                try {
-                    console.log('Submitting form...');
-                    console.log('Raw JSON:', data.data_json);
-                    const rawData = JSON.parse(data.data_json); 
-                    // Controller expects 'data' as array
-                    appendFormData(finalFormData, rawData, 'data');
-                    
-                    // Controller also validates specific fields like 'options' and 'correct_answer' at top level
-                    if(rawData.options) appendFormData(finalFormData, rawData.options, 'options');
-                    if(rawData.correct_answer) appendFormData(finalFormData, rawData.correct_answer, 'correct_answer');
-                    
-                } catch (err) {
-                    alert('Invalid JSON in Data field');
-                    return;
-                }
-
-                fetch(form.action, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    },
-                    body: finalFormData
-                })
-                .then(async res => {
-                    if (!res.ok) {
-                        const contentType = res.headers.get("content-type");
-                        if (contentType && contentType.indexOf("application/json") !== -1) {
-                            const errorData = await res.json();
-                            throw new Error(errorData.message || 'Validation Error');
-                        } else {
-                            const text = await res.text();
-                            console.error('Server Error:', text);
-                            throw new Error('Server responded with ' + res.status);
-                        }
-                    }
-                    return res.json();
-                })
-                .then(data => {
-                    if(data.success) location.reload();
-                    else alert('Save Failed: ' + data.message);
-                })
-                .catch(error => {
-                    console.error('Fetch Error:', error);
-                    alert('Error saving question: ' + error.message);
-                });
-            });
-        }
-    });
-    // Visual Diagram Editor Logic
-    let currentDiagramTags = [];
-    let activeDrag = null;
-    let activeResize = null;
-
-    function initDiagramEditor(dataObj) {
-        const editor = document.getElementById('diagramEditor');
-        const img = document.getElementById('diagramImage');
-        const overlay = document.getElementById('diagramOverlay');
-        
-        // Reset state
-        currentDiagramTags = dataObj.sub_questions || [];
-        
-        // Load Image
-        // If image is in root object (legacy) or data object
-        // The modal logic populates dataObj from question.sub_questions etc.
-        // We need to find the image URL. It might be in the main question object/data. 
-        // We need to pass the full question object or image path to this init function.
-        // For now, let's look for 'image' property in the JSON or assume it's passed differently.
-        // Quick fix: The image path isn't in sub_questions. It's usually question.image or question.data.image.
-        // The openQuestionModal function handles setting the image src on the DOM element.
-        
-        renderDiagramLabels();
-    }
-
-    function renderDiagramLabels() {
-        const overlay = document.getElementById('diagramOverlay');
-        overlay.innerHTML = ''; // Clear existing
-
-        currentDiagramTags.forEach(tag => {
-            const el = document.createElement('div');
-            el.className = 'absolute bg-white border border-blue-500 rounded flex items-center shadow-sm group';
-            // Default width 120px if not set, convert to percentage or keep px?
-            // Existing data uses % for x,y. Let's assume width is px for now or we add width support.
-            // If width is missing, default to some reasonable value relative to container or fixed.
-            const width = tag.width ? tag.width + 'px' : '100px'; 
-            
-            el.style.left = tag.x + '%';
-            el.style.top = tag.y + '%';
-            el.style.width = width;
-            el.style.transform = 'translate(0, -50%)'; // Vertically center on the point like the view does
-            el.style.cursor = 'move';
-            
-            el.innerHTML = `
-                <span class="font-bold text-blue-700 px-2 select-none">${tag.label}</span>
-                <div class="flex-grow h-6 bg-gray-100 border-l border-gray-300"></div>
-                <!-- Delete Handle -->
-                <button onclick="deleteDiagramLabel('${tag.id}')" class="bg-red-500 text-white w-5 h-5 flex items-center justify-center rounded-full absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity text-xs" title="Delete">×</button>
-                <!-- Resize Handle -->
-                <div class="absolute right-0 top-0 bottom-0 w-2 cursor-e-resize hover:bg-blue-300" onmousedown="startResize(event, '${tag.id}')"></div>
-            `;
-
-            el.onmousedown = (e) => startDrag(e, tag.id);
-            overlay.appendChild(el);
-        });
-    }
-
-    function startDrag(e, id) {
-        if (e.target.tagName === 'BUTTON' || e.target.classList.contains('cursor-e-resize')) return; // Ignore if clicking delete or resize
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const tag = currentDiagramTags.find(t => t.id == id);
-        const overlay = document.getElementById('diagramOverlay');
-        const rect = overlay.getBoundingClientRect();
-        
-        activeDrag = {
-            id: id,
-            startX: e.clientX,
-            startY: e.clientY,
-            initialLeft: parseFloat(tag.x), // Ensure it's number
-            initialTop: parseFloat(tag.y),   // Ensure it's number
-            containerWidth: rect.width,
-            containerHeight: rect.height
-        };
-        
-        document.addEventListener('mousemove', handleDrag);
-        document.addEventListener('mouseup', stopDrag);
-    }
-
-    function handleDrag(e) {
-        if (!activeDrag) return;
-        
-        const dxPx = e.clientX - activeDrag.startX;
-        const dyPx = e.clientY - activeDrag.startY;
-        
-        // Convert px delta to %
-        const dxPct = (dxPx / activeDrag.containerWidth) * 100;
-        const dyPct = (dyPx / activeDrag.containerHeight) * 100;
-        
-        let newX = activeDrag.initialLeft + dxPct;
-        let newY = activeDrag.initialTop + dyPct;
-        
-        // Clamp
-        newX = Math.max(0, Math.min(100, newX));
-        newY = Math.max(0, Math.min(100, newY));
-        
-        // Update state
-        const tag = currentDiagramTags.find(t => t.id == activeDrag.id);
-        tag.x = Math.round(newX * 100) / 100;
-        tag.y = Math.round(newY * 100) / 100;
-        
-        renderDiagramLabels();
-    }
-
-    function stopDrag() {
-        if(activeDrag) {
-            syncDiagramData();
-            activeDrag = null;
-        }
-        document.removeEventListener('mousemove', handleDrag);
-        document.removeEventListener('mouseup', stopDrag);
-    }
-
-    function startResize(e, id) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const tag = currentDiagramTags.find(t => t.id == id);
-        const el = e.target.parentElement;
-        
-        activeResize = {
-            id: id,
-            startX: e.clientX,
-            initialWidth: parseFloat(el.style.width) // px
-        };
-        
-        document.addEventListener('mousemove', handleResize);
-        document.addEventListener('mouseup', stopResize);
-    }
-
-    function handleResize(e) {
-        if (!activeResize) return;
-        const dx = e.clientX - activeResize.startX;
-        let newWidth = Math.max(50, activeResize.initialWidth + dx); // Min 50px
-        
-        const tag = currentDiagramTags.find(t => t.id == activeResize.id);
-        tag.width = Math.round(newWidth);
-        
-        renderDiagramLabels();
-    }
-
-    function stopResize() {
-        if (activeResize) {
-            syncDiagramData();
-            activeResize = null;
-        }
-        document.removeEventListener('mousemove', handleResize);
-        document.removeEventListener('mouseup', stopResize);
-    }
-
-    function addDiagramLabel() {
-        const id = (currentDiagramTags.length + 1).toString();
-        currentDiagramTags.push({
-            id: id,
-            label: id,
-            x: 50,
-            y: 50,
-            width: 100
-        });
-        renderDiagramLabels();
-        syncDiagramData();
-    }
-
-    function deleteDiagramLabel(id) {
-        if(!confirm('Delete this label?')) return;
-        currentDiagramTags = currentDiagramTags.filter(t => t.id != id);
-        renderDiagramLabels();
-        syncDiagramData();
-    }
-
-    function syncDiagramData() {
-        const jsonField = document.getElementById('question_data');
-        try {
-            const currentData = JSON.parse(jsonField.value || '{}');
-            currentData.sub_questions = currentDiagramTags;
-            jsonField.value = JSON.stringify(currentData, null, 2);
-            document.getElementById('jsonSyncMsg').classList.remove('hidden');
-            setTimeout(() => document.getElementById('jsonSyncMsg').classList.add('hidden'), 2000);
-        } catch(e) {
-            console.error("Cannot sync diagram data, invalid JSON in textarea", e);
-        }
-    }
 </script>
 
-<!-- Modals -->
-<div id="passageModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
-    <div class="bg-white rounded-xl p-8 max-w-6xl w-full">
-        <h3 id="passageModalTitle" class="text-2xl font-bold mb-4">Edit Passage</h3>
-        <form id="passageForm">
-            <input type="hidden" name="_method" id="passage_method" value="POST">
-            <input type="hidden" name="id" id="passage_id">
-            
-            <div class="mb-4">
-                <label class="block text-sm font-bold mb-2">Title</label>
-                <input type="text" name="title" id="passage_title" class="w-full border p-2 rounded">
-            </div>
-            <div class="mb-4">
-                <label class="block text-sm font-bold mb-2">Content (HTML)</label>
-                <textarea name="content" id="passage_content" class="w-full border p-2 rounded h-96 font-mono text-sm"></textarea>
-            </div>
-            <div class="flex justify-end gap-2">
-                <button type="button" onclick="closePassageModal()" class="px-4 py-2 bg-gray-200 rounded">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div id="questionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
-    <div class="bg-white rounded-xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <h3 id="questionModalTitle" class="text-2xl font-bold mb-4">Edit Question</h3>
-        <form id="questionForm">
-            <input type="hidden" name="_method" id="question_method" value="POST">
-            @csrf
-            <input type="hidden" name="passage_id" id="q_passage_id">
-            <input type="hidden" name="id" id="question_id">
-            
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block text-sm font-bold mb-2">Number (ID)</label>
-                    <input type="text" name="question_number" id="question_number" class="w-full border p-2 rounded">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold mb-2">Type</label>
-                    <select name="type" id="question_type" class="w-full border p-2 rounded">
-                        <option value="matching_headings">Matching Headings</option>
-                        <option value="summary_completion">Summary Completion</option>
-                        <option value="multiple_choice">Multiple Choice</option>
-                        <option value="true_false">True/False</option>
-                        <option value="short_answer">Short Answer</option>
-                        <option value="sentence_completion">Sentence Completion</option>
-                        <option value="diagram_labelling">Diagram Labelling</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="mb-4">
-                <label class="block text-sm font-bold mb-2">Instruction / Text</label>
-                <textarea name="question_text" id="question_text" class="w-full border p-2 rounded h-20"></textarea>
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-sm font-bold mb-2">Answer Key & Explanation</label>
-                <textarea name="explanation" id="question_explanation" class="w-full border p-2 rounded h-32"></textarea>
-            </div>
-            
-            <!-- Visual Editor for Diagram Labelling -->
-            <div id="diagramEditor" class="mb-4 hidden border rounded p-4 bg-gray-50 overflow-x-auto">
-                <label class="block text-sm font-bold mb-2">Visual Diagram Editor</label>
-                <!-- Image path is retrieved from question.image or data.image in JS -->
-                <p id="diagramError" class="hidden text-red-500 mb-2 font-bold">Error: No image path found. Please add "image" to the JSON.</p>
-                <div id="editorToolbar" class="mb-2 flex items-center gap-4 bg-blue-50 p-2 rounded border border-blue-100 min-w-[900px]">
-                    <button type="button" onclick="addDiagramLabel()" class="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 shadow-sm font-bold">
-                        + Add Label
-                    </button>
-                    <div class="text-xs text-blue-800 flex flex-col">
-                        <span><strong>Move:</strong> Click and drag any blue box.</span>
-                        <span><strong>Resize:</strong> Drag the right edge of a box.</span>
-                        <span><strong>Delete:</strong> Click the red 'X' on a box.</span>
-                    </div>
-                </div>
-                
-                <div id="diagramCanvas" class="relative overflow-hidden border border-gray-300 bg-white select-none shadow-inner" style="min-height: 400px; background-color: #f3f4f6; min-width: 900px;">
-                    <!-- Image and Labels will be injected here -->
-                    <img id="diagramImage" src="" class="w-full h-auto pointer-events-none block" style="user-select: none; pointer-events: none;">
-                    <div id="diagramOverlay" class="absolute inset-0 z-10"></div>
-                </div>
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-sm font-bold mb-2">Data Configuration (JSON)</label>
-                <p class="text-xs text-gray-500 mb-1">Includes options, correct_answer, sub_questions, placeholders. <span id="jsonSyncMsg" class="text-blue-600 hidden">Updated from Visual Editor.</span></p>
-                <textarea name="data_json" id="question_data" class="w-full border p-2 rounded h-80 font-mono text-xs"></textarea>
-            </div>
-
-            <div class="flex justify-end gap-2">
-                <button type="button" onclick="closeQuestionModal()" class="px-4 py-2 bg-gray-200 rounded">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
-            </div>
-        </form>
-    </div>
-</div>
-
+@unless($isSkillView ?? false)
+    @include('assignments.ielts.reading.partials.admin-toolbar')
+@endunless
 
 @push('scripts')
 <script>
-    // Generate Answer Key Data from PHP
-    const answerKeyData = {!! json_encode(collect($sections)->flatMap(fn($s) => $s['questions'] ?? [])->mapWithKeys(function($q) {
-        $keys = [];
-        $correctAnswers = $q['correct_answer'] ?? ($q['data']['correct_answer'] ?? []);
-        
-        if (isset($q['sub_questions'])) {
-            foreach ($q['sub_questions'] as $sq) {
-                $keys[$sq['id']] = [
-                    'correct' => $correctAnswers[$sq['id']] ?? null,
-                    'explanation' => $q['explanation'] ?? null
-                ];
-            }
-        } elseif (isset($q['blanks'])) {
-            foreach ($q['blanks'] as $key => $qNum) {
-                $keys[$key] = [
-                    'correct' => $correctAnswers[$key] ?? null,
-                    'explanation' => $q['explanation'] ?? null
-                ];
-            }
-        } elseif (isset($q['placeholders'])) {
-            foreach ($q['placeholders'] as $key => $qNum) {
-                $keys[$key] = [
-                    'correct' => $correctAnswers[$key] ?? null,
-                    'explanation' => $q['explanation'] ?? null
-                ];
-            }
-        } else {
-            // Single question
-            $keys[$q['id'] ?? $q['question_number']] = [
-                'correct' => $correctAnswers,
-                'explanation' => $q['explanation'] ?? null
-            ];
-        }
-        return $keys;
-    })->toArray()) !!};
-
-    function evaluateIeltsReading() {
-        let correctCount = 0;
-        let totalCount = Object.keys(answerKeyData).length;
-
+    async function evaluateIeltsReading() {
         // Prevent multiple clicks
-        document.getElementById('eval-button').classList.add('hidden');
-        const summaryBox = document.getElementById('eval-summary');
-        summaryBox.classList.remove('hidden');
+        const evalBtn = document.getElementById('eval-button');
+        const originalBtnText = evalBtn.innerHTML;
+        evalBtn.innerHTML = '<svg class="w-6 h-6 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Mengevaluasi...';
+        evalBtn.disabled = true;
 
-        // Check each question
-        Object.keys(answerKeyData).forEach(qid => {
-            const data = answerKeyData[qid];
-            if (!data.correct) return; // Skip if no correct answer is defined
-
-            let userAnswer = null;
+        // Collect answers
+        const allInputs = document.querySelectorAll('[data-qid]');
+        const userAnswers = {};
+        
+        allInputs.forEach(input => {
+            const qid = input.getAttribute('data-qid');
+            if (!qid) return;
             
-            // Try to find the input element(s) for this question
-            const inputs = document.querySelectorAll(`[data-qid="${qid}"]`);
-            if (inputs.length === 0) return; // Cannot find input
-
-            const firstInput = inputs[0];
-            let isCorrect = false;
-
-            // Extract value based on input type
-            if (firstInput.type === 'checkbox' || firstInput.type === 'radio') {
-                const checked = Array.from(inputs).filter(i => i.checked).map(i => i.value);
-                if (firstInput.type === 'radio') {
-                    userAnswer = checked.length > 0 ? checked[0] : null;
-                } else {
-                    userAnswer = checked; // Array
+            if (input.type === 'checkbox' || input.type === 'radio') {
+                if (input.checked) {
+                    if (input.type === 'radio') {
+                        userAnswers[qid] = input.value;
+                    } else {
+                        if (!userAnswers[qid]) userAnswers[qid] = [];
+                        userAnswers[qid].push(input.value);
+                    }
                 }
             } else {
-                userAnswer = firstInput.value;
-            }
-
-            // Normalize and compare
-            if (Array.isArray(data.correct)) {
-                // For multiple answers (e.g., checkboxes or alternatives)
-                if (Array.isArray(userAnswer)) {
-                    // Checkbox array match
-                    const sortedUser = [...userAnswer].sort();
-                    const sortedCorrect = [...data.correct].sort();
-                    isCorrect = JSON.stringify(sortedUser) === JSON.stringify(sortedCorrect);
-                } else {
-                    // Single answer that can be one of multiple correct options
-                    const normalizedCorrect = data.correct.map(c => c.toString().trim().toLowerCase());
-                    isCorrect = userAnswer && normalizedCorrect.includes(userAnswer.toString().trim().toLowerCase());
-                }
-            } else {
-                // String comparison
-                const ansStr = (userAnswer || '').toString().trim().toLowerCase();
-                const corrStr = (data.correct || '').toString().trim().toLowerCase();
-                isCorrect = ansStr === corrStr && ansStr !== '';
-            }
-
-            if (isCorrect) correctCount++;
-
-            // Inject Feedback into UI
-            // Find the closest wrapper to append the feedback
-            const wrapper = firstInput.closest('td') || firstInput.closest('.flex.items-center.justify-between') || firstInput.closest('.pl-10') || firstInput.closest('.mb-4') || firstInput.parentElement;
-            
-            if (wrapper) {
-                // Highlight input
-                if (isCorrect) {
-                    firstInput.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
-                    firstInput.classList.remove('border-gray-300', 'border-gray-200');
-                } else {
-                    firstInput.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-700');
-                    firstInput.classList.remove('border-gray-300', 'border-gray-200');
-                }
-
-                // Make input readonly
-                inputs.forEach(i => {
-                    i.setAttribute('disabled', 'true');
-                    i.classList.add('cursor-not-allowed', 'opacity-80');
-                });
-
-                // Create feedback box
-                const feedbackHtml = `
-                    <div class="mt-3 p-4 rounded-xl border ${isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'} shadow-sm text-left animate-fade-in">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="font-bold text-sm uppercase tracking-wide ${isCorrect ? 'text-emerald-700' : 'text-rose-700'}">
-                                ${isCorrect ? '✓ Benar' : '✕ Salah'}
-                            </span>
-                        </div>
-                        <div class="text-sm text-gray-800 mb-2">
-                            <span class="font-semibold text-gray-600">Jawaban Benar:</span> 
-                            <span class="font-bold bg-white px-2 py-0.5 rounded border border-gray-200">${Array.isArray(data.correct) ? data.correct.join(', ') : data.correct}</span>
-                        </div>
-                        ${data.explanation ? `
-                        <div class="mt-3 pt-3 border-t ${isCorrect ? 'border-emerald-200/60' : 'border-rose-200/60'}">
-                            <div class="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-1">Penjelasan:</div>
-                            <div class="text-sm text-gray-700 leading-relaxed">${data.explanation}</div>
-                        </div>
-                        ` : ''}
-                    </div>
-                `;
-                
-                // Append it safely
-                if (firstInput.closest('td')) {
-                    // For tables, append inside the cell if possible, or we might need to handle it carefully
-                    const div = document.createElement('div');
-                    div.innerHTML = feedbackHtml;
-                    wrapper.appendChild(div);
-                } else {
-                    const div = document.createElement('div');
-                    div.innerHTML = feedbackHtml;
-                    wrapper.parentNode.insertBefore(div, wrapper.nextSibling);
-                }
+                userAnswers[qid] = input.value;
             }
         });
 
-        // Update summary numbers
-        document.getElementById('eval-score').innerText = correctCount;
-        document.getElementById('eval-wrong').innerText = totalCount - correctCount;
+        try {
+            const response = await fetch("{{ route('assignments.ielts-academic.reading.practice-submit') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    material_id: "{{ $material_id ?? '' }}",
+                    answers: userAnswers
+                })
+            });
 
-        // Smooth scroll to the summary box
-        summaryBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            
+            const answerKeyData = data.answer_key;
+            
+            // Render Feedback
+            Object.keys(answerKeyData).forEach(qid => {
+                const ansData = answerKeyData[qid];
+                if (!ansData.correct) return;
+
+                let userAnswer = userAnswers[qid] || null;
+                let isCorrect = false;
+                
+                // Compare (similar to backend logic for UI rendering purposes)
+                if (Array.isArray(ansData.correct)) {
+                    if (Array.isArray(userAnswer)) {
+                        const sortedUser = [...userAnswer].sort();
+                        const sortedCorrect = [...ansData.correct].sort();
+                        isCorrect = JSON.stringify(sortedUser) === JSON.stringify(sortedCorrect);
+                    } else {
+                        const normalizedCorrect = ansData.correct.map(c => c.toString().trim().toLowerCase());
+                        isCorrect = userAnswer && normalizedCorrect.includes(userAnswer.toString().trim().toLowerCase());
+                    }
+                } else {
+                    const ansStr = (userAnswer || '').toString().trim().toLowerCase();
+                    const corrStr = (ansData.correct || '').toString().trim().toLowerCase();
+                    isCorrect = ansStr === corrStr && ansStr !== '';
+                }
+
+                // Inject Feedback into UI
+                const inputs = document.querySelectorAll(`[data-qid="${qid}"]`);
+                if (inputs.length === 0) return;
+                const firstInput = inputs[0];
+                
+                const wrapper = firstInput.closest('td') || firstInput.closest('.flex.items-center.justify-between') || firstInput.closest('.pl-10') || firstInput.closest('.mb-4') || firstInput.parentElement;
+                
+                if (wrapper) {
+                    if (isCorrect) {
+                        firstInput.classList.add('border-emerald-500', 'bg-white', 'text-emerald-700');
+                        firstInput.classList.remove('border-gray-300', 'border-gray-200');
+                    } else {
+                        firstInput.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-700');
+                        firstInput.classList.remove('border-gray-300', 'border-gray-200');
+                    }
+
+                    inputs.forEach(i => {
+                        i.setAttribute('disabled', 'true');
+                        i.classList.add('cursor-not-allowed', 'opacity-80');
+                    });
+
+                    const feedbackHtml = `
+                        <div class="mt-3 p-4 rounded-xl border ${isCorrect ? 'bg-white border-emerald-200' : 'bg-rose-50 border-rose-200'} shadow-sm text-left animate-fade-in">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="font-bold text-sm uppercase tracking-wide ${isCorrect ? 'text-emerald-700' : 'text-rose-700'}">
+                                    ${isCorrect ? '✓ Benar' : '✕ Salah'}
+                                </span>
+                            </div>
+                            <div class="text-sm text-gray-800 mb-2">
+                                <span class="font-semibold text-gray-600">Jawaban Benar:</span> 
+                                <span class="font-bold bg-white px-2 py-0.5 rounded border border-gray-200">${Array.isArray(ansData.correct) ? ansData.correct.join(', ') : ansData.correct}</span>
+                            </div>
+                            ${ansData.explanation ? `
+                            <div class="mt-3 pt-3 border-t ${isCorrect ? 'border-emerald-200/60' : 'border-rose-200/60'}">
+                                <div class="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-1">Penjelasan:</div>
+                                <div class="text-sm text-gray-700 leading-relaxed">${ansData.explanation}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    if (firstInput.closest('td')) {
+                        const div = document.createElement('div');
+                        div.innerHTML = feedbackHtml;
+                        wrapper.appendChild(div);
+                    } else {
+                        const div = document.createElement('div');
+                        div.innerHTML = feedbackHtml;
+                        wrapper.parentNode.insertBefore(div, wrapper.nextSibling);
+                    }
+                }
+            });
+
+            // Update summary numbers
+            document.getElementById('eval-score').innerText = data.correct;
+            document.getElementById('eval-wrong').innerText = data.total - data.correct;
+
+            evalBtn.classList.add('hidden');
+            const summaryBox = document.getElementById('eval-summary');
+            summaryBox.classList.remove('hidden');
+            summaryBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        } catch (error) {
+            console.error(error);
+            alert('Terjadi kesalahan saat mengevaluasi jawaban. Silakan coba lagi.');
+            evalBtn.innerHTML = originalBtnText;
+            evalBtn.disabled = false;
+        }
     }
 </script>
 

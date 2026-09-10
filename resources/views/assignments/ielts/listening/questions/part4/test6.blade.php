@@ -82,7 +82,7 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
         {{-- Header row --}}
-        <div class="grid grid-cols-3 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-3 border-b border-gray-200 bg-white">
             <div class="p-3 font-bold text-gray-700 border-r border-gray-200">Risk of leaks</div>
             <div class="p-3 font-bold text-gray-700 border-r border-gray-200">Cost</div>
             <div class="p-3 font-bold text-gray-700 flex items-center flex-wrap gap-1">
@@ -95,7 +95,7 @@
         </div>
 
         {{-- Row 1 --}}
-        <div class="grid grid-cols-3 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-3 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 border-r border-gray-200 flex items-center flex-wrap gap-1">
                 <span>Gas would become</span>
                 <strong class="text-blue-600">35</strong>
@@ -132,7 +132,7 @@
         </div>
 
         {{-- Row 2 --}}
-        <div class="grid grid-cols-3 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-3 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700 border-r border-gray-200 flex items-center flex-wrap gap-1">
                 <span>risk of widespread</span>
                 <strong class="text-blue-600">38</strong>

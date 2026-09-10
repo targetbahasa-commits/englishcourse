@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', ($meeting->title ?? 'Meeting ' . ($meeting->meeting_number ?? '')) . ' - IELTS Writing')
+
 @push('styles')
     <script src="{{ asset('js/auto-save.js') }}?v={{ time() }}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -16,22 +18,6 @@
 
 @section('content')
 <script>
-    // NUCLEAR OPTION: Global Alpine Interceptor
-    document.addEventListener('alpine:init', () => {
-        Alpine.store('safeRender', {
-            html(value) {
-                if (!value || value === 'undefined' || String(value).includes('undefined')) {
-                    console.warn('🚫 BLOCKED undefined render');
-                    return '';
-                }
-                return value;
-            }
-        });
-    });
-</script>
-
-
-<script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('ieltsWritingTask', (idioms = [], collocations = []) => ({
             isCollocationsOpen: false,
@@ -43,9 +29,23 @@
             loading: false,
             improving: false,
             essay: '',
+            draftSyncTimer: null,
             error: null,
+            lastSubmissionId: null,
             showResults: false,
-            
+            correctionFailed: false,
+            feedbackFailed: false,
+            improveFailed: false,
+            vocabLoading: false,
+            vocabError: null,
+            grammarLoading: false,
+            grammarError: null,
+            showTopicGrammar: false,
+            taskResponseLoading: false,
+            taskResponseError: null,
+            coherenceLoading: false,
+            coherenceError: null,
+
             // INITIALIZE IMMEDIATELY
             result: {
                 status: 'pending',
@@ -67,8 +67,12 @@
                 },
                 correction_html: null,
                 better_version: null,
-                vocabulary_improvements: [],
-                collocations: []
+                lexical_improvements: null,
+                topic_vocabularies: null,
+                grammar_improvements: null,
+                topic_grammar: null,
+                task_response_improvements: null,
+                coherence_improvements: null
             },
             
             get safeHtml() {
@@ -93,6 +97,16 @@
                 this.plan.extras.push('');
             },
 
+            previewEvaluasi() {
+                // Admin preview: run the SAME live AI evaluation pipeline real students use
+                // (evaluate -> feedback -> correct -> improve), instead of showing fake canned
+                // scores. Uses a sample essay only if the admin hasn't written one.
+                if (!this.essay || this.essay.trim().length < 50) {
+                    this.essay = "The line graph illustrates website traffic over time from 2010 to 2020. Overall, traffic experienced a steady upward trend over the ten-year period, with notable peaks observed in the final quarter. The numbers rose sharply between 2012 and 2015 before stabilizing towards the end of the period.";
+                }
+                this.submitEssay();
+            },
+
             removeParagraph(index) {
                 this.plan.extras.splice(index, 1);
             },
@@ -110,19 +124,30 @@
                 // Load Plan from LocalStorage
                 const planKey = 'ielts_plan_' + '{{ $meeting->id }}';
                 const savedPlan = localStorage.getItem(planKey);
+                let planRestoredLocally = false;
                 if (savedPlan) {
                     try {
                          const parsed = JSON.parse(savedPlan);
                          this.plan = { ...this.plan, ...parsed };
-                         if (!this.plan.extras) this.plan.extras = []; 
+                         if (!this.plan.extras) this.plan.extras = [];
+                         planRestoredLocally = true;
                     } catch(e) { console.error('Error loading plan', e); }
                 }
 
                 // Watch Plan for Changes
                 this.$watch('plan', (val) => {
                     localStorage.setItem(planKey, JSON.stringify(val));
+                    this.queueDraftSync();
                 });
-                
+
+                // Sync essay draft to server whenever it changes (debounced) -
+                // this is separate from AutoSave.js's own localStorage-only
+                // persistence below, and is what makes both cross-device
+                // draft restore and the admin live-preview possible.
+                this.$watch('essay', () => {
+                    this.queueDraftSync();
+                });
+
                 setTimeout(() => {
                     const textarea = document.querySelector('textarea[name="essay"]');
                     if (textarea && textarea.value) {
@@ -137,6 +162,14 @@
                             this.essay = textarea.value;
                         }
                     }
+
+                    // Only reach for the server copy if this browser's own
+                    // localStorage (via AutoSave.js above and the plan-
+                    // specific watcher) had nothing for either field - see
+                    // restoreFromServerAnswers()'s docblock.
+                    if (!this.essay || !planRestoredLocally) {
+                        this.restoreFromServerAnswers(!this.essay, !planRestoredLocally);
+                    }
                 }, 500);
 
                 this.$watch('result', (val) => {
@@ -145,14 +178,217 @@
                         this.result.correction_html = '<p>' + this.essay.replace(/\n/g, '<br>') + '</p>';
                     }
                 });
-                
-                // Initialize External AutoSave
+                          // Initialize External AutoSave
                 if (window.AutoSave) {
                     window.AutoSave.init('{{ $meeting->meeting_number }}', '{{ Auth::id() }}');
                 }
+
+                // ── Multi-Lifecycle Live Preview & Autosave Resilience ──
+                window.addEventListener('online', () => {
+                    console.log('[IELTS Writing] Network back online, flushing draft sync.');
+                    this.syncDraftToServer();
+                });
+                window.addEventListener('focus', () => {
+                    if (this.essay && this.essay.trim()) this.syncDraftToServer();
+                });
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible' && this.essay && this.essay.trim()) {
+                        this.syncDraftToServer();
+                    }
+                });
+                window.addEventListener('pageshow', () => {
+                    if (this.essay && this.essay.trim()) this.syncDraftToServer();
+                });
+                // 45s periodic background sync to keep admin live-preview fresh
+                setInterval(() => {
+                    if (this.essay && this.essay.trim()) {
+                        this.syncDraftToServer();
+                    }
+                }, 45000);
+            },
+
+            // Rebuilds essay/plan from the flat "essay"/"plan_body1"/
+            // "plan_extra_{index}" shape saveMeetingDraft() stores server-
+            // side (see buildDraftPayload() below - the exact inverse of
+            // this). Only restores whichever of essay/plan this browser's
+            // localStorage didn't already have (via AutoSave.js or the
+            // plan watcher above), so a student switching devices - or a
+            // page that was completely unrecoverable before name="essay"
+            // was added to the textarea - doesn't lose a draft that was
+            // persisted to the DB.
+            restoreFromServerAnswers(restoreEssay, restorePlan) {
+                const flat = window.__ieltsWritingServerDraft || {};
+                if (!flat || typeof flat !== 'object' || Object.keys(flat).length === 0) {
+                    return;
+                }
+
+                if (restoreEssay && flat.essay !== undefined) {
+                    this.essay = flat.essay;
+                }
+
+                if (restorePlan) {
+                    if (flat.plan_body1 !== undefined) this.plan.body1 = flat.plan_body1;
+                    if (flat.plan_body2 !== undefined) this.plan.body2 = flat.plan_body2;
+
+                    const extras = Object.keys(flat)
+                        .filter((k) => /^plan_extra_\d+$/.test(k))
+                        .map((k) => ({ index: parseInt(k.replace('plan_extra_', ''), 10), value: flat[k] }))
+                        .sort((a, b) => a.index - b.index)
+                        .map((item) => item.value);
+                    if (extras.length > 0) {
+                        this.plan.extras = extras;
+                    }
+                }
+            },
+
+            // Inverse of restoreFromServerAnswers() - flattens essay/plan
+            // into the same "essay"/"plan_body1"/"plan_extra_{index}" names
+            // the fields themselves carry (see their name/:name attributes
+            // above), so the admin live-preview's flatten()-and-match-by-
+            // name injection works with no server-side reshaping needed.
+            buildDraftPayload() {
+                const payload = {
+                    essay: this.essay,
+                    plan_body1: this.plan.body1,
+                    plan_body2: this.plan.body2,
+                };
+                (this.plan.extras || []).forEach((value, index) => {
+                    payload['plan_extra_' + index] = value;
+                });
+                return payload;
+            },
+
+            queueDraftSync() {
+                clearTimeout(this.draftSyncTimer);
+                this.draftSyncTimer = setTimeout(() => this.syncDraftToServer(), 800);
+            },
+
+            async syncDraftToServer() {
+                try {
+                    let csrfToken = document.querySelector('meta[name=csrf-token]')?.content || '';
+                    let response = await fetch('/assignments/ielts-academic/writing/meeting/{{ $meeting->id }}/draft', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: JSON.stringify({ userAnswers: this.buildDraftPayload() }),
+                        keepalive: true,
+                    });
+
+                    // Auto-recover from CSRF 419 token expiration
+                    if (response.status === 419) {
+                        try {
+                            const tokenRes = await fetch('/csrf-token');
+                            if (tokenRes.ok) {
+                                const data = await tokenRes.json();
+                                if (data.token) {
+                                    const metaTag = document.querySelector('meta[name=csrf-token]');
+                                    if (metaTag) metaTag.content = data.token;
+                                    csrfToken = data.token;
+                                    response = await fetch('/assignments/ielts-academic/writing/meeting/{{ $meeting->id }}/draft', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': csrfToken,
+                                            'X-Requested-With': 'XMLHttpRequest',
+                                        },
+                                        body: JSON.stringify({ userAnswers: this.buildDraftPayload() }),
+                                        keepalive: true,
+                                    });
+                                }
+                            }
+                        } catch (reErr) {
+                            console.error('CSRF token refresh failed:', reErr);
+                        }
+                    }
+
+                    return response.ok;
+                } catch (e) {
+                    console.error('Failed to sync draft to server:', e);
+                    return false;
+                }
+            },
+
+            /**
+             * Manual "Save" button handler - forces an immediate server
+             * sync (bypassing the 800ms debounce) and gives explicit
+             * visual confirmation once the server has actually persisted
+             * the essay/plan, rather than relying purely on the silent
+             * background debounce.
+             */
+            async manualSaveDraft() {
+                const btn = document.getElementById('manual-save-btn');
+                if (btn) {
+                    btn.dataset.originalText = btn.dataset.originalText || btn.innerHTML;
+                    btn.disabled = true;
+                    btn.innerHTML = 'Menyimpan...';
+                }
+
+                clearTimeout(this.draftSyncTimer);
+                const ok = await this.syncDraftToServer();
+
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = btn.dataset.originalText;
+                }
+
+                const indicator = document.createElement('div');
+                indicator.style.transition = 'opacity 0.3s';
+                if (ok) {
+                    indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+                    indicator.innerHTML = '✓ Tersimpan';
+                } else {
+                    indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+                    indicator.innerHTML = '✗ Gagal menyimpan, coba lagi';
+                }
+                document.body.appendChild(indicator);
+                setTimeout(() => {
+                    indicator.style.opacity = '0';
+                    setTimeout(() => indicator.remove(), 300);
+                }, 3000);
             },
             
             statusMessage: '',
+
+            scrollToAnalysis() {
+                let attempts = 0;
+                const doScroll = () => {
+                    attempts++;
+                    const leftPanel = document.getElementById('left-panel');
+                    const analysisCard = document.getElementById('detailed-text-analysis');
+                    
+                    if (!leftPanel || !analysisCard) return;
+
+                    const isVisible = analysisCard.offsetHeight > 0 || analysisCard.getClientRects().length > 0;
+                    if (!isVisible && attempts < 15) {
+                        setTimeout(doScroll, 50);
+                        return;
+                    }
+
+                    const leftPanelRect = leftPanel.getBoundingClientRect();
+                    const cardRect = analysisCard.getBoundingClientRect();
+                    
+                    let targetScrollTop = 0;
+                    if (cardRect.top > 0) {
+                        targetScrollTop = leftPanel.scrollTop + (cardRect.top - leftPanelRect.top) - 16;
+                    } else if (analysisCard.offsetTop > 0) {
+                        targetScrollTop = analysisCard.offsetTop - 16;
+                    }
+
+                    if (targetScrollTop > 0) {
+                        leftPanel.scrollTo({
+                            top: targetScrollTop,
+                            behavior: 'smooth'
+                        });
+                    }
+                };
+
+                this.$nextTick(() => {
+                    setTimeout(doScroll, 50);
+                });
+            },
 
             async submitEssay() {
                 if (this.essay.trim().length < 50) {
@@ -166,20 +402,29 @@
                 this.result.correction_html = null;
                 this.statusMessage = 'Evaluating Scores...';
                 
+                this.scrollToAnalysis();
+                
                 try {
-                    const response = await fetch('{{ route('assignments.ielts.writing.evaluate') }}', {
+                    const response = await this.fetchWithTimeout('{{ route('assignments.ielts.writing.evaluate') }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
                         },
-                        body: JSON.stringify({ essay: this.essay, task_type: '{{ $task }}' })
+                        body: JSON.stringify({ essay: this.essay, task_type: '{{ $task }}', meeting_id: '{{ $meeting->id ?? '' }}' })
                     });
                     
                     if (!response.ok) throw new Error('Evaluation failed. Server returned ' + response.status);
                     
                     let data = await response.json();
                     data = this.sanitizeRecursive(data);
+                    if (data.submission_id) this.lastSubmissionId = data.submission_id;
+                    
+                    if (data.redirect_url) {
+                        if (data.message) alert(data.message);
+                        window.location.href = data.redirect_url;
+                        return;
+                    }
                     
                     if (data.scores) {
                          this.result.scores = { ...this.result.scores, ...data.scores };
@@ -187,9 +432,15 @@
                     
                     this.showResults = true;
                     
-                    await this.getFeedback();
-                    await this.getCorrection();
-                    await this.improveEssay();
+                    await Promise.all([
+                        this.getFeedback(),
+                        this.getCorrection(),
+                        this.improveEssay()
+                    ]);
+                    
+                    if (this.lastSubmissionId) {
+                        this.persistFullFeedback();
+                    }
                     
                 } catch (e) {
                     console.error(e);
@@ -197,6 +448,27 @@
                 } finally {
                     this.statusMessage = '';
                     this.loading = false;
+                }
+            },
+
+            async persistFullFeedback() {
+                if (!this.lastSubmissionId) return;
+                try {
+                    await fetch(`/assignments/ielts-academic/writing/submission/${this.lastSubmissionId}/save-feedback`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                        },
+                        body: JSON.stringify({
+                            scores: this.result.scores,
+                            feedback: this.result.feedback,
+                            correction_html: this.result.correction_html,
+                            better_version: this.result.better_version
+                        })
+                    });
+                } catch (e) {
+                    console.warn('Persist feedback error:', e);
                 }
             },
 
@@ -226,71 +498,16 @@
                 }
             },
 
-            highlightInEssay(original) {
-                this.tab = 'analysis';
-                const highlight = () => {
-                    try {
-                        const container = document.querySelector('.detailed-analysis') || document.querySelector('.p-6.prose');
-                        if (!container) return;
-
-                        // Clear previous highlights
-                        container.querySelectorAll('.tb-highlight').forEach(el => {
-                            el.classList.remove('tb-highlight');
-                            if (el.dataset && el.dataset.replaced === '1') {
-                                const parent = el.parentNode;
-                                while (el.firstChild) parent.insertBefore(el.firstChild, el);
-                                parent.removeChild(el);
-                            }
-                        });
-
-                        const phrase = String(original).trim();
-                        if (!phrase) return;
-
-                        // Find first element whose text contains the phrase
-                        const nodes = Array.from(container.querySelectorAll('*'));
-                        const matchingElement = nodes.find(el => el.childElementCount === 0 && el.innerText && el.innerText.toLowerCase().includes(phrase.toLowerCase()));
-
-                        if (matchingElement) {
-                            const text = matchingElement.innerText;
-                            const idx = text.toLowerCase().indexOf(phrase.toLowerCase());
-                            if (idx >= 0) {
-                                const before = text.slice(0, idx);
-                                const matchText = text.slice(idx, idx + phrase.length);
-                                const after = text.slice(idx + phrase.length);
-                                matchingElement.innerHTML = `${before}<span class="tb-highlight" data-replaced="1">${matchText}</span>${after}`;
-                                const wrapper = matchingElement.querySelector('.tb-highlight');
-                                if (wrapper) wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                return;
-                            }
-                        }
-
-                        const fallback = Array.from(container.querySelectorAll('*')).find(el => el.innerText && el.innerText.toLowerCase().includes(phrase.toLowerCase()));
-                        if (fallback) {
-                            fallback.classList.add('tb-highlight');
-                            fallback.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }
-                    } catch (e) {
-                        console.error('Highlight failed', e);
-                    }
-                };
-
-                if (typeof this.$nextTick === 'function') {
-                    this.$nextTick(highlight);
-                } else {
-                    setTimeout(highlight, 50);
-                }
-            },
-
             async getFeedback() {
                 this.statusMessage = 'Generating Detailed Feedback...';
                 try {
-                    const response = await fetch('{{ route('assignments.ielts.writing.feedback') }}', {
+                    const response = await this.fetchWithTimeout('{{ route('assignments.ielts.writing.feedback') }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
                         },
-                        body: JSON.stringify({ essay: this.essay, task_type: '{{ $task }}' })
+                        body: JSON.stringify({ essay: this.essay, task_type: '{{ $task }}', meeting_id: '{{ $meeting->id ?? '' }}' })
                     });
 
                     if (response.ok) {
@@ -298,10 +515,37 @@
                         data = this.sanitizeRecursive(data);
                         if (data.feedback) {
                             this.result.feedback = { ...this.result.feedback, ...data.feedback };
+                            this.feedbackFailed = false;
+                        } else {
+                            this.feedbackFailed = true;
                         }
+                    } else {
+                        this.feedbackFailed = true;
                     }
                 } catch (e) {
                     console.error('Feedback stage failed:', e);
+                    this.feedbackFailed = true;
+                }
+            },
+
+            getBulletPoints(text) {
+                if (!text || typeof text !== 'string') return null;
+                const parts = text.split(/(?:^|\s)-\s+/).map(p => p.trim()).filter(p => p.length > 0);
+                return parts.length > 1 ? parts : null;
+            },
+
+            async fetchWithTimeout(url, options = {}, timeoutMs = 70000) {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), timeoutMs);
+                try {
+                    return await fetch(url, { ...options, signal: controller.signal });
+                } catch (e) {
+                    if (e.name === 'AbortError') {
+                        throw new Error('Request timed out. The server took too long to respond.');
+                    }
+                    throw e;
+                } finally {
+                    clearTimeout(timer);
                 }
             },
 
@@ -325,36 +569,44 @@
             async getCorrection() {
                 this.statusMessage = 'Analyzing Text for Corrections...';
                 try {
-                    const response = await fetch('{{ route('assignments.ielts.writing.correct') }}', {
+                    const response = await this.fetchWithTimeout('{{ route('assignments.ielts.writing.correct') }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
                         },
-                        body: JSON.stringify({ essay: this.essay, task_type: '{{ $task }}' })
+                        body: JSON.stringify({ essay: this.essay, task_type: '{{ $task }}', meeting_id: '{{ $meeting->id ?? '' }}' })
                     });
 
                     if (response.ok) {
                         let data = await response.json();
                         data = this.sanitizeRecursive(data);
-                        
+
                         let finalHtml = null;
                         if (data.correction_html && data.correction_html.length > 20) {
                             finalHtml = data.correction_html;
+                            this.correctionFailed = false;
+                        } else {
+                            finalHtml = '<p>' + this.essay.replace(/\n/g, '<br>') + '</p>';
+                            this.correctionFailed = true;
                         }
-                        
-                        if (!finalHtml) {
-                             finalHtml = '<p>' + this.essay.replace(/\n/g, '<br>') + '</p>';
-                        }
-                        
+
                         this.result = {
                             ...this.result,
                             ...data,
                             correction_html: finalHtml
                         };
+                        this.scrollToAnalysis();
+                    } else {
+                        this.correctionFailed = true;
+                        this.result = {
+                            ...this.result,
+                            correction_html: '<p>' + this.essay.replace(/\n/g, '<br>') + '</p>'
+                        };
                     }
                 } catch (e) {
                     console.error('Correction stage failed:', e);
+                    this.correctionFailed = true;
                      this.result = {
                          ...this.result,
                          correction_html: '<p>' + this.essay.replace(/\n/g, '<br>') + '</p>'
@@ -366,58 +618,180 @@
                 this.statusMessage = 'Creating Better Version...';
                 this.improving = true;
                 try {
-                    const response = await fetch('{{ route('assignments.ielts.writing.improve') }}', {
+                    const response = await this.fetchWithTimeout('{{ route('assignments.ielts.writing.improve') }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
                         },
-                        body: JSON.stringify({ essay: this.essay, task_type: '{{ $task }}' })
+                        body: JSON.stringify({ essay: this.essay, task_type: '{{ $task }}', meeting_id: '{{ $meeting->id ?? '' }}' })
                     });
 
                     if (response.ok) {
                         let data = await response.json();
                         data = this.sanitizeRecursive(data);
-                        
-                        if (data.better_version) this.result.better_version = data.better_version;
-                        if (data.vocabulary_improvements) this.result.vocabulary_improvements = data.vocabulary_improvements;
-                        if (data.collocations) this.result.collocations = data.collocations;
+
+                        if (data.better_version) {
+                            this.result.better_version = data.better_version;
+                            this.improveFailed = false;
+                        } else {
+                            this.improveFailed = true;
+                        }
+                    } else {
+                        this.improveFailed = true;
                     }
                 } catch (e) {
                     console.error('Improvement stage failed:', e);
+                    this.improveFailed = true;
                 } finally {
                     this.improving = false;
                 }
             },
 
-            getGrammarErrors() {
-                if (!this.result?.correction_html) return [];
-                
-                const div = document.createElement('div');
-                div.innerHTML = this.result.correction_html;
-                
-                const errors = [];
-                const spans = div.querySelectorAll('span');
-                
-                for (let i = 0; i < spans.length; i++) {
-                    const span = spans[i];
-                    if (span.classList.contains('bg-red-100') || span.classList.contains('text-red-600')) {
-                        const errorText = span.innerText;
-                        let correctionText = '';
-                        
-                        let next = span.nextSibling;
-                        if (next && next.nodeType === 3 && next.textContent.trim() === '') {
-                            next = next.nextSibling; 
+            async getVocabulary() {
+                this.vocabLoading = true;
+                this.vocabError = null;
+
+                try {
+                    const response = await this.fetchWithTimeout('{{ route('assignments.ielts.writing.vocabulary') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                        },
+                        body: JSON.stringify({ essay: this.essay, task_type: '{{ $task }}', meeting_id: '{{ $meeting->id ?? '' }}' })
+                    });
+
+                    if (response.ok) {
+                        let data = await response.json();
+                        data = this.sanitizeRecursive(data);
+                        if (data.lexical_improvements || data.topic_vocabularies) {
+                            this.result = {
+                                ...this.result,
+                                lexical_improvements: data.lexical_improvements || this.result?.lexical_improvements,
+                                topic_vocabularies: data.topic_vocabularies || this.result?.topic_vocabularies
+                            };
+                        } else {
+                            throw new Error('Vocabulary analysis failed');
                         }
-                        
-                        if (next && next.nodeType === 1 && next.tagName === 'SPAN' && (next.classList.contains('text-green-600') || next.classList.contains('font-bold'))) {
-                            correctionText = next.innerText;
-                        }
-                        
-                        errors.push({ error: errorText, correction: correctionText });
+                    } else {
+                        throw new Error('Vocabulary analysis failed');
                     }
+                } catch (e) {
+                    console.error(e);
+                    this.vocabError = 'Failed to analyze vocabulary. Please try again.';
+                } finally {
+                    this.vocabLoading = false;
                 }
-                return errors;
+            },
+
+            async getGrammar() {
+                this.grammarLoading = true;
+                this.grammarError = null;
+
+                try {
+                    const response = await this.fetchWithTimeout('{{ route('assignments.ielts.writing.grammar') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                        },
+                        body: JSON.stringify({ essay: this.essay, task_type: '{{ $task }}', meeting_id: '{{ $meeting->id ?? '' }}' })
+                    });
+
+                    if (response.ok) {
+                        let data = await response.json();
+                        data = this.sanitizeRecursive(data);
+                        if (data.grammar_improvements || data.topic_grammar) {
+                            this.result = {
+                                ...this.result,
+                                grammar_improvements: data.grammar_improvements || this.result?.grammar_improvements,
+                                topic_grammar: data.topic_grammar || this.result?.topic_grammar
+                            };
+                        } else {
+                            throw new Error('Grammar analysis failed');
+                        }
+                    } else {
+                        throw new Error('Grammar analysis failed');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    this.grammarError = 'Failed to analyze grammar. Please try again.';
+                } finally {
+                    this.grammarLoading = false;
+                }
+            },
+
+            async getTaskResponse() {
+                this.taskResponseLoading = true;
+                this.taskResponseError = null;
+
+                try {
+                    const response = await this.fetchWithTimeout('{{ route('assignments.ielts.writing.task_response') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                        },
+                        body: JSON.stringify({ essay: this.essay, task_type: '{{ $task }}', meeting_id: '{{ $meeting->id ?? '' }}' })
+                    });
+
+                    if (response.ok) {
+                        let data = await response.json();
+                        data = this.sanitizeRecursive(data);
+                        if (data.task_response_improvements) {
+                            this.result = {
+                                ...this.result,
+                                task_response_improvements: data.task_response_improvements
+                            };
+                        } else {
+                            throw new Error('Task Response analysis failed');
+                        }
+                    } else {
+                        throw new Error('Task Response analysis failed');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    this.taskResponseError = 'Failed to analyze task response. Please try again.';
+                } finally {
+                    this.taskResponseLoading = false;
+                }
+            },
+
+            async getCoherence() {
+                this.coherenceLoading = true;
+                this.coherenceError = null;
+
+                try {
+                    const response = await this.fetchWithTimeout('{{ route('assignments.ielts.writing.coherence') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                        },
+                        body: JSON.stringify({ essay: this.essay, task_type: '{{ $task }}', meeting_id: '{{ $meeting->id ?? '' }}' })
+                    });
+
+                    if (response.ok) {
+                        let data = await response.json();
+                        data = this.sanitizeRecursive(data);
+                        if (data.coherence_improvements) {
+                            this.result = {
+                                ...this.result,
+                                coherence_improvements: data.coherence_improvements
+                            };
+                        } else {
+                            throw new Error('Coherence analysis failed');
+                        }
+                    } else {
+                        throw new Error('Coherence analysis failed');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    this.coherenceError = 'Failed to analyze coherence. Please try again.';
+                } finally {
+                    this.coherenceLoading = false;
+                }
             }
         }));
     });
@@ -428,6 +802,18 @@
      @toggle-collocations.window="isCollocationsOpen = !isCollocationsOpen; if(isCollocationsOpen) isIdiomsOpen = false"
      @toggle-idioms.window="isIdiomsOpen = !isIdiomsOpen; if(isIdiomsOpen) isCollocationsOpen = false"
 >
+    {{-- Fixed bottom-center, horizontally aligned with the Whiteboard
+         toggle button (layouts.admin includes <x-live-drawing />, which
+         uses the same left: 50%; transform: translateX(-50%) centering,
+         but pinned to the top instead of the bottom). --}}
+    <div x-show="!showResults" class="fixed bottom-4 z-50" style="left: 50%; transform: translateX(-50%);">
+        <button type="button" id="manual-save-btn" @click="manualSaveDraft()"
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold shadow-lg transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3M8 7h8"></path></svg>
+            Save
+        </button>
+    </div>
+
     <!-- WRITING MODE HEADER -->
     <div x-show="!showResults" class="flex items-center justify-between mb-6 px-4 pt-4 md:px-6 lg:px-8">
         <div class="flex items-center gap-3">
@@ -440,7 +826,13 @@
             </div>
         </div>
         
-          <div class="flex gap-3">
+          <div class="flex gap-3 items-center">
+                 @if(Auth::check() && Auth::user()->isAdmin())
+                     <button type="button" @click="previewEvaluasi()" :disabled="loading" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-lg shadow-sm transition-colors flex items-center gap-2" title="Khusus Admin: Preview Hasil Evaluasi AI (menggunakan sistem evaluasi yang sama dengan submission asli)">
+                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                         <span>Preview Evaluasi</span>
+                     </button>
+                 @endif
                  <div class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-mono font-medium">
                      <span x-text="new Date(time * 1000).toISOString().substr(11, 8)">00:00:00</span>
                  </div>
@@ -461,8 +853,8 @@
         <div>
             <span class="font-bold">Evaluation Failed:</span>
             <span x-text="error"></span>
-            <p class="text-sm mt-1 text-red-600">Please ensure your local AI server (LM Studio or Ollama) is running.</p>
             <p class="text-sm mt-2 text-red-600">💡 <strong>Coba ulang jika gagal memuat</strong></p>
+            <button type="button" @click="submitEssay()" class="mt-2 text-sm font-semibold text-red-700 hover:text-red-800 bg-white border border-red-200 px-3 py-1.5 rounded-lg">Try again</button>
         </div>
         <button @click="error = null" class="ml-auto text-red-400 hover:text-red-600">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -515,13 +907,8 @@
                  } catch(e) {}
              }
          }">
-         <!-- Left Column: Question / Prompt + RESULTS -->
+        <!-- Left Column: Question / Prompt + RESULTS -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-0 min-w-0 lg:h-full overflow-hidden" :style="panelStyle('left')">
-            <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                <h2 class="font-bold text-gray-700">Question Prompt</h2>
-                <span class="text-xs font-semibold text-gray-400">Read Carefully</span>
-            </div>
-            
             <div class="p-6 pb-24 lg:pb-28 overflow-y-auto flex-1 prose max-w-none scroll-pb-24 lg:scroll-pb-28">
                 @if($task == 1)
                     <div class="not-prose space-y-5">
@@ -545,46 +932,34 @@
                         </section>
                     </div>
                 @else
-                    <h3 class="text-lg font-bold mb-4 text-gray-700">You should spend about 40 minutes on this task.</h3>
-                    
-                    <!-- Question Container -->
-                    <div class="bg-indigo-50/50 p-6 rounded-xl border border-indigo-100 mb-8 shadow-sm">
-                        <div class="prose prose-lg text-gray-800 font-medium italic">
-                            "{!! $meeting->prompt ?? 'Discuss the advantages and disadvantages...' !!}"
-                        </div>
-                    </div>
+                    <!-- Textbook Style IELTS Writing Task 2 (Cambridge IELTS Style) -->
+                    @php
+                        $promptText = trim(trim($meeting->prompt ?? 'Discuss the advantages and disadvantages...'), '"\'');
+                    @endphp
 
-                @if(!isset($meeting) || $meeting->category != 'practice_item')
-                    <!-- Divider -->
-                    <div class="flex items-center gap-4 mb-8">
-                        <div class="h-px bg-gray-200 flex-1"></div>
-                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Instructions</span>
-                        <div class="h-px bg-gray-200 flex-1"></div>
-                    </div>
-
-                    <!-- Instructions Container -->
-                    <div class="space-y-6">
-                        <div class="flex gap-4">
-                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-gray-800 mb-1">Your Task</h4>
-                                <p class="text-gray-600">Write an essay in response to the above topic. Give reasons for your answer and include any relevant examples from your own knowledge or experience.</p>
-                            </div>
+                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200 mb-6 font-sans">
+                        <!-- WRITING Header Badge -->
+                        <div class="flex justify-center mb-6">
+                            <span class="text-xl font-bold bg-black text-white px-6 py-1.5 uppercase tracking-widest shadow-xs">WRITING</span>
                         </div>
 
-                        <div class="flex gap-4 p-4 bg-yellow-50 rounded-xl border border-yellow-100">
-                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div class="space-y-4 text-gray-900 text-[15px] leading-relaxed">
+                            <h2 class="font-bold text-base tracking-wide uppercase text-gray-900 mb-1">WRITING TASK 2</h2>
+                            <p class="text-gray-700 text-sm">You should spend about 40 minutes on this task.</p>
+                            <p class="text-gray-900 text-sm">Write about the following topic:</p>
+
+                            <!-- Textbook Question Box with 2px Black Border -->
+                            <div class="border-2 border-gray-900 p-6 bg-white my-6 font-semibold italic text-gray-900 leading-relaxed shadow-2xs">
+                                {!! $promptText !!}
                             </div>
-                            <div>
-                                <h4 class="font-bold text-yellow-800 mb-1">Expert Tip</h4>
-                                <p class="text-sm text-yellow-700">Ensure you have a clear introduction, body paragraphs, and conclusion.</p>
+
+                            <!-- Standard Instructions Below Box -->
+                            <div class="space-y-2 text-gray-800 text-sm font-normal pt-2">
+                                <p>Give reasons for your answer and include any relevant examples from your own knowledge or experience.</p>
+                                <p>Write at least 250 words.</p>
                             </div>
                         </div>
                     </div>
-                @endif
                 @endif
 
 
@@ -680,19 +1055,19 @@
                     <div :class="isFloating ? 'p-4 overflow-y-auto custom-scrollbar flex-1 bg-white relative' : 'space-y-4'">
                         <div class="p-3 bg-orange-50 border border-orange-100 rounded-xl">
                             <h4 class="font-bold text-orange-800 mb-2">Body Paragraph 1</h4>
-                             <textarea x-model="plan.body1" 
+                             <textarea name="plan_body1" x-model="plan.body1"
                                        x-init="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
                                        @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
-                                       class="w-full bg-white/50 border-orange-200 rounded-lg text-sm text-orange-900 placeholder-orange-300 focus:ring-orange-500 focus:border-orange-500 p-2 min-h-[80px] overflow-hidden resize-none" 
+                                       class="w-full bg-white/50 border-orange-200 rounded-lg text-sm text-orange-900 placeholder-orange-300 focus:ring-orange-500 focus:border-orange-500 p-2 min-h-[80px] overflow-hidden resize-none"
                                        placeholder="• Topic Sentence (Main Idea 1)&#10;• Explain/Expand&#10;• Example"></textarea>
                         </div>
 
                         <div class="p-3 bg-orange-50 border border-orange-100 rounded-xl">
                             <h4 class="font-bold text-orange-800 mb-2">Body Paragraph 2</h4>
-                             <textarea x-model="plan.body2" 
+                             <textarea name="plan_body2" x-model="plan.body2"
                                        x-init="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
                                        @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
-                                       class="w-full bg-white/50 border-orange-200 rounded-lg text-sm text-orange-900 placeholder-orange-300 focus:ring-orange-500 focus:border-orange-500 p-2 min-h-[80px] overflow-hidden resize-none" 
+                                       class="w-full bg-white/50 border-orange-200 rounded-lg text-sm text-orange-900 placeholder-orange-300 focus:ring-orange-500 focus:border-orange-500 p-2 min-h-[80px] overflow-hidden resize-none"
                                        placeholder="• Topic Sentence (Main Idea 2)&#10;• Explain/Expand&#10;• Example"></textarea>
                         </div>
 
@@ -702,10 +1077,10 @@
                                 <button @click="removeParagraph(index)" class="absolute top-2 right-2 text-orange-300 hover:text-orange-600 p-1 bg-orange-50 rounded-full" title="Remove Paragraph">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                 </button>
-                                 <textarea x-model="plan.extras[index]" 
+                                 <textarea :name="'plan_extra_' + index" x-model="plan.extras[index]"
                                            x-init="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
                                            @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
-                                           class="w-full bg-white/50 border-orange-200 rounded-lg text-sm text-orange-900 placeholder-orange-300 focus:ring-orange-500 focus:border-orange-500 p-2 min-h-[80px] overflow-hidden resize-none" 
+                                           class="w-full bg-white/50 border-orange-200 rounded-lg text-sm text-orange-900 placeholder-orange-300 focus:ring-orange-500 focus:border-orange-500 p-2 min-h-[80px] overflow-hidden resize-none"
                                            placeholder="• Topic Sentence&#10;• Explain/Expand&#10;• Example"></textarea>
                             </div>
                         </template>
@@ -755,7 +1130,7 @@
                     x-init="count = countWords(essay || ''); $watch('essay', value => count = countWords(value))"
                 >Word Count: <span x-text="count">0</span></span>
             </div>
-            <textarea x-model="essay" class="flex-1 min-h-0 w-full p-6 resize-none overflow-y-auto focus:outline-none focus:bg-blue-50/30 transition-colors font-serif leading-relaxed text-gray-800 text-lg" placeholder="Start typing your answer here..."></textarea>
+            <textarea name="essay" x-model="essay" class="flex-1 min-h-0 w-full p-6 resize-none overflow-y-auto focus:outline-none focus:bg-blue-50/30 transition-colors font-serif leading-relaxed text-gray-800 text-lg" placeholder="Start typing your answer here..."></textarea>
             
             <!-- Footer -->
             <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
@@ -774,9 +1149,14 @@
                 </button>
                 <div>
                     <h2 class="text-2xl font-bold text-red-600">Your Evaluation Results</h2>
-                    <div class="flex items-center gap-2 mt-1">
+                    <div class="flex items-center gap-3 mt-1">
                         <span class="text-gray-500 text-sm">Overall Band Score:</span>
                         <span class="px-3 py-0.5 bg-red-100 text-red-700 font-bold rounded-full text-lg" x-text="result?.scores?.overall_band"></span>
+                        <template x-if="lastSubmissionId">
+                            <a :href="'/assignments/ielts-academic/writing/submission/' + lastSubmissionId" class="ml-2 inline-flex items-center gap-1 px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors" target="_blank">
+                                <span>Halaman Hasil Pengerjaan Lengkap ↗</span>
+                            </a>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -802,94 +1182,72 @@
             </div>
         </div>
 
+        <style>
+            .detailed-analysis .grammar-correction { display: none; }
+
+            /* Highlight struck-through / error tokens to make them visible in the essay */
+            .detailed-analysis s,
+            .detailed-analysis del,
+            .detailed-analysis .line-through,
+            .detailed-analysis .text-red-600,
+            .detailed-analysis .bg-red-100 {
+                background: rgba(254, 202, 202, 0.3);
+                padding: 0.12rem 0.25rem;
+                border-radius: 6px;
+                color: inherit;
+                margin: 0 0.05rem;
+                text-decoration: line-through;
+            }
+        </style>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0">
-            <!-- Left Column: Topic & Detailed Analysis -->
-            <div class="flex flex-col gap-4 min-h-0 h-full">
-                <!-- Topic Card -->
+            <!-- Left Column: Topic & Detailed Text Analysis -->
+            <div id="left-panel" class="relative flex flex-col gap-4 min-h-0 h-full overflow-y-auto custom-scrollbar">
+                <!-- Topic Card & Chart -->
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex-shrink-0">
                     <h5 class="font-bold text-gray-800 mb-2">Topic</h5>
-                    <p class="text-gray-600 text-sm leading-relaxed">{{ $meeting->prompt }}</p>
+                    <div class="text-gray-600 text-sm leading-relaxed">{!! $meeting->prompt !!}</div>
+                    @if(!empty($meeting->image))
+                        <div class="mt-4 p-2 bg-gray-50 rounded-xl border border-gray-100 flex justify-center">
+                            <img src="{{ asset('storage/' . $meeting->image) }}" class="max-h-80 object-contain rounded-lg shadow-sm" alt="Task Diagram" />
+                        </div>
+                    @elseif(class_exists('\App\Support\IeltsTask1ChartResolver') && isset($meeting))
+                        @php
+                            $chart = \App\Support\IeltsTask1ChartResolver::resolve($meeting);
+                        @endphp
+                        @if(!empty($chart['publicUrl']))
+                            <div class="mt-4 p-2 bg-gray-50 rounded-xl border border-gray-100 flex justify-center">
+                                <img src="{{ asset($chart['publicUrl']) }}" class="max-h-80 object-contain rounded-lg shadow-sm" alt="Task Diagram" />
+                            </div>
+                        @endif
+                    @endif
                 </div>
 
-                <!-- Analysis Card -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col flex-1 min-h-0">
-                    <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                        <h3 class="font-bold text-gray-700">Detailed Text Analysis</h3>
+                <!-- Detailed Text Analysis Card -->
+                <div id="detailed-text-analysis" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col flex-1 min-h-0">
+                    <div class="p-4 border-b border-gray-100 bg-indigo-50/50 flex justify-between items-center flex-shrink-0">
+                        <h3 class="font-bold text-indigo-800">Detailed Text Analysis</h3>
                         <div class="flex items-center gap-3 text-xs font-medium">
-                            <span class="bg-red-100 text-red-600 px-1 rounded">Error</span>
-                            <span class="bg-yellow-200 text-gray-800 px-2 py-0.5 rounded">Improvement</span>
+                            <span class="bg-red-100 text-red-600 px-2 py-1 rounded">Error</span>
+                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded">Improvement</span>
+                            <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded">Suggestion</span>
                         </div>
                     </div>
-                    <!-- Correction Content -->
-                    <style>
-                        .detailed-analysis .grammar-correction { display: none; }
-                    </style>
-                    <style>
-                        /* Highlight struck-through / error tokens to make them visible in the essay */
-                        .detailed-analysis s,
-                        .detailed-analysis del,
-                        .detailed-analysis .line-through,
-                        .detailed-analysis .text-red-600,
-                        .detailed-analysis .bg-red-100 {
-                            background: rgba(254, 202, 202, 0.3);
-                            padding: 0.12rem 0.25rem;
-                            border-radius: 6px;
-                            color: inherit;
-                            margin: 0 0.05rem;
-                        }
-
-                        /* Make sure removal markers remain visually crossed-out */
-                        .detailed-analysis s,
-                        .detailed-analysis del,
-                        .detailed-analysis .line-through {
-                            text-decoration: line-through;
-                        }
-                    </style>
-                    <style>
-                        /* Highlight wrapper applied when user clicks a vocab item */
-                        .tb-highlight {
-                            background: rgba(167,139,250,0.18);
-                            padding: 0.12rem 0.22rem;
-                            border-radius: 6px;
-                            box-shadow: 0 0 0 2px rgba(167,139,250,0.06) inset;
-                        }
-                    </style>
-                    <!-- Correction Content -->
-                    <style>
-                        .detailed-analysis .grammar-correction { display: none; }
-                    </style>
-                    <div class="detailed-analysis p-6 overflow-y-auto flex-1 prose max-w-none leading-loose text-lg text-gray-800 selection:bg-blue-100">
-                        
-                        <!-- DEBUG BANNER -->
-                        <div class="bg-red-600 text-white text-center font-bold p-2 mb-4 rounded">
-                            DEBUG MODE ACTIVE v{{ time() }}
-                        </div>
-
+                    <div class="detailed-analysis p-6 overflow-y-auto flex-1 prose prose-indigo max-w-none leading-loose text-lg text-gray-800 selection:bg-blue-100">
                         <!-- Loading Indicator -->
-                        <div x-show="loading" class="mb-4 text-orange-500 flex items-center gap-2 animate-pulse">
+                        <div x-show="loading" class="mb-4 text-orange-500 flex items-center gap-2 animate-pulse not-prose">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                             <span class="text-sm font-semibold">AI is analyzing your text...</span>
                         </div>
 
-                        <!-- NUCLEAR OPTION: Inline sanitization -->
-                        <div x-html="(() => {
-                            try {
-                                const html = result?.correction_html;
-                                let isBad = false;
-                                
-                                if (!html) isBad = true;
-                                if (html === 'undefined') isBad = true;
-                                if (typeof html === 'string' && html.indexOf('undefined') !== -1) isBad = true;
-                                if (html && html.length < 15) isBad = true;
+                        <!-- Graceful notice when the AI markup couldn't be generated -->
+                        <div x-show="!loading && correctionFailed" class="mb-4 bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-lg flex items-center justify-between gap-4 not-prose">
+                            <span class="text-sm">The detailed markup is taking longer than usual. Showing your original essay below.</span>
+                            <button type="button" @click="getCorrection()" class="text-sm font-semibold text-orange-600 hover:text-orange-700 whitespace-nowrap flex-shrink-0">Try again</button>
+                        </div>
 
-                                if (isBad) {
-                                    let content = essay;
-                                    if (!content || content === 'undefined') content = 'Waiting for content...';
-                                    return '<div class=\'bg-red-50 border-2 border-red-500 p-4 rounded\'><strong>FALLBACK TRIGGERED:</strong><br>' + content.replace(/\n/g, '<br>') + '</div>';
-                                }
-                                return html;
-                            } catch (e) { return 'JS ERROR'; }
-                        })()"></div>
+                        <div x-show="!loading && !result?.correction_html && !correctionFailed" class="text-gray-400 italic animate-pulse py-8 text-center not-prose">Analyzing text structure and grammar...</div>
+                        <div x-html="safeHtml"></div>
                     </div>
                 </div>
             </div>
@@ -903,11 +1261,6 @@
                     <button @click="tab = 'coherence'" :class="{ 'border-b-2 border-orange-500 text-orange-600': tab === 'coherence' }" class="px-4 py-3 font-semibold text-gray-500 hover:text-orange-500 transition-colors whitespace-nowrap flex-shrink-0">Coherence</button>
                     <button @click="tab = 'lexical'" :class="{ 'border-b-2 border-orange-500 text-orange-600': tab === 'lexical' }" class="px-4 py-3 font-semibold text-gray-500 hover:text-orange-500 transition-colors whitespace-nowrap flex-shrink-0">Lexical</button>
                     <button @click="tab = 'grammar'" :class="{ 'border-b-2 border-orange-500 text-orange-600': tab === 'grammar' }" class="px-4 py-3 font-semibold text-gray-500 hover:text-orange-500 transition-colors whitespace-nowrap flex-shrink-0">Grammar</button>
-                    <button @click="tab = 'vocab'" :class="{ 'border-b-2 border-orange-500 text-orange-600': tab === 'vocab' }" class="px-4 py-3 font-semibold text-gray-500 hover:text-orange-500 transition-colors whitespace-nowrap flex-shrink-0 flex items-center gap-2">
-                        <span>Vocabulary</span>
-                        <span x-show="improving && !result?.vocabulary_improvements" class="animate-spin h-3 w-3 border-2 border-orange-500 border-t-transparent rounded-full"></span>
-                    </button>
-                    <button @click="tab = 'analysis'" :class="{ 'border-b-2 border-orange-500 text-orange-600': tab === 'analysis' }" class="px-4 py-3 font-semibold text-gray-500 hover:text-orange-500 transition-colors whitespace-nowrap flex-shrink-0">Text Analysis</button>
                     <button @click="tab = 'better'" :class="{ 'border-b-2 border-orange-500 text-orange-600': tab === 'better' }" class="px-4 py-3 font-semibold text-gray-500 hover:text-orange-500 transition-colors whitespace-nowrap flex-shrink-0 flex items-center gap-2">
                         <span>Band 9 Version</span>
                         <span x-show="improving && !result?.better_version" class="animate-spin h-3 w-3 border-2 border-orange-500 border-t-transparent rounded-full"></span>
@@ -919,8 +1272,12 @@
                     <div x-show="tab === 'feedback'" class="space-y-4">
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                             <h5 class="font-bold text-gray-800 mb-2">General Comments</h5>
-                            <p x-show="!result?.feedback" class="text-gray-400 italic animate-pulse">Generating detailed feedback...</p>
-                            <p x-show="result?.feedback" class="text-gray-600 leading-relaxed" x-text="result?.feedback?.overall_comment"></p>
+                            <p x-show="!result?.feedback?.overall_comment && !feedbackFailed" class="text-gray-400 italic animate-pulse">Generating detailed feedback...</p>
+                            <div x-show="feedbackFailed && !result?.feedback?.overall_comment" class="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-lg flex items-center justify-between gap-4">
+                                <span class="text-sm">Detailed feedback is taking longer than usual.</span>
+                                <button type="button" @click="getFeedback()" class="text-sm font-semibold text-orange-600 hover:text-orange-700 whitespace-nowrap flex-shrink-0">Try again</button>
+                            </div>
+                            <p x-show="result?.feedback?.overall_comment" class="text-gray-600 leading-relaxed" x-text="result?.feedback?.overall_comment"></p>
                         </div>
                     </div>
 
@@ -928,8 +1285,74 @@
                     <div x-show="tab === 'task_response'" class="space-y-4">
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                             <h5 class="font-bold text-gray-800 mb-1 text-sm uppercase text-xs tracking-wider">Task Response Detailed Feedback</h5>
-                            <p x-show="!result?.feedback" class="text-gray-400 italic animate-pulse">Generating...</p>
-                            <p x-show="result?.feedback" class="text-gray-600 text-sm" x-text="result?.feedback?.task_achievement"></p>
+                            <p x-show="!result?.feedback?.task_achievement && !feedbackFailed" class="text-gray-400 italic animate-pulse">Generating...</p>
+                            <p x-show="feedbackFailed && !result?.feedback?.task_achievement" class="text-amber-700 text-sm">Couldn't generate this section. Try again from the Examiner Feedback tab.</p>
+                            <template x-if="getBulletPoints(result?.feedback?.task_achievement)">
+                                <ul class="list-disc list-inside space-y-1 text-gray-600 text-sm">
+                                    <template x-for="(point, idx) in getBulletPoints(result?.feedback?.task_achievement)" :key="idx">
+                                        <li x-text="point"></li>
+                                    </template>
+                                </ul>
+                            </template>
+                            <p x-show="result?.feedback?.task_achievement && !getBulletPoints(result?.feedback?.task_achievement)" class="text-gray-600 text-sm" x-text="result?.feedback?.task_achievement"></p>
+
+                            <div class="mt-6 pt-6 border-t border-gray-100">
+                                <!-- Action Button -->
+                                <div x-show="!taskResponseLoading" class="mb-4">
+                                    <button type="button" @click="getTaskResponse()" class="w-full py-3 bg-green-50 text-green-700 font-bold rounded-lg border border-green-100 hover:bg-green-100 transition-colors flex items-center justify-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                        <span x-text="result?.task_response_improvements ? 'Re-Analyze & Upgrade Task Response (Band 7-9)' : 'Analyze & Upgrade Task Response (Band 7-9)'"></span>
+                                    </button>
+                                </div>
+
+                                <!-- Loading State -->
+                                <div x-show="taskResponseLoading" class="py-4 text-center text-green-600 animate-pulse flex flex-col items-center">
+                                    <div class="animate-spin h-6 w-6 border-2 border-green-500 border-t-transparent rounded-full mb-2"></div>
+                                    <span class="text-sm font-semibold">Analyzing Ideas & Argumentation...</span>
+                                </div>
+
+                                <!-- Error State -->
+                                <div x-show="taskResponseError" class="py-2 text-center text-red-500 text-sm space-y-1">
+                                    <span x-text="taskResponseError"></span>
+                                    <p class="text-xs mt-2 text-red-600">💡 <strong>Coba ulang jika gagal memuat</strong></p>
+                                </div>
+
+                                <!-- Results -->
+                                <div x-show="result?.task_response_improvements?.length > 0" class="space-y-4">
+                                    <h6 class="font-bold text-green-700 text-sm flex items-center gap-2">
+                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                         Upgrade Task Response (Band 7-9)
+                                    </h6>
+                                    <div class="space-y-3">
+                                        <template x-for="(item, idx) in result?.task_response_improvements || []" :key="item.text">
+                                            <div class="bg-green-50 p-3 rounded-lg border border-green-100">
+                                                <div class="mb-2">
+                                                    <span class="text-xs font-semibold text-green-800 bg-green-200 px-2 py-0.5 rounded">IDE / MASALAH ASLI</span>
+                                                    <p class="text-gray-600 text-sm mt-1 italic" x-text="item.text"></p>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <span class="text-xs font-semibold text-green-800 bg-green-200 px-2 py-0.5 rounded">VERSI LEBIH BAIK (BAND 9)</span>
+                                                    <p class="text-green-800 font-medium text-sm mt-1" x-text="item.improved"></p>
+                                                </div>
+                                                <p class="text-green-700 text-xs mt-2 border-t border-green-200 pt-2" x-text="item.explanation"></p>
+
+                                                <!-- Step-by-step revision guide -->
+                                                <div x-show="item.steps?.length > 0" class="mt-3 pt-3 border-t border-green-200">
+                                                    <span class="text-xs font-semibold text-green-800">LANGKAH PERBAIKAN:</span>
+                                                    <ol class="mt-1 space-y-1 list-none">
+                                                        <template x-for="(step, stepIdx) in item.steps || []" :key="stepIdx">
+                                                            <li class="flex items-start gap-2 text-xs text-gray-700">
+                                                                <span class="flex-shrink-0 w-4 h-4 rounded-full bg-green-600 text-white flex items-center justify-center text-[10px] font-bold mt-0.5" x-text="stepIdx + 1"></span>
+                                                                <span x-text="step"></span>
+                                                            </li>
+                                                        </template>
+                                                    </ol>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -937,25 +1360,58 @@
                     <div x-show="tab === 'coherence'" class="space-y-4">
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                             <h5 class="font-bold text-gray-800 mb-1 text-sm uppercase text-xs tracking-wider">Coherence Detailed Feedback</h5>
-                            <p x-show="!result?.feedback" class="text-gray-400 italic animate-pulse">Generating...</p>
-                            <p x-show="result?.feedback" class="text-gray-600 text-sm" x-text="result?.feedback?.coherence_cohesion"></p>
-                        </div>
+                            <p x-show="!result?.feedback?.coherence_cohesion && !feedbackFailed" class="text-gray-400 italic animate-pulse">Generating...</p>
+                            <p x-show="feedbackFailed && !result?.feedback?.coherence_cohesion" class="text-amber-700 text-sm">Couldn't generate this section. Try again from the Examiner Feedback tab.</p>
+                            <template x-if="getBulletPoints(result?.feedback?.coherence_cohesion)">
+                                <ul class="list-disc list-inside space-y-1 text-gray-600 text-sm">
+                                    <template x-for="(point, idx) in getBulletPoints(result?.feedback?.coherence_cohesion)" :key="idx">
+                                        <li x-text="point"></li>
+                                    </template>
+                                </ul>
+                            </template>
+                            <p x-show="result?.feedback?.coherence_cohesion && !getBulletPoints(result?.feedback?.coherence_cohesion)" class="text-gray-600 text-sm" x-text="result?.feedback?.coherence_cohesion"></p>
 
-                        <!-- Coherence Improvements -->
-                        <div x-show="result?.feedback?.coherence_improvements?.length > 0">
-                             <h4 class="font-bold text-gray-800 mb-3 mt-4 text-sm uppercase tracking-wide">Saran Penggunaan Conjunctions/Linking Words</h4>
-                             <div class="space-y-3">
-                                <template x-for="(item, idx) in result?.feedback?.coherence_improvements" :key="idx">
-                                    <div class="bg-white p-3 rounded-lg border border-gray-100">
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <span class="text-red-500 line-through decoration-red-300 text-sm" x-text="item.text"></span>
-                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                                            <span class="text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded text-sm" x-text="item.improved"></span>
-                                        </div>
-                                        <p class="text-gray-500 text-xs italic" x-text="item.explanation"></p>
+                            <div class="mt-6 pt-6 border-t border-gray-100">
+                                <!-- Loading State -->
+                                <div x-show="coherenceLoading" class="py-4 text-center text-blue-600 animate-pulse flex flex-col items-center">
+                                    <div class="animate-spin h-6 w-6 border-2 border-blue-500 border-t-transparent rounded-full mb-2"></div>
+                                    <span class="text-sm font-semibold">Analyzing Coherence...</span>
+                                </div>
+
+                                <!-- Error State -->
+                                <div x-show="coherenceError" class="py-2 text-center text-red-500 text-sm space-y-1">
+                                    <span x-text="coherenceError"></span>
+                                    <p class="text-xs mt-2 text-red-600">💡 <strong>Coba ulang jika gagal memuat</strong></p>
+                                </div>
+
+                                <!-- Results -->
+                                <div x-show="result?.coherence_improvements?.length > 0" class="space-y-4 mb-4">
+                                    <h6 class="font-bold text-blue-700 text-sm flex items-center gap-2">
+                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                         Upgrade Coherence (Band 7-9)
+                                    </h6>
+                                    <div class="space-y-3">
+                                        <template x-for="item in result?.coherence_improvements || []" :key="item.text">
+                                            <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                                <div class="flex flex-wrap items-center gap-2 mb-1">
+                                                    <span class="text-gray-400 line-through text-sm" x-text="item.text"></span>
+                                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                                    <span class="text-blue-700 font-bold text-sm bg-white px-2 py-0.5 rounded shadow-sm border border-blue-100" x-text="item.improved"></span>
+                                                </div>
+                                                <p class="text-gray-600 text-xs mt-1" x-text="item.explanation"></p>
+                                            </div>
+                                        </template>
                                     </div>
-                                </template>
-                             </div>
+                                </div>
+
+                                <!-- Action Button -->
+                                <div x-show="!coherenceLoading" class="mt-4">
+                                    <button type="button" @click="getCoherence()" class="w-full py-3 bg-blue-50 text-blue-700 font-bold rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors flex items-center justify-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                                        <span>Analyze & Upgrade Coherence (Band 7-9)</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -963,8 +1419,84 @@
                     <div x-show="tab === 'lexical'" class="space-y-4">
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                             <h5 class="font-bold text-gray-800 mb-1 text-sm uppercase text-xs tracking-wider">Lexical Detailed Feedback</h5>
-                            <p x-show="!result?.feedback" class="text-gray-400 italic animate-pulse">Generating...</p>
-                            <p x-show="result?.feedback" class="text-gray-600 text-sm" x-text="result?.feedback?.lexical_resource"></p>
+                            <p x-show="!result?.feedback?.lexical_resource && !feedbackFailed" class="text-gray-400 italic animate-pulse">Generating...</p>
+                            <p x-show="feedbackFailed && !result?.feedback?.lexical_resource" class="text-amber-700 text-sm">Couldn't generate this section. Try again from the Examiner Feedback tab.</p>
+                            <template x-if="getBulletPoints(result?.feedback?.lexical_resource)">
+                                <ul class="list-disc list-inside space-y-1 text-gray-600 text-sm">
+                                    <template x-for="(point, idx) in getBulletPoints(result?.feedback?.lexical_resource)" :key="idx">
+                                        <li x-text="point"></li>
+                                    </template>
+                                </ul>
+                            </template>
+                            <p x-show="result?.feedback?.lexical_resource && !getBulletPoints(result?.feedback?.lexical_resource)" class="text-gray-600 text-sm" x-text="result?.feedback?.lexical_resource"></p>
+
+                            <div class="mt-6 pt-6 border-t border-gray-100">
+                                <!-- Loading State -->
+                                <div x-show="vocabLoading" class="py-4 text-center text-purple-600 animate-pulse flex flex-col items-center">
+                                    <div class="animate-spin h-6 w-6 border-2 border-purple-500 border-t-transparent rounded-full mb-2"></div>
+                                    <span class="text-sm font-semibold">Analyzing Vocabulary...</span>
+                                </div>
+
+                                <!-- Error State -->
+                                <div x-show="vocabError" class="py-2 text-center text-red-500 text-sm space-y-1">
+                                    <span x-text="vocabError"></span>
+                                    <p class="text-xs mt-2 text-red-600">💡 <strong>Coba ulang jika gagal memuat</strong></p>
+                                </div>
+
+                                <!-- Results -->
+                                <div x-show="result?.lexical_improvements?.length > 0" class="space-y-4 mb-4">
+                                    <h6 class="font-bold text-purple-700 text-sm flex items-center gap-2">
+                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                         Upgrade Vocabulary (Band 7-9)
+                                    </h6>
+                                    <div class="space-y-3">
+                                        <template x-for="item in result?.lexical_improvements || []" :key="item.text">
+                                            <div class="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                                                <div class="flex flex-wrap items-center gap-2 mb-1">
+                                                    <span class="text-gray-400 line-through text-sm" x-text="item.text"></span>
+                                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                                    <span class="text-purple-700 font-bold text-sm bg-white px-2 py-0.5 rounded shadow-sm border border-purple-100" x-text="item.improved"></span>
+                                                </div>
+                                                <p class="text-gray-600 text-xs mt-1" x-text="item.explanation"></p>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <div class="mt-4 pt-4 border-t border-gray-100">
+                                        <h6 class="font-bold text-purple-700 text-sm flex items-center gap-2 mb-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                            </svg>
+                                            C1 Vocabulary You Could Use (from this topic)
+                                        </h6>
+                                        <p class="text-xs text-gray-500 mb-3">Advanced (CEFR C1 / IELTS Band 7-8) words and collocations relevant to this essay's topic that would have strengthened your score.</p>
+
+                                        <div class="space-y-3">
+                                            <template x-for="vocab in result?.topic_vocabularies || []" :key="vocab.term">
+                                                <div class="bg-white p-3 rounded-lg border border-purple-100 shadow-sm">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="font-bold text-purple-800 text-sm" x-text="vocab.term"></span>
+                                                        <span class="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">C1</span>
+                                                    </div>
+                                                    <p class="text-sm text-gray-700 mt-1 font-medium" x-text="vocab.meaning"></p>
+                                                    <p class="text-xs text-gray-500 mt-1 italic">
+                                                        <span class="font-semibold text-purple-600">Ex:</span>
+                                                        <span x-text="vocab.example"></span>
+                                                    </p>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Button -->
+                                <div x-show="!vocabLoading" class="mt-4">
+                                    <button type="button" @click="getVocabulary()" class="w-full py-3 bg-purple-50 text-purple-700 font-bold rounded-lg border border-purple-100 hover:bg-purple-100 transition-colors flex items-center justify-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                                        <span>Analyze & Upgrade Vocabulary (Band 7-9)</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -972,70 +1504,110 @@
                     <div x-show="tab === 'grammar'" class="space-y-4">
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                             <h5 class="font-bold text-gray-800 mb-1 text-sm uppercase text-xs tracking-wider">Grammar Detailed Feedback</h5>
-                            <p x-show="!result?.feedback" class="text-gray-400 italic animate-pulse">Generating...</p>
-                            <p x-show="result?.feedback" class="text-gray-600 text-sm" x-text="result?.feedback?.grammatical_range"></p>
-                        </div>
+                            <p x-show="!result?.feedback?.grammatical_range && !feedbackFailed" class="text-gray-400 italic animate-pulse">Generating...</p>
+                            <p x-show="feedbackFailed && !result?.feedback?.grammatical_range" class="text-amber-700 text-sm">Couldn't generate this section. Try again from the Examiner Feedback tab.</p>
+                            <template x-if="getBulletPoints(result?.feedback?.grammatical_range)">
+                                <ul class="list-disc list-inside space-y-1 text-gray-600 text-sm">
+                                    <template x-for="(point, idx) in getBulletPoints(result?.feedback?.grammatical_range)" :key="idx">
+                                        <li x-text="point"></li>
+                                    </template>
+                                </ul>
+                            </template>
+                            <p x-show="result?.feedback?.grammatical_range && !getBulletPoints(result?.feedback?.grammatical_range)" class="text-gray-600 text-sm" x-text="result?.feedback?.grammatical_range"></p>
 
-                        <!-- Extracted Grammar List -->
-                        <div x-show="getGrammarErrors().length > 0">
-                            <h4 class="font-bold text-gray-800 mb-3 mt-4 text-sm uppercase tracking-wide">Perbaikan Grammar</h4>
-                            <div class="space-y-2">
-                                <template x-for="(item, idx) in getGrammarErrors()" :key="idx">
-                                    <div class="bg-white p-3 rounded-lg border border-gray-100 flex flex-wrap items-center gap-3">
-                                        <div class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xs font-bold" x-text="idx + 1"></span>
-                                            <span class="text-red-500 line-through decoration-red-300" x-text="item.error"></span>
-                                        </div>
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                                        <span class="text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded" x-text="item.correction || '(Remove)'"></span>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tab: Vocabulary -->
-                    <div x-show="tab === 'vocab'" class="space-y-6">
-                        <div x-show="result?.vocabulary_improvements?.length > 0">
-                            <h4 class="font-bold text-gray-800 mb-3">Suggested Improvements</h4>
-                            <div class="space-y-3">
-                                <template x-for="item in result?.vocabulary_improvements">
-                                    <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100">
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <button type="button" @click.prevent="highlightInEssay(item.original)" class="text-red-500 line-through hover:opacity-90 cursor-pointer" x-text="item.original"></button>
-                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                                            <button type="button" class="text-green-600 font-bold" @click.prevent="highlightInEssay(item.improved)" x-text="item.improved"></button>
-                                        </div>
-                                        <p class="text-sm text-gray-600" x-text="item.explanation"></p>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-
-                        <div x-show="result?.collocations?.length > 0">
-                             <h4 class="font-bold text-gray-800 mb-3 border-t border-gray-200 pt-4">Relevant Collocations</h4>
-                             <div class="flex flex-wrap gap-2">
-                                <template x-for="col in result?.collocations">
-                                    <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium" x-text="col"></span>
-                                </template>
-                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Tab: Text Analysis -->
-                    <div x-show="tab === 'analysis'" class="max-w-3xl mx-auto">
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                             <div class="p-4 border-b border-gray-100 bg-indigo-50/50 flex justify-between items-center">
-                                <h3 class="font-bold text-indigo-800">Detailed Text Analysis</h3>
-                                <div class="flex items-center gap-3 text-xs font-medium">
-                                    <span class="bg-red-100 text-red-600 px-2 py-1 rounded">Error</span>
-                                    <span class="bg-green-100 text-green-700 px-2 py-1 rounded">Improvement</span>
-                                    <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded">Suggestion</span>
+                            <div class="mt-6 pt-6 border-t border-gray-100">
+                                <!-- Loading State -->
+                                <div x-show="grammarLoading" class="py-4 text-center text-purple-600 animate-pulse flex flex-col items-center">
+                                    <div class="animate-spin h-6 w-6 border-2 border-purple-500 border-t-transparent rounded-full mb-2"></div>
+                                    <span class="text-sm font-semibold">Analyzing Sentence Structures...</span>
                                 </div>
-                            </div>
-                            <div class="p-6 prose prose-indigo max-w-none leading-loose text-lg text-gray-800">
-                                <div x-show="!result?.correction_html" class="text-gray-400 italic animate-pulse py-8 text-center">Analyzing text structure and grammar...</div>
-                                <div x-html="safeHtml"></div>
+
+                                <!-- Error State -->
+                                <div x-show="grammarError" class="py-2 text-center text-red-500 text-sm space-y-1">
+                                    <span x-text="grammarError"></span>
+                                    <p class="text-xs mt-2 text-red-600">💡 <strong>Coba ulang jika gagal memuat</strong></p>
+                                </div>
+
+                                <!-- Results -->
+                                <div x-show="result?.grammar_improvements?.length > 0" class="space-y-4 mb-4">
+                                    <!-- Grammar Errors List Section -->
+                                    <div class="bg-red-50 rounded-xl border border-red-100 p-4">
+                                        <h6 class="font-bold text-red-700 text-sm flex items-center gap-2 mb-3">
+                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                             Kesalahan Grammar yang Ditemukan
+                                        </h6>
+                                        <div class="space-y-2">
+                                            <template x-for="(item, index) in result?.grammar_improvements || []" :key="item.text">
+                                                <div class="bg-white p-3 rounded-lg border border-red-200 flex items-start gap-3 hover:shadow-sm transition-shadow">
+                                                    <div class="flex-shrink-0 mt-0.5">
+                                                        <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full" x-text="index + 1"></span>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-red-700 text-italic line-clamp-2" x-text="item.text"></p>
+                                                        <p class="text-xs text-gray-500 mt-1">⚠️ Grammar issue: <span x-text="item.explanation?.split('(')[0]?.trim() || 'Structure needs improvement'"></span></p>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Upgrade Grammar Section -->
+                                    <h6 class="font-bold text-purple-700 text-sm flex items-center gap-2 mt-6">
+                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                         Upgrade Grammar (Band 7-9)
+                                    </h6>
+                                    <div class="space-y-3">
+                                        <template x-for="item in result?.grammar_improvements || []" :key="item.text">
+                                            <div class="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                                                <div class="mb-2">
+                                                    <span class="text-xs font-semibold text-purple-800 bg-purple-200 px-2 py-0.5 rounded">KALIMAT ASLI</span>
+                                                    <p class="text-gray-600 text-sm mt-1 italic" x-text="item.text"></p>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <span class="text-xs font-semibold text-purple-800 bg-purple-200 px-2 py-0.5 rounded">VERSI LEBIH BAIK (BAND 9)</span>
+                                                    <p class="text-purple-800 font-medium text-sm mt-1" x-text="item.improved"></p>
+                                                </div>
+                                                <p class="text-purple-700 text-xs mt-2 border-t border-purple-200 pt-2" x-text="item.explanation"></p>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <!-- TOPIC GRAMMAR SECTION -->
+                                    <div class="mt-8 pt-6 border-t border-purple-100" x-show="result?.topic_grammar?.length > 0">
+                                        <button type="button" @click="showTopicGrammar = !showTopicGrammar" class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-white rounded-xl border border-purple-100 hover:shadow-md transition-all group">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                                </div>
+                                                <div class="text-left">
+                                                    <h6 class="font-bold text-gray-800">Advanced Grammar Structures</h6>
+                                                    <p class="text-xs text-purple-600 font-medium">Topic-specific grammar (Band 7-9)</p>
+                                                </div>
+                                            </div>
+                                            <svg :class="{'rotate-180': showTopicGrammar}" class="w-5 h-5 text-purple-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </button>
+
+                                        <div x-show="showTopicGrammar" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="mt-4 grid grid-cols-1 gap-3">
+                                            <template x-for="item in result?.topic_grammar || []" :key="item.type">
+                                                <div class="bg-white p-4 rounded-xl border border-purple-100 shadow-sm hover:border-purple-300 transition-colors">
+                                                    <div class="flex items-center justify-between mb-2">
+                                                        <span class="text-xs font-bold text-white bg-purple-600 px-2 py-1 rounded-md tracking-wide" x-text="item.type"></span>
+                                                    </div>
+                                                    <p class="text-gray-800 font-medium text-lg leading-relaxed mb-2 font-serif" x-text="item.example"></p>
+                                                    <p class="text-sm text-gray-500 italic border-l-2 border-purple-200 pl-3" x-text="item.explanation"></p>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Button -->
+                                <div x-show="!grammarLoading" class="mt-4">
+                                    <button type="button" @click="getGrammar()" class="w-full py-3 bg-purple-50 text-purple-700 font-bold rounded-lg border border-purple-100 hover:bg-purple-100 transition-colors flex items-center justify-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                                        <span>Analyze & Upgrade Grammar (Band 7-9)</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1045,6 +1617,10 @@
                         <div x-show="!result?.better_version && improving" class="flex flex-col items-center justify-center py-12 text-gray-400 animate-pulse">
                             <svg class="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
                             <p>Crafting Band 9 Version...</p>
+                        </div>
+                        <div x-show="!result?.better_version && !improving && improveFailed" class="flex flex-col items-center justify-center py-12 text-gray-500 not-prose">
+                            <p class="mb-3 text-sm">The Band 9 rewrite is taking longer than usual.</p>
+                            <button type="button" @click="improveEssay()" class="text-sm font-semibold text-orange-600 hover:text-orange-700 bg-orange-50 px-4 py-2 rounded-lg">Try again</button>
                         </div>
                         <div x-show="result?.better_version">
                             <div class="bg-orange-50 p-4 rounded-xl border border-orange-100 mb-4">
@@ -1269,16 +1845,45 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-@if(auth()->check() && in_array(auth()->user()->role, ['student', 'guest']))
+{{--
+    Live-sync (teacher watches the student's essay update in real time) is
+    gated on CRDT_WS_URL being explicitly configured to our OWN relay
+    server - it deliberately no longer falls back to the public Yjs demo
+    server (wss://demos.yjs.dev). That demo server was never meant for
+    real traffic: student essay content (including exam prompts) was
+    being sent to an unauthenticated third-party server with no SLA, and
+    its instability is why "CRDT: reconnecting..." showed up so often.
+    Until CRDT_WS_URL and CRDT_RELAY_SECRET both point at our own
+    infrastructure, this feature is simply off - students can still write
+    and submit normally either way, this only affects the separate
+    "teacher watches live" capability.
+--}}
+@if(auth()->check() && in_array(auth()->user()->role, ['student', 'guest']) && !empty(env('CRDT_WS_URL')) && !empty(env('CRDT_RELAY_SECRET')))
 @php
     $crdtRoomId = 'ielts-writing:' . $meeting->id . ':task:' . (int) $task . ':user:' . auth()->id();
+    // Our own relay rejects any connection whose token doesn't match this
+    // HMAC - see the relay's server.js. Without it, knowing/guessing a
+    // room name (predictable: meeting/task/user IDs) would be enough to
+    // read or write into someone else's essay in real time.
+    $crdtToken = hash_hmac('sha256', $crdtRoomId, env('CRDT_RELAY_SECRET'));
 @endphp
 <script type="module">
+    // ?deps=yjs@13.6.18 pins y-websocket's OWN internal yjs dependency to
+    // the exact same module instance imported below - without it, esm.sh
+    // resolves y-websocket's yjs separately (a different version even),
+    // producing a real SECOND Yjs instance side-by-side. Yjs's internal
+    // constructor checks silently fail to merge updates across that
+    // instance boundary, so this isn't cosmetic: without this pin, sync
+    // updates round-trip over the wire (confirmed via byte-level logging)
+    // but never actually apply to the receiving side's document - the
+    // "live sync" here would never have worked correctly.
+    // See https://github.com/yjs/yjs/issues/438
     import * as Y from 'https://esm.sh/yjs@13.6.18';
-    import { WebsocketProvider } from 'https://esm.sh/y-websocket@1.5.3';
+    import { WebsocketProvider } from 'https://esm.sh/y-websocket@1.5.3?deps=yjs@13.6.18';
 
-    const wsUrl = @json(env('CRDT_WS_URL', 'wss://demos.yjs.dev'));
+    const wsUrl = @json(env('CRDT_WS_URL'));
     const roomId = @json($crdtRoomId);
+    const crdtToken = @json($crdtToken);
 
     const statusPill = document.createElement('div');
     statusPill.id = 'crdtWriterStatus';
@@ -1309,7 +1914,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const doc = new Y.Doc();
-    const provider = new WebsocketProvider(wsUrl, roomId, doc, { connect: true });
+    const provider = new WebsocketProvider(wsUrl, roomId, doc, { connect: true, params: { token: crdtToken } });
     const yEssay = doc.getText('essay');
 
     provider.on('status', (event) => {
@@ -1328,6 +1933,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const syncTextareaFromY = () => {
         const nextValue = yEssay.toString();
         if (textarea.value === nextValue) {
+            return;
+        }
+
+        // Never stomp the user's own live typing - if this field is
+        // focused, skip the overwrite entirely rather than clobbering
+        // mid-keystroke. It'll be re-applied on the next observe tick
+        // once there's a genuinely newer remote change to reflect.
+        if (document.activeElement === textarea) {
             return;
         }
 
@@ -1354,12 +1967,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 'local-essay-input');
     };
 
-    yEssay.observe(() => {
+    // Origin-tagged: only re-apply to the textarea for changes that did
+    // NOT originate from this same client's own pushTextareaToY() call
+    // just above. Without this check, every local edit "echoes" back
+    // through Y ~40-160ms later (the combined push+apply debounce) and
+    // re-stamps the textarea with that now-stale snapshot - silently
+    // wiping out whatever the user typed in the meantime and resetting
+    // the caret to the end. That's what caused characters to drop out
+    // mid-word while typing (e.g. "with" becoming "w c").
+    yEssay.observe((event, transaction) => {
+        if (transaction.origin === 'local-essay-input') {
+            return;
+        }
         clearTimeout(applyTimer);
         applyTimer = setTimeout(syncTextareaFromY, 40);
     });
 
     textarea.addEventListener('input', () => {
+        // Also skip scheduling a push for the synthetic 'input' event
+        // syncTextareaFromY() dispatches when applying a remote change -
+        // there's nothing new to push back in that case.
+        if (applyingRemote) {
+            return;
+        }
         clearTimeout(pushTimer);
         pushTimer = setTimeout(pushTextareaToY, 120);
     });

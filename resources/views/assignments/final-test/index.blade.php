@@ -61,9 +61,9 @@
                 'emerald' => [
                     'line'   => 'bg-gradient-to-r from-emerald-400 to-emerald-500',
                     'text'   => 'text-emerald-700',
-                    'soft'   => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                    'soft'   => 'bg-white text-emerald-700 border-emerald-200',
                     'button' => 'bg-emerald-600 hover:bg-emerald-500 shadow-md hover:shadow-lg hover:-translate-y-0.5',
-                    'badge'  => 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                    'badge'  => 'bg-white text-emerald-800 border-emerald-200',
                     'ring'   => 'ring-emerald-100',
                 ],
                 'violet' => [
@@ -85,25 +85,25 @@
                 'amber' => [
                     'line'   => 'bg-gradient-to-r from-amber-400 to-amber-500',
                     'text'   => 'text-amber-700',
-                    'soft'   => 'bg-amber-50 text-amber-700 border-amber-200',
+                    'soft'   => 'bg-white text-amber-700 border-amber-200',
                     'button' => 'bg-amber-500 hover:bg-amber-400 shadow-md hover:shadow-lg hover:-translate-y-0.5',
-                    'badge'  => 'bg-amber-100 text-amber-800 border-amber-200',
+                    'badge'  => 'bg-white text-amber-800 border-amber-200',
                     'ring'   => 'ring-amber-100',
                 ],
                 'blue' => [
                     'line'   => 'bg-gradient-to-r from-blue-400 to-blue-500',
                     'text'   => 'text-blue-700',
-                    'soft'   => 'bg-blue-50 text-blue-700 border-blue-200',
+                    'soft'   => 'bg-white text-blue-700 border-blue-200',
                     'button' => 'bg-blue-600 hover:bg-blue-500 shadow-md hover:shadow-lg hover:-translate-y-0.5',
-                    'badge'  => 'bg-blue-100 text-blue-800 border-blue-200',
+                    'badge'  => 'bg-white text-blue-800 border-blue-200',
                     'ring'   => 'ring-blue-100',
                 ],
                 'slate' => [
                     'line'   => 'bg-gradient-to-r from-slate-400 to-slate-500',
                     'text'   => 'text-slate-700',
-                    'soft'   => 'bg-slate-50 text-slate-700 border-slate-200',
+                    'soft'   => 'bg-white text-slate-700 border-slate-200',
                     'button' => 'bg-slate-800 hover:bg-slate-700 shadow-md hover:shadow-lg hover:-translate-y-0.5',
-                    'badge'  => 'bg-slate-100 text-slate-800 border-slate-200',
+                    'badge'  => 'bg-white text-slate-800 border-slate-200',
                     'ring'   => 'ring-slate-100',
                 ],
             ];
@@ -142,7 +142,7 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
-                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600">
                                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
                                 </div>
                                 <div>
@@ -151,7 +151,7 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
-                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600">
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-purple-600">
                                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </div>
                                 <div>
@@ -170,7 +170,7 @@
                     @endif
 
                     @if(session('success'))
-                        <div class="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                        <div class="mt-5 rounded-lg border border-emerald-200 bg-white px-4 py-3 text-sm font-medium text-emerald-700">
                             {{ session('success') }}
                         </div>
                     @endif
@@ -223,7 +223,7 @@
                             <input type="hidden" name="return_to" value="admin.manage-final-test" />
 
                             <div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-                                <div class="flex flex-col gap-4 border-b border-gray-100 bg-gray-50/50 p-5 xl:flex-row xl:items-center xl:justify-between">
+                                <div class="flex flex-col gap-4 border-b border-gray-100 bg-white p-5 xl:flex-row xl:items-center xl:justify-between">
                                     <div class="relative w-full xl:w-96">
                                         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                             <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -271,7 +271,7 @@
                                             $accent = $accentClasses[$meta['accent']] ?? $accentClasses['slate'];
                                         @endphp
                                         <article
-                                            class="group relative bg-white p-5 transition-colors hover:bg-gray-50/50"
+                                            class="group relative bg-white p-5 transition-colors hover:bg-white"
                                             x-show="!searchQuery || '{{ strtolower(addslashes($label . ' ' . $meta['sections'] . ' ' . $meta['mode'])) }}'.includes(searchQuery.toLowerCase())"
                                         >
                                             <div class="absolute left-0 top-5 h-10 w-1.5 rounded-r-full {{ $accent['line'] }}"></div>
@@ -289,7 +289,7 @@
                                                     </div>
                                                 </div>
 
-                                                <label class="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-semibold transition {{ !empty($settings['enabled']) ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-gray-200 bg-gray-100 text-gray-500' }}">
+                                                <label class="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-semibold transition {{ !empty($settings['enabled']) ? 'border-emerald-200 bg-white text-emerald-700' : 'border-gray-200 bg-white text-gray-500' }}">
                                                     <input type="hidden" name="tests[{{ $slug }}][enabled]" value="0" />
                                                     <input type="checkbox" name="tests[{{ $slug }}][enabled]" value="1" {{ !empty($settings['enabled']) ? 'checked' : '' }} class="form-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
                                                     <span>Enabled</span>
@@ -299,16 +299,16 @@
                                             <div class="mt-5 pl-3">
                                                 <div class="mb-2 flex items-center justify-between gap-3">
                                                     <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Allowed batches</p>
-                                                    <span class="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-100">{{ $selectedPeriods->count() }} selected</span>
+                                                    <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-100">{{ $selectedPeriods->count() }} selected</span>
                                                 </div>
 
                                                 <div class="min-h-8">
                                                     @if($selectedPeriods->isEmpty())
-                                                        <div class="rounded-xl border border-dashed border-gray-200 bg-gray-50 px-3 py-2 text-sm italic text-gray-400">No active batches selected</div>
+                                                        <div class="rounded-xl border border-dashed border-gray-200 bg-white px-3 py-2 text-sm italic text-gray-400">No active batches selected</div>
                                                     @else
                                                         <div class="flex flex-wrap gap-2">
                                                             @foreach($selectedPeriods as $period)
-                                                                <span class="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-100">
+                                                                <span class="inline-flex items-center gap-2 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-100">
                                                                     {{ $period->batch_number ? 'Batch ' . $period->batch_number : 'Batch' }} — {{ Illuminate\Support\Str::limit($period->name ?? $period->id, 28) }}
                                                                 </span>
                                                             @endforeach
@@ -319,7 +319,7 @@
                                                 <details class="mt-4 rounded-xl border border-gray-100 bg-white p-3 shadow-sm">
                                                     <summary class="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-medium text-gray-600 marker:hidden">
                                                         <span>Select batches (multiple)</span>
-                                                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-gray-50 text-gray-400">
+                                                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-white text-gray-400">
                                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                                             </svg>
@@ -327,11 +327,11 @@
                                                     </summary>
                                                     <div class="mt-3 max-h-44 space-y-1 overflow-auto pr-1">
                                                         @forelse($periods as $period)
-                                                            <label class="flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2 text-sm transition hover:bg-gray-50">
+                                                            <label class="flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2 text-sm transition hover:bg-white">
                                                                 <input type="checkbox" name="tests[{{ $slug }}][class_period_ids][]" value="{{ $period->id }}" {{ in_array($period->id, $settings['class_period_ids'] ?? [], true) ? 'checked' : '' }} class="form-checkbox mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
                                                                 <span class="min-w-0 flex-1">
                                                                     <span class="flex flex-wrap items-center gap-2">
-                                                                        <span class="inline-flex items-center rounded bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-800">
+                                                                        <span class="inline-flex items-center rounded bg-white px-2 py-0.5 text-xs font-bold text-blue-800">
                                                                             {{ $period->batch_number ? 'Batch ' . $period->batch_number : 'Batch' }}
                                                                         </span>
                                                                         <span class="font-semibold text-gray-800">{{ $period->name ?? 'Class Period' }}</span>
@@ -344,7 +344,7 @@
                                                                     </span>
                                                                     <span class="mt-1 flex flex-wrap items-center gap-2 text-[11px]">
                                                                         @if($period->learning_mode)
-                                                                            <span class="rounded px-1.5 py-0.5 font-medium {{ $period->learning_mode === 'online' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
+                                                                            <span class="rounded px-1.5 py-0.5 font-medium {{ $period->learning_mode === 'online' ? 'bg-white text-blue-800' : 'bg-white text-purple-800' }}">
                                                                                 {{ ucfirst($period->learning_mode) }}
                                                                             </span>
                                                                         @endif
@@ -353,7 +353,7 @@
                                                                 </span>
                                                             </label>
                                                         @empty
-                                                            <div class="rounded-lg bg-gray-50 p-3 text-xs text-gray-400">No batches available for this program.</div>
+                                                            <div class="rounded-lg bg-white p-3 text-xs text-gray-400">No batches available for this program.</div>
                                                         @endforelse
                                                     </div>
                                                     <div class="mt-4 flex items-center justify-end border-t border-gray-100 pt-3">
@@ -378,7 +378,7 @@
                                     </svg>
                                     Save changes
                                 </button>
-                                <a href="{{ route('final-test') }}" class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gray-100 px-5 text-sm font-semibold text-gray-700 transition hover:bg-gray-200">
+                                <a href="{{ route('final-test') }}" class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-semibold text-gray-700 transition hover:bg-gray-200">
                                     Back to final test
                                 </a>
                             </div>
@@ -414,20 +414,20 @@
                                                     <p class="mt-1 text-xs font-semibold uppercase tracking-wide {{ $accent['text'] }}">{{ $meta['mode'] }}</p>
                                                 </div>
                                             </div>
-                                            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600">
+                                            <div class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600">
                                                 {{ $meta['duration'] }}
                                             </div>
                                         </div>
 
                                         <p class="mt-5 text-sm leading-6 text-slate-600">{{ $program['description'] ?? 'Final assessment untuk program Anda.' }}</p>
 
-                                        <div class="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                        <div class="mt-5 rounded-xl border border-slate-200 bg-white p-4">
                                             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Sections</p>
                                             <p class="mt-1 text-sm font-medium text-slate-800">{{ $meta['sections'] }}</p>
                                         </div>
 
                                         <div class="mt-6 flex items-center justify-between gap-3">
-                                            <span class="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
+                                            <span class="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm font-semibold text-emerald-700">
                                                 <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
                                                 Ready
                                             </span>
@@ -484,7 +484,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-500 shadow-sm">
+                                <div class="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-500 shadow-sm">
                                     <span class="flex items-center gap-1">
                                         <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                         {{ $meta['duration'] }}
@@ -501,7 +501,7 @@
 
                             <div class="mt-5 flex items-center justify-between gap-3">
                                 @if($isLocked)
-                                    <span class="inline-flex items-center gap-2 rounded-xl border border-amber-200/60 bg-amber-50/80 px-4 py-2.5 text-sm font-bold text-amber-700">
+                                    <span class="inline-flex items-center gap-2 rounded-xl border border-amber-200/60 bg-white px-4 py-2.5 text-sm font-bold text-amber-700">
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4" />
                                         </svg>
@@ -513,7 +513,7 @@
                                         </a>
                                     @endif
                                 @else
-                                    <span class="inline-flex items-center gap-2.5 rounded-xl border border-emerald-200/60 bg-emerald-50/80 px-4 py-2.5 text-sm font-bold text-emerald-700">
+                                    <span class="inline-flex items-center gap-2.5 rounded-xl border border-emerald-200/60 bg-white px-4 py-2.5 text-sm font-bold text-emerald-700">
                                         <span class="relative flex h-2.5 w-2.5">
                                           <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                                           <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
@@ -562,7 +562,7 @@
                             <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Track Selections</span>
                             <div class="h-px flex-1 bg-slate-200"></div>
                         </div>
-                        <a href="#" class="hidden lg:inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-blue-600 shadow-sm transition hover:bg-slate-50">
+                        <a href="#" class="hidden lg:inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-blue-600 shadow-sm transition hover:bg-white">
                             Lihat Semua Track
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
                         </a>
@@ -610,7 +610,7 @@
                                             <div class="mt-4 flex flex-wrap items-center gap-2">
                                                 <span class="rounded-md border {{ $group['accent']['soft'] }} px-2.5 py-1 text-xs font-bold">{{ count($group['items']) }} Level</span>
                                                 @foreach($group['items'] as $item)
-                                                    <span class="rounded-md bg-slate-50 border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600">{{ explode(' ', $item['name'])[0] }}</span>
+                                                    <span class="rounded-md bg-white border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600">{{ $item['short_name'] ?? explode(' ', $item['name'])[0] }}</span>
                                                 @endforeach
                                             </div>
                                         </div>
@@ -624,7 +624,7 @@
                                 </div>
                                 <div x-show="open" x-transition class="mt-8 border-t border-slate-100 pt-8">
                                 @if(($group['per_track_settings'] ?? false) && $groupProgramLocked)
-                                    <div class="flex flex-col gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
+                                    <div class="flex flex-col gap-3 rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
                                         <div>
                                             <p class="text-sm font-bold text-slate-900">Akses Terkunci</p>
                                             <p class="mt-1 text-sm text-slate-500">Anda tidak memiliki akses ke {{ $group['title'] }}.</p>
@@ -636,7 +636,7 @@
                                         @endif
                                     </div>
                                 @elseif(!($group['per_track_settings'] ?? false) && ($groupLocked ?? false))
-                                    <div class="flex flex-col gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
+                                    <div class="flex flex-col gap-3 rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
                                         <div>
                                             <p class="text-sm font-bold text-slate-900">Akses Terkunci</p>
                                             <p class="mt-1 text-sm text-slate-500">
@@ -650,7 +650,7 @@
                                         @endif
                                     </div>
                                 @elseif(empty($group['items']))
-                                    <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center">
+                                    <div class="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center">
                                         <p class="text-sm font-medium text-slate-500">Belum ada track {{ $group['title'] }} yang tersedia untuk batch Anda.</p>
                                     </div>
                                 @else
@@ -670,20 +670,20 @@
                                             @endphp
 
                                             @if($itemLocked)
-                                                <div class="flex items-center justify-between gap-4 rounded-xl border border-slate-100 bg-slate-50/50 px-5 py-4 transition-colors">
+                                                <div class="flex items-center justify-between gap-4 rounded-xl border border-slate-100 bg-white px-5 py-4 transition-colors">
                                                     <div class="flex min-w-0 items-center gap-4">
                                                         <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-200 text-sm font-black text-slate-400 shadow-inner">{{ $index + 1 }}</span>
                                                         <span class="truncate text-base font-bold text-slate-400">{{ $item['name'] }}</span>
                                                     </div>
-                                                    <span class="shrink-0 rounded-lg border border-amber-200/60 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700 shadow-[0_0_15px_rgba(245,158,11,0.1)]">Restricted</span>
+                                                    <span class="shrink-0 rounded-lg border border-amber-200/60 bg-white px-3 py-1.5 text-xs font-bold text-amber-700 shadow-[0_0_15px_rgba(245,158,11,0.1)]">Restricted</span>
                                                 </div>
                                             @else
-                                                <a href="{{ $item['route'] }}" class="group/item flex items-center justify-between gap-4 rounded-xl border border-slate-100 bg-slate-50/40 px-5 py-4 transition-all hover:-translate-x-px hover:border-slate-200 hover:bg-white hover:shadow-md">
+                                                <a href="{{ $item['route'] }}" class="group/item flex items-center justify-between gap-4 rounded-xl border border-slate-100 bg-white px-5 py-4 transition-all hover:-translate-x-px hover:border-slate-200 hover:bg-white hover:shadow-md">
                                                     <div class="flex min-w-0 items-center gap-4">
                                                         <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-white text-sm font-black shadow-sm transition-all group-hover/item:scale-110 {{ $group['accent']['soft'] }}">{{ $index + 1 }}</span>
                                                         <span class="truncate text-base font-bold text-slate-700 transition-colors group-hover/item:text-slate-900">{{ $item['name'] }}</span>
                                                     </div>
-                                                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-all group-hover/item:bg-slate-900 group-hover/item:text-white group-hover/item:shadow-sm">
+                                                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-slate-400 transition-all group-hover/item:bg-slate-900 group-hover/item:text-white group-hover/item:shadow-sm">
                                                         <svg class="h-4 w-4 transition-transform group-hover/item:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                                                         </svg>
@@ -711,14 +711,14 @@
                         @foreach($offlineTestResults as $result)
                         <div class="flex flex-col justify-between rounded-[1.5rem] border border-slate-100 bg-white p-6 shadow-sm hover:shadow-md transition">
                             <div class="mb-4">
-                                <div class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 mb-4">
+                                <div class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-indigo-600 mb-4">
                                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                 </div>
                                 <h3 class="text-lg font-bold text-slate-900">{{ str($result->test_type)->replace('_', ' ')->title() }}</h3>
                                 <p class="text-sm text-slate-500 mt-1">Tanggal Ujian: {{ $result->created_at->format('d M Y') }}</p>
                                 <div class="mt-3 flex items-center gap-2">
                                     <span class="text-xs font-semibold text-slate-500">Nilai:</span>
-                                    <span class="inline-flex items-center rounded-lg bg-emerald-50 px-2.5 py-1 text-sm font-bold text-emerald-700">{{ $result->score + 0 }}</span>
+                                    <span class="inline-flex items-center rounded-lg bg-white px-2.5 py-1 text-sm font-bold text-emerald-700">{{ $result->score + 0 }}</span>
                                 </div>
                             </div>
                             
@@ -729,7 +729,7 @@
                                         Download Sertifikat
                                     </a>
                                 @else
-                                    <div class="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-50 border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-400">
+                                    <div class="flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-400">
                                         Sertifikat Belum Tersedia
                                     </div>
                                 @endif
@@ -742,7 +742,7 @@
 
                 <section class="mt-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                     <div class="flex items-start gap-4 rounded-[1.25rem] bg-white p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                         </div>
                         <div>
@@ -751,7 +751,7 @@
                         </div>
                     </div>
                     <div class="flex items-start gap-4 rounded-[1.25rem] bg-white p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-600">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </div>
                         <div>
@@ -760,7 +760,7 @@
                         </div>
                     </div>
                     <div class="flex items-start gap-4 rounded-[1.25rem] bg-white p-5 border border-slate-100 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-indigo-600">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
                         </div>
                         <div>

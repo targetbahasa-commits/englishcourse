@@ -1,3 +1,14 @@
+@php
+    // Sidebar suppressed entirely during admin's "Live Student View" preview
+    // (?live_preview_for=... - see admin/students/current-assignment.blade.php).
+    // Simpler and far more robust than swapping to the "correct" role's
+    // sidebar across the 20+ pages that each independently @include this
+    // file - that approach kept regressing whenever a previewed page used
+    // a layout that hadn't also been patched with the same override.
+    if (request()->query('live_preview_for')) {
+        return;
+    }
+@endphp
 <div class="px-4 py-4">
     <div class="mb-4">
         <p class="text-xs font-semibold text-gray-400 mb-3">OVERVIEW</p>
@@ -29,13 +40,34 @@
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a5 5 0 00-10 0v2M5 9h14l1 10a2 2 0 01-2 2H6a2 2 0 01-2-2L5 9z"></path></svg>
                 <span>Payments</span>
             </a>
-            <a href="{{ route('admin.payments.queue') }}" class="flex items-center gap-2.5 px-3 py-2.5 {{ request()->routeIs('admin.payments.queue') ? 'bg-blue-50 text-blue-600 ' : 'text-gray-500 hover:bg-gray-50 ' }} rounded-xl text-base font-medium transition pl-8">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
-                <span class="text-sm">Payment Queue</span>
+            <a href="{{ route('admin.payments.queue') }}" class="flex items-center justify-between gap-2 px-3 py-2.5 {{ request()->routeIs('admin.payments.queue') ? 'bg-blue-50 text-blue-600 ' : 'text-gray-500 hover:bg-gray-50 ' }} rounded-xl text-base font-medium transition pl-8">
+                <div class="flex items-center gap-2.5">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                    <span class="text-sm">Payment Queue</span>
+                </div>
+                @php
+                    $pendingPaymentQueueCount = \App\Models\Payment::whereIn('status', ['pending', 'waiting_verification'])->count();
+                @endphp
+                @if($pendingPaymentQueueCount > 0)
+                    <span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full" title="{{ $pendingPaymentQueueCount }} pendaftaran / pembayaran pending">{{ $pendingPaymentQueueCount }}</span>
+                @endif
             </a>
-            <a href="{{ route('admin.payments.proofs') }}" class="flex items-center gap-2.5 px-3 py-2.5 {{ request()->routeIs('admin.payments.proofs') ? 'bg-blue-50 text-blue-600 ' : 'text-gray-500 hover:bg-gray-50 ' }} rounded-xl text-base font-medium transition pl-8">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                <span class="text-sm">Bukti Transfer</span>
+            <a href="{{ route('admin.payments.proofs') }}" class="flex items-center justify-between gap-2 px-3 py-2.5 {{ request()->routeIs('admin.payments.proofs') ? 'bg-blue-50 text-blue-600 ' : 'text-gray-500 hover:bg-gray-50 ' }} rounded-xl text-base font-medium transition pl-8">
+                <div class="flex items-center gap-2.5">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span class="text-sm">Bukti Transfer</span>
+                </div>
+                @php
+                    $pendingProofCount = \App\Models\Payment::whereIn('status', ['pending', 'waiting_verification'])
+                        ->where(function ($q) {
+                            $q->whereNotNull('proof_file')
+                              ->orWhereNotNull('meta->transfer_proof_path');
+                        })
+                        ->count();
+                @endphp
+                @if($pendingProofCount > 0)
+                    <span class="bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full" title="{{ $pendingProofCount }} bukti transfer perlu diverifikasi">{{ $pendingProofCount }}</span>
+                @endif
             </a>
         </nav>
     </div>

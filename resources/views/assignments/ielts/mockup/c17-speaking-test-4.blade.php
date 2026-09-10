@@ -16,7 +16,7 @@
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50" x-data="speakingMockup()" x-cloak>
+<body class="font-sans antialiased bg-white" x-data="speakingMockup()" x-cloak>
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -57,7 +57,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <span x-text="formattedGlobalTime">15:00</span>
                 </div>
-                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
                     Exit
                 </a>
             </div>
@@ -149,7 +149,7 @@
         </div>
 
         {{-- RIGHT: Recorder --}}
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar flex flex-col items-center justify-center">
+        <div class="h-full overflow-y-auto bg-white custom-scrollbar flex flex-col items-center justify-center">
             <div class="bg-white rounded-3xl shadow-sm border border-gray-200 p-8 max-w-md w-full mx-auto">
 
                 {{-- Part badge --}}
@@ -166,7 +166,7 @@
                 </div>
 
                 <!-- Visualizer -->
-                <div class="h-28 flex items-center justify-center w-full mb-8 bg-gray-50 rounded-2xl border border-gray-100">
+                <div class="h-28 flex items-center justify-center w-full mb-8 bg-white rounded-2xl border border-gray-100">
                     <template x-if="!recordings[currentPart] && !isRecording && !isPreparing && !isReadingPrompt">
                         <div class="flex flex-col items-center p-4">
                             <svg class="w-8 h-8 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -270,7 +270,7 @@
                 <div class="flex justify-between items-center pt-6 border-t border-gray-100">
                     <button @click="prevPart()"
                             :class="{'opacity-0 pointer-events-none': currentPart === 1}"
-                            class="px-6 py-2.5 rounded-xl text-gray-500 font-medium hover:bg-gray-100 transition-colors flex items-center gap-2">
+                            class="px-6 py-2.5 rounded-xl text-gray-500 font-medium hover:bg-white transition-colors flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                         Part <span x-text="currentPart - 1"></span>
                     </button>

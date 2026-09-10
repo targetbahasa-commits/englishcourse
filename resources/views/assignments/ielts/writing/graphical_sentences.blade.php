@@ -1,12 +1,14 @@
 @extends('layouts.admin')
 
+@section('title', ($meeting->title ?? 'Graphical Sentences') . ' - IELTS Writing Task ' . ($task ?? 1))
+
 @section('head')
     <script src="{{ asset('js/auto-save.js') }}?v={{ time() }}"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
 @section('content')
-<div class="w-full max-w-[1920px] mx-auto px-6 py-8 flex flex-col min-h-screen" x-data="graphicalSentences({{ $meeting->id }})">
+<div class="w-full max-w-[1920px] mx-auto px-6 py-8 flex flex-col min-h-screen" x-data="graphicalSentences({{ $meeting->id }}, {{ Js::from($savedAnswers ?? []) }})">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
@@ -118,20 +120,22 @@
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-600 mb-1">Jawaban 1 (Verb)</label>
                                         <textarea
-                                            :value="userAnswers[item.id]?.verb || ''"
-                                            @input="setAnswer(item.id, 'verb', $event.target.value); autoResize($event.target)"
+                                            :name="'answer_' + item.id + '_verb'"
+                                            x-model="userAnswers[item.id].verb"
+                                            @input="queueDraftSync(); autoResize($event.target)"
                                             x-init="$nextTick(() => autoResize($el))"
-                                            :placeholder="'Contoh: rose'"
+                                            placeholder="Contoh: rose"
                                             class="w-full min-h-[2.5rem] p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all text-sm resize-none overflow-hidden leading-relaxed"
                                         ></textarea>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-600 mb-1">Jawaban 2 (Noun)</label>
                                         <textarea
-                                            :value="userAnswers[item.id]?.noun || ''"
-                                            @input="setAnswer(item.id, 'noun', $event.target.value); autoResize($event.target)"
+                                            :name="'answer_' + item.id + '_noun'"
+                                            x-model="userAnswers[item.id].noun"
+                                            @input="queueDraftSync(); autoResize($event.target)"
                                             x-init="$nextTick(() => autoResize($el))"
-                                            :placeholder="'Contoh: a rise'"
+                                            placeholder="Contoh: a rise"
                                             class="w-full min-h-[2.5rem] p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all text-sm resize-none overflow-hidden leading-relaxed"
                                         ></textarea>
                                     </div>
@@ -145,13 +149,10 @@
                         <p class="mt-1"><strong>Example:</strong> It is predicted that the number of radio listeners will fall to 45,000 people in 2030.</p>
                     </div>
                     
-                    <div class="flex gap-3 pt-4">
-                        <button @click="submit()" :disabled="loading" class="flex-1 px-6 py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50">
+                    <div class="pt-4">
+                        <button @click="submit()" :disabled="loading" class="w-full px-6 py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50">
                             <span x-show="!loading">Submit Answers</span>
                             <span x-show="loading">Saving...</span>
-                        </button>
-                        <button @click="checkAnswers()" class="flex-1 px-6 py-3 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-700 transition-colors">
-                            Check My Answers
                         </button>
                     </div>
                 </div>
@@ -163,7 +164,7 @@
 <!-- Alpine Data for the page -->
 <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('graphicalSentences', (meetingId) => ({
+        Alpine.data('graphicalSentences', (meetingId, savedAnswers = {}) => ({
             userAnswers: {},
             loading: false,
             exercises3: [
@@ -180,18 +181,129 @@
                 { id: 'K', prompt: 'Graph K (Radio listeners)', x: 1, y: 3 },
                 { id: 'L', prompt: 'Graph L (Radio listeners)', x: 2, y: 3 },
             ],
+            draftSyncTimer: null,
+
+            get storageKey() {
+                return 'graphical_sentences_autosave_v3_' + meetingId;
+            },
+
+            saveData() {
+                const key = this.storageKey;
+                const payload = {
+                    userAnswers: this.userAnswers,
+                    timestamp: Date.now()
+                };
+                try {
+                    localStorage.setItem(key, JSON.stringify(payload));
+                } catch(e) {
+                    console.error('[AutoSave] LocalStorage save error:', e);
+                }
+                this.queueDraftSync();
+            },
+
+            loadData() {
+                // 1. Seed from server-side savedAnswers if passed
+                if (savedAnswers && typeof savedAnswers === 'object' && Object.keys(savedAnswers).length > 0) {
+                    this.userAnswers = JSON.parse(JSON.stringify(savedAnswers));
+                }
+
+                // 2. Overlay from localStorage if saved locally
+                const key = this.storageKey;
+                const stored = localStorage.getItem(key);
+                if (stored) {
+                    try {
+                        const data = JSON.parse(stored);
+                        const answersObj = data.userAnswers || data;
+                        if (answersObj && typeof answersObj === 'object') {
+                            Object.keys(answersObj).forEach(id => {
+                                const item = answersObj[id];
+                                if (item && (item.verb || item.noun)) {
+                                    this.userAnswers[id] = {
+                                        verb: item.verb || '',
+                                        noun: item.noun || ''
+                                    };
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        console.error('[AutoSave] LocalStorage load error:', e);
+                    }
+                }
+
+                // 3. Ensure structure exists for all items A..L
+                this.exercises3.forEach(item => {
+                    if (!this.userAnswers[item.id]) {
+                        this.userAnswers[item.id] = { verb: '', noun: '' };
+                    } else {
+                        if (typeof this.userAnswers[item.id].verb === 'undefined') this.userAnswers[item.id].verb = '';
+                        if (typeof this.userAnswers[item.id].noun === 'undefined') this.userAnswers[item.id].noun = '';
+                    }
+                });
+            },
+
             setAnswer(id, type, value) {
                 if (!this.userAnswers[id]) {
                     this.userAnswers[id] = { verb: '', noun: '' };
                 }
                 this.userAnswers[id][type] = value;
+                this.saveData();
             },
+
+            queueDraftSync() {
+                if (window.showAutosaveIndicator) {
+                    window.showAutosaveIndicator('Menyimpan draft...', 'saving');
+                }
+                clearTimeout(this.draftSyncTimer);
+                this.draftSyncTimer = setTimeout(() => this.syncDraftToServer(), 800);
+            },
+
+            async syncDraftToServer() {
+                try {
+                    await fetch('/assignments/ielts-academic/writing/meeting/' + meetingId + '/draft', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: JSON.stringify({ userAnswers: this.userAnswers }),
+                        keepalive: true,
+                    });
+                    if (window.showAutosaveIndicator) {
+                        window.showAutosaveIndicator();
+                    }
+                } catch (e) {
+                    console.error('Failed to sync draft to server:', e);
+                    if (window.showAutosaveIndicator) {
+                        window.showAutosaveIndicator('Gagal menyimpan draft', 'error');
+                    }
+                }
+            },
+
             autoResize(el) {
                 if (!el) return;
                 el.style.height = 'auto';
                 el.style.height = `${el.scrollHeight}px`;
             },
+
             init() {
+                // Load saved data FIRST before registering watchers (matches promo/show.blade.php)
+                this.loadData();
+
+                // Register watchers in $nextTick so initial data load does not trigger save
+                this.$nextTick(() => {
+                    this.$watch('userAnswers', () => {
+                        this.saveData();
+                    }, { deep: true });
+                });
+
+                // Handle BFCache (back button restoration)
+                window.addEventListener('pageshow', (event) => {
+                    if (event.persisted) {
+                        this.loadData();
+                    }
+                });
+
                 if (window.AutoSave) {
                     window.AutoSave.init(meetingId, '{{ Auth::id() }}');
                 }
@@ -200,19 +312,42 @@
                     document.querySelectorAll('textarea').forEach(el => this.autoResize(el));
                 }, 300);
             },
-            submit() {
+            async submit() {
                 this.loading = true;
-                const key = 'graphical_sentences_autosave_' + meetingId;
-                localStorage.setItem(key, JSON.stringify(this.userAnswers));
-                
-                setTimeout(() => {
+                this.saveData();
+
+                const formattedEssay = Object.entries(this.userAnswers)
+                    .map(([id, ans]) => `Graph ${id}: Verb: ${ans.verb || '-'}, Noun: ${ans.noun || '-'}`)
+                    .join("\n");
+
+                try {
+                    const response = await fetch('/assignments/ielts-academic/writing/evaluate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                        },
+                        body: JSON.stringify({ essay: formattedEssay || 'No answers provided', task_type: '1', meeting_id: meetingId })
+                    });
+                    const data = await response.json();
                     this.loading = false;
-                    alert('Your answers have been saved!');
-                }, 1000);
+                    if (data.redirect_url) {
+                        if (data.message) alert(data.message);
+                        window.location.href = data.redirect_url;
+                        return;
+                    }
+                    if (data.submission_id) {
+                        if (confirm('Jawaban berhasil dikirim! Apakah Anda ingin melihat halaman hasil pengerjaan lengkap?')) {
+                            window.open('/assignments/ielts-academic/writing/submission/' + data.submission_id, '_blank');
+                        }
+                    } else {
+                        alert('Jawaban berhasil disimpan!');
+                    }
+                } catch (e) {
+                    this.loading = false;
+                    alert('Jawaban berhasil disimpan secara lokal!');
+                }
             },
-            checkAnswers() {
-                alert('Your answers have been recorded. Continue practicing to improve your sentence structure!');
-            }
         }))
     })
 </script>

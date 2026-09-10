@@ -181,7 +181,7 @@
 
                     <!-- Remember Me -->
                     <div class="flex items-center">
-                        <input id="remember_me" type="checkbox" name="remember" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer transition-all">
+                        <input id="remember_me" type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer transition-all">
                         <label for="remember_me" class="ml-2 text-sm font-medium text-gray-600 cursor-pointer select-none">Remember me for 30 days</label>
                     </div>
 
@@ -231,6 +231,21 @@
                     }
                 });
             }
+        });
+
+        // Auto-refresh CSRF token on back-forward cache or stale session tab
+        window.addEventListener('pageshow', async function(event) {
+            try {
+                const res = await fetch('/csrf-token', { headers: { 'Accept': 'application/json' } });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.token) {
+                        document.querySelectorAll('input[name="_token"]').forEach(input => input.value = data.token);
+                        const meta = document.querySelector('meta[name="csrf-token"]');
+                        if (meta) meta.content = data.token;
+                    }
+                }
+            } catch(e) {}
         });
     </script>
 </body>

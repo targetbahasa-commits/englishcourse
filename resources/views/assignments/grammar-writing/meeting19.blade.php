@@ -18,26 +18,7 @@
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
     <div class="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-        <div class="flex justify-between items-center mb-8">
-            <a href="{{ route('assignments.grammar-writing') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
-    <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-    </svg>
-    Back
-</a>
-            
-            @if(Auth::guard('web')->check() && Auth::guard('web')->user()->isAdmin())
-                <form method="POST" action="{{ route('assignments.grammar-writing.meeting19.reset') }}">
-                    @csrf
-                    <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-bold flex items-center gap-2 shadow-sm" onclick="return confirm('Reset semua progress (Session only)?')">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Reset (Admin)
-                    </button>
-                </form>
-            @endif
-        </div>
+        <x-grammar-meeting-actions :meetingNumber="19" track="fast-track" />
 
         <h1 class="text-3xl font-bold text-center text-purple-600 mb-8">Adverbs (Pertemuan 19)</h1>
         
@@ -48,7 +29,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('assignments.grammar-writing.meeting19.submit') }}">
+        <form method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting19.submit'), PHP_URL_PATH) }}" id="meetingAnswerForm">
             @csrf
             
             <!-- Individual Questions -->
@@ -310,7 +291,7 @@
         </form>
         
         @if($submitted)
-            <form method="POST" action="{{ route('assignments.grammar-writing.meeting19.reset') }}" class="mt-4">
+            <form method="POST" action="{{ parse_url(route('assignments.grammar-writing.meeting19.reset'), PHP_URL_PATH) }}" class="mt-4">
                 @csrf
                 <button type="submit" class="w-full py-4 bg-gray-500 text-white rounded-xl font-bold text-lg hover:bg-gray-600 transition-colors shadow-lg">
                     Coba Lagi
@@ -331,7 +312,7 @@
                     <h3 class="text-xl font-bold">Tambah Soal Baru</h3>
                     <button @click="open = false" class="text-gray-500 hover:text-gray-700">&times;</button>
                 </div>
-                <form action="{{ route('admin.grammar.question.store') }}" method="POST" class="p-6 space-y-4">
+                <form action="{{ parse_url(route('admin.grammar.question.store'), PHP_URL_PATH) }}" method="POST" class="p-6 space-y-4">
                     @csrf
                     <input type="hidden" name="meeting_number" value="19">
                     
@@ -384,7 +365,7 @@
                     <h3 class="text-xl font-bold">Edit Soal <span x-text="data.question_number"></span></h3>
                     <button @click="open = false" class="text-gray-500 hover:text-gray-700">&times;</button>
                 </div>
-                <form :action="'/admin/grammar/question/' + data.db_id" method="POST" class="p-6 space-y-4">
+                <form :action="'/admin/assignments/grammar-writing/questions/' + data.db_id" method="POST" class="p-6 space-y-4">
                     @csrf
                     @method('PUT')
                     
@@ -432,7 +413,7 @@
                     <h3 class="text-xl font-bold">Tambah Paragraf</h3>
                     <button @click="open = false" class="text-gray-500 hover:text-gray-700">&times;</button>
                 </div>
-                <form action="{{ route('admin.grammar.question.store') }}" method="POST" class="p-6 space-y-4">
+                <form action="{{ parse_url(route('admin.grammar.question.store'), PHP_URL_PATH) }}" method="POST" class="p-6 space-y-4">
                     @csrf
                     <input type="hidden" name="meeting_number" value="19">
                     <input type="hidden" name="section" value="paragraph">
@@ -474,7 +455,7 @@
                     <h3 class="text-xl font-bold">Edit Paragraf</h3>
                     <button @click="open = false" class="text-gray-500 hover:text-gray-700">&times;</button>
                 </div>
-                <form :action="'/admin/grammar/question/' + db_id" method="POST" class="p-6 space-y-4">
+                <form :action="'/admin/assignments/grammar-writing/questions/' + db_id" method="POST" class="p-6 space-y-4">
                     @csrf
                     @method('PUT')
                     
@@ -555,7 +536,7 @@
             // Create form and submit
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = `/admin/grammar/question/${id}`;
+            form.action = `/admin/assignments/grammar-writing/questions/${id}`;
             
             const csrfInput = document.createElement('input');
             csrfInput.type = 'hidden';
@@ -574,10 +555,325 @@
         };
     </script>
     @endif
-    
-    <x-irregular-verbs-button />
 
+    <!-- INLINE AUTO-SAVE SCRIPT -->
+    <script>
+    const AutoSave = {
+        debounceTimer: null,
+        debounceDelay: 500,
+        userId: null,
+        draftSyncTimer: null,
+
+        init(meetingNumber, userId = null) {
+            this.meetingNumber = meetingNumber;
+            this.userId = userId || window.userId || 'guest';
+            this.storageKey = `grammar_writing_meeting${meetingNumber}_user_${this.userId}`;
+
+            this.isSubmitted = this.checkIfSubmitted();
+
+            if (this.isSubmitted) {
+                this.clearSaved();
+                return;
+            }
+
+            this.restoreAnswers();
+            this.setupAutoSave();
+        },
+
+        checkIfSubmitted() {
+            const isReadonly = document.querySelector('#meetingAnswerForm input[type="text"][readonly]');
+            return !!isReadonly;
+        },
+
+        setupAutoSave() {
+            const form = document.getElementById('meetingAnswerForm');
+            if (!form) {
+                return;
+            }
+
+            const inputs = form.querySelectorAll('input[type="text"], textarea');
+
+            inputs.forEach(input => {
+                if (input.readOnly || input.disabled) {
+                    return;
+                }
+
+                input.addEventListener('input', () => {
+                    this.saveAnswers();
+                });
+
+                input.addEventListener('blur', () => {
+                    this.saveAnswers();
+                });
+
+                input.addEventListener('keyup', () => {
+                    this.saveAnswers();
+                });
+            });
+        },
+
+        saveAnswers() {
+            if (this.isSubmitted) {
+                return;
+            }
+
+            const form = document.getElementById('meetingAnswerForm');
+            if (!form) {
+                return;
+            }
+
+            const inputs = form.querySelectorAll('input[type="text"], textarea');
+            const answers = {};
+
+            inputs.forEach(input => {
+                if (input.name && input.value) {
+                    answers[input.name] = input.value;
+                }
+            });
+
+            try {
+                localStorage.setItem(this.storageKey, JSON.stringify(answers));
+                this.showSaveIndicator();
+                this.queueDraftSync(form);
+            } catch (e) {
+                console.error('Failed to save to localStorage:', e);
+            }
+        },
+
+        queueDraftSync(form) {
+            clearTimeout(this.draftSyncTimer);
+            this.draftSyncTimer = setTimeout(() => {
+                this.syncDraftToServer(form);
+            }, this.debounceDelay);
+        },
+
+        async syncDraftToServer(form) {
+            if (!form) {
+                return false;
+            }
+
+            const action = form.getAttribute('action') || '';
+            const match = action.match(/\/assignments\/grammar-writing\/fast-track\/meeting(\d+)/);
+            if (!match) {
+                return false;
+            }
+
+            const meetingNumber = match[1];
+            const draftEndpoint = '/assignments/grammar-writing/fast-track/meeting' + meetingNumber + '/draft';
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+            const payload = {};
+            const assignNestedValue = (obj, key, value) => {
+                const parts = String(key).replace(/\]/g, '').split('[');
+                let ref = obj;
+
+                for (let i = 0; i < parts.length; i++) {
+                    const part = parts[i];
+                    const isLast = i === parts.length - 1;
+
+                    if (isLast) {
+                        ref[part] = value;
+                        return;
+                    }
+
+                    if (typeof ref[part] !== 'object' || ref[part] === null) {
+                        ref[part] = {};
+                    }
+
+                    ref = ref[part];
+                }
+            };
+
+            new FormData(form).forEach((value, key) => {
+                if (key === '_token') {
+                    return;
+                }
+
+                assignNestedValue(payload, key, value);
+            });
+
+            try {
+                await fetch(draftEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify(payload),
+                    keepalive: true,
+                });
+                return true;
+            } catch (e) {
+                console.error('Failed to sync draft to server:', e);
+                return false;
+            }
+        },
+
+        restoreAnswers() {
+            try {
+                const savedData = localStorage.getItem(this.storageKey);
+
+                if (!savedData) {
+                    return;
+                }
+
+                const answers = JSON.parse(savedData);
+                let restoredCount = 0;
+
+                Object.keys(answers).forEach(name => {
+                    const input = document.querySelector(`input[name="${name}"], textarea[name="${name}"]`);
+
+                    if (input && !input.value && !input.readOnly) {
+                        input.value = answers[name];
+                        restoredCount++;
+                    }
+                });
+
+                if (restoredCount > 0) {
+                    this.showRestoreIndicator(restoredCount);
+                }
+            } catch (e) {
+                console.error('Failed to restore from localStorage:', e);
+            }
+        },
+
+        showRestoreIndicator(count) {
+            const indicator = document.createElement('div');
+            indicator.className = 'fixed top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+            indicator.innerHTML = `✓ ${count} jawaban dipulihkan`;
+            document.body.appendChild(indicator);
+
+            setTimeout(() => {
+                indicator.style.opacity = '0';
+                indicator.style.transition = 'opacity 0.3s';
+                setTimeout(() => indicator.remove(), 300);
+            }, 3000);
+        },
+
+        showSaveIndicator() {
+            let indicator = document.getElementById('auto-save-indicator');
+
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'auto-save-indicator';
+                indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+                indicator.style.transition = 'opacity 0.3s';
+                indicator.innerHTML = '✓ Tersimpan otomatis';
+                document.body.appendChild(indicator);
+            }
+
+            indicator.style.opacity = '1';
+            indicator.style.backgroundColor = '#10b981';
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            indicator.innerHTML = `✓ Tersimpan ${timeStr}`;
+
+            clearTimeout(this.saveIndicatorTimeout);
+            this.saveIndicatorTimeout = setTimeout(() => {
+                indicator.style.opacity = '0.7';
+            }, 3000);
+        },
+
+        clearSaved() {
+            try {
+                localStorage.removeItem(this.storageKey);
+            } catch (e) {
+                console.error('Failed to clear localStorage:', e);
+            }
+        }
+    };
+
+    window.AutoSave = AutoSave;
+    AutoSave.showSaveErrorIndicator = function () {
+        const indicator = document.createElement('div');
+        indicator.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm font-medium';
+        indicator.style.transition = 'opacity 0.3s';
+        indicator.innerHTML = '✗ Gagal menyimpan, coba lagi';
+        document.body.appendChild(indicator);
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+            setTimeout(() => indicator.remove(), 300);
+        }, 3000);
+    };
+
+    AutoSave.manualSave = async function () {
+        const form = document.getElementById('meetingAnswerForm');
+        if (!form) {
+            return;
+        }
+
+        const btn = document.getElementById('manual-save-btn');
+        if (btn) {
+            btn.dataset.originalText = btn.dataset.originalText || btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Menyimpan...';
+        }
+
+        try {
+            const inputs = form.querySelectorAll('input[type="text"], textarea');
+            const answers = {};
+            inputs.forEach((input) => {
+                if (input.name && input.value) {
+                    answers[input.name] = input.value;
+                }
+            });
+            localStorage.setItem(this.storageKey, JSON.stringify(answers));
+        } catch (e) {
+            console.error('[ManualSave] Failed to update localStorage:', e);
+        }
+
+        const ok = await this.syncDraftToServer(form);
+
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.originalText;
+        }
+
+        if (ok) {
+            this.showSaveIndicator();
+        } else {
+            this.showSaveErrorIndicator();
+        }
+    };
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const userId = {{ Auth::id() ?? 'null' }};
+        if (userId && !window.location.search.includes('live_preview_for')) {
+            AutoSave.init('19', userId);
+        }
+    });
+    </script>
 
     <x-live-drawing />
+
+    {{-- Consolidated Floating Helper Buttons (hidden during admin Live
+         Preview - these are student-only interactive tools, not relevant
+         to the admin's read-only observation view) --}}
+    @if(!request()->filled('live_preview_for'))
+    <div class="fixed bottom-4 right-8 z-50 flex flex-col gap-2 items-end">
+        <x-dictionary-button />
+        <x-conjunction-button />
+        <x-preposition-button />
+        <x-pronouns-button />
+        <x-verb-patterns-button />
+        <x-modal-button />
+        <x-tenses-button />
+        <x-irregular-verbs-button />
+    </div>
+    @endif
+
+    @if(!$submitted)
+        <div class="fixed bottom-4 z-50" style="left: 50%; transform: translateX(-50%);">
+            <button type="button" id="manual-save-btn" onclick="AutoSave.manualSave()"
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold shadow-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3M8 7h8"></path></svg>
+                Save
+            </button>
+        </div>
+    @endif
+
 </body>
 </html>

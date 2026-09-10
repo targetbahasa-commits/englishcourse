@@ -2,52 +2,97 @@
 
 namespace App\Application\GrammarWriting;
 
-use App\Application\GrammarWriting\Concerns\ScoresWordMatchAnswers;
-
 class EvaluateGrammarWritingMeeting4Submission
 {
-    use ScoresWordMatchAnswers;
+    public function handle(
+        array $input,
+        array $translationSentences,
+        array $matrixIntroSentences,
+        array $translationMatrix,
+    ): array {
+        // Part 1: PR sentences
+        $transResults = ['sentences' => [], 'matrixIntro' => [], 'matrix' => []];
+        $part1Score = 0;
+        $totalItemsPart1 = 0;
 
-    public function handle(array $questions, string $paragraphAnswer, array $userAnswers, string $correctParagraph): array
-    {
-        $results = [];
-        $totalScore = 0;
-        $maxScore = (count($questions) * 10) + 20;
+        foreach ($translationSentences as $index => $item) {
+            $userAnswer = trim((string) ($input['trans_sent'][$index] ?? ''));
+            $correctAnswer = (string) ($item['en'] ?? '');
 
-        foreach ($questions as $index => $question) {
-            $userTranslation = trim((string) ($userAnswers[$index]['trans'] ?? ''));
-            $translationResult = $this->scoreWordMatchAnswer($userTranslation, (string) $question['en'], 10);
+            $isCorrect = strtolower(rtrim($userAnswer, '.!')) === strtolower(rtrim($correctAnswer, '.!')) && $userAnswer !== '';
+            if ($isCorrect) {
+                $part1Score++;
+            }
+            $totalItemsPart1++;
 
-            $results[$index] = [
-                'user_trans' => $userTranslation,
-                'trans_score' => $translationResult['score'],
-                'formatted_answer' => $translationResult['formatted_answer'],
+            $transResults['sentences'][$index] = [
+                'user_answer' => $userAnswer,
+                'correct_answer' => $correctAnswer,
+                'is_correct' => $isCorrect,
             ];
-
-            $totalScore += $translationResult['score'];
         }
 
-        $paragraphResult = $this->evaluateParagraph($paragraphAnswer, $correctParagraph);
-        $totalScore += $paragraphResult['score'];
+        $finalScorePart1 = $totalItemsPart1 > 0 ? round(($part1Score / $totalItemsPart1) * 50) : 0;
+
+        // Part 2: matrix intro sentences (Simple Present/Past Verbal, asked as standalone sentences)
+        // + tenses x structure matrix (remaining cells)
+        $part2Score = 0;
+        $totalItemsPart2 = 0;
+
+        foreach ($matrixIntroSentences as $index => $item) {
+            $userAnswer = trim((string) ($input['trans_matrix_intro'][$index] ?? ''));
+            $correctAnswer = (string) ($item['en'] ?? '');
+
+            $isCorrect = strtolower(rtrim($userAnswer, '.!')) === strtolower(rtrim($correctAnswer, '.!')) && $userAnswer !== '';
+            if ($isCorrect) {
+                $part2Score++;
+            }
+            $totalItemsPart2++;
+
+            $transResults['matrixIntro'][$index] = [
+                'user_answer' => $userAnswer,
+                'correct_answer' => $correctAnswer,
+                'is_correct' => $isCorrect,
+            ];
+        }
+
+        foreach ($translationMatrix as $tenseName => $items) {
+            foreach (['verbal', 'nominal', 'passive'] as $type) {
+                if (!isset($items[$type])) {
+                    continue;
+                }
+
+                $key = str_replace(' ', '_', strtolower($tenseName)) . '_' . $type;
+                $userAnswer = trim((string) ($input['trans_matrix'][$key] ?? ''));
+                $correctAnswer = (string) ($items[$type]['en'] ?? '');
+
+                $isCorrect = strtolower(rtrim($userAnswer, '.!')) === strtolower(rtrim($correctAnswer, '.!')) && $userAnswer !== '';
+                if ($isCorrect) {
+                    $part2Score++;
+                }
+                $totalItemsPart2++;
+
+                $transResults['matrix'][$tenseName][$type] = [
+                    'user_answer' => $userAnswer,
+                    'correct_answer' => $correctAnswer,
+                    'is_correct' => $isCorrect,
+                ];
+            }
+        }
+
+        $finalScorePart2 = $totalItemsPart2 > 0 ? round(($part2Score / $totalItemsPart2) * 50) : 0;
+        $totalScore = $finalScorePart1 + $finalScorePart2;
 
         return [
-            'meeting4_submitted' => true,
-            'meeting4_results' => $results,
-            'meeting4_paragraph_result' => $paragraphResult,
-            'meeting4_final_score' => $maxScore > 0 ? round(($totalScore / $maxScore) * 100) : 0,
-            'meeting4_user_answers' => $userAnswers,
-            'meeting4_user_paragraph_answer' => $paragraphAnswer,
-        ];
-    }
-
-    private function evaluateParagraph(string $paragraphAnswer, string $correctParagraph): array
-    {
-        $paragraphResult = $this->scoreWordMatchAnswer($paragraphAnswer, $correctParagraph, 20);
-
-        return [
-            'score' => $paragraphResult['score'],
-            'max_score' => 20,
-            'formatted_answer' => $paragraphResult['formatted_answer'],
+            'session' => [
+                'meeting4_stage' => 3,
+                'meeting4_trans_results' => $transResults,
+                'meeting4_score_part1' => $finalScorePart1,
+                'meeting4_score_part2' => $finalScorePart2,
+                'meeting4_total_score' => $totalScore,
+            ],
+            'saveScore' => true,
+            'totalScore' => $totalScore,
         ];
     }
 }

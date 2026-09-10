@@ -8,7 +8,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     <div class="flex min-h-screen">
         {{-- Sidebar --}}
@@ -16,6 +16,14 @@
 
         {{-- Main Content --}}
         <main class="flex-1 md:ml-64 p-8 pl-10 md:pl-12">
+            @php
+                $isGeneral = !empty($isGeneral);
+                $backLink = $isGeneral ? route('mock-test.ielts-general.cambridge.edition', ['edition' => $edition]) : route('assignments.ielts-academic.mockup.cambridge.edition', ['edition' => $edition]);
+                $listeningLink = $isGeneral ? route('mock-test.ielts-general.cambridge.test', ['edition' => $edition, 'id' => $testId, 'skill' => 'listening']) : route('assignments.ielts-academic.mockup.cambridge.test', ['edition' => $edition, 'id' => $testId, 'skill' => 'listening']);
+                $readingLink = $isGeneral ? route('mock-test.ielts-general.cambridge.test', ['edition' => $edition, 'id' => $testId, 'skill' => 'reading']) : route('assignments.ielts-academic.mockup.cambridge.test', ['edition' => $edition, 'id' => $testId, 'skill' => 'reading']);
+                $writingLink = $isGeneral ? route('mock-test.ielts-general.cambridge.test', ['edition' => $edition, 'id' => $testId, 'skill' => 'writing']) : route('assignments.ielts-academic.mockup.cambridge.test', ['edition' => $edition, 'id' => $testId, 'skill' => 'writing']);
+                $speakingLink = $isGeneral ? route('mock-test.ielts-general.cambridge.test', ['edition' => $edition, 'id' => $testId, 'skill' => 'speaking']) : route('assignments.ielts-academic.mockup.cambridge.test', ['edition' => $edition, 'id' => $testId, 'skill' => 'speaking']);
+            @endphp
             {{-- Header --}}
             <div class="mb-8">
                 <div class="flex items-center justify-between mb-4">
@@ -27,7 +35,7 @@
                         </div>
                         <div>
                             <div class="flex items-center gap-2 text-sm text-gray-400 mb-1">
-                                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.edition', ['edition' => $edition]) }}" class="hover:text-blue-600 transition">Cambridge {{ $edition }}</a>
+                                <a href="{{ $backLink }}" class="hover:text-blue-600 transition">Cambridge {{ $edition }} {{ $isGeneral ? 'General' : '' }}</a>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                                 <span class="text-gray-600 font-medium">Test {{ $testId }}</span>
                             </div>
@@ -35,7 +43,7 @@
                             <p class="text-gray-600 mt-1">Choose which skill section you want to attempt</p>
                         </div>
                     </div>
-                    <a href="{{ route('assignments.ielts-academic.mockup.cambridge.edition', ['edition' => $edition]) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+                    <a href="{{ $backLink }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
@@ -48,7 +56,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
                 {{-- IELTS Listening --}}
-                <a href="{{ route('assignments.ielts-academic.mockup.cambridge.test', ['edition' => $edition, 'id' => $testId, 'skill' => 'listening']) }}" class="group block bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <a href="{{ $listeningLink }}" class="group block bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                     <div class="h-32 bg-gradient-to-br from-blue-400 to-blue-600 relative flex items-center justify-center overflow-hidden">
                         <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                         <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30 group-hover:scale-110 transition-transform duration-300">
@@ -68,9 +76,6 @@
                 </a>
 
                 {{-- IELTS Reading --}}
-                @php
-                    $readingLink = in_array($testId, [1, 2, 3, 4]) ? route('assignments.ielts-academic.mockup.cambridge.test', ['edition' => $edition, 'id' => $testId, 'skill' => 'reading']) : '#';
-                @endphp
                 <a href="{{ $readingLink }}" class="group block bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                     <div class="h-32 bg-gradient-to-br from-green-400 to-green-600 relative flex items-center justify-center overflow-hidden">
                         <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
@@ -91,9 +96,6 @@
                 </a>
 
                 {{-- IELTS Writing --}}
-                @php
-                    $writingLink = in_array($testId, [1, 2, 3, 4]) ? route('assignments.ielts-academic.mockup.cambridge.test', ['edition' => $edition, 'id' => $testId, 'skill' => 'writing']) : '#';
-                @endphp
                 <a href="{{ $writingLink }}" class="group block bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                     <div class="h-32 bg-gradient-to-br from-orange-400 to-orange-600 relative flex items-center justify-center overflow-hidden">
                         <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
@@ -114,9 +116,6 @@
                 </a>
 
                 {{-- IELTS Speaking --}}
-                @php
-                    $speakingLink = in_array($testId, [1, 2, 3, 4]) ? route('assignments.ielts-academic.mockup.cambridge.test', ['edition' => $edition, 'id' => $testId, 'skill' => 'speaking']) : '#';
-                @endphp
                 <a href="{{ $speakingLink }}" class="group block bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                     <div class="h-32 bg-gradient-to-br from-pink-400 to-pink-600 relative flex items-center justify-center overflow-hidden">
                         <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>

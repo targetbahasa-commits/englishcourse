@@ -12,49 +12,32 @@ class AiController extends Controller
 {
     private function sendToHybridAi(array $messages, bool $jsonMode = false, int $maxTokens = 4096, float $temperature = 0.3)
     {
-        $payload = [
-            'messages' => $messages,
-            'temperature' => $temperature,
-            'max_tokens' => $maxTokens,
-            'stream' => false,
-        ];
-        if ($jsonMode) {
-            $payload['response_format'] = ['type' => 'json_object'];
-        }
-
-        try {
-            $payload['model'] = 'llama-3.1-8b-instant';
-            $result = GroqKeyManager::callWithFallback('general', $payload, 30);
-            return [
-                'content' => $result['body']['choices'][0]['message']['content'],
-                'source'  => 'Groq (Llama 3.1) [key ' . $result['key_used'] . ']',
-            ];
-        } catch (\Exception $e) {
-            Log::warning("Groq failed in AiController (all keys exhausted): " . $e->getMessage());
-        }
-
-        $geminiKeys = \App\Services\AiProviderKeyManager::getKeys('gemini');
-        $payload['model'] = 'gemini-2.5-flash';
-        
-        foreach ($geminiKeys as $index => $geminiKey) {
-            try {
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $geminiKey,
-                ])->timeout(60)->post("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", $payload);
-
-                if ($response->successful() && isset($response->json()['choices'][0]['message']['content'])) {
-                    return [
-                        'content' => $response->json()['choices'][0]['message']['content'],
-                        'source' => 'Gemini API [key ' . \App\Services\GroqKeyManager::maskKey($geminiKey) . ']'
-                    ];
-                }
-                \Log::warning("Gemini fallback key #{$index} failed in AiController", ['status' => $response->status()]);
-            } catch (\Exception $e) {
-                \Log::error("Gemini exception key #{$index} in AiController: " . $e->getMessage());
+        $systemPrompt = '';
+        $userContent = '';
+        foreach ($messages as $msg) {
+            if (($msg['role'] ?? '') === 'system') {
+                $systemPrompt = $msg['content'];
+            } else {
+                $userContent .= ($userContent !== '' ? "\n\n" : '') . $msg['content'];
             }
         }
 
-        throw new \Exception('All AI services failed (Groq and Gemini)');
+        // Full provider chain (not just Groq -> Gemini) so this doesn't become a
+        // single point of failure under load from many concurrent students.
+        $providers = ['groq', 'sambanova', 'siliconflow', 'cerebras', 'deepinfra', 'gemini', 'openrouter', 'openai'];
+
+        $result = \App\Services\MultiProviderAiClient::chat($providers, $systemPrompt, $userContent, [
+            'groq_feature' => 'general',
+            'max_tokens' => $maxTokens,
+            'temperature' => $temperature,
+            'json_mode' => $jsonMode,
+        ]);
+
+        if ($result) {
+            return $result;
+        }
+
+        throw new \Exception('All AI services failed (Groq, SambaNova, SiliconFlow, Cerebras, DeepInfra, Gemini, OpenRouter, OpenAI)');
     }
 
     private function sendToGeminiOnly(array $messages, bool $jsonMode = false, int $maxTokens = 4096, float $temperature = 0.3)
@@ -84,7 +67,7 @@ class AiController extends Controller
             try {
                 $response = Http::withHeaders([
                     'Content-Type' => 'application/json'
-                ])->timeout(60)->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $geminiKey, $payload);
+                ])->timeout(20)->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $geminiKey, $payload);
 
                 if ($response->successful() && $response->json('candidates.0.content.parts.0.text')) {
                     return [

@@ -4,20 +4,28 @@ namespace App\Application\IeltsWriting;
 
 class BuildIeltsWritingAiPrompt
 {
-    public function grading(string $essay, string $taskType): string
+    public function grading(string $essay, string $taskType, ?int $meetingId = null): string
     {
         $context = $this->gradingContext($taskType);
+        $meetingContext = $this->resolveMeetingContext($meetingId);
+        $wordCount = str_word_count(strip_tags($essay));
+        $minWords = $taskType === '1' ? 150 : 250;
+        $wordCountRule = $wordCount < $minWords
+            ? "\n        WORD COUNT PENALTY (MANDATORY — OFFICIAL IELTS POLICY):\n        - This essay contains exactly {$wordCount} words. The required minimum for Task {$taskType} is {$minWords} words.\n        - This is UNDER-LENGTH by " . ($minWords - $wordCount) . " words.\n        - Per official IELTS policy, an under-length response is very unlikely to have fully developed its ideas. You MUST cap 'task_achievement' at 5.0 or lower, REGARDLESS of how well-written or well-argued the essay otherwise is. Do NOT give task_achievement above 5.0 under any circumstance for this essay.\n"
+            : "\n        WORD COUNT CHECK: This essay contains {$wordCount} words, which meets the Task {$taskType} minimum of {$minWords} words. No length penalty applies.\n";
 
         return "You are a strict IELTS Examiner. Analyze the following IELTS Writing Task {$taskType} essay.
-        
+
         Original Essay:
         \"{$essay}\"
 
+        {$meetingContext}
+        {$wordCountRule}
         Rubric / Band Descriptors ( STRICTLY FOLLOW THESE ):
         {$context['band_descriptors']}
 
         {$context['role_instruction']}
-    
+
         MENTAL STATE:
         - Anda BUKAN guru yang menyemangati murid. Anda adalah EXAMINER UJIAN RESMI.
         - Anda menghargai presisi. Esai yang pendek, repetitif, atau terlalu sederhana HARUS dihukum dengan skor rendah.
@@ -56,14 +64,17 @@ class BuildIeltsWritingAiPrompt
         - Basic vocabulary? -> LR Max 5.0";
     }
 
-    public function feedback(string $essay, string $taskType): string
+    public function feedback(string $essay, string $taskType, ?int $meetingId = null): string
     {
         $context = $this->feedbackContext($taskType);
+        $meetingContext = $this->resolveMeetingContext($meetingId);
 
         return "You are a Senior IELTS Writing Examiner. You are experienced, objective, and constructive. Analyze the following IELTS Writing Task {$taskType} essay.
         
         Original Essay:
         \"{$essay}\"
+
+        {$meetingContext}
 
         {$context['tone']}
         2.  **Band 6+ Context**: If the essay is competent (Band 6.0+), ACKNOWLEDGE the strengths.
@@ -81,8 +92,11 @@ class BuildIeltsWritingAiPrompt
            - For 'grammar_improvements', identify AS MANY specific grammatical errors or weak sentences from the essay AS POSSIBLE (maximum 20). Provide the original text, the corrected version, and a brief explanation in Indonesian.
            - For 'cohesive_devices_used', list the linking words and cohesive devices that the candidate ACTUALLY used in the essay. Evaluate if they are overused or used correctly (in Indonesian).
            - For 'good_vocabulary_used', list up to 5 advanced or topic-specific words/collocations the candidate ACTUALLY used in the essay, along with their meaning in Indonesian.
-           - For 'vocabulary_improvements', list 3 basic or repetitive words used by the candidate and suggest Band 7-9 alternatives, with an explanation in Indonesian.
-           - For 'overall_comment', provide a brief summary of the candidate's performance.
+           - For 'vocabulary_improvements', identify AS MANY specific basic or repetitive words used by the candidate AS POSSIBLE (at least 15 to 20 items). Suggest Band 7-9 alternatives, with an explanation in Indonesian.
+           - For 'overall_comment', write a comprehensive examiner-style summary of AT LEAST 6-8 sentences across 2 short paragraphs (do NOT write just 1-2 sentences).
+             * Paragraph 1: State the overall band level and WHY, then briefly comment on the candidate's performance in EACH of the four criteria (Task Response, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy), citing at least one specific observation or example from the essay for each.
+             * Paragraph 2: Close with 2-3 concrete, actionable suggestions the candidate should focus on to reach the next band.
+             * Write it as a flowing narrative in Indonesian, not a bullet list, and do not simply repeat the other feedback fields verbatim — synthesize them into a coherent overview.
 
         
         Provide a strictly JSON response with this structure:
@@ -118,7 +132,7 @@ class BuildIeltsWritingAiPrompt
                         \"explanation\": \"Explanation of grammar error/improvement (in Indonesian)\"
                     }
                 ],
-                \"overall_comment\": \"... (Brief Indonesian summary)\"
+                \"overall_comment\": \"... (Comprehensive Indonesian summary, at least 6-8 sentences across 2 paragraphs, covering all 4 criteria with specific examples plus actionable next-step suggestions)\"
             }
         }
 
@@ -160,14 +174,14 @@ class BuildIeltsWritingAiPrompt
 
         Perform the following task:
         1. Identify SPECIFIC Lexical Resource issues (Vocabulary & Collocations).
-           - Create a list of 'lexical_improvements'. You MUST provide EXACTLY 10 items. If there are fewer than 10 bad words, pick simple but correct words and upgrade them to advanced (Band 7-9) vocabulary.
+           - Create a list of 'lexical_improvements'. You MUST provide AT LEAST 15 to 20 items. Identify simple or repetitive words/phrases/collocations in the essay, or simple but correct words if needed, and upgrade them to advanced (Band 7-9) vocabulary.
            - Identify simple words or weak collocations used in the essay.
            - Provide higher-level (Band 7-9) synonyms or collocations.
            - Explain why the improvement is better in Bahasa Indonesia.
         
-        2. Provide a list of 'topic_vocabularies' (Band 8/9) that matches the SPECIFIC TOPIC of this essay.
-           - These should be words/phrases the candidate *could have used* to boost their score.
-           - You MUST include EXACTLY 10 items.
+        2. Provide a list of 'topic_vocabularies': CEFR C1-level (IELTS Band 7-8) words/phrases and collocations that match the SPECIFIC TOPIC of this essay.
+           - These should be words/phrases the candidate *could have used* in THIS essay to boost their score — genuinely usable for this specific topic, not generic advanced vocabulary.
+           - You MUST include AT LEAST 15 items.
            - 'meaning' MUST be in Bahasa Indonesia.
 
         Provide a strictly JSON response with this structure:
@@ -228,11 +242,12 @@ class BuildIeltsWritingAiPrompt
 
         Perform the following task:
         Identify SPECIFIC Task Response / Task Achievement issues.
-        - Create a list of 'task_response_improvements'. You MUST provide EXACTLY 10 items. If there are fewer than 10 major issues, pick any sentences/arguments and provide a more fully developed Band 7-9 version.
+        - Create a list of 'task_response_improvements'. You MUST provide AT LEAST 5 items and AT MOST 10 items — this is a strict requirement, never fewer than 5. If the essay has fewer than 5 major issues, break your analysis down further: examine EACH body paragraph and the introduction/conclusion separately for weak topic sentences, missing examples, underdeveloped explanations, or restated-not-analyzed ideas, and provide a Band 7-9 improved version for each. Do NOT stop at 3-4 items.
         - Identify arguments that are underdeveloped, unclear, or lack supporting examples.
         - Identify if the writer's position is unclear or not maintained.
         - Provide a concrete 'improved' version of the argument or paragraph (Band 7-9 style).
         - Explain why the improvement better addresses the prompt (in Bahasa Indonesia).
+        - For 'steps', provide a step-by-step list (3-5 short, concrete, actionable steps in Bahasa Indonesia) explaining HOW the candidate should revise the original text to reach the improved version — not just WHAT changed, but the concrete editing steps to get there.
         - IMPORTANT: If the 'text' field describes a MISSING element (e.g. 'Thesis statement is missing'), write that description in **Bahasa Indonesia** (e.g. 'Esai ini tidak memiliki pernyataan tesis'). If it is a quote, keep it in English.
 
         Provide a strictly JSON response with this structure:
@@ -241,7 +256,8 @@ class BuildIeltsWritingAiPrompt
                 {
                     \"text\": \"original weak argument/paragraph\",
                     \"improved\": \"better argument/paragraph (fully developed)\",
-                    \"explanation\": \"Why this improves Task Response (in Indonesian)\"
+                    \"explanation\": \"Why this improves Task Response (in Indonesian)\",
+                    \"steps\": [\"Step 1 in Indonesian\", \"Step 2 in Indonesian\", \"Step 3 in Indonesian\"]
                 }
             ]
         }
@@ -368,17 +384,37 @@ class BuildIeltsWritingAiPrompt
             - Grammatical Range and Accuracy (GRA): Variasi struktur kalimat (simple vs complex) dan tingkat kesalahan tata bahasa serta tanda baca.
             ",
                 'critical_rules' => "
-            CRITICAL SCORING RULES (Task 1):
+            CRITICAL SCORING RULES (Task 1 — Official IELTS Academic Task 1 assessment criteria):
             1. WORD COUNT PENALTY (Task Achievement):
-               - If the report is UNDER 150 words, the Task Achievement (TA) score MUST be penalized.
-               - TA cannot exceed Band 5.0 if the report is significantly underlength.
-            2. NO OVERVIEW (Task Achievement):
-               - If there is NO clear overview of main trends, differences, or stages, Task Achievement cannot exceed Band 5.0.
+               - If the report is UNDER 150 words, Task Achievement (TA) MUST be capped at Band 5.0 or lower, regardless of quality.
+            2. OVERVIEW REQUIREMENT (Task Achievement):
+               - The report MUST contain a clear, STANDALONE overview — typically a short paragraph after the introduction — that summarises the single most significant overall trend, feature, stage, or change, WITHOUT citing specific numbers or data points (the overview should be free of detailed figures; those belong in the body paragraphs).
+               - If the overview is missing entirely, or is really just a restatement of one data point rather than a genuine summary, TA CANNOT exceed Band 5.0.
+               - If the 'overview' only lists every category one by one instead of identifying the main pattern, that is NOT a genuine overview — score TA no higher than Band 5.0-6.0.
+            3. DATA ACCURACY (Task Achievement) — only apply if SOURCE CHART DATA or SOURCE VISUAL context is provided above:
+               - You MUST verify the essay's reported figures, trends, and stages against that real source data/visual.
+               - If the essay describes a DIFFERENT topic than the source data/visual entirely (wrong subject matter), or fabricates figures/trends that contradict the real data, this is a severe failure to address the task — TA CANNOT exceed Band 2.0-3.0.
+               - If the essay's numbers are mostly accurate but a few specific figures are wrong or imprecise, apply a smaller penalty instead (cap TA around Band 6.0), not a severe one.
+            4. COMPARISONS REQUIREMENT (Task Achievement):
+               - The task instruction requires the candidate to 'make comparisons where relevant'. If the chart/table has multiple categories, datasets, or time periods and the essay makes NO comparisons between them (only lists figures individually with no comparative language), penalize TA (cap around Band 5.0-6.0).
+            5. TASK-TYPE-SPECIFIC OVERVIEW EXPECTATIONS:
+               - Line/bar/pie/table/mixed data charts: the overview should state the overall trend or most striking feature(s), not restate every number.
+               - Process diagrams/flowcharts: the overview should state how many main stages there are and where the process starts/ends, not describe every single step in detail.
+               - Maps (before/after or two-period comparisons): the overview should state the most significant overall changes, not describe every location individually.
+            6. STRICT BAND CEILINGS (STRICT CAMBRIDGE EXAMINER STANDARDS - DO NOT GIVE BAND 7-8 TO AVERAGE ESSAYS):
+               - Band 8.0+ TA requires a sophisticated overview, key trends clearly synthesized, and thorough, highly accurate comparisons. If the candidate merely lists data sequentially year-by-year without high-level synthesis, TA CANNOT exceed 6.5.
+               - Band 7.0+ Lexical Resource requires precise academic vocabulary and varied trend verbs/collocations (e.g., 'fluctuated', 'surged', 'plateaued', 'eclipsed'). If the essay relies on repetitive basic verbs ('went up', 'increased', 'showed', 'rose', 'high', 'low'), LR CANNOT exceed Band 6.0.
+               - Band 7.0+ Grammatical Range & Accuracy requires frequent error-free complex structures (e.g., reduced relative clauses, passive voice, complex prepositional phrases). If the essay uses mostly simple/compound sentences, GRA CANNOT exceed Band 6.0.
+               - Band 7.0+ Coherence & Cohesion requires varied and subtle cohesive devices. If linking words ('however', 'while', 'overall', 'meanwhile') are overused or used mechanically, CC CANNOT exceed Band 6.0.
             ",
                 'reminder' => "
             REMINDER:
             - Report < 150 words? -> TA Max 5.0
-            - No Overview? -> TA Max 5.0
+            - No standalone overview (or overview is just a data restatement / a list of every category)? -> TA Max 5.0-6.0
+            - Essay describes a different topic than the real chart, or fabricates data? -> TA Max 2.0-3.0
+            - Minor figure inaccuracies only? -> TA Max 6.0
+            - No comparisons made despite multiple categories/datasets? -> TA capped around 5.0-6.0
+            - Basic vocabulary or repetitive sentence structures? -> LR/GRA capped at Band 6.0 max. BE STRICT & UNCOMPROMISING like an official Cambridge examiner!
             ",
             ];
         }
@@ -453,17 +489,19 @@ class BuildIeltsWritingAiPrompt
         if ($taskType === '1') {
             return [
                 'score_criteria' => "
-            - **Task Achievement**: Evaluate how well the prompt is addressed (Overview, Data features, Comparisons). 
+            - **Task Achievement**: Evaluate how well the prompt is addressed (Overview, Data features, Comparisons).
               **CRITICAL**: IF the report is under 150 words, you MUST explicitly state: \"Jumlah kata di bawah 150 kata (Hanya [X] kata). Ini mengurangi skor Task Achievement secara signifikan.\" inside the Task Achievement feedback.
-              **CRITICAL**: IF no Clear Overview, explicitly state it.
+              **CRITICAL**: IF there is no clear, standalone overview (free of specific numbers), explicitly state it — a list of every category one by one is NOT an overview.
+              **CRITICAL**: IF SOURCE CHART DATA or SOURCE VISUAL context was provided above, explicitly state in Indonesian whether the essay's reported figures/trends/stages actually match the real data — call out any invented numbers, wrong topic, or contradicted trends.
+              **CRITICAL**: IF the chart/table has multiple categories or datasets but the essay makes no comparisons between them, explicitly note this as a missed requirement (the task asks to 'make comparisons where relevant').
             - **Coherence**: Evaluate paragraphing and linking.
             - **Lexical**: Evaluate vocabulary range and accuracy.
             - **Grammar**: Evaluate sentence structures and error density.
              ",
                 'tone' => "
              TONE & APPROACH (Task 1 Report):
-             1. **Objective & Factual**: Comment on the accuracy of data reporting.
-             2. **Band 6+**: Acknowledge if the overview is clear.
+             1. **Objective & Factual**: Comment on the accuracy of data reporting against the real source data, not just writing quality.
+             2. **Band 6+**: Acknowledge if the overview is clear and data-accurate.
              ",
             ];
         }
@@ -481,5 +519,71 @@ class BuildIeltsWritingAiPrompt
              1. **Professional & Constructive**: Helpful, not discouraging.
              ",
         ];
+    }
+
+    private function resolveMeetingContext(?int $meetingId): string
+    {
+        if (!$meetingId) {
+            return '';
+        }
+
+        $meeting = \App\Models\IeltsWritingMeeting::find($meetingId);
+        if (!$meeting) {
+            $meeting = \App\Models\IeltsWritingMeeting::where('meeting_number', $meetingId)->first();
+        }
+
+        if (!$meeting) {
+            return '';
+        }
+
+        $text = "\nQUESTION & PROMPT CONTEXT:\nTitle: {$meeting->title}\nQuestion Prompt: " . strip_tags($meeting->prompt);
+        if (!empty($meeting->graph_data_json)) {
+            $text .= "\nGraph/Chart Data JSON: {$meeting->graph_data_json}";
+        }
+
+        $text .= $this->formatChartContext($meeting);
+
+        return $text . "\n";
+    }
+
+    /**
+     * IELTS Writing Task 1 requires describing a specific chart/graph/table/
+     * diagram/map. Without this, the grading/feedback prompts only see the
+     * essay text and the generic instruction ("Summarise the information..."),
+     * with no way to judge whether the essay's numbers/trends/steps actually
+     * match the source visual — Task Achievement can't genuinely be assessed.
+     * This resolves the actual underlying chart data (line/bar/pie/table/mixed)
+     * or diagram description (flowchart/map) and inlines it as text so every
+     * prompt can check the essay against the real source data.
+     */
+    private function formatChartContext($meeting): string
+    {
+        if (!class_exists(\App\Support\IeltsTask1ChartResolver::class)) {
+            return '';
+        }
+
+        $chart = \App\Support\IeltsTask1ChartResolver::resolve($meeting);
+        $kind = $chart['kind'] ?? 'none';
+
+        if ($kind === 'none') {
+            return '';
+        }
+
+        if (in_array($kind, ['flowchart', 'map'], true)) {
+            if (empty($chart['instructionTitle'])) {
+                return '';
+            }
+            $label = $kind === 'flowchart' ? ($chart['instructionType'] ?? 'process diagram') : 'map/plan';
+            return "\nSOURCE VISUAL ({$label}): This Task 1 item asks the candidate to describe {$chart['instructionTitle']}. Judge Task Achievement based on whether the essay's described stages/changes are plausible and well-organised for this specific topic.\n";
+        }
+
+        // Data-driven chart kinds (line/bar/pie/table/mixed): inline the actual
+        // underlying numbers so the AI can verify the essay's claims against them.
+        $json = json_encode($chart, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        if (!$json) {
+            return '';
+        }
+
+        return "\nSOURCE CHART DATA (kind: {$kind}) — this is the ACTUAL underlying data of the chart the candidate was asked to describe. Use it to verify whether the essay accurately reports the real figures, trends, and comparisons, and penalize Task Achievement if the essay invents numbers or describes trends that contradict this data:\n{$json}\n";
     }
 }

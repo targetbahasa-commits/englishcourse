@@ -1,12 +1,14 @@
 @extends('layouts.admin')
 
+@section('title', ($meeting->title ?? 'Connecting Trend') . ' - IELTS Writing Task ' . ($task ?? 1))
+
 @section('head')
     <script src="{{ asset('js/auto-save.js') }}?v={{ time() }}"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
 @section('content')
-<div class="w-full max-w-[1920px] mx-auto px-6 py-8 flex flex-col min-h-screen" x-data="connectingTrend({{ $meeting->id }})">
+<div class="w-full max-w-[1920px] mx-auto px-6 py-8 flex flex-col min-h-screen" x-data="connectingTrend({{ $meeting->id }}, {{ Js::from($savedAnswers ?? []) }})">
     <form method="POST" action="#" id="connectingTrendForm">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
@@ -99,76 +101,16 @@
                         <!-- Badge -->
                         <div class="absolute top-0 right-0 bg-teal-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg shadow-sm z-10" x-text="'Graph ' + item.id"></div>
 
-                        <!-- SVG Chart (sharp rendering) -->
-                        <div class="px-4 pt-8 pb-4 border-b border-gray-100 bg-white">
-                            <h4 class="text-center text-4xl font-bold text-gray-600 leading-none mb-2" x-text="item.title"></h4>
-                            <div class="mx-auto w-full max-w-[360px]">
-                                <svg viewBox="0 0 560 360" class="w-full h-auto" role="img" :aria-label="'Graph ' + item.id">
-                                    <rect x="24" y="24" width="512" height="312" rx="24" ry="24" fill="#f9fafb" stroke="#9ca3af" stroke-width="2"></rect>
-
-                                    <rect
-                                        :x="chart.plotX"
-                                        :y="chart.plotY"
-                                        :width="chart.plotW"
-                                        :height="chart.plotH"
-                                        fill="#f3f4f6"
-                                        :stroke="item.color"
-                                        stroke-width="4"
-                                    ></rect>
-
-                                    <template x-for="tick in chart.yTicks" :key="'y-' + item.id + '-' + tick">
-                                        <line
-                                            :x1="chart.plotX"
-                                            :x2="chart.plotX + chart.plotW"
-                                            :y1="valueToY(tick)"
-                                            :y2="valueToY(tick)"
-                                            stroke="#9ca3af"
-                                            stroke-width="1.5"
-                                        ></line>
-                                    </template>
-
-                                    <polyline
-                                        :points="polylinePoints(item)"
-                                        fill="none"
-                                        stroke="#111827"
-                                        stroke-width="8"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    ></polyline>
-
-                                    <rect :x="indexToX(0) - 7" :y="valueToY(item.values[0]) - 7" width="14" height="14" rx="1" fill="#dc2626" :transform="`rotate(45 ${indexToX(0)} ${valueToY(item.values[0])})`"></rect>
-                                    <rect :x="indexToX(1) - 7" :y="valueToY(item.values[1]) - 7" width="14" height="14" rx="1" fill="#dc2626" :transform="`rotate(45 ${indexToX(1)} ${valueToY(item.values[1])})`"></rect>
-                                    <rect :x="indexToX(2) - 7" :y="valueToY(item.values[2]) - 7" width="14" height="14" rx="1" fill="#dc2626" :transform="`rotate(45 ${indexToX(2)} ${valueToY(item.values[2])})`"></rect>
-                                    <rect :x="indexToX(3) - 7" :y="valueToY(item.values[3]) - 7" width="14" height="14" rx="1" fill="#dc2626" :transform="`rotate(45 ${indexToX(3)} ${valueToY(item.values[3])})`"></rect>
-                                    <rect :x="indexToX(4) - 7" :y="valueToY(item.values[4]) - 7" width="14" height="14" rx="1" fill="#dc2626" :transform="`rotate(45 ${indexToX(4)} ${valueToY(item.values[4])})`"></rect>
-                                    <rect :x="indexToX(5) - 7" :y="valueToY(item.values[5]) - 7" width="14" height="14" rx="1" fill="#dc2626" :transform="`rotate(45 ${indexToX(5)} ${valueToY(item.values[5])})`"></rect>
-
-                                    <template x-for="tick in chart.yTicks" :key="'yl-' + item.id + '-' + tick">
-                                        <text
-                                            :x="chart.plotX - 24"
-                                            :y="valueToY(tick) + 6"
-                                            text-anchor="end"
-                                            font-size="12"
-                                            font-weight="700"
-                                            fill="#374151"
-                                            x-text="tick"
-                                        ></text>
-                                    </template>
-
-                                    <template x-for="(year, index) in chart.years" :key="'x-' + item.id + '-' + year">
-                                        <text
-                                            :x="indexToX(index)"
-                                            :y="chart.plotY + chart.plotH + 34"
-                                            transform-origin="center"
-                                            :transform="`rotate(-35 ${indexToX(index)} ${chart.plotY + chart.plotH + 34})`"
-                                            text-anchor="middle"
-                                            font-size="10"
-                                            font-weight="700"
-                                            fill="#4b5563"
-                                            x-text="year"
-                                        ></text>
-                                    </template>
-                                </svg>
+                        <!-- Graph Image (Exact 1:1 Match with Reference Sheet) -->
+                        <div class="p-6 border-b border-gray-100 bg-white flex justify-center items-center">
+                            <div class="w-full max-w-[440px] rounded-2xl border border-gray-200 shadow-sm overflow-hidden bg-white" style="aspect-ratio: 420/280;">
+                                <div class="w-full h-full bg-no-repeat bg-cover"
+                                     :style="`
+                                         background-image: url('{{ asset('images/materials/ielts-writing/connecting_trend.png') }}');
+                                         background-position: ${item.x * 50}% ${item.y * 100}%;
+                                         background-size: 300% 200%;
+                                     `">
+                                </div>
                             </div>
                         </div>
 
@@ -178,7 +120,7 @@
                                 :placeholder="'Describe trend ' + item.id + '...'"
                                 x-model="answers[item.id]"
                                 :name="'answer_' + item.id"
-                                @input="autoResize($event.target)"
+                                @input="autoResize($event.target); queueDraftSync()"
                                 x-init="$nextTick(() => autoResize($el))"
                             ></textarea>
                         </div>
@@ -194,36 +136,36 @@
 <!-- Alpine Data for the page -->
 <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('connectingTrend', (meetingId) => ({
-            answers: {},
+        Alpine.data('connectingTrend', (meetingId, savedAnswers = {}) => ({
+            // Seeded from the student's last autosaved draft (see
+            // IeltsWritingController::showMeeting()) - previously this
+            // always started empty, so a normal page refresh looked like
+            // it had wiped the student's answers even though they were
+            // already safely saved server-side the whole time.
+            answers: savedAnswers || {},
             loading: false,
             chart: {
-                plotX: 110,
-                plotY: 70,
-                plotW: 390,
-                plotH: 210,
-                yMin: 5,
-                yMax: 105,
                 yTicks: [105, 85, 65, 45, 25, 5],
                 years: [1960, 1970, 1980, 1990, 2000, 2010],
             },
             items: [
-                { id: 'A', title: "A (Net users in '000)", color: '#3b82f6', values: [95, 55, 30, 25, 25, 20] },
-                { id: 'B', title: 'B (Net users)', color: '#ef4444', values: [20, 45, 95, 95, 95, 95] },
-                { id: 'C', title: 'C (Net users)', color: '#3b82f6', values: [20, 30, 50, 80, 100, 105] },
-                { id: 'D', title: 'D (Birds population)', color: '#84cc16', values: [95, 70, 60, 20, 50, 70] },
-                { id: 'E', title: 'E (Birds population)', color: '#f97316', values: [95, 80, 20, 18, 18, 18] },
-                { id: 'F', title: 'F (Birds population)', color: '#06b6d4', values: [85, 20, 70, 20, 80, 105] },
+                { id: 'A', title: "A (Net users in '000)", x: 0, y: 0 },
+                { id: 'B', title: "B (Net users)", x: 1, y: 0 },
+                { id: 'C', title: "C (Net users)", x: 2, y: 0 },
+                { id: 'D', title: "D (Birds population in '000)", x: 0, y: 1 },
+                { id: 'E', title: "E (Birds population)", x: 1, y: 1 },
+                { id: 'F', title: "F (Birds population)", x: 2, y: 1 },
             ],
             valueToY(value) {
-                const ratio = (value - this.chart.yMin) / (this.chart.yMax - this.chart.yMin);
-                return this.chart.plotY + this.chart.plotH - (ratio * this.chart.plotH);
+                const ratio = (value - 5) / (105 - 5);
+                return 65 + 205 - (ratio * 205);
             },
             indexToX(index) {
-                const step = this.chart.plotW / (this.chart.years.length - 1);
-                return this.chart.plotX + (index * step);
+                const step = 340 / 5;
+                return 120 + (index * step);
             },
             pointObjects(item) {
+                if (!item || !item.values) return [];
                 return item.values.map((value, index) => ({
                     x: this.indexToX(index),
                     y: this.valueToY(value),
@@ -240,16 +182,10 @@
                 el.style.height = `${el.scrollHeight}px`;
             },
             init() {
-                // Initialize External AutoSave
                 if (window.AutoSave) {
                     window.AutoSave.init(meetingId, '{{ Auth::id() }}');
                 }
 
-                // Restore from AutoSave (optional overlap, but AutoSave handles restoration)
-                // However, we need to sync x-model 'answers' with the restored DOM values if AutoSave runs first.
-                // Actually AutoSave updates DOM values. Alpine might overwrite them if 'answers' is empty.
-                // Let's rely on AutoSave restoring to input, then syncing back to x-model? 
-                // Or better: Let AutoSave handle it, and we update 'answers' from DOM after valid restore?
                 setTimeout(() => {
                     this.items.forEach(item => {
                         const el = document.querySelector(`[name="answer_${item.id}"]`);
@@ -262,15 +198,72 @@
                     });
                 }, 500);
             },
-            submit() {
+            draftSyncTimer: null,
+            queueDraftSync() {
+                if (window.showAutosaveIndicator) {
+                    window.showAutosaveIndicator('Menyimpan draft...', 'saving');
+                }
+                clearTimeout(this.draftSyncTimer);
+                this.draftSyncTimer = setTimeout(() => this.syncDraftToServer(), 800);
+            },
+            async syncDraftToServer() {
+                try {
+                    await fetch('/assignments/ielts-academic/writing/meeting/' + meetingId + '/draft', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: JSON.stringify({ userAnswers: this.answers }),
+                        keepalive: true,
+                    });
+                    if (window.showAutosaveIndicator) {
+                        window.showAutosaveIndicator();
+                    }
+                } catch (e) {
+                    console.error('Failed to sync draft to server:', e);
+                    if (window.showAutosaveIndicator) {
+                        window.showAutosaveIndicator('Gagal menyimpan draft', 'error');
+                    }
+                }
+            },
+            async submit() {
                 this.loading = true;
                 const key = 'connecting_trend_autosave_' + meetingId;
                 localStorage.setItem(key, JSON.stringify(this.answers));
-                
-                setTimeout(() => {
+
+                const formattedEssay = Object.entries(this.answers)
+                    .map(([id, ans]) => `Graph ${id}: ${ans || '-'}`)
+                    .join("\n");
+
+                try {
+                    const response = await fetch('/assignments/ielts-academic/writing/evaluate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                        },
+                        body: JSON.stringify({ essay: formattedEssay || 'No answers provided', task_type: '1', meeting_id: meetingId })
+                    });
+                    const data = await response.json();
                     this.loading = false;
-                    alert('Practice saved successfully!');
-                }, 1000);
+                    if (data.redirect_url) {
+                        if (data.message) alert(data.message);
+                        window.location.href = data.redirect_url;
+                        return;
+                    }
+                    if (data.submission_id) {
+                        if (confirm('Jawaban berhasil dikirim! Apakah Anda ingin melihat halaman hasil pengerjaan lengkap?')) {
+                            window.open('/assignments/ielts-academic/writing/submission/' + data.submission_id, '_blank');
+                        }
+                    } else {
+                        alert('Jawaban berhasil disimpan!');
+                    }
+                } catch (e) {
+                    this.loading = false;
+                    alert('Jawaban berhasil disimpan secara lokal!');
+                }
             }
         }))
     })

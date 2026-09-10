@@ -11,13 +11,13 @@
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
 
         {{-- Section: Appearance and lifestyle --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Appearance and lifestyle</p>
         </div>
         <div class="border-b border-gray-200 p-4">
             <p class="text-gray-700">They are also called Jackass Penguins for the sound they make.</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>The</span>
                 <strong class="text-blue-600">31</strong>
@@ -27,7 +27,7 @@
                 <span>of their body remains constant.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>They restrict their</span>
                 <strong class="text-blue-600">32</strong>
@@ -37,7 +37,7 @@
                 <span>on land from dusk till dawn.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>They cannot fly because they have heavy</span>
                 <strong class="text-blue-600">33</strong>
@@ -46,7 +46,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>They nest under</span>
                 <strong class="text-blue-600">34</strong>
@@ -55,7 +55,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>They eat tree</span>
                 <strong class="text-blue-600">35</strong>
@@ -66,13 +66,13 @@
         </div>
 
         {{-- Section: Predators --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Predators</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <p class="text-gray-700">• seals</p>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>•</span>
                 <strong class="text-blue-600">36</strong>
@@ -81,7 +81,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>• seagulls (eat the penguin</span>
                 <strong class="text-blue-600">37</strong>
@@ -93,10 +93,10 @@
         </div>
 
         {{-- Section: Threats --}}
-        <div class="border-b border-gray-200 bg-gray-50 p-3">
+        <div class="border-b border-gray-200 bg-white p-3">
             <p class="font-bold text-gray-800">Threats</p>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>They lose</span>
                 <strong class="text-blue-600">38</strong>
@@ -106,7 +106,7 @@
                 <span>in winter.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>They are fighting for nesting</span>
                 <strong class="text-blue-600">39</strong>
@@ -116,7 +116,7 @@
                 <span>and food because of human activities.</span>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>In order to improve survivorship, it is helpful to increase the</span>
                 <strong class="text-blue-600">40</strong>

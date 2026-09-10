@@ -73,7 +73,7 @@
                     <h2 class="text-2xl font-bold text-gray-800">TOEFL ITP Reading</h2>
                     <p class="text-gray-500 text-sm">Improve your reading comprehension skills.</p>
                     <p class="text-xs mt-2">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-100">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-white text-blue-700 font-semibold border border-blue-100">
                             Active Batch: {{ $selectedClassPeriod->name ?? 'No Batch Active' }}
                         </span>
                     </p>
@@ -85,7 +85,7 @@
                         Add Lesson
                     </button>
                     @endif
-                    <a href="{{ route('assignments.toefl-itp') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+                    <a href="{{ route('assignments.toefl-itp') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
@@ -100,7 +100,7 @@
                         @csrf
                         <input type="hidden" name="program_id" value="{{ $batchProgram?->id }}">
                         <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                        <select name="class_period_id" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
+                        <select name="class_period_id" class="border-none bg-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
                             @if(!$batchProgram)
                                 <option value="" selected>No program found</option>
                             @elseif($batchProgram->classPeriods->isEmpty())
@@ -120,7 +120,7 @@
                 @else
                     <div class="inline-flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
                         <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                        <div class="bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium text-gray-800 min-w-[220px]">
+                        <div class="bg-white px-4 py-2 rounded-lg text-sm font-medium text-gray-800 min-w-[220px]">
                             {{ $selectedClassPeriod->name ?? 'No Batch Active' }}
                         </div>
                     </div>
@@ -131,7 +131,7 @@
                     $calendarBatchName = addslashes($batchProgram->name ?? 'Assignments');
                 @endphp
                 @if($calendarClassPeriodId)
-                    <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 text-sm text-gray-600">
+                    <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-white text-sm text-gray-600">
                         Lihat Kalender
                     </button>
                 @endif
@@ -142,7 +142,7 @@
                 @foreach($meetings as $meeting)
                 <div class="meeting-card bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition group relative" data-id="{{ $meeting->id }}">
                     <div class="flex justify-between items-start mb-4">
-                        <span class="px-3 py-1 {{ $meeting->is_locked ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600' }} rounded-full text-xs font-bold">
+                        <span class="px-3 py-1 {{ $meeting->is_locked ? 'bg-red-100 text-red-600' : 'bg-white text-blue-600' }} rounded-full text-xs font-bold">
                             {{ $meeting->is_locked ? 'LOCKED' : 'OPEN' }}
                         </span>
                         
@@ -163,7 +163,7 @@
                                 @endif
                                 <button
                                     type="submit"
-                                    class="inline-flex items-center justify-center p-1.5 rounded-lg border transition {{ $meeting->is_locked ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700' : 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-700' }}"
+                                    class="inline-flex items-center justify-center p-1.5 rounded-lg border transition {{ $meeting->is_locked ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700' : 'bg-white text-emerald-600 border-emerald-200 hover:bg-white hover:text-emerald-700' }}"
                                     title="{{ $meeting->is_locked ? 'Unlock' : 'Lock' }}"
                                 >
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -194,7 +194,7 @@
                     </div>
                     
                     <!-- Icon -->
-                    <div class="w-12 h-12 {{ $meeting->is_locked ? 'bg-gray-100 text-gray-400' : 'bg-blue-100 text-blue-600' }} rounded-2xl flex items-center justify-center mb-4 transition">
+                    <div class="w-12 h-12 {{ $meeting->is_locked ? 'bg-white text-gray-400' : 'bg-white text-blue-600' }} rounded-2xl flex items-center justify-center mb-4 transition">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                     </div>
                     
@@ -291,7 +291,7 @@
             var el = document.getElementById('meetings-grid'); // Select the grid container
             var sortable = Sortable.create(el, {
                 animation: 150,
-                ghostClass: 'bg-blue-50',
+                ghostClass: 'bg-white',
                 handle: '.cursor-move',
                 onEnd: function() {
                     let order = [];

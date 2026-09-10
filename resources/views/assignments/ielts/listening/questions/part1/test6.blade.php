@@ -11,14 +11,14 @@
     <div class="overflow-x-auto mb-8">
         <table class="w-full border-collapse border border-gray-300">
             <thead>
-                <tr class="bg-gray-100">
+                <tr class="bg-white">
                     <th class="border border-gray-300 p-3 text-left w-1/4"></th>
                     <th class="border border-gray-300 p-3 text-center font-bold">Good Points About Him</th>
                     <th class="border border-gray-300 p-3 text-center font-bold">Bad Points About Him</th>
                 </tr>
             </thead>
             <tbody>
-                <tr class="hover:bg-gray-50 transition-colors">
+                <tr class="hover:bg-white transition-colors">
                     <td class="border border-gray-300 p-3 font-medium">Behaviour</td>
                     <td class="border border-gray-300 p-3">
                         He is <strong>1</strong>
@@ -33,7 +33,7 @@
                         </span>
                     </td>
                 </tr>
-                <tr class="bg-gray-50 hover:bg-gray-100 transition-colors">
+                <tr class="bg-white hover:bg-white transition-colors">
                     <td class="border border-gray-300 p-3 font-medium">His Friends</td>
                     <td class="border border-gray-300 p-3">
                         His friends visit <strong>3</strong>
@@ -48,7 +48,7 @@
                         </span>
                     </td>
                 </tr>
-                <tr class="hover:bg-gray-50 transition-colors">
+                <tr class="hover:bg-white transition-colors">
                     <td class="border border-gray-300 p-3 font-medium">Other</td>
                     <td class="border border-gray-300 p-3">
                         He pays rent <strong>5</strong>

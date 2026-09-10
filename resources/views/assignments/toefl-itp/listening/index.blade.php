@@ -49,7 +49,7 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-100 text-xs">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-white text-blue-700 font-semibold border border-blue-100 text-xs">
                 Active Batch: {{ $selectedClassPeriod->name ?? 'No Batch Active' }}
             </span>
             @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
@@ -57,7 +57,7 @@
                     @csrf
                     <input type="hidden" name="program_id" value="{{ $batchProgram?->id }}">
                     <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                    <select name="class_period_id" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
+                    <select name="class_period_id" class="border-none bg-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
                         @if(!$batchProgram)
                             <option value="" selected>No program found</option>
                         @elseif($batchProgram->classPeriods->isEmpty())
@@ -77,7 +77,7 @@
             @else
                 <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
                     <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                    <div class="bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium text-gray-800 min-w-[220px]">
+                    <div class="bg-white px-4 py-2 rounded-lg text-sm font-medium text-gray-800 min-w-[220px]">
                         {{ $selectedClassPeriod->name ?? 'No Batch Active' }}
                     </div>
                 </div>
@@ -88,7 +88,7 @@
                 $calendarBatchName = addslashes($batchProgram->name ?? 'Assignments');
             @endphp
             @if($calendarClassPeriodId)
-                <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 text-sm text-gray-600">
+                <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-white text-sm text-gray-600">
                     Lihat Kalender
                 </button>
             @endif
@@ -159,7 +159,7 @@
                                             @endif
                                             <button
                                                 type="submit"
-                                                class="inline-flex items-center justify-center p-1.5 rounded-lg border transition {{ $meeting['is_locked'] ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700' : 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-700' }}"
+                                                class="inline-flex items-center justify-center p-1.5 rounded-lg border transition {{ $meeting['is_locked'] ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700' : 'bg-white text-emerald-600 border-emerald-200 hover:bg-white hover:text-emerald-700' }}"
                                                 title="Toggle Meeting Lock"
                                             >
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,7 +175,7 @@
                                         {{-- Transcript Lock Toggle --}}
                                         <form action="{{ route('assignments.toefl-itp.listening.toggle-transcript', $number) }}" method="POST">
                                             @csrf
-                                            <button type="submit" class="{{ $meeting['transcript_enabled'] ? 'text-purple-600 hover:text-purple-700' : 'text-gray-400 hover:text-gray-600' }} transition p-1 hover:bg-purple-50 rounded-full" title="Toggle Transcript">
+                                            <button type="submit" class="{{ $meeting['transcript_enabled'] ? 'text-purple-600 hover:text-purple-700' : 'text-gray-400 hover:text-gray-600' }} transition p-1 hover:bg-white rounded-full" title="Toggle Transcript">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     @if($meeting['transcript_enabled'])
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -198,7 +198,7 @@
                             <!-- Icon & Title -->
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-3">
-                                    <div class="w-10 h-10 {{ $meeting['is_locked'] ? 'bg-gray-100 text-gray-400' : 'bg-blue-50 text-blue-600' }} rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <div class="w-10 h-10 {{ $meeting['is_locked'] ? 'bg-white text-gray-400' : 'bg-white text-blue-600' }} rounded-xl flex items-center justify-center flex-shrink-0">
                                         <span class="font-bold text-lg">{{ $number }}</span>
                                     </div>
                                     <h3 class="font-bold text-gray-800 leading-tight line-clamp-2" title="{{ $title }}">{{ $title }}</h3>
@@ -207,7 +207,7 @@
                             
                             <!-- Score -->
                             @if($meeting['completed'])
-                                <div class="mb-4 mt-2 py-2 px-3 bg-blue-50 rounded-xl border border-blue-100 flex items-center justify-between">
+                                <div class="mb-4 mt-2 py-2 px-3 bg-white rounded-xl border border-blue-100 flex items-center justify-between">
                                     <span class="text-xs font-bold text-blue-600 uppercase">Score</span>
                                     <span class="font-bold text-blue-700">{{ $meeting['score'] }}%</span>
                                 </div>
@@ -222,7 +222,7 @@
                                     Start Lesson
                                 </a>
                             @else
-                                <button disabled class="block w-full py-2.5 bg-gray-100 text-gray-400 text-center rounded-xl font-bold cursor-not-allowed text-sm">
+                                <button disabled class="block w-full py-2.5 bg-white text-gray-400 text-center rounded-xl font-bold cursor-not-allowed text-sm">
                                     Locked
                                 </button>
                             @endif

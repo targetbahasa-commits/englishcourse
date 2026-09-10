@@ -64,7 +64,7 @@
     <p class="mb-2 text-gray-700">Complete the tutor's summary notes on Melanie below.</p>
     <p class="mb-6 text-gray-700">Write <strong>NO MORE THAN THREE WORDS</strong> for each answer.</p>
 
-    <div class="border border-gray-300 rounded-lg p-5 max-w-2xl bg-gray-50">
+    <div class="border border-gray-300 rounded-lg p-5 max-w-2xl bg-white">
         <p class="font-bold text-gray-800 mb-3 text-center">Notes on Student Essays</p>
         <div class="text-gray-700" style="line-height: 3rem;">
             <p style="line-height: 3rem;">

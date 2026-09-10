@@ -45,6 +45,13 @@
                                 💳 Payment {{ $emailLog->payment->invoice_number }}
                             </a>
                         </div>
+                    @elseif($emailLog->related_type)
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-gray-500 font-medium w-16">Related:</span>
+                            <span class="inline-flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                                {{ ucfirst(str_replace('_', ' ', $emailLog->related_type)) }} #{{ $emailLog->related_id }}
+                            </span>
+                        </div>
                     @endif
                 </div>
                 <div class="flex items-center gap-2">

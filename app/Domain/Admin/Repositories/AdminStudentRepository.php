@@ -22,6 +22,8 @@ interface AdminStudentRepository
 
     public function getLatestTest(int $userId): mixed;
 
+    public function getLatestFinalTest(int $userId): mixed;
+
     public function assignTeacher(mixed $student, ?int $teacherId): string;
 
     public function quickUpdate(mixed $student, array $data): void;

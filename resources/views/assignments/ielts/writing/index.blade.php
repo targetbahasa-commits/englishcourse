@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', 'IELTS Writing - Task ' . ($task ?? 1))
+
 @section('content')
 <div class="container mx-auto px-4 py-8" x-data="{ 
     showModal: false, 
@@ -59,7 +61,7 @@
                     @csrf
                     <input type="hidden" name="program_id" value="{{ $batchProgram?->id }}">
                     <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                    <select name="class_period_id" class="border-none bg-gray-50 rounded-lg text-sm focus:ring-2 focus:ring-red-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
+                    <select name="class_period_id" class="border-none bg-white rounded-lg text-sm focus:ring-2 focus:ring-red-500 min-w-[220px]" {{ !$batchProgram ? 'disabled' : '' }}>
                         @if(!$batchProgram)
                             <option value="" selected>No program found</option>
                         @elseif($batchProgram->classPeriods->isEmpty())
@@ -79,7 +81,7 @@
             @else
                 <div class="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
                     <span class="text-sm font-semibold text-gray-600 pl-2">Class Period:</span>
-                    <div class="bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium text-gray-800 min-w-[220px]">
+                    <div class="bg-white px-4 py-2 rounded-lg text-sm font-medium text-gray-800 min-w-[220px]">
                         {{ $selectedClassPeriod->name ?? 'No Batch Active' }}
                     </div>
                 </div>
@@ -90,7 +92,7 @@
                 $calendarBatchName = addslashes($batchProgram->name ?? 'Assignments');
             @endphp
             @if($calendarClassPeriodId)
-                <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 text-sm text-gray-600">
+                <button type="button" onclick="event.preventDefault(); (function(){ const cp='{{ $calendarClassPeriodId }}'; if(!cp){ alert('Batch kelas tidak tersedia.'); return; } window.dispatchEvent(new CustomEvent('open-batch-calendar',{detail:{classPeriodId:cp,batchName:{!! json_encode($calendarBatchName) !!}}})); })()" class="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-white text-sm text-gray-600">
                     Lihat Kalender
                 </button>
             @endif
@@ -108,22 +110,103 @@
             <h2 class="text-2xl font-bold text-gray-800">Practice Tests</h2>
         </div>
 
+        @if(!empty($isGeneral))
+        <div id="ielts-writing-tasks" class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <!-- Task 1 Formal Letter Card -->
+            <a href="{{ route('assignments.ielts-general.writing.index', ['task' => 1, 'letter_type' => 'formal']) }}" class="group relative overflow-hidden bg-white rounded-3xl shadow-lg border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-bl-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+
+                <div class="relative z-10 flex flex-col h-full items-center text-center">
+                    <div class="w-20 h-20 bg-white text-teal-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-teal-600 group-hover:text-white transition-colors duration-300">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+
+                    <h3 class="text-3xl font-bold text-gray-800 mb-3 group-hover:text-teal-600 transition-colors">Task 1</h3>
+                    <p class="text-gray-500 font-medium mb-2">Formal Letter</p>
+                    <p class="text-sm text-gray-400">Write a formal letter to an authority, company, or organization in response to a given situation.</p>
+
+                    <div class="mt-8 flex items-center text-teal-600 font-bold group-hover:translate-x-2 transition-transform">
+                        @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                            <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Kerjakan Ulang ↺</span>
+                        @else
+                            <span>Start Practice</span>
+                        @endif
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Task 1 Informal Letter Card -->
+            <a href="{{ route('assignments.ielts-general.writing.index', ['task' => 1, 'letter_type' => 'informal']) }}" class="group relative overflow-hidden bg-white rounded-3xl shadow-lg border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-bl-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+
+                <div class="relative z-10 flex flex-col h-full items-center text-center">
+                    <div class="w-20 h-20 bg-white text-sky-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-sky-600 group-hover:text-white transition-colors duration-300">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+
+                    <h3 class="text-3xl font-bold text-gray-800 mb-3 group-hover:text-sky-600 transition-colors">Task 1</h3>
+                    <p class="text-gray-500 font-medium mb-2">Informal Letter</p>
+                    <p class="text-sm text-gray-400">Write a semi-formal or informal letter to a friend or relative in response to a given everyday situation.</p>
+
+                    <div class="mt-8 flex items-center text-sky-600 font-bold group-hover:translate-x-2 transition-transform">
+                        @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                            <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Kerjakan Ulang ↺</span>
+                        @else
+                            <span>Start Practice</span>
+                        @endif
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Task 2 Card -->
+            <a href="{{ route('assignments.ielts-general.writing.index', ['task' => 2]) }}" class="group relative overflow-hidden bg-white rounded-3xl shadow-lg border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-bl-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+
+                <div class="relative z-10 flex flex-col h-full items-center text-center">
+                    <div class="w-20 h-20 bg-white text-orange-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-orange-600 group-hover:text-white transition-colors duration-300">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                        </svg>
+                    </div>
+
+                    <h3 class="text-3xl font-bold text-gray-800 mb-3 group-hover:text-orange-600 transition-colors">Task 2</h3>
+                    <p class="text-gray-500 font-medium mb-2">Essay Writing</p>
+                    <p class="text-sm text-gray-400">Write a formal essay in response to a point of view, argument or problem.</p>
+
+                    <div class="mt-8 flex items-center text-orange-600 font-bold group-hover:translate-x-2 transition-transform">
+                        @if(!empty($isClassEnded) && Auth::user()->isStudent())
+                            <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Kerjakan Ulang ↺</span>
+                        @else
+                            <span>Start Practice</span>
+                        @endif
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </div>
+                </div>
+            </a>
+        </div>
+        @else
         <div id="ielts-writing-tasks" class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <!-- Task 1 Card -->
-            <a href="{{ !empty($isGeneral) ? route('assignments.ielts-general.writing.index', ['task' => 1]) : route('assignments.ielts-academic.writing.index', ['task' => 1]) }}" class="group relative overflow-hidden bg-white rounded-3xl shadow-lg border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-bl-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
-                
+            <a href="{{ route('assignments.ielts-academic.writing.index', ['task' => 1]) }}" class="group relative overflow-hidden bg-white rounded-3xl shadow-lg border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-bl-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+
                 <div class="relative z-10 flex flex-col h-full items-center text-center">
-                    <div class="w-20 h-20 bg-teal-100 text-teal-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-teal-600 group-hover:text-white transition-colors duration-300">
+                    <div class="w-20 h-20 bg-white text-teal-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-teal-600 group-hover:text-white transition-colors duration-300">
                         <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                     </div>
-                    
+
                     <h3 class="text-3xl font-bold text-gray-800 mb-3 group-hover:text-teal-600 transition-colors">Task 1</h3>
-                    <p class="text-gray-500 font-medium mb-2">{{ !empty($isGeneral) ? 'Letter Writing' : 'Academic Report' }}</p>
-                    <p class="text-sm text-gray-400">{{ !empty($isGeneral) ? 'Write a formal, semi-formal, or informal letter in response to a given everyday situation.' : 'Describe visual information (graphs, charts, tables) in roughly 150 words.' }}</p>
-                    
+                    <p class="text-gray-500 font-medium mb-2">Academic Report</p>
+                    <p class="text-sm text-gray-400">Describe visual information (graphs, charts, tables) in roughly 150 words.</p>
+
                     <div class="mt-8 flex items-center text-teal-600 font-bold group-hover:translate-x-2 transition-transform">
                         @if(!empty($isClassEnded) && Auth::user()->isStudent())
                             <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Kerjakan Ulang ↺</span>
@@ -136,20 +219,20 @@
             </a>
 
             <!-- Task 2 Card -->
-            <a href="{{ !empty($isGeneral) ? route('assignments.ielts-general.writing.index', ['task' => 2]) : route('assignments.ielts-academic.writing.index', ['task' => 2]) }}" class="group relative overflow-hidden bg-white rounded-3xl shadow-lg border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
-                
+            <a href="{{ route('assignments.ielts-academic.writing.index', ['task' => 2]) }}" class="group relative overflow-hidden bg-white rounded-3xl shadow-lg border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-bl-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+
                 <div class="relative z-10 flex flex-col h-full items-center text-center">
-                    <div class="w-20 h-20 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-orange-600 group-hover:text-white transition-colors duration-300">
+                    <div class="w-20 h-20 bg-white text-orange-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-orange-600 group-hover:text-white transition-colors duration-300">
                         <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
                         </svg>
                     </div>
-                    
+
                     <h3 class="text-3xl font-bold text-gray-800 mb-3 group-hover:text-orange-600 transition-colors">Task 2</h3>
                     <p class="text-gray-500 font-medium mb-2">Essay Writing</p>
                     <p class="text-sm text-gray-400">Write a formal essay in response to a point of view, argument or problem.</p>
-                    
+
                     <div class="mt-8 flex items-center text-orange-600 font-bold group-hover:translate-x-2 transition-transform">
                         @if(!empty($isClassEnded) && Auth::user()->isStudent())
                             <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Kerjakan Ulang ↺</span>
@@ -161,6 +244,7 @@
                 </div>
             </a>
         </div>
+        @endif
     </div>
     @include('components.meetings-calendar-modal')
 </div>

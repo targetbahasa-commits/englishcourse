@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Mail;
 class AssignmentController extends Controller
 {
     use EvaluatesClassPeriodEnd;
+    use \App\Application\GrammarWriting\Concerns\ScoresWordMatchAnswers;
     private const TEMP_FULL_ASSIGNMENT_ACCESS_EMAILS = [
         'student4@dummy.com',
     ];
@@ -31,6 +32,10 @@ class AssignmentController extends Controller
             $user = Auth::user();
 
             if ($user && ($user->isGuest() || $user->isTestTaker())) {
+                $routeName = $request->route()?->getName() ?? '';
+                if (str_starts_with($routeName, 'assignments.pte-academic')) {
+                    return $next($request);
+                }
                 return redirect()->route('guest.free-tests')
                     ->with('error', 'Guest account does not have access to assignments.');
             }
@@ -49,7 +54,7 @@ class AssignmentController extends Controller
                 $enrollments = \App\Models\Enrollment::where('user_id', $user->id)->whereIn('status', ['active', 'completed'])->whereNotNull('class_period_id')->with('program')->get();
                 foreach ($enrollments as $enr) { if ($enr->program) $rawSlugs[] = $enr->program->slug; }
                 
-                $hasFullAccess = in_array('ielts-academic-full-package', $rawSlugs) || in_array('ielts-academic', $rawSlugs) || $this->hasTemporaryFullAssignmentAccess($user);
+                $hasFullAccess = in_array('ielts-academic-full-package', $rawSlugs) || in_array('ielts-academic-all-sections', $rawSlugs) || in_array('ielts-academic', $rawSlugs) || $this->hasTemporaryFullAssignmentAccess($user);
                 
                 if (!$hasFullAccess) {
                     if (str_contains($routeName, '.listening.') && !in_array('ielts-academic-listening', $rawSlugs)) {
@@ -81,11 +86,13 @@ class AssignmentController extends Controller
             'fast-track-grammar-for-writing',
         ];
 
-        // Slugs for the 3 Speaking sub-classes (shown inside the group page)
+        // Slugs for the 5 Speaking sub-classes (shown inside the group page)
         $speakingSubSlugs = [
             'introductory-speaking',
             'intermediate-speaking',
             'advanced-speaking',
+            'proficiency-speaking',
+            'super-speaking',
         ];
 
         // Exclude internal/helper programs AND the Grammar/Speaking sub-programs from the main dashboard
@@ -156,14 +163,14 @@ class AssignmentController extends Controller
             }
         }
 
-        $hasFullAccess = $user && ($user->isAdmin() || $user->isTeacher() || in_array('ielts-academic-full-package', $rawSlugs) || in_array('ielts-academic', $rawSlugs));
-        
+        $hasFullAccess = $user && ($user->isAdmin() || $user->isTeacher() || in_array('ielts-academic-full-package', $rawSlugs) || in_array('ielts-academic-all-sections', $rawSlugs) || in_array('ielts-academic', $rawSlugs));
+
         $hasListening = $hasFullAccess || in_array('ielts-academic-listening', $rawSlugs);
         $hasReading = $hasFullAccess || in_array('ielts-academic-reading', $rawSlugs);
         $hasWriting = $hasFullAccess || in_array('ielts-academic-writing', $rawSlugs);
         $hasSpeaking = $hasFullAccess || in_array('ielts-academic-speaking', $rawSlugs);
 
-        $isClassEnded = $user?->isStudent() ? $this->isStudentClassPeriodEnded('ielts-academic-full-package') : false;
+        $isClassEnded = $user?->isStudent() ? $this->isStudentClassPeriodEnded('ielts-academic') : false;
 
         return view('ielts.writing.index', compact('hasListening', 'hasReading', 'hasWriting', 'hasSpeaking', 'hasFullAccess', 'isClassEnded'));
     }
@@ -177,7 +184,53 @@ class AssignmentController extends Controller
 
         $isClassEnded = $user?->isStudent() ? $this->isStudentClassPeriodEnded('pte-academic') : false;
 
-        return view('assignments.pte-academic', compact('isClassEnded'));
+        $results = \App\Models\PtePracticeResult::where('user_id', $user->id)->get();
+        $listening = []; $reading = []; $speaking = []; $writing = [];
+        $latestAttemptDate = null;
+
+        $listeningKeys = ['summarize-spoken-text', 'sst', 'listening-multiple-choice-multiple-answer', 'lmcma', 'listening-mcma', 'listening-fill-blanks', 'lfb', 'listening-highlight-correct-summary', 'lhcs', 'listening-multiple-choice-single-answer', 'lmcsa', 'listening-mcsa', 'listening-select-missing-word', 'smw', 'listening-highlight-incorrect-words', 'hiw', 'listening-write-from-dictation', 'wfd'];
+        $readingKeys   = ['reading-fill-blanks', 'rfib', 'reading-writing-fill-blanks', 'rwfib', 'reorder-paragraphs', 'reorder', 'multiple-choice-multiple-answer', 'mcma', 'multiple-choice-single-answer', 'mcsa'];
+        $speakingKeys  = ['read-aloud', 'ra', 'repeat-sentence', 'rs', 'describe-image', 'di', 'retell-lecture', 'rl', 'answer-short-question', 'asq', 'summarize-group-discussion', 'sgd', 'respond-to-a-situation', 'rts'];
+        $writingKeys   = ['summarize-written-text', 'swt', 'write-essay', 'we'];
+
+        foreach ($results as $res) {
+            $scaled = ($res->max_score == 90 || $res->score > 10) ? $res->score : round(10 + ($res->score / max(1, $res->max_score)) * 80);
+            $mod = strtolower(trim($res->module));
+
+            if (in_array($mod, $listeningKeys) || str_contains($mod, 'listening') || str_contains($mod, 'spoken') || str_contains($mod, 'dictation')) {
+                $listening[] = $scaled;
+            } elseif (in_array($mod, $readingKeys) || str_contains($mod, 'reading') || str_contains($mod, 'reorder')) {
+                $reading[] = $scaled;
+            } elseif (in_array($mod, $speakingKeys) || str_contains($mod, 'speaking') || str_contains($mod, 'aloud') || str_contains($mod, 'repeat') || str_contains($mod, 'describe') || str_contains($mod, 'retell') || str_contains($mod, 'short-question') || str_contains($mod, 'situation')) {
+                $speaking[] = $scaled;
+            } elseif (in_array($mod, $writingKeys) || str_contains($mod, 'writing') || str_contains($mod, 'essay') || str_contains($mod, 'written')) {
+                $writing[] = $scaled;
+            }
+
+            if (!$latestAttemptDate || $res->created_at > $latestAttemptDate) {
+                $latestAttemptDate = $res->created_at;
+            }
+        }
+
+        $avgListening = count($listening) ? round(array_sum($listening) / count($listening)) : 0;
+        $avgReading   = count($reading) ? round(array_sum($reading) / count($reading)) : 0;
+        $avgSpeaking  = count($speaking) ? round(array_sum($speaking) / count($speaking)) : 0;
+        $avgWriting   = count($writing) ? round(array_sum($writing) / count($writing)) : 0;
+
+        $validScores = array_filter([$avgListening, $avgReading, $avgSpeaking, $avgWriting]);
+        $overallScore = count($validScores) ? round(array_sum($validScores) / count($validScores)) : 0;
+
+        $pteScores = [
+            'listening' => $avgListening,
+            'reading'   => $avgReading,
+            'speaking'  => $avgSpeaking,
+            'writing'   => $avgWriting,
+            'overall'   => $overallScore,
+            'latest_date' => $latestAttemptDate ? $latestAttemptDate->format('d M Y') : date('d M Y'),
+            'total_attempts' => $results->count(),
+        ];
+
+        return view('assignments.pte-academic', compact('isClassEnded', 'pteScores'));
     }
 
     public function finalTestIndex()
@@ -253,24 +306,28 @@ class AssignmentController extends Controller
         $grammarPrograms = collect([
             [
                 'name' => 'Introductory Grammar for Writing',
+                'short_name' => 'Introductory',
                 'variant' => 'introductory',
                 'settings_slug' => 'introductory-grammar-for-writing',
                 'route' => route('final-test.show', ['program' => 'grammar-for-writing', 'variant' => 'introductory']),
             ],
             [
                 'name' => 'Grammar for Writing Complexity',
+                'short_name' => 'Complexity',
                 'variant' => 'complexity',
                 'settings_slug' => 'complexity-grammar-for-writing',
                 'route' => route('final-test.show', ['program' => 'grammar-for-writing', 'variant' => 'complexity']),
             ],
             [
                 'name' => 'Grammar for Writing Proficiency',
+                'short_name' => 'Proficiency',
                 'variant' => 'proficiency',
                 'settings_slug' => 'proficiency-grammar-for-writing',
                 'route' => route('final-test.show', ['program' => 'grammar-for-writing', 'variant' => 'proficiency']),
             ],
             [
                 'name' => 'Grammar for Writing Fast Track',
+                'short_name' => 'Fast Track',
                 'variant' => 'fast-track',
                 'settings_slug' => 'fast-track-grammar-for-writing',
                 'route' => route('final-test.show', ['program' => 'grammar-for-writing', 'variant' => 'fast-track']),
@@ -281,28 +338,32 @@ class AssignmentController extends Controller
                 $program['enabled'] = (bool) ($settings['enabled'] ?? true);
                 $program['class_period_ids'] = array_values(array_map('intval', $settings['class_period_ids'] ?? []));
                 $program['batch_allowed'] = $this->userCanAccessFinalTestBatch($user, $program['class_period_ids'], $userClassPeriodIds);
+                $program['track_unlocked'] = $this->isGrammarWritingTrackUnlockedForUser($user, $program['variant']);
 
                 return $program;
             })
-            ->filter(fn (array $program) => $user?->isAdmin() || ($program['enabled'] && $program['batch_allowed']))
+            ->filter(fn (array $program) => $user?->isAdmin() || ($program['enabled'] && $program['batch_allowed'] && ($program['track_unlocked'] ?? true)))
             ->values()
             ->all();
 
         $speakingPrograms = collect([
             [
                 'name' => 'Introductory Speaking',
+                'short_name' => 'Introductory',
                 'variant' => 'introductory',
                 'settings_slug' => 'introductory-speaking',
                 'route' => route('final-test.show', ['program' => 'speaking', 'variant' => 'introductory']),
             ],
             [
                 'name' => 'Intermediate Speaking',
+                'short_name' => 'Intermediate',
                 'variant' => 'intermediate',
                 'settings_slug' => 'intermediate-speaking',
                 'route' => route('final-test.show', ['program' => 'speaking', 'variant' => 'intermediate']),
             ],
             [
                 'name' => 'Advanced Speaking',
+                'short_name' => 'Advanced',
                 'variant' => 'advanced',
                 'settings_slug' => 'advanced-speaking',
                 'route' => route('final-test.show', ['program' => 'speaking', 'variant' => 'advanced']),
@@ -526,6 +587,11 @@ class AssignmentController extends Controller
                 return redirect()->route('final-test')
                     ->with('error', 'Anda hanya dapat mengakses Final Test untuk program kelas yang Anda ambil.');
             }
+
+            if ($program === 'grammar-for-writing' && !$this->isGrammarWritingTrackUnlockedForUser($user, $variant)) {
+                return redirect()->route('assignments.grammar-writing.track', ['track' => $variant ?? 'fast-track'])
+                    ->with('error', 'Final Test masih terkunci. Semua pertemuan harus dibuka terlebih dahulu.');
+            }
         } elseif (!empty($allowedAssignmentProgramSlugs) && !in_array($program, $allowedAssignmentProgramSlugs, true)) {
             return redirect()->route('final-test')
                 ->with('error', 'You can only access final tests for your registered program.');
@@ -551,7 +617,42 @@ class AssignmentController extends Controller
 
         $displayBatch = $user?->isAdmin() || $user?->isTeacher() ? $allowedBatchesText : $studentBatchName;
 
-        return view('assignments.final-test.show', compact('program', 'variant', 'selectedProgram', 'variantLabel', 'displayBatch'));
+        $testData = null;
+        if ($program === 'grammar-for-writing') {
+            $testData = $this->getGrammarForWritingFinalTestData($variant);
+        }
+
+        $savedDraft = $user
+            ? \App\Models\FinalTestDraft::where('user_id', $user->id)->where('test_type', $settingsKey)->first()
+            : null;
+
+        return view('assignments.final-test.show', compact('program', 'variant', 'selectedProgram', 'variantLabel', 'displayBatch', 'testData', 'savedDraft'));
+    }
+
+    public function saveFinalTestDraft(Request $request, string $program, ?string $variant = null)
+    {
+        $validated = $request->validate([
+            'paragraphs' => ['nullable', 'array'],
+            'time_spent_seconds' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false], 401);
+        }
+
+        $settingsKey = $this->resolveFinalTestSettingsKey($program, $variant);
+
+        \App\Models\FinalTestDraft::updateOrCreate(
+            ['user_id' => $user->id, 'test_type' => $settingsKey],
+            [
+                'answers' => $validated['paragraphs'] ?? [],
+                'time_spent_seconds' => $validated['time_spent_seconds'] ?? null,
+                'last_saved_at' => now(),
+            ]
+        );
+
+        return response()->json(['success' => true]);
     }
 
     public function completeFinalTest(Request $request, string $program, ?string $variant = null)
@@ -560,6 +661,7 @@ class AssignmentController extends Controller
             'score' => ['nullable', 'numeric', 'min:0', 'max:999'],
             'time_spent_seconds' => ['nullable', 'integer', 'min:0'],
             'answers' => ['nullable', 'array'],
+            'paragraphs' => ['nullable', 'array'],
         ]);
 
         $access = $this->resolveFinalTestAccess($program, $variant);
@@ -574,6 +676,17 @@ class AssignmentController extends Controller
         $testLabel = $this->finalTestDisplayLabel($program, $variant, $access['selectedProgram']);
         $timeSpent = (int) ($validated['time_spent_seconds'] ?? 0);
         $score = $validated['score'] ?? 100;
+        $answersData = $validated['answers'] ?? [];
+
+        $paragraphAnswers = $request->input('paragraphs', []);
+        $fullTranslation = trim((string) $request->input('full_translation', ''));
+
+        if ($program === 'grammar-for-writing' && (!empty($fullTranslation) || !empty($paragraphAnswers))) {
+            $testData = $this->getGrammarForWritingFinalTestData($variant);
+            $evaluator = new \App\Application\GrammarWriting\EvaluateGrammarForWritingFinalTest();
+            $answersData = $evaluator->evaluate($paragraphAnswers, $testData);
+            $score = $answersData['score'] ?? 0;
+        }
 
         $result = FinalTestResult::create([
             'user_id' => $user?->id,
@@ -586,7 +699,7 @@ class AssignmentController extends Controller
             'duration_minutes' => $timeSpent > 0 ? (int) ceil($timeSpent / 60) : null,
             'time_spent_seconds' => $timeSpent ?: null,
             'score' => $score,
-            'answers_data' => $validated['answers'] ?? [],
+            'answers_data' => $answersData,
             'evaluation_data' => [
                 'certificate_email_status' => 'pending',
                 'completed_from' => 'final_test',
@@ -594,6 +707,10 @@ class AssignmentController extends Controller
             'started_at' => $timeSpent > 0 ? now()->subSeconds($timeSpent) : now(),
             'completed_at' => now(),
         ]);
+
+        if ($user) {
+            \App\Models\FinalTestDraft::where('user_id', $user->id)->where('test_type', $settingsKey)->delete();
+        }
 
         $emailStatus = $this->sendFinalTestCertificateEmail($result);
 
@@ -604,6 +721,11 @@ class AssignmentController extends Controller
                 : ($emailStatus === 'queued'
                     ? 'Final test completed. Certificate email has been queued for delivery.'
                     : 'Final test completed, but sending the certificate email failed. Please contact support.'));
+    }
+
+    public function getGrammarForWritingFinalTestData(?string $variant = null): array
+    {
+        return (new \App\Application\GrammarWriting\GrammarForWritingFinalTestCatalog())->getData($variant);
     }
 
     public function showFinalTestResult(FinalTestResult $result)
@@ -697,7 +819,7 @@ class AssignmentController extends Controller
             }
         }
 
-        $hasFullAccess = $user && ($user->isAdmin() || $user->isTeacher() || in_array('ielts-general-full-package', $rawSlugs) || in_array('ielts-general', $rawSlugs) || in_array('ielts-academic', $rawSlugs) || in_array('ielts-academic-full-package', $rawSlugs));
+        $hasFullAccess = $user && ($user->isAdmin() || $user->isTeacher() || in_array('ielts-general-full-package', $rawSlugs) || in_array('ielts-general', $rawSlugs) || in_array('ielts-academic', $rawSlugs) || in_array('ielts-academic-full-package', $rawSlugs) || in_array('ielts-academic-all-sections', $rawSlugs));
         
         $hasListening = $hasFullAccess || in_array('ielts-general-listening', $rawSlugs) || in_array('ielts-academic-listening', $rawSlugs);
         $hasReading = $hasFullAccess || in_array('ielts-general-reading', $rawSlugs);
@@ -881,6 +1003,11 @@ class AssignmentController extends Controller
                 return redirect()->route('final-test')
                     ->with('error', 'Anda hanya dapat mengakses Final Test untuk program kelas yang Anda ambil.');
             }
+
+            if ($program === 'grammar-for-writing' && !$this->isGrammarWritingTrackUnlockedForUser($user, $variant)) {
+                return redirect()->route('assignments.grammar-writing.track', ['track' => $variant ?? 'fast-track'])
+                    ->with('error', 'Final Test masih terkunci. Semua pertemuan harus dibuka terlebih dahulu.');
+            }
         } else {
             $allowedAssignmentProgramSlugs = $this->resolveAllowedAssignmentProgramSlugsForUser($user);
             if (!empty($allowedAssignmentProgramSlugs) && !in_array($program, $allowedAssignmentProgramSlugs, true)) {
@@ -890,6 +1017,52 @@ class AssignmentController extends Controller
         }
 
         return ['selectedProgram' => $selectedProgram, 'settingsKey' => $settingsKey];
+    }
+
+    protected function isGrammarWritingTrackUnlockedForUser(?\App\Models\User $user, ?string $variant): bool
+    {
+        if (!$variant) {
+            return true;
+        }
+
+        $trackProgramSlug = match ($variant) {
+            'fast-track' => 'fast-track-grammar-for-writing',
+            'introductory' => 'introductory-grammar-for-writing',
+            'complexity' => 'complexity-grammar-for-writing',
+            'proficiency' => 'proficiency-grammar-for-writing',
+            default => null,
+        };
+
+        if (!$trackProgramSlug) {
+            return true;
+        }
+
+        $trackProgram = \App\Models\Program::where('slug', $trackProgramSlug)->with('meetings')->first();
+        if (!$trackProgram || $trackProgram->meetings->isEmpty()) {
+            return true;
+        }
+
+        $selectedClassPeriod = null;
+        $periodMeetingStatus = collect();
+        if ($user) {
+            $enrollment = $user->enrollments()->where('program_id', $trackProgram->id)->whereHas('classPeriod')->first();
+            $selectedClassPeriod = $enrollment?->classPeriod;
+            if ($selectedClassPeriod) {
+                $periodMeetingStatus = $selectedClassPeriod->meetings()->pluck('class_period_meetings.is_open', 'meetings.id');
+            }
+        }
+
+        foreach ($trackProgram->meetings as $meeting) {
+            $isLocked = $selectedClassPeriod
+                ? !((bool) ($periodMeetingStatus[$meeting->id] ?? false))
+                : $meeting->isLockedFor($user);
+
+            if ($isLocked) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     protected function finalTestCertificateType(string $settingsKey): string
@@ -931,7 +1104,7 @@ class AssignmentController extends Controller
     {
         $user = $result->user ?: (object) ['name' => $result->name ?: 'Student'];
 
-        return Pdf::loadView('final-tests.certificate-pdf', [
+        return Pdf::loadView('free-tests.certificate-pdf', [
             'user' => $user,
             'result' => $result,
             'certificate' => $certificate,
@@ -1148,7 +1321,7 @@ class AssignmentController extends Controller
             ->map(fn ($slug) => $this->normalizeAssignmentProgramSlug($slug))
             ->all();
 
-        $allowedProgramSlugs = array_merge($allowedProgramSlugs, $enrollmentProgramSlugs, $accessProgramSlugs, ['ielts-academic']);
+        $allowedProgramSlugs = array_merge($allowedProgramSlugs, $enrollmentProgramSlugs, $accessProgramSlugs);
 
         return array_values(array_unique(array_filter($allowedProgramSlugs)));
     }
@@ -1166,7 +1339,7 @@ class AssignmentController extends Controller
             'intermediate-speaking',
             'advanced-speaking' => 'speaking',
             'pte' => 'pte-academic',
-            'ielts-academic-listening', 'ielts-academic-reading', 'ielts-academic-full-package' => 'ielts-academic',
+            'ielts-academic-listening', 'ielts-academic-reading', 'ielts-academic-writing', 'ielts-academic-speaking', 'ielts-academic-full-package', 'ielts-academic-all-sections' => 'ielts-academic',
             default => $slug,
         };
     }
@@ -3770,7 +3943,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
     private function queryAI($prompt, $jsonMode = false, $timeout = 300, $maxTokens = 4096)
     {
         $payload = [
-            'model' => 'llama-3.3-70b-versatile',
+            'model' => 'openai/gpt-oss-120b',
             'messages' => [
                 ['role' => 'system', 'content' => $jsonMode ? 'Output ONLY valid JSON.' : 'You are a helpful assistant.'],
                 ['role' => 'user', 'content' => $prompt]
@@ -3818,7 +3991,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             
             try {
                 $client = new \GuzzleHttp\Client();
-                $geminiResponse = $client->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$geminiKey}", [
+                $geminiResponse = $client->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$geminiKey}", [
                     'headers' => ['Content-Type' => 'application/json'],
                     'json' => $geminiPayload,
                     'timeout' => $timeout
@@ -3836,902 +4009,6 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
                 throw new \Exception('All AI services failed (Groq and Gemini). Last error: ' . $geminiE->getMessage());
             }
         }
-    }
-
-    public function evaluateIeltsWriting(Request $request)
-    {
-        ini_set('max_execution_time', 1200);
-        set_time_limit(1200); 
-
-        $request->validate([
-            'essay' => 'required|string|min:50',
-            'task_type' => 'required|in:1,2'
-        ]);
-
-        $essay = $request->input('essay');
-        $taskType = $request->input('task_type');
-
-        // STAGE 1 PROMPT: Grading & Scores ONLY (FAST)
-        $bandDescriptors = "";
-        $roleInstruction = "";
-        $criticalRules = "";
-        $reminder = "";
-
-        if ($taskType == 1) {
-            $bandDescriptors = "
-            BAND 9:
-            - TA: Fully satisfies all the requirements of the task. Clearly presents a fully developed response.
-            - CC: Uses cohesion in such a way that it attracts no attention. Skillfully manages paragraphing.
-            - LR: Wide range of vocabulary, very natural. Rare minor errors.
-            - GRA: Wide range of structures with full flexibility. Rare minor errors.
-
-            BAND 8:
-            - TA: Covers all requirements of the task sufficiently. Presents, highlights and illustrates key features/bullet points clearly and appropriately.
-            - CC: Sequences information and ideas logically. Manages all aspects of cohesion well.
-            - LR: Fluent and flexible uses of vocabulary. Occasional inaccuracies allowed.
-            - GRA: Wide range of structures. Majority of sentences are error-free. Occasional errors allowed.
-
-            BAND 7:
-            - TA: Covers the requirements of the task. Presents a clear overview of main trends, differences or stages.
-            - CC: Logically organises information and ideas. Clear progression. Range of cohesive devices.
-            - LR: Sufficient range of vocabulary. Some awareness of style/collocation. Occasional errors in word choice.
-            - GRA: Uses a variety of complex structures. Produces frequent error-free sentences. Good control of grammar/punctuation.
-
-            BAND 6:
-            - TA: Addresses the requirements of the task. Presents an overview with information appropriately selected.
-            - CC: Arranges information coherently. Progression is clear. Cohesion within/between sentences may be faulty/mechanical.
-            - LR: Adequate range for the task. Attempts less common vocabulary with some inaccuracy.
-            - GRA: Mix of simple and complex sentence forms. Errors in grammar/punctuation occur but rarely reduce communication.
-
-            BAND 5:
-            - TA: Generally addresses the task; the format may be inappropriate in places. Recounts detail mechanically with no clear overview.
-            - CC: Presents information with some organization but lack of progression. Inadequate/inaccurate use of cohesive devices.
-            - LR: Limited range of vocabulary. Noticeable errors in spelling/word formation.
-            - GRA: Limited range of structures. Attempts complex sentences but they are less accurate than simple sentences.
-
-            BAND 4:
-            - TA: Attempts to address the task but does not cover all key features/bullet points; the format may be inappropriate.
-            - CC: Presents information but not arranged coherently. Basic cohesive devices used inaccurately.
-            - LR: Basic vocabulary used repetitively.
-            - GRA: Very limited range of structures. Subordinate clauses rare. Errors predominate.
-
-            BAND 3:
-            - TA: Fails to address the task, which may have been completely misunderstood.
-            - CC: Does not organize ideas logically. Very limited cohesive devices.
-            - LR: Very limited range of words/expressions. Errors severely distort meaning.
-            - GRA: Attempts sentence forms but errors predominate and distort meaning.
-            ";
-
-            $roleInstruction = "Role: Bertindaklah sebagai Senior IELTS Writing Examiner yang sangat berpengalaman, OBJEKTIF, dan TEGAS (RUTHLESS). Tugas Anda adalah menilai laporan IELTS Writing Task 1 berdasarkan standar resmi \"IELTS Writing Task 1 Band Descriptors (Public Version)\".
-            
-            Instructions: Lakukan analisis mendalam terhadap laporan yang diberikan berdasarkan empat kriteria utama:
-            - Task Achievement (TA): Sejauh mana laporan memenuhi persyaratan tugas, memberikan gambaran umum (overview) yang jelas tentang tren/perbedaan/tahapan utama, dan menyajikan poin-poin kunci secara jelas.
-            - Coherence and Cohesion (CC): Logika pengaturan informasi, penggunaan kata penghubung (cohesive devices), dan efektivitas penggunaan paragraf.
-            - Lexical Resource (LR): Variasi kosakata, ketepatan penggunaan kata (collocation), dan akurasi ejaan/pembentukan kata.
-            - Grammatical Range and Accuracy (GRA): Variasi struktur kalimat (simple vs complex) dan tingkat kesalahan tata bahasa serta tanda baca.
-            ";
-
-            $criticalRules = "
-            CRITICAL SCORING RULES (Task 1):
-            1. WORD COUNT PENALTY (Task Achievement):
-               - If the report is UNDER 150 words, the Task Achievement (TA) score MUST be penalized.
-               - TA cannot exceed Band 5.0 if the report is significantly underlength.
-            2. NO OVERVIEW (Task Achievement):
-               - If there is NO clear overview of main trends, differences, or stages, Task Achievement cannot exceed Band 5.0.
-            ";
-
-            $reminder = "
-            REMINDER:
-            - Report < 150 words? -> TA Max 5.0
-            - No Overview? -> TA Max 5.0
-            ";
-
-        } else {
-            // Task 2 Logic (Existing)
-            $bandDescriptors = "
-            BAND 9:
-            - TR: Fully addresses all parts of the task. Fully developed position.
-            - CC: Uses cohesion in such a way that it attracts no attention. Skillfully manages paragraphing.
-            - LR: Wide range of vocabulary, very natural. Rare minor errors.
-            - GRA: Wide range of structures with full flexibility. Rare minor errors.
-
-            BAND 8:
-            - TR: Sufficiently addresses all parts. Well-developed response.
-            - CC: Sequences information and ideas logically. Manages all aspects of cohesion well.
-            - LR: Fluent and flexible uses of vocabulary. Occasional inaccuracies allowed.
-            - GRA: Wide range of structures. Majority of sentences are error-free. Occasional errors allowed.
-
-            BAND 7:
-            - TR: Addresses all parts of the task. Clear position throughout. Main ideas extended and supported.
-            - CC: Logically organises information and ideas. Clear progression. Range of cohesive devices.
-            - LR: Sufficient range of vocabulary. Some awareness of style/collocation. Occasional errors in word choice.
-            - GRA: Uses a variety of complex structures. Produces frequent error-free sentences. Good control of grammar/punctuation.
-
-            BAND 6:
-            - TR: Addresses all parts (some more fully than others). Relevant position but conclusions may be unclear.
-            - CC: Arranges information coherently. Progression is clear. Cohesion within/between sentences may be faulty/mechanical.
-            - LR: Adequate range for the task. Attempts less common vocabulary with some inaccuracy.
-            - GRA: Mix of simple and complex sentence forms. Errors in grammar/punctuation occur but rarely reduce communication.
-
-            BAND 5:
-            - TR: Addresses the task only partially. Position may be unclear. Main ideas limited/not sufficiently developed.
-            - CC: Presents information with some organization but lack of progression. Inadequate/inaccurate use of cohesive devices.
-            - LR: Limited range of vocabulary. Noticeable errors in spelling/word formation.
-            - GRA: Limited range of structures. Attempts complex sentences but they are less accurate than simple sentences.
-
-            BAND 4:
-            - TR: Responds to task only in minimal way. format may be inappropriate.
-            - CC: Presents information but not arranged coherently. Basic cohesive devices used inaccurately.
-            - LR: Basic vocabulary used repetitively.
-            - GRA: Very limited range of structures. Subordinate clauses rare. Errors predominate.
-
-            BAND 3:
-            - TR: Does not adequately address any part of the task.
-            - CC: Does not organize ideas logically. Very limited cohesive devices.
-            - LR: Very limited range of words/expressions. Errors severely distort meaning.
-            - GRA: Attempts sentence forms but errors predominate and distort meaning.
-            ";
-
-            $roleInstruction = "Role: Bertindaklah sebagai Senior IELTS Writing Examiner yang sangat berpengalaman, OBJEKTIF, dan TEGAS (RUTHLESS). Tugas Anda adalah menilai esai IELTS Writing Task 2 berdasarkan standar resmi \"IELTS Writing Task 2 Band Descriptors (Public Version)\".
-            
-            Instructions: Lakukan analisis mendalam terhadap esai yang diberikan berdasarkan empat kriteria utama:
-            - Task Response (TR): Sejauh mana esai menjawab seluruh bagian soal, kejelasan posisi/argumen, dan pengembangan ide.
-            - Coherence and Cohesion (CC): Logika pengaturan informasi, penggunaan kata penghubung (cohesive devices), dan efektivitas penggunaan paragraf.
-            - Lexical Resource (LR): Variasi kosakata, ketepatan penggunaan kata (collocation), dan akurasi ejaan/pembentukan kata.
-            - Grammatical Range and Accuracy (GRA): Variasi struktur kalimat (simple vs complex) dan tingkat kesalahan tata bahasa serta tanda baca.
-            ";
-
-            $criticalRules = "
-            CRITICAL SCORING RULES (Task 2):
-            1. WORD COUNT PENALTY (Task Response):
-               - If the essay is UNDER 250 words, the Task Response (TR) score MUST be penalized.
-               - TR cannot exceed Band 5.0 if the essay is significantly underlength.
-            ";
-
-            $reminder = "
-            REMINDER:
-            - Essay < 250 words? -> TR Max 5.0
-            ";
-        }
-
-        $prompt = "You are a strict IELTS Examiner. Analyze the following IELTS Writing Task {$taskType} essay.
-        
-        Original Essay:
-        \"{$essay}\"
-
-        Rubric / Band Descriptors ( STRICTLY FOLLOW THESE ):
-        {$bandDescriptors}
-
-        {$roleInstruction}
-    
-        MENTAL STATE:
-        - Anda BUKAN guru yang menyemangati murid. Anda adalah EXAMINER UJIAN RESMI.
-        - Anda menghargai presisi. Esai yang pendek, repetitif, atau terlalu sederhana HARUS dihukum dengan skor rendah.
-        - JANGAN PERNAH merasa \"kasihan\". Skor harus mencerminkan kenyataan. Band 5 adalah skor untuk level \"Modest User\" (banyak kesalahan, kalimat sederhana).
-        - Esai dengan kalimat sederhana seperti \"It is good\" atau \"People like it\" ADALAH BAND 4 atau 5. JANGAN BERI 6.
-
-        Constraint: Gunakan nada yang profesional, konstruktif, dan jujur. Jangan memberikan skor tinggi jika esai masih memiliki kesalahan dasar pada subject-verb agreement atau penggunaan cohesive devices yang mekanis (seperti pada kriteria Band 5 atau 6).
-
-        COMMON CRITICAL SCORING RULES:
-        1. SENTENCE COMPLEXITY (GRA):
-           - If the essay relies mostly on simple sentence structures (e.g., \"Online learning is good. It is easy.\"), the Grammatical Range & Accuracy (GRA) score CANNOT exceed Band 5.0.
-           - Do NOT give high scores just for being \"understandable\" if the structure is too simple.
-        2. VOCABULARY (LR):
-           - If the vocabulary is basic (e.g., \"good\", \"bad\", \"thing\", \"people\"), the Lexical Resource score CANNOT exceed Band 5.0.
-        
-        {$criticalRules}
-
-        Perform the following tasks:
-        1. Grade the essay (Band 1-9) for each rubric and overall based on the above Constraints.
-        
-        Provide a strictly JSON response with this structure:
-        {
-            \"scores\": {
-                \"task_achievement\": 0.0, // (For Task 2, represents Task Response)
-                \"coherence_cohesion\": 0.0,
-                \"lexical_resource\": 0.0,
-                \"grammatical_range\": 0.0,
-                \"overall_band\": 0.0
-            }
-        }
-
-        Do NOT output markdown code blocks. Output ONLY raw JSON. Ensure all double quotes inside strings are strictly escaped.
-        CRITICAL: The example scores above are placeholders (0.0). You MUST generate ACTUAL scores (1.0 - 9.0) based on the essay quality.
-        {$reminder}
-        - Simple sentences only? -> GRA Max 5.0
-        - Basic vocabulary? -> LR Max 5.0";
-        try {
-            $result = $this->queryAI($prompt, true, 1200);
-            $content = $result['content'];
-
-            // Use Robust Extraction
-            $cleanJson = $this->extractJson($content);
-            $json = $this->robustJsonDecode($cleanJson);
-            
-            // Fallback: try aggressive cleanup if first decode failed but we have content
-            if (!$json && $cleanJson) {
-                $cleanJson = $this->cleanJsonString($cleanJson);
-                $json = $this->robustJsonDecode($cleanJson);
-            }
-            
-            if ($json) {
-                $json = $this->sanitizeRecursive($json);
-                $json['status'] = 'success';
-                return response()->json($json);
-            }
-            
-            \Illuminate\Support\Facades\Log::error('IELTS Grading JSON Failure', ['clean_json' => $cleanJson, 'raw' => $content]);
-            return response()->json(['error' => 'AI Response Error', 'status' => 'failed'], 500);
-
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('IELTS Grading Exception', ['message' => $e->getMessage()]);
-            return response()->json(['error' => $e->getMessage(), 'status' => 'failed'], 500);
-        }
-    }
-
-    public function evaluateIeltsFeedback(Request $request)
-    {
-        ini_set('max_execution_time', 600);
-        set_time_limit(600); 
-
-        $request->validate([
-            'essay' => 'required|string|min:50',
-            'task_type' => 'required|in:1,2'
-        ]);
-
-        $essay = $request->input('essay');
-        $taskType = $request->input('task_type');
-
-        // STAGE 2 PROMPT: Detailed Feedback & ALL Improvements (Coherence + Grammar)
-        $scoreCriteria = "";
-        $tone = "";
-
-        if ($taskType == 1) {
-             $scoreCriteria = "
-            - **Task Achievement**: Evaluate how well the prompt is addressed (Overview, Data features, Comparisons). 
-              **CRITICAL**: IF the report is under 150 words, you MUST explicitly state: \"Jumlah kata di bawah 150 kata (Hanya [X] kata). Ini mengurangi skor Task Achievement secara signifikan.\" inside the Task Achievement feedback.
-              **CRITICAL**: IF no Clear Overview, explicitly state it.
-            - **Coherence**: Evaluate paragraphing and linking.
-            - **Lexical**: Evaluate vocabulary range and accuracy.
-            - **Grammar**: Evaluate sentence structures and error density.
-             ";
-             $tone = "
-             TONE & APPROACH (Task 1 Report):
-             1. **Objective & Factual**: Comment on the accuracy of data reporting.
-             2. **Band 6+**: Acknowledge if the overview is clear.
-             ";
-        } else {
-             $scoreCriteria = "
-            - **Task Achievement**: Evaluate how well the prompt is addressed. 
-              **CRITICAL**: IF the essay is under 250 words, you MUST explicitly state: \"Jumlah kata di bawah 250 kata (Hanya [X] kata). Ini mengurangi skor Task Response secara signifikan.\" inside the Task Achievement feedback.
-            - **Coherence**: Evaluate paragraphing and linking.
-            - **Lexical**: Evaluate vocabulary range and accuracy.
-            - **Grammar**: Evaluate sentence structures and error density.
-             ";
-             $tone = "
-             TONE & APPROACH (Task 2 Essay):
-             1. **Professional & Constructive**: Helpful, not discouraging.
-             ";
-        }
-
-        $prompt = "You are a Senior IELTS Writing Examiner. You are experienced, objective, and constructive. Analyze the following IELTS Writing Task {$taskType} essay.
-        
-        Original Essay:
-        \"{$essay}\"
-
-        {$tone}
-        2.  **Band 6+ Context**: If the essay is competent (Band 6.0+), ACKNOWLEDGE the strengths.
-        3.  **Band 4-5 Context**: If the essay has frequent errors, be direct.
-        4.  **Consistency**: Ensure feedback matches the quality.
-
-        Perform the following tasks:
-        1. Provide detailed feedback for each rubric in **Bahasa Indonesia**.
-           - The 'feedback' content MUST be in Indonesian.
-           - Use the word 'kandidat' instead of 'calon'.
-           {$scoreCriteria}
-           - **Overall**: Summarize performance. If Band 6+, be positive but point out the gap to Band 7.
-           - The 'feedback' content MUST be in Indonesian.
-           - **CRITICAL**: The feedback for EACH category MUST be concise, bulleted, and direct (max 3 bullet points).
-           - For 'overall_comment', provide a brief summary of the candidate's performance.
-
-        
-        Provide a strictly JSON response with this structure:
-        {
-            \"feedback\": {
-                \"task_achievement\": \"... (Concise Indonesian feedback, max 3 bullet points)\",
-                \"coherence_cohesion\": \"... (Concise Indonesian feedback, max 3 bullet points)\",
-                \"lexical_resource\": \"... (Concise Indonesian feedback, max 3 bullet points)\",
-                \"grammatical_range\": \"... (Concise Indonesian feedback, max 3 bullet points)\",
-                \"overall_comment\": \"... (Brief Indonesian summary)\"
-            }
-        }
-
-        Do NOT output markdown code blocks. Output ONLY raw JSON. Ensure all double quotes inside strings are strictly escaped.";
-
-        try {
-            $result = $this->queryAI($prompt, true, 1200, 4096);
-            $content = $result['content'];
-
-            // Use Robust Extraction
-            $cleanJson = $this->extractJson($content);
-            $json = $this->robustJsonDecode($cleanJson);
-            
-            // Fallback: try aggressive cleanup if first decode failed but we have content
-            if (!$json && $cleanJson) {
-                $cleanJson = $this->cleanJsonString($cleanJson);
-                $json = $this->robustJsonDecode($cleanJson);
-            }
-            
-            if ($json) {
-                $json = $this->sanitizeRecursive($json);
-                $json['status'] = 'success';
-                \Illuminate\Support\Facades\Log::info('IELTS Feedback Success', ['raw' => substr($content, 0, 100), 'keys' => array_keys($json['feedback'] ?? [])]);
-                return response()->json($json);
-            }
-            \Illuminate\Support\Facades\Log::error('IELTS Feedback JSON Null', ['clean_json' => $cleanJson, 'raw' => $content]);
-            return response()->json(['error' => 'AI Response Error', 'status' => 'failed'], 500);
-
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage(), 'status' => 'failed'], 500);
-        }
-    }
-
-    public function evaluateIeltsCorrection(Request $request)
-    {
-        ini_set('max_execution_time', 1200);
-        set_time_limit(1200); 
-
-        $request->validate([
-            'essay' => 'required|string|min:50',
-            'task_type' => 'required|in:1,2'
-        ]);
-
-        $essay = $request->input('essay');
-        $taskType = $request->input('task_type');
-
-        // STAGE 3 PROMPT: Correction HTML Only
-        $prompt = "You are a strict IELTS Examiner. Analyze the following IELTS Writing Task {$taskType} essay.
-        
-        Original Essay:
-        \"{$essay}\"
-
-        Perform the following tasks:
-        1. Create a 'correction_html' version of the FULL essay (keep text in English).
-           - You MUST return the EXACT original essay text content, paragraph by paragraph.
-           - Do NOT summarize, shorten, or truncate the text. If the essay is long, correct all of it.
-           - Apply the following MARKDOWN tags to the text:
-             * Wrap errors in {RED}error{/RED}
-             * Wrap corrections in {GREEN}correction{/GREEN}
-             * Wrap suggestions/improvements in {YELLOW}suggestion{/YELLOW}
-           - Use <p> tags for each paragraph.
-           - CRITICAL: The output MUST contain the full length of the original essay.
-
-        Provide a strictly JSON response with this structure:
-        {
-            \"correction_html\": \"<p>Full text with highlights...</p>\"
-        }
-
-        Do NOT output markdown code blocks. Output ONLY raw JSON.";
-
-        try {
-            $result = $this->queryAI($prompt, true, 1200, 4096);
-            $content = $result['content'];
-
-            // Use Robust Extraction
-            $cleanJson = $this->extractJson($content);
-            $json = $this->robustJsonDecode($cleanJson);
-
-            // Fallback: try aggressive cleanup if first decode failed but we have content
-            if (!$json && $cleanJson) {
-                $cleanJson = $this->cleanJsonString($cleanJson);
-                $json = $this->robustJsonDecode($cleanJson);
-            }
-            
-            if ($json) {
-                // RECURSIVE SANITIZATION: Remove "undefined" strings from the entire JSON tree
-                $json = $this->sanitizeRecursive($json);
-
-                 $html = $json['correction_html'] ?? '';
-
-                 // Fallback if AI returns garbage, empty, or undefined (even after sanitization)
-                 // Use strpos for PHP 7.x compatibility
-                 // ALSO CHECK FOR "undefined" STRING EXPLICITLY
-                 if (!$html || strlen($html) < 20 || stripos($html, 'undefined') !== false) {
-                     \Illuminate\Support\Facades\Log::warning('IELTS Correction fallback triggered', ['content' => $html]);
-                     // Fallback to original essay
-                     $html = '<p>' . nl2br(e($essay)) . '</p>';
-                 }
-                 
-                 // Apply formatting replacements
-                 if ($html) { 
-                    $replacements = [
-                        '{RED}' => "<span class='grammar-error bg-red-100 text-red-600 rounded px-1 mx-0.5 cursor-pointer' title='Error'>",
-                        '{/RED}' => "</span>",
-                        '{GREEN}' => "<span class='grammar-correction text-green-600 font-bold mx-1'>",
-                        '{/GREEN}' => "</span>",
-                        '{YELLOW}' => "<span class='grammar-improvement bg-yellow-200 text-gray-800 rounded px-1 mx-0.5' title='Suggestion'>",
-                        '{/YELLOW}' => "</span>",
-                        '{/GREEN>}' => "</span>", '/GREEN>' => "</span>", '</GREEN>' => "</span>",
-                        '{/RED>}' => "</span>", '/RED>' => "</span>", '</RED>' => "</span>",
-                        '{/YELLOW>}' => "</span>", '/YELLOW>' => "</span>", '</YELLOW>' => "</span>"
-                    ];
-                    $html = str_replace(array_keys($replacements), array_values($replacements), $html);
-                    $json['correction_html'] = $html;
-                }
-                
-                // Add explicit status
-                $json['status'] = 'success';
-                
-                return response()->json($json);
-            }
-            return response()->json(['error' => 'AI Response Error', 'status' => 'failed'], 500);
-
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage(), 'status' => 'failed'], 500);
-        }
-    }
-
-    public function evaluateIeltsVocabulary(Request $request)
-    {
-        ini_set('max_execution_time', 300);
-        set_time_limit(300);
-
-        $request->validate([
-            'essay' => 'required|string|min:50',
-            'task_type' => 'required|in:1,2'
-        ]);
-
-        $essay = $request->input('essay');
-        $taskType = $request->input('task_type');
-
-        $prompt = "You are a strict IELTS Examiner. Analyze the following IELTS Writing Task {$taskType} essay.
-
-        Original Essay:
-        \"{$essay}\"
-
-        Perform the following task:
-        1. Identify SPECIFIC Lexical Resource issues (Vocabulary & Collocations).
-           - Create a list of 'lexical_improvements'.
-           - Identify simple words or weak collocations used in the essay.
-           - Provide higher-level (Band 7-9) synonyms or collocations.
-           - Explain why the improvement is better in Bahasa Indonesia.
-        
-        2. Provide a list of 'topic_vocabularies' (Band 8/9) that matches the SPECIFIC TOPIC of this essay.
-           - These should be words/phrases the candidate *could have used* to boost their score.
-           - Include 6 items.
-           - 'meaning' MUST be in Bahasa Indonesia.
-
-        Provide a strictly JSON response with this structure:
-        {
-            \"lexical_improvements\": [
-                {
-                    \"text\": \"original weak word/phrase\",
-                    \"improved\": \"better vocabulary/collocation\",
-                    \"explanation\": \"Why this is better (in Indonesian)\"
-                }
-            ],
-            \"topic_vocabularies\": [
-                {
-                    \"term\": \"advanced term/collocation\",
-                    \"meaning\": \"Meaning in Indonesian\",
-                    \"example\": \"English example sentence relevant to this topic\"
-                }
-            ]
-        }
-
-        Do NOT output markdown code blocks. Output ONLY raw JSON.";
-
-        ini_set('max_execution_time', 300); // Allow 5 minutes for generation
-
-        try {
-            $result = $this->queryAI($prompt, true, 4096, 4096);
-            $content = $result['content'];
-
-            $cleanJson = $this->extractJson($content);
-            $json = $this->robustJsonDecode($cleanJson);
-
-            if (!$json && $cleanJson) {
-                $cleanJson = $this->cleanJsonString($cleanJson);
-                $json = $this->robustJsonDecode($cleanJson);
-            }
-
-            if ($json) {
-                $json['status'] = 'success';
-                return response()->json($json);
-            }
-            return response()->json(['error' => 'AI Response Error', 'status' => 'failed'], 500);
-
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage(), 'status' => 'failed'], 500);
-        }
-    }
-
-    public function evaluateIeltsCoherence(Request $request)
-    {
-        ini_set('max_execution_time', 300);
-        set_time_limit(300);
-
-        $request->validate([
-            'essay' => 'required|string|min:50',
-            'task_type' => 'required|in:1,2'
-        ]);
-
-        $essay = $request->input('essay');
-        $taskType = $request->input('task_type');
-
-        $prompt = "You are a strict IELTS Examiner. Analyze the following IELTS Writing Task {$taskType} essay.
-
-        Original Essay:
-        \"{$essay}\"
-
-        Perform the following task:
-        Identify SPECIFIC Coherence & Cohesion issues related to Conjunctions/Linking Words.
-        - Create a list of 'coherence_improvements'.
-        - Find linking words preventing a higher band or suggest where they are missing.
-        - Provide better, high-level alternatives (Band 7-9 style).
-        - Explain why the improvement is better in Bahasa Indonesia.
-
-        Provide a strictly JSON response with this structure:
-        {
-            \"coherence_improvements\": [
-                {
-                    \"text\": \"original linking word/phrase\",
-                    \"improved\": \"better linking word/phrase\",
-                    \"explanation\": \"Why this improves coherence (in Indonesian)\"
-                }
-            ]
-        }
-
-        Do NOT output markdown code blocks. Output ONLY raw JSON.";
-
-        try {
-            $result = $this->queryAI($prompt, true, 600, 4096);
-            $content = $result['content'];
-
-            $cleanJson = $this->extractJson($content);
-            $json = $this->robustJsonDecode($cleanJson);
-
-            if (!$json && $cleanJson) {
-                $cleanJson = $this->cleanJsonString($cleanJson);
-                $json = $this->robustJsonDecode($cleanJson);
-            }
-
-            if ($json) {
-                $json['status'] = 'success';
-                return response()->json($json);
-            }
-            return response()->json(['error' => 'AI Response Error', 'status' => 'failed'], 500);
-
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage(), 'status' => 'failed'], 500);
-        }
-    }
-
-    public function evaluateIeltsTaskResponse(Request $request)
-    {
-        ini_set('max_execution_time', 300);
-        set_time_limit(300);
-
-        $request->validate([
-            'essay' => 'required|string|min:50',
-            'task_type' => 'required|in:1,2'
-        ]);
-
-        $essay = $request->input('essay');
-        $taskType = $request->input('task_type');
-
-        $prompt = "You are a strict IELTS Examiner. Analyze the following IELTS Writing Task {$taskType} essay.
-
-        Original Essay:
-        \"{$essay}\"
-
-        Perform the following task:
-        Identify SPECIFIC Task Response / Task Achievement issues.
-        - Create a list of 'task_response_improvements'.
-        - Identify arguments that are underdeveloped, unclear, or lack supporting examples.
-        - Identify if the writer's position is unclear or not maintained.
-        - Provide a concrete 'improved' version of the argument or paragraph (Band 7-9 style).
-        - Explain why the improvement better addresses the prompt (in Bahasa Indonesia).
-        - IMPORTANT: If the 'text' field describes a MISSING element (e.g. 'Thesis statement is missing'), write that description in **Bahasa Indonesia** (e.g. 'Esai ini tidak memiliki pernyataan tesis'). If it is a quote, keep it in English.
-
-        Provide a strictly JSON response with this structure:
-        {
-            \"task_response_improvements\": [
-                {
-                    \"text\": \"original weak argument/paragraph\",
-                    \"improved\": \"better argument/paragraph (fully developed)\",
-                    \"explanation\": \"Why this improves Task Response (in Indonesian)\"
-                }
-            ]
-        }
-
-        Do NOT output markdown code blocks. Output ONLY raw JSON.";
-
-        try {
-            $result = $this->queryAI($prompt, true, 600, 4096);
-            $content = $result['content'];
-
-            $cleanJson = $this->extractJson($content);
-            $json = $this->robustJsonDecode($cleanJson);
-
-            if (!$json && $cleanJson) {
-                $cleanJson = $this->cleanJsonString($cleanJson);
-                $json = $this->robustJsonDecode($cleanJson);
-            }
-
-            if ($json) {
-                $json['status'] = 'success';
-                return response()->json($json);
-            }
-            return response()->json(['error' => 'AI Response Error', 'status' => 'failed'], 500);
-
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage(), 'status' => 'failed'], 500);
-        }
-    }
-
-    public function evaluateIeltsGrammar(Request $request)
-    {
-        ini_set('max_execution_time', 300);
-        set_time_limit(300);
-
-        $request->validate([
-            'essay' => 'required|string|min:50',
-            'task_type' => 'required|in:1,2'
-        ]);
-
-        $essay = $request->input('essay');
-        $taskType = $request->input('task_type');
-
-        $prompt = "You are a strict IELTS Examiner. Analyze the following IELTS Writing Task {$taskType} essay.
-
-        Original Essay:
-        \"{$essay}\"
-
-        Perform the following task:
-        1. Identify SPECIFIC Grammatical Structure issues.
-           - Create a list of 'grammar_improvements'.
-           - Identify sentences that are too simple, repetitive, or grammatically weak.
-           - Suggest a 'better_structure' (e.g., using passive voice, complex sentence, conditional, inversion) to increase the band score.
-           - Provide the 'improved' sentence.
-           - Explain the specific grammar rule or structure used in the improvement (in Bahasa Indonesia).
-
-        2. Provide a list of 'topic_grammar' (Advanced Structures) relevant to this essay's topic.
-           - Generate 4 specific examples using the essay's topic for:
-             a. Adjective Clause
-             b. Noun Clause
-             c. Gerund as Subject
-             d. Adverbial Clause (Level Advanced)
-           - 'example' must be a sentence using the structure about the essay topic.
-           - 'explanation' in Bahasa Indonesia.
-
-        Provide a strictly JSON response with this structure:
-        {
-            \"grammar_improvements\": [
-                {
-                    \"text\": \"original weak sentence\",
-                    \"improved\": \"better structured sentence\",
-                    \"explanation\": \"Explanation of grammar (e.g. Passive Voice, Inversion) (in Indonesian)\"
-                }
-            ],
-            \"topic_grammar\": [
-                {
-                    \"type\": \"Adjective Clause\",
-                    \"example\": \"Advanced sentence example...\",
-                    \"explanation\": \"Brief explanation in Indonesian\"
-                }
-            ]
-        }
-
-        Do NOT output markdown code blocks. Output ONLY raw JSON.";
-
-        ini_set('max_execution_time', 300);
-
-        try {
-            $result = $this->queryAI($prompt, true, 2048, 4096);
-            $content = $result['content'];
-
-            $cleanJson = $this->extractJson($content);
-            $json = $this->robustJsonDecode($cleanJson);
-
-            if (!$json && $cleanJson) {
-                $cleanJson = $this->cleanJsonString($cleanJson);
-                $json = $this->robustJsonDecode($cleanJson);
-            }
-
-            if ($json) {
-                $json['status'] = 'success';
-                return response()->json($json);
-            }
-            return response()->json(['error' => 'AI Response Error', 'status' => 'failed'], 500);
-
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage(), 'status' => 'failed'], 500);
-        }
-    }
-
-    /**
-     * Recursively traverse an array and replace "undefined" strings with null/empty.
-     */
-    private function sanitizeRecursive($data) {
-        if (is_array($data)) {
-            foreach ($data as $key => $value) {
-                $data[$key] = $this->sanitizeRecursive($value);
-            }
-            return $data;
-        }
-        
-        if (is_string($data)) {
-            // AGGRESSIVE SANITIZATION
-            // 1. If it's literally "undefined", kill it.
-            if (trim($data) === 'undefined') return '';
-            
-            // 2. If it contains "undefined", replace that part with empty string (except if it looks accidental, but for now we kill it)
-            if (stripos($data, 'undefined') !== false) {
-                 $data = str_ireplace('undefined', '', $data);
-            }
-            
-            return $data;
-        }
-        
-        return $data;
-    }
-
-    public function improveIeltsWriting(Request $request)
-    {
-        set_time_limit(300); 
-
-        $request->validate([
-            'essay' => 'required|string|min:50',
-            'task_type' => 'required|in:1,2'
-        ]);
-
-        $essay = $request->input('essay');
-        $taskType = $request->input('task_type');
-
-        // STAGE 2 PROMPT: Enhancement (Band 9)
-        $prompt = "You are an expert IELTS Tutor. Review the following IELTS Writing Task {$taskType} essay.
-
-        Original Essay:
-        \"{$essay}\"
-
-        Perform the following tasks:
-        1. Write a 'better_version' of the essay that scores a perfect Band 9. It should be sophisticated but natural (English).
-        - CRITICAL: Do NOT use actual newlines inside strings. Use '\\n' for line breaks.
-
-        Provide a strictly JSON response with this structure:
-        {
-            \"better_version\": \"Full Band 9 example essay...\"
-        }
-
-        Do NOT output markdown code blocks. Output ONLY raw JSON.";
-
-        try {
-            $result = $this->queryAI($prompt, true);
-            $content = $result['content'];
-            
-            // Use Robust Extraction
-            $cleanJson = $this->extractJson($content);
-            $json = json_decode($cleanJson, true, 512, JSON_INVALID_UTF8_IGNORE);
-            
-            // Fallback: try aggressive cleanup if first decode failed but we have content
-            if (!$json && $cleanJson) {
-                $cleanJson = $this->cleanJsonString($cleanJson);
-                $json = json_decode($cleanJson, true, 512, JSON_INVALID_UTF8_IGNORE);
-            }
-            
-            if ($json) {
-                $json = $this->sanitizeRecursive($json);
-                $json['status'] = 'success';
-                return response()->json($json);
-            }
-            
-            \Illuminate\Support\Facades\Log::error('IELTS Improvement: Failed to parse JSON', [
-                'error' => json_last_error_msg(),
-                'content' => $result['content'] ?? 'No content'
-            ]);
-            return response()->json(['error' => 'AI Response Error: ' . json_last_error_msg(), 'status' => 'failed'], 500);
-
-        } catch (\Exception $e) {
-             \Illuminate\Support\Facades\Log::error('IELTS Improvement Error: ' . $e->getMessage());
-            return response()->json(['error' => $e->getMessage(), 'status' => 'failed'], 500);
-        }
-    }
-    
-    /**
-     * Fixes common JSON issues from AI responses, primarily unescaped newlines inside strings.
-     */
-    /**
-     * Extracts valid JSON from AI response, handling markdown blocks and pre/post text.
-     */
-    private function extractJson($content)
-    {
-        // 1. Try to find content explicitly wrapped in ```json ... ``` (Regex is fine for short blocks, but let's be safe)
-        if (preg_match('/```json\s*(.*?)\s*```/s', $content, $matches)) {
-            return $this->cleanJsonString($matches[1]);
-        }
-        
-        // 2. Try to find content wrapped in any markdown code block
-        if (preg_match('/```\s*(.*?)\s*```/s', $content, $matches)) {
-            return $this->cleanJsonString($matches[1]);
-        }
-        
-        // 3. Robust string extraction (avoids Regex backtracking limits)
-        $start = strpos($content, '{');
-        $end = strrpos($content, '}');
-        
-        if ($start !== false && $end !== false && $end > $start) {
-            $jsonStr = substr($content, $start, $end - $start + 1);
-            return $this->cleanJsonString($jsonStr);
-        }
-        
-        // 4. Fallback
-        return $this->cleanJsonString($content);
-    }
-
-    /**
-     * Cleans common JSON syntax errors from AI.
-     */
-    private function cleanJsonString($json)
-    {
-        // 1. Remove non-printable control characters (ASCII 0-31), EXCEPT newlines (10), carriage returns (13), and tabs (9).
-        // This prevents "Control character error" without destroying structure.
-        $json = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $json);
-
-        // 2. Fix unescaped newlines/tabs inside JSON strings.
-        // This regex looks for double quotes and walks through the string content.
-        $json = preg_replace_callback(
-            '/"(?:[^"\\\\]|\\\\.)*"/s', 
-            function ($m) {
-                // Inside a string, replace literal control chars with escaped versions
-                return str_replace(["\r\n", "\n", "\r", "\t"], ['\\n', '\\n', '\\r', '\\t'], $m[0]);
-            }, 
-            $json
-        );
-        
-        // 3. Remove trailing commas before closing braces/brackets
-        $json = preg_replace('/,\s*([\}\]])/', '$1', $json);
-        
-        return $json;
-    }
-    
-    /**
-     * Attempts to fix and decode truncated JSON by appending missing braces.
-     */
-    private function robustJsonDecode($jsonStr) {
-        // 1. Initial attempt
-        $json = json_decode($jsonStr, true, 512, JSON_INVALID_UTF8_IGNORE);
-
-        if ($json) return $json;
-
-        // 2. Try balancing braces
-        $open = substr_count($jsonStr, '{');
-        $close = substr_count($jsonStr, '}');
-        
-        if ($open > $close) {
-            $needed = $open - $close;
-            // Try appending needed braces one by one (sometimes just 1 is enough even if logic says 2)
-            $fixed = $jsonStr . str_repeat('}', $needed);
-            $json = json_decode($fixed, true, 512, JSON_INVALID_UTF8_IGNORE);
-            if ($json) return $json;
-        }
-        
-        // 3. Fallback: try just one brace (common case)
-        $fixed = $jsonStr . '}';
-        $json = json_decode($fixed, true, 512, JSON_INVALID_UTF8_IGNORE);
-        if ($json) return $json;
-
-        // 4. Fallback: try two braces
-        $fixed = $jsonStr . '}}';
-        $json = json_decode($fixed, true, 512, JSON_INVALID_UTF8_IGNORE);
-        if ($json) return $json;
-
-        return null;
-    }
-
-    // Deprecated alias
-    private function sanitizeJson($json) {
-        return $this->cleanJsonString($json);
     }
 
     public function ieltsWritingMockUp()
@@ -6875,13 +6152,13 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
                     'explanation' => '(Saran) ' . $data[1]
                 ];
                 $count++;
-                if ($count >= 5) break; 
+                if ($count >= 15) break; 
              }
         }
 
         return response()->json([
             'status' => 'success',
-            'improvements' => array_slice($improvements, 0, 5) // Limit to 5
+            'improvements' => array_slice($improvements, 0, 15)
         ]);
     }
 
@@ -12712,6 +11989,739 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             ->with('success_state', $meeting->is_locked ? 'locked' : 'open');
     }
 
+    public function getFastTrackCheatSheet(int $meetingNumber): ?array
+    {
+        $adminController = app(\App\Http\Controllers\GrammarWritingAdminController::class);
+
+        return match ($meetingNumber) {
+            1 => $adminController->introductoryMeetingCheatSheet(10),
+            2 => $adminController->complexityMeetingCheatSheet(2),
+            3 => $adminController->complexityMeetingCheatSheet(2),
+            4 => $adminController->introductoryMeetingCheatSheet(15),
+            6 => [
+                '__html__' => <<<'HTML'
+    <div class="mb-6">
+        <!-- 1. Noun Phrase -->
+        <h5 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
+            <span class="bg-indigo-600 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold shadow-xs">1</span>
+            Noun Phrase (Frasa Kata Benda)
+        </h5>
+        <div class="overflow-hidden rounded-xl border border-gray-200 shadow-xs mb-4">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse bg-white text-xs sm:text-sm">
+                    <thead>
+                        <tr class="bg-gray-800 text-white text-xs uppercase tracking-wider">
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Komponen</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Formula & Anggota</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Fungsi Gramatikal</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Contoh Frasa</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-gray-700">
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3.5 font-bold text-gray-900 whitespace-nowrap">Limiting Adjective (LA)</td>
+                            <td class="p-3.5 font-mono text-xs">Article (a/an/the), Demonstrative (this/that/these/those), Possessive (my/their/etc.), Quantity (some/many/all), Numeral (one/first/two)</td>
+                            <td class="p-3.5 text-gray-800">Membatasi jumlah atau kepemilikan kata benda</td>
+                            <td class="p-3.5 italic text-gray-600">the book, my car, five students, this country</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3.5 font-bold text-gray-900 whitespace-nowrap">Descriptive Adjective (DA)</td>
+                            <td class="p-3.5 font-mono text-xs"><strong>OSASCOMP:</strong> Opinion → Size → Age → Shape → Color → Origin → Material → Purpose</td>
+                            <td class="p-3.5 text-gray-800">Menjelaskan karakteristik, kualitas fisik, dan sifat benda</td>
+                            <td class="p-3.5 italic text-gray-600">a beautiful large old round wooden table</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3.5 font-bold text-gray-900 whitespace-nowrap">Head Noun (H)</td>
+                            <td class="p-3.5 font-mono text-xs">Countable Noun / Uncountable Noun</td>
+                            <td class="p-3.5 text-gray-800">Inti kata benda yang dijelaskan oleh modifiers</td>
+                            <td class="p-3.5 italic text-gray-600">country, institution, artifact, student</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-purple-50 border border-purple-200 text-purple-950 p-4 rounded-xl mb-6 text-xs sm:text-sm">
+            <strong class="block mb-1.5 text-purple-900 font-bold flex items-center gap-1.5">
+                <span>📐</span> Formula Dasar Noun Phrase:
+            </strong>
+            <div class="p-2.5 bg-white rounded-lg border border-purple-200 font-mono text-purple-800 font-bold text-xs sm:text-sm text-center shadow-xs">
+                [Limiting Adjective] + [Descriptive Adjective(s)] + [Head Noun]
+            </div>
+            <p class="mt-2 text-purple-900 text-xs">
+                Contoh: <span class="font-semibold italic">This</span> (LA) + <span class="font-semibold italic">famous independent global</span> (DA) + <span class="font-semibold italic">research institution</span> (Head Noun).
+            </p>
+        </div>
+
+        <!-- 2. Comparative & Superlative Degree -->
+        <h5 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2 mt-6">
+            <span class="bg-indigo-600 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold shadow-xs">2</span>
+            Comparative & Superlative Degree
+        </h5>
+        <div class="overflow-hidden rounded-xl border border-gray-200 shadow-xs mb-4">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse bg-white text-xs sm:text-sm">
+                    <thead>
+                        <tr class="bg-gray-800 text-white text-xs uppercase tracking-wider">
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Bentuk Perbandingan</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Formula Utama</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Makna Gramatikal</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Contoh Kalimat</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-gray-700">
+                        <tr class="bg-white hover:bg-white transition-colors">
+                            <td class="p-3.5 font-bold text-blue-700 whitespace-nowrap">Comparative Degree</td>
+                            <td class="p-3.5 font-mono text-xs sm:text-sm">more + Adj + than / Adj-er than</td>
+                            <td class="p-3.5 text-gray-800">Lebih ... daripada</td>
+                            <td class="p-3.5 italic text-gray-600">Renewable energy grows <strong>much faster than</strong> fossil energy.</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-white transition-colors">
+                            <td class="p-3.5 font-bold text-red-700 whitespace-nowrap">Superlative Degree</td>
+                            <td class="p-3.5 font-mono text-xs sm:text-sm">the most + Adj / the Adj-est</td>
+                            <td class="p-3.5 text-gray-800">Paling ... / Ter-...</td>
+                            <td class="p-3.5 italic text-gray-600">Jupiter is <strong>the largest</strong> planet in our solar system.</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-white transition-colors">
+                            <td class="p-3.5 font-bold text-purple-700 whitespace-nowrap">Double Comparative</td>
+                            <td class="p-3.5 font-mono text-xs sm:text-sm">The more..., the more...</td>
+                            <td class="p-3.5 text-gray-800">Semakin ..., semakin ...</td>
+                            <td class="p-3.5 italic text-gray-600"><strong>The more complex</strong> the data, <strong>the harder</strong> the analysis.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h6 class="text-sm font-bold text-gray-800 mb-1 mt-4">Perubahan Adjective/Adverb</h6>
+        <p class="text-xs text-gray-600 mb-2">Regular comparative & superlative sebagai berikut :</p>
+        <div class="overflow-hidden rounded-xl border border-gray-200 shadow-xs mb-4">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse bg-white text-xs sm:text-sm">
+                    <thead>
+                        <tr class="bg-gray-800 text-white text-xs uppercase tracking-wider">
+                            <th class="p-3.5 font-semibold border-b border-gray-700 w-32 text-center">Syllable /<br>Suku kata</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Positive</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Comparative<br><span class="text-gray-300 font-normal text-xs normal-case">(Lebih... daripada ...)</span></th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Superlative<br><span class="text-gray-300 font-normal text-xs normal-case">(Ter... / paling...)</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-gray-700">
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3.5 font-bold text-gray-900 text-center align-top bg-gray-50/50">1</td>
+                            <td class="p-3.5 align-top">
+                                <ul class="space-y-1 font-medium text-gray-800">
+                                    <li>- Tall</li>
+                                    <li>- Smart</li>
+                                    <li>- Short</li>
+                                </ul>
+                            </td>
+                            <td class="p-3.5 align-top font-bold text-blue-700">
+                                <ul class="space-y-1">
+                                    <li>- Taller</li>
+                                    <li>- Smarter</li>
+                                    <li>- Shorter</li>
+                                </ul>
+                            </td>
+                            <td class="p-3.5 align-top font-bold text-red-700">
+                                <ul class="space-y-1">
+                                    <li>- Tallest</li>
+                                    <li>- Smartest</li>
+                                    <li>- Shortest</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3.5 font-bold text-gray-900 text-center align-top bg-gray-50/50">2</td>
+                            <td class="p-3.5 align-top">
+                                <ul class="space-y-1 font-medium text-gray-800">
+                                    <li>- Clever</li>
+                                </ul>
+                            </td>
+                            <td class="p-3.5 align-top font-bold text-blue-700">
+                                <ul class="space-y-1">
+                                    <li>- Cleverer / more clever</li>
+                                </ul>
+                            </td>
+                            <td class="p-3.5 align-top font-bold text-red-700">
+                                <ul class="space-y-1">
+                                    <li>- Cleverest / most clever</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3.5 font-bold text-gray-900 text-center align-top bg-gray-50/50">&gt; 2</td>
+                            <td class="p-3.5 align-top">
+                                <ul class="space-y-1 font-medium text-gray-800">
+                                    <li>- Beautiful</li>
+                                    <li>- Diligent</li>
+                                </ul>
+                            </td>
+                            <td class="p-3.5 align-top font-bold text-blue-700">
+                                <ul class="space-y-1">
+                                    <li>- More beautiful</li>
+                                    <li>- More diligent</li>
+                                </ul>
+                            </td>
+                            <td class="p-3.5 align-top font-bold text-red-700">
+                                <ul class="space-y-1">
+                                    <li>- Most beautiful</li>
+                                    <li>- Most diligent</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3.5 font-bold text-purple-900 text-center align-top bg-purple-50/40">
+                                PCP<br><span class="text-xs font-semibold text-purple-700">Ving / V3</span>
+                            </td>
+                            <td class="p-3.5 align-top">
+                                <ul class="space-y-1 font-medium text-gray-800">
+                                    <li>- Broken</li>
+                                    <li>- Tiring</li>
+                                </ul>
+                            </td>
+                            <td class="p-3.5 align-top font-bold text-blue-700">
+                                <ul class="space-y-1">
+                                    <li>- More broken</li>
+                                    <li>- More tiring</li>
+                                </ul>
+                            </td>
+                            <td class="p-3.5 align-top font-bold text-red-700">
+                                <ul class="space-y-1">
+                                    <li>- Most broken</li>
+                                    <li>- Most tiring</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h6 class="text-sm font-bold text-gray-800 mb-1 mt-4">Irregular Comparative & Superlative (Bentuk Tidak Beraturan)</h6>
+        <div class="overflow-hidden rounded-xl border border-gray-200 shadow-xs mb-4">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse bg-white text-xs sm:text-sm">
+                    <thead>
+                        <tr class="bg-gray-800 text-white text-xs uppercase tracking-wider">
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Positive (Dasar)</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Comparative (Lebih...)</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Superlative (Paling/Ter-)</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Makna Indonesia</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-gray-700">
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3 font-bold text-gray-900 font-mono">good / well</td>
+                            <td class="p-3 font-semibold text-blue-700 font-mono">better</td>
+                            <td class="p-3 font-semibold text-red-700 font-mono">the best</td>
+                            <td class="p-3 text-gray-800">baik &rarr; lebih baik &rarr; terbaik</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3 font-bold text-gray-900 font-mono">bad / badly</td>
+                            <td class="p-3 font-semibold text-blue-700 font-mono">worse</td>
+                            <td class="p-3 font-semibold text-red-700 font-mono">the worst</td>
+                            <td class="p-3 text-gray-800">buruk &rarr; lebih buruk &rarr; terburuk</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3 font-bold text-gray-900 font-mono">far <span class="text-gray-500 font-sans text-xs">(jarak fisik)</span></td>
+                            <td class="p-3 font-semibold text-blue-700 font-mono">farther</td>
+                            <td class="p-3 font-semibold text-red-700 font-mono">the farthest</td>
+                            <td class="p-3 text-gray-800">jauh &rarr; lebih jauh &rarr; terjauh</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3 font-bold text-gray-900 font-mono">far <span class="text-gray-500 font-sans text-xs">(tingkat/abstrak)</span></td>
+                            <td class="p-3 font-semibold text-blue-700 font-mono">further</td>
+                            <td class="p-3 font-semibold text-red-700 font-mono">the furthest</td>
+                            <td class="p-3 text-gray-800">lanjut &rarr; lebih lanjut &rarr; paling lanjut</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3 font-bold text-gray-900 font-mono">little <span class="text-gray-500 font-sans text-xs">(jumlah tak terhitung)</span></td>
+                            <td class="p-3 font-semibold text-blue-700 font-mono">less</td>
+                            <td class="p-3 font-semibold text-red-700 font-mono">the least</td>
+                            <td class="p-3 text-gray-800">sedikit &rarr; lebih sedikit &rarr; paling sedikit</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3 font-bold text-gray-900 font-mono">many / much <span class="text-gray-500 font-sans text-xs">(banyak)</span></td>
+                            <td class="p-3 font-semibold text-blue-700 font-mono">more</td>
+                            <td class="p-3 font-semibold text-red-700 font-mono">the most</td>
+                            <td class="p-3 text-gray-800">banyak &rarr; lebih banyak &rarr; terbanyak</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3 font-bold text-gray-900 font-mono">old <span class="text-gray-500 font-sans text-xs">(saudara/keluarga)</span></td>
+                            <td class="p-3 font-semibold text-blue-700 font-mono">elder</td>
+                            <td class="p-3 font-semibold text-red-700 font-mono">the eldest</td>
+                            <td class="p-3 text-gray-800">tua &rarr; lebih tua &rarr; tertua (sulung)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. Positive Degree -->
+        <h5 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2 mt-6">
+            <span class="bg-indigo-600 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold shadow-xs">3</span>
+            Positive Degree (Tingkat Setara - Modul Hal. 28)
+        </h5>
+        <div class="overflow-hidden rounded-xl border border-gray-200 shadow-xs mb-4">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse bg-white text-xs sm:text-sm">
+                    <thead>
+                        <tr class="bg-gray-800 text-white text-xs uppercase tracking-wider">
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Pola / Bentuk</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Formula Gramatikal</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Makna Indonesia</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Contoh Kalimat</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-gray-700">
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3.5 font-bold text-emerald-700 whitespace-nowrap">as + Adjective + as</td>
+                            <td class="p-3.5 font-mono text-xs text-blue-700 font-semibold">S + to-be + as + Adj + as + N/Pron</td>
+                            <td class="p-3.5 text-gray-800">Sama [sifat] dengan / Se-[sifat]</td>
+                            <td class="p-3.5 italic text-gray-600">The moon appears <strong>as big as</strong> the sun.</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3.5 font-bold text-emerald-700 whitespace-nowrap">as + Adverb + as</td>
+                            <td class="p-3.5 font-mono text-xs text-blue-700 font-semibold">S + Verb + as + Adv + as + N/Pron</td>
+                            <td class="p-3.5 text-gray-800">Sama [cara] dengan</td>
+                            <td class="p-3.5 italic text-gray-600">He runs <strong>as quickly as</strong> a cheetah.</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3.5 font-bold text-emerald-700 whitespace-nowrap">not as / so + Adj + as</td>
+                            <td class="p-3.5 font-mono text-xs text-blue-700 font-semibold">S + to-be + not + as/so + Adj + as + N</td>
+                            <td class="p-3.5 text-gray-800">Tidak se-[sifat] dengan</td>
+                            <td class="p-3.5 italic text-gray-600">Silver is <strong>not as expensive as</strong> gold.</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3.5 font-bold text-emerald-700 whitespace-nowrap">the same (Noun) as</td>
+                            <td class="p-3.5 font-mono text-xs text-blue-700 font-semibold">S + V + the same + (Noun) + as + N</td>
+                            <td class="p-3.5 text-gray-800">Sama [kata benda]-nya dengan</td>
+                            <td class="p-3.5 italic text-gray-600">He has <strong>the same age as</strong> my brother.</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-gray-50">
+                            <td class="p-3.5 font-bold text-emerald-700 whitespace-nowrap">as many / much + N + as</td>
+                            <td class="p-3.5 font-mono text-xs text-blue-700 font-semibold">S + V + as + many/much + Noun + as + N</td>
+                            <td class="p-3.5 text-gray-800">Sama banyak [benda] dengan</td>
+                            <td class="p-3.5 italic text-gray-600">She has <strong>as many books as</strong> I do.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-emerald-50 border border-emerald-200 text-emerald-950 p-4 rounded-xl mb-5 text-xs sm:text-sm">
+            <strong class="block mb-2 text-emerald-900 font-bold flex items-center gap-1">
+                <span>📌</span> Pasangan Perubahan: as + Adjective + as &harr; the same + Noun + as
+            </strong>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
+                <span class="bg-white p-2 rounded-lg border border-emerald-200 shadow-xs"><strong class="text-emerald-700">as old as</strong> &harr; the same age as</span>
+                <span class="bg-white p-2 rounded-lg border border-emerald-200 shadow-xs"><strong class="text-emerald-700">as heavy as</strong> &harr; the same weight as</span>
+                <span class="bg-white p-2 rounded-lg border border-emerald-200 shadow-xs"><strong class="text-emerald-700">as tall as</strong> &harr; the same height as</span>
+                <span class="bg-white p-2 rounded-lg border border-emerald-200 shadow-xs"><strong class="text-emerald-700">as big as</strong> &harr; the same size as</span>
+                <span class="bg-white p-2 rounded-lg border border-emerald-200 shadow-xs"><strong class="text-emerald-700">as wide as</strong> &harr; the same width as</span>
+                <span class="bg-white p-2 rounded-lg border border-emerald-200 shadow-xs"><strong class="text-emerald-700">as deep as</strong> &harr; the same depth as</span>
+                <span class="bg-white p-2 rounded-lg border border-emerald-200 shadow-xs"><strong class="text-emerald-700">as long as</strong> &harr; the same length as</span>
+                <span class="bg-white p-2 rounded-lg border border-emerald-200 shadow-xs"><strong class="text-emerald-700">as expensive as</strong> &harr; the same price as</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-blue-100 border border-blue-200/80 text-blue-950 p-4 sm:p-5 rounded-xl mb-5 shadow-xs" style="background-color: #dbeafe !important;">
+        <strong class="block mb-2 text-sm font-bold text-blue-900 flex items-center gap-2">
+            💡 Tips & Panduan Pemahaman:
+        </strong>
+        <ul class="list-disc list-inside space-y-1.5 ml-1 text-xs sm:text-sm text-blue-900">
+            <li class="leading-relaxed"><strong>Noun Phrase (LA + DA + Head Noun)</strong>: Posisikan kata penjelas sebelum Head Noun (misal: <em>a large tropical country</em>, bukan <em>a country tropical large</em>).</li>
+            <li class="leading-relaxed"><strong>Positive Degree (as ... as)</strong>: Digunakan saat menyatakan perbandingan setara ("sama ... dengan" / "se-...").</li>
+            <li class="leading-relaxed"><strong>Comparative / Superlative</strong>: Gunakan akhiran <strong>-er / -est</strong> untuk kata sifat 1 suku kata (<em>fast &rarr; faster &rarr; fastest</em>), dan <strong>more / most</strong> untuk 2+ suku kata.</li>
+            <li class="leading-relaxed"><strong>Irregular Degree</strong>: Hafalkan bentuk tidak beraturan seperti <em>good &rarr; better &rarr; best</em> dan <em>bad &rarr; worse &rarr; worst</em>.</li>
+        </ul>
+    </div>
+
+    <div class="bg-amber-100 border border-amber-200 text-amber-950 p-4 sm:p-5 rounded-xl mb-6 shadow-xs" style="background-color: #fef3c7 !important;">
+        <strong class="block mb-2 text-sm font-bold text-amber-900 flex items-center gap-2">
+            ⚠️ Aturan & Formula Penting:
+        </strong>
+        <ol class="list-decimal list-inside space-y-1.5 ml-1 text-xs sm:text-sm text-amber-950">
+            <li class="leading-relaxed">Urutan penyusunan Noun Phrase wajib: <strong>Limiting Adjective (Article/Demonstrative/Possessive) + Descriptive Adjectives + Head Noun</strong>.</li>
+            <li class="leading-relaxed">Perbandingan 'sama dengan' wajib menggunakan pasangan <strong>as ... as</strong> (bukan <em>same with</em>).</li>
+            <li class="leading-relaxed">Jangan gabungkan <em>more</em> dengan <em>-er</em> (<s>more faster</s> &rarr; <strong>faster</strong>) atau <em>most</em> dengan <em>-est</em> (<s>most highest</s> &rarr; <strong>highest</strong>).</li>
+            <li class="leading-relaxed">Superlative wajib didahului artikel <strong>the</strong> (<em>the highest, the most radioactive</em>).</li>
+        </ol>
+    </div>
+HTML
+            ],
+            7 => [
+                '__html__' => <<<'HTML'
+    <div class="mb-6">
+        <!-- 1. FANBOYS -->
+        <h5 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
+            <span class="bg-indigo-600 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold shadow-xs">1</span>
+            FANBOYS (Coordinating Conjunctions - Compound Sentences)
+        </h5>
+        <p class="text-xs sm:text-sm text-gray-600 mb-3">
+            <strong>FANBOYS</strong> adalah kata hubung koordinatif yang menghubungkan 2 kalimat utuh yang setara (Independent Clauses) membentuk <strong>Compound Sentence</strong>.
+        </p>
+        <div class="overflow-hidden rounded-xl border border-gray-200 shadow-xs mb-4">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse bg-white text-xs min-w-[500px]">
+                    <thead>
+                        <tr class="bg-gray-800 text-white text-[11px] uppercase tracking-wider">
+                            <th class="p-3 font-semibold border-b border-gray-700 w-16 text-center">Huruf</th>
+                            <th class="p-3 font-semibold border-b border-gray-700">Konjungsi</th>
+                            <th class="p-3 font-semibold border-b border-gray-700">Makna / Fungsi</th>
+                            <th class="p-3 font-semibold border-b border-gray-700">Contoh Kalimat</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-gray-700 font-mono text-[11px]">
+                        <tr class="bg-white hover:bg-indigo-50/40">
+                            <td class="p-2.5 font-bold text-indigo-700 text-center">F</td>
+                            <td class="p-2.5 font-bold text-gray-900">For</td>
+                            <td class="p-2.5 font-sans text-gray-700">Karena / Sebab</td>
+                            <td class="p-2.5 italic text-gray-600 font-sans">He studied hard, <strong>for</strong> the exam was crucial.</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-indigo-50/40">
+                            <td class="p-2.5 font-bold text-indigo-700 text-center">A</td>
+                            <td class="p-2.5 font-bold text-gray-900">And</td>
+                            <td class="p-2.5 font-sans text-gray-700">Dan / Serta (Penambahan)</td>
+                            <td class="p-2.5 italic text-gray-600 font-sans">She completed the report, <strong>and</strong> he presented it.</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-indigo-50/40">
+                            <td class="p-2.5 font-bold text-indigo-700 text-center">N</td>
+                            <td class="p-2.5 font-bold text-gray-900">Nor</td>
+                            <td class="p-2.5 font-sans text-gray-700">Maupun / Dan tidak juga (Inversi)</td>
+                            <td class="p-2.5 italic text-gray-600 font-sans">He did not call, <strong>nor</strong> did he send a message.</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-indigo-50/40">
+                            <td class="p-2.5 font-bold text-indigo-700 text-center">B</td>
+                            <td class="p-2.5 font-bold text-gray-900">But</td>
+                            <td class="p-2.5 font-sans text-gray-700">Tetapi / Namun (Kontras)</td>
+                            <td class="p-2.5 italic text-gray-600 font-sans">The plan was ambitious, <strong>but</strong> the budget was tight.</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-indigo-50/40">
+                            <td class="p-2.5 font-bold text-indigo-700 text-center">O</td>
+                            <td class="p-2.5 font-bold text-gray-900">Or</td>
+                            <td class="p-2.5 font-sans text-gray-700">Atau (Pilihan)</td>
+                            <td class="p-2.5 italic text-gray-600 font-sans">We must adapt now, <strong>or</strong> we will fall behind.</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-indigo-50/40">
+                            <td class="p-2.5 font-bold text-indigo-700 text-center">Y</td>
+                            <td class="p-2.5 font-bold text-gray-900">Yet</td>
+                            <td class="p-2.5 font-sans text-gray-700">Namun / Kendati demikian</td>
+                            <td class="p-2.5 italic text-gray-600 font-sans">It rained heavily, <strong>yet</strong> the match continued.</td>
+                        </tr>
+                        <tr class="bg-white hover:bg-indigo-50/40">
+                            <td class="p-2.5 font-bold text-indigo-700 text-center">S</td>
+                            <td class="p-2.5 font-bold text-gray-900">So</td>
+                            <td class="p-2.5 font-sans text-gray-700">Sehingga / Akibatnya (Hasil)</td>
+                            <td class="p-2.5 italic text-gray-600 font-sans">The data was validated, <strong>so</strong> the paper was published.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 2. Adverbial Clause -->
+        <h5 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2 mt-6">
+            <span class="bg-cyan-600 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold shadow-xs">2</span>
+            Pola & Posisi Adverbial Clause (Complex Sentences)
+        </h5>
+        <div class="overflow-hidden rounded-xl border border-gray-200 shadow-xs mb-4">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse bg-white text-xs min-w-[500px]">
+                    <thead>
+                        <tr class="bg-gray-800 text-white text-[11px] uppercase tracking-wider">
+                            <th class="p-3 font-semibold border-b border-gray-700">Posisi Klausa</th>
+                            <th class="p-3 font-semibold border-b border-gray-700">Formula Gramatikal</th>
+                            <th class="p-3 font-semibold border-b border-gray-700">Aturan Koma & Contoh</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-gray-700">
+                        <tr class="bg-white hover:bg-cyan-50/40">
+                            <td class="p-3 font-bold text-gray-900">Di Awal<br><span class="text-[10px] text-gray-500 font-normal">(Initial)</span></td>
+                            <td class="p-3 font-mono text-cyan-900 font-semibold text-[11px]">Conj + S + V, S + V</td>
+                            <td class="p-3">
+                                <div class="text-emerald-700 font-semibold text-[11px]">WAJIB tanda koma (,)</div>
+                                <div class="italic text-gray-600 text-[11px] mt-0.5"><u>Before the machine was invented</u>, spread of science was slow.</div>
+                            </td>
+                        </tr>
+                        <tr class="bg-white hover:bg-cyan-50/40">
+                            <td class="p-3 font-bold text-gray-900">Di Tengah<br><span class="text-[10px] text-gray-500 font-normal">(Middle)</span></td>
+                            <td class="p-3 font-mono text-cyan-900 font-semibold text-[11px]">S, Conj + S + V, + V</td>
+                            <td class="p-3">
+                                <div class="text-emerald-700 font-semibold text-[11px]">Diapit dua koma (,)</div>
+                                <div class="italic text-gray-600 text-[11px] mt-0.5">Civilization, <u>although very old</u>, built great monuments.</div>
+                            </td>
+                        </tr>
+                        <tr class="bg-white hover:bg-cyan-50/40">
+                            <td class="p-3 font-bold text-gray-900">Di Akhir<br><span class="text-[10px] text-gray-500 font-normal">(Final)</span></td>
+                            <td class="p-3 font-mono text-cyan-900 font-semibold text-[11px]">S + V + Conj + S + V</td>
+                            <td class="p-3">
+                                <div class="text-gray-700 font-semibold text-[11px]">Tidak perlu koma</div>
+                                <div class="italic text-gray-600 text-[11px] mt-0.5">I will wait for you <u>until you finish your work</u>.</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. Categories of Conjunctions -->
+        <h5 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2 mt-6">
+            <span class="bg-cyan-600 text-white w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold shadow-xs">3</span>
+            Daftar Kata Hubung Adverbial Clause & Artinya
+        </h5>
+        <div class="grid grid-cols-1 gap-3 text-xs mb-4">
+            <div class="bg-cyan-50/70 p-3 rounded-xl border border-cyan-100 space-y-1">
+                <strong class="text-cyan-900 font-bold block mb-1">1) Waktu (Time):</strong>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-2 gap-y-1 text-gray-800 font-mono text-[11px]">
+                    <div>• <strong>when</strong> = ketika / saat</div>
+                    <div>• <strong>whenever</strong> = kapan pun</div>
+                    <div>• <strong>while / as</strong> = selagi / sementara</div>
+                    <div>• <strong>before</strong> = sebelum</div>
+                    <div>• <strong>after</strong> = setelah / sesudah</div>
+                    <div>• <strong>since</strong> = sejak / semenjak</div>
+                    <div>• <strong>until / till</strong> = hingga / sampai</div>
+                    <div>• <strong>as soon as / once</strong> = segera setelah</div>
+                </div>
+            </div>
+
+            <div class="bg-emerald-50/70 p-3 rounded-xl border border-emerald-100 space-y-1">
+                <strong class="text-emerald-900 font-bold block mb-1">2) Sebab / Alasan (Cause & Reason):</strong>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-2 gap-y-1 text-gray-800 font-mono text-[11px]">
+                    <div>• <strong>because / as</strong> = karena / sebab</div>
+                    <div>• <strong>since</strong> = karena / berhubung</div>
+                    <div>• <strong>in that</strong> = karena / dalam hal</div>
+                    <div>• <strong>now that</strong> = karena sekarang</div>
+                </div>
+            </div>
+
+            <div class="bg-rose-50/70 p-3 rounded-xl border border-rose-100 space-y-1">
+                <strong class="text-rose-900 font-bold block mb-1">3) Pertentangan / Konsesi (Contrast & Concession):</strong>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-2 gap-y-1 text-gray-800 font-mono text-[11px]">
+                    <div>• <strong>although / even though</strong> = meskipun</div>
+                    <div>• <strong>while / whereas</strong> = sedangkan / sementara</div>
+                    <div>• <strong>despite the fact that</strong> = meski faktanya</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-blue-100 border border-blue-200/80 text-blue-950 p-4 sm:p-5 rounded-xl mb-5 shadow-xs" style="background-color: #dbeafe !important;">
+        <strong class="block mb-2 text-sm font-bold text-blue-900 flex items-center gap-2">
+            💡 Tips & Perbedaan Kunci:
+        </strong>
+        <ul class="list-disc list-inside space-y-1.5 ml-1 text-xs sm:text-sm text-blue-900">
+            <li><strong>Compound Sentence (FANBOYS):</strong> Menghubungkan 2 Independent Clause (klausa utama yang sama-sama bisa berdiri sendiri). Wajib ada tanda koma sebelum FANBOYS: <code>[Clause 1], + [FANBOYS] + [Clause 2]</code>.</li>
+            <li><strong>Complex Sentence (Adverbial Clause):</strong> Menghubungkan 1 Main Clause (klausa utama) dan 1 Dependent Clause (anak kalimat). Jika anak kalimat di awal, wajib pakai koma: <code>[Adv Clause], + [Main Clause]</code>.</li>
+            <li><strong>Rumus Jumlah Verb:</strong> <code>Total Verb Tenses = Total Conjunction + 1</code>.</li>
+        </ul>
+    </div>
+
+    <div class="bg-amber-100 border border-amber-200 text-amber-950 p-4 sm:p-5 rounded-xl mb-6 shadow-xs" style="background-color: #fef3c7 !important;">
+        <strong class="block mb-2 text-sm font-bold text-amber-900 flex items-center gap-2">
+            ⚠️ Aturan Emas Pembeda Preposisi vs Konjungsi:
+        </strong>
+        <ol class="list-decimal list-inside space-y-1.5 ml-1 text-xs sm:text-sm text-amber-950">
+            <li><strong>because / although / while:</strong> WAJIB diikuti Klausa (<code class="bg-white px-1 py-0.5 rounded font-mono text-[11px] border border-amber-300">S + V</code>) &rarr; <em>because the climate changed</em>.</li>
+            <li><strong>because of / despite / in spite of:</strong> WAJIB diikuti Frasa Kata Benda (<code class="bg-white px-1 py-0.5 rounded font-mono text-[11px] border border-amber-300">Noun Phrase / Gerund</code>) &rarr; <em>because of climate change</em>.</li>
+        </ol>
+    </div>
+HTML
+            ],
+            8 => [
+                '__html__' => <<<'HTML'
+    <div class="mb-6">
+        <h5 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
+            Pola Prepositional Phrase (Frasa Preposisi)
+        </h5>
+        <div class="overflow-hidden rounded-xl border border-gray-200 shadow-xs mb-4">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse bg-white text-xs sm:text-sm">
+                    <thead>
+                        <tr class="bg-gray-800 text-white text-xs uppercase tracking-wider">
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Komponen</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Formula Utama</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Preposisi Populer</th>
+                            <th class="p-3.5 font-semibold border-b border-gray-700">Contoh Kalimat</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-gray-700">
+                        <tr class="bg-white"><td class="p-3.5 font-bold text-gray-900">Prepositional Phrase</td><td class="p-3.5 font-mono text-xs text-blue-700">Preposition + Object of Preposition (N/Pron/NP)</td><td class="p-3.5">in, on, at, by, with, about, under, between, despite, in spite of</td><td class="p-3.5 italic">We are on the mountain. / He lives near the river.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="bg-blue-100 border border-blue-200/80 text-blue-950 p-4 sm:p-5 rounded-xl mb-5 shadow-xs" style="background-color: #dbeafe !important;">
+        <strong class="block mb-2 text-sm font-bold text-blue-900 flex items-center gap-2"> Tips & Panduan Pemahaman:</strong>
+        <ul class="list-disc list-inside space-y-1.5 ml-1 text-xs sm:text-sm text-blue-900">
+            <li>Prepositional phrase berfungsi menjelaskan tempat, waktu, arah, atau hubungan antar objek.</li>
+        </ul>
+    </div>
+    <div class="bg-amber-100 border border-amber-200 text-amber-950 p-4 sm:p-5 rounded-xl mb-6 shadow-xs" style="background-color: #fef3c7 !important;">
+        <strong class="block mb-2 text-sm font-bold text-amber-900 flex items-center gap-2"> Aturan & Formula Penting:</strong>
+        <ol class="list-decimal list-inside space-y-1.5 ml-1 text-xs sm:text-sm text-amber-950">
+            <li><strong>HUKUM UTAMA:</strong> Prepositional Phrase <u>TIDAK BISA</u> berfungsi sebagai Subject kalimat!</li>
+        </ol>
+        <em class="block mt-2.5 text-xs text-amber-900 font-medium border-t border-amber-200/60 pt-2">Catatan Kunci: Salah: <s>In Amazon forest provides oxygen</s> → Benar: <strong>Amazon forest provides oxygen</strong>.</em>
+    </div>
+HTML
+            ],
+            9 => $adminController->introductoryMeetingCheatSheet(9),
+            10 => [
+                '__html__' => <<<'HTML'
+    <div class="mb-6">
+        <!-- 1. Noun Clause -->
+        <h5 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
+            <span class="bg-purple-600 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold shadow-xs">1</span>
+            Pola Noun Clause (Klausa Kata Benda)
+        </h5>
+        <p class="text-xs sm:text-sm text-gray-600 mb-3">Noun Clause adalah anak kalimat (klausa) yang berfungsi sebagai kata benda (Subjek, Objek, atau Pelengkap) dalam kalimat utama.</p>
+
+        <div class="overflow-hidden rounded-xl border border-gray-200 shadow-xs mb-4">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse bg-white text-xs min-w-[520px]">
+                    <thead>
+                        <tr class="bg-gray-800 text-white text-[11px] uppercase tracking-wider">
+                            <th class="p-3 font-semibold border-b border-gray-700">Jenis Noun Clause</th>
+                            <th class="p-3 font-semibold border-b border-gray-700">Kata Hubung & Makna</th>
+                            <th class="p-3 font-semibold border-b border-gray-700">Formula & Contoh</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-gray-700">
+                        <tr class="bg-white hover:bg-purple-50/40">
+                            <td class="p-3 font-bold text-gray-900">That-Clause<br><span class="text-[10px] text-gray-500 font-normal">(Pernyataan / Fakta)</span></td>
+                            <td class="p-3 text-gray-800"><strong class="text-purple-700 font-mono">that</strong> = <em>bahwa</em></td>
+                            <td class="p-3">
+                                <div class="font-mono text-purple-900 font-semibold text-[11px]">that + S + V</div>
+                                <div class="italic text-gray-600 text-[11px] mt-0.5">We know <u>that Earth orbits the Sun</u>.</div>
+                            </td>
+                        </tr>
+                        <tr class="bg-white hover:bg-purple-50/40">
+                            <td class="p-3 font-bold text-gray-900">If / Whether Clause<br><span class="text-[10px] text-gray-500 font-normal">(Pilihan / Keraguan)</span></td>
+                            <td class="p-3 text-gray-800"><strong class="text-purple-700 font-mono">whether / if</strong> = <em>apakah</em></td>
+                            <td class="p-3">
+                                <div class="font-mono text-purple-900 font-semibold text-[11px]">whether / if + S + V</div>
+                                <div class="italic text-gray-600 text-[11px] mt-0.5">They wonder <u>whether life exists on Mars</u>.</div>
+                            </td>
+                        </tr>
+                        <tr class="bg-white hover:bg-purple-50/40">
+                            <td class="p-3 font-bold text-gray-900">Question Word Clause<br><span class="text-[10px] text-gray-500 font-normal">(Informasi / WH-Words)</span></td>
+                            <td class="p-3 text-gray-800">
+                                <div class="space-y-0.5 text-[11px]">
+                                    <div>• <strong class="text-purple-700 font-mono">what</strong> = apa / apa yang</div>
+                                    <div>• <strong class="text-purple-700 font-mono">where</strong> = di mana / ke mana</div>
+                                    <div>• <strong class="text-purple-700 font-mono">when</strong> = kapan / waktu ketika</div>
+                                    <div>• <strong class="text-purple-700 font-mono">why</strong> = mengapa / kenapa</div>
+                                    <div>• <strong class="text-purple-700 font-mono">how</strong> = bagaimana / cara</div>
+                                </div>
+                            </td>
+                            <td class="p-3">
+                                <div class="font-mono text-purple-900 font-semibold text-[11px]">Q-Word + S + V</div>
+                                <div class="italic text-gray-600 text-[11px] mt-0.5">I know <u>how black holes absorb matter</u>.</div>
+                                <div class="italic text-gray-600 text-[11px] mt-0.5">We saw <u>what happened</u>.</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 2. Prepositional Phrase -->
+        <h5 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2 mt-6">
+            <span class="bg-indigo-600 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold shadow-xs">2</span>
+            Pola Prepositional Phrase (Frasa Preposisi)
+        </h5>
+        <p class="text-xs sm:text-sm text-gray-600 mb-3">
+            <strong>Prepositional Phrase</strong> adalah gabungan kata depan (Preposition) dengan Objek Preposisi (Noun / Pronoun / Noun Phrase / Gerund).
+        </p>
+
+        <div class="overflow-hidden rounded-xl border border-gray-200 shadow-xs mb-4">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse bg-white text-xs min-w-[500px]">
+                    <thead>
+                        <tr class="bg-gray-800 text-white text-[11px] uppercase tracking-wider">
+                            <th class="p-3 font-semibold border-b border-gray-700">Fungsi Frasa</th>
+                            <th class="p-3 font-semibold border-b border-gray-700">Formula Gramatikal</th>
+                            <th class="p-3 font-semibold border-b border-gray-700">Penjelasan & Contoh</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-gray-700">
+                        <tr class="bg-white hover:bg-indigo-50/40">
+                            <td class="p-3 font-bold text-gray-900">Sebagai Adjective<br><span class="text-[10px] text-gray-500 font-normal">(Menerangkan Noun)</span></td>
+                            <td class="p-3 font-mono text-indigo-900 font-semibold text-[11px]">Noun + [Prep + Object]</td>
+                            <td class="p-3 text-[11px]">
+                                Menjelaskan kata benda di depannya.<br>
+                                <span class="italic text-gray-600">The report <u>on climate change</u> is very thorough.</span>
+                            </td>
+                        </tr>
+                        <tr class="bg-white hover:bg-indigo-50/40">
+                            <td class="p-3 font-bold text-gray-900">Sebagai Adverb<br><span class="text-[10px] text-gray-500 font-normal">(Menerangkan Verb/Klausa)</span></td>
+                            <td class="p-3 font-mono text-indigo-900 font-semibold text-[11px]">[Prep + Object], S + V<br>S + V + [Prep + Object]</td>
+                            <td class="p-3 text-[11px]">
+                                Menjelaskan waktu, tempat, cara, atau tujuan.<br>
+                                <span class="italic text-gray-600"><u>In the 19th century</u>, technology grew rapidly.</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-indigo-50/80 p-3 rounded-xl border border-indigo-100 space-y-1.5 text-xs text-gray-800 mb-4">
+            <strong class="text-indigo-900 font-bold block text-[11px]">📌 Daftar Preposisi Penting & Penggunaannya:</strong>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 font-mono text-[11px]">
+                <div>• <strong>in, on, at</strong> (tempat / waktu)</div>
+                <div>• <strong>during, throughout</strong> (selama)</div>
+                <div>• <strong>under, behind, between</strong> (posisi)</div>
+                <div>• <strong>according to</strong> (menurut)</div>
+                <div>• <strong>despite, in spite of</strong> (meskipun)</div>
+                <div>• <strong>due to, because of</strong> (karena)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-blue-100 border border-blue-200/80 text-blue-950 p-4 sm:p-5 rounded-xl mb-5 shadow-xs" style="background-color: #dbeafe !important;">
+        <strong class="block mb-2 text-sm font-bold text-blue-900 flex items-center gap-2">
+            💡 Tips & Panduan Pemahaman:
+        </strong>
+        <ul class="list-disc list-inside space-y-1.5 ml-1 text-xs sm:text-sm text-blue-900">
+            <li><strong>Noun Clause:</strong> Klausa utuh berpredikat (memiliki Subjek & Verb) yang menempati posisi kata benda: <em>I know <u>that she works hard</u></em>.</li>
+            <li><strong>Prepositional Phrase:</strong> Frasa tanpa predikat tenses yang diawali preposisi: <em>The book <u>on the desk</u></em> / <em><u>In modern society</u>, education is essential</em>.</li>
+            <li>Jika terdapat kata <strong>"bahwa"</strong>, gunakan <strong class="font-mono text-blue-800">that</strong>.</li>
+            <li>Jika terdapat kata <strong>"apakah"</strong> di tengah kalimat berita, gunakan <strong class="font-mono text-blue-800">whether / if</strong>.</li>
+        </ul>
+    </div>
+
+    <div class="bg-amber-100 border border-amber-200 text-amber-950 p-4 sm:p-5 rounded-xl mb-6 shadow-xs" style="background-color: #fef3c7 !important;">
+        <strong class="block mb-2 text-sm font-bold text-amber-900 flex items-center gap-2">
+            ⚠️ Aturan & Formula Penting:
+        </strong>
+        <ol class="list-decimal list-inside space-y-1.5 ml-1 text-xs sm:text-sm text-amber-950">
+            <li><strong>Susunan Berita (S+V):</strong> Noun Clause <u>WAJIB</u> berbentuk kalimat berita (Subject + Verb), bukan susunan kalimat tanya!</li>
+            <li><s>why did the system fail</s> → <strong>why the system failed</strong>.</li>
+            <li><strong>Hukum Subjek:</strong> Objek Preposisi (Prepositional Phrase) <u>TIDAK BISA</u> menjadi Subjek kalimat!</li>
+            <li><s>In the Amazon rainforest produces oxygen</s> → <strong>The Amazon rainforest produces oxygen</strong>.</li>
+        </ol>
+    </div>
+HTML
+            ],
+            11 => $adminController->complexityMeetingCheatSheet(5),
+            12 => $adminController->complexityMeetingCheatSheet(6),
+            13 => $adminController->complexityMeetingCheatSheet(8),
+            14 => $adminController->complexityMeetingCheatSheet(7),
+            15 => $adminController->complexityMeetingCheatSheet(8),
+            16 => $adminController->complexityMeetingCheatSheet(10),
+            17 => $adminController->complexityMeetingCheatSheet(9),
+            18 => $adminController->proficiencyMeetingCheatSheet(2),
+            19 => $adminController->proficiencyMeetingCheatSheet(6),
+            20 => $adminController->complexityMeetingCheatSheet(10),
+            default => null,
+        };
+    }
+
     /*
      * MEETING 1 LOGIC (DB-DRIVEN)
      */
@@ -12786,6 +12796,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             'questions' => $questions,
             'paragraphData' => $paragraphData,
             'vocabList' => $vocabList,
+            'cheatSheet' => $this->getFastTrackCheatSheet(1),
             'submitted' => false
         ]);
     }
@@ -13837,43 +13848,25 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
     }
 
     private $meeting3FallbackQuestions = [
-        1 => ['id' => 'Tempat penyimpanan air telah dibangun di desa ini.', 'en' => 'Water storage has been built in this village', 'tense' => 'Present Perfect Passive', 'vocab' => ['Water' => ['id' => 'Air', 'pos' => '(n)'], 'Storage' => ['id' => 'Penyimpanan', 'pos' => '(n)'], 'Village' => ['id' => 'Desa', 'pos' => '(n)']]],
-        2 => ['id' => 'Kemerdekaan Indonesia ada pada tanggal 17 agustus 1945.', 'en' => 'Indonesia\'s independence was on August 17, 1945', 'tense' => 'Simple Past Nominal', 'vocab' => ['Independence' => ['id' => 'Kemerdekaan', 'pos' => '(n)'], 'August' => ['id' => 'Agustus', 'pos' => '(n)']]],
-        3 => ['id' => 'Pembangunan daerah membantu perekonomian lokal.', 'en' => 'Regional development helps the local economy', 'tense' => 'Simple Present Verbal', 'vocab' => ['Regional' => ['id' => 'Daerah', 'pos' => '(adj)'], 'Development' => ['id' => 'Pembangunan', 'pos' => '(n)'], 'Help' => ['id' => 'Membantu', 'pos' => '(v)'], 'Local' => ['id' => 'Lokal', 'pos' => '(adj)'], 'Economy' => ['id' => 'Perekonomian', 'pos' => '(n)']]],
-        4 => ['id' => 'Pemanasan global sedang dibicarakan oleh seluruh orang di dunia.', 'en' => 'Global warming is being discussed by everyone in the world', 'tense' => 'Present Continuous Passive', 'vocab' => ['Global warming' => ['id' => 'Pemanasan global', 'pos' => '(n)'], 'Discuss' => ['id' => 'Membicarakan', 'pos' => '(v)'], 'Everyone' => ['id' => 'Seluruh orang', 'pos' => '(pron)'], 'World' => ['id' => 'Dunia', 'pos' => '(n)']]],
-        5 => ['id' => 'Laut adalah tempat dari banyak mineral di Bumi.', 'en' => 'The ocean is the place of many minerals on Earth', 'tense' => 'Simple Present Nominal', 'vocab' => ['Ocean' => ['id' => 'Laut', 'pos' => '(n)'], 'Place' => ['id' => 'Tempat', 'pos' => '(n)'], 'Many' => ['id' => 'Banyak', 'pos' => '(adj)'], 'Mineral' => ['id' => 'Mineral', 'pos' => '(n)'], 'Earth' => ['id' => 'Bumi', 'pos' => '(n)']]],
-        6 => ['id' => 'Banyak kebijakan telah diterapkan untuk melindungi satwa liar.', 'en' => 'Many policies have been implemented to protect wildlife', 'tense' => 'Present Perfect Passive', 'vocab' => ['Many' => ['id' => 'Banyak', 'pos' => '(adj)'], 'Policy' => ['id' => 'Kebijakan', 'pos' => '(n)'], 'Implement' => ['id' => 'Menerapkan', 'pos' => '(v)'], 'Protect' => ['id' => 'Melindungi', 'pos' => '(v)'], 'Wildlife' => ['id' => 'Satwa liar', 'pos' => '(n)']]],
-        7 => ['id' => 'Pendidikan adalah kunci untuk masa depan yang lebih baik.', 'en' => 'Education is the key to a better future', 'tense' => 'Simple Present Nominal', 'vocab' => ['Education' => ['id' => 'Pendidikan', 'pos' => '(n)'], 'Key' => ['id' => 'Kunci', 'pos' => '(n)'], 'Future' => ['id' => 'Masa depan', 'pos' => '(n)'], 'Better' => ['id' => 'Lebih baik', 'pos' => '(adj)']]],
-        8 => ['id' => 'Mereka sedang mendiskusikan rencana proyek baru.', 'en' => 'They are discussing the new project plan', 'tense' => 'Present Continuous Verbal', 'vocab' => ['Discuss' => ['id' => 'Mendiskusikan', 'pos' => '(v)'], 'Plan' => ['id' => 'Rencana', 'pos' => '(n)'], 'Project' => ['id' => 'Proyek', 'pos' => '(n)'], 'New' => ['id' => 'Baru', 'pos' => '(adj)']]],
-        9 => ['id' => 'Teknologi telah mengubah cara kita berkomunikasi.', 'en' => 'Technology has changed the way we communicate', 'tense' => 'Present Perfect Verbal', 'vocab' => ['Technology' => ['id' => 'Teknologi', 'pos' => '(n)'], 'Change' => ['id' => 'Mengubah', 'pos' => '(v)'], 'Way' => ['id' => 'Cara', 'pos' => '(n)'], 'Communicate' => ['id' => 'Berkomunikasi', 'pos' => '(v)']]],
-        10 => ['id' => 'Gunung krakatau akan menjadi lebih tinggi.', 'en' => 'Mount Krakatoa will become higher', 'tense' => 'Simple Future Verbal', 'vocab' => ['Mount' => ['id' => 'Gunung', 'pos' => '(n)'], 'Become' => ['id' => 'Menjadi', 'pos' => '(v)'], 'Higher' => ['id' => 'Lebih tinggi', 'pos' => '(adj)']]],
-        11 => ['id' => 'Apollo 11 mendarat di bulan 50 tahun lalu.', 'en' => 'Apollo 11 landed on the moon 50 years ago', 'tense' => 'Simple Past Verbal', 'vocab' => ['Land' => ['id' => 'Mendarat', 'pos' => '(v)'], 'Moon' => ['id' => 'Bulan', 'pos' => '(n)'], 'Ago' => ['id' => 'Lalu/Yang lalu', 'pos' => '(adv)']]],
-        12 => ['id' => 'Pertanian telah berkembang di Asia sebelum di America.', 'en' => 'Agriculture had developed in Asia before in America', 'tense' => 'Past Perfect Verbal', 'vocab' => ['Agriculture' => ['id' => 'Pertanian', 'pos' => '(n)'], 'Develop' => ['id' => 'Berkembang', 'pos' => '(v)'], 'Before' => ['id' => 'Sebelum', 'pos' => '(prep)']]],
-        13 => ['id' => 'Pembangunan negara telah sedang diwujudkan saat ini.', 'en' => 'National development has been being realized at this moment', 'tense' => 'Present Perfect Continuous Passive', 'vocab' => ['National' => ['id' => 'Negara', 'pos' => '(adj)'], 'Development' => ['id' => 'Pembangunan', 'pos' => '(n)'], 'Realize' => ['id' => 'Mewujudkan', 'pos' => '(v)'], 'Moment' => ['id' => 'Saat', 'pos' => '(n)']]],
-        14 => ['id' => 'Kami akan mengimplementasikan kebijakan baru bulan depan.', 'en' => 'We will implement the new policy next month', 'tense' => 'Simple Future Verbal', 'vocab' => ['Implement' => ['id' => 'Mengimplementasikan', 'pos' => '(v)'], 'Policy' => ['id' => 'Kebijakan', 'pos' => '(n)'], 'Next month' => ['id' => 'Bulan depan', 'pos' => '(adv)']]],
-        15 => ['id' => 'Anak-anak itu bermain di taman setiap sore.', 'en' => 'Those children play in the park every afternoon', 'tense' => 'Simple Present Verbal', 'vocab' => ['Children' => ['id' => 'Anak-anak', 'pos' => '(n)'], 'Play' => ['id' => 'Bermain', 'pos' => '(v)'], 'Park' => ['id' => 'Taman', 'pos' => '(n)'], 'Every afternoon' => ['id' => 'Setiap sore', 'pos' => '(adv)']]],
-        16 => ['id' => 'Peraturan harus diikuti secara ketat.', 'en' => 'Regulations must be followed strictly', 'tense' => 'Modal Passive', 'vocab' => ['Regulation' => ['id' => 'Peraturan', 'pos' => '(n)'], 'Must' => ['id' => 'Harus', 'pos' => '(modal)'], 'Follow' => ['id' => 'Mengikuti', 'pos' => '(v)'], 'Strictly' => ['id' => 'Secara ketat', 'pos' => '(adv)']]],
-        17 => ['id' => 'Pemerintah sedang ceroboh dalam kebijakan ini.', 'en' => 'The government is being careless in this policy', 'tense' => 'Present Continuous Nominal', 'vocab' => ['Government' => ['id' => 'Pemerintah', 'pos' => '(n)'], 'Careless' => ['id' => 'Ceroboh', 'pos' => '(adj)'], 'Policy' => ['id' => 'Kebijakan', 'pos' => '(n)']]],
-        18 => ['id' => 'Kerusakan ekosistem bisa menyebabkan kerusakan ekonomi.', 'en' => 'Ecosystem damage can cause economic damage', 'tense' => 'Modal Present', 'vocab' => ['Ecosystem' => ['id' => 'Ekosistem', 'pos' => '(n)'], 'Damage' => ['id' => 'Kerusakan', 'pos' => '(n)'], 'Can' => ['id' => 'Bisa', 'pos' => '(modal)'], 'Cause' => ['id' => 'Menyebabkan', 'pos' => '(v)'], 'Economic' => ['id' => 'Ekonomi', 'pos' => '(adj)']]],
-        19 => ['id' => 'Iklim global telah dipengaruhi oleh aktivitas manusia selama 1 abad ini.', 'en' => 'Global climate has been influenced by human activity for this century', 'tense' => 'Present Perfect Passive', 'vocab' => ['Global' => ['id' => 'Global', 'pos' => '(adj)'], 'Climate' => ['id' => 'Iklim', 'pos' => '(n)'], 'Influence' => ['id' => 'Mempengaruhi', 'pos' => '(v)'], 'Human' => ['id' => 'Manusia', 'pos' => '(n)'], 'Activity' => ['id' => 'Aktivitas', 'pos' => '(n)'], 'Century' => ['id' => 'Abad', 'pos' => '(n)']]],
-        20 => ['id' => 'Populasi Asia telah berada nomor 1 di dunia selama berabad - abad.', 'en' => 'Asia\'s population has been number 1 in the world for centuries', 'tense' => 'Present Perfect Nominal', 'vocab' => ['Population' => ['id' => 'Populasi', 'pos' => '(n)'], 'Number' => ['id' => 'Nomor', 'pos' => '(n)'], 'World' => ['id' => 'Dunia', 'pos' => '(n)'], 'Centuries' => ['id' => 'Berabad-abad', 'pos' => '(n)']]],
+        1 => ['id' => 'Artefak kuno dapat dilestarikan oleh metode konservasi modern.', 'en' => 'Ancient artifacts can be preserved by modern conservation methods', 'vocab' => ['artefak' => 'artifact', 'kuno' => 'ancient', 'oleh' => 'by', 'metode' => 'method', 'konservasi' => 'conservation', 'modern' => 'modern']],
+        2 => ['id' => 'Perubahan iklim mungkin mempercepat pemutihan terumbu karang.', 'en' => 'Climate change may accelerate coral bleaching', 'vocab' => ['perubahan' => 'change', 'iklim' => 'climate', 'mempercepat' => 'accelerate', 'pemutihan' => 'bleaching', 'terumbu karang' => 'coral reef']],
+        3 => ['id' => 'Organisasi internasional mungkin adalah penggerak utama aksi iklim dunia.', 'en' => 'International organizations may be the main drivers of global climate action', 'vocab' => ['organisasi' => 'organization', 'internasional' => 'international', 'penggerak' => 'driver', 'utama' => 'main', 'aksi' => 'action', 'dunia' => 'global']],
+        4 => ['id' => 'Negara-negara sebaiknya melindungi spesies yang terancam punah.', 'en' => 'Countries should protect endangered species', 'vocab' => ['negara' => 'country', 'melindungi' => 'protect', 'spesies' => 'species', 'terancam punah' => 'endangered']],
+        5 => ['id' => 'Hutan tropis harus dilindungi dari deforestasi besar-besaran.', 'en' => 'Tropical forests must be protected from massive deforestation', 'vocab' => ['hutan' => 'forest', 'tropis' => 'tropical', 'dari' => 'from', 'deforestasi' => 'deforestation', 'besar-besaran' => 'massive']],
+        6 => ['id' => 'Teknologi baru dapat menghasilkan solusi energi lebih efisien.', 'en' => 'New technology can produce more efficient energy solutions', 'vocab' => ['teknologi' => 'technology', 'baru' => 'new', 'menghasilkan' => 'produce', 'solusi' => 'solution', 'energi' => 'energy', 'lebih' => 'more', 'efisien' => 'efficient']],
+        7 => ['id' => 'Kerja sama global harus menjadi prioritas utama.', 'en' => 'Global cooperation must be the top priority', 'vocab' => ['kerja sama' => 'cooperation', 'global' => 'global', 'menjadi' => 'be', 'prioritas' => 'priority', 'utama' => 'top']],
+        8 => ['id' => 'Fosil baru mungkin ditemukan di daerah terpencil.', 'en' => 'New fossils may be found in remote areas', 'vocab' => ['fosil' => 'fossil', 'baru' => 'new', 'di' => 'in', 'daerah' => 'area', 'terpencil' => 'remote']],
+        9 => ['id' => 'Data ini dapat merupakan bukti evolusi yang signifikan.', 'en' => 'This data can be significant evidence of evolution', 'vocab' => ['data' => 'data', 'ini' => 'this', 'merupakan' => 'be', 'bukti' => 'evidence', 'evolusi' => 'evolution', 'signifikan' => 'significant']],
+        10 => ['id' => 'Pemerintah akan menerapkan kebijakan lingkungan baru tahun depan.', 'en' => 'The government will implement new environmental policies next year', 'vocab' => ['pemerintah' => 'government', 'menerapkan' => 'implement', 'kebijakan' => 'policy', 'lingkungan' => 'environmental', 'baru' => 'new', 'tahun depan' => 'next year']],
     ];
 
     private $meeting3FallbackParagraph = [
-        'id' => 'Polusi plastik merusak lingkungan setiap hari. Sampah plastik sedang mencemari lautan di seluruh dunia. Para ilmuwan telah menemukan mikroplastik dalam tubuh hewan laut. Banyak komunitas telah lama memperingatkan bahaya plastik sekali pakai. Larangan penggunaan kantong plastik dapat mengurangi jumlah sampah di tempat umum. Botol plastik bekas didaur ulang oleh beberapa perusahaan ramah lingkungan. Pada masa lalu, masyarakat kurang menyadari dampak jangka panjang limbah plastik. Anak-anak sekolah sedang diajari tentang pentingnya pengelolaan sampah. Masalah polusi plastik adalah ancaman serius bagi keberlanjutan bumi. Tahun depan, pemerintah akan memberlakukan regulasi baru tentang penggunaan plastik. Program pengurangan plastik akan sedang dilaksanakan di berbagai kota besar. Para aktivis lingkungan akan telah mengorganisir kampanye global dalam beberapa bulan mendatang. Upaya global harus difokuskan pada solusi jangka panjang. Negara-negara berkembang bisa mengalami kesulitan dalam menerapkan kebijakan ramah lingkungan. Organisasi internasional telah lama berusaha menyatukan negara-negara untuk mengatasi krisis ini. Edukasi sejak dini merupakan kunci dalam mengubah kebiasaan konsumen. Pada masa lalu, penggunaan plastik adalah simbol kemajuan dan kemudahan. Jika tidak dikendalikan, polusi plastik akan menjadi bencana lingkungan yang lebih besar.',
-        'en' => 'Plastic pollution damages the environment every day. Plastic waste is polluting oceans all over the world. Scientists have found microplastics in the bodies of marine animals. Many communities have long warned about the dangers of single-use plastic. The ban on plastic bags can reduce the amount of waste in public places. Used plastic bottles are recycled by several eco-friendly companies. In the past, society was less aware of the long-term impact of plastic waste. School children are being taught about the importance of waste management. The problem of plastic pollution is a serious threat to the earth\'s sustainability. Next year, the government will enforce new regulations on plastic use. Plastic reduction programs will be being implemented in various major cities. Environmental activists will have organized global campaigns in the coming months. Global efforts must be focused on long-term solutions. Developing countries could experience difficulties in implementing eco-friendly policies. International organizations have long been trying to unite countries to overcome this crisis. Early education is the key to changing consumer habits. In the past, plastic use was a symbol of progress and convenience. If not controlled, plastic pollution will become a greater environmental disaster.',
+        'id' => 'Upaya konservasi laut harus ditingkatkan untuk melindungi terumbu karang. Spesies langka mungkin dapat bertahan jika habitat mereka dijaga dengan baik. Masyarakat sebaiknya berpartisipasi aktif dalam menjaga kebersihan lingkungan.',
+        'en' => 'Marine conservation efforts must be increased to protect coral reefs. Rare species may survive if their habitats are properly guarded. Society should actively participate in maintaining environmental cleanliness.',
         'vocab' => [
-            'Plastic' => ['id' => 'Plastik', 'pos' => '(n)'],
-            'Pollution' => ['id' => 'Polusi', 'pos' => '(n)'],
-            'Environment' => ['id' => 'Lingkungan', 'pos' => '(n)'],
-            'Waste' => ['id' => 'Sampah/Limbah', 'pos' => '(n)'],
-            'Ocean' => ['id' => 'Lautan', 'pos' => '(n)'],
-            'Scientist' => ['id' => 'Ilmuwan', 'pos' => '(n)'],
-            'Microplastic' => ['id' => 'Mikroplastik', 'pos' => '(n)'],
-            'Single-use' => ['id' => 'Sekali pakai', 'pos' => '(adj)'],
-            'Regulation' => ['id' => 'Regulasi', 'pos' => '(n)'],
-            'Sustainability' => ['id' => 'Keberlanjutan', 'pos' => '(n)'],
-            'Disaster' => ['id' => 'Bencana', 'pos' => '(n)']
+            'Conservation' => ['id' => 'Konservasi', 'pos' => '(n)'],
+            'Habitat' => ['id' => 'Habitat', 'pos' => '(n)'],
+            'Cleanliness' => ['id' => 'Kebersihan', 'pos' => '(n)'],
         ]
     ];
 
@@ -14197,10 +14190,40 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
     ];
 
     private $meeting4Paragraph = [
-        'id' => 'Ini adalah paragraf contoh untuk pertemuan 4 karena teks asli tidak disediakan. Silakan terjemahkan kalimat ini dengan benar.',
-        'en' => 'This is a sample paragraph for meeting 4 because the original text was not provided. Please translate this sentence correctly.',
+        'id' => 'Para peneliti harus memverifikasi data laboratorium secara berkala. Limbah kimia berbahaya tidak boleh dibuang sembarangan ke lingkungan. Seluruh staf laboratorium harus selalu waspada terhadap potensi bahaya. Laporan eksperimen ini dapat diselesaikan dalam dua hari. Hasil tes awal mungkin tidak akurat tanpa prosedur standar. Setiap asisten laboratorium harus mengenakan alat pelindung diri lengkap. Bahan kimia reaktif harus disimpan di dalam lemari asam khusus. Peralatan gelas laboratorium tidak boleh dibiarkan kotor setelah digunakan. Semua ilmuwan seharusnya mencatat setiap perubahan suhu secara cermat. Sampel biologis tersebut dapat terkontaminasi oleh udara luar. Ventilasi ruangan laboratorium harus selalu berfungsi secara optimal. Teknisi baru bisa menjadi sangat terampil melalui pelatihan intensif.',
+        'en' => 'Researchers must verify laboratory data periodically. Hazardous chemical waste must not be disposed of carelessly into the environment. All laboratory staff must always be alert to potential hazards. This experiment report can be completed in two days. Initial test results might not be accurate without standard procedures. Every laboratory assistant must wear complete personal protective equipment. Reactive chemicals must be stored in a special fume hood. Laboratory glassware must not be left dirty after use. All scientists should record every temperature change carefully. The biological sample can be contaminated by outside air. Laboratory room ventilation must always function optimally. New technicians can become very skilled through intensive training.',
         'sentences' => [],
-        'vocab' => []
+        'vocab' => [
+            'verify' => ['id' => 'memverifikasi', 'pos' => '(v1)'],
+            'periodically' => ['id' => 'secara berkala', 'pos' => '(adv)'],
+            'hazardous chemical waste' => ['id' => 'limbah kimia berbahaya', 'pos' => '(n)'],
+            'dispose of' => ['id' => 'membuang', 'pos' => '(v1)'],
+            'carelessly' => ['id' => 'sembarangan', 'pos' => '(adv)'],
+            'laboratory staff' => ['id' => 'staf laboratorium', 'pos' => '(n)'],
+            'alert' => ['id' => 'waspada', 'pos' => '(adj)'],
+            'potential hazard' => ['id' => 'potensi bahaya', 'pos' => '(n)'],
+            'experiment report' => ['id' => 'laporan eksperimen', 'pos' => '(n)'],
+            'complete' => ['id' => 'menyelesaikan', 'pos' => '(v1)'],
+            'initial test' => ['id' => 'tes awal', 'pos' => '(n)'],
+            'accurate' => ['id' => 'akurat', 'pos' => '(adj)'],
+            'standard procedure' => ['id' => 'prosedur standar', 'pos' => '(n)'],
+            'laboratory assistant' => ['id' => 'asisten laboratorium', 'pos' => '(n)'],
+            'personal protective equipment' => ['id' => 'alat pelindung diri', 'pos' => '(n)'],
+            'reactive chemical' => ['id' => 'bahan kimia reaktif', 'pos' => '(n)'],
+            'fume hood' => ['id' => 'lemari asam', 'pos' => '(n)'],
+            'store' => ['id' => 'menyimpan', 'pos' => '(v1)'],
+            'glassware' => ['id' => 'peralatan gelas', 'pos' => '(n)'],
+            'dirty' => ['id' => 'kotor', 'pos' => '(adj)'],
+            'record' => ['id' => 'mencatat', 'pos' => '(v1)'],
+            'temperature change' => ['id' => 'perubahan suhu', 'pos' => '(n)'],
+            'carefully' => ['id' => 'secara cermat', 'pos' => '(adv)'],
+            'biological sample' => ['id' => 'sampel biologis', 'pos' => '(n)'],
+            'contaminate' => ['id' => 'mengontaminasi / mencemari', 'pos' => '(v1)'],
+            'ventilation' => ['id' => 'ventilasi', 'pos' => '(n)'],
+            'optimally' => ['id' => 'secara optimal', 'pos' => '(adv)'],
+            'skilled' => ['id' => 'terampil', 'pos' => '(adj)'],
+            'intensive training' => ['id' => 'pelatihan intensif', 'pos' => '(n)'],
+        ]
     ];
 
     private $meeting5TenseExamples = [
@@ -15864,8 +15887,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             'meeting9_user_answers' => [],
             'meeting9_user_paragraph_answer' => $userParagraphAnswer
         ]);
-
-        // Save score to database
+            // Save score to database
         $this->saveMeetingScore(9, $finalScore);
 
         return redirect()->route('assignments.grammar-writing.meeting9');
@@ -15886,214 +15908,214 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
 
     private $meeting10Questions = [
         1 => [
+            'id' => 'Negara kepulauan tropis besar ini memiliki keanekaragaman hayati yang luar biasa.', 
+            'en' => 'This large tropical archipelago country has extraordinary biodiversity', 
+            'type' => 'Noun Phrase',
+            'vocab' => ['Archipelago country' => ['id' => 'Negara kepulauan', 'pos' => '(n)'], 'Tropical' => ['id' => 'Tropis', 'pos' => '(adj)'], 'Large' => ['id' => 'Besar', 'pos' => '(adj)'], 'Extraordinary' => ['id' => 'Luar biasa', 'pos' => '(adj)'], 'Biodiversity' => ['id' => 'Keanekaragaman hayati', 'pos' => '(n)']],
+            'example' => ['id' => 'Negara maritim modern ini memiliki kekayaan laut melimpah.', 'en' => 'This modern maritime country has abundant marine wealth.']
+        ],
+        2 => [
+            'id' => 'Kota metropolitan modern yang hijau ini menjadi model pembangunan perkotaan dunia.', 
+            'en' => 'This green modern metropolitan city becomes a model for world urban development', 
+            'type' => 'Noun Phrase',
+            'vocab' => ['Metropolitan city' => ['id' => 'Kota metropolitan', 'pos' => '(n)'], 'Modern' => ['id' => 'Modern', 'pos' => '(adj)'], 'Green' => ['id' => 'Hijau / Ramah lingkungan', 'pos' => '(adj)'], 'Model' => ['id' => 'Model / Contoh', 'pos' => '(n)'], 'Urban development' => ['id' => 'Pembangunan perkotaan', 'pos' => '(n)']],
+            'example' => ['id' => 'Kota industri tua tersebut bertransformasi menjadi pusat teknologi.', 'en' => 'The old industrial city transformed into a technology center.']
+        ],
+        3 => [
+            'id' => 'Lembaga penelitian ekonomi independen yang terkenal ini merilis laporan tahunan.', 
+            'en' => 'This famous independent economic research institution releases an annual report', 
+            'type' => 'Noun Phrase',
+            'vocab' => ['Research institution' => ['id' => 'Lembaga penelitian', 'pos' => '(n)'], 'Economic' => ['id' => 'Ekonomi', 'pos' => '(adj)'], 'Independent' => ['id' => 'Independen', 'pos' => '(adj)'], 'Famous' => ['id' => 'Terkenal', 'pos' => '(adj)'], 'Annual report' => ['id' => 'Laporan tahunan', 'pos' => '(n)'], 'Release' => ['id' => 'Merilis / Menerbitkan', 'pos' => '(v)']],
+            'example' => ['id' => 'Organisasi kesehatan internasional tersebut menerbitkan panduan medis baru.', 'en' => 'The international health organization published new medical guidelines.']
+        ],
+        4 => [
+            'id' => 'Museum nasional bersejarah yang megah ini menyimpan artefak kuno yang sangat berharga.', 
+            'en' => 'This magnificent historic national museum stores very valuable ancient artifacts', 
+            'type' => 'Noun Phrase',
+            'vocab' => ['National museum' => ['id' => 'Museum nasional', 'pos' => '(n)'], 'Historic' => ['id' => 'Bersejarah', 'pos' => '(adj)'], 'Magnificent' => ['id' => 'Megah', 'pos' => '(adj)'], 'Store' => ['id' => 'Menyimpan', 'pos' => '(v)'], 'Ancient artifact' => ['id' => 'Artefak kuno', 'pos' => '(n)'], 'Valuable' => ['id' => 'Berharga', 'pos' => '(adj)']],
+            'example' => ['id' => 'Galeri seni kontemporer baru tersebut memamerkan lukisan langka.', 'en' => 'The new contemporary art gallery exhibits rare paintings.']
+        ],
+        5 => [
+            'id' => 'Ahli geografi memetakan wilayah perbatasan terpencil yang luas secara cermat.', 
+            'en' => 'Geographers map the vast remote border region carefully', 
+            'type' => 'Noun Phrase',
+            'vocab' => ['Geographer' => ['id' => 'Ahli geografi', 'pos' => '(n)'], 'Map' => ['id' => 'Memetakan', 'pos' => '(v)'], 'Border region' => ['id' => 'Wilayah perbatasan', 'pos' => '(n)'], 'Remote' => ['id' => 'Terpencil', 'pos' => '(adj)'], 'Vast' => ['id' => 'Luas', 'pos' => '(adj)'], 'Carefully' => ['id' => 'Secara cermat / teliti', 'pos' => '(adv)']],
+            'example' => ['id' => 'Peneliti menjelajahi hutan hujan primer yang lebat.', 'en' => 'Researchers explored the dense primary rainforest.']
+        ],
+        6 => [
+            'id' => 'Konferensi internasional lingkungan yang penting ini diadakan setiap tahun di Jenewa.', 
+            'en' => 'This important international environmental conference is held every year in Geneva', 
+            'type' => 'Noun Phrase',
+            'vocab' => ['Environmental conference' => ['id' => 'Konferensi lingkungan', 'pos' => '(n)'], 'International' => ['id' => 'Internasional', 'pos' => '(adj)'], 'Important' => ['id' => 'Penting', 'pos' => '(adj)'], 'Held' => ['id' => 'Diadakan', 'pos' => '(v3)'], 'Every year' => ['id' => 'Setiap tahun', 'pos' => '(phrase)']],
+            'example' => ['id' => 'Pertemuan diplomatik bilateral tertutup tersebut berlangsung di Jakarta.', 'en' => 'The closed bilateral diplomatic meeting took place in Jakarta.']
+        ],
+        7 => [
+            'id' => 'Buku referensi ilmiah klasik yang mahal tentang linguistik tersedia di perpustakaan universitas.', 
+            'en' => 'The expensive classic scientific reference book on linguistics is available in the university library', 
+            'type' => 'Noun Phrase',
+            'vocab' => ['Reference book' => ['id' => 'Buku referensi', 'pos' => '(n)'], 'Scientific' => ['id' => 'Ilmiah', 'pos' => '(adj)'], 'Classic' => ['id' => 'Klasik', 'pos' => '(adj)'], 'Expensive' => ['id' => 'Mahal', 'pos' => '(adj)'], 'Linguistics' => ['id' => 'Linguistik', 'pos' => '(n)'], 'Available' => ['id' => 'Tersedia', 'pos' => '(adj)'], 'University library' => ['id' => 'Perpustakaan universitas', 'pos' => '(n)']],
+            'example' => ['id' => 'Jurnal akademik kedokteran terkini tersebut dapat diakses secara daring.', 'en' => 'The latest medical academic journal can be accessed online.']
+        ],
+        8 => [
+            'id' => 'Para ilmuwan kelautan menemukan mineral langka yang berkilau di dasar samudra.', 
+            'en' => 'Marine scientists discover rare shiny minerals on the ocean floor', 
+            'type' => 'Noun Phrase',
+            'vocab' => ['Marine scientist' => ['id' => 'Ilmuwan kelautan', 'pos' => '(n)'], 'Discover' => ['id' => 'Menemukan', 'pos' => '(v)'], 'Mineral' => ['id' => 'Mineral', 'pos' => '(n)'], 'Shiny' => ['id' => 'Berkilau', 'pos' => '(adj)'], 'Rare' => ['id' => 'Langka', 'pos' => '(adj)'], 'Ocean floor' => ['id' => 'Dasar samudra', 'pos' => '(n)']],
+            'example' => ['id' => 'Ahli geologi mengidentifikasi batuan vulkanik hitam di lereng gunung.', 'en' => 'Geologists identified black volcanic rocks on the mountain slope.']
+        ],
+        9 => [
+            'id' => 'Program pendidikan usia dini yang inklusif berkembang pesat di wilayah pedesaan.', 
+            'en' => 'The inclusive early childhood education program develops rapidly in rural areas', 
+            'type' => 'Noun Phrase',
+            'vocab' => ['Education program' => ['id' => 'Program pendidikan', 'pos' => '(n)'], 'Early childhood' => ['id' => 'Usia dini', 'pos' => '(phrase)'], 'Inclusive' => ['id' => 'Inklusif', 'pos' => '(adj)'], 'Develop' => ['id' => 'Berkembang', 'pos' => '(v)'], 'Rapidly' => ['id' => 'Pesat / Cepat', 'pos' => '(adv)'], 'Rural area' => ['id' => 'Wilayah pedesaan', 'pos' => '(n)']],
+            'example' => ['id' => 'Inisiatif pelatihan keterampilan digital baru tersebut menjangkau banyak pemuda.', 'en' => 'The new digital skills training initiative reached many youths.']
+        ],
+        10 => [
+            'id' => 'Masyarakat adat pegunungan tinggi yang terpencil ini mempertahankan sistem tradisi yang unik.', 
+            'en' => 'This remote high mountain indigenous community maintains a unique traditional system', 
+            'type' => 'Noun Phrase',
+            'vocab' => ['Indigenous community' => ['id' => 'Masyarakat adat', 'pos' => '(n)'], 'High mountain' => ['id' => 'Pegunungan tinggi', 'pos' => '(n)'], 'Remote' => ['id' => 'Terpencil', 'pos' => '(adj)'], 'Maintain' => ['id' => 'Mempertahankan', 'pos' => '(v)'], 'Traditional system' => ['id' => 'Sistem tradisi', 'pos' => '(n)'], 'Unique' => ['id' => 'Unik', 'pos' => '(adj)']],
+            'example' => ['id' => 'Suku pedalaman pesisir selatan tersebut menjaga kearifan lokal leluhur.', 'en' => 'The southern coastal inland tribe preserves ancestral local wisdom.']
+        ],
+        11 => [
+            'id' => 'Tim astronomi mengamati fenomena kosmik misterius yang sangat langka di tepi galaksi.', 
+            'en' => 'The astronomy team observes an extremely rare mysterious cosmic phenomenon at the edge of the galaxy', 
+            'type' => 'Noun Phrase',
+            'vocab' => ['Astronomy team' => ['id' => 'Tim astronomi', 'pos' => '(n)'], 'Observe' => ['id' => 'Mengamati', 'pos' => '(v)'], 'Cosmic phenomenon' => ['id' => 'Fenomena kosmik', 'pos' => '(n)'], 'Mysterious' => ['id' => 'Misterius', 'pos' => '(adj)'], 'Extremely rare' => ['id' => 'Sangat langka', 'pos' => '(phrase)'], 'Edge of the galaxy' => ['id' => 'Tepi galaksi', 'pos' => '(phrase)']],
+            'example' => ['id' => 'Stasiun observatorium antariksa modern tersebut merekam ledakan bintang baru.', 'en' => 'The modern space observatory station recorded a new star explosion.']
+        ],
+        12 => [
+            'id' => 'Infrastruktur energi terbarukan yang canggih dan ramah lingkungan mendukung kebutuhan listrik perkotaan.', 
+            'en' => 'The advanced eco-friendly renewable energy infrastructure supports urban electricity needs', 
+            'type' => 'Noun Phrase',
+            'vocab' => ['Renewable energy infrastructure' => ['id' => 'Infrastruktur energi terbarukan', 'pos' => '(n)'], 'Advanced' => ['id' => 'Canggih', 'pos' => '(adj)'], 'Eco-friendly' => ['id' => 'Ramah lingkungan', 'pos' => '(adj)'], 'Support' => ['id' => 'Mendukung', 'pos' => '(v)'], 'Urban electricity needs' => ['id' => 'Kebutuhan listrik perkotaan', 'pos' => '(n)']],
+            'example' => ['id' => 'Sistem jaringan listrik tenaga surya modern tersebut mengurangi emisi karbon.', 'en' => 'The modern solar power grid system reduced carbon emissions.']
+        ],
+        13 => [
             'id' => 'Asia adalah benua terbesar di dunia.', 
             'en' => 'Asia is the biggest continent in the world', 
             'type' => 'Superlative',
             'vocab' => ['Continent' => ['id' => 'Benua', 'pos' => '(n)'], 'Big' => ['id' => 'Besar', 'pos' => '(adj)'], 'In the world' => ['id' => 'Di dunia', 'pos' => '(phrase)']],
             'example' => ['id' => 'Rusia adalah negara terluas di dunia.', 'en' => 'Russia is the largest country in the world.']
         ],
-        2 => [
+        14 => [
             'id' => 'Gunung tertinggi di dunia adalah Gunung Everest.', 
             'en' => 'The highest mountain in the world is Mount Everest', 
             'type' => 'Superlative',
             'vocab' => ['Mountain' => ['id' => 'Gunung', 'pos' => '(n)'], 'High' => ['id' => 'Tinggi', 'pos' => '(adj)'], 'In the world' => ['id' => 'Di dunia', 'pos' => '(phrase)']],
             'example' => ['id' => 'Sungai Nil adalah sungai terpanjang di dunia.', 'en' => 'The Nile is the longest river in the world.']
         ],
-        3 => [
+        15 => [
             'id' => 'Buku catatan Marie Curie adalah salah satu benda paling radioaktif di dunia.', 
             'en' => 'Marie Curie\'s notebook is one of the most radioactive objects in the world', 
             'type' => 'Superlative',
-            'vocab' => ['Radioactive' => ['id' => 'Radioaktif', 'pos' => '(adj)'], 'Object' => ['id' => 'Benda', 'pos' => '(n)'], 'In the world' => ['id' => 'Di dunia', 'pos' => '(phrase)']],
+            'vocab' => ['Notebook' => ['id' => 'Buku catatan', 'pos' => '(n)'], 'Radioactive' => ['id' => 'Radioaktif', 'pos' => '(adj)'], 'Object' => ['id' => 'Benda', 'pos' => '(n)']],
             'example' => ['id' => 'Ini adalah salah satu mobil paling mahal di showroom.', 'en' => 'This is one of the most expensive cars in the showroom.']
         ],
-        4 => [
+        16 => [
             'id' => 'Dinar Kuwait adalah mata uang paling kuat di dunia.', 
             'en' => 'The Kuwaiti Dinar is the strongest currency in the world', 
             'type' => 'Superlative',
-            'vocab' => ['Currency' => ['id' => 'Mata uang', 'pos' => '(n)'], 'Strong' => ['id' => 'Kuat', 'pos' => '(adj)'], 'In the world' => ['id' => 'Di dunia', 'pos' => '(phrase)']],
+            'vocab' => ['Currency' => ['id' => 'Mata uang', 'pos' => '(n)'], 'Strong' => ['id' => 'Kuat', 'pos' => '(adj)']],
             'example' => ['id' => 'Cheetah adalah hewan darat tercepat.', 'en' => 'The cheetah is the fastest land animal.']
         ],
-        5 => [
+        17 => [
             'id' => 'Pulau terbesar di dunia adalah Greenland.', 
             'en' => 'The largest island in the world is Greenland', 
             'type' => 'Superlative',
-            'vocab' => ['Island' => ['id' => 'Pulau', 'pos' => '(n)'], 'Large' => ['id' => 'Besar', 'pos' => '(adj)'], 'In the world' => ['id' => 'Di dunia', 'pos' => '(phrase)']],
+            'vocab' => ['Island' => ['id' => 'Pulau', 'pos' => '(n)'], 'Large' => ['id' => 'Besar/Luas', 'pos' => '(adj)']],
             'example' => ['id' => 'Jupiter adalah planet terbesar di tata surya kita.', 'en' => 'Jupiter is the biggest planet in our solar system.']
         ],
-        6 => [
+        18 => [
             'id' => 'Tempat terbaik untuk menangkap ikan adalah area terumbu karang.', 
             'en' => 'The best place to catch fish is the coral reef area', 
             'type' => 'Superlative',
-            'vocab' => ['Catch' => ['id' => 'Menangkap', 'pos' => '(v)'], 'Coral reef' => ['id' => 'Terumbu karang', 'pos' => '(n)'], 'Area' => ['id' => 'Area', 'pos' => '(n)'], 'Good' => ['id' => 'Baik/Bagus', 'pos' => '(adj)']],
+            'vocab' => ['Place' => ['id' => 'Tempat', 'pos' => '(n)'], 'Catch' => ['id' => 'Menangkap', 'pos' => '(v)'], 'Coral reef' => ['id' => 'Terumbu karang', 'pos' => '(n)'], 'Area' => ['id' => 'Area/Wilayah', 'pos' => '(n)']],
             'example' => ['id' => 'Waktu terbaik untuk mengunjungi Jepang adalah musim semi.', 'en' => 'The best time to visit Japan is spring.']
         ],
-        7 => [
-            'id' => 'Peradaban tertua di dunia adalah Mesopotamia.', 
-            'en' => 'The oldest civilization in the world is Mesopotamia', 
-            'type' => 'Superlative',
-            'vocab' => ['Civilization' => ['id' => 'Peradaban', 'pos' => '(n)'], 'Old' => ['id' => 'Tua', 'pos' => '(adj)'], 'In the world' => ['id' => 'Di dunia', 'pos' => '(phrase)']],
-            'example' => ['id' => 'Bangunan tertua di kota ini adalah gereja.', 'en' => 'The oldest building in this city is the church.']
-        ],
-        8 => [
-            'id' => 'Blanidae adalah kelompok yang paling primitif dari amphisbaenians.', 
-            'en' => 'Blanidae is the most primitive group of amphisbaenians', 
-            'type' => 'Superlative',
-            'vocab' => ['Primitive' => ['id' => 'Primitif', 'pos' => '(adj)'], 'Group' => ['id' => 'Kelompok', 'pos' => '(n)']],
-            'example' => ['id' => 'Ini adalah bagian paling rumit dari mesin itu.', 'en' => 'This is the most complex part of the machine.']
-        ],
-        9 => [
-            'id' => 'Burung dodo kemungkinan merupakan contoh paling baru dari burung yang tidak bisa terbang.', 
-            'en' => 'The dodo bird is probably the most recent example of flightless birds', 
-            'type' => 'Superlative',
-            'vocab' => ['Recent' => ['id' => 'Baru/Terkini', 'pos' => '(adj)'], 'Example' => ['id' => 'Contoh', 'pos' => '(n)'], 'Flightless' => ['id' => 'Tidak bisa terbang', 'pos' => '(adj)']],
-            'example' => ['id' => 'Ini adalah pembaruan paling baru untuk perangkat lunak tersebut.', 'en' => 'This is the most recent update for the software.']
-        ],
-        10 => [
-            'id' => 'Pada tahun 1955, Organisasi Kesehatan Dunia meluncurkan kampanye Global Malaria Eradication untuk melawan penyakit yang paling merusak di negara - negara tropis.', 
-            'en' => 'In 1955, the World Health Organization launched the Global Malaria Eradication campaign to fight the most destructive disease in tropical countries', 
-            'type' => 'Superlative',
-            'vocab' => ['Destructive' => ['id' => 'Merusak', 'pos' => '(adj)'], 'Disease' => ['id' => 'Penyakit', 'pos' => '(n)'], 'Tropical countries' => ['id' => 'Negara tropis', 'pos' => '(n)'], 'Fight' => ['id' => 'Melawan', 'pos' => '(v)'], 'Launch' => ['id' => 'Meluncurkan', 'pos' => '(v)'], 'Campaign' => ['id' => 'Kampanye', 'pos' => '(n)']],
-            'example' => ['id' => 'Itu adalah keputusan paling sulit dalam hidupku.', 'en' => 'It was the most difficult decision of my life.']
-        ],
-        11 => [
+        19 => [
             'id' => 'Kecepatan cahaya lebih cepat daripada kecepatan suara.', 
             'en' => 'The speed of light is faster than the speed of sound', 
             'type' => 'Comparative',
             'vocab' => ['Speed of light' => ['id' => 'Kecepatan cahaya', 'pos' => '(n)'], 'Speed of sound' => ['id' => 'Kecepatan suara', 'pos' => '(n)'], 'Fast' => ['id' => 'Cepat', 'pos' => '(adj)']],
-            'example' => ['id' => 'Emas lebih mahal daripada perak.', 'en' => 'Gold is more expensive than silver.']
-        ],
-        12 => [
-            'id' => 'Iklim dunia menjadi semakin panas.', 
-            'en' => 'The world\'s climate is becoming hotter', 
-            'type' => 'Comparative',
-            'vocab' => ['Climate' => ['id' => 'Iklim', 'pos' => '(n)'], 'Become' => ['id' => 'Menjadi', 'pos' => '(v)'], 'Hot' => ['id' => 'Panas', 'pos' => '(adj)']],
-            'example' => ['id' => 'Cuaca menjadi semakin dingin.', 'en' => 'The weather is getting colder.']
-        ],
-        13 => [
-            'id' => 'Sekitar 60 juta tahun yang lalu, permukaan samudra dekat Antartika adalah 10° hingga 15° lebih hangat daripada sekarang.', 
-            'en' => 'About 60 million years ago, the ocean surface near Antarctica was 10° to 15° warmer than now', 
-            'type' => 'Comparative',
-            'vocab' => ['Ocean surface' => ['id' => 'Permukaan laut', 'pos' => '(n)'], 'Warm' => ['id' => 'Hangat', 'pos' => '(adj)'], 'Near' => ['id' => 'Dekat', 'pos' => '(prep)']],
-            'example' => ['id' => 'Hari ini lebih hangat daripada kemarin.', 'en' => 'Today is warmer than yesterday.']
-        ],
-        14 => [
-            'id' => 'Kemajuan teknology yang paling maju sejak 1950 adalah komputer dan perjalanan luar angkasa.', 
-            'en' => 'The most advanced technological advances since 1950 are computers and space travel', 
-            'type' => 'Superlative',
-            'vocab' => ['Advanced' => ['id' => 'Maju', 'pos' => '(adj)'], 'Technological advance' => ['id' => 'Kemajuan teknologi', 'pos' => '(n)'], 'Space travel' => ['id' => 'Perjalanan luar angkasa', 'pos' => '(n)']],
-            'example' => ['id' => 'Hal yang paling penting adalah kejujuran.', 'en' => 'The most important thing is honesty.']
-        ],
-        15 => [
-            'id' => 'Roda adalah salah satu penemuan terbesar manusia.', 
-            'en' => 'The wheel is one of the greatest human inventions', 
-            'type' => 'Superlative',
-            'vocab' => ['Wheel' => ['id' => 'Roda', 'pos' => '(n)'], 'Invention' => ['id' => 'Penemuan', 'pos' => '(n)'], 'Great' => ['id' => 'Besar/Hebat', 'pos' => '(adj)'], 'Human' => ['id' => 'Manusia', 'pos' => '(n)']],
-            'example' => ['id' => 'Internet adalah salah satu penemuan terbesar.', 'en' => 'The internet is one of the greatest inventions.']
-        ],
-        16 => [
-            'id' => 'Mungkin, echinoderma terbesar dan yang paling spektakuler dari semua fosil invertebrata adalah sea lily.', 
-            'en' => 'Perhaps, the largest and most spectacular echinoderm of all invertebrate fossils is the sea lily', 
-            'type' => 'Superlative',
-            'vocab' => ['Spectacular' => ['id' => 'Spektakuler', 'pos' => '(adj)'], 'Large' => ['id' => 'Besar', 'pos' => '(adj)'], 'Fossil' => ['id' => 'Fosil', 'pos' => '(n)'], 'Invertebrate' => ['id' => 'Invertebrata', 'pos' => '(n)']],
-            'example' => ['id' => 'Paus biru adalah hewan terbesar di lautan.', 'en' => 'The blue whale is the largest animal in the ocean.']
-        ],
-        17 => [
-            'id' => 'Ecotourism dan ethnic tourism adalah dua sektor yang paling cepat tumbuh.', 
-            'en' => 'Ecotourism and ethnic tourism are the two fastest growing sectors', 
-            'type' => 'Superlative',
-            'vocab' => ['Sector' => ['id' => 'Sektor', 'pos' => '(n)'], 'Growing' => ['id' => 'Tumbuh', 'pos' => '(adj)'], 'Fast' => ['id' => 'Cepat', 'pos' => '(adj)']],
-            'example' => ['id' => 'Teknologi adalah industri yang paling cepat berubah.', 'en' => 'Technology is the fastest changing industry.']
-        ],
-        18 => [
-            'id' => 'Gunung berapi yang bangkit kembali adalah yang paling ganas dari semua jenis gunung berapi.', 
-            'en' => 'Resurgent volcanoes are the most violent of all types of volcanoes', 
-            'type' => 'Superlative',
-            'vocab' => ['Volcano' => ['id' => 'Gunung berapi', 'pos' => '(n)'], 'Violent' => ['id' => 'Ganas', 'pos' => '(adj)'], 'Type' => ['id' => 'Jenis', 'pos' => '(n)'], 'Resurgent' => ['id' => 'Bangkit kembali', 'pos' => '(adj)']],
-            'example' => ['id' => 'Hewan paling berbahaya adalah nyamuk.', 'en' => 'The most dangerous animal is the mosquito.']
-        ],
-        19 => [
-            'id' => 'Deposit di Outwash plain memiliki sebagian dari tanah pertanian terbaik di Amerika.', 
-            'en' => 'Deposits in the Outwash plain have some of the best agricultural land in America', 
-            'type' => 'Superlative',
-            'vocab' => ['Deposit' => ['id' => 'Deposit', 'pos' => '(n)'], 'Agricultural land' => ['id' => 'Tanah pertanian', 'pos' => '(n)'], 'Good' => ['id' => 'Baik', 'pos' => '(adj)']],
-            'example' => ['id' => 'Dia memiliki beberapa ide terbaik.', 'en' => 'He has some of the best ideas.']
+            'example' => ['id' => 'Pesawat terbang lebih cepat daripada kereta api.', 'en' => 'An airplane is faster than a train.']
         ],
         20 => [
-            'id' => 'Mungkin, kenyataan terburuk bagi orang - orang untuk pahami adalah kepunahan besar dan kita adalah hominim terakhir.', 
-            'en' => 'Perhaps, the worst reality for people to understand is mass extinction and we are the last hominins', 
-            'type' => 'Superlative',
-            'vocab' => ['Bad' => ['id' => 'Buruk', 'pos' => '(adj)'], 'Reality' => ['id' => 'Kenyataan', 'pos' => '(n)'], 'Mass extinction' => ['id' => 'Kepunahan massal', 'pos' => '(n)'], 'Hominin' => ['id' => 'Hominim', 'pos' => '(n)']],
-            'example' => ['id' => 'Perasaan terburuk adalah kesepian.', 'en' => 'The worst feeling is loneliness.']
+            'id' => 'Emas jauh lebih mahal daripada perak.', 
+            'en' => 'Gold is much more expensive than silver', 
+            'type' => 'Comparative',
+            'vocab' => ['Gold' => ['id' => 'Emas', 'pos' => '(n)'], 'Expensive' => ['id' => 'Mahal', 'pos' => '(adj)'], 'Silver' => ['id' => 'Perak', 'pos' => '(n)']],
+            'example' => ['id' => 'Mobil ini jauh lebih nyaman daripada sepeda motor.', 'en' => 'This car is much more comfortable than a motorcycle.']
         ],
         21 => [
+            'id' => 'Energi matahari jauh lebih bersih daripada bahan bakar fosil.', 
+            'en' => 'Solar energy is much cleaner than fossil fuels', 
+            'type' => 'Comparative',
+            'vocab' => ['Solar energy' => ['id' => 'Energi matahari', 'pos' => '(n)'], 'Clean' => ['id' => 'Bersih', 'pos' => '(adj)'], 'Fossil fuels' => ['id' => 'Bahan bakar fosil', 'pos' => '(n)'], 'Much' => ['id' => 'Jauh lebih', 'pos' => '(adv)']],
+            'example' => ['id' => 'Energi angin lebih ramah lingkungan daripada batu bara.', 'en' => 'Wind energy is more eco-friendly than coal.']
+        ],
+        22 => [
+            'id' => 'Perjalanan dengan kereta cepat lebih efisien daripada penerbangan domestik.', 
+            'en' => 'Traveling by high-speed train is more efficient than domestic flights', 
+            'type' => 'Comparative',
+            'vocab' => ['Traveling' => ['id' => 'Perjalanan', 'pos' => '(gerund)'], 'High-speed train' => ['id' => 'Kereta cepat', 'pos' => '(n)'], 'Efficient' => ['id' => 'Efisien', 'pos' => '(adj)'], 'Domestic flight' => ['id' => 'Penerbangan domestik', 'pos' => '(n)']],
+            'example' => ['id' => 'Bus listrik lebih hemat energi daripada kendaraan pribadi.', 'en' => 'Electric buses are more energy-efficient than private vehicles.']
+        ],
+        23 => [
+            'id' => 'Kondisi ekonomi tahun ini jauh lebih baik daripada tahun lalu.', 
+            'en' => 'The economic condition this year is much better than last year', 
+            'type' => 'Comparative',
+            'vocab' => ['Economic condition' => ['id' => 'Kondisi ekonomi', 'pos' => '(n)'], 'Better' => ['id' => 'Lebih baik', 'pos' => '(adj)'], 'This year' => ['id' => 'Tahun ini', 'pos' => '(phrase)'], 'Last year' => ['id' => 'Tahun lalu', 'pos' => '(phrase)']],
+            'example' => ['id' => 'Kualitas udara di desa jauh lebih baik daripada di kota besar.', 'en' => 'Air quality in the village is much better than in big cities.']
+        ],
+        24 => [
+            'id' => 'Kamera profesional menghasilkan gambar yang lebih tajam daripada ponsel pintar.', 
+            'en' => 'Professional cameras produce sharper images than smartphones', 
+            'type' => 'Comparative',
+            'vocab' => ['Professional camera' => ['id' => 'Kamera profesional', 'pos' => '(n)'], 'Produce' => ['id' => 'Menghasilkan', 'pos' => '(v)'], 'Sharp' => ['id' => 'Tajam', 'pos' => '(adj)'], 'Image' => ['id' => 'Gambar', 'pos' => '(n)'], 'Smartphone' => ['id' => 'Ponsel pintar', 'pos' => '(n)']],
+            'example' => ['id' => 'Teleskop canggih menangkap sinyal yang lebih jelas daripada antena biasa.', 'en' => 'Advanced telescopes capture clearer signals than ordinary antennas.']
+        ],
+        25 => [
             'id' => 'Bulan tampak sebesar matahari pada gerhana bulan penuh.', 
             'en' => 'The moon appears as big as the sun during a total lunar eclipse', 
             'type' => 'Positive',
-            'vocab' => ['Appear' => ['id' => 'Tampak', 'pos' => '(v)'], 'Lunar eclipse' => ['id' => 'Gerhana bulan', 'pos' => '(n)'], 'Big' => ['id' => 'Besar', 'pos' => '(adj)']],
-            'example' => ['id' => 'Dia setinggi ayahnya.', 'en' => 'He is as tall as his father.']
+            'vocab' => ['Appear' => ['id' => 'Tampak/Kelihatan', 'pos' => '(v)'], 'Big' => ['id' => 'Besar', 'pos' => '(adj)'], 'Total lunar eclipse' => ['id' => 'Gerhana bulan penuh', 'pos' => '(n)']],
+            'example' => ['id' => 'Bintang itu tampak seterang bulan.', 'en' => 'The star appears as bright as the moon.']
         ],
-        22 => [
+        26 => [
             'id' => 'Gigitan komodo seberbahaya racun mereka.', 
             'en' => 'Komodo bites are as dangerous as their venom', 
             'type' => 'Positive',
-            'vocab' => ['Bite' => ['id' => 'Gigitan', 'pos' => '(n)'], 'Dangerous' => ['id' => 'Berbahaya', 'pos' => '(adj)'], 'Venom' => ['id' => 'Racun', 'pos' => '(n)']],
-            'example' => ['id' => 'Tugas ini sesulit tugas sebelumnya.', 'en' => 'This task is as difficult as the previous one.']
+            'vocab' => ['Bite' => ['id' => 'Gigitan', 'pos' => '(n)'], 'Dangerous' => ['id' => 'Berbahaya', 'pos' => '(adj)'], 'Venom' => ['id' => 'Racun/Bisa', 'pos' => '(n)']],
+            'example' => ['id' => 'Sengatan lebah sesakit gigitan semut.', 'en' => 'A bee sting is as painful as an ant bite.']
         ],
-        23 => [
-            'id' => 'Paus sebesar dengan bus.', 
-            'en' => 'Whales are as big as buses', 
+        27 => [
+            'id' => 'Gunung Kilimanjaro hampir setinggi Gunung Everest.', 
+            'en' => 'Mount Kilimanjaro is almost as high as Mount Everest', 
             'type' => 'Positive',
-            'vocab' => ['Whale' => ['id' => 'Paus', 'pos' => '(n)'], 'Bus' => ['id' => 'Bus', 'pos' => '(n)'], 'Big' => ['id' => 'Besar', 'pos' => '(adj)']],
-            'example' => ['id' => 'Rambutnya sehitam arang.', 'en' => 'Her hair is as black as coal.']
+            'vocab' => ['Almost' => ['id' => 'Hampir', 'pos' => '(adv)'], 'High' => ['id' => 'Tinggi', 'pos' => '(adj)']],
+            'example' => ['id' => 'Gedung ini hampir setinggi menara itu.', 'en' => 'This building is almost as tall as that tower.']
         ],
-        24 => [
-            'id' => 'Keanekaragaman hayati di Australia tidak sekaya Amerika selatan.', 
+        28 => [
+            'id' => 'Gurun Sahara sama panasnya dengan Death Valley di musim panas.', 
+            'en' => 'The Sahara Desert is as hot as Death Valley in summer', 
+            'type' => 'Positive',
+            'vocab' => ['Desert' => ['id' => 'Gurun', 'pos' => '(n)'], 'Hot' => ['id' => 'Panas', 'pos' => '(adj)'], 'Summer' => ['id' => 'Musim panas', 'pos' => '(n)']],
+            'example' => ['id' => 'Kutub Utara sama dinginnya dengan Kutub Selatan.', 'en' => 'The North Pole is as cold as the South Pole.']
+        ],
+        29 => [
+            'id' => 'Keanekaragaman hayati di Australia tidak sekaya Amerika Selatan.', 
             'en' => 'Biodiversity in Australia is not as rich as South America', 
             'type' => 'Positive',
             'vocab' => ['Biodiversity' => ['id' => 'Keanekaragaman hayati', 'pos' => '(n)'], 'Rich' => ['id' => 'Kaya', 'pos' => '(adj)']],
-            'example' => ['id' => 'Rumahku tidak sebesar rumahmu.', 'en' => 'My house is not as big as yours.']
-        ],
-        25 => [
-            'id' => 'Gajah pygmy dari Yunani dulu sebesar anjing.', 
-            'en' => 'Pygmy elephants from Greece were as big as dogs', 
-            'type' => 'Positive',
-            'vocab' => ['Pygmy elephant' => ['id' => 'Gajah pygmy', 'pos' => '(n)'], 'Greece' => ['id' => 'Yunani', 'pos' => '(n)'], 'Big' => ['id' => 'Besar', 'pos' => '(adj)']],
-            'example' => ['id' => 'Kucing itu sekecil tikus.', 'en' => 'The cat was as small as a mouse.']
-        ],
-        26 => [
-            'id' => 'Suhu di Eastern Antarctic Plateau serendah - 94 derajat celcius.', 
-            'en' => 'The temperature in the Eastern Antarctic Plateau is as low as -94 degrees Celsius', 
-            'type' => 'Positive',
-            'vocab' => ['Temperature' => ['id' => 'Suhu', 'pos' => '(n)'], 'Plateau' => ['id' => 'Dataran tinggi', 'pos' => '(n)'], 'Low' => ['id' => 'Rendah', 'pos' => '(adj)']],
-            'example' => ['id' => 'Airnya sedingin es.', 'en' => 'The water is as cold as ice.']
-        ],
-        27 => [
-            'id' => 'Bakteri di badan kita sepenting nutrisi bagi diri kita.', 
-            'en' => 'Bacteria in our body are as important as nutrients for ourselves', 
-            'type' => 'Positive',
-            'vocab' => ['Bacteria' => ['id' => 'Bakteri', 'pos' => '(n)'], 'Nutrient' => ['id' => 'Nutrisi', 'pos' => '(n)'], 'Important' => ['id' => 'Penting', 'pos' => '(adj)']],
-            'example' => ['id' => 'Pendidikan sepenting kesehatan.', 'en' => 'Education is as important as health.']
-        ],
-        28 => [
-            'id' => 'Ancaman kepunahan massal saat ini di bumi segenting kepunahan massal 65 juta tahun yang lalu.', 
-            'en' => 'The threat of mass extinction on earth today is as critical as the mass extinction 65 million years ago', 
-            'type' => 'Positive',
-            'vocab' => ['Threat' => ['id' => 'Ancaman', 'pos' => '(n)'], 'Mass extinction' => ['id' => 'Kepunahan massal', 'pos' => '(n)'], 'Critical' => ['id' => 'Genting', 'pos' => '(adj)']],
-            'example' => ['id' => 'Situasinya segenting sebelumnya.', 'en' => 'The situation is as critical as before.']
-        ],
-        29 => [
-            'id' => 'Gunung everest setinggi 8.849 meter di atas permukaan laut.', 
-            'en' => 'Mount Everest is as high as 8,849 meters above sea level', 
-            'type' => 'Positive',
-            'vocab' => ['High' => ['id' => 'Tinggi', 'pos' => '(adj)'], 'Above sea level' => ['id' => 'Di atas permukaan laut', 'pos' => '(phrase)']],
-            'example' => ['id' => 'Bangunan itu setinggi gunung.', 'en' => 'The building is as high as a mountain.']
+            'example' => ['id' => 'Hutan ini tidak selebat hutan Amazon.', 'en' => 'This forest is not as dense as the Amazon rainforest.']
         ],
         30 => [
-            'id' => 'Pencemaran udara oleh kendaraan bermotor semerusak polusi oleh gunung berapi.', 
-            'en' => 'Air pollution by motor vehicles is as destructive as pollution by volcanoes', 
+            'id' => 'Dia memiliki umur yang sama dengan saudara laki-laki saya.', 
+            'en' => 'He has the same age as my brother', 
             'type' => 'Positive',
-            'vocab' => ['Air pollution' => ['id' => 'Pencemaran udara', 'pos' => '(n)'], 'Motor vehicle' => ['id' => 'Kendaraan bermotor', 'pos' => '(n)'], 'Destructive' => ['id' => 'Merusak', 'pos' => '(adj)'], 'Volcano' => ['id' => 'Gunung berapi', 'pos' => '(n)']],
-            'example' => ['id' => 'Sampah plastik semerusak limbah kimia.', 'en' => 'Plastic waste is as destructive as chemical waste.']
+            'vocab' => ['Same age' => ['id' => 'Umur yang sama', 'pos' => '(phrase)'], 'Brother' => ['id' => 'Saudara laki-laki', 'pos' => '(n)']],
+            'example' => ['id' => 'Mobil ini memiliki harga yang sama dengan rumah itu.', 'en' => 'This car has the same price as that house.']
         ]
     ];
 
@@ -16627,219 +16649,1473 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         return redirect()->route('assignments.grammar-writing.meeting11');
     }
 
-    private $meeting12Questions = [
-        1 => [
-            'id' => 'Masyarakat agraris berkembang pesat ketika sistem irigasi kuno mulai digunakan.',
-            'en' => 'Agrarian societies developed rapidly when ancient irrigation systems began to be used',
-            'type' => 'time',
-            'conjunction' => 'when (ketika)',
-            'example' => ['id' => 'Dia menelepon ketika saya sedang makan.', 'en' => 'He called when I was eating.'],
-            'vocab' => [
-                'Agrarian' => ['id' => 'Agraris', 'pos' => '(adj)'],
-                'Society' => ['id' => 'Masyarakat', 'pos' => '(n)'],
-                'Develop' => ['id' => 'Berkembang', 'pos' => '(v)'],
-                'Rapidly' => ['id' => 'Pesat', 'pos' => '(adv)'],
-                'Irrigation' => ['id' => 'Irigasi', 'pos' => '(n)'],
-                'Ancient' => ['id' => 'Kuno', 'pos' => '(adj)']
-            ]
-        ],
-        2 => [
-            'id' => 'Kebudayaan Mesir meninggalkan piramida megah, sementara banyak peradaban kuno lain telah runtuh.',
-            'en' => 'Egyptian culture left magnificent pyramids, while many other ancient civilizations have collapsed',
-            'type' => 'time',
-            'conjunction' => 'while (sementara)',
-            'example' => ['id' => 'Saya belajar, sementara adik saya bermain.', 'en' => 'I study, while my brother plays.'],
-            'vocab' => [
-                'Culture' => ['id' => 'Kebudayaan', 'pos' => '(n)'],
-                'Magnificent' => ['id' => 'Megah', 'pos' => '(adj)'],
-                'Pyramid' => ['id' => 'Piramida', 'pos' => '(n)'],
-                'Civilization' => ['id' => 'Peradaban', 'pos' => '(n)'],
-                'Collapse' => ['id' => 'Runtuh', 'pos' => '(v)']
-            ]
-        ],
-        3 => [
-            'id' => 'Penyebaran ilmu pengetahuan terbatas, sebelum mesin cetak Gutenberg diperkenalkan di Eropa.',
-            'en' => 'The spread of knowledge was limited, before the Gutenberg printing press was introduced in Europe',
-            'type' => 'time',
-            'conjunction' => 'before (sebelum)',
-            'example' => ['id' => 'Cuci tangan sebelum kamu makan.', 'en' => 'Wash your hands before you eat.'],
-            'vocab' => [
-                'Spread' => ['id' => 'Penyebaran', 'pos' => '(n)'],
-                'Knowledge' => ['id' => 'Ilmu pengetahuan', 'pos' => '(n)'],
-                'Limited' => ['id' => 'Terbatas', 'pos' => '(adj)'],
-                'Printing press' => ['id' => 'Mesin cetak', 'pos' => '(n)'],
-                'Introduce' => ['id' => 'Diperkenalkan', 'pos' => '(v)']
-            ]
-        ],
-        4 => [
-            'id' => 'Pola kerja manusia berubah drastis setelah revolusi industri dimulai di Inggris.',
-            'en' => 'Human work patterns changed drastically after the industrial revolution began in England',
-            'type' => 'time',
-            'conjunction' => 'after (setelah)',
-            'example' => ['id' => 'Dia pergi setelah rapat selesai.', 'en' => 'He left after the meeting ended.'],
-            'vocab' => [
-                'Pattern' => ['id' => 'Pola', 'pos' => '(n)'],
-                'Work' => ['id' => 'Kerja', 'pos' => '(n)'],
-                'Change' => ['id' => 'Berubah', 'pos' => '(v)'],
-                'Drastically' => ['id' => 'Drastis', 'pos' => '(adv)'],
-                'Industrial revolution' => ['id' => 'Revolusi industri', 'pos' => '(n)']
-            ]
-        ],
-        5 => [
-            'id' => 'Pemahaman tentang tata surya semakin akurat sejak astronomi berkembang sebagai ilmu modern.',
-            'en' => 'Understanding of the solar system became increasingly accurate since astronomy developed as a modern science',
-            'type' => 'time',
-            'conjunction' => 'since (sejak)',
-            'example' => ['id' => 'Saya tinggal di sini sejak tahun 2020.', 'en' => 'I have lived here since 2020.'],
-            'vocab' => [
-                'Understanding' => ['id' => 'Pemahaman', 'pos' => '(n)'],
-                'Solar system' => ['id' => 'Tata surya', 'pos' => '(n)'],
-                'Accurate' => ['id' => 'Akurat', 'pos' => '(adj)'],
-                'Astronomy' => ['id' => 'Astronomi', 'pos' => '(n)'],
-                'Modern' => ['id' => 'Modern', 'pos' => '(adj)']
-            ]
-        ],
-        6 => [
-            'id' => 'Epidemi luas sering terjadi sampai vaksin berhasil ditemukan.',
-            'en' => 'Widespread epidemics often occurred until vaccines were successfully discovered',
-            'type' => 'time',
-            'conjunction' => 'until (sampai)',
-            'example' => ['id' => 'Tunggu sampai hujan berhenti.', 'en' => 'Wait until the rain stops.'],
-            'vocab' => [
-                'Epidemic' => ['id' => 'Epidemi', 'pos' => '(n)'],
-                'Widespread' => ['id' => 'Luas', 'pos' => '(adj)'],
-                'Occur' => ['id' => 'Terjadi', 'pos' => '(v)'],
-                'Vaccine' => ['id' => 'Vaksin', 'pos' => '(n)'],
-                'Discover' => ['id' => 'Ditemukan', 'pos' => '(v)']
-            ]
-        ],
-        7 => [
-            'id' => 'Produktivitas industri meningkat signifikan segera setelah listrik diperkenalkan di kota besar.',
-            'en' => 'Industrial productivity increased significantly as soon as electricity was introduced in big cities',
-            'type' => 'time',
-            'conjunction' => 'as soon as (segera setelah)',
-            'example' => ['id' => 'Hubungi saya segera setelah kamu tiba.', 'en' => 'Contact me as soon as you arrive.'],
-            'vocab' => [
-                'Productivity' => ['id' => 'Produktivitas', 'pos' => '(n)'],
-                'Industrial' => ['id' => 'Industri', 'pos' => '(adj)'],
-                'Increase' => ['id' => 'Meningkat', 'pos' => '(v)'],
-                'Significantly' => ['id' => 'Signifikan', 'pos' => '(adv)'],
-                'Electricity' => ['id' => 'Listrik', 'pos' => '(n)']
-            ]
-        ],
-        8 => [
-            'id' => 'Banyak masyarakat tinggal di sekitar gunung berapi karena tanah di sekitarnya sangat subur.',
-            'en' => 'Many communities live around volcanoes because the surrounding soil is very fertile',
-            'type' => 'cause',
-            'conjunction' => 'because (karena)',
-            'example' => ['id' => 'Dia tidak datang karena dia sakit.', 'en' => 'He did not come because he was sick.'],
-            'vocab' => [
-                'Community' => ['id' => 'Masyarakat', 'pos' => '(n)'],
-                'Volcano' => ['id' => 'Gunung berapi', 'pos' => '(n)'],
-                'Surrounding' => ['id' => 'Sekitar', 'pos' => '(adj)'],
-                'Soil' => ['id' => 'Tanah', 'pos' => '(n)'],
-                'Fertile' => ['id' => 'Subur', 'pos' => '(adj)']
-            ]
-        ],
-        9 => [
-            'id' => 'Teori heliosentris akhirnya diterima sebagai dasar ilmu astronomi, meskipun awalnya ditolak.',
-            'en' => 'The heliocentric theory was finally accepted as the basis of astronomy, although it was initially rejected',
-            'type' => 'contrast',
-            'conjunction' => 'although (meskipun)',
-            'example' => ['id' => 'Dia tetap bekerja meskipun dia lelah.', 'en' => 'He kept working although he was tired.'],
-            'vocab' => [
-                'Heliocentric' => ['id' => 'Heliosentris', 'pos' => '(adj)'],
-                'Theory' => ['id' => 'Teori', 'pos' => '(n)'],
-                'Accept' => ['id' => 'Diterima', 'pos' => '(v)'],
-                'Basis' => ['id' => 'Dasar', 'pos' => '(n)'],
-                'Reject' => ['id' => 'Ditolak', 'pos' => '(v)']
-            ]
-        ],
-        10 => [
-            'id' => 'Para penjelajah berhasil menyeberangi Samudra Pasifik, walaupun lautannya sangat luas.',
-            'en' => 'Explorers successfully crossed the Pacific Ocean, although the ocean was very vast',
-            'type' => 'contrast',
-            'conjunction' => 'although (walaupun)',
-            'example' => ['id' => 'Dia lulus walaupun jarang belajar.', 'en' => 'He passed although he rarely studied.'],
-            'vocab' => [
-                'Explorer' => ['id' => 'Penjelajah', 'pos' => '(n)'],
-                'Successfully' => ['id' => 'Berhasil', 'pos' => '(adv)'],
-                'Cross' => ['id' => 'Menyeberangi', 'pos' => '(v)'],
-                'Ocean' => ['id' => 'Samudra', 'pos' => '(n)'],
-                'Vast' => ['id' => 'Luas', 'pos' => '(adj)']
-            ]
-        ],
-        11 => [
-            'id' => 'Keanekaragaman hayati dapat bertahan jika hutan hujan tropis tetap terjaga.',
-            'en' => 'Biodiversity can survive if tropical rainforests remain preserved',
-            'type' => 'condition',
-            'conjunction' => 'if (jika)',
-            'example' => ['id' => 'Jika hujan, saya akan di rumah.', 'en' => 'If it rains, I will stay home.'],
-            'vocab' => [
-                'Biodiversity' => ['id' => 'Keanekaragaman hayati', 'pos' => '(n)'],
-                'Survive' => ['id' => 'Bertahan', 'pos' => '(v)'],
-                'Tropical' => ['id' => 'Tropis', 'pos' => '(adj)'],
-                'Rainforest' => ['id' => 'Hutan hujan', 'pos' => '(n)'],
-                'Preserve' => ['id' => 'Terjaga', 'pos' => '(v)']
-            ]
-        ],
-        12 => [
-            'id' => 'Populasi ikan menurun drastis kecuali jika konservasi laut dilakukan secara serius.',
-            'en' => 'Fish populations decline drastically unless marine conservation is carried out seriously',
-            'type' => 'condition',
-            'conjunction' => 'unless (kecuali jika)',
-            'example' => ['id' => 'Kamu akan gagal kecuali jika kamu belajar.', 'en' => 'You will fail unless you study.'],
-            'vocab' => [
-                'Population' => ['id' => 'Populasi', 'pos' => '(n)'],
-                'Decline' => ['id' => 'Menurun', 'pos' => '(v)'],
-                'Marine' => ['id' => 'Laut', 'pos' => '(adj)'],
-                'Conservation' => ['id' => 'Konservasi', 'pos' => '(n)'],
-                'Carry out' => ['id' => 'Dilakukan', 'pos' => '(v)']
-            ]
-        ],
-        13 => [
-            'id' => 'Teknologi satelit dikembangkan agar komunikasi antarnegara menjadi lebih mudah.',
-            'en' => 'Satellite technology was developed so that communication between countries became easier',
-            'type' => 'purpose',
-            'conjunction' => 'so that (agar)',
-            'example' => ['id' => 'Dia belajar keras agar bisa lulus.', 'en' => 'He studies hard so that he can pass.'],
-            'vocab' => [
-                'Satellite' => ['id' => 'Satelit', 'pos' => '(n)'],
-                'Technology' => ['id' => 'Teknologi', 'pos' => '(n)'],
-                'Develop' => ['id' => 'Dikembangkan', 'pos' => '(v)'],
-                'Communication' => ['id' => 'Komunikasi', 'pos' => '(n)'],
-                'Easier' => ['id' => 'Lebih mudah', 'pos' => '(adj)']
-            ]
-        ],
-        14 => [
-            'id' => 'Interaksi budaya meningkat pesat di mana pun jalur perdagangan internasional terbuka.',
-            'en' => 'Cultural interaction increased rapidly wherever international trade routes opened',
-            'type' => 'place',
-            'conjunction' => 'wherever (di mana pun)',
-            'example' => ['id' => 'Dia pergi ke mana pun dia mau.', 'en' => 'He goes wherever he wants.'],
-            'vocab' => [
-                'Interaction' => ['id' => 'Interaksi', 'pos' => '(n)'],
-                'Cultural' => ['id' => 'Budaya', 'pos' => '(adj)'],
-                'Trade route' => ['id' => 'Jalur perdagangan', 'pos' => '(n)'],
-                'International' => ['id' => 'Internasional', 'pos' => '(adj)'],
-                'Open' => ['id' => 'Terbuka', 'pos' => '(v)']
-            ]
-        ],
-        15 => [
-            'id' => 'Kota Petra terlihat seakan keluar dari tebing batu, seolah-olah arsitekturnya terukir secara alami.',
-            'en' => 'The city of Petra looks as if it emerges from the rock cliffs, as if its architecture was carved naturally',
-            'type' => 'manner',
-            'conjunction' => 'as if (seolah-olah)',
-            'example' => ['id' => 'Dia bertingkah seolah-olah dia raja.', 'en' => 'He acts as if he is a king.'],
-            'vocab' => [
-                'Emerge' => ['id' => 'Keluar', 'pos' => '(v)'],
-                'Rock cliff' => ['id' => 'Tebing batu', 'pos' => '(n)'],
-                'Architecture' => ['id' => 'Arsitektur', 'pos' => '(n)'],
-                'Carve' => ['id' => 'Terukir', 'pos' => '(v)'],
-                'Naturally' => ['id' => 'Secara alami', 'pos' => '(adv)']
-            ]
-        ]
-    ];
+        private $meeting12Questions = array (
+  1 => 
+  array (
+    'id' => 'Burung-burung Trumpeter lebih suka dengan kanopi yang tebal untuk menyediakan perlindungan dan penutup di sarang mereka.',
+    'en' => 'Trumpeter birds more prefer thick canopy to provide protection and cover on their nests',
+    'type' => 'fanboys',
+    'conjunction' => 'and (dan)',
+    'example' => 
+    array (
+      'id' => 'Burung mencari tempat teduh untuk sarang mereka.',
+      'en' => 'Birds seek shade for their nests.',
+    ),
+    'vocab' => 
+    array (
+      'Trumpeter bird' => 
+      array (
+        'id' => 'Burung Trumpeter',
+        'pos' => '(n)',
+      ),
+      'Prefer' => 
+      array (
+        'id' => 'Lebih suka',
+        'pos' => '(v)',
+      ),
+      'Thick canopy' => 
+      array (
+        'id' => 'Kanopi yang tebal',
+        'pos' => '(n)',
+      ),
+      'Provide' => 
+      array (
+        'id' => 'Menyediakan',
+        'pos' => '(v)',
+      ),
+      'Protection' => 
+      array (
+        'id' => 'Perlindungan',
+        'pos' => '(n)',
+      ),
+      'Cover' => 
+      array (
+        'id' => 'Penutup',
+        'pos' => '(n)',
+      ),
+      'Nest' => 
+      array (
+        'id' => 'Sarang',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  2 => 
+  array (
+    'id' => 'Perencanaan dari proyek baru termasuk dari pendesainan, perhitungan biaya, dan pembangunan.',
+    'en' => 'The planning of the new project includes designing, cost calculation, and construction',
+    'type' => 'fanboys',
+    'conjunction' => 'and (dan)',
+    'example' => 
+    array (
+      'id' => 'Proyek ini mencakup analisis dan implementasi.',
+      'en' => 'This project includes analysis and implementation.',
+    ),
+    'vocab' => 
+    array (
+      'Planning' => 
+      array (
+        'id' => 'Perencanaan',
+        'pos' => '(n)',
+      ),
+      'New project' => 
+      array (
+        'id' => 'Proyek baru',
+        'pos' => '(n)',
+      ),
+      'Include' => 
+      array (
+        'id' => 'Termasuk / Mencakup',
+        'pos' => '(v)',
+      ),
+      'Designing' => 
+      array (
+        'id' => 'Pendesainan',
+        'pos' => '(n/gerund)',
+      ),
+      'Cost calculation' => 
+      array (
+        'id' => 'Perhitungan biaya',
+        'pos' => '(n)',
+      ),
+      'Construction' => 
+      array (
+        'id' => 'Pembangunan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  3 => 
+  array (
+    'id' => 'Permintaan, kecantikan, keawetan, kelangkaan, dan kesempurnaan dari potongan menentukan nilai dari batu berharga.',
+    'en' => 'Demand, beauty, durability, rarity, and perfection of the cut determine the value of precious stones',
+    'type' => 'fanboys',
+    'conjunction' => 'and (dan)',
+    'example' => 
+    array (
+      'id' => 'Kualitas dan warna menentukan harga permata.',
+      'en' => 'Quality and color determine the gemstone price.',
+    ),
+    'vocab' => 
+    array (
+      'Demand' => 
+      array (
+        'id' => 'Permintaan',
+        'pos' => '(n)',
+      ),
+      'Beauty' => 
+      array (
+        'id' => 'Kecantikan',
+        'pos' => '(n)',
+      ),
+      'Durability' => 
+      array (
+        'id' => 'Keawetan',
+        'pos' => '(n)',
+      ),
+      'Rarity' => 
+      array (
+        'id' => 'Kelangkaan',
+        'pos' => '(n)',
+      ),
+      'Perfection of the cut' => 
+      array (
+        'id' => 'Kesempurnaan dari potongan',
+        'pos' => '(n)',
+      ),
+      'Determine' => 
+      array (
+        'id' => 'Menentukan',
+        'pos' => '(v)',
+      ),
+      'Precious stone' => 
+      array (
+        'id' => 'Batu berharga',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  4 => 
+  array (
+    'id' => 'Perkembangan bayi dipengaruhi oleh keturunan dan oleh lingkungan.',
+    'en' => 'Infant development is influenced by heredity and by the environment',
+    'type' => 'fanboys',
+    'conjunction' => 'and (dan)',
+    'example' => 
+    array (
+      'id' => 'Pertumbuhan anak dipengaruhi oleh nutrisi dan pola asuh.',
+      'en' => 'Child growth is influenced by nutrition and parenting.',
+    ),
+    'vocab' => 
+    array (
+      'Infant development' => 
+      array (
+        'id' => 'Perkembangan bayi',
+        'pos' => '(n)',
+      ),
+      'Influence' => 
+      array (
+        'id' => 'Mempengaruhi / Dipengaruhi',
+        'pos' => '(v)',
+      ),
+      'Heredity' => 
+      array (
+        'id' => 'Keturunan',
+        'pos' => '(n)',
+      ),
+      'Environment' => 
+      array (
+        'id' => 'Lingkungan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  5 => 
+  array (
+    'id' => 'Terumbu karang terpengaruhi oleh perubahan iklim dan dasar samudra dipengaruhi oleh sampah plastik.',
+    'en' => 'Coral reefs are affected by climate change, and the ocean floor is affected by plastic waste',
+    'type' => 'fanboys',
+    'conjunction' => 'and (dan)',
+    'example' => 
+    array (
+      'id' => 'Hutan terancam deforestasi, dan satwa terancam perburuan.',
+      'en' => 'Forests are threatened by deforestation, and animals are threatened by poaching.',
+    ),
+    'vocab' => 
+    array (
+      'Coral reef' => 
+      array (
+        'id' => 'Terumbu karang',
+        'pos' => '(n)',
+      ),
+      'Climate change' => 
+      array (
+        'id' => 'Perubahan iklim',
+        'pos' => '(n)',
+      ),
+      'Ocean floor' => 
+      array (
+        'id' => 'Dasar samudra',
+        'pos' => '(n)',
+      ),
+      'Plastic waste' => 
+      array (
+        'id' => 'Sampah plastik',
+        'pos' => '(n)',
+      ),
+      'Affect' => 
+      array (
+        'id' => 'Mempengaruhi / Terpengaruhi',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  6 => 
+  array (
+    'id' => 'Hutan harus dilindungi, diamankan, dan dilestarikan untuk generasi mendatang.',
+    'en' => 'Forests must be protected, secured, and preserved for future generations',
+    'type' => 'fanboys',
+    'conjunction' => 'and (dan)',
+    'example' => 
+    array (
+      'id' => 'Sumber air harus dijaga dan dilindungi untuk masa depan.',
+      'en' => 'Water sources must be maintained and protected for the future.',
+    ),
+    'vocab' => 
+    array (
+      'Forest' => 
+      array (
+        'id' => 'Hutan',
+        'pos' => '(n)',
+      ),
+      'Protect' => 
+      array (
+        'id' => 'Dilindungi',
+        'pos' => '(v)',
+      ),
+      'Secure' => 
+      array (
+        'id' => 'Diamankan',
+        'pos' => '(v)',
+      ),
+      'Preserve' => 
+      array (
+        'id' => 'Dilestarikan',
+        'pos' => '(v)',
+      ),
+      'Future generations' => 
+      array (
+        'id' => 'Generasi mendatang',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  7 => 
+  array (
+    'id' => 'Kepolisian bertugas menjaga negara dan tentara bertugas mempertahankan negara.',
+    'en' => 'The police are tasked with guarding the country, and the army is tasked with defending the country',
+    'type' => 'fanboys',
+    'conjunction' => 'and (dan)',
+    'example' => 
+    array (
+      'id' => 'Dokter merawat pasien, dan perawat membantu pemulihan.',
+      'en' => 'Doctors treat patients, and nurses assist in recovery.',
+    ),
+    'vocab' => 
+    array (
+      'Police' => 
+      array (
+        'id' => 'Kepolisian',
+        'pos' => '(n)',
+      ),
+      'Tasked with' => 
+      array (
+        'id' => 'Bertugas',
+        'pos' => '(phrase)',
+      ),
+      'Guard' => 
+      array (
+        'id' => 'Menjaga',
+        'pos' => '(v)',
+      ),
+      'Army' => 
+      array (
+        'id' => 'Tentara',
+        'pos' => '(n)',
+      ),
+      'Defend' => 
+      array (
+        'id' => 'Mempertahankan',
+        'pos' => '(v)',
+      ),
+      'Country' => 
+      array (
+        'id' => 'Negara',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  8 => 
+  array (
+    'id' => 'Kita harus mencari solusi dari masalah ini atau negara kita akan menghadapi masalah yang serius.',
+    'en' => 'We must find a solution to this problem, or our country will face serious problems',
+    'type' => 'fanboys',
+    'conjunction' => 'or (atau)',
+    'example' => 
+    array (
+      'id' => 'Kita harus bertindak sekarang, atau kita akan terlambat.',
+      'en' => 'We must act now, or we will be too late.',
+    ),
+    'vocab' => 
+    array (
+      'Find a solution' => 
+      array (
+        'id' => 'Mencari solusi',
+        'pos' => '(phrase)',
+      ),
+      'Problem' => 
+      array (
+        'id' => 'Masalah',
+        'pos' => '(n)',
+      ),
+      'Our country' => 
+      array (
+        'id' => 'Negara kita',
+        'pos' => '(n)',
+      ),
+      'Face' => 
+      array (
+        'id' => 'Menghadapi',
+        'pos' => '(v)',
+      ),
+      'Serious problem' => 
+      array (
+        'id' => 'Masalah yang serius',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  9 => 
+  array (
+    'id' => 'Penelitian genetik telah memberikan banyak kontribusi kepada masyarakat namun banyak orang yang masih tidak setuju dengan bidang ini.',
+    'en' => 'Genetic research has made many contributions to society, yet many people still disagree with this field',
+    'type' => 'fanboys',
+    'conjunction' => 'yet / but (namun)',
+    'example' => 
+    array (
+      'id' => 'Teknologi membawa manfaat, namun beberapa pihak masih ragu.',
+      'en' => 'Technology brings benefits, yet some parties remain doubtful.',
+    ),
+    'vocab' => 
+    array (
+      'Genetic research' => 
+      array (
+        'id' => 'Penelitian genetik',
+        'pos' => '(n)',
+      ),
+      'Contribution' => 
+      array (
+        'id' => 'Kontribusi',
+        'pos' => '(n)',
+      ),
+      'Society' => 
+      array (
+        'id' => 'Masyarakat',
+        'pos' => '(n)',
+      ),
+      'Disagree' => 
+      array (
+        'id' => 'Tidak setuju',
+        'pos' => '(v)',
+      ),
+      'Field' => 
+      array (
+        'id' => 'Bidang',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  10 => 
+  array (
+    'id' => 'Sayangnya, ini saat sekarang hampir mustahil untuk memprediksi kesuksesan dari spesies invasif, tidak juga kita bisa membuat prediksi daftar dari penginvasi.',
+    'en' => 'Unfortunately, it is currently almost impossible to predict the success of invasive species, nor can we make a predicted list of invaders',
+    'type' => 'fanboys',
+    'conjunction' => 'nor (tidak juga)',
+    'example' => 
+    array (
+      'id' => 'Dia tidak dapat datang, dan tidak juga dia memberi kabar.',
+      'en' => 'He cannot come, nor did he give notice.',
+    ),
+    'vocab' => 
+    array (
+      'Unfortunately' => 
+      array (
+        'id' => 'Sayangnya',
+        'pos' => '(adv)',
+      ),
+      'Currently' => 
+      array (
+        'id' => 'Saat sekarang',
+        'pos' => '(adv)',
+      ),
+      'Almost impossible' => 
+      array (
+        'id' => 'Hampir mustahil',
+        'pos' => '(phrase)',
+      ),
+      'Predict' => 
+      array (
+        'id' => 'Memprediksi',
+        'pos' => '(v)',
+      ),
+      'Invasive species' => 
+      array (
+        'id' => 'Spesies invasif',
+        'pos' => '(n)',
+      ),
+      'Invader' => 
+      array (
+        'id' => 'Penginvasi',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  11 => 
+  array (
+    'id' => 'Pengoperasian dari sistem ini tidak menyebabkan kehilangan biodiversitas dalam lingkungan alam. Tidak juga terdapat bukti untuk membangun aturan yang ketat.',
+    'en' => 'The operation of this system does not cause loss of biodiversity in the natural environment, nor is there evidence to establish strict regulations',
+    'type' => 'fanboys',
+    'conjunction' => 'nor (tidak juga)',
+    'example' => 
+    array (
+      'id' => 'Pabrik tidak mencemari sungai, dan tidak juga melanggar baku mutu.',
+      'en' => 'The factory does not pollute the river, nor does it violate standards.',
+    ),
+    'vocab' => 
+    array (
+      'Operation' => 
+      array (
+        'id' => 'Pengoperasian',
+        'pos' => '(n)',
+      ),
+      'Loss of biodiversity' => 
+      array (
+        'id' => 'Kehilangan biodiversitas',
+        'pos' => '(phrase)',
+      ),
+      'Natural environment' => 
+      array (
+        'id' => 'Lingkungan alam',
+        'pos' => '(n)',
+      ),
+      'Evidence' => 
+      array (
+        'id' => 'Bukti',
+        'pos' => '(n)',
+      ),
+      'Establish' => 
+      array (
+        'id' => 'Membangun / Menetapkan',
+        'pos' => '(v)',
+      ),
+      'Strict regulations' => 
+      array (
+        'id' => 'Aturan yang ketat',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  12 => 
+  array (
+    'id' => 'Dalam beberapa situasi, kapasitas untuk terbang menjadi tidak diperlukan, sehingga ini ditinggalkan.',
+    'en' => 'In some situations, the capacity to fly becomes unnecessary, so it is abandoned',
+    'type' => 'fanboys',
+    'conjunction' => 'so (sehingga)',
+    'example' => 
+    array (
+      'id' => 'Fitur tersebut jarang dipakai, sehingga dihapus.',
+      'en' => 'The feature was rarely used, so it was removed.',
+    ),
+    'vocab' => 
+    array (
+      'Situation' => 
+      array (
+        'id' => 'Situasi',
+        'pos' => '(n)',
+      ),
+      'Capacity to fly' => 
+      array (
+        'id' => 'Kapasitas untuk terbang',
+        'pos' => '(phrase)',
+      ),
+      'Unnecessary' => 
+      array (
+        'id' => 'Tidak diperlukan',
+        'pos' => '(adj)',
+      ),
+      'Abandoned' => 
+      array (
+        'id' => 'Ditinggalkan',
+        'pos' => '(v3)',
+      ),
+    ),
+  ),
+  13 => 
+  array (
+    'id' => 'Penelitian menunjukkan bahwa kelompok experimental tidak menunjukkan perubahan signifikan dalam kinerja kognitif mereka setelah intervensi, tidak juga group kendali.',
+    'en' => 'Research shows that the experimental group did not show significant changes in their cognitive performance after the intervention, nor did the control group',
+    'type' => 'fanboys',
+    'conjunction' => 'nor (tidak juga)',
+    'example' => 
+    array (
+      'id' => 'Siswa kelas A tidak mengalami penurunan nilai, dan tidak juga kelas B.',
+      'en' => 'Class A students saw no score drop, nor did Class B.',
+    ),
+    'vocab' => 
+    array (
+      'Experimental group' => 
+      array (
+        'id' => 'Kelompok experimental',
+        'pos' => '(n)',
+      ),
+      'Significant change' => 
+      array (
+        'id' => 'Perubahan signifikan',
+        'pos' => '(n)',
+      ),
+      'Cognitive performance' => 
+      array (
+        'id' => 'Kinerja kognitif',
+        'pos' => '(n)',
+      ),
+      'Intervention' => 
+      array (
+        'id' => 'Intervensi',
+        'pos' => '(n)',
+      ),
+      'Control group' => 
+      array (
+        'id' => 'Grup kendali',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  14 => 
+  array (
+    'id' => 'Penurunan nilai ekonomi mempengaruhi pasar saham, sehingga hal ini juga menghasilkan kehilangan pekerjaan yang meluas ke berbagai industri.',
+    'en' => 'The economic decline affects the stock market, so this also results in widespread job losses across various industries',
+    'type' => 'fanboys',
+    'conjunction' => 'so (sehingga)',
+    'example' => 
+    array (
+      'id' => 'Inflasi meningkat tinggi, sehingga daya beli masyarakat menurun.',
+      'en' => 'Inflation rose high, so public purchasing power decreased.',
+    ),
+    'vocab' => 
+    array (
+      'Economic decline' => 
+      array (
+        'id' => 'Penurunan nilai ekonomi',
+        'pos' => '(n)',
+      ),
+      'Stock market' => 
+      array (
+        'id' => 'Pasar saham',
+        'pos' => '(n)',
+      ),
+      'Affect' => 
+      array (
+        'id' => 'Mempengaruhi',
+        'pos' => '(v)',
+      ),
+      'Result in' => 
+      array (
+        'id' => 'Menghasilkan',
+        'pos' => '(v)',
+      ),
+      'Widespread job loss' => 
+      array (
+        'id' => 'Kehilangan pekerjaan yang meluas',
+        'pos' => '(n)',
+      ),
+      'Various industries' => 
+      array (
+        'id' => 'Berbagai industri',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  15 => 
+  array (
+    'id' => 'Ilmuwan dan ahli lingkungan sedang semakin khawatir mengenai dampak dari perubahan iklim terhadap ekosistem laut, tidak juga masalah ini bisa diabaikan.',
+    'en' => 'Scientists and environmentalists are increasingly worried about the impact of climate change on marine ecosystems, nor can this problem be ignored',
+    'type' => 'fanboys',
+    'conjunction' => 'nor (tidak juga)',
+    'example' => 
+    array (
+      'id' => 'Pakar riset cemas akan polusi udara, dan isu ini tidak bisa disepelekan.',
+      'en' => 'Researchers worry about air pollution, nor can this issue be downplayed.',
+    ),
+    'vocab' => 
+    array (
+      'Scientist' => 
+      array (
+        'id' => 'Ilmuwan',
+        'pos' => '(n)',
+      ),
+      'Environmentalist' => 
+      array (
+        'id' => 'Ahli lingkungan',
+        'pos' => '(n)',
+      ),
+      'Increasingly worried' => 
+      array (
+        'id' => 'Semakin khawatir',
+        'pos' => '(phrase)',
+      ),
+      'Impact' => 
+      array (
+        'id' => 'Dampak',
+        'pos' => '(n)',
+      ),
+      'Marine ecosystem' => 
+      array (
+        'id' => 'Ekosistem laut',
+        'pos' => '(n)',
+      ),
+      'Ignored' => 
+      array (
+        'id' => 'Diabaikan',
+        'pos' => '(v3)',
+      ),
+    ),
+  ),
+  16 => 
+  array (
+    'id' => 'Banyak orang menolak AI. Namun begitu kemajuan dari kecerdasan buatan telah merevolusi berbagai industri dari bidang kesehatan hingga keuangan.',
+    'en' => 'Many people reject AI, yet advancements in artificial intelligence have revolutionized various industries from healthcare to finance',
+    'type' => 'fanboys',
+    'conjunction' => 'yet (namun begitu)',
+    'example' => 
+    array (
+      'id' => 'Banyak yang menolak metode baru, namun hasilnya terbukti efektif.',
+      'en' => 'Many rejected the new method, yet its results proved effective.',
+    ),
+    'vocab' => 
+    array (
+      'Reject' => 
+      array (
+        'id' => 'Menolak',
+        'pos' => '(v)',
+      ),
+      'Advancement' => 
+      array (
+        'id' => 'Kemajuan',
+        'pos' => '(n)',
+      ),
+      'Artificial intelligence' => 
+      array (
+        'id' => 'Kecerdasan buatan',
+        'pos' => '(n)',
+      ),
+      'Revolutionize' => 
+      array (
+        'id' => 'Merevolusi',
+        'pos' => '(v)',
+      ),
+      'Healthcare' => 
+      array (
+        'id' => 'Bidang kesehatan',
+        'pos' => '(n)',
+      ),
+      'Finance' => 
+      array (
+        'id' => 'Keuangan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  17 => 
+  array (
+    'id' => 'Karenakan media sosial memiliki peran yang kuat dalam membentuk arah politik, ini telah menjadi point utama dalam berbagai penelitian akademik dan debat publik.',
+    'en' => 'Social media has a strong role in shaping political direction, for it has become a focal point in various academic studies and public debates',
+    'type' => 'fanboys',
+    'conjunction' => 'for (karenakan / sebab)',
+    'example' => 
+    array (
+      'id' => 'Isu ini sangat krusial, sebab menentukan masa depan organisasi.',
+      'en' => 'This issue is very crucial, for it determines the organization future.',
+    ),
+    'vocab' => 
+    array (
+      'Social media' => 
+      array (
+        'id' => 'Media sosial',
+        'pos' => '(n)',
+      ),
+      'Strong role' => 
+      array (
+        'id' => 'Peran yang kuat',
+        'pos' => '(n)',
+      ),
+      'Shape political direction' => 
+      array (
+        'id' => 'Membentuk arah politik',
+        'pos' => '(phrase)',
+      ),
+      'Focal point' => 
+      array (
+        'id' => 'Poin utama',
+        'pos' => '(n)',
+      ),
+      'Academic study' => 
+      array (
+        'id' => 'Penelitian akademik',
+        'pos' => '(n)',
+      ),
+      'Public debate' => 
+      array (
+        'id' => 'Debat publik',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  18 => 
+  array (
+    'id' => 'Implikasi etis dari modifikasi gen telah menyalakan debat di antara para ilmuwan, pembuat kebijakan, dan publik. Namun, masyarakat telah merasakan manfaatnya secara langsung.',
+    'en' => 'The ethical implications of gene modification have sparked debate among scientists, policymakers, and the public, but society has directly experienced its benefits',
+    'type' => 'fanboys',
+    'conjunction' => 'but / yet (namun)',
+    'example' => 
+    array (
+      'id' => 'Teknologi ini memicu perdebatan, namun manfaatnya sudah terasa.',
+      'en' => 'This technology sparked debate, but its benefits are already felt.',
+    ),
+    'vocab' => 
+    array (
+      'Ethical implications' => 
+      array (
+        'id' => 'Implikasi etis',
+        'pos' => '(n)',
+      ),
+      'Gene modification' => 
+      array (
+        'id' => 'Modifikasi gen',
+        'pos' => '(n)',
+      ),
+      'Spark debate' => 
+      array (
+        'id' => 'Menyalakan / Memicu debat',
+        'pos' => '(phrase)',
+      ),
+      'Policymakers' => 
+      array (
+        'id' => 'Pembuat kebijakan',
+        'pos' => '(n)',
+      ),
+      'Directly' => 
+      array (
+        'id' => 'Secara langsung',
+        'pos' => '(adv)',
+      ),
+      'Benefit' => 
+      array (
+        'id' => 'Manfaat',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  19 => 
+  array (
+    'id' => 'Sampai kekebalan kelompok yang memadai tercapai secara komprehensif, otoritas kesehatan terus memantau mutasi patogen secara ketat.',
+    'en' => 'Until adequate herd immunity is comprehensively achieved, health authorities continually monitor pathogen mutations closely',
+    'type' => 'time',
+    'pos_type' => 'initial',
+    'conjunction' => 'until (sampai / hingga)',
+    'example' => 
+    array (
+      'id' => 'Sebelum rapat dimulai, peserta membaca dokumen.',
+      'en' => 'Before the meeting started, attendees read documents.',
+    ),
+    'vocab' => 
+    array (
+      'Until' => 
+      array (
+        'id' => 'Sampai / Hingga',
+        'pos' => '(conj)',
+      ),
+      'Adequate' => 
+      array (
+        'id' => 'Memadai',
+        'pos' => '(adj)',
+      ),
+      'Herd immunity' => 
+      array (
+        'id' => 'Kekebalan kelompok',
+        'pos' => '(n)',
+      ),
+      'Comprehensively' => 
+      array (
+        'id' => 'Secara komprehensif',
+        'pos' => '(adv)',
+      ),
+      'Health authority' => 
+      array (
+        'id' => 'Otoritas kesehatan',
+        'pos' => '(n)',
+      ),
+      'Continually monitor' => 
+      array (
+        'id' => 'Terus memantau',
+        'pos' => '(v)',
+      ),
+      'Pathogen mutation' => 
+      array (
+        'id' => 'Mutasi patogen',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  20 => 
+  array (
+    'id' => 'Ketika instrumen teleskopik canggih mendeteksi anomali gelombang mikro, para astronom mengidentifikasi radiasi kosmik purba.',
+    'en' => 'When sophisticated telescopic instruments detected microwave anomalies, astronomers identified ancient cosmic radiation',
+    'type' => 'time',
+    'pos_type' => 'initial',
+    'conjunction' => 'when (ketika / saat)',
+    'example' => 
+    array (
+      'id' => 'Ketika alarm berbunyi, petugas evakuasi bertindak.',
+      'en' => 'When the alarm sounded, evacuation officers acted.',
+    ),
+    'vocab' => 
+    array (
+      'When' => 
+      array (
+        'id' => 'Ketika / Saat',
+        'pos' => '(conj)',
+      ),
+      'Sophisticated' => 
+      array (
+        'id' => 'Canggih',
+        'pos' => '(adj)',
+      ),
+      'Telescopic instrument' => 
+      array (
+        'id' => 'Instrumen teleskopik',
+        'pos' => '(n)',
+      ),
+      'Detect' => 
+      array (
+        'id' => 'Mendeteksi',
+        'pos' => '(v)',
+      ),
+      'Microwave anomaly' => 
+      array (
+        'id' => 'Anomali gelombang mikro',
+        'pos' => '(n)',
+      ),
+      'Astronomer' => 
+      array (
+        'id' => 'Astronom',
+        'pos' => '(n)',
+      ),
+      'Identify' => 
+      array (
+        'id' => 'Mengidentifikasi',
+        'pos' => '(v)',
+      ),
+      'Cosmic radiation' => 
+      array (
+        'id' => 'Radiasi kosmik',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  21 => 
+  array (
+    'id' => 'Sebelum teknologi percetakan tipe bergerak diperkenalkan di Eropa Barat, diseminasi literatur ilmiah sangat terbatas.',
+    'en' => 'Before movable-type printing technology was introduced in Western Europe, the dissemination of scientific literature was profoundly constrained',
+    'type' => 'time',
+    'pos_type' => 'initial',
+    'conjunction' => 'before (sebelum)',
+    'example' => 
+    array (
+      'id' => 'Sebelum eksperimen dimulai, lab disterilkan.',
+      'en' => 'Before the experiment began, the lab was sterilized.',
+    ),
+    'vocab' => 
+    array (
+      'Before' => 
+      array (
+        'id' => 'Sebelum',
+        'pos' => '(conj)',
+      ),
+      'Movable-type printing' => 
+      array (
+        'id' => 'Percetakan tipe bergerak',
+        'pos' => '(n)',
+      ),
+      'Introduce' => 
+      array (
+        'id' => 'Diperkenalkan',
+        'pos' => '(v)',
+      ),
+      'Dissemination' => 
+      array (
+        'id' => 'Diseminasi / Penyebaran',
+        'pos' => '(n)',
+      ),
+      'Scientific literature' => 
+      array (
+        'id' => 'Literatur ilmiah',
+        'pos' => '(n)',
+      ),
+      'Profoundly constrained' => 
+      array (
+        'id' => 'Sangat terbatas / Terhambat',
+        'pos' => '(adj)',
+      ),
+    ),
+  ),
+  22 => 
+  array (
+    'id' => 'Karena sedimentasi aluvial sangat memperkaya kesuburan tanah, banyak peradaban agraris mendiami wilayah delta sungai.',
+    'en' => 'Because alluvial sedimentation greatly enriched soil fertility, many agrarian civilizations inhabited river delta regions',
+    'type' => 'cause',
+    'pos_type' => 'initial',
+    'conjunction' => 'because (karena)',
+    'example' => 
+    array (
+      'id' => 'Karena iklim mendukung, hasil panen melimpah.',
+      'en' => 'Because the climate was favorable, yields were abundant.',
+    ),
+    'vocab' => 
+    array (
+      'Because' => 
+      array (
+        'id' => 'Karena',
+        'pos' => '(conj)',
+      ),
+      'Alluvial sedimentation' => 
+      array (
+        'id' => 'Sedimentasi aluvial',
+        'pos' => '(n)',
+      ),
+      'Enrich soil fertility' => 
+      array (
+        'id' => 'Memperkaya kesuburan tanah',
+        'pos' => '(v)',
+      ),
+      'Agrarian civilization' => 
+      array (
+        'id' => 'Peradaban agraris',
+        'pos' => '(n)',
+      ),
+      'Inhabit' => 
+      array (
+        'id' => 'Mendiami / Menghuni',
+        'pos' => '(v)',
+      ),
+      'River delta region' => 
+      array (
+        'id' => 'Wilayah delta sungai',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  23 => 
+  array (
+    'id' => 'Meskipun tantangan kestabilan medan magnet plasma masih sangat kompleks, eksperimen fusi nuklir tetap dilanjutkan.',
+    'en' => 'Although the challenges of plasma magnetic field stability remain exceptionally complex, nuclear fusion experiments are still continued',
+    'type' => 'contrast',
+    'pos_type' => 'initial',
+    'conjunction' => 'although (meskipun)',
+    'example' => 
+    array (
+      'id' => 'Meskipun biaya tinggi, riset tetap berjalan.',
+      'en' => 'Although costs were high, research continued.',
+    ),
+    'vocab' => 
+    array (
+      'Although' => 
+      array (
+        'id' => 'Meskipun / Walaupun',
+        'pos' => '(conj)',
+      ),
+      'Stability challenge' => 
+      array (
+        'id' => 'Tantangan kestabilan',
+        'pos' => '(n)',
+      ),
+      'Plasma magnetic field' => 
+      array (
+        'id' => 'Medan magnet plasma',
+        'pos' => '(n)',
+      ),
+      'Exceptionally complex' => 
+      array (
+        'id' => 'Sangat kompleks',
+        'pos' => '(adj)',
+      ),
+      'Nuclear fusion experiment' => 
+      array (
+        'id' => 'Eksperimen fusi nuklir',
+        'pos' => '(n)',
+      ),
+      'Continue' => 
+      array (
+        'id' => 'Dilanjutkan',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  24 => 
+  array (
+    'id' => 'Paradigma sosioekonomi global, setelah otomatisasi industri berskala besar diterapkan, bertransformasi secara radikal.',
+    'en' => 'The global socioeconomic paradigm, after large-scale industrial automation was implemented, transformed radically',
+    'type' => 'time',
+    'pos_type' => 'middle',
+    'conjunction' => 'after (setelah)',
+    'example' => 
+    array (
+      'id' => 'Perusahaan, setelah regulasi baru berlaku, meningkatkan standar keselamatan.',
+      'en' => 'The company, after new rules took effect, upgraded safety standards.',
+    ),
+    'vocab' => 
+    array (
+      'Socioeconomic paradigm' => 
+      array (
+        'id' => 'Paradigma sosioekonomi',
+        'pos' => '(n)',
+      ),
+      'After' => 
+      array (
+        'id' => 'Setelah',
+        'pos' => '(conj)',
+      ),
+      'Large-scale' => 
+      array (
+        'id' => 'Berskala besar',
+        'pos' => '(adj)',
+      ),
+      'Industrial automation' => 
+      array (
+        'id' => 'Otomatisasi industri',
+        'pos' => '(n)',
+      ),
+      'Implement' => 
+      array (
+        'id' => 'Diterapkan',
+        'pos' => '(v)',
+      ),
+      'Transform radically' => 
+      array (
+        'id' => 'Bertransformasi secara radikal',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  25 => 
+  array (
+    'id' => 'Pemodelan iklim global, sejak komputasi kuantum diterapkan dalam meteorologi modern, menjadi semakin presisi.',
+    'en' => 'Global climate modeling, since quantum computing was implemented in modern meteorology, became increasingly precise',
+    'type' => 'time',
+    'pos_type' => 'middle',
+    'conjunction' => 'since (sejak)',
+    'example' => 
+    array (
+      'id' => 'Kualitas udara, sejak filter baru dipasang, membaik drastis.',
+      'en' => 'Air quality, since new filters were installed, improved drastically.',
+    ),
+    'vocab' => 
+    array (
+      'Climate modeling' => 
+      array (
+        'id' => 'Pemodelan iklim',
+        'pos' => '(n)',
+      ),
+      'Since' => 
+      array (
+        'id' => 'Sejak',
+        'pos' => '(conj)',
+      ),
+      'Quantum computing' => 
+      array (
+        'id' => 'Komputasi kuantum',
+        'pos' => '(n)',
+      ),
+      'Meteorology' => 
+      array (
+        'id' => 'Meteorologi',
+        'pos' => '(n)',
+      ),
+      'Increasingly precise' => 
+      array (
+        'id' => 'Semakin presisi',
+        'pos' => '(adj)',
+      ),
+    ),
+  ),
+  26 => 
+  array (
+    'id' => 'Model heliosentris, meskipun awalnya ditentang keras oleh kalangan ortodoks, akhirnya diakui sebagai landasan kosmologi modern.',
+    'en' => 'The heliocentric model, although the notion was initially vehemently opposed by orthodox circles, was eventually acknowledged as the cornerstone of modern cosmology',
+    'type' => 'contrast',
+    'pos_type' => 'middle',
+    'conjunction' => 'although (meskipun)',
+    'example' => 
+    array (
+      'id' => 'Teori itu, meskipun diragukan pada awalnya, kini terbukti benar.',
+      'en' => 'The theory, although initially doubted, is now proven correct.',
+    ),
+    'vocab' => 
+    array (
+      'Heliocentric model' => 
+      array (
+        'id' => 'Model heliosentris',
+        'pos' => '(n)',
+      ),
+      'Although' => 
+      array (
+        'id' => 'Meskipun',
+        'pos' => '(conj)',
+      ),
+      'Vehemently opposed' => 
+      array (
+        'id' => 'Ditentang keras',
+        'pos' => '(v)',
+      ),
+      'Orthodox circles' => 
+      array (
+        'id' => 'Kalangan ortodoks',
+        'pos' => '(n)',
+      ),
+      'Eventually acknowledged' => 
+      array (
+        'id' => 'Akhirnya diakui',
+        'pos' => '(v)',
+      ),
+      'Cornerstone' => 
+      array (
+        'id' => 'Landasan / Batu penjuru',
+        'pos' => '(n)',
+      ),
+      'Cosmology' => 
+      array (
+        'id' => 'Kosmologi',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  27 => 
+  array (
+    'id' => 'Keanekaragaman hayati ekosistem laut, jika eksploitasi terumbu karang dihentikan secara permanen, dapat dipertahankan secara optimal.',
+    'en' => 'Marine ecosystem biodiversity, if coral reef exploitation is permanently halted, can be preserved optimally',
+    'type' => 'condition',
+    'pos_type' => 'middle',
+    'conjunction' => 'if (jika)',
+    'example' => 
+    array (
+      'id' => 'Populasi satwa, jika perburuan liar dilarang, akan pulih dengan cepat.',
+      'en' => 'Wildlife populations, if poaching is banned, will recover quickly.',
+    ),
+    'vocab' => 
+    array (
+      'Biodiversity' => 
+      array (
+        'id' => 'Keanekaragaman hayati',
+        'pos' => '(n)',
+      ),
+      'Marine ecosystem' => 
+      array (
+        'id' => 'Ekosistem laut',
+        'pos' => '(n)',
+      ),
+      'If' => 
+      array (
+        'id' => 'Jika',
+        'pos' => '(conj)',
+      ),
+      'Coral reef exploitation' => 
+      array (
+        'id' => 'Eksploitasi terumbu karang',
+        'pos' => '(n)',
+      ),
+      'Permanently halted' => 
+      array (
+        'id' => 'Dihentikan secara permanen',
+        'pos' => '(v)',
+      ),
+      'Preserve optimally' => 
+      array (
+        'id' => 'Dipertahankan secara optimal',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  28 => 
+  array (
+    'id' => 'Stabilitas fiskal nasional, kecuali jika reformasi perpajakan progresif diimplementasikan secara konsisten, akan memburuk secara drastis.',
+    'en' => 'National fiscal stability, unless progressive tax reforms are implemented consistently, will deteriorate drastically',
+    'type' => 'condition',
+    'pos_type' => 'middle',
+    'conjunction' => 'unless (kecuali jika)',
+    'example' => 
+    array (
+      'id' => 'Perekonomian, kecuali jika suku bunga distabilkan, akan mengalami resesi.',
+      'en' => 'The economy, unless interest rates are stabilized, will face a recession.',
+    ),
+    'vocab' => 
+    array (
+      'Fiscal stability' => 
+      array (
+        'id' => 'Stabilitas fiskal',
+        'pos' => '(n)',
+      ),
+      'Unless' => 
+      array (
+        'id' => 'Kecuali jika',
+        'pos' => '(conj)',
+      ),
+      'Progressive tax reform' => 
+      array (
+        'id' => 'Reformasi pajak progresif',
+        'pos' => '(n)',
+      ),
+      'Implement consistently' => 
+      array (
+        'id' => 'Diimplementasikan secara konsisten',
+        'pos' => '(v)',
+      ),
+      'Deteriorate drastically' => 
+      array (
+        'id' => 'Memburuk secara drastis',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  29 => 
+  array (
+    'id' => 'Sektor bioteknologi mengalami ekspansi eksponensial, sementara industri manufaktur konvensional menghadapi stagnasi berkepanjangan.',
+    'en' => 'The biotechnology sector experiences exponential expansion, while conventional manufacturing industries face prolonged stagnation',
+    'type' => 'time',
+    'pos_type' => 'final',
+    'conjunction' => 'while / whereas (sementara)',
+    'example' => 
+    array (
+      'id' => 'Ekspor meningkat sementara impor menurun.',
+      'en' => 'Exports rose while imports declined.',
+    ),
+    'vocab' => 
+    array (
+      'Biotechnology sector' => 
+      array (
+        'id' => 'Sektor bioteknologi',
+        'pos' => '(n)',
+      ),
+      'Exponential expansion' => 
+      array (
+        'id' => 'Ekspansi eksponensial',
+        'pos' => '(n)',
+      ),
+      'While / Whereas' => 
+      array (
+        'id' => 'Sementara',
+        'pos' => '(conj)',
+      ),
+      'Conventional manufacturing' => 
+      array (
+        'id' => 'Manufaktur konvensional',
+        'pos' => '(n)',
+      ),
+      'Prolonged stagnation' => 
+      array (
+        'id' => 'Stagnasi berkepanjangan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  30 => 
+  array (
+    'id' => 'Efisiensi termodinamika meningkat secara signifikan segera setelah katalis nanoteknologi disintesis ke dalam reaktor.',
+    'en' => 'Thermodynamic efficiency increases significantly as soon as nanotechnology catalysts are synthesized into the reactor',
+    'type' => 'time',
+    'pos_type' => 'final',
+    'conjunction' => 'as soon as (segera setelah)',
+    'example' => 
+    array (
+      'id' => 'Reaksi terjadi segera setelah suhu dinaikkan.',
+      'en' => 'The reaction occurred as soon as temperature rose.',
+    ),
+    'vocab' => 
+    array (
+      'Thermodynamic efficiency' => 
+      array (
+        'id' => 'Efisiensi termodinamika',
+        'pos' => '(n)',
+      ),
+      'Significantly' => 
+      array (
+        'id' => 'Secara signifikan',
+        'pos' => '(adv)',
+      ),
+      'As soon as' => 
+      array (
+        'id' => 'Segera setelah',
+        'pos' => '(conj)',
+      ),
+      'Nanotechnology catalyst' => 
+      array (
+        'id' => 'Katalis nanoteknologi',
+        'pos' => '(n)',
+      ),
+      'Synthesize' => 
+      array (
+        'id' => 'Disintesis',
+        'pos' => '(v)',
+      ),
+      'Reactor' => 
+      array (
+        'id' => 'Reaktor',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  31 => 
+  array (
+    'id' => 'Protokol enkripsi kuantum dikembangkan agar transmisi data antarlembaga tetap terlindungi dari intersepsi siber.',
+    'en' => 'Quantum encryption protocols were developed so that inter-institutional data transmission remains safeguarded from cyber interception',
+    'type' => 'purpose',
+    'pos_type' => 'final',
+    'conjunction' => 'so that (agar / supaya)',
+    'example' => 
+    array (
+      'id' => 'Sistem diamankan agar data tidak bocor.',
+      'en' => 'Systems are secured so that data is safe.',
+    ),
+    'vocab' => 
+    array (
+      'Quantum encryption protocol' => 
+      array (
+        'id' => 'Protokol enkripsi kuantum',
+        'pos' => '(n)',
+      ),
+      'So that' => 
+      array (
+        'id' => 'Agar / Supaya',
+        'pos' => '(conj)',
+      ),
+      'Inter-institutional' => 
+      array (
+        'id' => 'Antarlembaga',
+        'pos' => '(adj)',
+      ),
+      'Transmission' => 
+      array (
+        'id' => 'Transmisi',
+        'pos' => '(n)',
+      ),
+      'Safeguarded' => 
+      array (
+        'id' => 'Terlindungi',
+        'pos' => '(v)',
+      ),
+      'Cyber interception' => 
+      array (
+        'id' => 'Intersepsi siber',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  32 => 
+  array (
+    'id' => 'Kolaborasi akademik berkembang secara dinamis di mana pun ekosistem riset interdisipliner didukung secara optimal.',
+    'en' => 'Academic collaboration flourishes dynamically wherever interdisciplinary research ecosystems are optimally supported',
+    'type' => 'place',
+    'pos_type' => 'final',
+    'conjunction' => 'wherever (di mana pun)',
+    'example' => 
+    array (
+      'id' => 'Inovasi muncul di mana pun ada dukungan.',
+      'en' => 'Innovation emerges wherever there is support.',
+    ),
+    'vocab' => 
+    array (
+      'Academic collaboration' => 
+      array (
+        'id' => 'Kolaborasi akademik',
+        'pos' => '(n)',
+      ),
+      'Flourish dynamically' => 
+      array (
+        'id' => 'Berkembang secara dinamis',
+        'pos' => '(v)',
+      ),
+      'Wherever' => 
+      array (
+        'id' => 'Di mana pun',
+        'pos' => '(conj)',
+      ),
+      'Interdisciplinary' => 
+      array (
+        'id' => 'Interdisipliner',
+        'pos' => '(adj)',
+      ),
+      'Optimally supported' => 
+      array (
+        'id' => 'Didukung secara optimal',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  33 => 
+  array (
+    'id' => 'Formasi geologis ngarai tersebut tampak seolah-olah struktur batuannya terukir oleh gaya tektonik prasejarah yang masif.',
+    'en' => 'The geological formation of the canyon appears as if its rock structure was sculpted by massive prehistoric tectonic forces',
+    'type' => 'manner',
+    'pos_type' => 'final',
+    'conjunction' => 'as if (seolah-olah)',
+    'example' => 
+    array (
+      'id' => 'Batu itu tampak seolah-olah dipahat.',
+      'en' => 'The rock looks as if it was carved.',
+    ),
+    'vocab' => 
+    array (
+      'Geological formation' => 
+      array (
+        'id' => 'Formasi geologis',
+        'pos' => '(n)',
+      ),
+      'Canyon' => 
+      array (
+        'id' => 'Ngarai / Lembah curam',
+        'pos' => '(n)',
+      ),
+      'As if' => 
+      array (
+        'id' => 'Seolah-olah',
+        'pos' => '(conj)',
+      ),
+      'Sculpted' => 
+      array (
+        'id' => 'Terukir / Terpahat',
+        'pos' => '(v)',
+      ),
+      'Prehistoric' => 
+      array (
+        'id' => 'Prasejarah',
+        'pos' => '(adj)',
+      ),
+      'Tectonic forces' => 
+      array (
+        'id' => 'Gaya tektonik',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+);
 
     private $meeting12Paragraph = [
         'id' => 'Perkembangan teknologi terus mengalami percepatan sejak revolusi industri dimulai di Eropa. Inovasi dalam bidang komunikasi semakin penting ketika mesin telegraf diperkenalkan pada abad ke-19. Internet menjadi tonggak besar, karena ia menghubungkan miliaran manusia dalam waktu nyata. Penyebaran informasi menjadi semakin cepat, walaupun masih terdapat kesenjangan digital di beberapa wilayah. Penelitian ilmiah pun berkembang pesat, agar masyarakat dapat memperoleh solusi atas tantangan global yang semakin kompleks.',
@@ -17542,268 +18818,1273 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         return redirect()->route('assignments.grammar-writing.meeting13');
     }
 
-    private $meeting14Questions = [
-        1 => [
-            'id' => 'Ilmuwan yang menemukan vaksin baru menyelamatkan jutaan nyawa.', 
-            'en' => 'The scientist who discovered the new vaccine saved millions of lives',
-            'vocab' => [
-                'Scientist' => ['id' => 'Ilmuwan', 'pos' => '(n)'],
-                'Discover' => ['id' => 'Menemukan', 'pos' => '(v)'],
-                'Vaccine' => ['id' => 'Vaksin', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Orang yang menelpon saya tadi adalah ayah saya.',
-                'en' => 'The person who called me earlier is my father.'
-            ]
-        ],
-        2 => [
-            'id' => 'Penulis yang meneliti sejarah kuno menerbitkan karya monumental.', 
-            'en' => 'The writer who researched ancient history published a monumental work',
-            'vocab' => [
-                'Writer' => ['id' => 'Penulis', 'pos' => '(n)'],
-                'Research' => ['id' => 'Meneliti', 'pos' => '(v)'],
-                'Ancient' => ['id' => 'Kuno', 'pos' => '(adj)']
-            ],
-            'example' => [
-                'id' => 'Wanita yang tinggal di sebelah rumah saya adalah seorang dokter.',
-                'en' => 'The woman who lives next door is a doctor.'
-            ]
-        ],
-        3 => [
-            'id' => 'Guru yang mengajar di universitas ternama mendapatkan penghargaan akademik.', 
-            'en' => 'The teacher who teaches at a renowned university received an academic award',
-            'vocab' => [
-                'Renowned' => ['id' => 'Ternama', 'pos' => '(adj)'],
-                'University' => ['id' => 'Universitas', 'pos' => '(n)'],
-                'Award' => ['id' => 'Penghargaan', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Pria yang bekerja di bank itu adalah paman saya.',
-                'en' => 'The man who works at the bank is my uncle.'
-            ]
-        ],
-        4 => [
-            'id' => 'Arsitek yang merancang gedung tinggi itu memenangkan kompetisi internasional.', 
-            'en' => 'The architect who designed the tall building won an international competition',
-            'vocab' => [
-                'Architect' => ['id' => 'Arsitek', 'pos' => '(n)'],
-                'Design' => ['id' => 'Merancang', 'pos' => '(v)'],
-                'Competition' => ['id' => 'Kompetisi', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Siswa yang memenangkan lomba itu sangat pintar.',
-                'en' => 'The student who won the competition is very smart.'
-            ]
-        ],
-        5 => [
-            'id' => 'Petani yang membudidayakan padi organik berhasil meningkatkan hasil panen.', 
-            'en' => 'The farmer who cultivates organic rice successfully increased the harvest yield',
-            'vocab' => [
-                'Farmer' => ['id' => 'Petani', 'pos' => '(n)'],
-                'Cultivate' => ['id' => 'Membudidayakan', 'pos' => '(v)'],
-                'Yield' => ['id' => 'Hasil panen', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Orang yang menanam bunga itu suka berkebun.',
-                'en' => 'The person who plants the flowers likes gardening.'
-            ]
-        ],
-        6 => [
-            'id' => 'Mahasiswa yang mengikuti program pertukaran memperluas wawasan global mereka.', 
-            'en' => 'Students who participate in exchange programs expand their global perspectives',
-            'vocab' => [
-                'Participate' => ['id' => 'Mengikuti/Berpartisipasi', 'pos' => '(v)'],
-                'Exchange' => ['id' => 'Pertukaran', 'pos' => '(n)'],
-                'Perspective' => ['id' => 'Wawasan/Sudut pandang', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Anak-anak yang bermain di taman terlihat senang.',
-                'en' => 'The children who play in the park look happy.'
-            ]
-        ],
-        7 => [
-            'id' => 'Dokter yang meneliti penyakit langka mempresentasikan temuannya di konferensi.', 
-            'en' => 'The doctor who researches rare diseases presented his findings at a conference',
-            'vocab' => [
-                'Research' => ['id' => 'Meneliti', 'pos' => '(v)'],
-                'Rare' => ['id' => 'Langka', 'pos' => '(adj)'],
-                'Conference' => ['id' => 'Konferensi', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Ilmuwan yang mempelajari bintang itu sangat terkenal.',
-                'en' => 'The scientist who studies stars is very famous.'
-            ]
-        ],
-        8 => [
-            'id' => 'Fisikawan yang mempelajari partikel subatom bekerja di laboratorium khusus.', 
-            'en' => 'The physicist who studies subatomic particles works in a special laboratory',
-            'vocab' => [
-                'Physicist' => ['id' => 'Fisikawan', 'pos' => '(n)'],
-                'Particle' => ['id' => 'Partikel', 'pos' => '(n)'],
-                'Laboratory' => ['id' => 'Laboratorium', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Guru yang mengajar matematika itu sangat sabar.',
-                'en' => 'The teacher who teaches math is very patient.'
-            ]
-        ],
-        9 => [
-            'id' => 'Aktivis yang memperjuangkan hak lingkungan diakui dunia internasional.', 
-            'en' => 'The activist who fights for environmental rights is recognized internationally',
-            'vocab' => [
-                'Activist' => ['id' => 'Aktivis', 'pos' => '(n)'],
-                'Fight for' => ['id' => 'Memperjuangkan', 'pos' => '(v)'],
-                'Recognize' => ['id' => 'Mengakui', 'pos' => '(v)']
-            ],
-            'example' => [
-                'id' => 'Pahlawan yang berjuang untuk kemerdekaan dihormati semua orang.',
-                'en' => 'The hero who fought for independence is respected by everyone.'
-            ]
-        ],
-        10 => [
-            'id' => 'Seniman yang melukis mural besar itu menginspirasi komunitas lokal.', 
-            'en' => 'The artist who painted the large mural inspires the local community',
-            'vocab' => [
-                'Artist' => ['id' => 'Seniman', 'pos' => '(n)'],
-                'Mural' => ['id' => 'Mural/Lukisan dinding', 'pos' => '(n)'],
-                'Inspire' => ['id' => 'Menginspirasi', 'pos' => '(v)']
-            ],
-            'example' => [
-                'id' => 'Penulis yang menulis novel itu memenangkan penghargaan.',
-                'en' => 'The writer who wrote the novel won an award.'
-            ]
-        ],
-        11 => [
-            'id' => 'Para dokter merawat pasien yang menderita penyakit langka.', 
-            'en' => 'Doctors treat patients who suffer from rare diseases',
-            'vocab' => [
-                'Treat' => ['id' => 'Merawat', 'pos' => '(v)'],
-                'Suffer' => ['id' => 'Menderita', 'pos' => '(v)'],
-                'Disease' => ['id' => 'Penyakit', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Saya membantu orang yang membutuhkan bantuan.',
-                'en' => 'I help people who need help.'
-            ]
-        ],
-        12 => [
-            'id' => 'Penulis menerbitkan buku yang menguraikan sejarah Asia Tenggara.', 
-            'en' => 'The writer published a book that describes the history of Southeast Asia',
-            'vocab' => [
-                'Publish' => ['id' => 'Menerbitkan', 'pos' => '(v)'],
-                'Describe' => ['id' => 'Menguraikan/Menjelaskan', 'pos' => '(v)'],
-                'History' => ['id' => 'Sejarah', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Dia membaca artikel yang membahas politik.',
-                'en' => 'He reads articles that discuss politics.'
-            ]
-        ],
-        13 => [
-            'id' => 'Perusahaan mengembangkan sistem yang meningkatkan keamanan data.', 
-            'en' => 'The company develops a system that improves data security',
-            'vocab' => [
-                'Develop' => ['id' => 'Mengembangkan', 'pos' => '(v)'],
-                'Improve' => ['id' => 'Meningkatkan', 'pos' => '(v)'],
-                'Security' => ['id' => 'Keamanan', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Mereka membuat aplikasi yang membantu belajar.',
-                'en' => 'They create applications that help learning.'
-            ]
-        ],
-        14 => [
-            'id' => 'Relawan membantu komunitas yang terdampak bencana alam.', 
-            'en' => 'Volunteers help communities that are affected by natural disasters',
-            'vocab' => [
-                'Volunteer' => ['id' => 'Relawan', 'pos' => '(n)'],
-                'Affected' => ['id' => 'Terdampak', 'pos' => '(adj)'],
-                'Disaster' => ['id' => 'Bencana', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Kami menyumbang ke panti asuhan yang membutuhkan dana.',
-                'en' => 'We donate to orphanages that need funds.'
-            ]
-        ],
-        15 => [
-            'id' => 'Universitas membuka fakultas baru yang memfokuskan pada teknologi lingkungan.', 
-            'en' => 'The university opens a new faculty that focuses on environmental technology',
-            'vocab' => [
-                'Faculty' => ['id' => 'Fakultas', 'pos' => '(n)'],
-                'Focus' => ['id' => 'Memfokuskan', 'pos' => '(v)'],
-                'Environment' => ['id' => 'Lingkungan', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Sekolah menawarkan program yang mengajarkan koding.',
-                'en' => 'The school offers programs that teach coding.'
-            ]
-        ],
-        16 => [
-            'id' => 'Penjelajah mendaki gunung yang diselimuti salju abadi.', 
-            'en' => 'The explorer climbs the mountain that is covered with eternal snow',
-            'vocab' => [
-                'Explorer' => ['id' => 'Penjelajah', 'pos' => '(n)'],
-                'Climb' => ['id' => 'Mendaki', 'pos' => '(v)'],
-                'Covered' => ['id' => 'Diselimuti', 'pos' => '(adj)']
-            ],
-            'example' => [
-                'id' => 'Burung itu terbang di atas pohon yang tinggi.',
-                'en' => 'The bird flies over the tree that is tall.'
-            ]
-        ],
-        17 => [
-            'id' => 'Seniman menciptakan mural yang menggambarkan keragaman budaya.', 
-            'en' => 'The artist creates a mural that depicts cultural diversity',
-            'vocab' => [
-                'Create' => ['id' => 'Menciptakan', 'pos' => '(v)'],
-                'Depict' => ['id' => 'Menggambarkan', 'pos' => '(v)'],
-                'Diversity' => ['id' => 'Keragaman', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Dia melukis gambar yang menunjukkan keindahan alam.',
-                'en' => 'She paints pictures that show the beauty of nature.'
-            ]
-        ],
-        18 => [
-            'id' => 'Perpustakaan menyimpan koleksi yang berasal dari abad pertengahan.', 
-            'en' => 'The library stores collections that originate from the Middle Ages',
-            'vocab' => [
-                'Store' => ['id' => 'Menyimpan', 'pos' => '(v)'],
-                'Collection' => ['id' => 'Koleksi', 'pos' => '(n)'],
-                'Originate' => ['id' => 'Berasal', 'pos' => '(v)']
-            ],
-            'example' => [
-                'id' => 'Museum memamerkan benda yang berusia ribuan tahun.',
-                'en' => 'The museum exhibits items that are thousands of years old.'
-            ]
-        ],
-        19 => [
-            'id' => 'Arkeolog menggali situs yang menunjukkan pola pemukiman kuno.', 
-            'en' => 'Archaeologists excavate sites that show ancient settlement patterns',
-            'vocab' => [
-                'Excavate' => ['id' => 'Menggali', 'pos' => '(v)'],
-                'Site' => ['id' => 'Situs', 'pos' => '(n)'],
-                'Settlement' => ['id' => 'Pemukiman', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Mereka menemukan reruntuhan yang menceritakan sejarah kota.',
-                'en' => 'They found ruins that tell the history of the city.'
-            ]
-        ],
-        20 => [
-            'id' => 'Pusat riset meluncurkan proyek yang menargetkan pemulihan ekosistem laut.', 
-            'en' => 'The research center launches a project that targets marine ecosystem recovery',
-            'vocab' => [
-                'Launch' => ['id' => 'Meluncurkan', 'pos' => '(v)'],
-                'Target' => ['id' => 'Menargetkan', 'pos' => '(v)'],
-                'Recovery' => ['id' => 'Pemulihan', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Pemerintah memulai program yang membantu orang miskin.',
-                'en' => 'The government started a program that helps the poor.'
-            ]
-        ]
-    ];
+        private $meeting14Questions = array (
+  1 => 
+  array (
+    'id' => 'Para akademisi yang merumuskan hipotesis revolusioner ini mendapatkan pengakuan internasional.',
+    'en' => 'The academics who formulated this revolutionary hypothesis received international recognition',
+    'structure' => 'rps',
+    'pos_type' => 'subject',
+    'conjunction' => 'who + Verb (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Ilmuwan yang menemukan obat baru itu menerima penghargaan.',
+      'en' => 'The scientist who discovered the new drug received an award.',
+    ),
+    'vocab' => 
+    array (
+      'Academic' => 
+      array (
+        'id' => 'Para akademisi',
+        'pos' => '(n)',
+      ),
+      'Formulate' => 
+      array (
+        'id' => 'Merumuskan',
+        'pos' => '(v)',
+      ),
+      'Revolutionary hypothesis' => 
+      array (
+        'id' => 'Hipotesis revolusioner',
+        'pos' => '(n)',
+      ),
+      'Receive' => 
+      array (
+        'id' => 'Mendapatkan',
+        'pos' => '(v)',
+      ),
+      'International recognition' => 
+      array (
+        'id' => 'Pengakuan internasional',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  2 => 
+  array (
+    'id' => 'Komite Nobel menganugerahi ilmuwan yang menemukan metode pengeditan gen baru.',
+    'en' => 'The Nobel committee awarded the scientist who discovered the new gene editing method',
+    'structure' => 'rps',
+    'pos_type' => 'object',
+    'conjunction' => 'who + Verb (Objek)',
+    'example' => 
+    array (
+      'id' => 'Universitas mempekerjakan profesor yang menulis buku terkenal itu.',
+      'en' => 'The university hired the professor who wrote the famous book.',
+    ),
+    'vocab' => 
+    array (
+      'Nobel committee' => 
+      array (
+        'id' => 'Komite Nobel',
+        'pos' => '(n)',
+      ),
+      'Award' => 
+      array (
+        'id' => 'Menganugerahi / Memberi penghargaan',
+        'pos' => '(v)',
+      ),
+      'Scientist' => 
+      array (
+        'id' => 'Ilmuwan',
+        'pos' => '(n)',
+      ),
+      'Discover' => 
+      array (
+        'id' => 'Menemukan',
+        'pos' => '(v)',
+      ),
+      'Gene editing method' => 
+      array (
+        'id' => 'Metode pengeditan gen',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  3 => 
+  array (
+    'id' => 'Pakar sosiologi yang mengkaji disparitas ekonomi mempublikasikan temuan empiris yang komprehensif.',
+    'en' => 'Sociologists who examine economic disparities publish comprehensive empirical findings',
+    'structure' => 'rps',
+    'pos_type' => 'subject',
+    'conjunction' => 'who + Verb (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Peneliti yang meneliti iklim menerbitkan jurnal baru.',
+      'en' => 'Researchers who study climate publish new journals.',
+    ),
+    'vocab' => 
+    array (
+      'Sociologist' => 
+      array (
+        'id' => 'Pakar sosiologi',
+        'pos' => '(n)',
+      ),
+      'Examine' => 
+      array (
+        'id' => 'Mengkaji / Meneliti',
+        'pos' => '(v)',
+      ),
+      'Economic disparity' => 
+      array (
+        'id' => 'Disparitas ekonomi',
+        'pos' => '(n)',
+      ),
+      'Publish' => 
+      array (
+        'id' => 'Mempublikasikan',
+        'pos' => '(v)',
+      ),
+      'Comprehensive empirical findings' => 
+      array (
+        'id' => 'Temuan empiris komprehensif',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  4 => 
+  array (
+    'id' => 'Universitas terkemuka merekrut para profesor yang memimpin proyek kecerdasan buatan terdepan.',
+    'en' => 'Leading universities recruit professors who lead cutting-edge artificial intelligence projects',
+    'structure' => 'rps',
+    'pos_type' => 'object',
+    'conjunction' => 'who + Verb (Objek)',
+    'example' => 
+    array (
+      'id' => 'Perusahaan mencari insinyur yang memahami sistem kuantum.',
+      'en' => 'The company seeks engineers who understand quantum systems.',
+    ),
+    'vocab' => 
+    array (
+      'Leading university' => 
+      array (
+        'id' => 'Universitas terkemuka',
+        'pos' => '(n)',
+      ),
+      'Recruit' => 
+      array (
+        'id' => 'Merekrut',
+        'pos' => '(v)',
+      ),
+      'Professor' => 
+      array (
+        'id' => 'Profesor',
+        'pos' => '(n)',
+      ),
+      'Lead' => 
+      array (
+        'id' => 'Memimpin',
+        'pos' => '(v)',
+      ),
+      'Cutting-edge' => 
+      array (
+        'id' => 'Terdepan / Mutakhir',
+        'pos' => '(adj)',
+      ),
+      'Artificial intelligence' => 
+      array (
+        'id' => 'Kecerdasan buatan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  5 => 
+  array (
+    'id' => 'Para ekonom yang memproyeksikan tren inflasi menyarankan reformasi kebijakan moneter secara menyeluruh.',
+    'en' => 'Economists who project inflation trends advise comprehensive monetary policy reforms',
+    'structure' => 'rps',
+    'pos_type' => 'subject',
+    'conjunction' => 'who + Verb (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Analis yang memantau pasar memprediksi pemulihan ekonomi.',
+      'en' => 'Analysts who monitor the market predict economic recovery.',
+    ),
+    'vocab' => 
+    array (
+      'Economist' => 
+      array (
+        'id' => 'Ekonom / Pakar ekonomi',
+        'pos' => '(n)',
+      ),
+      'Project' => 
+      array (
+        'id' => 'Memproyeksikan',
+        'pos' => '(v)',
+      ),
+      'Inflation trend' => 
+      array (
+        'id' => 'Tren inflasi',
+        'pos' => '(n)',
+      ),
+      'Advise' => 
+      array (
+        'id' => 'Menyarankan / Merekomendasikan',
+        'pos' => '(v)',
+      ),
+      'Monetary policy reform' => 
+      array (
+        'id' => 'Reformasi kebijakan moneter',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  6 => 
+  array (
+    'id' => 'Organisasi kesehatan mendanai para dokter yang meneliti vaksin resisten terhadap mutasi patogen.',
+    'en' => 'The health organization funds doctors who research vaccines resistant to pathogen mutations',
+    'structure' => 'rps',
+    'pos_type' => 'object',
+    'conjunction' => 'who + Verb (Objek)',
+    'example' => 
+    array (
+      'id' => 'Yayasan mendukung peneliti yang mengembangkan obat baru.',
+      'en' => 'The foundation supports researchers who develop new medicines.',
+    ),
+    'vocab' => 
+    array (
+      'Health organization' => 
+      array (
+        'id' => 'Organisasi kesehatan',
+        'pos' => '(n)',
+      ),
+      'Fund' => 
+      array (
+        'id' => 'Mendanai',
+        'pos' => '(v)',
+      ),
+      'Doctor' => 
+      array (
+        'id' => 'Dokter',
+        'pos' => '(n)',
+      ),
+      'Research' => 
+      array (
+        'id' => 'Meneliti',
+        'pos' => '(v)',
+      ),
+      'Resistant' => 
+      array (
+        'id' => 'Resisten / Kebal',
+        'pos' => '(adj)',
+      ),
+      'Pathogen mutation' => 
+      array (
+        'id' => 'Mutasi patogen',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  7 => 
+  array (
+    'id' => 'Para sejarawan yang mendokumentasikan peradaban maritim menganalisis manuskrip navigasi kuno.',
+    'en' => 'Historians who document maritime civilizations analyze ancient navigational manuscripts',
+    'structure' => 'rps',
+    'pos_type' => 'subject',
+    'conjunction' => 'who + Verb (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Arkeolog yang meneliti fosil menemukan jejak sejarah.',
+      'en' => 'Archaeologists who study fossils discover historical traces.',
+    ),
+    'vocab' => 
+    array (
+      'Historian' => 
+      array (
+        'id' => 'Sejarawan',
+        'pos' => '(n)',
+      ),
+      'Document' => 
+      array (
+        'id' => 'Mendokumentasikan',
+        'pos' => '(v)',
+      ),
+      'Maritime civilization' => 
+      array (
+        'id' => 'Peradaban maritim',
+        'pos' => '(n)',
+      ),
+      'Analyze' => 
+      array (
+        'id' => 'Menganalisis',
+        'pos' => '(v)',
+      ),
+      'Ancient navigational manuscript' => 
+      array (
+        'id' => 'Manuskrip navigasi kuno',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  8 => 
+  array (
+    'id' => 'Unsur kimia yang memiliki konfigurasi elektron tidak stabil bereaksi secara spontan dengan oksigen.',
+    'en' => 'Chemical elements which have unstable electron configurations react spontaneously with oxygen',
+    'structure' => 'rps',
+    'pos_type' => 'subject',
+    'conjunction' => 'which / that + Verb (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Material yang memiliki kerapatan tinggi menyerap radiasi.',
+      'en' => 'Materials which have high density absorb radiation.',
+    ),
+    'vocab' => 
+    array (
+      'Chemical element' => 
+      array (
+        'id' => 'Unsur kimia',
+        'pos' => '(n)',
+      ),
+      'Unstable electron configuration' => 
+      array (
+        'id' => 'Konfigurasi elektron tidak stabil',
+        'pos' => '(n)',
+      ),
+      'React spontaneously' => 
+      array (
+        'id' => 'Bereaksi secara spontan',
+        'pos' => '(v)',
+      ),
+      'Oxygen' => 
+      array (
+        'id' => 'Oksigen',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  9 => 
+  array (
+    'id' => 'Laboratorium farmasi mengembangkan obat baru yang menekan replikasi virus berbahaya.',
+    'en' => 'The pharmaceutical laboratory develops new drugs which suppress the replication of dangerous viruses',
+    'structure' => 'rps',
+    'pos_type' => 'object',
+    'conjunction' => 'which / that + Verb (Objek)',
+    'example' => 
+    array (
+      'id' => 'Pabrik memproduksi mesin yang menghemat konsumsi energi.',
+      'en' => 'The factory produces machines which save energy consumption.',
+    ),
+    'vocab' => 
+    array (
+      'Pharmaceutical laboratory' => 
+      array (
+        'id' => 'Laboratorium farmasi',
+        'pos' => '(n)',
+      ),
+      'Develop' => 
+      array (
+        'id' => 'Mengembangkan',
+        'pos' => '(v)',
+      ),
+      'Suppress' => 
+      array (
+        'id' => 'Menekan / Menghambat',
+        'pos' => '(v)',
+      ),
+      'Viral replication' => 
+      array (
+        'id' => 'Replikasi virus',
+        'pos' => '(n)',
+      ),
+      'Dangerous virus' => 
+      array (
+        'id' => 'Virus berbahaya',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  10 => 
+  array (
+    'id' => 'Sistem komputasi yang mengotomatisasi pemrosesan data mempercepat efisiensi diagnosis klinis.',
+    'en' => 'Computing systems which automate data processing accelerate the efficiency of clinical diagnosis',
+    'structure' => 'rps',
+    'pos_type' => 'subject',
+    'conjunction' => 'which / that + Verb (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Perangkat lunak yang mengelola arsip meningkatkan produktivitas.',
+      'en' => 'Software which manages archives improves productivity.',
+    ),
+    'vocab' => 
+    array (
+      'Computing system' => 
+      array (
+        'id' => 'Sistem komputasi',
+        'pos' => '(n)',
+      ),
+      'Automate' => 
+      array (
+        'id' => 'Mengotomatisasi',
+        'pos' => '(v)',
+      ),
+      'Data processing' => 
+      array (
+        'id' => 'Pemrosesan data',
+        'pos' => '(n)',
+      ),
+      'Accelerate' => 
+      array (
+        'id' => 'Mempercepat',
+        'pos' => '(v)',
+      ),
+      'Clinical diagnosis' => 
+      array (
+        'id' => 'Diagnosis klinis',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  11 => 
+  array (
+    'id' => 'Pemerintah meratifikasi perjanjian internasional yang membatasi emisi karbon industri secara ketat.',
+    'en' => 'The government ratified an international treaty which strictly limits industrial carbon emissions',
+    'structure' => 'rps',
+    'pos_type' => 'object',
+    'conjunction' => 'which / that + Verb (Objek)',
+    'example' => 
+    array (
+      'id' => 'Negara menyetujui protokol yang melindungi keanekaragaman hayati.',
+      'en' => 'Countries approved protocols which protect biodiversity.',
+    ),
+    'vocab' => 
+    array (
+      'Ratify' => 
+      array (
+        'id' => 'Meratifikasi',
+        'pos' => '(v)',
+      ),
+      'International treaty' => 
+      array (
+        'id' => 'Perjanjian internasional',
+        'pos' => '(n)',
+      ),
+      'Strictly limit' => 
+      array (
+        'id' => 'Membatasi secara ketat',
+        'pos' => '(v)',
+      ),
+      'Industrial carbon emission' => 
+      array (
+        'id' => 'Emisi karbon industri',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  12 => 
+  array (
+    'id' => 'Reaksi termonuklir yang terjadi di inti bintang melepaskan radiasi elektromagnetik yang masif.',
+    'en' => 'Thermonuclear reactions which occur in stellar cores release massive electromagnetic radiation',
+    'structure' => 'rps',
+    'pos_type' => 'subject',
+    'conjunction' => 'which / that + Verb (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Erupsi gunung berapi yang terjadi di wilayah itu memicu tsunami.',
+      'en' => 'Volcanic eruptions which occur in that region trigger tsunamis.',
+    ),
+    'vocab' => 
+    array (
+      'Thermonuclear reaction' => 
+      array (
+        'id' => 'Reaksi termonuklir',
+        'pos' => '(n)',
+      ),
+      'Stellar core' => 
+      array (
+        'id' => 'Inti bintang',
+        'pos' => '(n)',
+      ),
+      'Release' => 
+      array (
+        'id' => 'Melepaskan',
+        'pos' => '(v)',
+      ),
+      'Massive' => 
+      array (
+        'id' => 'Masif / Sangat besar',
+        'pos' => '(adj)',
+      ),
+      'Electromagnetic radiation' => 
+      array (
+        'id' => 'Radiasi elektromagnetik',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  13 => 
+  array (
+    'id' => 'Pusat data memasang turbin pendingin yang mengurangi konsumsi listrik secara drastis.',
+    'en' => 'The data center installed cooling turbines which drastically reduced electricity consumption',
+    'structure' => 'rps',
+    'pos_type' => 'object',
+    'conjunction' => 'which / that + Verb (Objek)',
+    'example' => 
+    array (
+      'id' => 'Perusahaan memasang panel surya yang menghasilkan energi bersih.',
+      'en' => 'The company installed solar panels which generate clean energy.',
+    ),
+    'vocab' => 
+    array (
+      'Data center' => 
+      array (
+        'id' => 'Pusat data',
+        'pos' => '(n)',
+      ),
+      'Install' => 
+      array (
+        'id' => 'Memasang',
+        'pos' => '(v)',
+      ),
+      'Cooling turbine' => 
+      array (
+        'id' => 'Turbin pendingin',
+        'pos' => '(n)',
+      ),
+      'Drastically reduce' => 
+      array (
+        'id' => 'Mengurangi secara drastis',
+        'pos' => '(v)',
+      ),
+      'Electricity consumption' => 
+      array (
+        'id' => 'Konsumsi listrik',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  14 => 
+  array (
+    'id' => 'Sensor seismik yang mendeteksi getaran tektonik frekuensi rendah memberikan peringatan dini tsunami.',
+    'en' => 'Seismic sensors which detect low-frequency tectonic vibrations provide early tsunami warnings',
+    'structure' => 'rps',
+    'pos_type' => 'subject',
+    'conjunction' => 'which / that + Verb (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Alat yang mengukur kelembaban tanah membantu petani.',
+      'en' => 'Tools which measure soil moisture help farmers.',
+    ),
+    'vocab' => 
+    array (
+      'Seismic sensor' => 
+      array (
+        'id' => 'Sensor seismik',
+        'pos' => '(n)',
+      ),
+      'Detect' => 
+      array (
+        'id' => 'Mendeteksi',
+        'pos' => '(v)',
+      ),
+      'Low-frequency' => 
+      array (
+        'id' => 'Frekuensi rendah',
+        'pos' => '(adj)',
+      ),
+      'Tectonic vibration' => 
+      array (
+        'id' => 'Getaran tektonik',
+        'pos' => '(n)',
+      ),
+      'Early tsunami warning' => 
+      array (
+        'id' => 'Peringatan dini tsunami',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  15 => 
+  array (
+    'id' => 'Badan antariksa meluncurkan satelit observasi yang memetakan deforestasi hutan hujan tropis.',
+    'en' => 'The space agency launched observation satellites which map tropical rainforest deforestation',
+    'structure' => 'rps',
+    'pos_type' => 'object',
+    'conjunction' => 'which / that + Verb (Objek)',
+    'example' => 
+    array (
+      'id' => 'Pemerintah meluncurkan program yang mengatasi polusi.',
+      'en' => 'The government launched programs which address pollution.',
+    ),
+    'vocab' => 
+    array (
+      'Space agency' => 
+      array (
+        'id' => 'Badan antariksa',
+        'pos' => '(n)',
+      ),
+      'Launch' => 
+      array (
+        'id' => 'Meluncurkan',
+        'pos' => '(v)',
+      ),
+      'Observation satellite' => 
+      array (
+        'id' => 'Satelit observasi',
+        'pos' => '(n)',
+      ),
+      'Map' => 
+      array (
+        'id' => 'Memetakan',
+        'pos' => '(v)',
+      ),
+      'Tropical rainforest deforestation' => 
+      array (
+        'id' => 'Deforestasi hutan hujan tropis',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  16 => 
+  array (
+    'id' => 'Kandidat yang dewan direksi tunjuk memiliki keahlian tata kelola korporasi yang teruji.',
+    'en' => 'The candidate whom the board of directors appointed possesses proven corporate governance expertise',
+    'structure' => 'rpo',
+    'pos_type' => 'subject',
+    'conjunction' => 'whom / who / that + S + V (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Manajer yang komite pilih memiliki visi strategis.',
+      'en' => 'The manager whom the committee chose has strategic vision.',
+    ),
+    'vocab' => 
+    array (
+      'Candidate' => 
+      array (
+        'id' => 'Kandidat',
+        'pos' => '(n)',
+      ),
+      'Board of directors' => 
+      array (
+        'id' => 'Dewan direksi',
+        'pos' => '(n)',
+      ),
+      'Appoint' => 
+      array (
+        'id' => 'Menunjuk',
+        'pos' => '(v)',
+      ),
+      'Possess' => 
+      array (
+        'id' => 'Memiliki',
+        'pos' => '(v)',
+      ),
+      'Corporate governance' => 
+      array (
+        'id' => 'Tata kelola korporasi',
+        'pos' => '(n)',
+      ),
+      'Proven expertise' => 
+      array (
+        'id' => 'Keahlian teruji',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  17 => 
+  array (
+    'id' => 'Masyarakat sangat menghormati diplomat yang presiden utus untuk misi perdamaian internasional.',
+    'en' => 'Society greatly respects the diplomat whom the president sent for the international peace mission',
+    'structure' => 'rpo',
+    'pos_type' => 'object',
+    'conjunction' => 'whom / who / that + S + V (Objek)',
+    'example' => 
+    array (
+      'id' => 'Rakyat mengagumi pemimpin yang mereka pilih secara demokratis.',
+      'en' => 'The people admire the leader whom they elected democratically.',
+    ),
+    'vocab' => 
+    array (
+      'Society' => 
+      array (
+        'id' => 'Masyarakat',
+        'pos' => '(n)',
+      ),
+      'Greatly respect' => 
+      array (
+        'id' => 'Sangat menghormati',
+        'pos' => '(v)',
+      ),
+      'Diplomat' => 
+      array (
+        'id' => 'Diplomat',
+        'pos' => '(n)',
+      ),
+      'Send' => 
+      array (
+        'id' => 'Mengutus / Mengirim',
+        'pos' => '(v)',
+      ),
+      'Peace mission' => 
+      array (
+        'id' => 'Misi perdamaian',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  18 => 
+  array (
+    'id' => 'Pakar klimatologi yang universitas undang mempresentasikan data degradasi glasial terbaru.',
+    'en' => 'The climatologist whom the university invited presented the latest glacial degradation data',
+    'structure' => 'rpo',
+    'pos_type' => 'subject',
+    'conjunction' => 'whom / who / that + S + V (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Arsitek yang yayasan sewa merancang gedung modern itu.',
+      'en' => 'The architect whom the foundation hired designed the modern building.',
+    ),
+    'vocab' => 
+    array (
+      'Climatologist' => 
+      array (
+        'id' => 'Pakar klimatologi',
+        'pos' => '(n)',
+      ),
+      'Invite' => 
+      array (
+        'id' => 'Mengundang',
+        'pos' => '(v)',
+      ),
+      'Present' => 
+      array (
+        'id' => 'Mempresentasikan',
+        'pos' => '(v)',
+      ),
+      'Glacial degradation' => 
+      array (
+        'id' => 'Degradasi glasial',
+        'pos' => '(n)',
+      ),
+      'Latest data' => 
+      array (
+        'id' => 'Data terbaru',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  19 => 
+  array (
+    'id' => 'Para juri memuji penulis muda yang para kritikus sastra rekomendasikan dalam festival buku.',
+    'en' => 'The judges praised the young author whom literary critics recommended at the book festival',
+    'structure' => 'rpo',
+    'pos_type' => 'object',
+    'conjunction' => 'whom / who / that + S + V (Objek)',
+    'example' => 
+    array (
+      'id' => 'Direktur memuji karyawan yang manajer promosikan.',
+      'en' => 'The director praised the employee whom the manager promoted.',
+    ),
+    'vocab' => 
+    array (
+      'Judge' => 
+      array (
+        'id' => 'Para juri',
+        'pos' => '(n)',
+      ),
+      'Praise' => 
+      array (
+        'id' => 'Memuji',
+        'pos' => '(v)',
+      ),
+      'Young author' => 
+      array (
+        'id' => 'Penulis muda',
+        'pos' => '(n)',
+      ),
+      'Literary critic' => 
+      array (
+        'id' => 'Kritikus sastra',
+        'pos' => '(n)',
+      ),
+      'Recommend' => 
+      array (
+        'id' => 'Merekomendasikan',
+        'pos' => '(v)',
+      ),
+      'Book festival' => 
+      array (
+        'id' => 'Festival buku',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  20 => 
+  array (
+    'id' => 'Para dokter spesialis yang kementerian tugaskan berhasil memitigasi penyebaran epidemi menular.',
+    'en' => 'The medical specialists whom the ministry assigned succeeded in mitigating the spread of the contagious epidemic',
+    'structure' => 'rpo',
+    'pos_type' => 'subject',
+    'conjunction' => 'whom / who / that + S + V (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Relawan yang organisasi latih mendistribusikan bantuan darurat.',
+      'en' => 'Volunteers whom the organization trained distributed emergency aid.',
+    ),
+    'vocab' => 
+    array (
+      'Medical specialist' => 
+      array (
+        'id' => 'Dokter spesialis',
+        'pos' => '(n)',
+      ),
+      'Assign' => 
+      array (
+        'id' => 'Menugaskan',
+        'pos' => '(v)',
+      ),
+      'Succeed in mitigating' => 
+      array (
+        'id' => 'Berhasil memitigasi',
+        'pos' => '(v)',
+      ),
+      'Contagious epidemic' => 
+      array (
+        'id' => 'Epidemi menular',
+        'pos' => '(n)',
+      ),
+      'Spread' => 
+      array (
+        'id' => 'Penyebaran',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  21 => 
+  array (
+    'id' => 'Komisi etik mewawancarai auditor independen yang pemegang saham tunjuk untuk audit investigatif.',
+    'en' => 'The ethics commission interviewed the independent auditor whom shareholders appointed for the investigative audit',
+    'structure' => 'rpo',
+    'pos_type' => 'object',
+    'conjunction' => 'whom / who / that + S + V (Objek)',
+    'example' => 
+    array (
+      'id' => 'Komite menginterogasi saksi yang pengacara panggil.',
+      'en' => 'The committee interrogated the witness whom the lawyer summoned.',
+    ),
+    'vocab' => 
+    array (
+      'Ethics commission' => 
+      array (
+        'id' => 'Komisi etik',
+        'pos' => '(n)',
+      ),
+      'Interview' => 
+      array (
+        'id' => 'Mewawancarai',
+        'pos' => '(v)',
+      ),
+      'Independent auditor' => 
+      array (
+        'id' => 'Auditor independen',
+        'pos' => '(n)',
+      ),
+      'Shareholder' => 
+      array (
+        'id' => 'Pemegang saham',
+        'pos' => '(n)',
+      ),
+      'Appoint' => 
+      array (
+        'id' => 'Menunjuk',
+        'pos' => '(v)',
+      ),
+      'Investigative audit' => 
+      array (
+        'id' => 'Audit investigatif',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  22 => 
+  array (
+    'id' => 'Arsitek terkenal yang yayasan budaya pekerjakan merancang museum seni kontemporer yang ikonik.',
+    'en' => 'The renowned architect whom the cultural foundation employed designed the iconic contemporary art museum',
+    'structure' => 'rpo',
+    'pos_type' => 'subject',
+    'conjunction' => 'whom / who / that + S + V (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Desainer yang perusahaan sewa membuat logo baru.',
+      'en' => 'The designer whom the company hired created a new logo.',
+    ),
+    'vocab' => 
+    array (
+      'Renowned architect' => 
+      array (
+        'id' => 'Arsitek terkenal',
+        'pos' => '(n)',
+      ),
+      'Cultural foundation' => 
+      array (
+        'id' => 'Yayasan budaya',
+        'pos' => '(n)',
+      ),
+      'Employ' => 
+      array (
+        'id' => 'Mempekerjakan',
+        'pos' => '(v)',
+      ),
+      'Design' => 
+      array (
+        'id' => 'Merancang',
+        'pos' => '(v)',
+      ),
+      'Iconic' => 
+      array (
+        'id' => 'Ikonik',
+        'pos' => '(adj)',
+      ),
+      'Contemporary art museum' => 
+      array (
+        'id' => 'Museum seni kontemporer',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  23 => 
+  array (
+    'id' => 'Sampel mikroskopis yang para ilmuwan isolasi menunjukkan resistensi antibiotik yang signifikan.',
+    'en' => 'The microscopic samples which scientists isolated demonstrate significant antibiotic resistance',
+    'structure' => 'rpo',
+    'pos_type' => 'subject',
+    'conjunction' => 'which / that + S + V (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Fosil purba yang arkeolog temukan berusia jutaan tahun.',
+      'en' => 'The ancient fossil which archaeologists discovered was millions of years old.',
+    ),
+    'vocab' => 
+    array (
+      'Microscopic sample' => 
+      array (
+        'id' => 'Sampel mikroskopis',
+        'pos' => '(n)',
+      ),
+      'Isolate' => 
+      array (
+        'id' => 'Mengisolasi',
+        'pos' => '(v)',
+      ),
+      'Demonstrate' => 
+      array (
+        'id' => 'Menunjukkan',
+        'pos' => '(v)',
+      ),
+      'Significant' => 
+      array (
+        'id' => 'Signifikan',
+        'pos' => '(adj)',
+      ),
+      'Antibiotic resistance' => 
+      array (
+        'id' => 'Resistensi antibiotik',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  24 => 
+  array (
+    'id' => 'Perusahaan teknologi meluncurkan platform perangkat lunak yang para insinyur kembangkan selama bertahun-tahun.',
+    'en' => 'The technology company launched the software platform which engineers developed for years',
+    'structure' => 'rpo',
+    'pos_type' => 'object',
+    'conjunction' => 'which / that + S + V (Objek)',
+    'example' => 
+    array (
+      'id' => 'Institut mempublikasikan laporan yang komite susun secara independen.',
+      'en' => 'The institute published the report which the committee prepared independently.',
+    ),
+    'vocab' => 
+    array (
+      'Technology company' => 
+      array (
+        'id' => 'Perusahaan teknologi',
+        'pos' => '(n)',
+      ),
+      'Launch' => 
+      array (
+        'id' => 'Meluncurkan',
+        'pos' => '(v)',
+      ),
+      'Software platform' => 
+      array (
+        'id' => 'Platform perangkat lunak',
+        'pos' => '(n)',
+      ),
+      'Engineer' => 
+      array (
+        'id' => 'Insinyur',
+        'pos' => '(n)',
+      ),
+      'Develop' => 
+      array (
+        'id' => 'Mengembangkan',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  25 => 
+  array (
+    'id' => 'Dokumen arsip rahasia yang komite independen tinjau mengungkap ketidakpatuhan regulasi finansial.',
+    'en' => 'The confidential archive documents which the independent committee reviewed revealed financial regulatory non-compliance',
+    'structure' => 'rpo',
+    'pos_type' => 'subject',
+    'conjunction' => 'which / that + S + V (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Data statistik yang lembaga survei kumpulkan menunjukkan inflasi.',
+      'en' => 'Statistical data which survey agencies collected indicated inflation.',
+    ),
+    'vocab' => 
+    array (
+      'Confidential archive document' => 
+      array (
+        'id' => 'Dokumen arsip rahasia',
+        'pos' => '(n)',
+      ),
+      'Independent committee' => 
+      array (
+        'id' => 'Komite independen',
+        'pos' => '(n)',
+      ),
+      'Review' => 
+      array (
+        'id' => 'Meninjau',
+        'pos' => '(v)',
+      ),
+      'Reveal' => 
+      array (
+        'id' => 'Mengungkap',
+        'pos' => '(v)',
+      ),
+      'Financial regulatory non-compliance' => 
+      array (
+        'id' => 'Ketidakpatuhan regulasi finansial',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  26 => 
+  array (
+    'id' => 'Warga mengapresiasi strategi mitigasi bencana yang pemerintah kota terapkan di kawasan pesisir.',
+    'en' => 'Citizens appreciate the disaster mitigation strategy which the city government implemented in coastal areas',
+    'structure' => 'rpo',
+    'pos_type' => 'object',
+    'conjunction' => 'which / that + S + V (Objek)',
+    'example' => 
+    array (
+      'id' => 'Konsumen menyukai desain produk yang perancang perkenalkan.',
+      'en' => 'Consumers liked the product design which the designer introduced.',
+    ),
+    'vocab' => 
+    array (
+      'Citizen' => 
+      array (
+        'id' => 'Warga / Penduduk',
+        'pos' => '(n)',
+      ),
+      'Appreciate' => 
+      array (
+        'id' => 'Mengapresiasi',
+        'pos' => '(v)',
+      ),
+      'Disaster mitigation strategy' => 
+      array (
+        'id' => 'Strategi mitigasi bencana',
+        'pos' => '(n)',
+      ),
+      'City government' => 
+      array (
+        'id' => 'Pemerintah kota',
+        'pos' => '(n)',
+      ),
+      'Implement' => 
+      array (
+        'id' => 'Menerapkan',
+        'pos' => '(v)',
+      ),
+      'Coastal area' => 
+      array (
+        'id' => 'Kawasan pesisir',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  27 => 
+  array (
+    'id' => 'Hipotesis astrofisika yang para peneliti uji menjelaskan proses pembentukan lubang hitam supermasif.',
+    'en' => 'The astrophysical hypothesis which researchers tested explains the formation process of supermassive black holes',
+    'structure' => 'rpo',
+    'pos_type' => 'subject',
+    'conjunction' => 'which / that + S + V (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Teori fisika yang ilmuwan buktikan mengubah pemahaman gravitasi.',
+      'en' => 'Physics theories which scientists proved changed the understanding of gravity.',
+    ),
+    'vocab' => 
+    array (
+      'Astrophysical hypothesis' => 
+      array (
+        'id' => 'Hipotesis astrofisika',
+        'pos' => '(n)',
+      ),
+      'Test' => 
+      array (
+        'id' => 'Menguji',
+        'pos' => '(v)',
+      ),
+      'Explain' => 
+      array (
+        'id' => 'Menjelaskan',
+        'pos' => '(v)',
+      ),
+      'Supermassive black hole' => 
+      array (
+        'id' => 'Lubang hitam supermasif',
+        'pos' => '(n)',
+      ),
+      'Formation process' => 
+      array (
+        'id' => 'Proses pembentukan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  28 => 
+  array (
+    'id' => 'Kementerian keuangan mengevaluasi model ekonometrik yang tim analis ajukan untuk proyeksi pendapatan negara.',
+    'en' => 'The ministry of finance evaluates econometric models which the analyst team proposed for state revenue projections',
+    'structure' => 'rpo',
+    'pos_type' => 'object',
+    'conjunction' => 'which / that + S + V (Objek)',
+    'example' => 
+    array (
+      'id' => 'Bank sentral menguji simulasi moneter yang para ahli rancang.',
+      'en' => 'The central bank tests monetary simulations which experts designed.',
+    ),
+    'vocab' => 
+    array (
+      'Ministry of finance' => 
+      array (
+        'id' => 'Kementerian keuangan',
+        'pos' => '(n)',
+      ),
+      'Evaluate' => 
+      array (
+        'id' => 'Mengevaluasi',
+        'pos' => '(v)',
+      ),
+      'Econometric model' => 
+      array (
+        'id' => 'Model ekonometrik',
+        'pos' => '(n)',
+      ),
+      'Analyst team' => 
+      array (
+        'id' => 'Tim analis',
+        'pos' => '(n)',
+      ),
+      'Propose' => 
+      array (
+        'id' => 'Mengajukan',
+        'pos' => '(v)',
+      ),
+      'State revenue projection' => 
+      array (
+        'id' => 'Proyeksi pendapatan negara',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  29 => 
+  array (
+    'id' => 'Instrumen optik canggih yang teleskop luar angkasa gunakan menangkap radiasi inframerah dari galaksi terjauh.',
+    'en' => 'Advanced optical instruments which the space telescope uses capture infrared radiation from the most distant galaxies',
+    'structure' => 'rpo',
+    'pos_type' => 'subject',
+    'conjunction' => 'which / that + S + V (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Kamera khusus yang mikroskop gunakan merekam pergerakan sel.',
+      'en' => 'Special cameras which the microscope uses record cell movements.',
+    ),
+    'vocab' => 
+    array (
+      'Advanced optical instrument' => 
+      array (
+        'id' => 'Instrumen optik canggih',
+        'pos' => '(n)',
+      ),
+      'Space telescope' => 
+      array (
+        'id' => 'Teleskop luar angkasa',
+        'pos' => '(n)',
+      ),
+      'Capture' => 
+      array (
+        'id' => 'Menangkap',
+        'pos' => '(v)',
+      ),
+      'Infrared radiation' => 
+      array (
+        'id' => 'Radiasi inframerah',
+        'pos' => '(n)',
+      ),
+      'Distant galaxy' => 
+      array (
+        'id' => 'Galaksi terjauh',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  30 => 
+  array (
+    'id' => 'Komunitas medis menyambut baik pedoman pengobatan klinis yang panel pakar formulasikan setelah uji coba bertahun-tahun.',
+    'en' => 'The medical community welcomed clinical treatment guidelines which the expert panel formulated after years of trials',
+    'structure' => 'rpo',
+    'pos_type' => 'object',
+    'conjunction' => 'which / that + S + V (Objek)',
+    'example' => 
+    array (
+      'id' => 'Para dokter menerapkan protokol baru yang kementerian terbitkan.',
+      'en' => 'Doctors implement new protocols which the ministry published.',
+    ),
+    'vocab' => 
+    array (
+      'Medical community' => 
+      array (
+        'id' => 'Komunitas medis',
+        'pos' => '(n)',
+      ),
+      'Welcome' => 
+      array (
+        'id' => 'Menyambut baik',
+        'pos' => '(v)',
+      ),
+      'Clinical treatment guideline' => 
+      array (
+        'id' => 'Pedoman pengobatan klinis',
+        'pos' => '(n)',
+      ),
+      'Expert panel' => 
+      array (
+        'id' => 'Panel pakar',
+        'pos' => '(n)',
+      ),
+      'Formulate' => 
+      array (
+        'id' => 'Memformulasikan',
+        'pos' => '(v)',
+      ),
+      'Trial' => 
+      array (
+        'id' => 'Uji coba',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+);
 
     private $meeting14Paragraph = [
         'id' => 'Para arkeolog baru-baru ini menggali situs kuno yang menunjukkan pola pemukiman awal di daerah pesisir. Di sekitar lokasi itu, mereka menemukan peralatan batu yang digunakan untuk berburu hewan kecil. Temuan ini kemudian dikaitkan dengan catatan sejarah, termasuk naskah kuno yang menjelaskan migrasi manusia dari satu pulau ke pulau lain. Di sisi lain, para peneliti juga mempelajari fosil hewan laut yang menandakan perubahan iklim ribuan tahun lalu. Semua data tersebut dikumpulkan ke dalam laporan ilmiah yang dipublikasikan oleh lembaga riset internasional. Selain itu, perpustakaan universitas menyimpan koleksi manuskrip yang berasal dari abad pertengahan dan memberikan konteks tambahan pada penelitian ini. Para mahasiswa membaca dokumen yang memuat deskripsi perjalanan para pedagang kuno, sementara dosen mereka menyiapkan analisis yang menyoroti hubungan perdagangan dengan perkembangan budaya lokal. Dengan demikian, proyek lintas disiplin ini menciptakan sebuah gambaran sejarah yang memperlihatkan interaksi manusia dengan lingkungannya secara lebih jelas.',
@@ -18008,349 +20289,1158 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
         return redirect()->route('assignments.grammar-writing.meeting14');
     }
 
-    private $meeting15Questions = [
-        // Adjective Clause RPP (whose)
-        1 => [
-            'id' => 'Oseanografi meliputi banyak bidang ilmiah yang tujuannya adalah untuk memahami laut dan kehidupan di dalamnya.', 
-            'en' => 'Oceanography consists of many scientific fields whose purpose is to understand the sea and life inside it',
-            'vocab' => [
-                'Oceanography' => ['id' => 'Oseanografi', 'pos' => '(n)'],
-                'Scientific field' => ['id' => 'Bidang ilmiah', 'pos' => '(n)'],
-                'Purpose' => ['id' => 'Tujuan', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Saya punya teman yang ayahnya adalah seorang dokter.',
-                'en' => 'I have a friend whose father is a doctor.'
-            ]
-        ],
-        2 => [
-            'id' => 'Palung mariana yang kedalamannya menyembunyikan banyak spesies asing terletak di Samudra Pasifik.', 
-            'en' => 'The Mariana Trench whose depth hides many alien species is located in the Pacific Ocean',
-            'vocab' => [
-                'Trench' => ['id' => 'Palung', 'pos' => '(n)'],
-                'Depth' => ['id' => 'Kedalaman', 'pos' => '(n)'],
-                'Hide' => ['id' => 'Menyembunyikan', 'pos' => '(v)']
-            ],
-            'example' => [
-                'id' => 'Wanita yang mobilnya dicuri itu menelpon polisi.',
-                'en' => 'The woman whose car was stolen called the police.'
-            ]
-        ],
-        3 => [
-            'id' => 'Terdapat lebih dari 300 spesies dari alga emas yang platistidnya kuning keemasan.', 
-            'en' => 'There are more than 300 species of golden algae whose plastids are golden yellow',
-            'vocab' => [
-                'Species' => ['id' => 'Spesies', 'pos' => '(n)'],
-                'Algae' => ['id' => 'Alga', 'pos' => '(n)'],
-                'Plastid' => ['id' => 'Plastida', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Saya melihat burung yang sayapnya berwarna biru.',
-                'en' => 'I saw a bird whose wings are blue.'
-            ]
-        ],
-        4 => [
-            'id' => 'Paus bungkuk, anjing laut monk, dan penyu hijau adalah beberapa makhluk air yang habitatnya secara buruk dipengaruhi oleh pembangunan pesisir.', 
-            'en' => 'Humpback whales, monk seals, and green turtles are some aquatic creatures whose habitats are badly affected by coastal development',
-            'vocab' => [
-                'Whale' => ['id' => 'Paus', 'pos' => '(n)'],
-                'Creature' => ['id' => 'Makhluk', 'pos' => '(n)'],
-                'Habitat' => ['id' => 'Habitat', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Keluarga yang rumahnya terbakar itu selamat.',
-                'en' => 'The family whose house burned down is safe.'
-            ]
-        ],
-        5 => [
-            'id' => 'Invasif spesies bisa berupa spesies eksotis atau natif yang populasinya berkembang secara cepat dan mengancam fungsi dari ekosistem.', 
-            'en' => 'Invasive species can be exotic or native species whose populations grow rapidly and threaten ecosystem functions',
-            'vocab' => [
-                'Invasive' => ['id' => 'Invasif', 'pos' => '(adj)'],
-                'Population' => ['id' => 'Populasi', 'pos' => '(n)'],
-                'Threaten' => ['id' => 'Mengancam', 'pos' => '(v)']
-            ],
-            'example' => [
-                'id' => 'Perusahaan yang keuntungannya meningkat itu akan membuka cabang baru.',
-                'en' => 'The company whose profits increased will open a new branch.'
-            ]
-        ],
-        6 => [
-            'id' => 'Tanaman yang reproduksinya dikendalikan oleh panjang dari siang hari dan malam hari mungkin tidak akan berbunga di bawah cahaya buatan.', 
-            'en' => 'Plants whose reproduction is controlled by the length of day and night may not flower under artificial light',
-            'vocab' => [
-                'Plant' => ['id' => 'Tanaman', 'pos' => '(n)'],
-                'Reproduction' => ['id' => 'Reproduksi', 'pos' => '(n)'],
-                'Artificial' => ['id' => 'Buatan', 'pos' => '(adj)']
-            ],
-            'example' => [
-                'id' => 'Penulis yang bukunya menjadi best seller itu sangat kaya.',
-                'en' => 'The writer whose book became a best seller is very rich.'
-            ]
-        ],
-        7 => [
-            'id' => 'Di Australia sekitar 40.000 tahun yang lalu, satu satunya mamalia di sana adalah marsupials yang anaknya berkembang di kantong external di badan induknya.', 
-            'en' => 'In Australia about 40,000 years ago, the only mammals there were marsupials whose young develop in external pouches on their mother\'s body',
-            'vocab' => [
-                'Mammal' => ['id' => 'Mamalia', 'pos' => '(n)'],
-                'Develop' => ['id' => 'Berkembang', 'pos' => '(v)'],
-                'Pouch' => ['id' => 'Kantong', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Kucing yang anaknya hilang itu terus mengeong.',
-                'en' => 'The cat whose kitten is lost keeps meowing.'
-            ]
-        ],
-        8 => [
-            'id' => 'Banyak negara maju yang penduduk mudanya terus menurun mendatangkan tenaga asing dari negara berkembang.', 
-            'en' => 'Many developed countries whose young populations continue to decline bring in foreign workers from developing countries',
-            'vocab' => [
-                'Developed' => ['id' => 'Maju', 'pos' => '(adj)'],
-                'Population' => ['id' => 'Penduduk/Populasi', 'pos' => '(n)'],
-                'Decline' => ['id' => 'Menurun', 'pos' => '(v)']
-            ],
-            'example' => [
-                'id' => 'Negara yang ekonominya kuat memiliki pengaruh besar.',
-                'en' => 'A country whose economy is strong has great influence.'
-            ]
-        ],
-        9 => [
-            'id' => 'Tingkat kelahiran tertinggi dimiliki oleh negara-negara berkembang yang kondisi perekonomiannya tidak mampu menopang pertumbuhan penduduknya.', 
-            'en' => 'The highest birth rates are owned by developing countries whose economic conditions cannot support their population growth',
-            'vocab' => [
-                'Birth rate' => ['id' => 'Tingkat kelahiran', 'pos' => '(n)'],
-                'Support' => ['id' => 'Menopang/Mendukung', 'pos' => '(v)'],
-                'Growth' => ['id' => 'Pertumbuhan', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Siswa yang nilainya bagus mendapat beasiswa.',
-                'en' => 'Students whose grades are good get scholarships.'
-            ]
-        ],
-        10 => [
-            'id' => 'Kutub selatan yang banyak sumber daya alamnya masih belum dimanfaatkan perlu dilindungi oleh PBB.', 
-            'en' => 'Antarctica whose many natural resources are still not utilized needs to be protected by the UN',
-            'vocab' => [
-                'Resource' => ['id' => 'Sumber daya', 'pos' => '(n)'],
-                'Utilize' => ['id' => 'Memanfaatkan', 'pos' => '(v)'],
-                'Protect' => ['id' => 'Melindungi', 'pos' => '(v)']
-            ],
-            'example' => [
-                'id' => 'Pulau yang pantainya indah itu menarik banyak turis.',
-                'en' => 'The island whose beaches are beautiful attracts many tourists.'
-            ]
-        ],
-        11 => [
-            'id' => 'R.H. Whittaker yang penelitiannya menunjukkan betapa berbedanya bakteri dan jamur dengan tanaman mengajukan sistem 5 kerajaan untuk makhluk hidup.', 
-            'en' => 'R.H. Whittaker whose research showed how different bacteria and fungi are from plants proposed a 5-kingdom system for living things',
-            'vocab' => [
-                'Research' => ['id' => 'Penelitian', 'pos' => '(n)'],
-                'Show' => ['id' => 'Menunjukkan', 'pos' => '(v)'],
-                'Propose' => ['id' => 'Mengajukan', 'pos' => '(v)']
-            ],
-            'example' => [
-                'id' => 'Ilmuwan yang teorinya terbukti benar itu mendapat hadiah Nobel.',
-                'en' => 'The scientist whose theory was proven correct received a Nobel prize.'
-            ]
-        ],
-        
-        // Relative Adverb (where, when, why, how)
-        12 => [
-            'id' => 'Kita harus menghormati dan menjaga setiap ekologi dimana makhluk hidup lainnya hidup.', 
-            'en' => 'We must respect and keep every ecology where other living creatures live',
-            'vocab' => [
-                'Respect' => ['id' => 'Menghormati', 'pos' => '(v)'],
-                'Ecology' => ['id' => 'Ekologi', 'pos' => '(n)'],
-                'Creature' => ['id' => 'Makhluk', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Ini adalah rumah dimana saya lahir.',
-                'en' => 'This is the house where I was born.'
-            ]
-        ],
-        13 => [
-            'id' => 'Meskipun perbedaan namanya, embriologi dan biologi perkembangan berbagi satu tujuan tunggal untuk membuka tabir dari cara yang rumit dimana organisme multisel dibangun.', 
-            'en' => 'Despite their different names, embryology and developmental biology share a single goal to unveil the complex way in which multicellular organisms are built',
-            'vocab' => [
-                'Goal' => ['id' => 'Tujuan', 'pos' => '(n)'],
-                'Unveil' => ['id' => 'Membuka tabir/Mengungkap', 'pos' => '(v)'],
-                'Complex' => ['id' => 'Rumit', 'pos' => '(adj)']
-            ],
-            'example' => [
-                'id' => 'Saya suka cara dia berbicara.',
-                'en' => 'I like the way in which he speaks.'
-            ]
-        ],
-        14 => [
-            'id' => 'Homo sapiens adalah pengklasifikasian genus dan spesies dimana semua tingkah laku dan anatomi dari manusia modern teridentifikasi.', 
-            'en' => 'Homo sapiens is the genus and species classification in which all behavior and anatomy of modern humans are identified',
-            'vocab' => [
-                'Classification' => ['id' => 'Pengklasifikasian', 'pos' => '(n)'],
-                'Behavior' => ['id' => 'Tingkah laku', 'pos' => '(n)'],
-                'Identify' => ['id' => 'Mengidentifikasi', 'pos' => '(v)']
-            ],
-            'example' => [
-                'id' => 'Kotak dimana saya menyimpan uang hilang.',
-                'en' => 'The box in which I kept the money is lost.'
-            ]
-        ],
-        15 => [
-            'id' => 'Agama menyediakan pengikut mereka dengan etika atau kode yang berfungsi sebagai tujuan bagi tingkah laku manusia dan norma dimana tingkah laku dievaluasi.', 
-            'en' => 'Religion provides its followers with ethics or codes that serve as goals for human behavior and norms by which behavior is evaluated',
-            'vocab' => [
-                'Provide' => ['id' => 'Menyediakan', 'pos' => '(v)'],
-                'Follower' => ['id' => 'Pengikut', 'pos' => '(n)'],
-                'Evaluate' => ['id' => 'Mengevaluasi', 'pos' => '(v)']
-            ],
-            'example' => [
-                'id' => 'Standar dimana kita dinilai sangat tinggi.',
-                'en' => 'The standard by which we are judged is very high.'
-            ]
-        ],
-        16 => [
-            'id' => 'Bioakumulasi adalah proses dimana bahan kimia yang larut dalam lemak terkumpul di lapisan kulit lemak dari hewan setelah mereka mengolah nutrisi mereka.', 
-            'en' => 'Bioaccumulation is the process by which fat-soluble chemicals accumulate in the fatty skin layers of animals after they process their nutrients',
-            'vocab' => [
-                'Process' => ['id' => 'Proses', 'pos' => '(n)'],
-                'Accumulate' => ['id' => 'Terkumpul/Menumpuk', 'pos' => '(v)'],
-                'Nutrient' => ['id' => 'Nutrisi', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Cara dimana dia memecahkan masalah itu cerdas.',
-                'en' => 'The process by which he solved the problem was clever.'
-            ]
-        ],
-        17 => [
-            'id' => 'Zaman es terakhir ketika manusia mengembangkan seni adalah 26.000 tahun sebelum masehi.', 
-            'en' => 'The last ice age when humans developed art was 26,000 BC',
-            'vocab' => [
-                'Ice age' => ['id' => 'Zaman es', 'pos' => '(n)'],
-                'Develop' => ['id' => 'Mengembangkan', 'pos' => '(v)'],
-                'Art' => ['id' => 'Seni', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Saya ingat hari ketika kita bertemu.',
-                'en' => 'I remember the day when we met.'
-            ]
-        ],
-        18 => [
-            'id' => 'Asia dimana lebih dari 50% populasi manusia tinggal menghadapi masalah kependudukan yang parah.', 
-            'en' => 'Asia where more than 50% of the human population lives faces severe population problems',
-            'vocab' => [
-                'Population' => ['id' => 'Populasi', 'pos' => '(n)'],
-                'Face' => ['id' => 'Menghadapi', 'pos' => '(v)'],
-                'Severe' => ['id' => 'Parah', 'pos' => '(adj)']
-            ],
-            'example' => [
-                'id' => 'Taman dimana anak-anak bermain sangat bersih.',
-                'en' => 'The park where children play is very clean.'
-            ]
-        ],
-        19 => [
-            'id' => '500 sebelum masehi - 600 sebelum masehi ketika masyarakat pemburu dan pengumpul berakhir adalah awal dari masyarakat pertanian.', 
-            'en' => '500 BC - 600 BC when hunter-gatherer societies ended was the beginning of agricultural societies',
-            'vocab' => [
-                'Society' => ['id' => 'Masyarakat', 'pos' => '(n)'],
-                'End' => ['id' => 'Berakhir', 'pos' => '(v)'],
-                'Beginning' => ['id' => 'Awal', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Tahun ketika saya lulus adalah tahun yang spesial.',
-                'en' => 'The year when I graduated was a special year.'
-            ]
-        ],
-        20 => [
-            'id' => 'Area dimana F spinosum dikumpulkan telah dibersihkan dari hutannya untuk membuka lahan untuk pertanian.', 
-            'en' => 'The area where F spinosum was collected has been cleared of its forests to open land for agriculture',
-            'vocab' => [
-                'Area' => ['id' => 'Area/Wilayah', 'pos' => '(n)'],
-                'Collect' => ['id' => 'Mengumpulkan', 'pos' => '(v)'],
-                'Agriculture' => ['id' => 'Pertanian', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Tempat dimana kami berkemah sangat sepi.',
-                'en' => 'The place where we camped was very quiet.'
-            ]
-        ],
-        21 => [
-            'id' => 'Sampah manusia bahkan bisa ditemukan di gunung everest dimana titik tertinggi di Bumi terletak.', 
-            'en' => 'Human waste can even be found on Mount Everest where the highest point on Earth is located',
-            'vocab' => [
-                'Waste' => ['id' => 'Sampah/Limbah', 'pos' => '(n)'],
-                'Highest' => ['id' => 'Tertinggi', 'pos' => '(adj)'],
-                'Located' => ['id' => 'Terletak', 'pos' => '(v)']
-            ],
-            'example' => [
-                'id' => 'Kota dimana dia tinggal sangat ramai.',
-                'en' => 'The city where he lives is very crowded.'
-            ]
-        ],
-        22 => [
-            'id' => '2023 ketika suhu tertinggi yang pernah tercatat sejak 1850 merupakan tahun terburuk bagi es di kutub Bumi.', 
-            'en' => '2023 when the highest temperature ever recorded since 1850 was the worst year for ice at Earth\'s poles',
-            'vocab' => [
-                'Temperature' => ['id' => 'Suhu', 'pos' => '(n)'],
-                'Record' => ['id' => 'Mencatat', 'pos' => '(v)'],
-                'Pole' => ['id' => 'Kutub', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Masa ketika dinosaurus hidup sangat berbeda.',
-                'en' => 'The time when dinosaurs lived was very different.'
-            ]
-        ],
-        23 => [
-            'id' => 'Antartika dimana Gunung berapi Erebus terletak memiliki es setebal 4776 meter.', 
-            'en' => 'Antarctica where Mount Erebus volcano is located has ice as thick as 4776 meters',
-            'vocab' => [
-                'Volcano' => ['id' => 'Gunung berapi', 'pos' => '(n)'],
-                'Located' => ['id' => 'Terletak', 'pos' => '(v)'],
-                'Thick' => ['id' => 'Tebal', 'pos' => '(adj)']
-            ],
-            'example' => [
-                'id' => 'Desa dimana nenek saya tinggal sangat asri.',
-                'en' => 'The village where my grandmother lives is very beautiful.'
-            ]
-        ],
-        24 => [
-            'id' => 'Alasan mengapa Bumi dapat dihuni oleh makhluk hidup adalah karena jaraknya dari matahari dan air yang dikandungnya.', 
-            'en' => 'The reason why Earth can be inhabited by living things is because of its distance from the sun and the water it contains',
-            'vocab' => [
-                'Reason' => ['id' => 'Alasan', 'pos' => '(n)'],
-                'Inhabit' => ['id' => 'Menghuni', 'pos' => '(v)'],
-                'Distance' => ['id' => 'Jarak', 'pos' => '(n)']
-            ],
-            'example' => [
-                'id' => 'Alasan mengapa dia menangis tidak diketahui.',
-                'en' => 'The reason why she cried is unknown.'
-            ]
-        ],
-        25 => [
-            'id' => 'Mekanisme fisiologi bagaimana lemur mendetoks sianida masih tidak diketahui.', 
-            'en' => 'The physiological mechanism of how lemurs detoxify cyanide is still unknown',
-            'vocab' => [
-                'Mechanism' => ['id' => 'Mekanisme', 'pos' => '(n)'],
-                'Detoxify' => ['id' => 'Mendetoks', 'pos' => '(v)'],
-                'Unknown' => ['id' => 'Tidak diketahui', 'pos' => '(adj)']
-            ],
-            'example' => [
-                'id' => 'Saya tidak tahu bagaimana dia melakukannya.',
-                'en' => 'I don\'t know how he did it.'
-            ]
-        ],
-        26 => [
-            'id' => 'Erosi adalah proses dinamis dimana air yang mengalir, glasier, angin, ombak dan arus, gravitasi, dan air tanah mengusangkan Bumi.', 
-            'en' => 'Erosion is a dynamic process in which flowing water, glaciers, wind, waves and currents, gravity, and groundwater wear down the Earth',
-            'vocab' => [
-                'Process' => ['id' => 'Proses', 'pos' => '(n)'],
-                'Flow' => ['id' => 'Mengalir', 'pos' => '(v)'],
-                'Wear down' => ['id' => 'Mengusangkan/Mengikis', 'pos' => '(v)']
-            ],
-            'example' => [
-                'id' => 'Cara dimana burung membangun sarang sangat menarik.',
-                'en' => 'The way in which birds build nests is very interesting.'
-            ]
-        ]
-    ];
+    private $meeting15Questions = array (
+  1 => 
+  array (
+    'id' => 'Perusahaan farmasi yang paten obatnya kedaluwarsa mengalami penurunan profitabilitas yang signifikan.',
+    'en' => 'Pharmaceutical corporations whose drug patents expired experienced a significant decline in profitability',
+    'structure' => 'rpp',
+    'pos_type' => 'subject',
+    'conjunction' => 'whose + Noun (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Wanita yang mobilnya dicuri menelpon polisi.',
+      'en' => 'The woman whose car was stolen called the police.',
+    ),
+    'vocab' => 
+    array (
+      'Pharmaceutical corporation' => 
+      array (
+        'id' => 'Perusahaan farmasi',
+        'pos' => '(n)',
+      ),
+      'Drug patent' => 
+      array (
+        'id' => 'Paten obat',
+        'pos' => '(n)',
+      ),
+      'Expire' => 
+      array (
+        'id' => 'Kedaluwarsa',
+        'pos' => '(v)',
+      ),
+      'Decline in profitability' => 
+      array (
+        'id' => 'Penurunan profitabilitas',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  2 => 
+  array (
+    'id' => 'Pemerintah memberikan subsidi darurat kepada para petani yang lahan panennya terdampak banjir bandang.',
+    'en' => 'The government provides emergency subsidies to farmers whose crop lands were affected by flash floods',
+    'structure' => 'rpp',
+    'pos_type' => 'object',
+    'conjunction' => 'whose + Noun (Objek)',
+    'example' => 
+    array (
+      'id' => 'Saya membantu tetangga yang rumahnya rusak.',
+      'en' => 'I helped the neighbor whose house was damaged.',
+    ),
+    'vocab' => 
+    array (
+      'Government' => 
+      array (
+        'id' => 'Pemerintah',
+        'pos' => '(n)',
+      ),
+      'Emergency subsidy' => 
+      array (
+        'id' => 'Subsidi darurat',
+        'pos' => '(n)',
+      ),
+      'Farmer' => 
+      array (
+        'id' => 'Petani',
+        'pos' => '(n)',
+      ),
+      'Crop land' => 
+      array (
+        'id' => 'Lahan panen / tanaman',
+        'pos' => '(n)',
+      ),
+      'Flash flood' => 
+      array (
+        'id' => 'Banjir bandang',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  3 => 
+  array (
+    'id' => 'Spesies endemik yang habitat alaminya terfragmentasi menghadapi ancaman kepunahan akut.',
+    'en' => 'Endemic species whose natural habitats are fragmented face acute extinction threats',
+    'structure' => 'rpp',
+    'pos_type' => 'subject',
+    'conjunction' => 'whose + Noun (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Burung yang sayapnya terluka dirawat dokter.',
+      'en' => 'The bird whose wing was injured was treated by a vet.',
+    ),
+    'vocab' => 
+    array (
+      'Endemic species' => 
+      array (
+        'id' => 'Spesies endemik',
+        'pos' => '(n)',
+      ),
+      'Natural habitat' => 
+      array (
+        'id' => 'Habitat alami',
+        'pos' => '(n)',
+      ),
+      'Fragmented' => 
+      array (
+        'id' => 'Terfragmentasi',
+        'pos' => '(adj)',
+      ),
+      'Acute extinction threat' => 
+      array (
+        'id' => 'Ancaman kepunahan akut',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  4 => 
+  array (
+    'id' => 'Dewan juri menganugerahkan medali kehormatan kepada ilmuwan muda yang penelitian genomnya membuka paradigma baru.',
+    'en' => 'The panel of judges awarded a medal of honor to the young scientist whose genome research opened a new paradigm',
+    'structure' => 'rpp',
+    'pos_type' => 'object',
+    'conjunction' => 'whose + Noun (Objek)',
+    'example' => 
+    array (
+      'id' => 'Komite menghargai penulis yang bukunya populer.',
+      'en' => 'The committee praised the author whose book was popular.',
+    ),
+    'vocab' => 
+    array (
+      'Panel of judges' => 
+      array (
+        'id' => 'Dewan juri',
+        'pos' => '(n)',
+      ),
+      'Medal of honor' => 
+      array (
+        'id' => 'Medali kehormatan',
+        'pos' => '(n)',
+      ),
+      'Young scientist' => 
+      array (
+        'id' => 'Ilmuwan muda',
+        'pos' => '(n)',
+      ),
+      'Genome research' => 
+      array (
+        'id' => 'Penelitian genom',
+        'pos' => '(n)',
+      ),
+      'Open a new paradigm' => 
+      array (
+        'id' => 'Membuka paradigma baru',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  5 => 
+  array (
+    'id' => 'Ekosistem pesisir yang terumbu karangnya terdegradasi parah kehilangan perlindungan alami terhadap abrasi gelombang.',
+    'en' => 'Coastal ecosystems whose coral reefs are severely degraded lose natural protection against wave abrasion',
+    'structure' => 'rpp',
+    'pos_type' => 'subject',
+    'conjunction' => 'whose + Noun (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Hutan yang pohonnya ditebang kehilangan kesuburan.',
+      'en' => 'Forests whose trees were cut lost fertility.',
+    ),
+    'vocab' => 
+    array (
+      'Coastal ecosystem' => 
+      array (
+        'id' => 'Ekosistem pesisir',
+        'pos' => '(n)',
+      ),
+      'Coral reef' => 
+      array (
+        'id' => 'Terumbu karang',
+        'pos' => '(n)',
+      ),
+      'Severely degraded' => 
+      array (
+        'id' => 'Terdegradasi parah',
+        'pos' => '(adj)',
+      ),
+      'Wave abrasion' => 
+      array (
+        'id' => 'Abrasi gelombang',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  6 => 
+  array (
+    'id' => 'Bank sentral merekapitalisasi lembaga keuangan yang rasio kecukupan modalnya berada di bawah standar minimum.',
+    'en' => 'The central bank recapitalized financial institutions whose capital adequacy ratios were below the minimum standard',
+    'structure' => 'rpp',
+    'pos_type' => 'object',
+    'conjunction' => 'whose + Noun (Objek)',
+    'example' => 
+    array (
+      'id' => 'Pemerintah membantu bank yang likuiditasnya turun.',
+      'en' => 'The government assisted banks whose liquidity dropped.',
+    ),
+    'vocab' => 
+    array (
+      'Central bank' => 
+      array (
+        'id' => 'Bank sentral',
+        'pos' => '(n)',
+      ),
+      'Recapitalize' => 
+      array (
+        'id' => 'Merekapitalisasi',
+        'pos' => '(v)',
+      ),
+      'Financial institution' => 
+      array (
+        'id' => 'Lembaga keuangan',
+        'pos' => '(n)',
+      ),
+      'Capital adequacy ratio' => 
+      array (
+        'id' => 'Rasio kecukupan modal',
+        'pos' => '(n)',
+      ),
+      'Minimum standard' => 
+      array (
+        'id' => 'Standar minimum',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  7 => 
+  array (
+    'id' => 'Universitas riset yang kontribusi akademiknya berpengaruh memimpin konsorsium ilmiah internasional.',
+    'en' => 'Research universities whose academic contributions are influential spearhead international scientific consortia',
+    'structure' => 'rpp',
+    'pos_type' => 'subject',
+    'conjunction' => 'whose + Noun (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Institut yang reputasinya tinggi menerima banyak hibah.',
+      'en' => 'Institutes whose reputation is high receive many grants.',
+    ),
+    'vocab' => 
+    array (
+      'Research university' => 
+      array (
+        'id' => 'Universitas riset',
+        'pos' => '(n)',
+      ),
+      'Academic contribution' => 
+      array (
+        'id' => 'Kontribusi akademik',
+        'pos' => '(n)',
+      ),
+      'Influential' => 
+      array (
+        'id' => 'Berpengaruh',
+        'pos' => '(adj)',
+      ),
+      'Spearhead' => 
+      array (
+        'id' => 'Memimpin / Memelopori',
+        'pos' => '(v)',
+      ),
+      'Scientific consortia' => 
+      array (
+        'id' => 'Konsorsium ilmiah',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  8 => 
+  array (
+    'id' => 'Insinyur kedirgantaraan menguji material komposit yang ketahanan termalnya melampaui standar industri.',
+    'en' => 'Aerospace engineers tested composite materials whose thermal resilience exceeded industry standards',
+    'structure' => 'rpp',
+    'pos_type' => 'object',
+    'conjunction' => 'whose + Noun (Objek)',
+    'example' => 
+    array (
+      'id' => 'Pabrik menggunakan logam yang kekuatannya teruji.',
+      'en' => 'The factory uses metals whose strength is tested.',
+    ),
+    'vocab' => 
+    array (
+      'Aerospace engineer' => 
+      array (
+        'id' => 'Insinyur kedirgantaraan',
+        'pos' => '(n)',
+      ),
+      'Composite material' => 
+      array (
+        'id' => 'Material komposit',
+        'pos' => '(n)',
+      ),
+      'Thermal resilience' => 
+      array (
+        'id' => 'Ketahanan termal',
+        'pos' => '(n)',
+      ),
+      'Exceed' => 
+      array (
+        'id' => 'Melampaui',
+        'pos' => '(v)',
+      ),
+      'Industry standard' => 
+      array (
+        'id' => 'Standar industri',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  9 => 
+  array (
+    'id' => 'Kandidat direktur yang rekam jejak kepemimpinannya terbukti sukses memenangkan kepercayaan dewan komisaris.',
+    'en' => 'The director candidate whose leadership track record proved successful won the trust of the board of commissioners',
+    'structure' => 'rpp',
+    'pos_type' => 'subject',
+    'conjunction' => 'whose + Noun (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Manajer yang prestasinya bagus dipromosikan.',
+      'en' => 'The manager whose performance was good got promoted.',
+    ),
+    'vocab' => 
+    array (
+      'Director candidate' => 
+      array (
+        'id' => 'Kandidat direktur',
+        'pos' => '(n)',
+      ),
+      'Leadership track record' => 
+      array (
+        'id' => 'Rekam jejak kepemimpinan',
+        'pos' => '(n)',
+      ),
+      'Prove successful' => 
+      array (
+        'id' => 'Terbukti sukses',
+        'pos' => '(v)',
+      ),
+      'Board of commissioners' => 
+      array (
+        'id' => 'Dewan komisaris',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  10 => 
+  array (
+    'id' => 'Masyarakat adat melindungi kawasan hutan purba yang keanekaragaman floranya belum terpetakan secara lengkap.',
+    'en' => 'Indigenous communities protect ancient forest areas whose floral diversity has not been fully mapped',
+    'structure' => 'rpp',
+    'pos_type' => 'object',
+    'conjunction' => 'whose + Noun (Objek)',
+    'example' => 
+    array (
+      'id' => 'Warga menjaga sungai yang sumber airnya bersih.',
+      'en' => 'Residents guard the river whose water source is clean.',
+    ),
+    'vocab' => 
+    array (
+      'Indigenous community' => 
+      array (
+        'id' => 'Masyarakat adat',
+        'pos' => '(n)',
+      ),
+      'Ancient forest area' => 
+      array (
+        'id' => 'Kawasan hutan purba',
+        'pos' => '(n)',
+      ),
+      'Floral diversity' => 
+      array (
+        'id' => 'Keanekaragaman flora',
+        'pos' => '(n)',
+      ),
+      'Fully mapped' => 
+      array (
+        'id' => 'Terpetakan secara lengkap',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  11 => 
+  array (
+    'id' => 'Satelit navigasi yang transmisi sinyalnya terganggu oleh badai matahari memerlukan kalibrasi orbit ulang.',
+    'en' => 'Navigation satellites whose signal transmission was disrupted by solar storms require orbital recalibration',
+    'structure' => 'rpp',
+    'pos_type' => 'subject',
+    'conjunction' => 'whose + Noun (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Antena yang koneksinya rusak sedang diperbaiki.',
+      'en' => 'The antenna whose connection was broken is being repaired.',
+    ),
+    'vocab' => 
+    array (
+      'Navigation satellite' => 
+      array (
+        'id' => 'Satelit navigasi',
+        'pos' => '(n)',
+      ),
+      'Signal transmission' => 
+      array (
+        'id' => 'Transmisi sinyal',
+        'pos' => '(n)',
+      ),
+      'Disrupted' => 
+      array (
+        'id' => 'Terganggu',
+        'pos' => '(v)',
+      ),
+      'Solar storm' => 
+      array (
+        'id' => 'Badai matahari',
+        'pos' => '(n)',
+      ),
+      'Orbital recalibration' => 
+      array (
+        'id' => 'Kalibrasi orbit ulang',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  12 => 
+  array (
+    'id' => 'Kementerian kesehatan mengisolasi fasilitas medis yang sistem ventilasinya terkontaminasi oleh aerosol patogenik.',
+    'en' => 'The ministry of health isolated medical facilities whose ventilation systems were contaminated by pathogenic aerosols',
+    'structure' => 'rpp',
+    'pos_type' => 'object',
+    'conjunction' => 'whose + Noun (Objek)',
+    'example' => 
+    array (
+      'id' => 'Rumah sakit menutup ruangan yang udaranya kotor.',
+      'en' => 'The hospital closed the room whose air was polluted.',
+    ),
+    'vocab' => 
+    array (
+      'Ministry of health' => 
+      array (
+        'id' => 'Kementerian kesehatan',
+        'pos' => '(n)',
+      ),
+      'Isolate' => 
+      array (
+        'id' => 'Mengisolasi',
+        'pos' => '(v)',
+      ),
+      'Medical facility' => 
+      array (
+        'id' => 'Fasilitas medis',
+        'pos' => '(n)',
+      ),
+      'Ventilation system' => 
+      array (
+        'id' => 'Sistem ventilasi',
+        'pos' => '(n)',
+      ),
+      'Contaminated' => 
+      array (
+        'id' => 'Terkontaminasi',
+        'pos' => '(v)',
+      ),
+      'Pathogenic aerosol' => 
+      array (
+        'id' => 'Aerosol patogenik',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  13 => 
+  array (
+    'id' => 'Arsitek perkotaan yang konsep tata ruangnya mengutamakan keberlanjutan lingkungan memenangkan kompetisi desain global.',
+    'en' => 'Urban architects whose spatial planning concepts prioritize environmental sustainability won the global design competition',
+    'structure' => 'rpp',
+    'pos_type' => 'subject',
+    'conjunction' => 'whose + Noun (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Perancang yang karyanya unik mendapat apresiasi.',
+      'en' => 'The designer whose work was unique gained appreciation.',
+    ),
+    'vocab' => 
+    array (
+      'Urban architect' => 
+      array (
+        'id' => 'Arsitek perkotaan',
+        'pos' => '(n)',
+      ),
+      'Spatial planning concept' => 
+      array (
+        'id' => 'Konsep tata ruang',
+        'pos' => '(n)',
+      ),
+      'Prioritize' => 
+      array (
+        'id' => 'Mengutamakan',
+        'pos' => '(v)',
+      ),
+      'Environmental sustainability' => 
+      array (
+        'id' => 'Keberlanjutan lingkungan',
+        'pos' => '(n)',
+      ),
+      'Global design competition' => 
+      array (
+        'id' => 'Kompetisi desain global',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  14 => 
+  array (
+    'id' => 'Laboratorium forensik memeriksa artefak arkeologis yang komposisi isotopnya mengindikasikan asal usul peradaban kuno.',
+    'en' => 'The forensic laboratory examined archaeological artifacts whose isotope composition indicated ancient civilizational origins',
+    'structure' => 'rpp',
+    'pos_type' => 'object',
+    'conjunction' => 'whose + Noun (Objek)',
+    'example' => 
+    array (
+      'id' => 'Museum membeli lukisan yang pigmen catnya langka.',
+      'en' => 'The museum bought paintings whose paint pigment was rare.',
+    ),
+    'vocab' => 
+    array (
+      'Forensic laboratory' => 
+      array (
+        'id' => 'Laboratorium forensik',
+        'pos' => '(n)',
+      ),
+      'Archaeological artifact' => 
+      array (
+        'id' => 'Artefak arkeologis',
+        'pos' => '(n)',
+      ),
+      'Isotope composition' => 
+      array (
+        'id' => 'Komposisi isotop',
+        'pos' => '(n)',
+      ),
+      'Ancient civilizational origin' => 
+      array (
+        'id' => 'Asal usul peradaban kuno',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  15 => 
+  array (
+    'id' => 'Organisasi kemanusiaan yang jaringan logistiknya menjangkau zona konflik mendistribusikan pasokan medis darurat.',
+    'en' => 'Humanitarian organizations whose logistical networks reach conflict zones distribute emergency medical supplies',
+    'structure' => 'rpp',
+    'pos_type' => 'subject',
+    'conjunction' => 'whose + Noun (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Yayasan yang cabangnya tersebar membantu korban bencana.',
+      'en' => 'Foundations whose branches are widespread help disaster victims.',
+    ),
+    'vocab' => 
+    array (
+      'Humanitarian organization' => 
+      array (
+        'id' => 'Organisasi kemanusiaan',
+        'pos' => '(n)',
+      ),
+      'Logistical network' => 
+      array (
+        'id' => 'Jaringan logistik',
+        'pos' => '(n)',
+      ),
+      'Conflict zone' => 
+      array (
+        'id' => 'Zona konflik',
+        'pos' => '(n)',
+      ),
+      'Distribute' => 
+      array (
+        'id' => 'Mendistribusikan',
+        'pos' => '(v)',
+      ),
+      'Emergency medical supplies' => 
+      array (
+        'id' => 'Pasokan medis darurat',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  16 => 
+  array (
+    'id' => 'Laboratorium berteknologi tinggi di mana eksperimen fusi nuklir dilakukan menerapkan protokol keselamatan mutlak.',
+    'en' => 'The high-tech laboratory where nuclear fusion experiments are conducted enforces absolute safety protocols',
+    'structure' => 'ra_where',
+    'pos_type' => 'subject',
+    'conjunction' => 'where + S + V (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Gedung tempat kami bekerja sangat luas.',
+      'en' => 'The building where we work is very spacious.',
+    ),
+    'vocab' => 
+    array (
+      'High-tech laboratory' => 
+      array (
+        'id' => 'Laboratorium berteknologi tinggi',
+        'pos' => '(n)',
+      ),
+      'Nuclear fusion' => 
+      array (
+        'id' => 'Fusi nuklir',
+        'pos' => '(n)',
+      ),
+      'Conduct' => 
+      array (
+        'id' => 'Dilakukan',
+        'pos' => '(v)',
+      ),
+      'Enforce' => 
+      array (
+        'id' => 'Menerapkan',
+        'pos' => '(v)',
+      ),
+      'Safety protocol' => 
+      array (
+        'id' => 'Protokol keselamatan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  17 => 
+  array (
+    'id' => 'Investor multinasional mendanai kawasan industri hijau di mana energi terbarukan diintegrasikan secara penuh.',
+    'en' => 'Multinational investors fund green industrial zones where renewable energy is fully integrated',
+    'structure' => 'ra_where',
+    'pos_type' => 'object',
+    'conjunction' => 'where + S + V (Objek)',
+    'example' => 
+    array (
+      'id' => 'Turis mengunjungi kota di mana festival diadakan.',
+      'en' => 'Tourists visit the town where festivals are held.',
+    ),
+    'vocab' => 
+    array (
+      'Multinational investor' => 
+      array (
+        'id' => 'Investor multinasional',
+        'pos' => '(n)',
+      ),
+      'Green industrial zone' => 
+      array (
+        'id' => 'Kawasan industri hijau',
+        'pos' => '(n)',
+      ),
+      'Renewable energy' => 
+      array (
+        'id' => 'Energi terbarukan',
+        'pos' => '(n)',
+      ),
+      'Fully integrated' => 
+      array (
+        'id' => 'Diintegrasikan secara penuh',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  18 => 
+  array (
+    'id' => 'Cagar biosfer terisolasi di mana keanekaragaman genetik dilindungi tetap terbebas dari intervensi antropogenik.',
+    'en' => 'The isolated biosphere reserve where genetic diversity is preserved remains free from anthropogenic intervention',
+    'structure' => 'ra_where',
+    'pos_type' => 'subject',
+    'conjunction' => 'where + S + V (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Taman nasional tempat hewan langka tinggal dijaga ketat.',
+      'en' => 'The national park where rare animals live is closely guarded.',
+    ),
+    'vocab' => 
+    array (
+      'Biosphere reserve' => 
+      array (
+        'id' => 'Cagar biosfer',
+        'pos' => '(n)',
+      ),
+      'Genetic diversity' => 
+      array (
+        'id' => 'Keanekaragaman genetik',
+        'pos' => '(n)',
+      ),
+      'Preserve' => 
+      array (
+        'id' => 'Dilindungi',
+        'pos' => '(v)',
+      ),
+      'Anthropogenic intervention' => 
+      array (
+        'id' => 'Intervensi antropogenik / manusia',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  19 => 
+  array (
+    'id' => 'Para delegasi menghadiri konferensi tingkat tinggi di mana traktat iklim internasional diratifikasi secara resmi.',
+    'en' => 'Delegates attended the summit where the international climate treaty was officially ratified',
+    'structure' => 'ra_where',
+    'pos_type' => 'object',
+    'conjunction' => 'where + S + V (Objek)',
+    'example' => 
+    array (
+      'id' => 'Menteri mengunjungi aula di mana perjanjian ditandatangani.',
+      'en' => 'The minister visited the hall where the treaty was signed.',
+    ),
+    'vocab' => 
+    array (
+      'Delegate' => 
+      array (
+        'id' => 'Para delegasi',
+        'pos' => '(n)',
+      ),
+      'Summit' => 
+      array (
+        'id' => 'Konferensi tingkat tinggi',
+        'pos' => '(n)',
+      ),
+      'Climate treaty' => 
+      array (
+        'id' => 'Traktat iklim',
+        'pos' => '(n)',
+      ),
+      'Officially ratified' => 
+      array (
+        'id' => 'Diratifikasi secara resmi',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  20 => 
+  array (
+    'id' => 'Observatorium astronomi di mana teleskop optik mutakhir ditempatkan berlokasi di dataran tinggi yang terisolasi.',
+    'en' => 'The astronomical observatory where state-of-the-art optical telescopes are stationed is located on an isolated plateau',
+    'structure' => 'ra_where',
+    'pos_type' => 'subject',
+    'conjunction' => 'where + S + V (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Stasiun cuaca tempat data dicatat berada di bukit.',
+      'en' => 'The weather station where data is recorded is on a hill.',
+    ),
+    'vocab' => 
+    array (
+      'Astronomical observatory' => 
+      array (
+        'id' => 'Observatorium astronomi',
+        'pos' => '(n)',
+      ),
+      'State-of-the-art' => 
+      array (
+        'id' => 'Mutakhir / Canggih',
+        'pos' => '(adj)',
+      ),
+      'Stationed' => 
+      array (
+        'id' => 'Ditempatkan',
+        'pos' => '(v)',
+      ),
+      'Isolated plateau' => 
+      array (
+        'id' => 'Dataran tinggi terisolasi',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  21 => 
+  array (
+    'id' => 'Era pencerahan ketika eksplorasi ilmiah berkembang pesat membuka paradigma pengetahuan interdisipliner.',
+    'en' => 'The Enlightenment era when scientific exploration flourished opened interdisciplinary knowledge paradigms',
+    'structure' => 'ra_when',
+    'pos_type' => 'subject',
+    'conjunction' => 'when + S + V (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Masa ketika internet ditemukan mengubah peradaban.',
+      'en' => 'The period when the internet was invented changed civilization.',
+    ),
+    'vocab' => 
+    array (
+      'Enlightenment era' => 
+      array (
+        'id' => 'Era pencerahan',
+        'pos' => '(n)',
+      ),
+      'Scientific exploration' => 
+      array (
+        'id' => 'Eksplorasi ilmiah',
+        'pos' => '(n)',
+      ),
+      'Flourish' => 
+      array (
+        'id' => 'Berkembang pesat',
+        'pos' => '(v)',
+      ),
+      'Interdisciplinary knowledge' => 
+      array (
+        'id' => 'Pengetahuan interdisipliner',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  22 => 
+  array (
+    'id' => 'Pemerintah mengenang fase krisis moneter ketika hiperinflasi melonjak tajam dan melumpuhkan sektor perbankan.',
+    'en' => 'The government remembers the monetary crisis phase when hyperinflation surged sharply and paralyzed the banking sector',
+    'structure' => 'ra_when',
+    'pos_type' => 'object',
+    'conjunction' => 'when + S + V (Objek)',
+    'example' => 
+    array (
+      'id' => 'Warga mengingat hari ketika badai menerjang kota.',
+      'en' => 'Citizens recall the day when the storm struck the town.',
+    ),
+    'vocab' => 
+    array (
+      'Monetary crisis' => 
+      array (
+        'id' => 'Krisis moneter',
+        'pos' => '(n)',
+      ),
+      'Hyperinflation' => 
+      array (
+        'id' => 'Hiperinflasi',
+        'pos' => '(n)',
+      ),
+      'Surge sharply' => 
+      array (
+        'id' => 'Melonjak tajam',
+        'pos' => '(v)',
+      ),
+      'Paralyze' => 
+      array (
+        'id' => 'Melumpuhkan',
+        'pos' => '(v)',
+      ),
+      'Banking sector' => 
+      array (
+        'id' => 'Sektor perbankan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  23 => 
+  array (
+    'id' => 'Tonggak sejarah ketika vaksin berbasis mRNA disetujui menandai terobosan revolusioner dalam bidang imunologi.',
+    'en' => 'The historical milestone when mRNA-based vaccines were approved marked a revolutionary breakthrough in immunology',
+    'structure' => 'ra_when',
+    'pos_type' => 'subject',
+    'conjunction' => 'when + S + V (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Saat obat baru disetujui membawa harapan.',
+      'en' => 'The moment when the new drug was approved brought hope.',
+    ),
+    'vocab' => 
+    array (
+      'Historical milestone' => 
+      array (
+        'id' => 'Tonggak sejarah',
+        'pos' => '(n)',
+      ),
+      'Approved' => 
+      array (
+        'id' => 'Disetujui',
+        'pos' => '(v)',
+      ),
+      'Revolutionary breakthrough' => 
+      array (
+        'id' => 'Terobosan revolusioner',
+        'pos' => '(n)',
+      ),
+      'Immunology' => 
+      array (
+        'id' => 'Imunologi',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  24 => 
+  array (
+    'id' => 'Masyarakat merayakan tahun bersejarah ketika para antariksawan mendarat di permukaan bulan.',
+    'en' => 'Society celebrated the historic year when astronauts landed on the lunar surface',
+    'structure' => 'ra_when',
+    'pos_type' => 'object',
+    'conjunction' => 'when + S + V (Objek)',
+    'example' => 
+    array (
+      'id' => 'Kami memperingati tanggal ketika kemerdekaan dideklarasikan.',
+      'en' => 'We commemorated the date when independence was declared.',
+    ),
+    'vocab' => 
+    array (
+      'Celebrate' => 
+      array (
+        'id' => 'Merayakan',
+        'pos' => '(v)',
+      ),
+      'Historic year' => 
+      array (
+        'id' => 'Tahun bersejarah',
+        'pos' => '(n)',
+      ),
+      'Astronaut' => 
+      array (
+        'id' => 'Antariksawan',
+        'pos' => '(n)',
+      ),
+      'Lunar surface' => 
+      array (
+        'id' => 'Permukaan bulan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  25 => 
+  array (
+    'id' => 'Fase transisi ketika otomasi cerdas diadopsi secara massal mengubah struktur ketenagakerjaan global.',
+    'en' => 'The transition phase when intelligent automation was adopted en masse transformed global employment structures',
+    'structure' => 'ra_when',
+    'pos_type' => 'subject',
+    'conjunction' => 'when + S + V (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Era ketika listrik diperkenalkan mengubah industri.',
+      'en' => 'The era when electricity was introduced changed industry.',
+    ),
+    'vocab' => 
+    array (
+      'Transition phase' => 
+      array (
+        'id' => 'Fase transisi',
+        'pos' => '(n)',
+      ),
+      'Intelligent automation' => 
+      array (
+        'id' => 'Otomasi cerdas',
+        'pos' => '(n)',
+      ),
+      'En masse' => 
+      array (
+        'id' => 'Secara massal',
+        'pos' => '(adv)',
+      ),
+      'Employment structure' => 
+      array (
+        'id' => 'Struktur ketenagakerjaan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  26 => 
+  array (
+    'id' => 'Mekanisme biologis yang mendasari alasan mengapa sel ganas bermetastasis masih diselidiki secara intensif.',
+    'en' => 'The biological mechanism underlying the reason why malignant cells metastasize is still intensively investigated',
+    'structure' => 'ra_why',
+    'pos_type' => 'subject',
+    'conjunction' => 'why + S + V (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Faktor yang menjadi alasan mengapa virus bermutasi sedang diteliti.',
+      'en' => 'Factors explaining why viruses mutate are being studied.',
+    ),
+    'vocab' => 
+    array (
+      'Biological mechanism' => 
+      array (
+        'id' => 'Mekanisme biologis',
+        'pos' => '(n)',
+      ),
+      'Underlying' => 
+      array (
+        'id' => 'Mendasari',
+        'pos' => '(adj)',
+      ),
+      'Malignant cell' => 
+      array (
+        'id' => 'Sel ganas',
+        'pos' => '(n)',
+      ),
+      'Metastasize' => 
+      array (
+        'id' => 'Bermetastasis',
+        'pos' => '(v)',
+      ),
+      'Investigate' => 
+      array (
+        'id' => 'Diselidiki',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  27 => 
+  array (
+    'id' => 'Para diplomat mengkaji faktor geopolitik yang menjadi alasan mengapa aliansi militer strategis terbentuk.',
+    'en' => 'Diplomats examine geopolitical factors representing the reason why strategic military alliances coalesce',
+    'structure' => 'ra_why',
+    'pos_type' => 'object',
+    'conjunction' => 'why + S + V (Objek)',
+    'example' => 
+    array (
+      'id' => 'Analis mendiskusikan alasan mengapa perjanjian gagal.',
+      'en' => 'Analysts discussed the reason why the agreement failed.',
+    ),
+    'vocab' => 
+    array (
+      'Diplomat' => 
+      array (
+        'id' => 'Diplomat',
+        'pos' => '(n)',
+      ),
+      'Geopolitical factor' => 
+      array (
+        'id' => 'Faktor geopolitik',
+        'pos' => '(n)',
+      ),
+      'Strategic military alliance' => 
+      array (
+        'id' => 'Aliansi militer strategis',
+        'pos' => '(n)',
+      ),
+      'Coalesce' => 
+      array (
+        'id' => 'Terbentuk / Bersatu',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  28 => 
+  array (
+    'id' => 'Pertimbangan etika merupakan alasan utama mengapa rekayasa genetika pada embrio manusia dibatasi secara ketat.',
+    'en' => 'Ethical considerations represent the primary reason why genetic engineering in human embryos is strictly restricted',
+    'structure' => 'ra_why',
+    'pos_type' => 'subject',
+    'conjunction' => 'why + S + V (Subjek)',
+    'example' => 
+    array (
+      'id' => 'Biaya tinggi adalah alasan mengapa proyek ditunda.',
+      'en' => 'High cost is the reason why the project was delayed.',
+    ),
+    'vocab' => 
+    array (
+      'Ethical consideration' => 
+      array (
+        'id' => 'Pertimbangan etika',
+        'pos' => '(n)',
+      ),
+      'Primary reason' => 
+      array (
+        'id' => 'Alasan utama',
+        'pos' => '(n)',
+      ),
+      'Genetic engineering' => 
+      array (
+        'id' => 'Rekayasa genetika',
+        'pos' => '(n)',
+      ),
+      'Human embryo' => 
+      array (
+        'id' => 'Embrio manusia',
+        'pos' => '(n)',
+      ),
+      'Strictly restricted' => 
+      array (
+        'id' => 'Dibatasi secara ketat',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  29 => 
+  array (
+    'id' => 'Peneliti sosiologi mempublikasikan laporan yang menjelaskan alasan mengapa polarisasi opini publik tereskalasi di media sosial.',
+    'en' => 'Sociological researchers published a report explaining the reason why public opinion polarization escalates on social media',
+    'structure' => 'ra_why',
+    'pos_type' => 'object',
+    'conjunction' => 'why + S + V (Objek)',
+    'example' => 
+    array (
+      'id' => 'Pakar menulis artikel tentang alasan mengapa inflasi naik.',
+      'en' => 'Experts wrote articles about why inflation increased.',
+    ),
+    'vocab' => 
+    array (
+      'Sociological researcher' => 
+      array (
+        'id' => 'Peneliti sosiologi',
+        'pos' => '(n)',
+      ),
+      'Public opinion polarization' => 
+      array (
+        'id' => 'Polarisasi opini publik',
+        'pos' => '(n)',
+      ),
+      'Escalate' => 
+      array (
+        'id' => 'Tereskalasi / Meningkat',
+        'pos' => '(v)',
+      ),
+      'Social media' => 
+      array (
+        'id' => 'Media sosial',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  30 => 
+  array (
+    'id' => 'Dinamika pasar modal menguraikan alasan mengapa fluktuasi harga komoditas global terjadi secara mendadak.',
+    'en' => 'Capital market dynamics elucidate the reason why global commodity price fluctuations occur abruptly',
+    'structure' => 'ra_why',
+    'pos_type' => 'object',
+    'conjunction' => 'why + S + V (Objek)',
+    'example' => 
+    array (
+      'id' => 'Laporan keuangan menjelaskan alasan mengapa laba turun.',
+      'en' => 'Financial reports explain why profits fell.',
+    ),
+    'vocab' => 
+    array (
+      'Capital market dynamics' => 
+      array (
+        'id' => 'Dinamika pasar modal',
+        'pos' => '(n)',
+      ),
+      'Elucidate' => 
+      array (
+        'id' => 'Menguraikan / Menjelaskan',
+        'pos' => '(v)',
+      ),
+      'Commodity price fluctuation' => 
+      array (
+        'id' => 'Fluktuasi harga komoditas',
+        'pos' => '(n)',
+      ),
+      'Abruptly' => 
+      array (
+        'id' => 'Secara mendadak',
+        'pos' => '(adv)',
+      ),
+    ),
+  ),
+);
 
     private $meeting15Paragraph = [
         'id' => 'Sebuah organisasi internasional meluncurkan program konservasi, yang dampaknya dirasakan oleh komunitas lokal yang tanahnya terancam oleh deforestasi. Kota besar modern membangun taman ekologis, di mana masyarakat dapat belajar tentang pentingnya menjaga keanekaragaman hayati. Tahun 2015 adalah titik penting, ketika negara-negara menandatangani Perjanjian Paris untuk mengurangi emisi karbon. Universitas riset global mendirikan pusat inovasi, yang penelitiannya berfokus pada pengembangan energi terbarukan. Banyak ahli menjelaskan alasan, mengapa kesadaran lingkungan harus ditingkatkan melalui pendidikan sejak usia dini.',
@@ -18549,220 +21639,1243 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
     }
 
     // Meeting 17 - Noun Clause
-    private $meeting17Questions = [
-        1 => [
-            'id' => 'NASA masih belum membuktikan secara visual apakah (whether) Mars mengandung air saat ini.',
-            'en' => 'NASA has not yet visually proven whether Mars contains water at present',
-            'example' => ['id' => 'Para ilmuwan belum membuktikan secara eksperimental apakah Jupiter memiliki inti padat.', 'en' => 'Scientists have not yet experimentally proven whether Jupiter has a solid core.'],
-            'vocab' => [
-                'Prove' => ['id' => 'Membuktikan', 'pos' => '(v)'],
-                'Visually' => ['id' => 'Secara visual', 'pos' => '(adv)'],
-                'Contain' => ['id' => 'Mengandung', 'pos' => '(v)'],
-                'Water' => ['id' => 'Air', 'pos' => '(n)'],
-                'At present' => ['id' => 'Saat ini', 'pos' => '(adv)']
-            ]
-        ],
-        2 => [
-            'id' => 'Kita tidak bisa mengasumsikan bahwa suhu Bumi akan bisa menurun secara sendirinya.',
-            'en' => 'We cannot assume that Earth\'s temperature will decrease on its own',
-            'example' => ['id' => 'Mereka tidak bisa mengasumsikan bahwa populasi hewan akan meningkat secara alami.', 'en' => 'They cannot assume that animal populations will increase naturally.'],
-            'vocab' => [
-                'Assume' => ['id' => 'Mengasumsikan', 'pos' => '(v)'],
-                'Temperature' => ['id' => 'Suhu', 'pos' => '(n)'],
-                'Decrease' => ['id' => 'Menurun', 'pos' => '(v)'],
-                'On its own' => ['id' => 'Secara sendirinya', 'pos' => '(adv)']
-            ]
-        ],
-        3 => [
-            'id' => 'Banyak orang bertanya-tanya apakah kehidupan ada di planet lain.',
-            'en' => 'Many people wonder whether life exists on other planets',
-            'example' => ['id' => 'Beberapa peneliti bertanya-tanya apakah air ada di bulan Saturnus.', 'en' => 'Some researchers wonder whether water exists on Saturn\'s moons.'],
-            'vocab' => [
-                'Wonder' => ['id' => 'Bertanya-tanya', 'pos' => '(v)'],
-                'Life' => ['id' => 'Kehidupan', 'pos' => '(n)'],
-                'Exist' => ['id' => 'Ada', 'pos' => '(v)'],
-                'Planet' => ['id' => 'Planet', 'pos' => '(n)']
-            ]
-        ],
-        4 => [
-            'id' => 'Jika sebuah populasi dari sebuah spesies menjadi terisolasi, mereka berpisah dalam apa yang disebut spesiasi.',
-            'en' => 'If a population of a species becomes isolated, they separate in what is called speciation',
-            'example' => ['id' => 'Ketika sebuah kelompok dari sebuah organisme menjadi terpisah, mereka berkembang dalam apa yang disebut adaptasi.', 'en' => 'When a group of an organism becomes separated, they develop in what is called adaptation.'],
-            'vocab' => [
-                'Population' => ['id' => 'Populasi', 'pos' => '(n)'],
-                'Species' => ['id' => 'Spesies', 'pos' => '(n)'],
-                'Isolated' => ['id' => 'Terisolasi', 'pos' => '(adj)'],
-                'Separate' => ['id' => 'Berpisah', 'pos' => '(v)'],
-                'Speciation' => ['id' => 'Spesiasi', 'pos' => '(n)']
-            ]
-        ],
-        5 => [
-            'id' => 'Negara mana yang akan menjadi tujuan migrasi adalah suatu fenomena yang masih diperdebatkan.',
-            'en' => 'Which country will become a migration destination is a phenomenon that is still debated',
-            'example' => ['id' => 'Pulau mana yang akan menjadi habitat terakhir adalah suatu misteri yang masih dipelajari.', 'en' => 'Which island will become the last habitat is a mystery that is still being studied.'],
-            'vocab' => [
-                'Country' => ['id' => 'Negara', 'pos' => '(n)'],
-                'Destination' => ['id' => 'Tujuan', 'pos' => '(n)'],
-                'Migration' => ['id' => 'Migrasi', 'pos' => '(n)'],
-                'Phenomenon' => ['id' => 'Fenomena', 'pos' => '(n)'],
-                'Debated' => ['id' => 'Diperdebatkan', 'pos' => '(v)']
-            ]
-        ],
-        6 => [
-            'id' => 'Bagaimana orang mesir kuno membangun piramida giza masih menjadi perdebatan dari para ahli sejarah.',
-            'en' => 'How the ancient Egyptians built the Giza pyramids is still a matter of debate among historians',
-            'example' => ['id' => 'Bagaimana suku Maya kuno membangun kota Tikal masih menjadi perdebatan dari para ahli arkeologi.', 'en' => 'How the ancient Maya built the city of Tikal is still a matter of debate among archaeologists.'],
-            'vocab' => [
-                'Ancient' => ['id' => 'Kuno', 'pos' => '(adj)'],
-                'Egyptian' => ['id' => 'Mesir', 'pos' => '(n)'],
-                'Build' => ['id' => 'Membangun', 'pos' => '(v)'],
-                'Pyramid' => ['id' => 'Piramida', 'pos' => '(n)'],
-                'Debate' => ['id' => 'Perdebatan', 'pos' => '(n)'],
-                'Historian' => ['id' => 'Ahli sejarah', 'pos' => '(n)']
-            ]
-        ],
-        7 => [
-            'id' => 'Bahwa manusia tidak menyebabkan kepunahan banyak spesies adalah peremehan.',
-            'en' => 'That humans do not cause the extinction of many species is an understatement',
-            'example' => ['id' => 'Bahwa teknologi tidak menyebabkan polusi udara adalah kesalahpahaman.', 'en' => 'That technology does not cause air pollution is a misconception.'],
-            'vocab' => [
-                'Cause' => ['id' => 'Menyebabkan', 'pos' => '(v)'],
-                'Extinction' => ['id' => 'Kepunahan', 'pos' => '(n)'],
-                'Species' => ['id' => 'Spesies', 'pos' => '(n)'],
-                'Understatement' => ['id' => 'Peremehan', 'pos' => '(n)']
-            ]
-        ],
-        8 => [
-            'id' => 'Kita mengelompokkan makhluk hidup melalui apa yang disebut taxonomy.',
-            'en' => 'We classify living things through what is called taxonomy',
-            'example' => ['id' => 'Kita mengorganisir tumbuhan melalui apa yang disebut botani.', 'en' => 'We organize plants through what is called botany.'],
-            'vocab' => [
-                'Classify' => ['id' => 'Mengelompokkan', 'pos' => '(v)'],
-                'Living things' => ['id' => 'Makhluk hidup', 'pos' => '(n)'],
-                'Taxonomy' => ['id' => 'Taxonomy', 'pos' => '(n)']
-            ]
-        ],
-        9 => [
-            'id' => 'Faktor-faktor yang menentukan bagaimana manusia berinteraksi dengan lingkungan adalah komplek.',
-            'en' => 'The factors that determine how humans interact with the environment are complex',
-            'example' => ['id' => 'Elemen-elemen yang menentukan bagaimana organisme beradaptasi dengan habitat adalah beragam.', 'en' => 'The elements that determine how organisms adapt to habitats are diverse.'],
-            'vocab' => [
-                'Factor' => ['id' => 'Faktor', 'pos' => '(n)'],
-                'Determine' => ['id' => 'Menentukan', 'pos' => '(v)'],
-                'Interact' => ['id' => 'Berinteraksi', 'pos' => '(v)'],
-                'Environment' => ['id' => 'Lingkungan', 'pos' => '(n)'],
-                'Complex' => ['id' => 'Komplek', 'pos' => '(adj)']
-            ]
-        ],
-        10 => [
-            'id' => 'Teori Perdagangan Baru menjelaskan mengapa banyak perdagangan dari ekonomi maju terdiri dari komoditas terbedakan yang dihasilkan dari kondisi kompetisi yang tidak sempurna.',
-            'en' => 'New Trade Theory explains why much trade from advanced economies consists of differentiated commodities produced from imperfect competition conditions',
-            'example' => ['id' => 'Teori Ekonomi Klasik menjelaskan mengapa banyak transaksi dari pasar bebas terdiri dari barang standar yang dihasilkan dari kondisi persaingan yang sempurna.', 'en' => 'Classical Economic Theory explains why many transactions from free markets consist of standard goods produced from perfect competition conditions.'],
-            'vocab' => [
-                'Trade' => ['id' => 'Perdagangan', 'pos' => '(n)'],
-                'Advanced economy' => ['id' => 'Ekonomi maju', 'pos' => '(n)'],
-                'Consist of' => ['id' => 'Terdiri dari', 'pos' => '(v)'],
-                'Commodity' => ['id' => 'Komoditas', 'pos' => '(n)'],
-                'Differentiated' => ['id' => 'Terbedakan', 'pos' => '(adj)'],
-                'Competition' => ['id' => 'Kompetisi', 'pos' => '(n)']
-            ]
-        ],
-        11 => [
-            'id' => 'Kapan manusia mulai menghuni Australia masih belum dapat secara akurat ditentukan.',
-            'en' => 'When humans began to inhabit Australia has not yet been accurately determined',
-            'example' => ['id' => 'Kapan dinosaurus mulai menghuni Amerika masih belum dapat secara pasti ditentukan.', 'en' => 'When dinosaurs began to inhabit America has not yet been certainly determined.'],
-            'vocab' => [
-                'Inhabit' => ['id' => 'Menghuni', 'pos' => '(v)'],
-                'Accurately' => ['id' => 'Secara akurat', 'pos' => '(adv)'],
-                'Determined' => ['id' => 'Ditentukan', 'pos' => '(v)']
-            ]
-        ],
-        12 => [
-            'id' => 'Di Afrika Barat, dimana sedimen dibuang menyebabkan kerusakan yang signifikan terhadap terumbu karang di pesisir Kenya.',
-            'en' => 'In West Africa, where sediment is dumped causes significant damage to coral reefs off the coast of Kenya',
-            'example' => ['id' => 'Di Asia Tenggara, dimana limbah dibuang menyebabkan kerusakan yang serius terhadap ekosistem sungai di pesisir Thailand.', 'en' => 'In Southeast Asia, where waste is dumped causes serious damage to river ecosystems off the coast of Thailand.'],
-            'vocab' => [
-                'Sediment' => ['id' => 'Sedimen', 'pos' => '(n)'],
-                'Dump' => ['id' => 'Dibuang', 'pos' => '(v)'],
-                'Damage' => ['id' => 'Kerusakan', 'pos' => '(n)'],
-                'Significant' => ['id' => 'Signifikan', 'pos' => '(adj)'],
-                'Coral reef' => ['id' => 'Terumbu karang', 'pos' => '(n)'],
-                'Coast' => ['id' => 'Pesisir', 'pos' => '(n)']
-            ]
-        ],
-        13 => [
-            'id' => 'Apa yang mungkin bernilai bagi kita di masa depan adalah hampir mustahil untuk diprediksi.',
-            'en' => 'What might be valuable to us in the future is almost impossible to predict',
-            'example' => ['id' => 'Apa yang mungkin berguna bagi kita di masa lalu adalah hampir mustahil untuk diingat.', 'en' => 'What might be useful to us in the past is almost impossible to remember.'],
-            'vocab' => [
-                'Valuable' => ['id' => 'Bernilai', 'pos' => '(adj)'],
-                'Future' => ['id' => 'Masa depan', 'pos' => '(n)'],
-                'Impossible' => ['id' => 'Mustahil', 'pos' => '(adj)'],
-                'Predict' => ['id' => 'Diprediksi', 'pos' => '(v)']
-            ]
-        ],
-        14 => [
-            'id' => 'Beberapa merasa bahwa pemerintah dan perusahaan memiliki pengaruh yang lebih besar daripada individu terhadap keanekaragaman hayati lokal dan global.',
-            'en' => 'Some feel that governments and companies have a greater influence than individuals on local and global biodiversity',
-            'example' => ['id' => 'Beberapa berpendapat bahwa universitas dan institusi memiliki dampak yang lebih besar daripada individu terhadap inovasi teknologi lokal dan global.', 'en' => 'Some argue that universities and institutions have a greater impact than individuals on local and global technological innovation.'],
-            'vocab' => [
-                'Government' => ['id' => 'Pemerintah', 'pos' => '(n)'],
-                'Company' => ['id' => 'Perusahaan', 'pos' => '(n)'],
-                'Influence' => ['id' => 'Pengaruh', 'pos' => '(n)'],
-                'Individual' => ['id' => 'Individu', 'pos' => '(n)'],
-                'Biodiversity' => ['id' => 'Keanekaragaman hayati', 'pos' => '(n)']
-            ]
-        ],
-        15 => [
-            'id' => 'Ini masih belum jelas apakah spesies burung Carolina parakeet bersarang di musim semi atau musim panas.',
-            'en' => 'It is still unclear whether the Carolina parakeet bird species nested in spring or summer',
-            'example' => ['id' => 'Ini masih belum jelas apakah spesies ikan Coelacanth berkembang biak di musim hujan atau musim kemarau.', 'en' => 'It is still unclear whether the Coelacanth fish species reproduces in rainy season or dry season.'],
-            'vocab' => [
-                'Unclear' => ['id' => 'Belum jelas', 'pos' => '(adj)'],
-                'Bird species' => ['id' => 'Spesies burung', 'pos' => '(n)'],
-                'Nest' => ['id' => 'Bersarang', 'pos' => '(v)'],
-                'Spring' => ['id' => 'Musim semi', 'pos' => '(n)'],
-                'Summer' => ['id' => 'Musim panas', 'pos' => '(n)']
-            ]
-        ],
-        16 => [
-            'id' => 'Apa yang terjadi di pada suku Anasazi sebelum abad 12 menjadi bahan perdebatan banyak ahli.',
-            'en' => 'What happened to the Anasazi tribe before the 12th century is a matter of debate among many experts',
-            'example' => ['id' => 'Apa yang terjadi pada suku Inca sebelum abad 16 menjadi bahan perdebatan banyak sejarawan.', 'en' => 'What happened to the Inca tribe before the 16th century is a matter of debate among many historians.'],
-            'vocab' => [
-                'Happen' => ['id' => 'Terjadi', 'pos' => '(v)'],
-                'Tribe' => ['id' => 'Suku', 'pos' => '(n)'],
-                'Century' => ['id' => 'Abad', 'pos' => '(n)'],
-                'Matter of debate' => ['id' => 'Bahan perdebatan', 'pos' => '(n)'],
-                'Expert' => ['id' => 'Ahli', 'pos' => '(n)']
-            ]
-        ],
-        17 => [
-            'id' => 'Apa yang ahli ekonomi acu sebagai sebuah pilihan marginal adalah pilihan untuk memproduksi atau mengkonsumsi jasa atau barang selanjutnya.',
-            'en' => 'What economists refer to as a marginal choice is the choice to produce or consume the next service or good',
-            'example' => ['id' => 'Apa yang ahli biologi acu sebagai sebuah mutasi genetik adalah perubahan untuk menghasilkan atau mengadaptasi sifat atau karakteristik selanjutnya.', 'en' => 'What biologists refer to as a genetic mutation is the change to produce or adapt the next trait or characteristic.'],
-            'vocab' => [
-                'Economist' => ['id' => 'Ahli ekonomi', 'pos' => '(n)'],
-                'Refer to' => ['id' => 'Acu sebagai', 'pos' => '(v)'],
-                'Marginal choice' => ['id' => 'Pilihan marginal', 'pos' => '(n)'],
-                'Produce' => ['id' => 'Memproduksi', 'pos' => '(v)'],
-                'Consume' => ['id' => 'Mengkonsumsi', 'pos' => '(v)'],
-                'Service' => ['id' => 'Jasa', 'pos' => '(n)'],
-                'Good' => ['id' => 'Barang', 'pos' => '(n)']
-            ]
-        ],
-        18 => [
-            'id' => 'Apa yang ratu lebah konsumsi berbeda dengan apa yang lebah pekerja konsumsi.',
-            'en' => 'What the queen bee consumes differs from what worker bees consume',
-            'example' => ['id' => 'Apa yang burung hantu konsumsi berbeda dengan apa yang burung elang konsumsi.', 'en' => 'What owls consume differs from what eagles consume.'],
-            'vocab' => [
-                'Queen bee' => ['id' => 'Ratu lebah', 'pos' => '(n)'],
-                'Consume' => ['id' => 'Konsumsi', 'pos' => '(v)'],
-                'Differ' => ['id' => 'Berbeda', 'pos' => '(v)'],
-                'Worker bee' => ['id' => 'Lebah pekerja', 'pos' => '(n)']
-            ]
-        ]
-    ];
+    private $meeting17Questions = array (
+  1 => 
+  array (
+    'id' => 'Bahwa aktivitas antropogenik telah mempercepat laju kepunahan spesies global merupakan konsensus ilmiah yang tak terbantahkan.',
+    'en' => 'That anthropogenic activities have accelerated the rate of global species extinction is an indisputable scientific consensus',
+    'structure' => 'nc_subject',
+    'conjunction' => 'That-Clause (Sebagai Subjek)',
+    'pos_type' => 'subject',
+    'example' => 
+    array (
+      'id' => 'Bahwa bumi berputar mengelilingi matahari adalah fakta.',
+      'en' => 'That the Earth orbits the Sun is a fact.',
+    ),
+    'vocab' => 
+    array (
+      'Anthropogenic activity' => 
+      array (
+        'id' => 'Aktivitas antropogenik',
+        'pos' => '(n)',
+      ),
+      'Accelerate' => 
+      array (
+        'id' => 'Mempercepat',
+        'pos' => '(v)',
+      ),
+      'Species extinction rate' => 
+      array (
+        'id' => 'Laju kepunahan spesies',
+        'pos' => '(n)',
+      ),
+      'Indisputable' => 
+      array (
+        'id' => 'Tak terbantahkan',
+        'pos' => '(adj)',
+      ),
+      'Scientific consensus' => 
+      array (
+        'id' => 'Konsensus ilmiah',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  2 => 
+  array (
+    'id' => 'Bagaimana peradaban kuno mendirikan monumen megalitik dengan presisi geometris tinggi terus membingungkan para arkeolog.',
+    'en' => 'How ancient civilizations erected megalithic monuments with high geometric precision continues to baffle archaeologists',
+    'structure' => 'nc_subject',
+    'conjunction' => 'Q-Word: How (Sebagai Subjek)',
+    'pos_type' => 'subject',
+    'example' => 
+    array (
+      'id' => 'Bagaimana piramida dibangun masih menjadi misteri.',
+      'en' => 'How pyramids were built is still a mystery.',
+    ),
+    'vocab' => 
+    array (
+      'Ancient civilization' => 
+      array (
+        'id' => 'Peradaban kuno',
+        'pos' => '(n)',
+      ),
+      'Erect' => 
+      array (
+        'id' => 'Mendirikan',
+        'pos' => '(v)',
+      ),
+      'Megalithic monument' => 
+      array (
+        'id' => 'Monumen megalitik',
+        'pos' => '(n)',
+      ),
+      'Geometric precision' => 
+      array (
+        'id' => 'Presisi geometris',
+        'pos' => '(n)',
+      ),
+      'Baffle' => 
+      array (
+        'id' => 'Membingungkan',
+        'pos' => '(v)',
+      ),
+      'Archaeologist' => 
+      array (
+        'id' => 'Arkeolog',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  3 => 
+  array (
+    'id' => 'Apakah kecerdasan buatan umum dapat mencapai kesadaran mandiri tetap menjadi perdebatan filosofis yang mendalam.',
+    'en' => 'Whether artificial general intelligence can attain autonomous consciousness remains a profound philosophical debate',
+    'structure' => 'nc_subject',
+    'conjunction' => 'Whether-Clause (Sebagai Subjek)',
+    'pos_type' => 'subject',
+    'example' => 
+    array (
+      'id' => 'Apakah vaksin efektif sedang diuji.',
+      'en' => 'Whether the vaccine is effective is being tested.',
+    ),
+    'vocab' => 
+    array (
+      'Artificial general intelligence' => 
+      array (
+        'id' => 'Kecerdasan buatan umum',
+        'pos' => '(n)',
+      ),
+      'Attain' => 
+      array (
+        'id' => 'Mencapai',
+        'pos' => '(v)',
+      ),
+      'Autonomous consciousness' => 
+      array (
+        'id' => 'Kesadaran mandiri',
+        'pos' => '(n)',
+      ),
+      'Profound' => 
+      array (
+        'id' => 'Mendalam',
+        'pos' => '(adj)',
+      ),
+      'Philosophical debate' => 
+      array (
+        'id' => 'Perdebatan filosofis',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  4 => 
+  array (
+    'id' => 'Apa yang memicu keruntuhan peradaban Maya kuno masih diselidiki secara intensif oleh para sejarawan.',
+    'en' => 'What triggered the collapse of the ancient Maya civilization is still intensively investigated by historians',
+    'structure' => 'nc_subject',
+    'conjunction' => 'Q-Word: What (Sebagai Subjek)',
+    'pos_type' => 'subject',
+    'example' => 
+    array (
+      'id' => 'Apa yang terjadi kemarin mengejutkan semua orang.',
+      'en' => 'What happened yesterday surprised everyone.',
+    ),
+    'vocab' => 
+    array (
+      'Trigger' => 
+      array (
+        'id' => 'Memicu',
+        'pos' => '(v)',
+      ),
+      'Collapse' => 
+      array (
+        'id' => 'Keruntuhan',
+        'pos' => '(n)',
+      ),
+      'Ancient Maya civilization' => 
+      array (
+        'id' => 'Peradaban Maya kuno',
+        'pos' => '(n)',
+      ),
+      'Intensively investigated' => 
+      array (
+        'id' => 'Diselidiki secara intensif',
+        'pos' => '(v)',
+      ),
+      'Historian' => 
+      array (
+        'id' => 'Sejarawan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  5 => 
+  array (
+    'id' => 'Para astrofisikawan belum dapat memastikan secara empiris apakah biosfer ekstraterestrial eksis di exoplanet lain.',
+    'en' => 'Astrophysicists have not been able to empirically ascertain whether extraterrestrial biospheres exist on other exoplanets',
+    'structure' => 'nc_object',
+    'conjunction' => 'Whether-Clause (Objek Kata Kerja)',
+    'pos_type' => 'object',
+    'example' => 
+    array (
+      'id' => 'Mereka bertanya apakah ada kehidupan di Mars.',
+      'en' => 'They ask whether there is life on Mars.',
+    ),
+    'vocab' => 
+    array (
+      'Astrophysicist' => 
+      array (
+        'id' => 'Astrofisikawan',
+        'pos' => '(n)',
+      ),
+      'Empirically ascertain' => 
+      array (
+        'id' => 'Memastikan secara empiris',
+        'pos' => '(v)',
+      ),
+      'Extraterrestrial biosphere' => 
+      array (
+        'id' => 'Biosfer ekstraterestrial',
+        'pos' => '(n)',
+      ),
+      'Exist' => 
+      array (
+        'id' => 'Eksis / Ada',
+        'pos' => '(v)',
+      ),
+      'Exoplanet' => 
+      array (
+        'id' => 'Exoplanet',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  6 => 
+  array (
+    'id' => 'Para pembuat kebijakan tidak boleh mengasumsikan bahwa degradasi biosfer global akan pulih secara spontan.',
+    'en' => 'Policymakers must not assume that global biosphere degradation will recover spontaneously',
+    'structure' => 'nc_object',
+    'conjunction' => 'That-Clause (Objek Kata Kerja)',
+    'pos_type' => 'object',
+    'example' => 
+    array (
+      'id' => 'Dokter mengetahui bahwa pasien perlu istirahat.',
+      'en' => 'The doctor knows that the patient needs rest.',
+    ),
+    'vocab' => 
+    array (
+      'Policymaker' => 
+      array (
+        'id' => 'Pembuat kebijakan',
+        'pos' => '(n)',
+      ),
+      'Assume' => 
+      array (
+        'id' => 'Mengasumsikan',
+        'pos' => '(v)',
+      ),
+      'Biosphere degradation' => 
+      array (
+        'id' => 'Degradasi biosfer',
+        'pos' => '(n)',
+      ),
+      'Recover spontaneously' => 
+      array (
+        'id' => 'Pulih secara spontan',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  7 => 
+  array (
+    'id' => 'Teori Perdagangan Modern mengelaborasi mengapa negara-negara maju mendominasi pertukaran komoditas bernilai tambah tinggi.',
+    'en' => 'Modern Trade Theory elaborates why developed countries dominate the exchange of high-value-added commodities',
+    'structure' => 'nc_object',
+    'conjunction' => 'Q-Word: Why (Objek Kata Kerja)',
+    'pos_type' => 'object',
+    'example' => 
+    array (
+      'id' => 'Buku ini menjelaskan mengapa perang terjadi.',
+      'en' => 'This book explains why the war occurred.',
+    ),
+    'vocab' => 
+    array (
+      'Modern Trade Theory' => 
+      array (
+        'id' => 'Teori Perdagangan Modern',
+        'pos' => '(n)',
+      ),
+      'Elaborate' => 
+      array (
+        'id' => 'Mengelaborasi / Menjelaskan',
+        'pos' => '(v)',
+      ),
+      'Developed country' => 
+      array (
+        'id' => 'Negara maju',
+        'pos' => '(n)',
+      ),
+      'Dominate' => 
+      array (
+        'id' => 'Mendominasi',
+        'pos' => '(v)',
+      ),
+      'Commodity exchange' => 
+      array (
+        'id' => 'Pertukaran komoditas',
+        'pos' => '(n)',
+      ),
+      'High-value-added' => 
+      array (
+        'id' => 'Bernilai tambah tinggi',
+        'pos' => '(adj)',
+      ),
+    ),
+  ),
+  8 => 
+  array (
+    'id' => 'Para ahli saraf mendemonstrasikan bagaimana plastisitas sinaptik memfasilitasi pembentukan memori jangka panjang.',
+    'en' => 'Neuroscientists demonstrated how synaptic plasticity facilitates the formation of long-term memory',
+    'structure' => 'nc_object',
+    'conjunction' => 'Q-Word: How (Objek Kata Kerja)',
+    'pos_type' => 'object',
+    'example' => 
+    array (
+      'id' => 'Guru menunjukkan bagaimana rumus bekerja.',
+      'en' => 'The teacher showed how the formula works.',
+    ),
+    'vocab' => 
+    array (
+      'Neuroscientist' => 
+      array (
+        'id' => 'Ahli saraf',
+        'pos' => '(n)',
+      ),
+      'Demonstrate' => 
+      array (
+        'id' => 'Mendemonstrasikan',
+        'pos' => '(v)',
+      ),
+      'Synaptic plasticity' => 
+      array (
+        'id' => 'Plastisitas sinaptik',
+        'pos' => '(n)',
+      ),
+      'Facilitate' => 
+      array (
+        'id' => 'Memfasilitasi',
+        'pos' => '(v)',
+      ),
+      'Long-term memory formation' => 
+      array (
+        'id' => 'Pembentukan memori jangka panjang',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  9 => 
+  array (
+    'id' => 'Para ahli biologi taksonomi mengklasifikasikan organisme hidup melalui apa yang dirumuskan sebagai filogenetika molekuler.',
+    'en' => 'Taxonomic biologists classify living organisms through what is formulated as molecular phylogenetics',
+    'structure' => 'nc_prep_obj',
+    'conjunction' => 'Q-Word: What (Objek Preposisi)',
+    'pos_type' => 'prep_obj',
+    'example' => 
+    array (
+      'id' => 'Mereka berdiskusi tentang apa yang terjadi.',
+      'en' => 'They talked about what happened.',
+    ),
+    'vocab' => 
+    array (
+      'Taxonomic biologist' => 
+      array (
+        'id' => 'Ahli biologi taksonomi',
+        'pos' => '(n)',
+      ),
+      'Classify' => 
+      array (
+        'id' => 'Mengklasifikasikan',
+        'pos' => '(v)',
+      ),
+      'Living organism' => 
+      array (
+        'id' => 'Organisme hidup',
+        'pos' => '(n)',
+      ),
+      'Formulate' => 
+      array (
+        'id' => 'Merumuskan',
+        'pos' => '(v)',
+      ),
+      'Molecular phylogenetics' => 
+      array (
+        'id' => 'Filogenetika molekuler',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  10 => 
+  array (
+    'id' => 'Komisi independen memfokuskan penyelidikan pada mengapa protokol mitigasi risiko finansial diabaikan.',
+    'en' => 'The independent commission focused the investigation on why financial risk mitigation protocols were disregarded',
+    'structure' => 'nc_prep_obj',
+    'conjunction' => 'Q-Word: Why (Objek Preposisi)',
+    'pos_type' => 'prep_obj',
+    'example' => 
+    array (
+      'id' => 'Laporan fokus pada mengapa sistem gagal.',
+      'en' => 'The report focuses on why the system failed.',
+    ),
+    'vocab' => 
+    array (
+      'Independent commission' => 
+      array (
+        'id' => 'Komisi independen',
+        'pos' => '(n)',
+      ),
+      'Focus on' => 
+      array (
+        'id' => 'Memfokuskan pada',
+        'pos' => '(v)',
+      ),
+      'Investigation' => 
+      array (
+        'id' => 'Penyelidikan',
+        'pos' => '(n)',
+      ),
+      'Risk mitigation protocol' => 
+      array (
+        'id' => 'Protokol mitigasi risiko',
+        'pos' => '(n)',
+      ),
+      'Disregard' => 
+      array (
+        'id' => 'Mengabaikan',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  11 => 
+  array (
+    'id' => 'Keberhasilan diplomasi internasional bergantung pada bagaimana negara-negara bernegosiasi mengenai kuota emisi karbon.',
+    'en' => 'The success of international diplomacy depends on how sovereign nations negotiate regarding carbon emission quotas',
+    'structure' => 'nc_prep_obj',
+    'conjunction' => 'Q-Word: How (Objek Preposisi)',
+    'pos_type' => 'prep_obj',
+    'example' => 
+    array (
+      'id' => 'Hasilnya tergantung pada bagaimana kita bekerja.',
+      'en' => 'The outcome depends on how we work.',
+    ),
+    'vocab' => 
+    array (
+      'International diplomacy' => 
+      array (
+        'id' => 'Diplomasi internasional',
+        'pos' => '(n)',
+      ),
+      'Depend on' => 
+      array (
+        'id' => 'Bergantung pada',
+        'pos' => '(v)',
+      ),
+      'Sovereign nation' => 
+      array (
+        'id' => 'Negara berdaulat',
+        'pos' => '(n)',
+      ),
+      'Negotiate' => 
+      array (
+        'id' => 'Bernegosiasi',
+        'pos' => '(v)',
+      ),
+      'Carbon emission quota' => 
+      array (
+        'id' => 'Kuota emisi karbon',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  12 => 
+  array (
+    'id' => 'Pemerintah daerah tidak memberikan kepastian tentang di mana fasilitas pembuangan limbah nuklir akan dibangun.',
+    'en' => 'The regional government gave no certainty about where the nuclear waste disposal facility will be constructed',
+    'structure' => 'nc_prep_obj',
+    'conjunction' => 'Q-Word: Where (Objek Preposisi)',
+    'pos_type' => 'prep_obj',
+    'example' => 
+    array (
+      'id' => 'Polisi mencari info tentang di mana mobil itu diparkir.',
+      'en' => 'Police sought info about where the car was parked.',
+    ),
+    'vocab' => 
+    array (
+      'Regional government' => 
+      array (
+        'id' => 'Pemerintah daerah',
+        'pos' => '(n)',
+      ),
+      'Give certainty' => 
+      array (
+        'id' => 'Memberikan kepastian',
+        'pos' => '(v)',
+      ),
+      'Nuclear waste disposal facility' => 
+      array (
+        'id' => 'Fasilitas pembuangan limbah nuklir',
+        'pos' => '(n)',
+      ),
+      'Construct' => 
+      array (
+        'id' => 'Membangun',
+        'pos' => '(v)',
+      ),
+    ),
+  ),
+  13 => 
+  array (
+    'id' => 'Kekhawatiran utama para ekonom adalah apakah inflasi yang persisten akan menekan daya beli masyarakat.',
+    'en' => 'The primary concern of economists is whether persistent inflation will suppress public purchasing power',
+    'structure' => 'nc_complement',
+    'conjunction' => 'Whether-Clause (Pelengkap Subjek)',
+    'pos_type' => 'complement',
+    'example' => 
+    array (
+      'id' => 'Pertanyaannya adalah apakah dia akan datang.',
+      'en' => 'The question is whether he will come.',
+    ),
+    'vocab' => 
+    array (
+      'Primary concern' => 
+      array (
+        'id' => 'Kekhawatiran utama',
+        'pos' => '(n)',
+      ),
+      'Economist' => 
+      array (
+        'id' => 'Ekonom',
+        'pos' => '(n)',
+      ),
+      'Persistent inflation' => 
+      array (
+        'id' => 'Inflasi persisten',
+        'pos' => '(n)',
+      ),
+      'Suppress' => 
+      array (
+        'id' => 'Menekan',
+        'pos' => '(v)',
+      ),
+      'Purchasing power' => 
+      array (
+        'id' => 'Daya beli',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  14 => 
+  array (
+    'id' => 'Argumen fundamental dari teori evolusi adalah bahwa seleksi alam mendorong adaptasi genetik suatu populasi.',
+    'en' => 'The fundamental argument of evolutionary theory is that natural selection drives the genetic adaptation of a population',
+    'structure' => 'nc_complement',
+    'conjunction' => 'That-Clause (Pelengkap Subjek)',
+    'pos_type' => 'complement',
+    'example' => 
+    array (
+      'id' => 'Faktanya adalah bahwa proyek ini sukses.',
+      'en' => 'The fact is that this project succeeded.',
+    ),
+    'vocab' => 
+    array (
+      'Fundamental argument' => 
+      array (
+        'id' => 'Argumen fundamental',
+        'pos' => '(n)',
+      ),
+      'Evolutionary theory' => 
+      array (
+        'id' => 'Teori evolusi',
+        'pos' => '(n)',
+      ),
+      'Natural selection' => 
+      array (
+        'id' => 'Seleksi alam',
+        'pos' => '(n)',
+      ),
+      'Drive' => 
+      array (
+        'id' => 'Mendorong',
+        'pos' => '(v)',
+      ),
+      'Genetic adaptation' => 
+      array (
+        'id' => 'Adaptasi genetik',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  15 => 
+  array (
+    'id' => 'Tantangan terbesar dalam rekayasa robotika adalah bagaimana mesin cerdas dapat menginterpretasikan emosi manusia secara akurat.',
+    'en' => 'The greatest challenge in robotics engineering is how intelligent machines can accurately interpret human emotions',
+    'structure' => 'nc_complement',
+    'conjunction' => 'Q-Word: How (Pelengkap Subjek)',
+    'pos_type' => 'complement',
+    'example' => 
+    array (
+      'id' => 'Masalah utamanya adalah bagaimana kita menyelesaikannya.',
+      'en' => 'The main issue is how we solve it.',
+    ),
+    'vocab' => 
+    array (
+      'Greatest challenge' => 
+      array (
+        'id' => 'Tantangan terbesar',
+        'pos' => '(n)',
+      ),
+      'Robotics engineering' => 
+      array (
+        'id' => 'Rekayasa robotika',
+        'pos' => '(n)',
+      ),
+      'Intelligent machine' => 
+      array (
+        'id' => 'Mesin cerdas',
+        'pos' => '(n)',
+      ),
+      'Accurately interpret' => 
+      array (
+        'id' => 'Menginterpretasikan secara akurat',
+        'pos' => '(v)',
+      ),
+      'Human emotion' => 
+      array (
+        'id' => 'Emosi manusia',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  16 => 
+  array (
+    'id' => 'Laporan komprehensif tentang degradasi terumbu karang di kawasan Pasifik menarik perhatian organisasi lingkungan global.',
+    'en' => 'The comprehensive report on coral reef degradation in the Pacific region attracted the attention of global environmental organizations',
+    'structure' => 'pp_adjective',
+    'conjunction' => 'Prep Phrase (Sebagai Adjective)',
+    'pos_type' => 'prep_adj',
+    'example' => 
+    array (
+      'id' => 'Buku tentang sejarah itu sangat menarik.',
+      'en' => 'The book on history is very interesting.',
+    ),
+    'vocab' => 
+    array (
+      'Comprehensive report' => 
+      array (
+        'id' => 'Laporan komprehensif',
+        'pos' => '(n)',
+      ),
+      'Coral reef degradation' => 
+      array (
+        'id' => 'Degradasi terumbu karang',
+        'pos' => '(n)',
+      ),
+      'Pacific region' => 
+      array (
+        'id' => 'Kawasan Pasifik',
+        'pos' => '(n)',
+      ),
+      'Attract attention' => 
+      array (
+        'id' => 'Menarik perhatian',
+        'pos' => '(v)',
+      ),
+      'Environmental organization' => 
+      array (
+        'id' => 'Organisasi lingkungan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  17 => 
+  array (
+    'id' => 'Material superkonduktor dengan resistensi listrik nol membuka era baru dalam transmisi energi terbarukan.',
+    'en' => 'Superconducting materials with zero electrical resistance open a new era in renewable energy transmission',
+    'structure' => 'pp_adjective',
+    'conjunction' => 'Prep Phrase (Sebagai Adjective)',
+    'pos_type' => 'prep_adj',
+    'example' => 
+    array (
+      'id' => 'Mobil dengan teknologi listrik sangat efisien.',
+      'en' => 'Cars with electric technology are very efficient.',
+    ),
+    'vocab' => 
+    array (
+      'Superconducting material' => 
+      array (
+        'id' => 'Material superkonduktor',
+        'pos' => '(n)',
+      ),
+      'Zero electrical resistance' => 
+      array (
+        'id' => 'Resistensi listrik nol',
+        'pos' => '(n)',
+      ),
+      'Open a new era' => 
+      array (
+        'id' => 'Membuka era baru',
+        'pos' => '(v)',
+      ),
+      'Renewable energy transmission' => 
+      array (
+        'id' => 'Transmisi energi terbarukan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  18 => 
+  array (
+    'id' => 'Kolaborasi strategis antara universitas riset dan industri teknologi mempercepat komersialisasi paten inovatif.',
+    'en' => 'Strategic collaboration between research universities and technology industries accelerates the commercialization of innovative patents',
+    'structure' => 'pp_adjective',
+    'conjunction' => 'Prep Phrase (Sebagai Adjective)',
+    'pos_type' => 'prep_adj',
+    'example' => 
+    array (
+      'id' => 'Hubungan antara kedua negara membaik.',
+      'en' => 'The relation between the two countries improved.',
+    ),
+    'vocab' => 
+    array (
+      'Strategic collaboration' => 
+      array (
+        'id' => 'Kolaborasi strategis',
+        'pos' => '(n)',
+      ),
+      'Research university' => 
+      array (
+        'id' => 'Universitas riset',
+        'pos' => '(n)',
+      ),
+      'Technology industry' => 
+      array (
+        'id' => 'Industri teknologi',
+        'pos' => '(n)',
+      ),
+      'Accelerate' => 
+      array (
+        'id' => 'Mempercepat',
+        'pos' => '(v)',
+      ),
+      'Commercialization' => 
+      array (
+        'id' => 'Komersialisasi',
+        'pos' => '(n)',
+      ),
+      'Innovative patent' => 
+      array (
+        'id' => 'Paten inovatif',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  19 => 
+  array (
+    'id' => 'Spesies mikroorganisme di bawah lapisan es Arktik mempertahankan metabolisme aktif pada suhu ekstrem.',
+    'en' => 'Microorganism species under the Arctic ice sheet maintain active metabolism at extreme temperatures',
+    'structure' => 'pp_adjective',
+    'conjunction' => 'Prep Phrase (Sebagai Adjective)',
+    'pos_type' => 'prep_adj',
+    'example' => 
+    array (
+      'id' => 'Ikan di bawah air dingin bisa bertahan hidup.',
+      'en' => 'Fish under cold water can survive.',
+    ),
+    'vocab' => 
+    array (
+      'Microorganism species' => 
+      array (
+        'id' => 'Spesies mikroorganisme',
+        'pos' => '(n)',
+      ),
+      'Arctic ice sheet' => 
+      array (
+        'id' => 'Lapisan es Arktik',
+        'pos' => '(n)',
+      ),
+      'Maintain active metabolism' => 
+      array (
+        'id' => 'Mempertahankan metabolisme aktif',
+        'pos' => '(v)',
+      ),
+      'Extreme temperature' => 
+      array (
+        'id' => 'Suhu ekstrem',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  20 => 
+  array (
+    'id' => 'Protokol keamanan terhadap serangan siber melindungi integritas data finansial perbankan sentral.',
+    'en' => 'Security protocols against cyber attacks protect the integrity of central banking financial data',
+    'structure' => 'pp_adjective',
+    'conjunction' => 'Prep Phrase (Sebagai Adjective)',
+    'pos_type' => 'prep_adj',
+    'example' => 
+    array (
+      'id' => 'Perlindungan terhadap virus sangat penting.',
+      'en' => 'Protection against viruses is crucial.',
+    ),
+    'vocab' => 
+    array (
+      'Security protocol' => 
+      array (
+        'id' => 'Protokol keamanan',
+        'pos' => '(n)',
+      ),
+      'Cyber attack' => 
+      array (
+        'id' => 'Serangan siber',
+        'pos' => '(n)',
+      ),
+      'Protect integrity' => 
+      array (
+        'id' => 'Melindungi integritas',
+        'pos' => '(v)',
+      ),
+      'Central banking financial data' => 
+      array (
+        'id' => 'Data finansial perbankan sentral',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  21 => 
+  array (
+    'id' => 'Para delegasi diplomatik dari berbagai negara berkembang menandatangani deklarasi bersama tentang keadilan iklim.',
+    'en' => 'Diplomatic delegates from various developing nations signed a joint declaration on climate justice',
+    'structure' => 'pp_adjective',
+    'conjunction' => 'Prep Phrase (Sebagai Adjective)',
+    'pos_type' => 'prep_adj',
+    'example' => 
+    array (
+      'id' => 'Siswa dari sekolah lain datang berkunjung.',
+      'en' => 'Students from other schools visited.',
+    ),
+    'vocab' => 
+    array (
+      'Diplomatic delegate' => 
+      array (
+        'id' => 'Delegasi diplomatik',
+        'pos' => '(n)',
+      ),
+      'Developing nation' => 
+      array (
+        'id' => 'Negara berkembang',
+        'pos' => '(n)',
+      ),
+      'Sign' => 
+      array (
+        'id' => 'Menandatangani',
+        'pos' => '(v)',
+      ),
+      'Joint declaration' => 
+      array (
+        'id' => 'Deklarasi bersama',
+        'pos' => '(n)',
+      ),
+      'Climate justice' => 
+      array (
+        'id' => 'Keadilan iklim',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  22 => 
+  array (
+    'id' => 'Bukti empiris sepanjang abad kedua puluh mengonfirmasi percepatan migrasi penduduk ke wilayah perkotaan.',
+    'en' => 'Empirical evidence throughout the twentieth century confirms the acceleration of population migration to urban areas',
+    'structure' => 'pp_adjective',
+    'conjunction' => 'Prep Phrase (Sebagai Adjective)',
+    'pos_type' => 'prep_adj',
+    'example' => 
+    array (
+      'id' => 'Data sepanjang tahun lalu menunjukkan kenaikan.',
+      'en' => 'Data throughout last year shows an increase.',
+    ),
+    'vocab' => 
+    array (
+      'Empirical evidence' => 
+      array (
+        'id' => 'Bukti empiris',
+        'pos' => '(n)',
+      ),
+      'Twentieth century' => 
+      array (
+        'id' => 'Abad kedua puluh',
+        'pos' => '(n)',
+      ),
+      'Confirm' => 
+      array (
+        'id' => 'Mengonfirmasi',
+        'pos' => '(v)',
+      ),
+      'Acceleration' => 
+      array (
+        'id' => 'Percepatan',
+        'pos' => '(n)',
+      ),
+      'Population migration' => 
+      array (
+        'id' => 'Migrasi penduduk',
+        'pos' => '(n)',
+      ),
+      'Urban area' => 
+      array (
+        'id' => 'Wilayah perkotaan',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  23 => 
+  array (
+    'id' => 'Di laboratorium astrofisika modern, instrumen spektroskopi mengukur radiasi bintang dari galaksi terjauh.',
+    'en' => 'In modern astrophysics laboratories, spectroscopic instruments measure stellar radiation from distant galaxies',
+    'structure' => 'pp_adverb',
+    'conjunction' => 'Prep Phrase (Adverb di Awal)',
+    'pos_type' => 'prep_adv',
+    'example' => 
+    array (
+      'id' => 'Di universitas besar, riset didanai secara luas.',
+      'en' => 'In large universities, research is widely funded.',
+    ),
+    'vocab' => 
+    array (
+      'Modern astrophysics laboratory' => 
+      array (
+        'id' => 'Laboratorium astrofisika modern',
+        'pos' => '(n)',
+      ),
+      'Spectroscopic instrument' => 
+      array (
+        'id' => 'Instrumen spektroskopi',
+        'pos' => '(n)',
+      ),
+      'Measure' => 
+      array (
+        'id' => 'Mengukur',
+        'pos' => '(v)',
+      ),
+      'Stellar radiation' => 
+      array (
+        'id' => 'Radiasi bintang',
+        'pos' => '(n)',
+      ),
+      'Distant galaxy' => 
+      array (
+        'id' => 'Galaksi terjauh',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  24 => 
+  array (
+    'id' => 'Selama periode revolusi industri pertama, mekanisasi pabrik menggantikan tenaga kerja manual secara masif.',
+    'en' => 'During the first industrial revolution period, factory mechanization replaced manual labor massively',
+    'structure' => 'pp_adverb',
+    'conjunction' => 'Prep Phrase (Adverb di Awal)',
+    'pos_type' => 'prep_adv',
+    'example' => 
+    array (
+      'id' => 'Selama musim panas, suhu naik tinggi.',
+      'en' => 'During summer, temperatures rise high.',
+    ),
+    'vocab' => 
+    array (
+      'First industrial revolution' => 
+      array (
+        'id' => 'Revolusi industri pertama',
+        'pos' => '(n)',
+      ),
+      'Factory mechanization' => 
+      array (
+        'id' => 'Mekanisasi pabrik',
+        'pos' => '(n)',
+      ),
+      'Replace' => 
+      array (
+        'id' => 'Menggantikan',
+        'pos' => '(v)',
+      ),
+      'Manual labor' => 
+      array (
+        'id' => 'Tenaga kerja manual',
+        'pos' => '(n)',
+      ),
+      'Massively' => 
+      array (
+        'id' => 'Secara masif',
+        'pos' => '(adv)',
+      ),
+    ),
+  ),
+  25 => 
+  array (
+    'id' => 'Meskipun terjadi fluktuasi pasar global, ekonomi domestik mempertahankan laju pertumbuhan yang stabil.',
+    'en' => 'Despite global market fluctuations, the domestic economy maintained a stable growth rate',
+    'structure' => 'pp_adverb',
+    'conjunction' => 'Prep Phrase (Adverb di Awal)',
+    'pos_type' => 'prep_adv',
+    'example' => 
+    array (
+      'id' => 'Meskipun hujan lebat, acara tetap berlangsung.',
+      'en' => 'Despite heavy rain, the event continued.',
+    ),
+    'vocab' => 
+    array (
+      'Despite' => 
+      array (
+        'id' => 'Meskipun / Terlepas dari',
+        'pos' => '(prep)',
+      ),
+      'Global market fluctuation' => 
+      array (
+        'id' => 'Fluktuasi pasar global',
+        'pos' => '(n)',
+      ),
+      'Domestic economy' => 
+      array (
+        'id' => 'Ekonomi domestik',
+        'pos' => '(n)',
+      ),
+      'Maintain' => 
+      array (
+        'id' => 'Mempertahankan',
+        'pos' => '(v)',
+      ),
+      'Stable growth rate' => 
+      array (
+        'id' => 'Laju pertumbuhan stabil',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  26 => 
+  array (
+    'id' => 'Karena anomali geomagnetik yang ekstrem, komunikasi satelit di kutub utara mengalami gangguan transmisi sementara.',
+    'en' => 'Due to extreme geomagnetic anomalies, satellite communication in the North Pole experienced temporary transmission disruptions',
+    'structure' => 'pp_adverb',
+    'conjunction' => 'Prep Phrase (Adverb di Awal)',
+    'pos_type' => 'prep_adv',
+    'example' => 
+    array (
+      'id' => 'Karena cuaca buruk, penerbangan ditunda.',
+      'en' => 'Due to bad weather, flights were delayed.',
+    ),
+    'vocab' => 
+    array (
+      'Due to' => 
+      array (
+        'id' => 'Karena / Disebabkan oleh',
+        'pos' => '(prep)',
+      ),
+      'Extreme geomagnetic anomaly' => 
+      array (
+        'id' => 'Anomali geomagnetik ekstrem',
+        'pos' => '(n)',
+      ),
+      'Satellite communication' => 
+      array (
+        'id' => 'Komunikasi satelit',
+        'pos' => '(n)',
+      ),
+      'North Pole' => 
+      array (
+        'id' => 'Kutub utara',
+        'pos' => '(n)',
+      ),
+      'Temporary transmission disruption' => 
+      array (
+        'id' => 'Gangguan transmisi sementara',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  27 => 
+  array (
+    'id' => 'Menurut temuan penelitian terbaru, deforestasi di daerah tropis secara langsung mengganggu pola sirkulasi atmosfer global.',
+    'en' => 'According to the latest research findings, deforestation in tropical regions directly disrupts global atmospheric circulation patterns',
+    'structure' => 'pp_adverb',
+    'conjunction' => 'Prep Phrase (Adverb di Awal)',
+    'pos_type' => 'prep_adv',
+    'example' => 
+    array (
+      'id' => 'Menurut para ahli, olahraga menjaga kesehatan.',
+      'en' => 'According to experts, exercise maintains health.',
+    ),
+    'vocab' => 
+    array (
+      'According to' => 
+      array (
+        'id' => 'Menurut',
+        'pos' => '(prep)',
+      ),
+      'Latest research finding' => 
+      array (
+        'id' => 'Temuan penelitian terbaru',
+        'pos' => '(n)',
+      ),
+      'Deforestation' => 
+      array (
+        'id' => 'Deforestasi',
+        'pos' => '(n)',
+      ),
+      'Tropical region' => 
+      array (
+        'id' => 'Daerah tropis',
+        'pos' => '(n)',
+      ),
+      'Directly disrupt' => 
+      array (
+        'id' => 'Mengganggu secara langsung',
+        'pos' => '(v)',
+      ),
+      'Atmospheric circulation pattern' => 
+      array (
+        'id' => 'Pola sirkulasi atmosfer',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  28 => 
+  array (
+    'id' => 'Organisme eukariotik tidak dapat mempertahankan sintesis protein seluler tanpa pasokan energi mitokondria yang cukup.',
+    'en' => 'Eukaryotic organisms cannot maintain cellular protein synthesis without an adequate mitochondrial energy supply',
+    'structure' => 'pp_adverb',
+    'conjunction' => 'Prep Phrase (Adverb di Akhir)',
+    'pos_type' => 'prep_adv',
+    'example' => 
+    array (
+      'id' => 'Manusia tidak bisa hidup tanpa air.',
+      'en' => 'Humans cannot live without water.',
+    ),
+    'vocab' => 
+    array (
+      'Eukaryotic organism' => 
+      array (
+        'id' => 'Organisme eukariotik',
+        'pos' => '(n)',
+      ),
+      'Maintain' => 
+      array (
+        'id' => 'Mempertahankan',
+        'pos' => '(v)',
+      ),
+      'Cellular protein synthesis' => 
+      array (
+        'id' => 'Sintesis protein seluler',
+        'pos' => '(n)',
+      ),
+      'Without' => 
+      array (
+        'id' => 'Tanpa',
+        'pos' => '(prep)',
+      ),
+      'Adequate mitochondrial energy supply' => 
+      array (
+        'id' => 'Pasokan energi mitokondria memadai',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  29 => 
+  array (
+    'id' => 'Para ilmuwan menguji stabilitas paduan titanium di bawah tekanan hidrostatik ekstrem di palung laut dalam.',
+    'en' => 'Scientists tested the stability of titanium alloys under extreme hydrostatic pressure in deep-sea trenches',
+    'structure' => 'pp_adverb',
+    'conjunction' => 'Prep Phrase (Adverb di Akhir)',
+    'pos_type' => 'prep_adv',
+    'example' => 
+    array (
+      'id' => 'Eksperimen dilakukan di bawah pengawasan ketat.',
+      'en' => 'The experiment was done under strict supervision.',
+    ),
+    'vocab' => 
+    array (
+      'Scientist' => 
+      array (
+        'id' => 'Ilmuwan',
+        'pos' => '(n)',
+      ),
+      'Test stability' => 
+      array (
+        'id' => 'Menguji stabilitas',
+        'pos' => '(v)',
+      ),
+      'Titanium alloy' => 
+      array (
+        'id' => 'Paduan titanium',
+        'pos' => '(n)',
+      ),
+      'Under extreme hydrostatic pressure' => 
+      array (
+        'id' => 'Di bawah tekanan hidrostatik ekstrem',
+        'pos' => '(prep)',
+      ),
+      'Deep-sea trench' => 
+      array (
+        'id' => 'Palung laut dalam',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+  30 => 
+  array (
+    'id' => 'Komisi etik mewajibkan semua uji klinis farmasi beroperasi sesuai dengan standar regulasi internasional.',
+    'en' => 'The ethics commission mandates all pharmaceutical clinical trials to operate in accordance with international regulatory standards',
+    'structure' => 'pp_adverb',
+    'conjunction' => 'Prep Phrase (Adverb di Akhir)',
+    'pos_type' => 'prep_adv',
+    'example' => 
+    array (
+      'id' => 'Perusahaan beroperasi sesuai aturan hukum.',
+      'en' => 'The company operates in accordance with the law.',
+    ),
+    'vocab' => 
+    array (
+      'Ethics commission' => 
+      array (
+        'id' => 'Komisi etik',
+        'pos' => '(n)',
+      ),
+      'Mandate' => 
+      array (
+        'id' => 'Mewajibkan',
+        'pos' => '(v)',
+      ),
+      'Pharmaceutical clinical trial' => 
+      array (
+        'id' => 'Uji klinis farmasi',
+        'pos' => '(n)',
+      ),
+      'Operate' => 
+      array (
+        'id' => 'Beroperasi',
+        'pos' => '(v)',
+      ),
+      'In accordance with' => 
+      array (
+        'id' => 'Sesuai dengan',
+        'pos' => '(prep)',
+      ),
+      'International regulatory standards' => 
+      array (
+        'id' => 'Standar regulasi internasional',
+        'pos' => '(n)',
+      ),
+    ),
+  ),
+);
 
     private $meeting17Paragraph = [
         'id' => 'Banyak orang masih memperdebatkan apakah teknologi nuklir lebih membawa manfaat atau bahaya bagi umat manusia. Beberapa ilmuwan percaya bahwa energi nuklir adalah solusi terbaik untuk krisis energi global, karena efisiensinya yang tinggi dan emisi karbon yang rendah. Namun, masyarakat umum sering kali mengkhawatirkan apa yang bisa terjadi jika terjadi kebocoran reaktor atau penyalahgunaan bahan radioaktif. Fakta bahwa beberapa negara menggunakan teknologi ini untuk membuat senjata pemusnah massal semakin memperkuat rasa takut itu. Oleh karena itu, penting untuk mempertimbangkan bagaimana teknologi ini digunakan dan siapa yang mengendalikannya sebelum memutuskan arah pengembangannya di masa depan.',

@@ -16,7 +16,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-white">
     @include('components.impersonation-banner')
     @include('components.program-sidebar')
 
@@ -36,7 +36,7 @@
                     <p class="text-sm text-gray-500">Cambridge {{ $edition }} Reading Practice</p>
                 </div>
             </div>
-            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
+            <a href="{{ route('assignments.ielts-academic.mockup.cambridge.skills', ['edition' => $edition, 'id' => $testId]) }}" class="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back
             </a>
@@ -249,7 +249,7 @@
         </div>
 
         {{-- RIGHT: Questions --}}
-        <div class="h-full overflow-y-auto bg-gray-50 custom-scrollbar">
+        <div class="h-full overflow-y-auto bg-white custom-scrollbar">
             <div class="px-8 py-8 pb-24 max-w-2xl mx-auto">
 
                 {{-- PASSAGE 1 QUESTIONS header --}}
@@ -264,7 +264,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>NO MORE THAN TWO WORDS AND/OR A NUMBER</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 1–3 on your answer sheet.</p>
 
-                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <h4 class="text-base font-bold text-center mb-5">Urban farming in Paris</h4>
                         <div class="space-y-4">
                             <div class="flex items-baseline gap-2 flex-wrap leading-loose">
@@ -299,10 +299,10 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm border-collapse border border-gray-400">
                             <thead>
-                                <tr class="bg-gray-100">
+                                <tr class="bg-white">
                                     <th class="border border-gray-400 p-2 font-bold text-center" colspan="4">Intensive farming versus aeroponic urban farming</th>
                                 </tr>
-                                <tr class="bg-gray-50">
+                                <tr class="bg-white">
                                     <th class="border border-gray-400 p-2 font-bold w-32"></th>
                                     <th class="border border-gray-400 p-2 font-bold text-center">Growth</th>
                                     <th class="border border-gray-400 p-2 font-bold text-center">Selection</th>
@@ -356,7 +356,7 @@
                     <p class="text-sm text-gray-800 mb-3">Do the following statements agree with the information given in Reading Passage 1?</p>
                     <p class="text-sm italic text-gray-700 mb-4">In boxes 8–13 on your answer sheet, write</p>
 
-                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-gray-50">
+                    <div class="border border-gray-300 p-4 rounded-lg mb-6 text-sm bg-white">
                         <div class="grid gap-x-4 gap-y-1" style="grid-template-columns: auto 1fr">
                             <div><span class="font-bold italic">TRUE</span></div><div class="italic">if the statement agrees with the information</div>
                             <div><span class="font-bold italic">FALSE</span></div><div class="italic">if the statement contradicts the information</div>
@@ -367,7 +367,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-36 text-center">Answer</th>
@@ -382,7 +382,7 @@
                                     [12, 'Most produce can be grown on an aeroponic urban farm at any time of the year.'],
                                     [13, 'Beans take longer to grow on an urban farm than other vegetables.'],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -429,7 +429,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Information</th>
                                     <th class="p-3 font-bold text-gray-600 w-28 text-center">Paragraph</th>
@@ -443,7 +443,7 @@
                                     [17, 'examples of insects that attack trees'],
                                     [18, 'an alternative name for trees that produce low-use wood'],
                                 ] as [$num, $info])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $info }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -474,7 +474,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Write the correct letter, <strong>A</strong>, <strong>B</strong> or <strong>C</strong>, in boxes 19–21 on your answer sheet.</p>
                     <p class="text-sm italic text-gray-700 mb-4"><strong>NB</strong> You may use any letter more than once.</p>
 
-                    <div class="border border-gray-300 rounded-lg p-4 bg-gray-50 mb-5 inline-block">
+                    <div class="border border-gray-300 rounded-lg p-4 bg-white mb-5 inline-block">
                         <p class="font-bold text-sm text-center mb-2">List of Timber Cuts</p>
                         <div class="space-y-1 text-sm">
                             <div class="flex gap-3"><span class="font-bold">A</span><span>a TSI Cut</span></div>
@@ -486,7 +486,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Purpose</th>
                                     <th class="p-3 font-bold text-gray-600 w-28 text-center">Cut</th>
@@ -498,7 +498,7 @@
                                     [20, 'to generate income across a number of years'],
                                     [21, 'to create a forest whose trees are close in age'],
                                 ] as [$num, $purpose])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $purpose }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -585,7 +585,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Information</th>
                                     <th class="p-3 font-bold text-gray-600 w-28 text-center">Section</th>
@@ -599,7 +599,7 @@
                                     [30, 'a comparison between tracking objects in space and the efficiency of a transportation system'],
                                     [31, 'a reference to efforts to classify space junk'],
                                 ] as [$num, $info])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $info }}</td>
                                     <td class="py-3 px-3 text-center">
@@ -629,7 +629,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Choose <strong>ONE WORD ONLY</strong> from the passage for each answer.</p>
                     <p class="text-sm italic text-gray-700 mb-5">Write your answers in boxes 32–35 on your answer sheet.</p>
 
-                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-gray-50 text-sm">
+                    <div class="border-2 border-gray-400 rounded-lg p-5 bg-white text-sm">
                         <h4 class="text-base font-bold text-center mb-4">The Inter-Agency Space Debris Coordination Committee</h4>
                         <p class="text-gray-800 leading-loose">
                             The committee gives advice on how the <strong>32</strong>
@@ -656,7 +656,7 @@
                     <p class="text-sm italic text-gray-700 mb-1">Write the correct letter, <strong>A</strong>, <strong>B</strong>, <strong>C</strong> or <strong>D</strong>, in boxes 36–40 on your answer sheet.</p>
                     <p class="text-sm italic text-gray-700 mb-4"><strong>NB</strong> You may use any letter more than once.</p>
 
-                    <div class="border border-gray-300 rounded-lg p-4 bg-gray-50 mb-5 inline-block">
+                    <div class="border border-gray-300 rounded-lg p-4 bg-white mb-5 inline-block">
                         <p class="font-bold text-sm text-center mb-2">List of People</p>
                         <div class="space-y-1 text-sm">
                             <div class="flex gap-3"><span class="font-bold">A</span><span>Carolin Frueh</span></div>
@@ -669,7 +669,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse bg-white rounded-lg shadow-sm border border-gray-200">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
+                                <tr class="bg-white border-b border-gray-200">
                                     <th class="p-3 font-bold text-gray-500 w-10 text-center">#</th>
                                     <th class="p-3 font-bold text-gray-600">Statement</th>
                                     <th class="p-3 font-bold text-gray-600 w-28 text-center">Person</th>
@@ -683,7 +683,7 @@
                                     [39, 'There is conflicting information about where some satellites are in space.'],
                                     [40, 'There is a risk we will not be able to undo the damage that occurs in space.'],
                                 ] as [$num, $statement])
-                                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr class="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
                                     <td class="py-3 px-3 font-bold text-blue-600 text-center">{{ $num }}</td>
                                     <td class="py-3 px-3 text-gray-800 text-sm leading-relaxed">{{ $statement }}</td>
                                     <td class="py-3 px-3 text-center">

@@ -8,7 +8,7 @@
 
     <div class="mb-12 space-y-2 pl-2">
         @foreach(['A' => 'class time', 'B' => 'course topic', 'C' => 'amount of homework', 'D' => 'ease of course', 'E' => 'relevant to future career', 'F' => 'course structure', 'G' => 'professor reputation'] as $letter => $option)
-        <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+        <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
             <input type="checkbox" name="answers_multi[21_23][]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer rounded">
             <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
         </label>
@@ -27,7 +27,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">24</strong>&nbsp; The tutor recommends against taking Human Physiology because it would not be the best</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'time management.', 'B' => 'chance at earning an A.', 'C' => 'topic for a research paper.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[24]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -40,7 +40,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">25</strong>&nbsp; The student decides to do a dissertation because</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'he takes it to boost his GPA.', 'B' => 'he likes to develop more supportive details.', 'C' => 'he wants to conduct more interviews.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[25]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -53,7 +53,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">26</strong>&nbsp; The student thought the research paper was</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'already completed.', 'B' => 'worth finishing.', 'C' => 'too complicated.'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[26]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>
@@ -66,7 +66,7 @@
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">27</strong>&nbsp; The method of data collection was</p>
             <div class="space-y-2 pl-6">
                 @foreach(['A' => 'interviews', 'B' => 'lab studies.', 'C' => 'questionnaires'] as $letter => $option)
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[27]" value="{{ $letter }}" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">{{ $letter }}</span><span>{{ $option }}</span>
                 </label>

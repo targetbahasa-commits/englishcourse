@@ -16,6 +16,14 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
+        if ($request->has('live_preview_for') && ($user->isAdmin() || $user->isTeacher())) {
+            $targetStudent = \App\Models\User::find($request->query('live_preview_for'));
+            if ($targetStudent && $targetStudent->isStudent()) {
+                $data = $this->buildStudentDashboard->execute($targetStudent);
+                return view('dashboard', $data);
+            }
+        }
+
         if ($user->isAdmin()) {
             return redirect()->route('admin.dashboard');
         }

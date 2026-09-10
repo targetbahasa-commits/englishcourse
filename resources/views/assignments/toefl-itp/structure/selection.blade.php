@@ -124,7 +124,7 @@
                 <div class="space-y-2">
                     @foreach($exercises as $index => $exercise)
                         @if($exercise->meeting_number != 6)
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center justify-between p-3 bg-white rounded-lg">
                             <span class="font-medium">{{ $exercise->title }}</span>
                             <form action="{{ route('assignments.toefl-itp.structure.meeting.remove-set', $main->meeting_number) }}" method="POST" onsubmit="return confirm('Are you sure?');">
                                 @csrf
@@ -133,7 +133,7 @@
                             </form>
                         </div>
                         @else
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg opacity-50">
+                        <div class="flex items-center justify-between p-3 bg-white rounded-lg opacity-50">
                             <span class="font-medium">{{ $exercise->title }} (Main)</span>
                             <span class="text-xs text-gray-500">Cannot Delete</span>
                         </div>

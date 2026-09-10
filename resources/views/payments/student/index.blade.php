@@ -60,14 +60,29 @@
                             <label for="program_id" class="block text-sm font-medium text-slate-700 mb-1">Program</label>
                             <select id="program_id" name="program_id" class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500" required>
                                 <option value="">Pilih program</option>
-                                @foreach($programs as $program)
-                                    @php
-                                        $alreadyActive = in_array($program->id, $activeEnrollmentProgramIds, true);
-                                    @endphp
-                                    <option value="{{ $program->id }}" @selected((int) ($prefillProgramId ?? 0) === (int) $program->id) @disabled($alreadyActive)>
-                                        {{ $program->name }} - Rp{{ number_format((int) $program->price, 0, ',', '.') }}
-                                        {{ $alreadyActive ? '(Sudah aktif)' : '' }}
-                                    </option>
+                                @php
+                                    $categoryPriority = [
+                                        'IELTS Courses & Skills' => 1,
+                                        'TOEFL & PTE Courses' => 2,
+                                        'Grammar & Speaking Courses' => 3,
+                                        'TOEFL Mock Packages' => 4,
+                                        'Cambridge Practice Tests' => 5,
+                                        'Program Lainnya' => 99,
+                                    ];
+                                    $groupedPrograms = $programs->groupBy('category')->sortBy(fn($items, $key) => $categoryPriority[$key] ?? 99);
+                                @endphp
+                                @foreach($groupedPrograms as $categoryName => $groupPrograms)
+                                    <optgroup label="── {{ $categoryName }} ──">
+                                        @foreach($groupPrograms as $program)
+                                            @php
+                                                $alreadyActive = in_array($program->id, $activeEnrollmentProgramIds, true);
+                                            @endphp
+                                            <option value="{{ $program->id }}" @selected((int) ($prefillProgramId ?? 0) === (int) $program->id) @disabled($alreadyActive)>
+                                                {{ $program->name }} - Rp{{ number_format((int) $program->price, 0, ',', '.') }}
+                                                {{ $alreadyActive ? '(Sudah aktif)' : '' }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
                                 @endforeach
                             </select>
                         </div>
@@ -85,6 +100,7 @@
                             <label for="payment_channel" class="block text-sm font-medium text-slate-700 mb-1">Metode Pembayaran</label>
                             <select id="payment_channel" name="payment_channel" class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500" required>
                                 <option value="bank_transfer" @selected(($prefillPaymentChannel ?? 'bank_transfer') === 'bank_transfer')>Transfer Bank</option>
+                                <option value="qris" @selected(($prefillPaymentChannel ?? '') === 'qris')>QRIS</option>
                                 <option value="cash" @selected(($prefillPaymentChannel ?? '') === 'cash')>Cash (Bayar di kantor)</option>
                             </select>
                         </div>

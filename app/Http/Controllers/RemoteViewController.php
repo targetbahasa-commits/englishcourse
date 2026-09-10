@@ -136,7 +136,12 @@ class RemoteViewController extends Controller
     {
         $request->validate([
             'target_id' => 'required|integer|exists:users,id',
-            'type' => 'required|string|in:ScreenAccepted,ScreenRejected,Offer,Answer,IceCandidate,ScreenStopped,CloseSession,Log',
+            // AudioCallAccepted/AudioCallRejected/AudioCallEnded are the
+            // ring-step acks for AudioCallController's audio-call flow
+            // (see its docblock) - Offer/Answer/IceCandidate/Log/
+            // CloseSession are shared, already-generic signal types reused
+            // as-is by both screen-share and audio-call sessions.
+            'type' => 'required|string|in:ScreenAccepted,ScreenRejected,Offer,Answer,IceCandidate,ScreenStopped,CloseSession,Log,AudioCallAccepted,AudioCallRejected,AudioCallEnded',
             'payload' => 'nullable|array',
         ]);
 

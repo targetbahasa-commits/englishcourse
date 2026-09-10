@@ -4,7 +4,7 @@
     <p class="mb-1 text-gray-700">Which hotels have the following facilities?</p>
     <p class="mb-4 text-gray-700 italic">Write the correct letter, <strong>A</strong>, <strong>B</strong>, <strong>C</strong>, or <strong>D</strong> next to questions <strong>1-6</strong>.</p>
 
-    <div class="bg-gray-50 inline-block rounded-xl p-5 mb-6 space-y-2 min-w-[260px]">
+    <div class="bg-white inline-block rounded-xl p-5 mb-6 space-y-2 min-w-[260px]">
         <div class="flex gap-4 text-lg font-medium">
             <span class="font-bold w-6">A</span>
             <span>Royal Hotel</span>

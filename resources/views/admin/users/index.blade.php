@@ -171,7 +171,7 @@
                                 @endif
                                 <div>
                                     <div class="font-bold text-gray-900">{{ $user->name }}</div>
-                                    <div class="text-xs text-gray-500">Joined {{ $user->created_at->format('M Y') }}</div>
+                                    <div class="text-xs text-gray-500">Joined {{ $user->created_at ? $user->created_at->format('d M Y') : '-' }}</div>
                                 </div>
                             </div>
                         </td>
@@ -197,6 +197,13 @@
                                 <div class="text-sm font-medium text-gray-800">{{ $user->program->name }}</div>
                             @else
                                 <div class="text-sm text-gray-400 italic">No Program</div>
+                            @endif
+
+                            @if($user->classPeriod)
+                                <div class="text-xs text-blue-600 font-medium flex items-center mt-1 gap-1">
+                                    <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                    Batch: {{ $user->classPeriod->name }}
+                                </div>
                             @endif
                             
                             @if($user->teacher)

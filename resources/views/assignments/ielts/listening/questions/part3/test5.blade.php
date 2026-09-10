@@ -9,7 +9,7 @@
     <div class="overflow-x-auto mb-12">
         <table class="w-full border-collapse border border-gray-300 text-gray-700">
             <thead>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <th class="border border-gray-300 px-4 py-3 text-left font-bold w-1/4">Subject</th>
                     <th class="border border-gray-300 px-4 py-3 text-left font-bold w-1/3">Textbook Used</th>
                     <th class="border border-gray-300 px-4 py-3 text-left font-bold">Criticism of this book</th>
@@ -32,7 +32,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="bg-gray-50">
+                <tr class="bg-white">
                     <td class="border border-gray-300 px-4 py-3">Cultural Studies</td>
                     <td class="border border-gray-300 px-4 py-3">
                         <div class="flex items-center gap-2">
@@ -86,15 +86,15 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong class="text-blue-600">{{ $q }}</strong>&nbsp; {{ $name }}</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[{{ $q }}]" value="S" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">S</span><span>Social History</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[{{ $q }}]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span><span>Cultural Studies</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors w-fit">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors w-fit">
                     <input type="radio" name="answers[{{ $q }}]" value="P" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">P</span><span>Political Theory</span>
                 </label>

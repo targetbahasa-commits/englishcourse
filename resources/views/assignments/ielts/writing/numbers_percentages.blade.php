@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('title', ($meeting->title ?? 'Numbers & Percentages') . ' - IELTS Writing Task ' . ($task ?? 1))
+
 @section('head')
     <script src="{{ asset('js/auto-save.js') }}?v={{ time() }}"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -10,7 +12,7 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
-            <a href="{{ route('assignments.ielts-academic.writing.index', ['task' => 1]) }}" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+            <a href="{{ route('assignments.ielts-academic.writing.index', ['task' => 1]) }}" class="p-2 bg-white rounded-lg hover:bg-gray-200 transition-colors">
                 <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </a>
             <div>
@@ -32,10 +34,10 @@
         <!-- Left Column: Theory (Sticky) -->
         <div class="lg:col-span-5 sticky top-6 self-start space-y-6 max-h-[calc(100vh-2rem)] overflow-y-auto pr-2 custom-scrollbar">
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-indigo-50 px-6 py-4 border-b border-indigo-100 flex justify-between items-center">
+                <div class="bg-white px-6 py-4 border-b border-indigo-100 flex justify-between items-center">
                     <h2 class="text-lg font-bold text-indigo-900">Reference: Describing Numbers & Data</h2>
                 </div>
-                <div class="p-0 flex flex-col justify-center bg-gray-50">
+                <div class="p-0 flex flex-col justify-center bg-white">
                     <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson5_v2.png') }}" class="w-full h-auto shadow-sm" alt="Lesson 5 Theory">
                     <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson5_extended.png') }}" class="w-full h-auto shadow-sm border-t border-gray-100" alt="Lesson 5 Further Explanation">
                     <img src="{{ asset('images/materials/ielts-writing/ielts_writing_task1_lesson5_variations.png') }}" class="w-full h-auto rounded-b shadow-sm border-t border-gray-100" alt="Lesson 5 Variations">
@@ -47,9 +49,9 @@
         <div class="lg:col-span-7 space-y-8">
             <!-- Part 1 -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-teal-50 px-6 py-4 border-b border-teal-100">
+                <div class="bg-white px-6 py-4 border-b border-teal-100">
                     <h3 class="text-lg font-bold text-teal-800">Part 1: Numbers, Fractions, & Percentages</h3>
-                    <p class="text-sm text-teal-600 mt-1">Translate using the structure: <span class="font-mono bg-teal-100 px-1 rounded">"The number went up by [X] from [Y] to [Z]"</span></p>
+                    <p class="text-sm text-teal-600 mt-1">Translate using the structure: <span class="font-mono bg-white px-1 rounded">"The number went up by [X] from [Y] to [Z]"</span></p>
                 </div>
                 <div class="p-6 space-y-6">
                     <div class="space-y-2">
@@ -80,7 +82,7 @@
 
             <!-- Part 2 -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-blue-50 px-6 py-4 border-b border-blue-100">
+                <div class="bg-white px-6 py-4 border-b border-blue-100">
                     <h3 class="text-lg font-bold text-blue-800">Part 2: Multipliers (Double, Treble, -fold, Times)</h3>
                     <p class="text-sm text-blue-600 mt-1">Use the verb and adjective variations from Part B.</p>
                 </div>
@@ -125,7 +127,7 @@
 
             <!-- Part 3 -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-orange-50 px-6 py-4 border-b border-orange-100">
+                <div class="bg-white px-6 py-4 border-b border-orange-100">
                     <h3 class="text-lg font-bold text-orange-800">Part 3: Describing Decrease (Fractions)</h3>
                     <p class="text-sm text-orange-600 mt-1">Focus on using fractions for decrease.</p>
                 </div>
@@ -161,7 +163,7 @@
 
             <!-- Part 4 -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-purple-50 px-6 py-4 border-b border-purple-100">
+                <div class="bg-white px-6 py-4 border-b border-purple-100">
                     <h3 class="text-lg font-bold text-purple-800">Part 4: Percentage Placement</h3>
                 </div>
                 <div class="p-6 space-y-6">
@@ -213,7 +215,7 @@
 
             <!-- Part 6 -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-cyan-50 px-6 py-4 border-b border-cyan-100">
+                <div class="bg-white px-6 py-4 border-b border-cyan-100">
                     <h3 class="text-lg font-bold text-cyan-800">Part 6: Multipliers (Double, Twice, Three times)</h3>
                     <p class="text-sm text-cyan-600 mt-1">Use the patterns from point 1 and 2 in the chart.</p>
                 </div>
@@ -249,7 +251,7 @@
 
             <!-- Part 7 -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-emerald-50 px-6 py-4 border-b border-emerald-100">
+                <div class="bg-white px-6 py-4 border-b border-emerald-100">
                     <h3 class="text-lg font-bold text-emerald-800">Part 7: Twofold and Threefold</h3>
                     <p class="text-sm text-emerald-600 mt-1">Use as adjective (with noun) or adverb (after verb).</p>
                 </div>
@@ -330,7 +332,7 @@
 
             <!-- Part 9 -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-amber-50 px-6 py-4 border-b border-amber-100">
+                <div class="bg-white px-6 py-4 border-b border-amber-100">
                     <h3 class="text-lg font-bold text-amber-800">Part 9: Fractions & Percentages</h3>
                     <p class="text-sm text-amber-600 mt-1">Use the phrases for varying language (e.g. three-quarters, one in ten).</p>
                 </div>

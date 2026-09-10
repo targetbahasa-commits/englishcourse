@@ -30,6 +30,18 @@ class EloquentIeltsReadingRepository implements IeltsReadingRepository
             ->get()->all();
     }
 
+    public function getQuestionsByType(array $types): array
+    {
+        return IeltsReadingQuestion::whereIn('type', $types)
+            ->whereHas('passage', function ($query) {
+                $query->where('material_id', '<', 100);
+            })
+            ->with('passage')
+            ->orderBy('passage_id')
+            ->orderBy('order')
+            ->get()->all();
+    }
+
     public function createPassage(array $data): void
     {
         IeltsReadingPassage::create($data);

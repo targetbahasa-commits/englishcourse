@@ -52,13 +52,13 @@ if (!function_exists('srtTimeToSeconds')) {
     @php $drawerClass = $fixed ? 'mb-0 rounded-b-none border-b-0 pointer-events-auto' : 'mt-4 border-t-0 mb-4'; @endphp
     <div id="transcriptDrawer" style="height: 384px; max-height: 80vh; min-height: 200px;" class="hidden border border-gray-300 rounded-t-2xl mx-auto max-w-7xl {{ $drawerClass }} bg-white overflow-hidden flex flex-col shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)]">
         {{-- Resizer Handle --}}
-        <div id="transcriptResizer" class="w-full h-3 cursor-ns-resize bg-gray-100 hover:bg-gray-200 flex items-center justify-center border-b border-gray-300 flex-shrink-0 z-20" style="touch-action: none;">
+        <div id="transcriptResizer" class="w-full h-3 cursor-ns-resize bg-white hover:bg-gray-200 flex items-center justify-center border-b border-gray-300 flex-shrink-0 z-20" style="touch-action: none;">
             <div class="w-12 h-1 bg-gray-400 rounded-full"></div>
         </div>
         <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
             {{-- English Column --}}
-            <div class="flex flex-col h-full bg-slate-50">
-                <div class="flex-none px-4 py-2 bg-slate-100 border-b border-slate-200 font-semibold text-slate-700 flex items-center justify-between z-10">
+            <div class="flex flex-col h-full bg-white">
+                <div class="flex-none px-4 py-2 bg-white border-b border-slate-200 font-semibold text-slate-700 flex items-center justify-between z-10">
                     <div class="flex items-center gap-2">
                         <img src="https://flagcdn.com/w20/us.png" alt="US" class="rounded-sm"> English Script
                         @if(Auth::check() && strtolower(Auth::user()->role) === 'admin' && isset($testId) && isset($edition))
@@ -124,8 +124,8 @@ if (!function_exists('srtTimeToSeconds')) {
             </div>
             
             {{-- Indonesian Column --}}
-            <div class="flex flex-col h-full bg-gray-50">
-                <div class="flex-none px-4 py-2 bg-gray-100 border-b border-gray-200 font-semibold text-gray-800 flex items-center justify-between z-10">
+            <div class="flex flex-col h-full bg-white">
+                <div class="flex-none px-4 py-2 bg-white border-b border-gray-200 font-semibold text-gray-800 flex items-center justify-between z-10">
                     <div class="flex items-center gap-2">
                         <img src="https://flagcdn.com/w20/id.png" alt="ID" class="rounded-sm"> Terjemahan Indonesia
                         
@@ -216,13 +216,13 @@ if (!function_exists('srtTimeToSeconds')) {
             <div class="flex items-center gap-3">
                 @if(auth()->check() && strtolower(auth()->user()->role) === 'admin')
                     <div class="flex items-center gap-1 flex-shrink-0">
-                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold" :class="hasAudio() ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200'">
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold" :class="hasAudio() ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200'">
                             <span class="font-bold" x-text="hasAudio() ? '✓' : '✕'"></span> Audio
                         </span>
-                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold" :class="hasTranscript() ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200'">
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold" :class="hasTranscript() ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200'">
                             <span class="font-bold" x-text="hasTranscript() ? '✓' : '✕'"></span> SRT
                         </span>
-                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold" :class="hasAnswerKey() ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200'">
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-[11px] font-semibold" :class="hasAnswerKey() ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200'">
                             <span class="font-bold" x-text="hasAnswerKey() ? '✓' : '✕'"></span> Key
                         </span>
                     </div>
@@ -237,7 +237,7 @@ if (!function_exists('srtTimeToSeconds')) {
             <div class="flex-1 flex items-center gap-3 max-w-3xl">
                 {{-- Backward 10s Button --}}
                 <button type="button" onclick="skipAudio(-10)" 
-                        class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex-shrink-0" title="Mundur 10 detik">
+                        class="p-2 bg-white hover:bg-gray-200 rounded-lg transition-colors flex-shrink-0" title="Mundur 10 detik">
                     <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"></path>
                     </svg>
@@ -271,7 +271,7 @@ if (!function_exists('srtTimeToSeconds')) {
 
                 {{-- Forward 10s Button --}}
                 <button type="button" onclick="skipAudio(10)" 
-                        class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex-shrink-0" title="Maju 10 detik">
+                        class="p-2 bg-white hover:bg-gray-200 rounded-lg transition-colors flex-shrink-0" title="Maju 10 detik">
                     <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"></path>
                     </svg>
@@ -286,7 +286,7 @@ if (!function_exists('srtTimeToSeconds')) {
             {{-- Right Side: Transcript & Admin Controls --}}
             <div class="flex items-center gap-2">
                 {{-- Transcript Button --}}
-                <button onclick="toggleTranscriptDrawer()" class="px-3 py-2 text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-2 font-semibold shadow-sm text-sm border border-gray-200">
+                <button onclick="toggleTranscriptDrawer()" class="px-3 py-2 text-gray-600 hover:text-gray-900 bg-white hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-2 font-semibold shadow-sm text-sm border border-gray-200">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
@@ -422,7 +422,7 @@ if (!function_exists('srtTimeToSeconds')) {
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Audio File (MP3, WAV, OGG - Max 50MB)</label>
                     <input type="file" name="audio_file" accept=".mp3,.wav,.ogg,audio/*" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none">
                     
-                    <div class="mt-4 flex items-center gap-2 bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                    <div class="mt-4 flex items-center gap-2 bg-white p-3 rounded-lg border border-indigo-100">
                         <input type="checkbox" id="auto_transcribe" name="auto_transcribe" value="1" checked class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
                         <label for="auto_transcribe" class="text-sm text-indigo-900 font-medium cursor-pointer">Auto Transcribe & Translate dengan AI (Whisper)</label>
                     </div>

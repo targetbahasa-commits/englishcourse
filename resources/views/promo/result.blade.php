@@ -306,6 +306,55 @@
                                 <h5 class="font-bold text-gray-800 mb-1 text-sm uppercase tracking-wider">Lexical Detailed Feedback</h5>
                                 <div class="text-gray-600 text-sm prose max-w-none overflow-x-auto custom-scrollbar" x-html="result?.lexical_resource || 'No specific feedback.'"></div>
                             </div>
+
+                            <!-- Lexical Improvements Section -->
+                            <template x-if="(result?.lexical_improvements && result?.lexical_improvements?.length > 0) || (result?.vocabulary_improvements && result?.vocabulary_improvements?.length > 0)">
+                                <div class="space-y-4 mt-6 pt-4 border-t border-gray-100">
+                                    <div class="bg-purple-50 rounded-xl border border-purple-100 p-4">
+                                        <h6 class="font-bold text-purple-700 text-sm flex items-center gap-2 mb-3">
+                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                             Upgrade Vocabulary (Band 7-9)
+                                        </h6>
+                                        <div class="space-y-3">
+                                            <template x-for="(item, index) in (result?.lexical_improvements || result?.vocabulary_improvements || [])" :key="index">
+                                                <div class="bg-white p-3 rounded-lg border border-purple-100 shadow-sm">
+                                                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                                                        <span class="text-red-400 line-through text-sm" x-text="item.text || item.original"></span>
+                                                        <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                                        <span class="text-green-700 font-bold text-sm bg-green-50 px-2 py-0.5 rounded shadow-sm border border-green-100" x-text="item.improved || item.correction"></span>
+                                                    </div>
+                                                    <p class="text-gray-600 text-xs mt-1 italic" x-text="item.explanation"></p>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <template x-if="result?.topic_vocabularies && result?.topic_vocabularies?.length > 0">
+                                        <div class="bg-white rounded-xl border border-purple-100 p-4 shadow-sm">
+                                            <h6 class="font-bold text-purple-700 text-sm flex items-center gap-2 mb-1">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                                C1 Vocabulary You Could Use (from this topic)
+                                            </h6>
+                                            <p class="text-xs text-gray-500 mb-3">Kosakata tingkat lanjut (CEFR C1 / IELTS Band 7-8) yang relevan dengan topik esai ini.</p>
+                                            <div class="space-y-3">
+                                                <template x-for="(vocab, index) in result?.topic_vocabularies" :key="index">
+                                                    <div class="bg-purple-50/50 p-3 rounded-lg border border-purple-100">
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="font-bold text-purple-800 text-sm" x-text="vocab.term"></span>
+                                                            <span class="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 font-bold rounded-full">C1</span>
+                                                        </div>
+                                                        <p class="text-sm text-gray-700 mt-1 font-medium" x-text="vocab.meaning"></p>
+                                                        <p class="text-xs text-gray-500 mt-1 italic">
+                                                            <span class="font-semibold text-purple-600">Ex:</span>
+                                                            <span x-text="vocab.example"></span>
+                                                        </p>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
                         </div>
                         
                         <!-- Tab 5: Grammar -->
@@ -314,6 +363,55 @@
                                 <h5 class="font-bold text-gray-800 mb-1 text-sm uppercase tracking-wider">Grammar Detailed Feedback</h5>
                                 <div class="text-gray-600 text-sm prose max-w-none overflow-x-auto custom-scrollbar" x-html="result?.grammatical_range_and_accuracy || result?.grammatical_range || 'No specific feedback.'"></div>
                             </div>
+
+                            <!-- Grammar Improvements / Upgrade Grammar Section -->
+                            <template x-if="result?.grammar_improvements && result?.grammar_improvements?.length > 0">
+                                <div class="space-y-4 mt-6 pt-4 border-t border-gray-100">
+                                    <!-- Grammar Errors List Section -->
+                                    <div class="bg-red-50 rounded-xl border border-red-100 p-4">
+                                        <h6 class="font-bold text-red-700 text-sm flex items-center gap-2 mb-3">
+                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                             Kesalahan Grammar yang Ditemukan
+                                        </h6>
+                                        <div class="space-y-2">
+                                            <template x-for="(item, index) in result?.grammar_improvements" :key="index">
+                                                <div class="bg-white p-3 rounded-lg border border-red-200 flex items-start gap-3 hover:shadow-sm transition-shadow">
+                                                    <div class="flex-shrink-0 mt-0.5">
+                                                        <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full" x-text="index + 1"></span>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-red-700 text-sm italic line-clamp-2" x-text="item.text || item.original"></p>
+                                                        <p class="text-xs text-gray-500 mt-1">⚠️ Grammar issue: <span x-text="item.explanation?.split('(')[0]?.trim() || 'Structure needs improvement'"></span></p>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Upgrade Grammar Section -->
+                                    <div class="bg-purple-50 rounded-xl border border-purple-100 p-4">
+                                        <h6 class="font-bold text-purple-700 text-sm flex items-center gap-2 mb-3">
+                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                             Upgrade Grammar (Band 7-9)
+                                        </h6>
+                                        <div class="space-y-3">
+                                            <template x-for="(item, index) in result?.grammar_improvements" :key="index">
+                                                <div class="bg-white p-3 rounded-lg border border-purple-100 shadow-sm">
+                                                    <div class="mb-2">
+                                                        <span class="text-xs font-semibold text-purple-800 bg-purple-100 px-2 py-0.5 rounded">KALIMAT ASLI</span>
+                                                        <p class="text-gray-600 text-sm mt-1 italic" x-text="item.text || item.original"></p>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <span class="text-xs font-semibold text-purple-800 bg-purple-200 px-2 py-0.5 rounded">VERSI LEBIH BAIK (BAND 9)</span>
+                                                        <p class="text-purple-800 font-medium text-sm mt-1" x-text="item.improved || item.correction"></p>
+                                                    </div>
+                                                    <p class="text-purple-700 text-xs mt-2 border-t border-purple-100 pt-2" x-text="item.explanation"></p>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
 
                         <!-- Tab 6: Band 9 Version -->

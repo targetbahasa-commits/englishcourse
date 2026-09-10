@@ -158,6 +158,21 @@
                                 <div>
                                     <div class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
                                         {{ $program->name }}
+                                        @if($program->min_cefr_level || $program->max_cefr_level)
+                                            @php
+                                                $cefrText = $program->min_cefr_level ?? 'A1';
+                                                if ($program->max_cefr_level && $program->max_cefr_level !== $program->min_cefr_level) {
+                                                    $cefrText .= ' – ' . $program->max_cefr_level;
+                                                }
+                                            @endphp
+                                            <span class="ml-1.5 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-black bg-indigo-100 text-indigo-800 border border-indigo-200" title="Target Level CEFR untuk Rekomendasi AI">
+                                                🎯 CEFR: {{ $cefrText }}
+                                            </span>
+                                        @else
+                                            <span class="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200" title="Level CEFR belum ditentukan">
+                                                ⚠️ CEFR: Belum Diatur
+                                            </span>
+                                        @endif
                                         @php $activeDiscountCount = $program->discounts()->where('is_active', true)->count(); @endphp
                                         @if($isMockProgram($program))
                                             <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-pink-50 text-pink-700 border border-pink-200">
@@ -416,6 +431,8 @@
             price_semi_private: '',
             price_semi_private_offline: '',
             program_type: 'paket',
+            min_cefr_level: '',
+            max_cefr_level: '',
             subprograms: [],
             access_key: '',
             is_active: true
@@ -436,6 +453,8 @@
             form.price_semi_private = $event.detail.program.price_semi_private ? $event.detail.program.price_semi_private.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
             form.price_semi_private_offline = $event.detail.program.price_semi_private_offline ? $event.detail.program.price_semi_private_offline.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
             form.program_type = $event.detail.program.program_type || 'paket';
+            form.min_cefr_level = $event.detail.program.min_cefr_level || '';
+            form.max_cefr_level = $event.detail.program.max_cefr_level || '';
             form.subprograms = $event.detail.program.subprograms ? $event.detail.program.subprograms.map(p => p.id) : [];
             form.access_key = $event.detail.program.access_key || '';
             form.is_active = $event.detail.program.is_active == 1;
@@ -452,6 +471,8 @@
             form.price_semi_private = '';
             form.price_semi_private_offline = '';
             form.program_type = 'paket';
+            form.min_cefr_level = '';
+            form.max_cefr_level = '';
             form.subprograms = [];
             form.access_key = '';
             form.is_active = true;
@@ -496,75 +517,162 @@
 
 
                 <!-- Form -->
-                <form x-ref="programForm" :action="isEdit ? '/admin/programs/' + form.id : '{{ route('programs.store') }}'" method="POST" class="px-6 py-5 space-y-6">
+                <form x-ref="programForm" :action="isEdit ? '/admin/programs/' + form.id : '{{ route('programs.store') }}'" method="POST" class="px-6 py-5 space-y-5">
                     @csrf
                     <!-- Dynamic Method Injection for PUT requests -->
                     <input type="hidden" name="_method" :value="isEdit ? 'PUT' : 'POST'">
 
+                    <!-- Program Name -->
                     <div>
                         <label for="name" class="block text-sm font-semibold text-gray-700 mb-1">Program Name <span class="text-red-500">*</span></label>
                         <input type="text" x-model="form.name" name="name" id="name" required class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., IELTS Intensive Masterclass">
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="grid grid-cols-1 gap-6">
+                    <!-- Duration Tag & Tipe Program -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="period" class="block text-sm font-semibold text-gray-700 mb-1">Duration Tag <span class="text-red-500">*</span></label>
+                            <input type="text" x-model="form.period" name="period" id="period" required class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 3 Months, 20 Meetings">
+                        </div>
+                        <div>
+                            <label for="program_type" class="block text-sm font-semibold text-gray-700 mb-1">Tipe Program <span class="text-red-500">*</span></label>
+                            <select x-model="form.program_type" name="program_type" id="program_type" required class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white">
+                                <option value="paket">Program Paket (IELTS/TOEFL/PTE)</option>
+                                <option value="satuan">Program Satuan / Skill Khusus</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Level CEFR (Saran AI Tes Kompetensi) -->
+                    <div class="space-y-2 pt-1 border-t border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-sm font-semibold text-gray-700">
+                                Target Level CEFR Kelas <span class="text-gray-400 font-normal">(Untuk Rekomendasi AI)</span>
+                            </label>
+                            <template x-if="form.min_cefr_level || form.max_cefr_level">
+                                <span class="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-md">
+                                    Range: <span x-text="form.min_cefr_level || 'A1'"></span> – <span x-text="form.max_cefr_level || form.min_cefr_level || 'C2'"></span>
+                                </span>
+                            </template>
+                        </div>
+
+                        <!-- Quick Range Buttons -->
+                        <div class="flex flex-wrap items-center gap-1.5 p-2 bg-gray-50 rounded-xl border border-gray-200">
+                            <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wide mr-1">Pilih Range:</span>
+                            <button type="button" 
+                                    @click="form.min_cefr_level = 'A1'; form.max_cefr_level = 'A2'" 
+                                    :class="(form.min_cefr_level === 'A1' && form.max_cefr_level === 'A2') ? 'bg-blue-600 text-white font-bold shadow-xs' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200 font-medium'"
+                                    class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                                A1 – A2 (Dasar)
+                            </button>
+                            <button type="button" 
+                                    @click="form.min_cefr_level = 'B1'; form.max_cefr_level = 'B1'" 
+                                    :class="(form.min_cefr_level === 'B1' && form.max_cefr_level === 'B1') ? 'bg-blue-600 text-white font-bold shadow-xs' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200 font-medium'"
+                                    class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                                B1 (Fast Track)
+                            </button>
+                            <button type="button" 
+                                    @click="form.min_cefr_level = 'B1'; form.max_cefr_level = 'B2'" 
+                                    :class="(form.min_cefr_level === 'B1' && form.max_cefr_level === 'B2') ? 'bg-blue-600 text-white font-bold shadow-xs' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200 font-medium'"
+                                    class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                                B1 – B2 (Menengah)
+                            </button>
+                            <button type="button" 
+                                    @click="form.min_cefr_level = 'B2'; form.max_cefr_level = 'B2'" 
+                                    :class="(form.min_cefr_level === 'B2' && form.max_cefr_level === 'B2') ? 'bg-blue-600 text-white font-bold shadow-xs' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200 font-medium'"
+                                    class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                                B2 (Complexity)
+                            </button>
+                            <button type="button" 
+                                    @click="form.min_cefr_level = 'C1'; form.max_cefr_level = 'C2'" 
+                                    :class="(form.min_cefr_level === 'C1' && form.max_cefr_level === 'C2') ? 'bg-blue-600 text-white font-bold shadow-xs' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200 font-medium'"
+                                    class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                                C1 – C2 (Mahir)
+                            </button>
+                            <button type="button" 
+                                    @click="form.min_cefr_level = 'A1'; form.max_cefr_level = 'C2'" 
+                                    :class="(form.min_cefr_level === 'A1' && form.max_cefr_level === 'C2') ? 'bg-blue-600 text-white font-bold shadow-xs' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200 font-medium'"
+                                    class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                                A1 – C2 (Semua)
+                            </button>
+                        </div>
+
+                        <!-- Dual Min & Max Dropdown -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                             <div>
-                                <label for="period" class="block text-sm font-semibold text-gray-700 mb-1">Duration Tag <span class="text-red-500">*</span></label>
-                                <input type="text" x-model="form.period" name="period" id="period" required class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 3 Months, 20 Meetings">
+                                <label for="min_cefr_level" class="block text-xs font-semibold text-gray-600 mb-1">
+                                    Min CEFR Level
+                                </label>
+                                <select x-model="form.min_cefr_level" name="min_cefr_level" id="min_cefr_level" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white">
+                                    <option value="">— Tidak Dibatasi —</option>
+                                    @foreach(['A1','A2','B1','B2','C1','C2'] as $lvl)
+                                        <option value="{{ $lvl }}">Level {{ $lvl }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div>
-                                <label for="program_type" class="block text-sm font-semibold text-gray-700 mb-1">Tipe Program <span class="text-red-500">*</span></label>
-                                <select x-model="form.program_type" name="program_type" id="program_type" required class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white">
-                                    <option value="paket">Program Paket (IELTS/TOEFL/PTE)</option>
-                                    <option value="satuan">Program Satuan / Skill Khusus</option>
+                                <label for="max_cefr_level" class="block text-xs font-semibold text-gray-600 mb-1">
+                                    Max CEFR Level
+                                </label>
+                                <select x-model="form.max_cefr_level" name="max_cefr_level" id="max_cefr_level" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white">
+                                    <option value="">— Tidak Dibatasi —</option>
+                                    @foreach(['A1','A2','B1','B2','C1','C2'] as $lvl)
+                                        <option value="{{ $lvl }}">Level {{ $lvl }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                            <div>
-                                <label for="price" class="block text-sm font-semibold text-gray-700 mb-1">Regular Online Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
-                                <input type="text" inputmode="numeric" x-model="form.price" @input="form.price = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price" id="price" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 5.000.000">
-                            </div>
-                            <div>
-                                <label for="price_offline" class="block text-sm font-semibold text-gray-700 mb-1">Regular Offline / Pare Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
-                                <input type="text" inputmode="numeric" x-model="form.price_offline" @input="form.price_offline = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_offline" id="price_offline" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 5.500.000">
-                            </div>
-                        </div>
+                    </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 pt-4 border-t border-gray-100">
-                            <div>
-                                <label for="price_semi_private" class="block text-sm font-semibold text-gray-700 mb-1">Semi Private Online Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
-                                <input type="text" inputmode="numeric" x-model="form.price_semi_private" @input="form.price_semi_private = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_semi_private" id="price_semi_private" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 8.000.000">
-                            </div>
-                            <div>
-                                <label for="price_semi_private_offline" class="block text-sm font-semibold text-gray-700 mb-1">Semi Private Offline Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
-                                <input type="text" inputmode="numeric" x-model="form.price_semi_private_offline" @input="form.price_semi_private_offline = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_semi_private_offline" id="price_semi_private_offline" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 8.500.000">
-                            </div>
+                    <!-- Regular Prices -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+                        <div>
+                            <label for="price" class="block text-sm font-semibold text-gray-700 mb-1">Regular Online Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
+                            <input type="text" inputmode="numeric" x-model="form.price" @input="form.price = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price" id="price" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 5.000.000">
                         </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 pt-4 border-t border-gray-100">
-                            <div>
-                                <label for="price_private" class="block text-sm font-semibold text-gray-700 mb-1">Private Online Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
-                                <input type="text" inputmode="numeric" x-model="form.price_private" @input="form.price_private = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_private" id="price_private" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 12.000.000">
-                            </div>
-                            <div>
-                                <label for="price_private_offline" class="block text-sm font-semibold text-gray-700 mb-1">Private Offline Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
-                                <input type="text" inputmode="numeric" x-model="form.price_private_offline" @input="form.price_private_offline = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_private_offline" id="price_private_offline" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 12.500.000">
-                            </div>
+                        <div>
+                            <label for="price_offline" class="block text-sm font-semibold text-gray-700 mb-1">Regular Offline / Pare Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
+                            <input type="text" inputmode="numeric" x-model="form.price_offline" @input="form.price_offline = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_offline" id="price_offline" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 5.500.000">
                         </div>
                     </div>
 
-                    <div>
+                    <!-- Semi Private Prices -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+                        <div>
+                            <label for="price_semi_private" class="block text-sm font-semibold text-gray-700 mb-1">Semi Private Online Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
+                            <input type="text" inputmode="numeric" x-model="form.price_semi_private" @input="form.price_semi_private = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_semi_private" id="price_semi_private" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 8.000.000">
+                        </div>
+                        <div>
+                            <label for="price_semi_private_offline" class="block text-sm font-semibold text-gray-700 mb-1">Semi Private Offline Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
+                            <input type="text" inputmode="numeric" x-model="form.price_semi_private_offline" @input="form.price_semi_private_offline = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_semi_private_offline" id="price_semi_private_offline" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 8.500.000">
+                        </div>
+                    </div>
+
+                    <!-- Private Prices -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+                        <div>
+                            <label for="price_private" class="block text-sm font-semibold text-gray-700 mb-1">Private Online Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
+                            <input type="text" inputmode="numeric" x-model="form.price_private" @input="form.price_private = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_private" id="price_private" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 12.000.000">
+                        </div>
+                        <div>
+                            <label for="price_private_offline" class="block text-sm font-semibold text-gray-700 mb-1">Private Offline Price (IDR) <span class="text-gray-400 font-normal">(Optional)</span></label>
+                            <input type="text" inputmode="numeric" x-model="form.price_private_offline" @input="form.price_private_offline = $event.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')" name="price_private_offline" id="price_private_offline" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., 12.500.000">
+                        </div>
+                    </div>
+
+                    <!-- Access Key -->
+                    <div class="pt-2 border-t border-gray-100">
                         <label for="access_key" class="block text-sm font-semibold text-gray-700 mb-1">Access Key <span class="text-gray-400 font-normal">(Optional, can be changed anytime)</span></label>
                         <input type="text" x-model="form.access_key" name="access_key" id="access_key" class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder:text-gray-400" placeholder="e.g., secret2026">
-                        <span class="text-xs text-gray-400">Leave blank if you don't want to require a key for this program.</span>
+                        <span class="text-xs text-gray-400 mt-0.5 block">Kosongkan jika program ini tidak memerlukan kunci akses khusus.</span>
                     </div>
 
-                    <div x-show="form.program_type === 'paket'" class="mt-6 pt-6 border-t border-gray-100">
+                    <!-- Subprograms for Paket -->
+                    <div x-show="form.program_type === 'paket'" class="pt-2 border-t border-gray-100">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Program Satuan Penyusun Paket <span class="text-gray-400 font-normal">(Opsional)</span></label>
                         
                         @if(isset($satuanPrograms) && $satuanPrograms->count() > 0)
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-60 overflow-y-auto p-1 mb-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-1 mb-3">
                                 @foreach($satuanPrograms as $sat)
                                     <label class="flex items-start p-3 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors" :class="{'bg-blue-50 border-blue-200': form.subprograms.includes({{ $sat->id }})}">
                                         <div class="flex items-center h-5">
@@ -607,23 +715,26 @@
                         @endif
                     </div>
 
-                    <div>
+                    <!-- Description -->
+                    <div class="pt-2 border-t border-gray-100">
                         <label for="description" class="block text-sm font-semibold text-gray-700 mb-1">Description <span class="text-red-500">*</span></label>
-                        <textarea x-model="form.description" name="description" id="description" rows="3" required class="block w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 resize-none h-24 placeholder:text-gray-400" placeholder="Enter a brief summary of what this program covers and who it is for..."></textarea>
+                        <textarea x-model="form.description" name="description" id="description" rows="3" required class="block w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 resize-none h-24 placeholder:text-gray-400" placeholder="Enter a brief summary of what this program covers and who it is for..."></textarea>
                     </div>
 
+                    <!-- Program Status -->
                     <div class="pt-4 border-t border-gray-100 flex items-center justify-between">
                         <div>
                             <h4 class="text-sm font-semibold text-gray-900">Program Status</h4>
                             <p class="text-xs text-gray-500">Enable this to allow students to see and enroll in this program.</p>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" name="is_active" id="is_active" class="sr-only peer" x-model="form.is_active">
+                            <input type="hidden" name="is_active" value="0"><input type="checkbox" name="is_active" id="is_active" value="1" class="sr-only peer" :checked="form.is_active" @change="form.is_active = $event.target.checked">
                             <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none ring-0 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
                             <span class="ml-3 text-sm font-medium text-gray-700" x-text="form.is_active ? 'Active' : 'Draft'"></span>
                         </label>
                     </div>
 
+                    <!-- Modal Actions -->
                     <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3 -mx-6 -mb-5 rounded-b-2xl">
                         <button type="button" @click="isOpen = false" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                             Cancel

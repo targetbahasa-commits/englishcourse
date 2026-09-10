@@ -8,7 +8,7 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden">
         {{-- Name (example top) --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 text-gray-500 italic">Name:</div>
             <div class="p-3 text-gray-500 italic">John Murphy</div>
         </div>
@@ -20,13 +20,13 @@
         </div>
 
         {{-- Example row --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white">
             <div class="p-3 text-gray-600 italic">Position applying for:</div>
             <div class="p-3 text-gray-600 italic">lifeguard</div>
         </div>
 
         {{-- Q1: Street Address --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Street Address:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">45</span>
@@ -39,7 +39,7 @@
         </div>
 
         {{-- Q2: Contact phone number --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Contact phone number:</div>
             <div class="p-3">
                 <strong>2</strong>
@@ -50,7 +50,7 @@
         </div>
 
         {{-- Q3: Current part-time job --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Current part-time job:</div>
             <div class="p-3">
                 <strong>3</strong>
@@ -61,7 +61,7 @@
         </div>
 
         {{-- Q4: Previous job at Ridgemont --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Previous job at Ridgemont High School:</div>
             <div class="p-3">
                 <strong>4</strong>
@@ -72,7 +72,7 @@
         </div>
 
         {{-- Q5: Additional relevant work experience --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Additional relevant work experience:</div>
             <div class="p-3">
                 <strong>5</strong>
@@ -83,7 +83,7 @@
         </div>
 
         {{-- Q6: Relevant skills/qualifications --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Relevant skills/qualifications:</div>
             <div class="p-3 flex items-center flex-wrap gap-1">
                 <span class="text-gray-700">CPR certification &amp;</span>
@@ -95,7 +95,7 @@
         </div>
 
         {{-- Q7: CPR certification expiration date --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">CPR certification expiration date:</div>
             <div class="p-3">
                 <strong>7</strong>
@@ -106,7 +106,7 @@
         </div>
 
         {{-- Q8: Preferred weekly shift --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Preferred weekly shift:</div>
             <div class="p-3">
                 <strong>8</strong>
@@ -117,7 +117,7 @@
         </div>
 
         {{-- Q9: Time available to start work --}}
-        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-2 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Time available to start work:</div>
             <div class="p-3">
                 <strong>9</strong>
@@ -128,7 +128,7 @@
         </div>
 
         {{-- Q10: Advertisement source --}}
-        <div class="grid grid-cols-2 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-2 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-gray-700">Advertisement source:</div>
             <div class="p-3">
                 <strong>10</strong>

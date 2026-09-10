@@ -16,15 +16,23 @@ class BuildGrammarWritingMeeting6ViewData
     {
         [$verbPatterns, $toInfinitive, $gerund, $paragraph] = $this->loadSections();
 
+        // Admin Live Preview loads this exact page (with ?live_preview_for=)
+        // under the ADMIN's own authenticated session, not the student being
+        // previewed. Using session() below would prefill the page with the
+        // ADMIN's own session state instead of the real student's - the
+        // correct per-student data is safely injected client-side afterward
+        // by injectSnapshotIntoIframe() in current-assignment.blade.php.
+        $isLivePreview = request()->filled('live_preview_for');
+
         return [
             'verbPatterns' => $verbPatterns,
             'toInfinitive' => $toInfinitive,
             'gerund' => $gerund,
             'paragraph' => $paragraph,
-            'submitted' => session('meeting6_submitted', false),
-            'results' => session('meeting6_results', []),
-            'finalScore' => session('meeting6_final_score', 0),
-            'userAnswers' => session('meeting6_user_answers', []),
+            'submitted' => $isLivePreview ? false : session('meeting6_submitted', false),
+            'results' => $isLivePreview ? [] : session('meeting6_results', []),
+            'finalScore' => $isLivePreview ? 0 : session('meeting6_final_score', 0),
+            'userAnswers' => $isLivePreview ? [] : session('meeting6_user_answers', []),
         ];
     }
 

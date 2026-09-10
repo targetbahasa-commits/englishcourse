@@ -55,7 +55,7 @@
 
     <div class="space-y-6 mb-10">
         {{-- Paris Kitchen --}}
-        <div class="border border-gray-200 rounded-xl p-4 bg-gray-50">
+        <div class="border border-gray-200 rounded-xl p-4 bg-white">
             <p class="font-bold text-gray-800 mb-3">Paris Kitchen</p>
             <div class="space-y-2 text-gray-700 pl-2">
                 <p>• lack of variety of food</p>
@@ -70,7 +70,7 @@
         </div>
 
         {{-- Company Caterers --}}
-        <div class="border border-gray-200 rounded-xl p-4 bg-gray-50">
+        <div class="border border-gray-200 rounded-xl p-4 bg-white">
             <p class="font-bold text-gray-800 mb-3">Company Caterers</p>
             <div class="space-y-2 text-gray-700 pl-2">
                 <p>• expensive</p>
@@ -86,7 +86,7 @@
         </div>
 
         {{-- Celebrations --}}
-        <div class="border border-gray-200 rounded-xl p-4 bg-gray-50">
+        <div class="border border-gray-200 rounded-xl p-4 bg-white">
             <p class="font-bold text-gray-800 mb-3">Celebrations</p>
             <div class="space-y-2 text-gray-700 pl-2">
                 <p>• new company</p>

@@ -93,7 +93,7 @@
                             </div>
 
                             {{-- Card Body --}}
-                            <div class="p-4 flex flex-col flex-1 justify-between bg-gray-50/60">
+                            <div class="p-4 flex flex-col flex-1 justify-between bg-white">
                                 <p class="text-gray-500 text-sm mb-4 leading-relaxed">{{ $package['description'] }}</p>
 
                                 @if($isAvailable)

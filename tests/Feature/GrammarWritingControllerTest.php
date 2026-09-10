@@ -283,7 +283,7 @@ class GrammarWritingControllerTest extends TestCase
         $this->actingAs($user);
 
         $evaluator = new class extends EvaluateGrammarWritingMeeting2Submission {
-            public function handle($stage, $requestData, $tenses, $translationSentences, $translationMatrix, $scorePart1): array
+            public function handle(int $stage, array $input, array $tenses, array $translationSentences, array $translationMatrix, int $scorePart1, ?string $track = null): array
             {
                 return [
                     'session' => [
@@ -302,11 +302,11 @@ class GrammarWritingControllerTest extends TestCase
         $response = $this->withSession([
             'meeting2_stage' => 1,
             'meeting2_score_part1' => 40,
-        ])->post(route('assignments.grammar-writing.meeting2.submit'), [
+        ])->post(route('assignments.grammar-writing.meeting1.submit'), [
             'dummy' => 'value',
         ]);
 
-        $response->assertRedirect(route('assignments.grammar-writing.meeting2'));
+        $response->assertRedirect(route('assignments.grammar-writing.meeting1'));
         $response->assertSessionHas('meeting2_stage', 2);
         $response->assertSessionHas('meeting2_total_score', 91);
 
@@ -323,7 +323,7 @@ class GrammarWritingControllerTest extends TestCase
         $this->actingAs($user);
 
         $evaluator = new class extends EvaluateGrammarWritingMeeting2Submission {
-            public function handle($stage, $requestData, $tenses, $translationSentences, $translationMatrix, $scorePart1): array
+            public function handle(int $stage, array $input, array $tenses, array $translationSentences, array $translationMatrix, int $scorePart1, ?string $track = null): array
             {
                 return [
                     'session' => [
@@ -341,11 +341,11 @@ class GrammarWritingControllerTest extends TestCase
         $response = $this->withSession([
             'meeting2_stage' => 1,
             'meeting2_score_part1' => 40,
-        ])->post(route('assignments.grammar-writing.meeting2.submit'), [
+        ])->post(route('assignments.grammar-writing.meeting1.submit'), [
             'dummy' => 'value',
         ]);
 
-        $response->assertRedirect(route('assignments.grammar-writing.meeting2'));
+        $response->assertRedirect(route('assignments.grammar-writing.meeting1'));
         $response->assertSessionHas('meeting2_stage', 2);
         $response->assertSessionHas('meeting2_results', ['part1' => 'draft']);
 
@@ -449,18 +449,17 @@ class GrammarWritingControllerTest extends TestCase
                 parent::__construct($repository);
             }
 
-            public function handle(array $tenseExamples): array
+            public function handle(array $tenseExamples = []): array
             {
                 return [
-                    'questions' => collect([1 => ['id' => 'Question 1', 'en' => 'Answer 1', 'tense' => 'Simple Present', 'db_id' => 0]]),
-                    'matrix' => ['Simple Present' => ['verbal' => null, 'nominal' => null, 'passive' => null]],
-                    'prQuestions' => collect([]),
+                    'gerundInfinitiveComplex' => collect([1 => ['id' => 'Question 1', 'en' => 'Answer 1']]),
+                    'toInfinitive' => collect([]),
+                    'gerund' => collect([]),
+                    'paragraph' => ['id' => 'Paragraph text', 'en' => 'Paragraph en'],
                     'submitted' => false,
                     'results' => [],
                     'finalScore' => 0,
                     'userAnswers' => [],
-                    'tenseExamples' => ['Simple Present' => ['verbal' => ['id' => 'Example id', 'en' => 'Example en']]],
-                    'vocabularies' => [],
                 ];
             }
         };
@@ -472,7 +471,6 @@ class GrammarWritingControllerTest extends TestCase
         $response->assertOk();
         $response->assertViewIs('assignments.grammar-writing.meeting5');
         $response->assertViewHas('submitted', false);
-        $response->assertViewHas('questions');
     }
 
     public function test_meeting5_submit_redirects_with_session_payload_and_saves_score(): void
@@ -486,34 +484,19 @@ class GrammarWritingControllerTest extends TestCase
                 parent::__construct($repository);
             }
 
-            public function loadSentenceQuestions()
-            {
-                return collect([
-                    1 => ['id' => 'Question 1', 'en' => 'Answer 1', 'tense' => 'Simple Present', 'db_id' => 0],
-                ]);
-            }
-
-            public function loadMatrix(array $tenses): array
+            public function loadSections(): array
             {
                 return [
-                    'Simple Present' => [
-                        'verbal' => ['id' => 'Matrix id', 'en' => 'Matrix answer', 'db_id' => 0],
-                        'nominal' => null,
-                        'passive' => null,
-                    ],
+                    collect([1 => ['id' => 'Question 1', 'en' => 'Answer 1']]),
+                    collect([]),
+                    collect([]),
+                    ['id' => 'Paragraph text', 'en' => 'Paragraph en'],
                 ];
-            }
-
-            public function loadPrQuestions()
-            {
-                return collect([
-                    ['id' => 'PR 1', 'en' => 'Paragraph answer', 'tense' => 'Simple Present', 'example' => ['id' => 'Example', 'en' => 'Example'], 'vocabulary' => [], 'db_id' => 0],
-                ]);
             }
         };
 
         $evaluator = new class extends EvaluateGrammarWritingMeeting5Submission {
-            public function handle(array $userAnswers, Collection $sentenceQuestions, Collection $matrixQuestions, Collection $prQuestions): array
+            public function handle(array $userAnswers, mixed $sentenceQuestions = [], mixed $matrixQuestions = [], mixed $prQuestions = [], mixed $unused = []): array
             {
                 return [
                     'meeting5_submitted' => true,

@@ -58,12 +58,31 @@ class GroqKeyManager
             });
         }
 
+        // Also merge in the generic 'groq_keys' pool (AiProviderKeyManager's
+        // provider-level pool, used by non-feature-scoped callers). Feature
+        // pools were introduced later and several Groq accounts had only ever
+        // been added to the generic pool, so without this merge those keys
+        // were invisible to feature-scoped callers (e.g. PTE's Whisper
+        // transcription), silently running on a single key.
+        $genericKeys = Cache::remember('groq_keys_provider_generic', self::CACHE_TTL, function () {
+            $value = DB::table('settings')->where('key', 'groq_keys')->value('value');
+            return self::parseKeys($value);
+        });
+        $keys = array_values(array_unique(array_merge($keys, $genericKeys)));
+
         // Last resort: use .env GROQ_API_KEY
         if (empty($keys)) {
             $envKey = env('GROQ_API_KEY');
             if ($envKey) {
                 $keys = [$envKey];
             }
+        }
+
+        // Randomize order per call so concurrent requests spread across the
+        // whole pool instead of all piling onto key #0 first (see the same
+        // note in AiProviderKeyManager::getKeys()).
+        if (count($keys) > 1) {
+            shuffle($keys);
         }
 
         return $keys;
@@ -86,50 +105,71 @@ class GroqKeyManager
             throw new \RuntimeException("No Groq API keys configured for feature [{$feature}] or general pool.");
         }
 
+        // Auto-replace decommissioned models
+        $requestedModel = $payload['model'] ?? 'openai/gpt-oss-120b';
+        if ($requestedModel === 'llama-3.3-70b-versatile' || $requestedModel === 'mixtral-8x7b-32768') {
+            $requestedModel = 'openai/gpt-oss-120b';
+        }
+
+        $modelsToTry = array_unique([$requestedModel, 'openai/gpt-oss-120b', 'qwen/qwen3.6-27b', 'llama-3.1-8b-instant']);
+
         $lastError = null;
 
         foreach ($keys as $index => $key) {
-            try {
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $key,
-                    'Content-Type'  => 'application/json',
-                ])->timeout($timeout)->post('https://api.groq.com/openai/v1/chat/completions', $payload);
+            foreach ($modelsToTry as $targetModel) {
+                try {
+                    $currPayload = $payload;
+                    $currPayload['model'] = $targetModel;
 
-                $statusCode = $response->status();
+                    $response = Http::withHeaders([
+                        'Authorization' => 'Bearer ' . $key,
+                        'Content-Type'  => 'application/json',
+                    ])->timeout($timeout)->post('https://api.groq.com/openai/v1/chat/completions', $currPayload);
 
-                // On rate limit, log and try next key
-                if ($statusCode === 429) {
-                    Log::warning("GroqKeyManager: Key #{$index} for [{$feature}] hit rate limit (429). Trying next key.");
-                    $lastError = "Key #{$index} rate limited (429)";
+                    $statusCode = $response->status();
+
+                    // On rate limit, log and try next key
+                    if ($statusCode === 429) {
+                        Log::warning("GroqKeyManager: Key #{$index} for [{$feature}] hit rate limit (429). Trying next key.");
+                        $lastError = "Key #{$index} rate limited (429)";
+                        break; // break model loop to try next key
+                    }
+
+                    // On model error (400 / 404), try next model on this key
+                    if ($statusCode === 400 || $statusCode === 404) {
+                        Log::warning("GroqKeyManager: Model {$targetModel} returned HTTP {$statusCode}. Trying fallback model.");
+                        $lastError = "Model {$targetModel} returned HTTP {$statusCode}";
+                        continue;
+                    }
+
+                    // On other non-success, log and try next key
+                    if (!$response->successful()) {
+                        Log::warning("GroqKeyManager: Key #{$index} for [{$feature}] returned HTTP {$statusCode}. Trying next key.");
+                        $lastError = "Key #{$index} returned HTTP {$statusCode}";
+                        break;
+                    }
+
+                    $body = $response->json();
+                    if (!isset($body['choices'][0]['message']['content'])) {
+                        Log::warning("GroqKeyManager: Key #{$index} for [{$feature}] returned invalid structure. Trying next model/key.");
+                        $lastError = "Key #{$index} returned invalid response structure";
+                        continue;
+                    }
+
+                    // Success
+                    Log::info("GroqKeyManager: [{$feature}] succeeded with key #{$index} using model [{$targetModel}].");
+                    return [
+                        'body'      => $body,
+                        'key_index' => $index,
+                        'key_used'  => self::maskKey($key),
+                        'model'     => $targetModel,
+                    ];
+
+                } catch (\Exception $e) {
+                    Log::warning("GroqKeyManager: Key #{$index} with model {$targetModel} for [{$feature}] threw exception: " . $e->getMessage());
+                    $lastError = $e->getMessage();
                     continue;
                 }
-
-                // On other non-success, log and try next key
-                if (!$response->successful()) {
-                    Log::warning("GroqKeyManager: Key #{$index} for [{$feature}] returned HTTP {$statusCode}. Trying next key.");
-                    $lastError = "Key #{$index} returned HTTP {$statusCode}";
-                    continue;
-                }
-
-                $body = $response->json();
-                if (!isset($body['choices'][0]['message']['content'])) {
-                    Log::warning("GroqKeyManager: Key #{$index} for [{$feature}] returned invalid structure. Trying next key.");
-                    $lastError = "Key #{$index} returned invalid response structure";
-                    continue;
-                }
-
-                // Success
-                Log::info("GroqKeyManager: [{$feature}] succeeded with key #{$index}.");
-                return [
-                    'body'      => $body,
-                    'key_index' => $index,
-                    'key_used'  => self::maskKey($key),
-                ];
-
-            } catch (\Exception $e) {
-                Log::warning("GroqKeyManager: Key #{$index} for [{$feature}] threw exception: " . $e->getMessage());
-                $lastError = $e->getMessage();
-                continue;
             }
         }
 
@@ -143,7 +183,7 @@ class GroqKeyManager
     /**
      * Execute a Groq Whisper API call (Audio Transcription) with fallback.
      */
-    public static function callWhisperWithFallback(string $feature, string $audioPath, int $timeout = 60): array
+    public static function callWhisperWithFallback(string $feature, string $audioPath, int $timeout = 60, array $extraOptions = []): array
     {
         $keys = self::getKeysForFeature($feature);
 
@@ -153,16 +193,18 @@ class GroqKeyManager
 
         $lastError = null;
 
+        $postData = array_merge([
+            'model' => 'whisper-large-v3-turbo',
+            'response_format' => 'json'
+        ], $extraOptions);
+
         foreach ($keys as $index => $key) {
             try {
                 $response = Http::withHeaders([
                     'Authorization' => 'Bearer ' . $key,
                 ])->timeout($timeout)
                 ->attach('file', fopen($audioPath, 'r'), basename($audioPath))
-                ->post('https://api.groq.com/openai/v1/audio/transcriptions', [
-                    'model' => 'whisper-large-v3-turbo',
-                    'response_format' => 'json'
-                ]);
+                ->post('https://api.groq.com/openai/v1/audio/transcriptions', $postData);
 
                 $statusCode = $response->status();
 

@@ -1,8 +1,10 @@
 @extends('layouts.admin')
 
+@section('title', 'IELTS Writing - Bank Latihan')
+
 @php
     $taskParam = $task ?? request('task'); // null | '1' | '2'
-    $typeParam = $type ?? request('type'); // null | 'line' | 'bar' | ...
+    $typeParam = $type ?? request('type'); // null | 'line' | 'bar' | ... | 'formal' | 'informal'
     $typeLabels = [
         'line'                    => 'Line Chart',
         'bar'                     => 'Bar Chart',
@@ -16,66 +18,75 @@
         'problem_solution'        => 'Problem & Solution',
         'discussion'              => 'Two-Part Question',
         'agree_disagree'          => 'Agree or Disagree',
+        'formal'                  => 'Formal Letter',
+        'informal'                => 'Informal Letter',
     ];
     $currentTypeLabel = $typeParam ? ($typeLabels[$typeParam] ?? ucfirst($typeParam)) : '';
+
+    // Route names differ between IELTS Academic and IELTS General practice; computed once here
+    // so the rest of the view never has to branch on $isGeneral for routing.
+    $writingLandingRoute = !empty($isGeneral) ? 'assignments.ielts-general.writing.index' : 'assignments.ielts-academic.writing.index';
+    $writingPracticeIndexRoute = !empty($isGeneral) ? 'assignments.ielts-general.writing.practice.index' : 'assignments.ielts-academic.writing.practice.index';
+    $writingMeetingRoute = !empty($isGeneral) ? 'assignments.ielts-general.writing.meeting' : 'assignments.ielts-academic.writing.meeting';
 @endphp
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 md:px-8 py-4 md:py-8">
 
     <!-- Header -->
     <div class="mb-8">
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-3">
-                <div class="p-3 bg-gradient-to-br from-teal-400 to-teal-600 rounded-2xl shadow-lg">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="text-4xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">IELTS Writing Practice</h1>
-                    <p class="text-gray-600 mt-1">
-                        @if(!$taskParam)
-                            Focused exercises to improve your writing skills.
-                        @elseif($taskParam == 1 && !$typeParam)
-                            Task 1 — Select a chart type to practice.
-                        @elseif($taskParam == 1 && $typeParam)
-                            Task 1 &rsaquo; {{ $currentTypeLabel }}                        @elseif($taskParam == 2 && !$typeParam)
-                            Task 2 — Pilih jenis soal essay
-                        @elseif($taskParam == 2 && $typeParam)
-                            Task 2 › {{ $currentTypeLabel }}
-                        @endif
-                    </p>
-                </div>
-            </div>
-
-            {{-- Back button: context-aware --}}
+        {{-- Back button: context-aware sub-row on top for mobile protection --}}
+        <div class="flex justify-end mb-3">
             @if(!$taskParam)
-                <a href="{{ route('assignments.ielts-academic') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    Back to IELTS
+                <a href="{{ route($writingLandingRoute) }}" class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <span>{{ !empty($isGeneral) ? 'Back to IELTS General' : 'Back to IELTS' }}</span>
                 </a>
             @elseif($taskParam == 2 && !$typeParam)
-                <a href="{{ route('assignments.ielts-academic.writing.practice.index') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    Back to Task Selection
+                <a href="{{ route($writingPracticeIndexRoute) }}" class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <span>Back to Task Selection</span>
                 </a>
             @elseif($taskParam == 2 && $typeParam)
-                <a href="{{ route('assignments.ielts-academic.writing.practice.index', ['task' => 2]) }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    Back to Essay Types
+                <a href="{{ route($writingPracticeIndexRoute, ['task' => 2]) }}" class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <span>Back to Essay Types</span>
                 </a>
             @elseif($taskParam == 1 && !$typeParam)
-                <a href="{{ route('assignments.ielts-academic.writing.practice.index') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    Back to Task Selection
+                <a href="{{ route($writingPracticeIndexRoute) }}" class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <span>Back to Task Selection</span>
                 </a>
             @elseif($taskParam == 1 && $typeParam)
-                <a href="{{ route('assignments.ielts-academic.writing.practice.index') }}?task=1" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    Back to Chart Types
+                <a href="{{ route($writingPracticeIndexRoute) }}?task=1" class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <span>{{ !empty($isGeneral) ? 'Back to Letter Types' : 'Back to Chart Types' }}</span>
                 </a>
             @endif
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="p-2.5 sm:p-3 bg-gradient-to-br from-teal-400 to-teal-600 rounded-2xl shadow-lg shrink-0">
+                <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+            </div>
+            <div class="min-w-0 flex-1">
+                <h1 class="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent break-words">IELTS Writing Practice</h1>
+                <p class="text-xs sm:text-sm text-gray-600 mt-1 break-words">
+                    @if(!$taskParam)
+                        Focused exercises to improve your writing skills.
+                    @elseif($taskParam == 1 && !$typeParam)
+                        {{ !empty($isGeneral) ? 'Task 1 — Choose a letter type to practice.' : 'Task 1 — Select a chart type to practice.' }}
+                    @elseif($taskParam == 1 && $typeParam)
+                        Task 1 &rsaquo; {{ $currentTypeLabel }}
+                    @elseif($taskParam == 2 && !$typeParam)
+                        Task 2 — Pilih jenis soal essay
+                    @elseif($taskParam == 2 && $typeParam)
+                        Task 2 › {{ $currentTypeLabel }}
+                    @endif
+                </p>
+            </div>
         </div>
     </div>
 
@@ -88,7 +99,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
 
             {{-- Task 1 --}}
-            <a href="{{ route('assignments.ielts-academic.writing.practice.index') }}?task=1"
+            <a href="{{ route($writingPracticeIndexRoute) }}?task=1"
                class="group relative overflow-hidden rounded-3xl shadow-lg border-0 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl">
                 {{-- gradient bg --}}
                 <div class="absolute inset-0 bg-gradient-to-br from-teal-400 to-emerald-600"></div>
@@ -97,14 +108,20 @@
                 <div class="absolute -top-4 -left-4 w-24 h-24 bg-white/10 rounded-full"></div>
                 <div class="relative z-10 p-8 flex flex-col items-center text-center">
                     <div class="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+                        @if(!empty($isGeneral))
+                        <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                        @else
                         <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
+                        @endif
                     </div>
-                    <span class="text-xs font-bold uppercase tracking-widest text-white/70 mb-1">Academic Report</span>
+                    <span class="text-xs font-bold uppercase tracking-widest text-white/70 mb-1">{{ !empty($isGeneral) ? 'Letter Writing' : 'Academic Report' }}</span>
                     <h3 class="text-4xl font-black text-white mb-3">Task 1</h3>
-                    <p class="text-white/80 text-sm leading-relaxed">Charts, graphs, tables, flowcharts &amp; maps — ~150 words</p>
-                    <div class="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-white text-teal-700 font-bold text-sm rounded-full group-hover:bg-teal-50 transition-colors">
+                    <p class="text-white/80 text-sm leading-relaxed">{{ !empty($isGeneral) ? 'Formal and informal letters for everyday situations — ~150 words' : 'Charts, graphs, tables, flowcharts & maps — ~150 words' }}</p>
+                    <div class="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-white text-teal-700 font-bold text-sm rounded-full group-hover:bg-white transition-colors">
                         @if(!empty($isClassEnded) && Auth::user()->isStudent())
                             <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Kerjakan Ulang ↺</span>
                         @else
@@ -116,7 +133,7 @@
             </a>
 
             {{-- Task 2 --}}
-            <a href="{{ route('assignments.ielts-academic.writing.practice.index') }}?task=2"
+            <a href="{{ route($writingPracticeIndexRoute) }}?task=2"
                class="group relative overflow-hidden rounded-3xl shadow-lg border-0 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl">
                 <div class="absolute inset-0 bg-gradient-to-br from-orange-400 to-rose-600"></div>
                 <div class="absolute -bottom-8 -right-8 w-40 h-40 bg-white/10 rounded-full"></div>
@@ -130,7 +147,7 @@
                     <span class="text-xs font-bold uppercase tracking-widest text-white/70 mb-1">Essay Writing</span>
                     <h3 class="text-4xl font-black text-white mb-3">Task 2</h3>
                     <p class="text-white/80 text-sm leading-relaxed">Point of view, argument or problem — ~250 words</p>
-                    <div class="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-white text-orange-700 font-bold text-sm rounded-full group-hover:bg-orange-50 transition-colors">
+                    <div class="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-white text-orange-700 font-bold text-sm rounded-full group-hover:bg-white transition-colors">
                         @if(!empty($isClassEnded) && Auth::user()->isStudent())
                             <span class="bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Kerjakan Ulang ↺</span>
                         @else
@@ -143,6 +160,7 @@
 
         </div>
 
+        @if(empty($isGeneral))
         <div class="w-full max-w-2xl mt-6">
             <a href="{{ route('assignments.ielts-academic.writing.grammar-practice') }}"
                class="group relative overflow-hidden rounded-3xl shadow-lg border-0 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl block">
@@ -158,13 +176,14 @@
                     <span class="text-xs font-bold uppercase tracking-widest text-white/70 mb-1">Fundamental Skill</span>
                     <h3 class="text-3xl font-black text-white mb-2">Practice IELTS Grammar</h3>
                     <p class="text-white/80 text-sm leading-relaxed">Improve your grammatical range and accuracy for IELTS Writing.</p>
-                    <div class="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-white text-indigo-700 font-bold text-sm rounded-full group-hover:bg-indigo-50 transition-colors">
+                    <div class="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-white text-indigo-700 font-bold text-sm rounded-full group-hover:bg-white transition-colors">
                         Start Practice
                         <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                     </div>
                 </div>
             </a>
         </div>
+        @endif
     </div>
     @endif
 
@@ -254,8 +273,11 @@
         @if(count($task2Meetings) > 0)
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($task2Meetings as $m)
-                <a href="{{ route('assignments.ielts-academic.writing.meeting', ['task' => 2, 'id' => $m->id]) }}"
-                   class="block p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300 group">
+                <a href="{{ route($writingMeetingRoute, ['task' => 2, 'id' => $m->id]) }}"
+                   class="relative block p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300 group">
+                    @if(!empty($canManageAiGrading))
+                        @include('assignments.ielts.writing.partials.ai-grading-toggle', ['meeting' => $m])
+                    @endif
                     <div class="flex items-start justify-between mb-3">
                         <h3 class="font-bold text-gray-800 flex-1 group-hover:text-orange-600 transition">{{ $m->title }}</h3>
                     </div>
@@ -267,7 +289,7 @@
             @endforeach
         </div>
         @else
-        <div class="bg-orange-50 border border-orange-200 rounded-xl p-10 text-center">
+        <div class="bg-white border border-orange-200 rounded-xl p-10 text-center">
             <p class="text-gray-600 mb-2">Belum ada soal untuk tipe ini.</p>
             <p class="text-sm text-gray-400">Konten akan segera ditambahkan.</p>
         </div>
@@ -275,8 +297,57 @@
     </div>
     @endif
 
-    {{-- ── LEVEL 1 (Task 1): Chart Type Selector ── --}}
-    @if($taskParam == 1 && !$typeParam)
+    {{-- ── LEVEL 1 (Task 1, General): Letter Type Selector ── --}}
+    @if($taskParam == 1 && !$typeParam && !empty($isGeneral))
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Select Letter Type</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
+            <a href="?task=1&type=formal" class="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-0">
+                <div class="absolute inset-0" style="background: linear-gradient(135deg, #2dd4bf, #0d9488)"></div>
+                <div class="absolute -bottom-8 -right-8 w-28 h-28 bg-white/10 rounded-full"></div>
+                <div class="absolute -top-5 -left-5 w-20 h-20 bg-white/10 rounded-full"></div>
+                <div class="relative z-10 p-6 flex flex-col h-full">
+                    <span class="w-10 h-10 rounded-xl bg-white/25 backdrop-blur flex items-center justify-center border border-white/30 mb-4">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </span>
+                    <h3 class="font-bold text-xl text-white mb-1.5">Formal Letter</h3>
+                    <p class="text-white/80 text-sm flex-1">Write to an authority, company, or organization.</p>
+                    <div class="mt-5 inline-flex items-center gap-2 px-4 py-2 bg-white/95 text-gray-800 text-sm font-bold rounded-full w-fit group-hover:bg-white transition-colors">
+                        Mulai
+                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+            <a href="?task=1&type=informal" class="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-0">
+                <div class="absolute inset-0" style="background: linear-gradient(135deg, #38bdf8, #2563eb)"></div>
+                <div class="absolute -bottom-8 -right-8 w-28 h-28 bg-white/10 rounded-full"></div>
+                <div class="absolute -top-5 -left-5 w-20 h-20 bg-white/10 rounded-full"></div>
+                <div class="relative z-10 p-6 flex flex-col h-full">
+                    <span class="w-10 h-10 rounded-xl bg-white/25 backdrop-blur flex items-center justify-center border border-white/30 mb-4">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </span>
+                    <h3 class="font-bold text-xl text-white mb-1.5">Informal Letter</h3>
+                    <p class="text-white/80 text-sm flex-1">Write to a friend or relative about an everyday situation.</p>
+                    <div class="mt-5 inline-flex items-center gap-2 px-4 py-2 bg-white/95 text-gray-800 text-sm font-bold rounded-full w-fit group-hover:bg-white transition-colors">
+                        Mulai
+                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    @endif
+
+    {{-- ── LEVEL 1 (Task 1, Academic): Chart Type Selector ── --}}
+    @if($taskParam == 1 && !$typeParam && empty($isGeneral))
     <div class="mb-12">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Select Practice Type</h2>
         @php
@@ -344,7 +415,10 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($items as $item)
-                <a href="{{ route('assignments.ielts-academic.writing.meeting', ['task' => 1, 'id' => $item->id]) }}" class="block p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300 group">
+                <a href="{{ route($writingMeetingRoute, ['task' => 1, 'id' => $item->id]) }}" class="relative block p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition duration-300 group">
+                    @if(!empty($canManageAiGrading))
+                        @include('assignments.ielts.writing.partials.ai-grading-toggle', ['meeting' => $item])
+                    @endif
                     <div class="flex items-start justify-between mb-3">
                         <h3 class="font-bold text-gray-800 flex-1 group-hover:text-teal-600 transition">{{ $item->title }}</h3>
                     </div>
@@ -358,7 +432,7 @@
                     </div>
                 </a>
             @empty
-                <div class="col-span-full bg-teal-50 border border-teal-200 rounded-lg p-8 text-center">
+                <div class="col-span-full bg-white border border-teal-200 rounded-lg p-8 text-center">
                     <p class="text-gray-600 mb-2">No practice items available for this type yet.</p>
                     <p class="text-sm text-gray-500">Check back soon for more content.</p>
                 </div>

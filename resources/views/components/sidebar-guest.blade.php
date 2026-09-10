@@ -1,3 +1,21 @@
+@php
+    // Sidebar suppressed entirely during admin's "Live Student View" preview
+    // (?live_preview_for=... - see admin/students/current-assignment.blade.php).
+    // Simpler and far more robust than swapping to the "correct" role's
+    // sidebar across the 20+ pages that each independently @include this
+    // file - that approach kept regressing whenever a previewed page used
+    // a layout that hadn't also been patched with the same override.
+    if (request()->query('live_preview_for')) {
+        // No sidebar to offset for in this mode, but many pages that
+        // @include this file hardcode a "md:ml-64"-style left margin on
+        // their own <main> (an older pattern predating program-sidebar
+        // .blade.php's CSS-variable approach) - without this override,
+        // that margin stays applied even though the sidebar it was meant
+        // to clear never rendered, leaving a dead gap in its place.
+        echo '<style>main{margin-left:0 !important;}</style>';
+        return;
+    }
+@endphp
 {{-- Guest Sidebar Component --}}
 <style>
     .guest-sidebar-shell {

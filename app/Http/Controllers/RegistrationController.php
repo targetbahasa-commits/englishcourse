@@ -7,6 +7,7 @@ use App\Application\Registration\GetRegistrationForm;
 use App\Http\Controllers\Concerns\ExtractsAttributionData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class RegistrationController extends Controller
 {
@@ -34,12 +35,20 @@ class RegistrationController extends Controller
         $data = $request->validate([
             'full_name'            => 'required|string|max:150',
             'whatsapp'             => 'required|string|max:20',
-            'email'                => 'nullable|email|max:150',
+            // Blocks registering with an email that already belongs to a
+            // DIFFERENT account - shows a clear "already registered" error
+            // instead of silently logging the submitter into someone
+            // else's account (the previous behavior of the lookup below).
+            // ->ignore(auth()->id()) lets an already-logged-in user keep
+            // using their own email to register for an additional program
+            // via this same form - the one legitimate case of "resubmitting
+            // with an email that's already in `users`".
+            'email'                => ['nullable', 'email', 'max:150', Rule::unique('users', 'email')->ignore(auth()->id())],
             'city'                 => 'required|string|max:100',
             'age'                  => 'nullable|integer|min:10|max:100',
             'profession'           => 'required|in:student_sma,mahasiswa,karyawan,other',
             'profession_other'     => 'nullable|string|max:100',
-            'program_id'           => 'required|exists:programs,id',
+            'program_id'           => ['required', Rule::exists('programs', 'id')->where('is_active', true)],
             'class_period_id'      => 'nullable|exists:class_periods,id',
             'program_interest'     => 'nullable|string|max:100',
             'mode'                 => 'required|in:online,offline,flexible',
@@ -71,6 +80,7 @@ class RegistrationController extends Controller
         ], [
             'program_id.required' => 'Silakan pilih program yang kamu minati.',
             'program_id.exists'   => 'Program yang dipilih tidak valid.',
+            'email.unique'        => 'Email ini sudah terdaftar. Silakan login jika ini akun kamu, atau gunakan email lain.',
         ]);
 
         $data = array_merge($data, $this->extractAttributionData($request));
@@ -102,6 +112,24 @@ class RegistrationController extends Controller
 
         $user = \App\Models\User::where('email', $email)->first();
 
+        // Fallback match on WhatsApp number when there's no exact email
+        // match - this is the common case when email was left blank above
+        // (it's labeled optional on the form) and we just fabricated a
+        // synthetic, always-unique placeholder address, which meant the
+        // email lookup above could NEVER find a match even if this exact
+        // person had already registered before (via /daftar or
+        // /student/register) - silently creating a fresh duplicate
+        // `users` row every time. This was the single biggest source of
+        // duplicate student accounts sitewide (investigation dated
+        // 2026-09-01 found 6 duplicate-name groups, 12+ accounts).
+        // Scoped to role=student so a shared family phone doesn't
+        // accidentally match an unrelated admin/teacher account.
+        if (!$user && $rawPhone) {
+            $user = \App\Models\User::where('phone_number', $rawPhone)
+                ->where('role', 'student')
+                ->first();
+        }
+
         if (!$user) {
             $newReferralCode = strtoupper(\Illuminate\Support\Str::random(6));
             while (\App\Models\User::where('referral_code', $newReferralCode)->exists()) {
@@ -118,30 +146,57 @@ class RegistrationController extends Controller
             if (!empty($data['notes'])) $bioParts[] = "Catatan: " . $data['notes'];
             $bioStr = implode("\n", $bioParts);
 
-            $user = \App\Models\User::create([
-                'name'            => $data['full_name'],
-                'email'           => $email,
-                'phone_number'    => $rawPhone,
-                'password'        => $data['password'],
-                'role'            => 'student',
-                'status'          => 'active',
-                'program_id'      => $data['program_id'] ?? null,
-                'class_period_id' => $data['class_period_id'] ?? null,
-                'learning_mode'   => ($data['mode'] ?? 'flexible') === 'flexible' ? 'both' : ($data['mode'] ?? 'online'),
-                'referral_code'   => $newReferralCode,
-                'referred_by_id'  => $referrer ? $referrer->id : null,
-                'bio'             => $bioStr,
-            ]);
+            try {
+                $user = \App\Models\User::create([
+                    'name'            => $data['full_name'],
+                    'email'           => $email,
+                    'phone_number'    => $rawPhone,
+                    'password'        => $data['password'],
+                    'role'            => 'student',
+                    'status'          => 'active',
+                    'program_id'      => $data['program_id'] ?? null,
+                    'class_period_id' => $data['class_period_id'] ?? null,
+                    'learning_mode'   => ($data['mode'] ?? 'flexible') === 'flexible' ? 'both' : ($data['mode'] ?? 'online'),
+                    'referral_code'   => $newReferralCode,
+                    'referred_by_id'  => $referrer ? $referrer->id : null,
+                    'bio'             => $bioStr,
+                ]);
+            } catch (\Illuminate\Database\QueryException $e) {
+                // Two near-simultaneous submissions with the same email (double-click,
+                // client retry) can both pass the !$user check above before either
+                // insert commits. If this is the unique-email race, fall back to the
+                // row the other request just created instead of a raw 500.
+                $user = \App\Models\User::where('email', $email)->first();
+                if (!$user) {
+                    throw $e;
+                }
+            }
+        } elseif ($user->role === 'guest') {
+            // Same matched row (found by email or phone above), not a new
+            // one - this is a booking lead (see BookingClassController)
+            // completing real registration. Upgrade in place, mirroring
+            // EloquentAdminUserRepository::convertGuest() exactly, so they
+            // stop showing up in the admin's booking-leads list (which
+            // filters on converted_from_guest_at being null) and gain
+            // normal assignment access via HandlesAssignmentAccess.
+            $user->role = 'student';
+            $user->converted_from_guest_at = now();
+            $user->save();
         }
 
         $lead->update([
             'converted_user_id' => $user->id,
+            'status' => 'converted',
+            'converted_at' => $lead->converted_at ?? now(),
         ]);
 
-        // Auto-login the user so they can immediately see and manage their invoice
-        if (!Auth::check()) {
-            Auth::login($user);
-        }
+        // Auto-login as the newly registered/converted user so they can immediately see
+        // and manage their invoice. Always switch sessions (even if someone else, e.g. a
+        // stale guest/student session on a shared device, was already logged in) - the
+        // redirect below requires the CURRENT session to own $invoicePayment, so leaving
+        // a stale different-user session active would 403 the customer right after they
+        // just registered and paid.
+        Auth::login($user);
 
         $invoicePayment = null;
         if (!empty($data['program_id'])) {
@@ -283,5 +338,43 @@ class RegistrationController extends Controller
         }
 
         return view('registration.success', compact('paymentDetails'));
+    }
+
+    /**
+     * Entry point for the signed "Arahkan ke Registrasi" link generated on
+     * the admin bookings page (Admin\BookingController::index()). A
+     * booking-form lead (role='guest', see BookingClassController) isn't
+     * logged in on whatever device opens this link, and /daftar's email
+     * field is validated with Rule::unique(...)->ignore(auth()->id()) - if
+     * they aren't authenticated as themselves first, submitting the form
+     * pre-filled with their own already-used email would be rejected as
+     * "already registered" by the exact validation that was just added to
+     * stop a real duplicate-account incident (see store()). Logging them
+     * into their own existing account here is what makes ignore(auth()->id())
+     * correctly exempt their own row, so the pre-filled form can actually
+     * be submitted.
+     *
+     * The route this method is bound to is signed + time-limited
+     * (registered with the `signed` middleware) - Laravel rejects the
+     * request before this method ever runs if the URL has been tampered
+     * with or has expired, so $enrollment->id is trustworthy here.
+     */
+    public function continueFromBooking(\App\Models\Enrollment $enrollment)
+    {
+        $user = $enrollment->user;
+
+        if (!$user || !$enrollment->class_period_booked_at) {
+            abort(404);
+        }
+
+        Auth::login($user);
+
+        return redirect()->route('registration.show', [
+            'full_name' => $user->name,
+            'whatsapp' => $user->phone_number,
+            'email' => $user->email,
+            'program_id' => $enrollment->program_id,
+            'class_period_id' => $enrollment->class_period_id,
+        ]);
     }
 }

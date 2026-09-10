@@ -15,7 +15,7 @@ class GuestQuickAccessController extends Controller
 
     public function quickAccess(Request $request, $testType)
     {
-        $validTestTypes = ['ielts_academic', 'ielts_general', 'toefl_itp'];
+        $validTestTypes = ['ielts_academic', 'ielts_general', 'toefl_itp', 'pte_academic'];
         if (! in_array($testType, $validTestTypes)) {
             abort(404);
         }
@@ -46,6 +46,10 @@ class GuestQuickAccessController extends Controller
     {
         if ($testType === 'ielts_academic') {
             return redirect()->route('assignments.ielts-academic.mockup.cambridge');
+        }
+
+        if ($testType === 'pte_academic') {
+            return redirect()->route('assignments.pte-academic');
         }
 
         return redirect()->route('guest.free-tests');

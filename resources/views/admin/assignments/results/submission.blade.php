@@ -15,6 +15,18 @@
         </div>
     </div>
 
+    @if(session('success'))
+        <div class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(($submission->answers_data['ai_enabled'] ?? true) === false)
+        <div class="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium">
+            ⚠️ Penilaian AI dinonaktifkan saat siswa submit jawaban ini — skor otomatis di bawah belum mencerminkan penilaian sesungguhnya. Mohon isi Nilai Guru secara manual.
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <p class="text-sm font-semibold text-gray-500 uppercase">Student</p>
@@ -23,8 +35,11 @@
             <p class="text-xs text-gray-400 mt-3">User ID: {{ $submission->user->id ?? 'N/A' }}</p>
         </div>
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <p class="text-sm font-semibold text-gray-500 uppercase">Score</p>
+            <p class="text-sm font-semibold text-gray-500 uppercase">Skor Otomatis</p>
             <p class="text-4xl font-bold text-indigo-600 mt-2">{{ $submission->score ?? 'Pending' }}</p>
+            @if($submission->teacher_score !== null)
+                <p class="text-sm font-semibold text-purple-700 mt-1">Nilai Guru: {{ number_format($submission->teacher_score, 1) }}</p>
+            @endif
             <p class="text-sm text-gray-500 mt-2">Meeting {{ $submission->meeting_number }}</p>
             <p class="text-xs text-gray-400 mt-3">Submitted at: {{ $submission->submitted_at ? $submission->submitted_at->format('M d, Y H:i') : 'Not submitted' }}</p>
         </div>
@@ -35,27 +50,28 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">Submitted Answers</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Submitted Answers</h2>
 
-        @if(!empty($submission->answers_data) && is_array($submission->answers_data))
-            <div class="space-y-4">
-                @foreach($submission->answers_data as $key => $answer)
-                    <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-semibold text-gray-700">{{ ucwords(str_replace(['_', '-'], ' ', $key)) }}</span>
-                            <span class="text-xs text-gray-500">{{ is_scalar($answer) ? strlen((string) $answer) : 'Complex' }}</span>
-                        </div>
-                        <pre class="text-sm text-gray-800 whitespace-pre-wrap">{{ is_array($answer) ? json_encode($answer, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : $answer }}</pre>
-                    </div>
-                @endforeach
-            </div>
-        @else
-            <div class="text-center py-12 text-gray-500">
-                <p>No stored answer payload is available for this submission.</p>
-                <p class="mt-2 text-xs">If this is a legacy or unrecorded submission, the submission score may still be visible.</p>
-            </div>
-        @endif
+            <style>
+                .word-diff .word-correct { color: #2ecc71; font-weight: bold; }
+                .word-diff .word-extra { color: #3498db; font-weight: bold; text-decoration: line-through; }
+                .word-diff .word-missing { color: #f1c40f; font-weight: bold; }
+                .word-diff .word-wrong { color: #e74c3c; font-weight: bold; text-decoration: underline; }
+            </style>
+
+            @if(!empty($submission->answers_data) && is_array($submission->answers_data))
+                @include('partials.grammar-writing-answers-tree', ['data' => $submission->answers_data])
+            @else
+                <div class="text-center py-12 text-gray-500">
+                    <p>No stored answer payload is available for this submission.</p>
+                    <p class="mt-2 text-xs">If this is a legacy or unrecorded submission, the submission score may still be visible.</p>
+                </div>
+            @endif
+        </div>
+
+        @include('partials.submission-review-form', ['meetingScore' => $submission, 'reviewRoute' => route('admin.assignment-results.submission.review', [$program, $submission])])
     </div>
 </div>
 @endsection

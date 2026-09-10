@@ -388,18 +388,18 @@
                                 <!-- DEGREE AND SPEED -->
                                 <div class="space-y-3">
                                     <div class="flex items-center gap-2">
-                                        <svg class="w-8 h-8 text-slate-700" fill="none" stroke="currentColor"
+                                        <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
                                                 d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                         </svg>
-                                        <h4 class="font-bold text-lg text-gray-800">Degree & Speed</h4>
+                                        <h4 class="font-bold text-lg text-gray-800">Degree & Speed ⚡</h4>
                                     </div>
                                     <div class="flex gap-4 items-stretch">
                                         <div
-                                            class="flex-1 bg-gradient-to-b from-slate-100 to-white rounded-lg border border-gray-200 p-1">
+                                            class="flex-1 bg-gradient-to-b from-slate-50 to-white rounded-lg border border-gray-200 p-1">
                                             <table class="w-full text-sm border-collapse">
-                                                <thead class="bg-slate-200 text-slate-800">
+                                                <thead class="bg-slate-100 text-slate-800">
                                                     <tr>
                                                         <th class="p-2 text-left">Adverb</th>
                                                         <th class="p-2 text-left">Adjective</th>
@@ -407,53 +407,53 @@
                                                 </thead>
                                                 <tbody class="divide-y divide-gray-100">
                                                     <!-- Strong -->
-                                                    <tr class="bg-slate-100">
-                                                        <td class="p-2 font-semibold">dramatically</td>
-                                                        <td class="p-2 font-semibold">dramatic</td>
+                                                    <tr class="bg-rose-50/50 hover:bg-rose-50/80 transition duration-150">
+                                                        <td class="p-2 font-semibold text-rose-700">dramatically</td>
+                                                        <td class="p-2 font-semibold text-rose-700">dramatic</td>
                                                     </tr>
-                                                    <tr class="bg-slate-100">
-                                                        <td class="p-2 font-semibold">sharply</td>
-                                                        <td class="p-2 font-semibold">sharp</td>
+                                                    <tr class="bg-rose-50/30 hover:bg-rose-50/60 transition duration-150">
+                                                        <td class="p-2 font-semibold text-rose-700">sharply</td>
+                                                        <td class="p-2 font-semibold text-rose-700">sharp</td>
                                                     </tr>
-                                                    <tr class="bg-slate-100">
-                                                        <td class="p-2">enormously</td>
-                                                        <td class="p-2">enormous</td>
+                                                    <tr class="bg-purple-50/50 hover:bg-purple-50/80 transition duration-150">
+                                                        <td class="p-2 font-medium text-purple-700">enormously</td>
+                                                        <td class="p-2 font-medium text-purple-700">enormous</td>
                                                     </tr>
-                                                    <tr class="bg-slate-100">
-                                                        <td class="p-2">steeply</td>
-                                                        <td class="p-2">steep</td>
+                                                    <tr class="bg-purple-50/30 hover:bg-purple-50/60 transition duration-150">
+                                                        <td class="p-2 text-purple-700">steeply</td>
+                                                        <td class="p-2 text-purple-700">steep</td>
                                                     </tr>
-                                                    <tr>
-                                                        <td class="p-2">substantially</td>
-                                                        <td class="p-2">substantial</td>
+                                                    <tr class="bg-indigo-50/30 hover:bg-indigo-50/60 transition duration-150">
+                                                        <td class="p-2 text-indigo-700">substantially</td>
+                                                        <td class="p-2 text-indigo-700">substantial</td>
                                                     </tr>
-                                                    <tr>
-                                                        <td class="p-2">considerably</td>
-                                                        <td class="p-2">considerable</td>
+                                                    <tr class="bg-blue-50/50 hover:bg-blue-50/80 transition duration-150">
+                                                        <td class="p-2 text-blue-700">considerably</td>
+                                                        <td class="p-2 text-blue-700">considerable</td>
                                                     </tr>
-                                                    <tr>
-                                                        <td class="p-2">significantly</td>
-                                                        <td class="p-2">significant</td>
+                                                    <tr class="bg-blue-50/30 hover:bg-blue-50/60 transition duration-150">
+                                                        <td class="p-2 text-blue-700">significantly</td>
+                                                        <td class="p-2 text-blue-700">significant</td>
                                                     </tr>
-                                                    <tr>
-                                                        <td class="p-2">rapidly</td>
-                                                        <td class="p-2">rapid</td>
+                                                    <tr class="bg-cyan-50/30 hover:bg-cyan-50/60 transition duration-150">
+                                                        <td class="p-2 text-cyan-700">rapidly</td>
+                                                        <td class="p-2 text-cyan-700">rapid</td>
                                                     </tr>
-                                                    <tr>
-                                                        <td class="p-2">moderately</td>
-                                                        <td class="p-2">moderate</td>
+                                                    <tr class="hover:bg-slate-50/50 transition duration-150">
+                                                        <td class="p-2 text-gray-700">moderately</td>
+                                                        <td class="p-2 text-gray-700">moderate</td>
                                                     </tr>
-                                                    <tr>
-                                                        <td class="p-2">gradually</td>
-                                                        <td class="p-2">gradual</td>
+                                                    <tr class="hover:bg-slate-50/50 transition duration-150">
+                                                        <td class="p-2 text-gray-700">gradually</td>
+                                                        <td class="p-2 text-gray-700">gradual</td>
                                                     </tr>
-                                                    <tr>
-                                                        <td class="p-2 text-gray-600">slightly</td>
-                                                        <td class="p-2 text-gray-600">slight</td>
+                                                    <tr class="bg-slate-50/50 hover:bg-slate-100/50 transition duration-150">
+                                                        <td class="p-2 text-slate-700 font-medium">slightly</td>
+                                                        <td class="p-2 text-slate-700 font-medium">slight</td>
                                                     </tr>
-                                                    <tr class="bg-gray-50">
-                                                        <td class="p-2 text-gray-500">minimally</td>
-                                                        <td class="p-2 text-gray-500">minimal</td>
+                                                    <tr class="bg-slate-100/50 hover:bg-slate-200/50 transition duration-150">
+                                                        <td class="p-2 text-slate-700 font-medium">minimally</td>
+                                                        <td class="p-2 text-slate-700 font-medium">minimal</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -461,20 +461,21 @@
 
                                         <!-- Triangle Indicator -->
                                         <div class="flex flex-col items-center w-12 shrink-0 py-2">
-                                            <div class="text-xs font-bold text-slate-800 mb-1">Strong</div>
+                                            <div class="text-xs font-extrabold text-rose-600 mb-1 uppercase tracking-wider">Strong</div>
                                             <div class="flex-1 w-full relative">
                                                 <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100"
                                                     preserveAspectRatio="none">
                                                     <defs>
-                                                        <linearGradient id="gradTheme" x1="0%" y1="0%" x2="0%" y2="100%">
-                                                            <stop offset="0%" style="stop-color:#4b5563;stop-opacity:1" />
-                                                            <stop offset="100%" style="stop-color:#e5e7eb;stop-opacity:1" />
+                                                        <linearGradient id="gradDegreeSpeedPromo" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                            <stop offset="0%" style="stop-color:#f43f5e;stop-opacity:1" />
+                                                            <stop offset="50%" style="stop-color:#a855f7;stop-opacity:1" />
+                                                            <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
                                                         </linearGradient>
                                                     </defs>
-                                                    <polygon points="0,0 100,0 50,100" fill="url(#gradTheme)" />
+                                                    <polygon points="0,0 100,0 50,100" fill="url(#gradDegreeSpeedPromo)" />
                                                 </svg>
                                             </div>
-                                            <div class="text-xs font-bold text-gray-400 mt-1">Weak</div>
+                                            <div class="text-xs font-extrabold text-cyan-600 mt-1 uppercase tracking-wider">Weak</div>
                                         </div>
                                     </div>
                                 </div>
@@ -1665,6 +1666,9 @@
 <script>
 (function(){
     const tip = document.getElementById('tb-tooltip');
+    if (tip) {
+        document.body.appendChild(tip); // Move to body to prevent overflow clipping
+    }
     let hideTimer;
     document.addEventListener('mouseover', function(e){
         const btn = e.target.closest('[data-tooltip]');

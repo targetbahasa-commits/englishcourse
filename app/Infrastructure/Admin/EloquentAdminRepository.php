@@ -36,6 +36,14 @@ class EloquentAdminRepository implements AdminRepository
         $thresholdAt = now()->setTimestamp($threshold);
         $students = [];
 
+        // Populated only by the `sessions` branch below (it's the only
+        // source with a raw session payload to read a page URL out of),
+        // kept independent of $rememberLatestActivity's "most-recent
+        // source wins" merge - a session row can lose that comparison to
+        // a fresher users.last_seen_at row and still be the only place a
+        // real activity_url is available for that student.
+        $activityUrls = [];
+
         $rememberLatestActivity = function (iterable $rows, callable $timestampResolver, callable $programResolver) use (&$students): void {
             foreach ($rows as $row) {
                 $timestamp = $timestampResolver($row);
@@ -58,27 +66,60 @@ class EloquentAdminRepository implements AdminRepository
             }
         };
 
+        $sessionRows = DB::table('sessions')
+            ->join('users', 'sessions.user_id', '=', 'users.id')
+            ->leftJoin('programs', 'users.program_id', '=', 'programs.id')
+            ->whereNotNull('sessions.user_id')
+            ->where('sessions.last_activity', '>=', $threshold)
+            ->where('users.role', 'student')
+            ->select(
+                'users.id',
+                'users.name',
+                'users.role',
+                'programs.name as assigned_program_name',
+                'sessions.payload as session_payload',
+                'sessions.last_activity as activity_at'
+            )
+            ->get();
+
+        foreach ($sessionRows as $row) {
+            $url = $this->extractActivityUrlFromPayload($row->session_payload ?? null);
+            if ($url) {
+                $activityUrls[$row->id] = $url;
+            }
+        }
+
         $rememberLatestActivity(
-            DB::table('sessions')
-                ->join('users', 'sessions.user_id', '=', 'users.id')
-                ->leftJoin('programs', 'users.program_id', '=', 'programs.id')
-                ->whereNotNull('sessions.user_id')
-                ->where('sessions.last_activity', '>=', $threshold)
-                ->where('users.role', 'student')
-                ->select(
-                    'users.id',
-                    'users.name',
-                    'users.role',
-                    'programs.name as assigned_program_name',
-                    'sessions.payload as session_payload',
-                    'sessions.last_activity as activity_at'
-                )
-                ->get(),
+            $sessionRows,
             fn (object $row): ?int => is_numeric($row->activity_at ?? null) ? (int) $row->activity_at : null,
             fn (object $row): string => $this->inferProgramFromSessionPayload(
                 $row->session_payload ?? null,
                 $row->assigned_program_name ?: 'Student Dashboard'
             )
+        );
+
+        // General-purpose presence signal, stamped by UpdateLastSeen
+        // middleware on every authenticated request - unlike the sessions
+        // source above, it isn't lost to garbage collection after
+        // SESSION_LIFETIME (2h) of inactivity, so this is what actually
+        // makes a 24h/48h window meaningful for casual browsing that never
+        // triggers one of the action-specific sources below.
+        $rememberLatestActivity(
+            DB::table('users')
+                ->leftJoin('programs', 'users.program_id', '=', 'programs.id')
+                ->where('users.role', 'student')
+                ->whereNotNull('users.last_seen_at')
+                ->where('users.last_seen_at', '>=', $thresholdAt)
+                ->select(
+                    'users.id',
+                    'users.name',
+                    'users.role',
+                    'programs.name as program_name',
+                    'users.last_seen_at as activity_at'
+                )
+                ->get(),
+            fn (object $row): ?int => $this->normalizeTimestamp($row->activity_at ?? null),
+            fn (object $row): string => $row->program_name ?: 'Student Dashboard'
         );
 
         $rememberLatestActivity(
@@ -199,6 +240,10 @@ class EloquentAdminRepository implements AdminRepository
             fn (): string => 'TOEFL ITP Mockup'
         );
 
+        foreach ($students as $id => $student) {
+            $student->activity_url = $activityUrls[$id] ?? null;
+        }
+
         return collect($students)
             ->sortByDesc('last_activity')
             ->values()
@@ -207,6 +252,7 @@ class EloquentAdminRepository implements AdminRepository
 
     public function getActiveTeachers(int $threshold): array
     {
+        $thresholdAt = now()->setTimestamp($threshold);
         $teachers = [];
 
         $rememberLatestActivity = function (iterable $rows, callable $timestampResolver, callable $programResolver) use (&$teachers): void {
@@ -250,6 +296,27 @@ class EloquentAdminRepository implements AdminRepository
             )
         );
 
+        // Same general-purpose presence signal as getActiveStudents() -
+        // see that method's comment. Teachers previously had NO fallback
+        // beyond the sessions table at all, so this matters even more here.
+        $rememberLatestActivity(
+            DB::table('users')
+                ->leftJoin('programs', 'users.program_id', '=', 'programs.id')
+                ->where('users.role', 'teacher')
+                ->whereNotNull('users.last_seen_at')
+                ->where('users.last_seen_at', '>=', $thresholdAt)
+                ->select(
+                    'users.id',
+                    'users.name',
+                    'users.role',
+                    'programs.name as program_name',
+                    'users.last_seen_at as activity_at'
+                )
+                ->get(),
+            fn (object $row): ?int => $this->normalizeTimestamp($row->activity_at ?? null),
+            fn (object $row): string => $row->program_name ?: 'Teacher Dashboard'
+        );
+
         return collect($teachers)
             ->sortByDesc('last_activity')
             ->values()
@@ -258,17 +325,23 @@ class EloquentAdminRepository implements AdminRepository
 
     public function getProgramPerformance(int $threshold): array
     {
+        // Note: withCount() always emits COUNT(*), silently ignoring any ->distinct()
+        // call inside the closure - it does NOT become COUNT(DISTINCT ...). Since a
+        // student can have multiple concurrent session rows (multiple devices/browsers),
+        // counting via a plain relation-count after joining sessions would double-count
+        // them. Using addSelect() with an explicit COUNT(DISTINCT users.id) subquery
+        // avoids that.
         return Program::withCount([
             'users as students_count' => function ($q) {
                 $q->where('role', 'student');
             },
-            'users as active_students_count' => function ($q) use ($threshold) {
-                $q->where('role', 'student')
-                    ->join('sessions', 'users.id', '=', 'sessions.user_id')
-                    ->where('sessions.last_activity', '>=', $threshold)
-                    ->distinct('users.id');
-            },
         ])
+            ->addSelect(['active_students_count' => User::selectRaw('count(distinct users.id)')
+                ->whereColumn('users.program_id', 'programs.id')
+                ->where('role', 'student')
+                ->join('sessions', 'users.id', '=', 'sessions.user_id')
+                ->where('sessions.last_activity', '>=', $threshold),
+            ])
             ->orderByDesc('students_count')
             ->limit(5)
             ->get()->all();
@@ -314,6 +387,57 @@ class EloquentAdminRepository implements AdminRepository
             'pte_academic' => 'Free Test PTE Academic',
             default => 'Free Test ' . str_replace('_', ' ', strtoupper($testType)),
         };
+    }
+
+    /**
+     * Extracts a real page URL from a decoded session payload, for the
+     * Live Preview grid view's iframe tiles. Mirrors the same decode
+     * step as inferProgramFromSessionPayload() (same payload, read for a
+     * different purpose) and the same ignore-list ManageStudents::
+     * resolveActivityUrl() uses to skip internal API/polling URLs that
+     * would otherwise surface as a student's "current page".
+     */
+    private function extractActivityUrlFromPayload(?string $payload): ?string
+    {
+        if (!$payload) {
+            return null;
+        }
+
+        $decoded = base64_decode($payload, true);
+        if ($decoded === false || $decoded === '') {
+            return null;
+        }
+
+        $data = @unserialize($decoded, ['allowed_classes' => false]);
+        if (!is_array($data)) {
+            return null;
+        }
+
+        $url = null;
+        if (isset($data['_previous']) && is_array($data['_previous'])) {
+            $url = $data['_previous']['url'] ?? null;
+        }
+        if (!$url && isset($data['url.intended']) && is_string($data['url.intended'])) {
+            $url = $data['url.intended'];
+        }
+
+        if (!is_string($url) || trim($url) === '') {
+            return null;
+        }
+
+        $path = (string) parse_url($url, PHP_URL_PATH);
+
+        foreach (['/api/', '/broadcasting/'] as $prefix) {
+            if (str_starts_with($path, $prefix)) {
+                return null;
+            }
+        }
+
+        if (str_contains($path, '/current-assignment-json')) {
+            return null;
+        }
+
+        return $url;
     }
 
     private function inferProgramFromSessionPayload(?string $payload, string $fallback): string

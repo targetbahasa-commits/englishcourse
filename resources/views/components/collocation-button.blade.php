@@ -103,8 +103,8 @@ class="fixed z-50"
     <button @mousedown="startDrag"
             @touchstart="startDrag"
             @click="handleClick"
-            class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2 cursor-move select-none touch-none">
-        <span>🧠</span> Collocation Dictionary
+            class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2 cursor-move select-none touch-none opacity-60 hover:opacity-100 transition-all duration-300">
+        Collocation Dictionary
     </button>
 
     <!-- Modal Backdrop -->
@@ -127,7 +127,7 @@ class="fixed z-50"
             <div class="p-4 bg-purple-50 border-b border-purple-100 flex justify-between items-center" style="height: 70px;">
                 <div class="flex items-center gap-2">
                     <h3 class="text-xl font-bold text-purple-900">Collocation Dictionary</h3>
-                    <span class="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">Hybrid</span>
+                    <span class="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full opacity-60 hover:opacity-100 transition-all duration-300">Hybrid</span>
                 </div>
                 <button @click="open = false" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>

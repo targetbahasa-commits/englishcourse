@@ -11,7 +11,7 @@
 
         <div class="border border-gray-200 rounded-lg overflow-hidden">
             {{-- Example Row --}}
-            <div class="grid grid-cols-3 border-b border-gray-200 bg-gray-50 p-4 gap-4">
+            <div class="grid grid-cols-3 border-b border-gray-200 bg-white p-4 gap-4">
                 <div class="font-italic font-bold text-gray-600">
                     <em>Example</em><br>
                     <em><u>Pre-phase</u></em>
@@ -73,17 +73,17 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong>6</strong>&nbsp; The main form of data collection will be</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[6]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span>
                     <span>questionnaires.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[6]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span>
                     <span>Internet polling.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[6]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span>
                     <span>face-to-face interviews.</span>
@@ -95,17 +95,17 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong>7</strong>&nbsp; To finish in time, the staff will have to</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[7]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span>
                     <span>work late.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[7]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span>
                     <span>come in early.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[7]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span>
                     <span>take some work home.</span>
@@ -117,17 +117,17 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong>8</strong>&nbsp; The final report will contain</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[8]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span>
                     <span>three appendices.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[8]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span>
                     <span>material from the company website.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[8]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span>
                     <span>a supplementary booklet.</span>
@@ -139,17 +139,17 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong>9</strong>&nbsp; The final report will be handed in on the</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[9]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span>
                     <span>5th.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[9]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span>
                     <span>15th.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[9]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span>
                     <span>25th.</span>
@@ -161,17 +161,17 @@
         <div>
             <p class="text-lg font-medium mb-3"><strong>10</strong>&nbsp; At the end, there will be</p>
             <div class="space-y-2 pl-6">
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[10]" value="A" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">A</span>
                     <span>an office party.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[10]" value="B" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">B</span>
                     <span>a restaurant dinner.</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+                <label class="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
                     <input type="radio" name="answers[10]" value="C" class="w-4 h-4 text-blue-600 border-gray-400 focus:ring-blue-500 cursor-pointer">
                     <span class="font-bold">C</span>
                     <span>presents for all involved.</span>

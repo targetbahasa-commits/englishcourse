@@ -14,7 +14,7 @@
             <div class="p-3 italic text-gray-500 text-sm">Example</div>
             <div class="p-3 italic text-gray-500 text-sm">Answer</div>
         </div>
-        <div class="grid grid-cols-2 bg-gray-50">
+        <div class="grid grid-cols-2 bg-white">
             <div class="p-3 italic text-gray-600 text-sm">Type of room required:</div>
             <div class="p-3 italic text-gray-600 text-sm">double room</div>
         </div>
@@ -84,14 +84,14 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden">
         {{-- Table header --}}
-        <div class="grid grid-cols-3 bg-gray-100 border-b border-gray-200">
+        <div class="grid grid-cols-3 bg-white border-b border-gray-200">
             <div class="p-3 font-bold text-center text-gray-800">Day</div>
             <div class="p-3 font-bold text-center text-gray-800">Entertainment activities</div>
             <div class="p-3 font-bold text-center text-gray-800">Transportation</div>
         </div>
 
         {{-- Tuesdays --}}
-        <div class="grid grid-cols-3 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-3 border-b border-gray-200 hover:bg-white transition-colors">
             <div class="p-3 text-center text-gray-700 font-medium">Tuesdays</div>
             <div class="p-3 space-y-2 text-gray-700">
                 <p class="flex items-center flex-wrap gap-1">
@@ -114,7 +114,7 @@
         </div>
 
         {{-- Wednesdays --}}
-        <div class="grid grid-cols-3 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors">
+        <div class="grid grid-cols-3 border-b border-gray-200 bg-white hover:bg-white transition-colors">
             <div class="p-3 text-center text-gray-700 font-medium">Wednesdays</div>
             <div class="p-3 space-y-2 text-gray-700">
                 <p>• enjoying mountain view</p>
@@ -139,7 +139,7 @@
         </div>
 
         {{-- Thursdays --}}
-        <div class="grid grid-cols-3 hover:bg-gray-50 transition-colors">
+        <div class="grid grid-cols-3 hover:bg-white transition-colors">
             <div class="p-3 text-center text-gray-700 font-medium">Thursdays</div>
             <div class="p-3 space-y-2 text-gray-700">
                 <p>• having a fancy dinner</p>

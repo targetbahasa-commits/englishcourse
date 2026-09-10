@@ -10,7 +10,7 @@
 
     <div class="border border-gray-200 rounded-lg overflow-hidden mb-10">
 
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Meteors are usually named</span>
                 <strong class="text-blue-600">31</strong>
@@ -19,7 +19,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Meteoroids belong to inner</span>
                 <strong class="text-blue-600">32</strong>
@@ -29,7 +29,7 @@
                 <span>system.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Meteor storms are more beautiful and amazing than</span>
                 <strong class="text-blue-600">33</strong>
@@ -38,7 +38,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>The biggest meteor storm happened in</span>
                 <strong class="text-blue-600">34</strong>
@@ -47,7 +47,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Leonids are usually connected with</span>
                 <strong class="text-blue-600">35</strong>
@@ -56,7 +56,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>A</span>
                 <strong class="text-blue-600">36</strong>
@@ -66,7 +66,7 @@
                 <span>is brighter than any of the stars and planets.</span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Most meteors appear colour of</span>
                 <strong class="text-blue-600">37</strong>
@@ -75,7 +75,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors p-4">
+        <div class="border-b border-gray-200 bg-white hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>In the 17th Century, many people regarded meteorite as</span>
                 <strong class="text-blue-600">38</strong>
@@ -84,7 +84,7 @@
                 </span>
             </div>
         </div>
-        <div class="border-b border-gray-200 hover:bg-gray-50 transition-colors p-4">
+        <div class="border-b border-gray-200 hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>The most magnificent meteorite event took place on</span>
                 <strong class="text-blue-600">39</strong>
@@ -94,7 +94,7 @@
                 <span>1908.</span>
             </div>
         </div>
-        <div class="hover:bg-gray-50 transition-colors p-4">
+        <div class="hover:bg-white transition-colors p-4">
             <div class="flex items-center flex-wrap gap-1 text-gray-700">
                 <span>Dinosaurs became extinct about</span>
                 <strong class="text-blue-600">40</strong>

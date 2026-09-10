@@ -36,8 +36,8 @@
                 <h3 class="text-2xl font-bold text-gray-800">{{ $metrics['academic']['retention_rate'] }}</h3>
             </div>
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <p class="text-sm font-semibold text-gray-500 mb-1">Average Student Satisfaction</p>
-                <h3 class="text-2xl font-bold text-gray-800">{{ $metrics['academic']['avg_nps'] }}</h3>
+                <p class="text-sm font-semibold text-gray-500 mb-1">Average Teacher Rating (1-5)</p>
+                <h3 class="text-2xl font-bold text-gray-800">{{ $metrics['academic']['avg_teacher_rating'] }}</h3>
             </div>
         @elseif($activeTab === 'teacher')
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -161,7 +161,7 @@
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <h4 class="text-lg font-bold text-gray-800 mb-3">Konversi</h4>
                 <p class="text-sm text-gray-600">Conversion Rate (Guest → Student): <span class="font-bold text-gray-800">{{ $metrics['financial']['conversion_rate'] }}</span></p>
-                <p class="text-xs text-gray-500 mt-3">Catatan: nilai conversion rate saat ini masih berbasis metric summary existing.</p>
+                <p class="text-xs text-gray-500 mt-3">Dihitung dari total akun yang pernah dikonversi dari guest ke student, dibagi total akun guest + yang sudah dikonversi.</p>
             </div>
         </div>
     @else

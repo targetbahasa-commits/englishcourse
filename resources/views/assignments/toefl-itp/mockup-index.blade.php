@@ -147,7 +147,7 @@
             </div>
 
             <!-- Messages -->
-            <div class="h-80 overflow-y-auto p-4 space-y-3 bg-gray-50" id="chat-messages" x-ref="messages">
+            <div class="h-80 overflow-y-auto p-4 space-y-3 bg-white" id="chat-messages" x-ref="messages">
                 <template x-for="(msg, index) in messages" :key="index">
                     <div :class="msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
                         <div :class="msg.role === 'user' 
@@ -177,7 +177,7 @@
                            x-model="inputMessage"
                            @keydown.enter="sendMessage()"
                            placeholder="Ketik pesan..."
-                           class="flex-1 px-3 py-2 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           class="flex-1 px-3 py-2 bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                            :disabled="isLoading">
                     <button @click="sendMessage()" 
                             :disabled="!inputMessage.trim() || isLoading"
