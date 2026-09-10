@@ -222,6 +222,7 @@
         $footerLeft = $templateConfig['footer_left_label'] ?? 'Date';
         $footerRight = $templateConfig['footer_right_label'] ?? 'Authorized Signature';
         $signatureName = $templateConfig['signature_name'] ?? 'Target Bahasa';
+        $signatureTitle = $templateConfig['signature_title'] ?? (($signatureName === 'Nendra Wirawan' || empty($templateConfig['signature_title'])) ? 'Founder & Developer' : $templateConfig['signature_title']);
         $hasScoreTable = in_array($result->test_type, ['toefl_itp', 'ielts_academic', 'ielts_general']);
 
         // Prepare Base64 Signature Image for DomPDF
@@ -394,16 +395,23 @@
                     <tr>
                         <!-- Date -->
                         <td style="width: 37%; text-align: center; vertical-align: bottom; padding-bottom: 2px;">
-                            <div style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; color: #64748b; margin-bottom: 12px;">{{ $footerLeft }}</div>
-                            <div style="height: {{ $hasSigOrStamp ? '110px' : '20px' }};"></div>
+                            <div style="position: relative; width: 220px; height: {{ $hasSigOrStamp ? '110px' : '20px' }}; margin: 0 auto;">
+                                @if($stampBase64)
+                                    <img src="{{ $stampBase64 }}" style="position: absolute; left: 40px; bottom: -6px; height: 110px; max-width: 140px; z-index: 1;">
+                                @endif
+                            </div>
+                            <div style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; text-transform: uppercase; color: #64748b; margin-top: 4px; margin-bottom: 8px;"><span style="letter-spacing: 2px; margin-right: -2px;">{{ $footerLeft }}</span></div>
                             <div style="width: 220px; height: 1px; background-color: {{ $certificate->text_color ?: '#0f172a' }}; opacity: 0.3; margin: 0 auto 10px;"></div>
                             <div style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: bold; color: {{ $certificate->text_color ?: '#0f172a' }};">{{ $date ?? (isset($result->created_at) ? $result->created_at->format('d F Y') : date('d F Y')) }}</div>
+                            @if(!empty($signatureTitle))
+                                <div style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: 500; color: transparent; margin-top: 3px;">&nbsp;</div>
+                            @endif
                         </td>
                         
                         <!-- Seal -->
                         <td style="width: 26%; text-align: center; vertical-align: bottom;">
                             @if(!in_array($certificate->test_type, ['toefl_itp', 'ielts_academic', 'ielts_general']))
-                                <div style="position: relative; width: 140px; height: 120px; margin: 0 auto;">
+                                <div style="position: relative; width: 140px; height: 120px; margin: 0 auto; top: -40px;">
                                     <!-- Hanging Ribbons -->
                                     <div style="position: absolute; bottom: -8px; left: 41px; width: 25px; height: 50px; background-color: {{ $certificate->text_color ?: '#0f172a' }}; opacity: 0.85; z-index: 1;">
                                         <div style="position: absolute; bottom: 0; left: 0; width: 0; height: 0; border-left: 12.5px solid transparent; border-right: 12.5px solid transparent; border-bottom: 9px solid #ffffff;"></div>
@@ -429,17 +437,17 @@
                         
                         <!-- Signature -->
                         <td style="width: 37%; text-align: center; vertical-align: bottom; padding-bottom: 2px;">
-                            <div style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; color: #64748b; margin-bottom: 12px;">{{ $footerRight }}</div>
+                            <div style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; text-transform: uppercase; color: #64748b; margin-bottom: 12px;"><span style="letter-spacing: 2px; margin-right: -2px;">{{ $footerRight }}</span></div>
                             <div style="position: relative; width: 220px; height: {{ $hasSigOrStamp ? '110px' : '20px' }}; margin: 0 auto;">
-                                @if($stampBase64)
-                                    <img src="{{ $stampBase64 }}" style="position: absolute; left: 5px; bottom: -6px; height: 110px; max-width: 140px; z-index: 1;">
-                                @endif
                                 @if($signatureBase64)
                                     <img src="{{ $signatureBase64 }}" style="position: absolute; left: 10px; bottom: 0px; max-height: 105px; max-width: 220px; z-index: 2;">
                                 @endif
                             </div>
                             <div style="width: 220px; height: 1px; background-color: {{ $certificate->text_color ?: '#0f172a' }}; opacity: 0.3; margin: 0 auto 10px;"></div>
                             <div style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: bold; color: {{ $certificate->text_color ?: '#0f172a' }};">{{ $signatureName }}</div>
+                            @if(!empty($signatureTitle))
+                                <div style="font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: 500; color: #64748b; margin-top: 3px;">{{ $signatureTitle }}</div>
+                            @endif
                         </td>
                     </tr>
                 </table>

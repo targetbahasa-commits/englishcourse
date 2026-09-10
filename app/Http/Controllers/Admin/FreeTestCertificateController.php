@@ -40,6 +40,7 @@ class FreeTestCertificateController extends Controller
             'footer_left_label'       => 'nullable|string|max:120',
             'footer_right_label'      => 'nullable|string|max:120',
             'signature_name'          => 'nullable|string|max:120',
+            'signature_title'         => 'nullable|string|max:120',
         ]);
 
         $certificate = $this->useCase->findOrFail($id);
@@ -53,6 +54,7 @@ class FreeTestCertificateController extends Controller
         $templateConfig['footer_left_label'] = $validated['footer_left_label'] ?? null;
         $templateConfig['footer_right_label'] = $validated['footer_right_label'] ?? null;
         $templateConfig['signature_name'] = $validated['signature_name'] ?? null;
+        $templateConfig['signature_title'] = $validated['signature_title'] ?? null;
 
         $data = [
             'description'     => $validated['description'] ?? null,

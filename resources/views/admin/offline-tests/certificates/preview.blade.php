@@ -382,6 +382,7 @@
             $footerLeft = $config['footer_left_label'] ?? 'Date';
             $footerRight = $config['footer_right_label'] ?? 'Authorized Signature';
             $signatureName = $config['signature_name'] ?? 'Target Bahasa';
+            $signatureTitle = $config['signature_title'] ?? (($signatureName === 'Nendra Wirawan' || empty($config['signature_title'])) ? 'Founder & Developer' : $config['signature_title']);
             $mainColor = $certificate->text_color;
 
             $hasResult = $result !== null;
@@ -533,10 +534,17 @@
                             <!-- Bottom Layout (Date, Gold Seal, Signature) -->
                             <div class="cert-footer-layout">
                                 <div class="cert-footer-col">
-                                    <span class="cert-footer-label">{{ $footerLeft }}</span>
-                                    <div style="height: {{ (!empty($config['signature_image']) || !empty($config['stamp_image'])) ? '100px' : '20px' }};"></div>
+                                    <div class="cert-signature-wrap" style="position: relative; height: {{ (!empty($config['signature_image']) || !empty($config['stamp_image'])) ? '100px' : '20px' }}; width: 230px; display: flex; align-items: center; justify-content: center;">
+                                        @if(!empty($config['stamp_image']))
+                                            <img src="{{ route('offline-test-certificates.stamp', $certificate->id) }}" alt="Stamp" style="position: absolute; height: 95px; max-width: 115px; object-fit: contain; opacity: 0.88; transform: rotate(-6deg); pointer-events: none; z-index: 1;">
+                                        @endif
+                                    </div>
+                                    <span class="cert-footer-label" style="margin-top: 4px; margin-bottom: 8px;">{{ $footerLeft }}</span>
                                     <div class="cert-footer-line"></div>
                                     <span class="cert-footer-value">{{ $certificateDate }}</span>
+                                    @if(!empty($signatureTitle))
+                                        <span class="cert-footer-role" style="display: block; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 500; color: transparent; margin-top: 2px; user-select: none;">&nbsp;</span>
+                                    @endif
                                 </div>
 
                                 @if(!in_array($certificate->test_type, ['toefl_itp', 'ielts_academic', 'ielts_general']))
@@ -560,15 +568,15 @@
                                 <div class="cert-footer-col">
                                     <span class="cert-footer-label">{{ $footerRight }}</span>
                                     <div class="cert-signature-wrap" style="position: relative; height: {{ (!empty($config['signature_image']) || !empty($config['stamp_image'])) ? '100px' : '20px' }}; width: 230px; display: flex; align-items: center; justify-content: center;">
-                                        @if(!empty($config['stamp_image']))
-                                            <img src="{{ route('offline-test-certificates.stamp', $certificate->id) }}" alt="Stamp" style="position: absolute; left: 10px; bottom: -8px; height: 95px; max-width: 115px; object-fit: contain; opacity: 0.88; transform: rotate(-6deg); pointer-events: none; z-index: 1;">
-                                        @endif
                                         @if(!empty($config['signature_image']))
                                             <img src="{{ route('offline-test-certificates.signature', $certificate->id) }}" alt="Signature" style="position: relative; max-height: 95px; max-width: 220px; object-fit: contain; z-index: 2;">
                                         @endif
                                     </div>
                                     <div class="cert-footer-line"></div>
                                     <span class="cert-footer-value">{{ $signatureName }}</span>
+                                    @if(!empty($signatureTitle))
+                                        <span class="cert-footer-role" style="display: block; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 500; color: #64748b; margin-top: 2px;">{{ $signatureTitle }}</span>
+                                    @endif
                                 </div>
                             </div>
                         </div>

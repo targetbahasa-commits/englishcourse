@@ -276,8 +276,8 @@
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1.5">Tanda Tangan Digital</label>
                                 @if(!empty($templateConfig['signature_image']))
-                                    <div class="rounded-xl border border-slate-200 p-2 mb-2 bg-slate-50 flex items-center justify-center h-24 relative group">
-                                        <img src="{{ route('admin.free-tests.certificates.signature', $cert->id) }}" alt="Tanda Tangan" class="max-h-20 max-w-full object-contain">
+                                    <div class="rounded-xl border border-slate-200 p-2 mb-2 bg-slate-50 flex items-center justify-center h-24 relative group overflow-hidden">
+                                        <img src="{{ route('admin.free-tests.certificates.signature', $cert->id) }}" alt="Tanda Tangan" class="max-h-full max-w-full object-contain pointer-events-none" style="max-height: 80px; max-width: 100%; object-fit: contain;">
                                     </div>
                                     <div class="mb-2">
                                         <label class="inline-flex items-center gap-1.5 text-xs text-rose-600 font-medium cursor-pointer">
@@ -286,7 +286,7 @@
                                         </label>
                                     </div>
                                 @else
-                                    <div class="rounded-xl border border-dashed border-slate-300 mb-2 h-24 flex items-center justify-center bg-slate-50">
+                                    <div class="rounded-xl border border-dashed border-slate-300 mb-2 h-24 flex items-center justify-center bg-slate-50 overflow-hidden">
                                         <span class="text-xs text-slate-400 font-medium">Belum ada tanda tangan</span>
                                     </div>
                                 @endif
@@ -297,8 +297,8 @@
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1.5">Stempel Resmi (Seal/Stamp)</label>
                                 @if(!empty($templateConfig['stamp_image']))
-                                    <div class="rounded-xl border border-slate-200 p-2 mb-2 bg-slate-50 flex items-center justify-center h-24 relative group">
-                                        <img src="{{ route('admin.free-tests.certificates.stamp', $cert->id) }}" alt="Stempel" class="max-h-20 max-w-full object-contain">
+                                    <div class="rounded-xl border border-slate-200 p-2 mb-2 bg-slate-50 flex items-center justify-center h-24 relative group overflow-hidden">
+                                        <img src="{{ route('admin.free-tests.certificates.stamp', $cert->id) }}" alt="Stempel" class="max-h-full max-w-full object-contain pointer-events-none" style="max-height: 80px; max-width: 100%; object-fit: contain;">
                                     </div>
                                     <div class="mb-2">
                                         <label class="inline-flex items-center gap-1.5 text-xs text-rose-600 font-medium cursor-pointer">
@@ -307,7 +307,7 @@
                                         </label>
                                     </div>
                                 @else
-                                    <div class="rounded-xl border border-dashed border-slate-300 mb-2 h-24 flex items-center justify-center bg-slate-50">
+                                    <div class="rounded-xl border border-dashed border-slate-300 mb-2 h-24 flex items-center justify-center bg-slate-50 overflow-hidden">
                                         <span class="text-xs text-slate-400 font-medium">Belum ada stempel</span>
                                     </div>
                                 @endif
@@ -318,9 +318,13 @@
 
                         <!-- Main Configuration Fields -->
                         <div class="grid gap-4 md:grid-cols-2">
-                            <div class="md:col-span-2">
+                            <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Penanda Tangan</label>
                                 <input type="text" name="signature_name" value="{{ old('signature_name', $templateConfig['signature_name'] ?? 'Target Bahasa') }}" placeholder="Target Bahasa" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Jabatan / Gelar Penanda Tangan</label>
+                                <input type="text" name="signature_title" value="{{ old('signature_title', $templateConfig['signature_title'] ?? (($templateConfig['signature_name'] ?? '') === 'Nendra Wirawan' ? 'Founder & Developer' : ($templateConfig['signature_title'] ?? 'Founder & Developer'))) }}" placeholder="Founder & Developer" class="form-input w-full rounded-xl border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                             </div>
                             
                             <div>
@@ -507,8 +511,12 @@
 
                                     <div class="mini-cert-footer" style="margin-top: 10px;">
                                         <div class="mini-cert-col">
-                                            <span class="mini-cert-label">{{ $templateConfig['footer_left_label'] ?? 'Date' }}</span>
-                                            <div style="height: {{ (!empty($templateConfig['signature_image']) || !empty($templateConfig['stamp_image'])) ? '34px' : '10px' }};"></div>
+                                            <div class="mini-cert-signature-wrap" style="position: relative; height: {{ (!empty($templateConfig['signature_image']) || !empty($templateConfig['stamp_image'])) ? '34px' : '10px' }}; width: 80px; display: flex; align-items: center; justify-content: center;">
+                                                @if(!empty($templateConfig['stamp_image']))
+                                                    <img src="{{ route('admin.free-tests.certificates.stamp', $cert->id) }}" alt="Stamp" style="position: absolute; height: 32px; max-width: 38px; object-fit: contain; opacity: 0.88; transform: rotate(-6deg); pointer-events: none; z-index: 1;">
+                                                @endif
+                                            </div>
+                                            <span class="mini-cert-label" style="margin-top: 1px; margin-bottom: 2px;">{{ $templateConfig['footer_left_label'] ?? 'Date' }}</span>
                                             <div class="mini-cert-line"></div>
                                             <span class="mini-cert-value">{{ now()->format('d M Y') }}</span>
                                         </div>
@@ -518,15 +526,18 @@
                                         <div class="mini-cert-col">
                                             <span class="mini-cert-label">{{ $templateConfig['footer_right_label'] ?? 'Authorized Signature' }}</span>
                                             <div class="mini-cert-signature-wrap" style="position: relative; height: {{ (!empty($templateConfig['signature_image']) || !empty($templateConfig['stamp_image'])) ? '34px' : '10px' }}; width: 80px; display: flex; align-items: center; justify-content: center;">
-                                                @if(!empty($templateConfig['stamp_image']))
-                                                    <img src="{{ route('admin.free-tests.certificates.stamp', $cert->id) }}" alt="Stamp" style="position: absolute; left: 2px; bottom: -3px; height: 32px; max-width: 38px; object-fit: contain; opacity: 0.88; transform: rotate(-6deg); pointer-events: none; z-index: 1;">
-                                                @endif
                                                 @if(!empty($templateConfig['signature_image']))
                                                     <img src="{{ route('admin.free-tests.certificates.signature', $cert->id) }}" alt="Signature" style="position: relative; max-height: 32px; max-width: 76px; object-fit: contain; z-index: 2;">
                                                 @endif
                                             </div>
                                             <div class="mini-cert-line"></div>
                                             <span class="mini-cert-value">{{ $templateConfig['signature_name'] ?? 'Target Bahasa' }}</span>
+                                            @php
+                                                $sigTitle = $templateConfig['signature_title'] ?? (($templateConfig['signature_name'] ?? '') === 'Nendra Wirawan' ? 'Founder & Developer' : ($templateConfig['signature_title'] ?? 'Founder & Developer'));
+                                            @endphp
+                                            @if(!empty($sigTitle))
+                                                <span class="mini-cert-value" style="font-size: 5px; font-weight: 500; color: #64748b; margin-top: 1px; display: block;">{{ $sigTitle }}</span>
+                                            @endif
                                         </div>
                                     </div>
                                 @elseif(in_array($cert->test_type, ['ielts_academic', 'ielts_general']))
@@ -555,8 +566,12 @@
 
                                     <div class="mini-cert-footer" style="margin-top: 10px;">
                                         <div class="mini-cert-col">
-                                            <span class="mini-cert-label">{{ $templateConfig['footer_left_label'] ?? 'Date' }}</span>
-                                            <div style="height: {{ (!empty($templateConfig['signature_image']) || !empty($templateConfig['stamp_image'])) ? '34px' : '10px' }};"></div>
+                                            <div class="mini-cert-signature-wrap" style="position: relative; height: {{ (!empty($templateConfig['signature_image']) || !empty($templateConfig['stamp_image'])) ? '34px' : '10px' }}; width: 80px; display: flex; align-items: center; justify-content: center;">
+                                                @if(!empty($templateConfig['stamp_image']))
+                                                    <img src="{{ route('admin.free-tests.certificates.stamp', $cert->id) }}" alt="Stamp" style="position: absolute; height: 32px; max-width: 38px; object-fit: contain; opacity: 0.88; transform: rotate(-6deg); pointer-events: none; z-index: 1;">
+                                                @endif
+                                            </div>
+                                            <span class="mini-cert-label" style="margin-top: 1px; margin-bottom: 2px;">{{ $templateConfig['footer_left_label'] ?? 'Date' }}</span>
                                             <div class="mini-cert-line"></div>
                                             <span class="mini-cert-value">{{ now()->format('d M Y') }}</span>
                                         </div>
@@ -566,22 +581,29 @@
                                         <div class="mini-cert-col">
                                             <span class="mini-cert-label">{{ $templateConfig['footer_right_label'] ?? 'Authorized Signature' }}</span>
                                             <div class="mini-cert-signature-wrap" style="position: relative; height: {{ (!empty($templateConfig['signature_image']) || !empty($templateConfig['stamp_image'])) ? '34px' : '10px' }}; width: 80px; display: flex; align-items: center; justify-content: center;">
-                                                @if(!empty($templateConfig['stamp_image']))
-                                                    <img src="{{ route('admin.free-tests.certificates.stamp', $cert->id) }}" alt="Stamp" style="position: absolute; left: 2px; bottom: -3px; height: 32px; max-width: 38px; object-fit: contain; opacity: 0.88; transform: rotate(-6deg); pointer-events: none; z-index: 1;">
-                                                @endif
                                                 @if(!empty($templateConfig['signature_image']))
                                                     <img src="{{ route('admin.free-tests.certificates.signature', $cert->id) }}" alt="Signature" style="position: relative; max-height: 32px; max-width: 76px; object-fit: contain; z-index: 2;">
                                                 @endif
                                             </div>
                                             <div class="mini-cert-line"></div>
                                             <span class="mini-cert-value">{{ $templateConfig['signature_name'] ?? 'Target Bahasa' }}</span>
+                                            @php
+                                                $sigTitle = $templateConfig['signature_title'] ?? (($templateConfig['signature_name'] ?? '') === 'Nendra Wirawan' ? 'Founder & Developer' : ($templateConfig['signature_title'] ?? 'Founder & Developer'));
+                                            @endphp
+                                            @if(!empty($sigTitle))
+                                                <span class="mini-cert-value" style="font-size: 5px; font-weight: 500; color: #64748b; margin-top: 1px; display: block;">{{ $sigTitle }}</span>
+                                            @endif
                                         </div>
                                     </div>
                                 @else
                                     <div class="mini-cert-footer">
                                         <div class="mini-cert-col">
-                                            <span class="mini-cert-label">{{ $templateConfig['footer_left_label'] ?? 'Date' }}</span>
-                                            <div style="height: {{ (!empty($templateConfig['signature_image']) || !empty($templateConfig['stamp_image'])) ? '34px' : '10px' }};"></div>
+                                            <div class="mini-cert-signature-wrap" style="position: relative; height: {{ (!empty($templateConfig['signature_image']) || !empty($templateConfig['stamp_image'])) ? '34px' : '10px' }}; width: 80px; display: flex; align-items: center; justify-content: center;">
+                                                @if(!empty($templateConfig['stamp_image']))
+                                                    <img src="{{ route('admin.free-tests.certificates.stamp', $cert->id) }}" alt="Stamp" style="position: absolute; height: 32px; max-width: 38px; object-fit: contain; opacity: 0.88; transform: rotate(-6deg); pointer-events: none; z-index: 1;">
+                                                @endif
+                                            </div>
+                                            <span class="mini-cert-label" style="margin-top: 1px; margin-bottom: 2px;">{{ $templateConfig['footer_left_label'] ?? 'Date' }}</span>
                                             <div class="mini-cert-line"></div>
                                             <span class="mini-cert-value">{{ now()->format('d M Y') }}</span>
                                         </div>
@@ -599,15 +621,18 @@
                                         <div class="mini-cert-col">
                                             <span class="mini-cert-label">{{ $templateConfig['footer_right_label'] ?? 'Authorized Signature' }}</span>
                                             <div class="mini-cert-signature-wrap" style="position: relative; height: {{ (!empty($templateConfig['signature_image']) || !empty($templateConfig['stamp_image'])) ? '34px' : '10px' }}; width: 80px; display: flex; align-items: center; justify-content: center;">
-                                                @if(!empty($templateConfig['stamp_image']))
-                                                    <img src="{{ route('admin.free-tests.certificates.stamp', $cert->id) }}" alt="Stamp" style="position: absolute; left: 2px; bottom: -3px; height: 32px; max-width: 38px; object-fit: contain; opacity: 0.88; transform: rotate(-6deg); pointer-events: none; z-index: 1;">
-                                                @endif
                                                 @if(!empty($templateConfig['signature_image']))
                                                     <img src="{{ route('admin.free-tests.certificates.signature', $cert->id) }}" alt="Signature" style="position: relative; max-height: 32px; max-width: 76px; object-fit: contain; z-index: 2;">
                                                 @endif
                                             </div>
                                             <div class="mini-cert-line"></div>
                                             <span class="mini-cert-value">{{ $templateConfig['signature_name'] ?? 'Target Bahasa' }}</span>
+                                            @php
+                                                $sigTitle = $templateConfig['signature_title'] ?? (($templateConfig['signature_name'] ?? '') === 'Nendra Wirawan' ? 'Founder & Developer' : ($templateConfig['signature_title'] ?? 'Founder & Developer'));
+                                            @endphp
+                                            @if(!empty($sigTitle))
+                                                <span class="mini-cert-value" style="font-size: 5px; font-weight: 500; color: #64748b; margin-top: 1px; display: block;">{{ $sigTitle }}</span>
+                                            @endif
                                         </div>
                                     </div>
                                 @endif

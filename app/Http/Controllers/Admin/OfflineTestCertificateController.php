@@ -61,6 +61,7 @@ class OfflineTestCertificateController extends Controller
             'footer_left_label'       => 'nullable|string|max:120',
             'footer_right_label'      => 'nullable|string|max:120',
             'signature_name'          => 'nullable|string|max:120',
+            'signature_title'         => 'nullable|string|max:120',
         ]);
 
         $certificate = OfflineTestCertificate::findOrFail($id);
@@ -76,6 +77,7 @@ class OfflineTestCertificateController extends Controller
         $templateConfig['footer_left_label'] = $validated['footer_left_label'] ?? null;
         $templateConfig['footer_right_label'] = $validated['footer_right_label'] ?? null;
         $templateConfig['signature_name'] = $validated['signature_name'] ?? null;
+        $templateConfig['signature_title'] = $validated['signature_title'] ?? null;
 
         // Handle signature image
         if ($request->boolean('remove_signature_image')) {
