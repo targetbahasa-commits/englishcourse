@@ -41,6 +41,61 @@
     stopCheatDrag() {
         this.cheatDrag.active = false;
     },
+    cheatBtnPos: { x: null, y: null },
+    cheatBtnDrag: { active: false, offsetX: 0, offsetY: 0, moved: false, startX: 0, startY: 0 },
+    startCheatBtnDrag(e) {
+        const p = e.touches ? e.touches[0] : e;
+        const btn = document.getElementById('contekan-btn');
+        if (this.cheatBtnPos.x === null && btn) {
+            const rect = btn.getBoundingClientRect();
+            this.cheatBtnPos.x = rect.left;
+            this.cheatBtnPos.y = rect.top;
+        }
+        this.cheatBtnDrag.active = true;
+        this.cheatBtnDrag.moved = false;
+        this.cheatBtnDrag.startX = p.clientX;
+        this.cheatBtnDrag.startY = p.clientY;
+        this.cheatBtnDrag.offsetX = p.clientX - this.cheatBtnPos.x;
+        this.cheatBtnDrag.offsetY = p.clientY - this.cheatBtnPos.y;
+    },
+    onCheatBtnDrag(e) {
+        if (!this.cheatBtnDrag.active) return;
+        const p = e.touches ? e.touches[0] : e;
+        // 4px was too strict - ordinary mouse/trackpad jitter during a
+        // genuine click easily exceeds it, which silently marked the click
+        // as a drag and made the button do nothing (no visual feedback
+        // explaining why - looked like the button was just broken).
+        if (Math.abs(p.clientX - this.cheatBtnDrag.startX) > 10 || Math.abs(p.clientY - this.cheatBtnDrag.startY) > 10) {
+            this.cheatBtnDrag.moved = true;
+        }
+        this.cheatBtnPos.x = p.clientX - this.cheatBtnDrag.offsetX;
+        this.cheatBtnPos.y = p.clientY - this.cheatBtnDrag.offsetY;
+        this.constrainCheatBtn();
+    },
+    stopCheatBtnDrag() {
+        this.cheatBtnDrag.active = false;
+    },
+    constrainCheatBtn() {
+        const btn = document.getElementById('contekan-btn');
+        // Previously this only ran when cheatBtnPos had already been set by
+        // dragging, so a button that was never dragged (still on its
+        // default CSS position) never got pulled back on-screen when the
+        // window was shrunk - it could end up partially clipped by the new,
+        // smaller window edge with no way to reach the rest of it. Seeding
+        // cheatBtnPos from the button's actual current position the first
+        // time this runs means every resize, dragged or not, keeps it fully
+        // reachable.
+        if (this.cheatBtnPos.x === null) {
+            if (!btn) return;
+            const rect = btn.getBoundingClientRect();
+            this.cheatBtnPos.x = rect.left;
+            this.cheatBtnPos.y = rect.top;
+        }
+        const w = btn ? btn.offsetWidth : 140;
+        const h = btn ? btn.offsetHeight : 44;
+        this.cheatBtnPos.x = Math.max(8, Math.min(window.innerWidth - w - 8, this.cheatBtnPos.x));
+        this.cheatBtnPos.y = Math.max(8, Math.min(window.innerHeight - h - 8, this.cheatBtnPos.y));
+    },
     cheatSize: { width: 350, height: Math.round(window.innerHeight * 0.8) },
     cheatResize: { active: false, startX: 0, startY: 0, startW: 0, startH: 0 },
     startCheatResize(e) {
@@ -99,28 +154,35 @@
         this.triggerCheatLaser(e);
     }
 }"
-@mousemove.window="onCheatDrag($event); onCheatResize($event)"
-@touchmove.window="onCheatDrag($event); onCheatResize($event)"
-@mouseup.window="stopCheatDrag(); stopCheatResize()"
-@touchend.window="stopCheatDrag(); stopCheatResize()"
-@resize.window="constrainCheatSheet()">
-            <!-- Fixed Cheat Sheet Button (Left of Question Area) -->
-    <button @click="showCheatSheet = !showCheatSheet; if (showCheatSheet) { $nextTick(() => { if (typeof initCanvases === 'function') initCanvases(); }); }"
-                        class="fixed bottom-8 left-7 md:left-72 z-[90] px-4 py-2 bg-yellow-400 text-yellow-900 rounded-full shadow-lg font-bold hover:bg-yellow-300 transition flex items-center gap-2 border border-yellow-500 cursor-pointer">
+@mousemove.window="onCheatDrag($event); onCheatResize($event); onCheatBtnDrag($event)"
+@touchmove.window="onCheatDrag($event); onCheatResize($event); onCheatBtnDrag($event)"
+@mouseup.window="stopCheatDrag(); stopCheatResize(); stopCheatBtnDrag()"
+@touchend.window="stopCheatDrag(); stopCheatResize(); stopCheatBtnDrag()"
+@resize.window="constrainCheatSheet(); constrainCheatBtn()"
+@keydown.escape.window="showCheatSheet = false">
+            <!-- Fixed Cheat Sheet Button (Left of Question Area) - draggable -->
+    <button id="contekan-btn"
+                        @mousedown="startCheatBtnDrag($event)"
+                        @touchstart="startCheatBtnDrag($event)"
+                        @click="if (!cheatBtnDrag.moved) { showCheatSheet = !showCheatSheet; if (showCheatSheet) { $nextTick(() => { if (typeof initCanvases === 'function') initCanvases(); }); } }"
+                        :style="(cheatBtnPos.x !== null ? `left:${cheatBtnPos.x}px; top:${cheatBtnPos.y}px; right:auto; bottom:auto;` : '') + 'touch-action:none;'"
+                        class="fixed bottom-8 left-7 md:left-72 z-[90] px-4 py-2 bg-yellow-400 text-yellow-900 rounded-full shadow-lg font-bold hover:bg-yellow-300 transition flex items-center gap-2 border border-yellow-500 cursor-grab active:cursor-grabbing select-none">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
         Contekan
     </button>
 
-    <!-- Cheat Sheet Popup (Fixed Position) -->
-    <div x-show="showCheatSheet" 
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-95"
+    <!-- Cheat Sheet Popup (Fixed Position) - no x-transition here (see the
+         same fix on the Stamps/Toolbar panels in the explanation-container
+         component above): this element also has a :style binding computed
+         from draggable/resizable state (cheatPos/cheatSize), and combining
+         that with x-transition's own opacity/transform inline-style
+         management leaves it stuck mid-fade (~10% opacity) the moment it
+         opens - which also visually explains why dragging it looked broken,
+         since the header rendered ghosted/overlapping the page behind it. -->
+    <div x-show="showCheatSheet"
             class="fixed z-[150] shadow-2xl rounded-xl ring-1 ring-black/5 bg-white border border-gray-200 flex flex-col"
-            :style="`left: ${cheatPos.x}px; top: ${cheatPos.y}px; width: ${cheatSize.width}px; height: ${cheatSize.height}px;`">
+            :style="`left: ${cheatPos.x}px; top: ${cheatPos.y}px; width: ${cheatSize.width}px; height: ${cheatSize.height}px;`"
+            style="display: none;">
         
         <!-- Header -->
         <div class="bg-yellow-300 border-b flex justify-between items-center select-none rounded-t-xl">
@@ -234,6 +296,32 @@
         color: white;
         content: attr(data-label);
     }
+    .error-option.correct-error {
+        color: #15803D !important;
+        text-decoration-color: #15803D !important;
+        background-color: #DCFCE7 !important;
+        font-weight: 600;
+        border-radius: 4px;
+    }
+    .error-option.correct-error::after {
+        background-color: #16A34A !important;
+        color: white !important;
+        content: '(' attr(data-label) ' ✓)' !important;
+        box-shadow: 0 0 0 2px #86EFAC !important;
+    }
+    .error-option.wrong-error {
+        color: #B91C1C !important;
+        text-decoration-color: #B91C1C !important;
+        background-color: #FEE2E2 !important;
+        font-weight: 600;
+        border-radius: 4px;
+    }
+    .error-option.wrong-error::after {
+        background-color: #DC2626 !important;
+        color: white !important;
+        content: '(' attr(data-label) ' ✗)' !important;
+        box-shadow: 0 0 0 2px #FCA5A5 !important;
+    }
     
     /* Laser Pointer Styles */
     @keyframes laser-trail-fade {
@@ -272,9 +360,20 @@
 </style>
 <div class="container mx-auto px-4 py-8">
     @php
-        $backRoute = $number > 50
-            ? route('assignments.toefl-itp.structure.practice')
-            : route('assignments.toefl-itp.structure');
+        $parentMeetingNumber = null;
+        if (isset($meeting) && $meeting->description && preg_match('/parent:(\d+)/', $meeting->description, $parentMatches)) {
+            $parentMeetingNumber = (int) $parentMatches[1];
+        }
+
+        // A meeting reached via ?exercise=N (from its own exercise-selection screen,
+        // see BuildStructureMeetingViewData) should go back to that same selection
+        // screen - i.e. this exact meeting number with no query string - rather than
+        // all the way out to the top-level Structure index.
+        $backRoute = request()->has('exercise')
+            ? route('assignments.toefl-itp.structure.meeting', $number)
+            : ($parentMeetingNumber
+                ? route('assignments.toefl-itp.structure.meeting', $parentMeetingNumber)
+                : ($number > 50 ? route('assignments.toefl-itp.structure.practice') : route('assignments.toefl-itp.structure')));
 
         $totalQuestionCount = collect($questions)->count();
         $answerKeyFilledCount = collect($questions)->filter(function ($question) {
@@ -289,9 +388,21 @@
                 <a href="{{ $backRoute }}" class="text-gray-500 hover:text-gray-700 transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </a>
-                <h2 class="text-2xl font-bold text-gray-800">Structure Meeting {{ $number }}</h2>
+                <h2 class="text-2xl font-bold text-gray-800">
+                    @if($parentMeetingNumber)
+                        {{ $title }}
+                    @else
+                        Structure Meeting {{ $number }}
+                    @endif
+                </h2>
             </div>
-            <p class="text-gray-500 text-sm ml-9">{{ $title }}</p>
+            <p class="text-gray-500 text-sm ml-9">
+                @if($parentMeetingNumber)
+                    Meeting {{ $parentMeetingNumber }} Practice Set
+                @else
+                    {{ $title }}
+                @endif
+            </p>
         </div>
 
         <div class="flex items-center gap-2 flex-wrap justify-end">
@@ -335,23 +446,58 @@
             @endif
 
             @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
-                <button onclick="document.getElementById('explanation-container').__x?.toggleAnswerKey()" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition flex items-center gap-2" id="toggleAnswerBtn">
+                <button type="button" onclick="window.toggleStructureAnswerKey()" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition flex items-center gap-2" id="toggleAnswerBtn">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                     <span>Show Answer Key</span>
                 </button>
+                <script>
+                    window.toggleStructureAnswerKey = function() {
+                        const el = document.getElementById('explanation-container');
+                        if (!el) return;
+                        let data = null;
+                        if (typeof Alpine !== 'undefined' && typeof Alpine.$data === 'function') {
+                            data = Alpine.$data(el);
+                        } else if (el._x_dataStack && el._x_dataStack[0]) {
+                            data = el._x_dataStack[0];
+                        } else if (el.__x) {
+                            data = el.__x;
+                        }
+                        if (data && typeof data.toggleAnswerKey === 'function') {
+                            data.toggleAnswerKey();
+                        }
+                    };
+                </script>
             @endif
         </div>
     </div>
 
     <!-- Questions Form -->
-    <div id="explanation-container" x-data="{ 
+    <div id="explanation-container" x-data="{
         explanationMode: false,
-        showAnswerKey: false, 
+        toolbarScale: 1,
+        showAnswerKey: false,
         questionZoom: 1,
         questionZoomMin: 0.8,
         questionZoomMax: 1.5,
         questionZoomStep: 0.1,
-        tool: 'pen', 
+        // Admin-only, this-browser-only font size for the question text
+        // itself (not the whole block like questionZoom's transform:scale,
+        // which also stretches the answer choices/spacing) - never
+        // persisted, resets on reload, doesn't affect what students see.
+        questionTextSize: 18,
+        questionTextSizeMin: 12,
+        questionTextSizeMax: 32,
+        questionTextSizeStep: 2,
+        // Admin-only, this-browser-only line spacing for the question
+        // paragraph - lets an admin spread wrapped lines further apart so
+        // stamp marks placed between lines (e.g. Subject / Verb Asli) don't
+        // visually overlap the text below them. Never persisted, resets on
+        // reload, doesn't affect what students see.
+        questionLineHeight: 1.6,
+        questionLineHeightMin: 1.2,
+        questionLineHeightMax: 3,
+        questionLineHeightStep: 0.1,
+        tool: 'pen',
         color: '#EF4444', 
         baseColor: '#EF4444',
         opacity: 0.2, 
@@ -362,14 +508,35 @@
         },
         stamps: ['Subject', 'Verb Asli', 'Verb Palsu', 'Ving', 'V3', 'To infinitive', 'Preposition', 'Conjunction', 'Appositive', 'FANBOYS', 'Main Clause', 'Sub Clause', 'Comparative', 'Superlative'],
         selectedStamp: null,
+        // Font size (px) of the pill-shaped stamp marks drawn onto the
+        // canvas (e.g. the Subject / Verb Asli tags placed on the question
+        // text). Only affects stamps drawn AFTER this is changed - it's
+        // rasterized onto the canvas at click time like the pen/
+        // highlighter, so existing stamps can't be resized retroactively.
+        stampSize: 11,
+        stampSizeMin: 8,
+        stampSizeMax: 20,
+        stampSizeStep: 1,
+        increaseStampSize() {
+            this.stampSize = Math.min(this.stampSizeMax, this.stampSize + this.stampSizeStep);
+        },
+        decreaseStampSize() {
+            this.stampSize = Math.max(this.stampSizeMin, this.stampSize - this.stampSizeStep);
+        },
+        resetStampSize() {
+            this.stampSize = 11;
+        },
         stampPanel: {
             x: Math.max(8, window.innerWidth - 170),
             y: Math.max(70, Math.round(window.innerHeight / 2) - 300),
+            width: 170,
             maxHeight: Math.max(260, window.innerHeight - 190),
+            heightCustomized: false,
             dragging: false,
             offsetX: 0,
             offsetY: 0
         },
+        stampResize: { active: false, startX: 0, startY: 0, startW: 0, startH: 0 },
         laserPointer: { visible: false, x: 0, y: 0, localX: 0, localY: 0, scope: 'question', timeout: null },
         laserPressing: false,
         laserTrail: [],
@@ -390,10 +557,76 @@
                 setTimeout(() => {
                      if(typeof initCanvases === 'function') initCanvases();
                 }, 50);
-                this.$nextTick(() => this.constrainStampPanel());
+                this.$nextTick(() => {
+                    this.constrainStampPanel();
+                    this.updateToolbarScale();
+                });
             } else {
                 this.laserTrail = [];
             }
+        },
+        updateToolbarScale() {
+            // The bottom toolbar has a fixed natural width (grows with the
+            // color palette / opacity slider) and was centered with plain
+            // left-1/2 + -translate-x-1/2, so on a narrow/shrunk window it
+            // simply overflowed both edges and got covered by the browser
+            // chrome or clipped. Scaling it down (via CSS transform, which
+            // doesn't affect offsetWidth/layout) to fit the viewport keeps
+            // every button reachable instead of hidden off-screen.
+            const el = document.getElementById('float-toolbar');
+            if (!el || !this.explanationMode) return;
+            const natural = el.offsetWidth;
+            if (!natural) return;
+            const available = window.innerWidth - 16;
+            this.toolbarScale = natural > available ? Math.max(0.45, available / natural) : 1;
+        },
+        modeBtnPos: { x: null, y: null },
+        modeBtnDrag: { active: false, offsetX: 0, offsetY: 0, moved: false, startX: 0, startY: 0 },
+        startModeBtnDrag(e) {
+            const p = e.touches ? e.touches[0] : e;
+            const btn = document.getElementById('mode-penjelasan-btn');
+            if (this.modeBtnPos.x === null && btn) {
+                const rect = btn.getBoundingClientRect();
+                this.modeBtnPos.x = rect.left;
+                this.modeBtnPos.y = rect.top;
+            }
+            this.modeBtnDrag.active = true;
+            this.modeBtnDrag.moved = false;
+            this.modeBtnDrag.startX = p.clientX;
+            this.modeBtnDrag.startY = p.clientY;
+            this.modeBtnDrag.offsetX = p.clientX - this.modeBtnPos.x;
+            this.modeBtnDrag.offsetY = p.clientY - this.modeBtnPos.y;
+        },
+        onModeBtnDrag(e) {
+            if (!this.modeBtnDrag.active) return;
+            const p = e.touches ? e.touches[0] : e;
+            // Same fix as onCheatBtnDrag() above: 4px was well within normal
+            // click jitter, so an ordinary click on this button could get
+            // silently misclassified as a drag and do nothing - this is what
+            // made Mode Penjelasan / Keluar Mode seem to randomly stop
+            // responding with no error or visual feedback.
+            if (Math.abs(p.clientX - this.modeBtnDrag.startX) > 10 || Math.abs(p.clientY - this.modeBtnDrag.startY) > 10) {
+                this.modeBtnDrag.moved = true;
+            }
+            this.modeBtnPos.x = p.clientX - this.modeBtnDrag.offsetX;
+            this.modeBtnPos.y = p.clientY - this.modeBtnDrag.offsetY;
+            this.constrainModeBtn();
+        },
+        stopModeBtnDrag() {
+            this.modeBtnDrag.active = false;
+        },
+        constrainModeBtn() {
+            const btn = document.getElementById('mode-penjelasan-btn');
+            if (this.modeBtnPos.x === null) {
+                if (!btn) return;
+                const rect = btn.getBoundingClientRect();
+                this.modeBtnPos.x = rect.left;
+                this.modeBtnPos.y = rect.top;
+            }
+            const w = btn ? btn.offsetWidth : 56;
+            const h = btn ? btn.offsetHeight : 56;
+            this.modeBtnPos.x = Math.max(8, Math.min(window.innerWidth - w - 8, this.modeBtnPos.x));
+            this.modeBtnPos.y = Math.max(8, Math.min(window.innerHeight - h - 8, this.modeBtnPos.y));
         },
         zoomQuestionIn() {
             this.questionZoom = Math.min(this.questionZoomMax, +(this.questionZoom + this.questionZoomStep).toFixed(2));
@@ -406,6 +639,24 @@
             if (this.explanationMode) {
                 setTimeout(() => { if (typeof initCanvases === 'function') initCanvases(); }, 80);
             }
+        },
+        increaseQuestionTextSize() {
+            this.questionTextSize = Math.min(this.questionTextSizeMax, this.questionTextSize + this.questionTextSizeStep);
+        },
+        decreaseQuestionTextSize() {
+            this.questionTextSize = Math.max(this.questionTextSizeMin, this.questionTextSize - this.questionTextSizeStep);
+        },
+        resetQuestionTextSize() {
+            this.questionTextSize = 18;
+        },
+        increaseQuestionLineHeight() {
+            this.questionLineHeight = Math.min(this.questionLineHeightMax, +(this.questionLineHeight + this.questionLineHeightStep).toFixed(1));
+        },
+        decreaseQuestionLineHeight() {
+            this.questionLineHeight = Math.max(this.questionLineHeightMin, +(this.questionLineHeight - this.questionLineHeightStep).toFixed(1));
+        },
+        resetQuestionLineHeight() {
+            this.questionLineHeight = 1.6;
         },
         resetQuestionZoom() {
             this.questionZoom = 1;
@@ -429,36 +680,88 @@
         stopStampDrag() {
             this.stampPanel.dragging = false;
         },
-        getStampPanelHeight() {
-            const panel = document.getElementById('stamp-panel');
-            if (panel && panel.offsetHeight > 0) {
-                return panel.offsetHeight;
-            }
-            return Math.min(window.innerHeight * 0.8, 560);
+        startStampResize(e) {
+            const p = e.touches ? e.touches[0] : e;
+            this.stampResize.active = true;
+            this.stampResize.startX = p.clientX;
+            this.stampResize.startY = p.clientY;
+            this.stampResize.startW = this.stampPanel.width;
+            this.stampResize.startH = this.stampPanel.maxHeight;
+        },
+        onStampResize(e) {
+            if (!this.stampResize.active) return;
+            const p = e.touches ? e.touches[0] : e;
+            const dx = p.clientX - this.stampResize.startX;
+            const dy = p.clientY - this.stampResize.startY;
+            this.stampPanel.width = Math.max(140, Math.min(window.innerWidth - this.stampPanel.x - 8, this.stampResize.startW + dx));
+            this.stampPanel.maxHeight = Math.max(180, Math.min(window.innerHeight - this.stampPanel.y - 8, this.stampResize.startH + dy));
+            this.stampPanel.heightCustomized = true;
+        },
+        stopStampResize() {
+            this.stampResize.active = false;
         },
         constrainStampPanel() {
-            const panelWidth = 180;
+            const panelWidth = this.stampPanel.width || 170;
             const minTop = 70;
+            const minPanelHeight = 180;
             const safeBottomGap = window.innerWidth < 768 ? 120 : 24;
-            const availableHeight = Math.max(260, window.innerHeight - minTop - safeBottomGap);
-            this.stampPanel.maxHeight = availableHeight;
 
-            const panelHeight = this.getStampPanelHeight();
-            const maxY = Math.max(minTop, window.innerHeight - panelHeight - safeBottomGap);
+            this.stampPanel.width = Math.max(140, Math.min(window.innerWidth - 16, this.stampPanel.width));
             this.stampPanel.x = Math.max(8, Math.min(window.innerWidth - panelWidth - 8, this.stampPanel.x));
+
+            // Clamp y first, all the way down to just above the safe-bottom
+            // gap (leaving room for at least minPanelHeight). Previously the
+            // un-resized panel's maxHeight was computed from a FIXED minTop
+            // (i.e. it always claimed the full minTop-to-bottom span), so
+            // maxY worked out to ~minTop regardless of where you dragged it
+            // - the panel was effectively stuck near the top with no room
+            // left to move down. Deriving maxHeight from the panel's actual
+            // (now-clamped) y below lets it shrink as it's dragged lower,
+            // so it can really reach the bottom instead of snapping back up.
+            const maxY = Math.max(minTop, window.innerHeight - minPanelHeight - safeBottomGap);
             this.stampPanel.y = Math.max(minTop, Math.min(maxY, this.stampPanel.y));
+
+            const availableHeight = Math.max(minPanelHeight, window.innerHeight - this.stampPanel.y - safeBottomGap);
+            // Once the user has manually resized the panel, only clamp it back
+            // within whatever room the viewport currently has (e.g. after a
+            // window resize) instead of overwriting their chosen height on
+            // every drag/resize event, the way the un-resizable version did.
+            this.stampPanel.maxHeight = this.stampPanel.heightCustomized
+                ? Math.min(this.stampPanel.maxHeight, availableHeight)
+                : availableHeight;
+        },
+        // Scales the Stamps buttons' text (and, via em-based padding on
+        // those buttons, their padding too) together with the panel as it's
+        // resized, instead of just leaving more empty whitespace around
+        // buttons that stay the original size. 170px is the panel's default
+        // width; 12px is text-xs's font-size, which this replaces.
+        stampButtonFontSize() {
+            const scale = this.stampPanel.width / 170;
+            return Math.round(Math.max(10, Math.min(22, 12 * scale)) * 10) / 10;
         },
         toggleAnswerKey() {
             this.showAnswerKey = !this.showAnswerKey;
             const btn = document.getElementById('toggleAnswerBtn');
-            const span = btn.querySelector('span');
-            if (this.showAnswerKey) {
-                btn.classList.add('ring-2', 'ring-yellow-400');
-                span.textContent = 'Hide Answer Key';
-            } else {
-                btn.classList.remove('ring-2', 'ring-yellow-400');
-                span.textContent = 'Show Answer Key';
+            if (btn) {
+                const span = btn.querySelector('span');
+                if (this.showAnswerKey) {
+                    btn.classList.add('ring-2', 'ring-yellow-400', 'bg-green-700');
+                    if (span) span.textContent = 'Hide Answer Key';
+                } else {
+                    btn.classList.remove('ring-2', 'ring-yellow-400', 'bg-green-700');
+                    if (span) span.textContent = 'Show Answer Key';
+                }
             }
+            // Toggle highlight for Error Analysis (Written Expression) options
+            document.querySelectorAll('.question-item').forEach(item => {
+                const correct = item.dataset.correct;
+                if (!correct) return;
+                item.querySelectorAll('.error-option').forEach(opt => {
+                    if (opt.dataset.label === correct) {
+                        opt.classList.toggle('correct-error', this.showAnswerKey);
+                    }
+                });
+            });
         },
         hexToRgba(hex, alpha) {
             let c;
@@ -491,10 +794,13 @@
             } else if (t === 'eraser') { 
                 this.lineWidth = 20; 
             } else { // Pen, Line, Text
-                this.lineWidth = 2; 
+                this.lineWidth = 2;
                 this.baseColor = this.colors.pen[0];
             }
             this.updateColor();
+            // Switching tools shows/hides the color palette + opacity
+            // slider, which changes the toolbar's natural width.
+            this.$nextTick(() => this.updateToolbarScale());
         },
         setStamp(s) {
             this.tool = 'stamp';
@@ -597,16 +903,17 @@
             }
         }
     }"
-    @mousemove.window="onStampDrag($event)"
-    @touchmove.window="onStampDrag($event)"
-    @mouseup.window="stopStampDrag()"
-    @touchend.window="stopStampDrag()"
+    @mousemove.window="onStampDrag($event); onStampResize($event); onModeBtnDrag($event)"
+    @touchmove.window="onStampDrag($event); onStampResize($event); onModeBtnDrag($event)"
+    @mouseup.window="stopStampDrag(); stopStampResize(); stopModeBtnDrag()"
+    @touchend.window="stopStampDrag(); stopStampResize(); stopModeBtnDrag()"
     @pointerdown.window="handleGlobalLaserDown($event)"
     @pointermove.window="handleGlobalLaserMove($event)"
     @pointerup.window="handleGlobalLaserUp()"
     @pointercancel.window="handleGlobalLaserUp()"
     @blur.window="handleGlobalLaserUp()"
-    @resize.window="constrainStampPanel()">
+    @resize.window="constrainStampPanel(); constrainModeBtn(); updateToolbarScale()"
+    @keydown.escape.window="explanationMode = false">
         
         <!-- Auto-save Indicator -->
         <div id="autosave-indicator"
@@ -622,13 +929,13 @@
                      :style="`left: ${point.x}px; top: ${point.y}px; transform: translate(-2.5px, -2.5px);`"></div>
             </template>
 
+            <!-- No x-transition here - same bug as Stamps/Cheat Sheet: this
+                 element's :style is driven by laserPointer.x/y, which change
+                 on every mousemove while pointing, and that constant
+                 re-evaluation stuck the fade mid-transition (confirmed: the
+                 dot silently goes to opacity:0 and stays invisible after any
+                 sustained pointer movement). -->
             <div x-show="laserPointer.visible && laserPointer.scope === 'global'"
-                 x-transition:enter="transition ease-out duration-100"
-                 x-transition:enter-start="opacity-0 scale-50"
-                 x-transition:enter-end="opacity-100 scale-100"
-                 x-transition:leave="transition ease-in duration-300"
-                 x-transition:leave-start="opacity-100 scale-100"
-                 x-transition:leave-end="opacity-0 scale-150"
                  class="fixed"
                  :style="`left: ${laserPointer.x}px; top: ${laserPointer.y}px; transform: translate(-2.5px, -2.5px);`"
                  style="display: none;">
@@ -637,6 +944,30 @@
         </div>
         <!-- Explanation Mode Toggle (Header) -->
         <div class="mb-4 flex justify-end gap-2">
+            @if(Auth::user()->isAdmin())
+                <!-- Admin-only: question TEXT font size (not the whole-block
+                     transform:scale zoom above, which also stretches the
+                     answer choices/spacing) - this-browser-only, never saved,
+                     doesn't affect what students see. -->
+                <div class="px-3 py-2 rounded-lg bg-white/80 border border-gray-200 shadow-sm flex items-center gap-2" title="Ukuran Teks Soal (khusus Admin, tidak tersimpan)">
+                    <span class="text-[11px] font-bold text-gray-500 hidden sm:inline">Teks Soal</span>
+                    <button type="button" @click="decreaseQuestionTextSize()" class="w-7 h-7 rounded-md bg-white hover:bg-gray-200 text-gray-700 font-bold">-</button>
+                    <span class="text-xs font-bold text-gray-600 min-w-[36px] text-center" x-text="questionTextSize + 'px'">18px</span>
+                    <button type="button" @click="increaseQuestionTextSize()" class="w-7 h-7 rounded-md bg-white hover:bg-gray-200 text-gray-700 font-bold">+</button>
+                    <button type="button" @click="resetQuestionTextSize()" class="px-2 py-1 rounded-md bg-white hover:bg-gray-200 text-[11px] font-semibold text-gray-700">Reset</button>
+                </div>
+                <!-- Admin-only: line spacing of the question paragraph, so
+                     wrapped lines can be spread apart when stamp marks
+                     (Subject / Verb Asli / etc.) placed between lines would
+                     otherwise overlap the text below them. -->
+                <div class="px-3 py-2 rounded-lg bg-white/80 border border-gray-200 shadow-sm flex items-center gap-2" title="Jarak Antar Baris Soal (khusus Admin, tidak tersimpan)">
+                    <span class="text-[11px] font-bold text-gray-500 hidden sm:inline">Jarak Baris</span>
+                    <button type="button" @click="decreaseQuestionLineHeight()" class="w-7 h-7 rounded-md bg-white hover:bg-gray-200 text-gray-700 font-bold">-</button>
+                    <span class="text-xs font-bold text-gray-600 min-w-[28px] text-center" x-text="questionLineHeight">1.6</span>
+                    <button type="button" @click="increaseQuestionLineHeight()" class="w-7 h-7 rounded-md bg-white hover:bg-gray-200 text-gray-700 font-bold">+</button>
+                    <button type="button" @click="resetQuestionLineHeight()" class="px-2 py-1 rounded-md bg-white hover:bg-gray-200 text-[11px] font-semibold text-gray-700">Reset</button>
+                </div>
+            @endif
             <div class="px-3 py-2 rounded-lg bg-white/80 border border-gray-200 shadow-sm flex items-center gap-2">
                 <button type="button" @click="zoomQuestionOut()" class="w-7 h-7 rounded-md bg-white hover:bg-gray-200 text-gray-700 font-bold">-</button>
                 <span class="text-xs font-bold text-gray-600 min-w-[48px] text-center" x-text="Math.round(questionZoom * 100) + '%'">100%</span>
@@ -645,10 +976,14 @@
             </div>
         </div>
 
-        <!-- Floating Explanation Mode Button -->
-        <button @click="toggleMode()"
+        <!-- Floating Explanation Mode Button - draggable -->
+        <button id="mode-penjelasan-btn"
+            @mousedown="startModeBtnDrag($event)"
+            @touchstart="startModeBtnDrag($event)"
+            @click="if (!modeBtnDrag.moved) toggleMode()"
             :class="explanationMode ? 'bg-yellow-500 text-gray-900 ring-2 ring-yellow-200' : 'bg-gray-900 text-white'"
-            class="fixed bottom-24 right-4 md:right-6 z-[120] h-14 w-14 sm:w-auto sm:min-w-[220px] sm:px-5 rounded-full font-bold shadow-xl transition hover:scale-105 active:scale-95 flex items-center justify-center gap-2 backdrop-blur-sm"
+            :style="(modeBtnPos.x !== null ? `left:${modeBtnPos.x}px; top:${modeBtnPos.y}px; right:auto; bottom:auto;` : '') + 'touch-action:none;'"
+            class="fixed bottom-24 right-4 md:right-6 z-[120] h-14 w-14 sm:w-auto sm:min-w-[220px] sm:px-5 rounded-full font-bold shadow-xl transition hover:scale-105 active:scale-95 flex items-center justify-center gap-2 backdrop-blur-sm cursor-grab active:cursor-grabbing select-none"
             :aria-label="explanationMode ? 'Keluar Mode Penjelasan' : 'Mode Penjelasan'"
             :title="explanationMode ? 'Keluar Mode Penjelasan' : 'Mode Penjelasan'">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
@@ -656,8 +991,10 @@
         </button>
 
         <!-- Float Toolbar (Bottom Tools) -->
-        <div x-show="explanationMode" x-transition 
-             class="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl z-50 flex items-center gap-4 border border-gray-700">
+        <div id="float-toolbar" x-show="explanationMode"
+             :style="`transform: translateX(-50%) scale(${toolbarScale});`"
+             style="display: none;"
+             class="fixed bottom-8 left-1/2 origin-bottom bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl z-50 flex items-center gap-4 border border-gray-700">
             
             <!-- Pen -->
             <button @click="setTool('pen')" :class="tool === 'pen' ? 'text-blue-400 scale-110' : 'text-gray-400 hover:text-white'" class="transition flex flex-col items-center">
@@ -731,30 +1068,93 @@
             </button>
         </div>
 
-        <!-- Vertical Stamp Sidebar -->
-        <div x-show="explanationMode" x-transition
+        <!-- Vertical Stamp Sidebar - deliberately no x-transition here (or on the
+             Float Toolbar below): with it, clicking "Keluar Mode" flips
+             explanationMode to false but this panel (and the toolbar) never
+             actually hides - the leave animation gets interrupted, likely by
+             the many x-for-rendered stamp/color buttons inside reactively
+             updating in the same tick, leaving it stuck at full opacity
+             forever. The three OTHER explanationMode-gated overlays in this
+             file use bare x-show (no x-transition) and hide correctly, which
+             is why this was changed to match rather than re-added. -->
+        <div x-show="explanationMode"
                id="stamp-panel"
-                         class="fixed bg-white/90 backdrop-blur-sm shadow-xl border border-gray-200 rounded-2xl p-2 z-[320] flex flex-col gap-2 overflow-y-auto"
-                         :style="`left: ${stampPanel.x}px; top: ${stampPanel.y}px; width: 170px; max-height: ${stampPanel.maxHeight}px;`">
+                         class="fixed bg-white/90 backdrop-blur-sm shadow-xl border border-gray-200 rounded-2xl z-[320] flex flex-col"
+                         :style="`left: ${stampPanel.x}px; top: ${stampPanel.y}px; width: ${stampPanel.width}px; max-height: ${stampPanel.maxHeight}px;`"
+                         style="display: none;">
+             <div class="flex-1 p-2 flex flex-col gap-2 overflow-y-auto">
                <div class="flex items-center justify-between px-1 mb-1 cursor-move select-none"
                    @mousedown.prevent="startStampDrag($event)"
                    @touchstart.prevent="startStampDrag($event)">
                 <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">Stamps</div>
                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9h8M8 15h8"></path></svg>
                </div>
+               <!-- Stamp mark size (applies to newly-placed stamps only) -->
+               <div class="flex items-center justify-between gap-1 px-1 mb-1" title="Ukuran Tanda Stempel">
+                <button type="button" @click.stop="decreaseStampSize()" @mousedown.stop class="w-5 h-5 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[10px] leading-none">-</button>
+                <span class="text-[10px] font-bold text-gray-500 flex-1 text-center" x-text="stampSize + 'px'">11px</span>
+                <button type="button" @click.stop="increaseStampSize()" @mousedown.stop class="w-5 h-5 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[10px] leading-none">+</button>
+                <button type="button" @click.stop="resetStampSize()" @mousedown.stop class="px-1.5 h-5 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 text-[9px] font-semibold leading-none">Reset</button>
+               </div>
              <button @click.stop="explanationMode = false" @mousedown.stop
-                 class="w-full flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold bg-red-50 text-red-500 hover:bg-red-100 border border-red-200 transition mb-1">
+                 :style="`font-size: ${stampButtonFontSize()}px; padding: 0.4em 0.5em;`"
+                 class="w-full flex items-center justify-center gap-1 rounded-lg font-bold bg-red-50 text-red-500 hover:bg-red-100 border border-red-200 transition mb-1">
                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                  Keluar Mode
              </button>
              <template x-for="stamp in stamps" :key="stamp">
                 <button @click="setStamp(stamp)"
-                    class="px-3 py-2 rounded-lg text-xs font-bold transition shadow-sm border"
+                    :style="`font-size: ${stampButtonFontSize()}px; padding: 0.5em 0.75em;`"
+                    class="rounded-lg font-bold transition shadow-sm border"
                     :class="selectedStamp === stamp ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 hover:bg-white border-gray-100'"
                     x-text="stamp"
                 ></button>
              </template>
+             </div>
+
+             <!-- Resize Handle -->
+             <div class="absolute bottom-0 right-0 w-5 h-5 cursor-se-resize z-10 flex items-center justify-center opacity-40 hover:opacity-90 transition-opacity"
+                  @mousedown.prevent.stop="startStampResize($event)"
+                  @touchstart.prevent.stop="startStampResize($event)"
+                  title="Resize">
+                 <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                     <path d="M11 1L1 11" stroke="#374151" stroke-width="1.5" stroke-linecap="round"/>
+                     <path d="M11 5L5 11" stroke="#374151" stroke-width="1.5" stroke-linecap="round"/>
+                 </svg>
+             </div>
         </div>
+
+        @php
+            $scoreData = $scoreData ?? session('score_data') ?? session('toefl_structure_score_' . $number);
+        @endphp
+
+        @if($scoreData)
+        <div class="max-w-4xl mx-auto mb-6 p-5 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-black text-xl shadow-md shrink-0">
+                    {{ round($scoreData['score'] ?? 0) }}
+                </div>
+                <div>
+                    <h4 class="text-sm font-black text-emerald-950 flex items-center gap-2">
+                        <span>Hasil Penilaian Tes Tersimpan</span>
+                        <span class="text-[11px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full">
+                            {{ $scoreData['correct_count'] ?? 0 }}/{{ $scoreData['total_questions'] ?? count($questions) }} Benar
+                        </span>
+                    </h4>
+                    <p class="text-xs text-emerald-700 mt-0.5">Penilaian dan pembahasan soal tetap tersimpan. Klik tombol "Ulangi Tes" untuk memulai tes baru dan mereset semua jawaban.</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
+                <button type="button" onclick="confirmResetAndRetryTest()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-black transition shadow hover:shadow-md flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    <span>Ulangi Tes</span>
+                </button>
+                <a href="{{ $backRoute }}" class="px-4 py-2.5 bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-xl text-xs font-bold transition">
+                    Kembali
+                </a>
+            </div>
+        </div>
+        @endif
 
         <form id="question-form-container" action="{{ route('assignments.toefl-itp.structure.meeting.submit', $number) }}" method="POST" class="relative max-w-4xl mx-auto transition-transform duration-150" :style="`transform: scale(${questionZoom}); transform-origin: top center; width: ${100 / questionZoom}%;`">
             @csrf
@@ -779,13 +1179,8 @@
                              :style="`left: ${point.x}px; top: ${point.y}px; transform: translate(-2.5px, -2.5px);`"></div>
                     </template>
 
+                    <!-- No x-transition here either - same reason as the global-scope dot above. -->
                     <div x-show="laserPointer.visible && laserPointer.scope === 'question'"
-                         x-transition:enter="transition ease-out duration-100"
-                         x-transition:enter-start="opacity-0 scale-50"
-                         x-transition:enter-end="opacity-100 scale-100"
-                         x-transition:leave="transition ease-in duration-300"
-                         x-transition:leave-start="opacity-100 scale-100"
-                         x-transition:leave-end="opacity-0 scale-150"
                          class="absolute"
                            :style="`left: ${laserPointer.localX}px; top: ${laserPointer.localY}px; transform: translate(-2.5px, -2.5px);`"
                          style="display: none;">
@@ -794,7 +1189,20 @@
                 </div>
                 <div class="space-y-8">
                     @forelse($questions as $question)
-                    <div class="question-item relative group/item" x-data="{ selected: '{{ $userAnswer ?? '' }}', menuOpen: false }">
+                    @php
+                        $userAnswer = null;
+                        $correctAnswer = null;
+                        $isCorrect = false;
+                        if($scoreData) {
+                            $userAnswer = $scoreData['user_answers'][$question->id] ?? null;
+                            $correctAnswer = $question->correct_answer;
+                            $isCorrect = $userAnswer === $correctAnswer;
+                        }
+                        
+                        // Identify Written Expression type
+                        $isWrittenExpression = str_contains($question->question_text, 'error-option');
+                    @endphp
+                    <div class="question-item relative group/item" data-correct="{{ $question->correct_answer }}" x-data="{ selected: '{{ $userAnswer ?? '' }}', menuOpen: false }">
 
                         @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
                             @if(Auth::user()->isAdmin())
@@ -828,8 +1236,8 @@
                                             <span>Kunci Jawaban ({{ $question->correct_answer }})</span>
                                         </button>
 
-                                        <button type="button" 
-                                                @click="menuOpen = false; openEditQuestionModal(@json($question))" 
+                                        <button type="button"
+                                                @click='menuOpen = false; openEditQuestionModal(@json($question))'
                                                 class="w-full px-3 py-2 text-left text-xs font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2.5 transition-colors">
                                             <span class="p-1 rounded bg-blue-100 text-blue-700 shrink-0">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
@@ -839,36 +1247,36 @@
                                     </div>
 
                                     <div class="py-1">
-                                        <form action="{{ route('assignments.toefl-itp.structure.question.destroy', $question->id) }}" method="POST" onsubmit="return confirm('Hapus soal ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" 
-                                                    class="w-full px-3 py-2 text-left text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2.5 transition-colors">
-                                                <span class="p-1 rounded bg-red-100 text-red-600 shrink-0">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                </span>
-                                                <span>Hapus Soal</span>
-                                            </button>
-                                        </form>
+                                        <!-- Plain button + JS-built form instead of a literal nested <form> here -
+                                             this sits inside the page's single outer <form id="question-form-container">
+                                             (wraps every question + the Submit Answers button), and nested <form>
+                                             elements are invalid HTML: the browser silently closed the outer form
+                                             at this point, leaving Submit Answers outside any form and doing nothing
+                                             when clicked. -->
+                                        <button type="button"
+                                                @click="
+                                                    if (confirm('Hapus soal ini?')) {
+                                                        const f = document.createElement('form');
+                                                        f.method = 'POST';
+                                                        f.action = '{{ route('assignments.toefl-itp.structure.question.destroy', $question->id) }}';
+                                                        f.style.display = 'none';
+                                                        const token = document.querySelector('meta[name=csrf-token]').getAttribute('content');
+                                                        f.innerHTML = `<input type='hidden' name='_token' value='${token}'><input type='hidden' name='_method' value='DELETE'>`;
+                                                        document.body.appendChild(f);
+                                                        f.submit();
+                                                    }
+                                                "
+                                                class="w-full px-3 py-2 text-left text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2.5 transition-colors">
+                                            <span class="p-1 rounded bg-red-100 text-red-600 shrink-0">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            </span>
+                                            <span>Hapus Soal</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                             @endif
                         @endif
-
-                        @php
-                            $userAnswer = null;
-                            $correctAnswer = null;
-                            $isCorrect = false;
-                            if(session('score_data')) {
-                                $userAnswer = session('answers')[$question->id] ?? null;
-                                $correctAnswer = $question->correct_answer;
-                                $isCorrect = $userAnswer === $correctAnswer;
-                            }
-                            
-                            // Identify Written Expression type
-                            $isWrittenExpression = str_contains($question->question_text, 'error-option');
-                        @endphp
 
                         <div class="flex gap-4 items-start">
                             <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-white text-gray-600 font-bold rounded-lg text-sm {{ $isWrittenExpression ? 'mt-4' : '' }}">
@@ -879,33 +1287,52 @@
                             
                             <div class="flex-1 min-w-0 pr-10" 
                                  @click.self="if($root.explanationMode && $root.tool === 'laser') { $root.showLaserPointer($event) }"
-                                 x-init="$watch('selected', value => {
-                                    $el.querySelectorAll('.error-option').forEach(opt => {
-                                        opt.classList.toggle('selected-error', opt.dataset.label === value);
-                                    });
-                                 });
-                                 // Initial check
-                                 $nextTick(() => {
-                                     $el.querySelectorAll('.error-option').forEach(opt => {
-                                        opt.classList.toggle('selected-error', opt.dataset.label === selected);
-                                    });
-                                 });
+                                 x-init="
+                                     const correct = '{{ $question->correct_answer }}';
+                                     const hasScore = {{ $scoreData ? 'true' : 'false' }};
+                                     const updateErrors = () => {
+                                         $el.querySelectorAll('.error-option').forEach(opt => {
+                                             const isSel = opt.dataset.label === selected;
+                                             const isCor = opt.dataset.label === correct;
+                                             if (hasScore) {
+                                                 if (isCor) {
+                                                     opt.classList.add('correct-error');
+                                                     opt.classList.remove('selected-error', 'wrong-error');
+                                                 } else if (isSel) {
+                                                     opt.classList.add('wrong-error');
+                                                     opt.classList.remove('selected-error', 'correct-error');
+                                                 } else {
+                                                     opt.classList.remove('selected-error', 'correct-error', 'wrong-error');
+                                                 }
+                                             } else {
+                                                 opt.classList.toggle('selected-error', isSel);
+                                                 opt.classList.toggle('correct-error', Boolean(showAnswerKey && isCor));
+                                             }
+                                         });
+                                     };
+                                     $watch('selected', () => updateErrors());
+                                     $watch('showAnswerKey', () => updateErrors());
+                                     $nextTick(() => updateErrors());
                                  "
                                  @click="
-                                    if ($event.target.classList.contains('error-option')) {
-                                        selected = $event.target.dataset.label;
-                                    } else if ($root.explanationMode && $root.tool === 'laser' && !$event.target.closest('label')) {
-                                        $root.showLaserPointer($event);
-                                    }
+                                     if ($event.target.classList.contains('error-option') && !{{ $scoreData ? 'true' : 'false' }}) {
+                                         selected = $event.target.dataset.label;
+                                     } else if ($root.explanationMode && $root.tool === 'laser' && !$event.target.closest('label')) {
+                                         $root.showLaserPointer($event);
+                                     }
                                  ">
-                                <!-- Conditional line-height only for Written Expression to handle labels -->
-                                <p class="text-gray-800 font-medium mb-4 text-lg select-none" style="{{ $isWrittenExpression ? 'line-height: 3.5 !important;' : '' }}">{!! $question->question_text !!}</p>
+                                <!-- font-size and line-height driven by the admin-only
+                                     questionTextSize/questionLineHeight controls above (defaults
+                                     18px / 1.6, matching the original text-lg). Written Expression
+                                     forces its own line-height (!important, so it always wins over
+                                     questionLineHeight) to make room for the error-option labels. -->
+                                <p class="text-gray-800 font-medium mb-4 select-none" :style="`font-size: ${questionTextSize}px; line-height: ${questionLineHeight};` + {{ $isWrittenExpression ? "'line-height: 3.5 !important;'" : "''" }}">{!! $question->question_text !!}</p>
                                 
                                 @if($isWrittenExpression)
                                     <!-- Written Expression Mode: Hidden Inputs + Clickable Text -->
                                     <div class="hidden">
                                         @foreach(['A', 'B', 'C', 'D'] as $option)
-                                            <input type="radio" name="answers[{{ $question->id }}]" value="{{ $option }}" x-model="selected">
+                                            <input type="radio" name="answers[{{ $question->id }}]" value="{{ $option }}" x-model="selected" {{ $scoreData ? 'disabled' : '' }}>
                                         @endforeach
                                     </div>
                                     <!-- Visual feedback for current selection is handled by the x-init logic above -->
@@ -919,7 +1346,7 @@
                                             $staticClass = 'border-gray-200 hover:bg-white';
                                             
                                             // PHP-based styling for scored state
-                                            if(session('score_data')) {
+                                            if($scoreData) {
                                                 $checked = $userAnswer === $optionUpper;
                                                 if($optionUpper === $correctAnswer) {
                                                     $staticClass = 'bg-green-50 border-green-500 ring-1 ring-green-500';
@@ -929,19 +1356,19 @@
                                             }
                                         @endphp
                                         <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition group relative"
-                                            @if(session('score_data'))
+                                            @if($scoreData)
                                                 class="{{ $staticClass }}"
                                             @else
                                                 :class="showAnswerKey && '{{ $optionUpper }}' === '{{ $question->correct_answer }}' ? 'border-green-500 bg-green-50 ring-1 ring-green-500' : (selected == '{{ $optionUpper }}' ? 'border-gray-300 bg-white' : 'border-gray-200 hover:bg-white')"
                                             @endif
                                         >
-                                            <input type="radio" name="answers[{{ $question->id }}]" value="{{ $optionUpper }}" class="peer sr-only" x-model="selected" {{ session('score_data') ? 'disabled' : '' }}>
+                                            <input type="radio" name="answers[{{ $question->id }}]" value="{{ $optionUpper }}" class="peer sr-only" x-model="selected" {{ $scoreData ? 'disabled' : '' }}>
                                             
                                             <!-- Container for Badge and Text -->
                                             <div class="flex items-center gap-3 w-full p-1">
                                                 <!-- Letter Badge -->
                                                 <span class="w-8 h-8 min-w-[2rem] shrink-0 flex items-center justify-center rounded-full text-sm font-bold transition-colors border aspect-square"
-                                                    @if(session('score_data'))
+                                                    @if($scoreData)
                                                         class="{{ $checked ? ($isCorrect ? 'bg-green-600 text-white border-green-600' : 'bg-red-600 text-white border-red-600') : 'bg-white text-gray-500 border-gray-200' }}"
                                                     @else
                                                         :class="showAnswerKey && '{{ $optionUpper }}' === '{{ $question->correct_answer }}' ? 'bg-green-600 text-white border-green-600' : (selected == '{{ $optionUpper }}' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-500 border-gray-200 group-hover:bg-white')"
@@ -950,9 +1377,11 @@
                                                     {{ $optionUpper }}
                                                 </span>
 
-                                                <!-- Option Text -->
+                                                <!-- Option Text - font-size tied to the same admin-only
+                                                     questionTextSize control as the question text above. -->
                                                 <span class="font-medium transition-colors select-none"
-                                                    @if(session('score_data'))
+                                                    :style="`font-size: ${questionTextSize}px;`"
+                                                    @if($scoreData)
                                                         class="{{ $checked ? ($isCorrect ? 'text-green-700' : 'text-red-700') : 'text-gray-600' }}"
                                                     @else
                                                         :class="showAnswerKey && '{{ $optionUpper }}' === '{{ $question->correct_answer }}' ? 'text-green-700' : (selected == '{{ $optionUpper }}' ? 'text-red-600' : 'text-gray-600 group-hover:text-gray-900')"
@@ -962,7 +1391,7 @@
                                                 </span>
                                             </div>
                                             
-                                            @if(session('score_data'))
+                                            @if($scoreData)
                                                 @if($optionUpper === $correctAnswer)
                                                     <span class="absolute right-3 text-green-500">
                                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -982,7 +1411,7 @@
                                     </div>
                                 @endif
 
-                                @if(session('score_data'))
+                                @if($scoreData)
                                     @php
                                         $answerStatus = is_null($userAnswer) ? 'Belum Dijawab' : ($isCorrect ? 'Benar' : 'Salah');
                                         $answerStatusClass = is_null($userAnswer)
@@ -1025,28 +1454,29 @@
                 </div>
             </div>
 
-            @if(session('score_data'))
+            @if($scoreData)
             <!-- Score Card -->
             <div class="bg-white rounded-3xl shadow-lg border border-green-100 p-8 mb-6 relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full blur-3xl -mr-16 -mt-16"></div>
                 <div class="relative z-10 text-center">
                     <h3 class="text-lg font-bold text-gray-400 mb-2 uppercase tracking-wider">Lesson Score</h3>
                     <div class="flex items-center justify-center gap-2 mb-4">
-                        <span class="text-6xl font-black text-gray-800">{{ round(session('score_data.score')) }}</span>
-                        @if(session('score_data.score') <= 100)
+                        <span class="text-6xl font-black text-gray-800">{{ round($scoreData['score'] ?? 0) }}</span>
+                        @if(($scoreData['score'] ?? 0) <= 100)
                         <span class="text-2xl font-bold text-gray-400">/ 100</span>
                         @endif
                     </div>
                     <div class="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full font-bold text-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        {{ session('score_data.correct_count') }} Correct Answers
+                        {{ $scoreData['correct_count'] ?? 0 }} Correct Answers
                     </div>
                     
                     <div class="mt-8 flex justify-center gap-4">
-                        <a href="{{ route('assignments.toefl-itp.structure.meeting', $number) }}" class="px-6 py-2 bg-white text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition">
-                            Try Again
-                        </a>
-                        <a href="{{ $backRoute }}" class="px-6 py-2 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition">
+                        <button type="button" onclick="confirmResetAndRetryTest()" class="px-6 py-2.5 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 transition shadow hover:shadow-md flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            <span>Ulangi Tes</span>
+                        </button>
+                        <a href="{{ $backRoute }}" class="px-6 py-2.5 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition">
                             Finish Lesson
                         </a>
                     </div>
@@ -1081,7 +1511,17 @@
 
         // ===== AUTO-SAVE =====
         const AUTOSAVE_KEY = 'expl_canvas_{{ $number }}';
+        const ANSWERS_AUTOSAVE_KEY = 'toefl_answers_{{ $meeting->id ?? $number }}';
         let autoSaveTimer = null;
+
+        function showAutoSaveIndicator() {
+            const el = document.getElementById('autosave-indicator');
+            if (el) {
+                el.style.opacity = '1';
+                clearTimeout(el._t);
+                el._t = setTimeout(() => { el.style.opacity = '0'; }, 2000);
+            }
+        }
 
         function autoSaveCanvas() {
             clearTimeout(autoSaveTimer);
@@ -1090,12 +1530,7 @@
                 if (!canvas || canvas.width === 0 || canvas.height === 0) return;
                 try {
                     localStorage.setItem(AUTOSAVE_KEY, canvas.toDataURL('image/png'));
-                    const el = document.getElementById('autosave-indicator');
-                    if (el) {
-                        el.style.opacity = '1';
-                        clearTimeout(el._t);
-                        el._t = setTimeout(() => { el.style.opacity = '0'; }, 2000);
-                    }
+                    showAutoSaveIndicator();
                 } catch(e) {}
             }, 1500);
         }
@@ -1108,6 +1543,90 @@
             const img = new Image();
             img.onload = () => canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
             img.src = saved;
+        }
+
+        // Student Answers Auto-save & Restore
+        function initAnswersAutoSave() {
+            @if($scoreData)
+                // Test is currently in scored/review mode; do NOT clear answers or listen for changes.
+                return;
+            @endif
+
+            const formContainer = document.getElementById('question-form-container');
+            if (!formContainer) return;
+
+            // 1. Restore saved answers from localStorage on page load
+            try {
+                const raw = localStorage.getItem(ANSWERS_AUTOSAVE_KEY);
+                if (raw) {
+                    const saved = JSON.parse(raw);
+                    if (saved && typeof saved === 'object') {
+                        Object.keys(saved).forEach(questionId => {
+                            const val = saved[questionId];
+                            const radio = formContainer.querySelector(`input[type="radio"][name="answers[${questionId}]"][value="${val}"]`);
+                            if (radio) {
+                                radio.checked = true;
+                                radio.dispatchEvent(new Event('change', { bubbles: true }));
+                                radio.dispatchEvent(new Event('input', { bubbles: true }));
+
+                                // Also sync Alpine component model if present
+                                const alpineEl = radio.closest('[x-data]');
+                                if (alpineEl && window.Alpine) {
+                                    const alpineData = Alpine.$data(alpineEl);
+                                    if (alpineData && 'selected' in alpineData) {
+                                        alpineData.selected = val;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            } catch (e) {
+                console.warn('Failed to restore saved answers:', e);
+            }
+
+            // 2. Listen for any answer changes (radio clicks & written expression selection)
+            formContainer.addEventListener('change', function(e) {
+                const target = e.target;
+                if (!target || !target.name || !target.name.startsWith('answers[')) return;
+
+                const match = target.name.match(/^answers\[(\d+)\]$/);
+                if (!match) return;
+
+                const questionId = match[1];
+                const selectedVal = target.value;
+
+                try {
+                    const raw = localStorage.getItem(ANSWERS_AUTOSAVE_KEY);
+                    const current = raw ? JSON.parse(raw) : {};
+                    current[questionId] = selectedVal;
+                    localStorage.setItem(ANSWERS_AUTOSAVE_KEY, JSON.stringify(current));
+                    showAutoSaveIndicator();
+                } catch (err) {
+                    console.warn('Failed to auto-save answer:', err);
+                }
+            });
+
+            // Note: Saved answers are retained upon form submission so reviews stay persistent.
+            // They will only be deleted when the user explicitly clicks "Ulangi Tes".
+        }
+
+        function confirmResetAndRetryTest() {
+            if (confirm('Apakah Anda yakin ingin mengulangi tes ini? Semua jawaban dan hasil penilaian yang tersimpan akan dihapus.')) {
+                try {
+                    localStorage.removeItem(ANSWERS_AUTOSAVE_KEY);
+                } catch (e) {}
+
+                const url = new URL(window.location.href);
+                url.searchParams.set('retry', '1');
+                window.location.href = url.toString();
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initAnswersAutoSave);
+        } else {
+            initAnswersAutoSave();
         }
         // ===== END AUTO-SAVE =====
 
@@ -1380,7 +1899,7 @@
             if (app.tool === 'stamp' && app.selectedStamp) {
                 if (undoStack.length > 50) undoStack.shift(); 
                 undoStack.push({ id: canvas.id, imageData: data.ctx.getImageData(0, 0, canvas.width, canvas.height) });
-                drawStamp(data.ctx, app.selectedStamp, x, y);
+                drawStamp(data.ctx, app.selectedStamp, x, y, app.stampSize);
                 autoSaveCanvas();
                 return;
             }
@@ -1486,13 +2005,18 @@
             ctx.stroke();
         }
 
-        function drawStamp(ctx, text, x, y) {
-            ctx.font = "bold 11px sans-serif";
-            const padding = 7;
+        function drawStamp(ctx, text, x, y, fontSize) {
+            // Padding/height/radius scale proportionally with fontSize,
+            // keeping the same proportions as the original fixed values
+            // (11px font / 7px padding / 22px height / 8px radius).
+            const size = fontSize || 11;
+            const scale = size / 11;
+            ctx.font = `bold ${size}px sans-serif`;
+            const padding = Math.round(7 * scale);
             const metrics = ctx.measureText(text);
             const width = metrics.width + (padding * 2);
-            const height = 22;
-            const radius = 8;
+            const height = Math.round(22 * scale);
+            const radius = Math.round(8 * scale);
 
             // Centering logic: Stamps are clicked at x,y. Let's center the pill there.
             const drawX = x - (width / 2);
