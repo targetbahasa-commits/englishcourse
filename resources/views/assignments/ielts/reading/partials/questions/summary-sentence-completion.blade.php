@@ -137,11 +137,14 @@
         </div>
     @endif
 
-    @if(isset($question['box_options']))
+    @php
+        $boxList = !empty($question['box_options']) ? $question['box_options'] : (!empty($optionsData) ? $optionsData : []);
+    @endphp
+    @if(!empty($boxList))
         <div class="bg-white p-4 rounded-lg border border-gray-200 mt-6">
-            <strong class="block text-gray-700 mb-2 uppercase text-sm tracking-wide">List of Words</strong>
+            <strong class="block text-gray-700 mb-2 uppercase text-sm tracking-wide">{{ $question['box_title'] ?? 'List of Words' }}</strong>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                @foreach($question['box_options'] ?? [] as $key => $option)
+                @foreach($boxList as $key => $option)
                     <div class="text-sm">
                         <span class="font-bold text-gray-900 mr-1">{{ $key }}</span>
                         <span class="text-gray-700">{{ $option }}</span>
