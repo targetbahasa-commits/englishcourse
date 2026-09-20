@@ -133,6 +133,22 @@ class IeltsReadingMaterialRenderTest extends TestCase
             'order' => 7,
         ]);
 
+        IeltsReadingQuestion::create([
+            'passage_id' => $passage->id,
+            'question_number' => 10,
+            'question_text' => 'Choose TWO letters, A-E.',
+            'type' => 'multiple_choice_multiple',
+            'options' => ['A' => 'Opt A', 'B' => 'Opt B', 'C' => 'Opt C', 'D' => 'Opt D', 'E' => 'Opt E'],
+            'correct_answer' => ['10' => 'A', '11' => 'B'],
+            'data' => [
+                'sub_questions' => [
+                    ['id' => '10', 'label' => 'Choose TWO letters', 'correct_answer' => 'A'],
+                    ['id' => '11', 'label' => 'Choose TWO letters', 'correct_answer' => 'B'],
+                ],
+            ],
+            'order' => 8,
+        ]);
+
         return $passage;
     }
 
@@ -159,8 +175,86 @@ class IeltsReadingMaterialRenderTest extends TestCase
         $this->assertNotEmpty($qidMatches[1], "Material page should render question input elements with data-qid.");
     }
 
+    public function test_sentence_completion_does_not_duplicate_instructions_inside_box(): void
+    {
+        $passage = IeltsReadingPassage::create([
+            'material_id' => 99,
+            'title' => 'Duplicate Instruction Test',
+            'content' => '<p>Passage content</p>',
+            'order' => 1,
+        ]);
+
+        IeltsReadingQuestion::create([
+            'passage_id' => $passage->id,
+            'question_number' => 11,
+            'question_text' => '<strong>Questions 11-13</strong><br><em>Complete the sentences below. Choose NO MORE THAN ONE WORD from the passage for each answer. Write your answers in boxes 11-13 on your answer sheet</em>',
+            'type' => 'sentence_completion',
+            'order' => 11,
+            'data' => [
+                'start_number' => 10,
+                'sub_questions' => [
+                    ['id' => '11', 'label' => 'Sentence one ...........', 'correct_answer' => 'answer1'],
+                    ['id' => '12', 'label' => 'Sentence two ...........', 'correct_answer' => 'answer2'],
+                ],
+                'summary_text' => 'Complete the sentences below.<br>Choose NO MORE THAN ONE WORD from the passage for each answer.<br>Write your answers in boxes 11-13 on your answer sheet',
+                'placeholders' => ['11' => 11, '12' => 12],
+            ],
+        ]);
+
+        $admin = $this->adminUser();
+        $response = $this->actingAs($admin)->get(route('assignments.ielts-academic.reading.material', 99));
+        $response->assertOk();
+
+        $html = $response->content();
+        $domQuestionPanel = explode('id="questions-panel"', $html)[1] ?? '';
+        $domBeforeScripts = explode('<script', $domQuestionPanel)[0] ?? '';
+        $occurrences = substr_count($domBeforeScripts, 'Complete the sentences below');
+        $this->assertEquals(1, $occurrences, 'Instructions should only be displayed once in the visible questions panel.');
+    }
+
+    public function test_sentence_completion_replaces_ellipsis_blank_inline(): void
+    {
+        $passage = IeltsReadingPassage::create([
+            'material_id' => 199,
+            'title' => 'Sentence Completion Test',
+            'content' => '<p>Passage content</p>',
+            'order' => 1,
+        ]);
+
+        IeltsReadingQuestion::create([
+            'passage_id' => $passage->id,
+            'question_number' => 1,
+            'question_text' => 'Complete the sentences below.',
+            'type' => 'sentence_completion',
+            'correct_answer' => ['1' => 'tombs'],
+            'data' => [
+                'sub_questions' => [
+                    [
+                        'id' => '1',
+                        'label' => 'Researchers believed the tea containers detected in .................... from the Han Dynasty was the first evidence of the use of tea.',
+                        'correct_answer' => 'tombs',
+                    ],
+                ],
+            ],
+            'order' => 1,
+        ]);
+
+        $admin = $this->adminUser();
+        $response = $this->actingAs($admin)->get(route('assignments.ielts-academic.reading.material', 199));
+        $response->assertOk();
+
+        $html = $response->content();
+        $domQuestionPanel = explode('id="questions-panel"', $html)[1] ?? '';
+        $domBeforeScripts = explode('<script', $domQuestionPanel)[0] ?? '';
+
+        $this->assertStringContainsString('detected in <span class="inline-inline-flex', $domBeforeScripts);
+        $this->assertStringContainsString('from the Han Dynasty', $domBeforeScripts);
+        $this->assertStringNotContainsString('detected in ....................', $domBeforeScripts);
+    }
+
     private function describe(mixed $value): string
     {
         return is_scalar($value) ? (string) $value : json_encode($value);
     }
 }
+

@@ -1,6 +1,6 @@
 <!-- Sentence Completion -->
 <div class="mt-6 mb-8 space-y-4">
-    @if(!empty($question['instruction']))
+    @if(!empty($question['instruction']) && empty($question['text']))
         <p class="mb-4 italic text-gray-700">{!! $question['instruction'] !!}</p>
     @endif
 
@@ -51,6 +51,10 @@
             // Replace dot patterns e.g. 21...... or 21... or 21.
             if ($sentenceHtml === $oldSentence) {
                 $sentenceHtml = preg_replace('/' . $qNum . '[\s\.\…\_]{1,}/u', $inputHtml, $sentenceHtml, 1);
+            }
+
+            if ($sentenceHtml === $oldSentence) {
+                $sentenceHtml = preg_replace('/[\.\…\_]{2,}/u', $inputHtml, $sentenceHtml, 1);
             }
 
             // Fallback if no placeholder pattern matched

@@ -4,19 +4,72 @@
         <h3 class="text-xl font-bold text-gray-900 mb-4 text-center font-serif">{{ $question['box_title'] }}</h3>
     @endif
 
-    @if(!empty($question['instruction']) && trim(strip_tags($question['instruction'])) !== trim(strip_tags($question['text'] ?? '')))
+    @if(!empty($question['instruction']) && empty($question['text']))
         <p class="mb-4 italic text-gray-700">{!! $question['instruction'] !!}</p>
     @endif
 
-    <div class="text-gray-800 leading-loose text-lg font-medium">
-        @php
-            $rawSummary = $question['summary_text'] ?? '';
-            if (empty($rawSummary) && !empty($question['text'])) {
-                if (preg_match('/\[\d+\]|\b\d{1,2}\s*[\.\…\_]{2,}/u', $question['text'])) {
-                    $rawSummary = $question['text'];
+    @php
+        $rawSummary = $question['summary_text'] ?? ($question['summary'] ?? '');
+        $hasExplicitSummary = (array_key_exists('summary_text', $question) && $question['summary_text'] !== null)
+            || (array_key_exists('summary', $question) && $question['summary'] !== null);
+
+        if (!$hasExplicitSummary && empty($rawSummary) && !empty($question['text'])) {
+            if (preg_match('/\[\d+\]|\b\d{1,2}\s*[\.\…\_]{2,}/u', $question['text'])) {
+                $rawSummary = $question['text'];
+            } elseif (!empty($question['sub_questions'])) {
+                $leadText = '';
+                $patterns = [
+                    '/(.*?on your answer sheet\.?)(.*)$/si',
+                    '/(.*?in boxes \d+[-–]\d+\.?)(.*)$/si',
+                    '/(.*?each answer\.?)(.*)$/si',
+                ];
+                foreach ($patterns as $p) {
+                    if (preg_match($p, $question['text'], $m)) {
+                        $leadText = trim(strip_tags($m[2]));
+                        break;
+                    }
                 }
+                $reconstructed = $leadText ? $leadText . ' ' : '';
+                foreach ($question['sub_questions'] as $sq) {
+                    $num = preg_replace('/\D/', '', $sq['id'] ?? '');
+                    $label = $sq['label'] ?? $sq['text'] ?? '';
+                    $cleanLabel = preg_replace('/^[.\x{2026}\s]+/u', '', $label);
+                    if (preg_match('/[\.\…\_]{2,}/u', $cleanLabel)) {
+                        $cleanLabel = preg_replace('/[\.\…\_]{2,}/u', '[' . $num . ']', $cleanLabel, 1);
+                        $reconstructed .= $cleanLabel . ' ';
+                    } else {
+                        $reconstructed .= '[' . $num . '] ' . $cleanLabel . ' ';
+                    }
+                }
+                $rawSummary = trim($reconstructed);
             }
-            $summaryText = $rawSummary;
+        }
+
+        // Strip leading instruction lines (e.g. "Complete the following summary...", "Using NO MORE THAN...", "Write your answers...", etc.),
+        // so they don't duplicate the question header instructions.
+        if (!empty($rawSummary)) {
+            $instructionPattern = '/^(?:Questions?\s+\d+|Complete\b|Choose\b|Write\b|Using\b|Use\b|In\s+box|You\s+may\s+use|NB\b|Reading\s+Test\s+\d+|Do\s+the\s+following|Look\s+at|Match\s+each|Classify\b|Answers?\b|,?\s*write\s+the\s+correct)/i';
+            $lines = preg_split('/<br\s*\/?>|\n/i', $rawSummary);
+            $strippedLines = [];
+            $stripping = true;
+            foreach ($lines as $line) {
+                $cleanLine = trim(strip_tags($line));
+                $cleanNoPunct = ltrim($cleanLine, " \t\n\r\0\x0B,.:;–-");
+                if ($stripping && (empty($cleanLine) || preg_match($instructionPattern, $cleanLine) || preg_match($instructionPattern, $cleanNoPunct))) {
+                    continue;
+                }
+                $stripping = false;
+                // Check if trailing metadata line
+                if (preg_match('/^(?:Reading\s+Test\s+\d+|Advertisements)$/i', $cleanLine)) {
+                    continue;
+                }
+                $strippedLines[] = $line;
+            }
+            $rawSummary = trim(implode('<br>', $strippedLines));
+        }
+
+        $summaryText = preg_replace('/\s*Advertisements\s*/i', '', $rawSummary);
+
 
             // Format 1: legacy 'placeholders' → ['q10' => 10, ...]
             $placeholderMap = [];
@@ -114,6 +167,9 @@
                     if ($lbl === $oldLbl) {
                         $lbl = preg_replace('/' . $qNum . '[\s\.\…\_]{1,}/u', $inputHtml, $lbl, 1);
                     }
+                    if ($lbl === $oldLbl) {
+                        $lbl = preg_replace('/[\.\…\_]{2,}/u', $inputHtml, $lbl, 1);
+                    }
 
                     if ($lbl !== $oldLbl) {
                         $unresolvedListItems[] = ['qNum' => $qNum, 'label' => $lbl, 'input' => ''];
@@ -123,11 +179,15 @@
                 }
             }
         @endphp
-        {!! $summaryText !!}
-    </div>
 
-    @if(!empty($unresolvedListItems))
-        <div class="mt-6 space-y-3">
+        @if(filled(trim(strip_tags($summaryText))))
+            <div class="text-gray-800 leading-loose text-lg font-medium mb-4">
+                {!! $summaryText !!}
+            </div>
+        @endif
+
+        @if(!empty($unresolvedListItems))
+            <div class="{{ filled(trim(strip_tags($summaryText))) ? 'mt-6' : '' }} space-y-3">
             @foreach($unresolvedListItems as $item)
                 <div class="text-gray-800 text-lg font-medium flex flex-wrap items-baseline gap-1">
                     <span class="mr-1">{!! $item['label'] !!}</span>
