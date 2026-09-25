@@ -380,6 +380,7 @@
             return filled(trim((string) ($question->correct_answer ?? '')));
         })->count();
         $isAnswerKeyComplete = $totalQuestionCount > 0 && $answerKeyFilledCount === $totalQuestionCount;
+        $canSeeAnswerKey = auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher());
     @endphp
     <!-- Header -->
     <div class="mb-8 flex justify-between items-end">
@@ -406,7 +407,27 @@
         </div>
 
         <div class="flex items-center gap-2 flex-wrap justify-end">
-            @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+            @if(!empty($scoreData))
+                <div class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-black bg-emerald-600 text-white shadow-sm" title="Hasil tes tersimpan permanen">
+                    <svg class="w-4 h-4 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>Nilai: {{ round($scoreData['score'] ?? 0) }} ({{ $scoreData['correct_count'] ?? 0 }}/{{ $scoreData['total_questions'] ?? count($questions) }} Benar)</span>
+                </div>
+            @else
+                <div id="answered-counter-badge" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold bg-white text-slate-700 border border-slate-200 transition" title="Jumlah soal yang sudah dijawab">
+                    {{ count(array_filter($draftAnswers ?? [])) }}/{{ $totalQuestionCount }} Terjawab
+                </div>
+                <div class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Jawaban disimpan secara otomatis">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="header-autosave-status">Autosave Aktif</span>
+                </div>
+            @endif
+
+            <button type="button" onclick="confirmResetAndRetryTest()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm hover:shadow transition" title="Ulangi mengerjakan soal dari awal">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                <span>Kerjakan Ulang</span>
+            </button>
+
+            @if($canSeeAnswerKey)
                 <button type="button" onclick="openAnswerKeyStatusModal()" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold {{ $isAnswerKeyComplete ? 'bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-200' : 'bg-white text-amber-700 border border-amber-200 hover:bg-amber-200' }} transition" title="Lihat daftar answer key">
                     <span class="w-2 h-2 rounded-full {{ $isAnswerKeyComplete ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
                     {{ $isAnswerKeyComplete ? 'Answer Key Ditambahkan' : 'Answer Key Belum Lengkap' }}
@@ -414,14 +435,6 @@
                 <button type="button" onclick="openAnswerKeyStatusModal()" class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-200 transition" title="Lihat daftar answer key">
                     {{ $answerKeyFilledCount }}/{{ $totalQuestionCount }} Soal
                 </button>
-            @else
-                <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold {{ $isAnswerKeyComplete ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-white text-amber-700 border border-amber-200' }}">
-                    <span class="w-2 h-2 rounded-full {{ $isAnswerKeyComplete ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
-                    {{ $isAnswerKeyComplete ? 'Answer Key Ditambahkan' : 'Answer Key Belum Lengkap' }}
-                </span>
-                <span class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold bg-white text-slate-700 border border-slate-200">
-                    {{ $answerKeyFilledCount }}/{{ $totalQuestionCount }} Soal
-                </span>
             @endif
 
             @if(Auth::user()->isAdmin())
@@ -445,7 +458,7 @@
                 </a>
             @endif
 
-            @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
+            @if($canSeeAnswerKey)
                 <button type="button" onclick="window.toggleStructureAnswerKey()" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition flex items-center gap-2" id="toggleAnswerBtn">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                     <span>Show Answer Key</span>
@@ -919,7 +932,7 @@
         <div id="autosave-indicator"
              class="fixed bottom-4 right-4 z-[200] flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white text-xs font-semibold rounded-full shadow-lg transition-opacity duration-500 opacity-0 pointer-events-none">
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-            Tersimpan otomatis
+            <span class="autosave-text">Tersimpan otomatis</span>
         </div>
 
         <!-- Global Laser Pointer Overlay -->
@@ -1126,28 +1139,30 @@
 
         @php
             $scoreData = $scoreData ?? session('score_data') ?? session('toefl_structure_score_' . $number);
+            $draftAnswers = $draftAnswers ?? [];
         @endphp
 
         @if($scoreData)
-        <div class="max-w-4xl mx-auto mb-6 p-5 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-black text-xl shadow-md shrink-0">
-                    {{ round($scoreData['score'] ?? 0) }}
+        <div class="max-w-4xl mx-auto mb-6 p-5 bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 border border-emerald-200 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-2xl bg-emerald-600 text-white flex flex-col items-center justify-center font-black shadow-md shrink-0">
+                    <span class="text-2xl leading-none">{{ round($scoreData['score'] ?? 0) }}</span>
+                    <span class="text-[10px] font-semibold uppercase tracking-wider text-emerald-100 mt-0.5">Skor</span>
                 </div>
                 <div>
-                    <h4 class="text-sm font-black text-emerald-950 flex items-center gap-2">
+                    <h4 class="text-base font-black text-emerald-950 flex items-center gap-2 flex-wrap">
                         <span>Hasil Penilaian Tes Tersimpan</span>
-                        <span class="text-[11px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full">
-                            {{ $scoreData['correct_count'] ?? 0 }}/{{ $scoreData['total_questions'] ?? count($questions) }} Benar
+                        <span class="text-xs font-bold px-2.5 py-0.5 bg-emerald-200 text-emerald-900 rounded-full">
+                            {{ $scoreData['correct_count'] ?? 0 }}/{{ $scoreData['total_questions'] ?? count($questions) }} Benar ({{ round(($scoreData['correct_count'] ?? 0) / max(1, ($scoreData['total_questions'] ?? count($questions))) * 100) }}%)
                         </span>
                     </h4>
-                    <p class="text-xs text-emerald-700 mt-0.5">Penilaian dan pembahasan soal tetap tersimpan. Klik tombol "Ulangi Tes" untuk memulai tes baru dan mereset semua jawaban.</p>
+                    <p class="text-xs text-emerald-800 mt-1">Jawaban dan pembahasan soal tersimpan permanen di akun Anda. Anda dapat meninjau setiap soal di bawah ini.</p>
                 </div>
             </div>
             <div class="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
                 <button type="button" onclick="confirmResetAndRetryTest()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-black transition shadow hover:shadow-md flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    <span>Ulangi Tes</span>
+                    <span>Kerjakan Ulang</span>
                 </button>
                 <a href="{{ $backRoute }}" class="px-4 py-2.5 bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-xl text-xs font-bold transition">
                     Kembali
@@ -1197,12 +1212,21 @@
                             $userAnswer = $scoreData['user_answers'][$question->id] ?? null;
                             $correctAnswer = $question->correct_answer;
                             $isCorrect = $userAnswer === $correctAnswer;
+                        } else {
+                            $userAnswer = $draftAnswers[$question->id] ?? null;
                         }
                         
                         // Identify Written Expression type
                         $isWrittenExpression = str_contains($question->question_text, 'error-option');
                     @endphp
-                    <div class="question-item relative group/item" data-correct="{{ $question->correct_answer }}" x-data="{ selected: '{{ $userAnswer ?? '' }}', menuOpen: false }">
+                    <div class="question-item relative group/item" data-correct="{{ ($canSeeAnswerKey || $scoreData) ? $question->correct_answer : '' }}" data-question-id="{{ $question->id }}" x-data="{ selected: '{{ $userAnswer ?? '' }}', menuOpen: false }"
+                         x-init="
+                             $watch('selected', (val) => {
+                                 if (typeof window.handleAnswerChange === 'function') {
+                                     window.handleAnswerChange({{ $question->id }}, val);
+                                 }
+                             });
+                         ">
 
                         @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
                             @if(Auth::user()->isAdmin())
@@ -1288,7 +1312,7 @@
                             <div class="flex-1 min-w-0 pr-10" 
                                  @click.self="if($root.explanationMode && $root.tool === 'laser') { $root.showLaserPointer($event) }"
                                  x-init="
-                                     const correct = '{{ $question->correct_answer }}';
+                                     const correct = '{{ ($canSeeAnswerKey || $scoreData) ? $question->correct_answer : '' }}';
                                      const hasScore = {{ $scoreData ? 'true' : 'false' }};
                                      const updateErrors = () => {
                                          $el.querySelectorAll('.error-option').forEach(opt => {
@@ -1332,11 +1356,11 @@
                                     <!-- Written Expression Mode: Hidden Inputs + Clickable Text -->
                                     <div class="hidden">
                                         @foreach(['A', 'B', 'C', 'D'] as $option)
-                                            <input type="radio" name="answers[{{ $question->id }}]" value="{{ $option }}" x-model="selected" {{ $scoreData ? 'disabled' : '' }}>
+                                            <input type="radio" name="answers[{{ $question->id }}]" value="{{ $option }}" x-model="selected" {{ ($userAnswer === $option) ? 'checked' : '' }} {{ $scoreData ? 'disabled' : '' }}>
                                         @endforeach
                                     </div>
                                     <!-- Visual feedback for current selection is handled by the x-init logic above -->
-                                @else
+                                 @else
                                     <!-- Standard Multiple Choice Grid -->
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         @foreach(['a', 'b', 'c', 'd'] as $option)
@@ -1358,11 +1382,13 @@
                                         <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition group relative"
                                             @if($scoreData)
                                                 class="{{ $staticClass }}"
-                                            @else
+                                            @elseif($canSeeAnswerKey)
                                                 :class="showAnswerKey && '{{ $optionUpper }}' === '{{ $question->correct_answer }}' ? 'border-green-500 bg-green-50 ring-1 ring-green-500' : (selected == '{{ $optionUpper }}' ? 'border-gray-300 bg-white' : 'border-gray-200 hover:bg-white')"
+                                            @else
+                                                :class="selected == '{{ $optionUpper }}' ? 'border-gray-300 bg-white' : 'border-gray-200 hover:bg-white'"
                                             @endif
                                         >
-                                            <input type="radio" name="answers[{{ $question->id }}]" value="{{ $optionUpper }}" class="peer sr-only" x-model="selected" {{ $scoreData ? 'disabled' : '' }}>
+                                            <input type="radio" name="answers[{{ $question->id }}]" value="{{ $optionUpper }}" class="peer sr-only" x-model="selected" {{ ($userAnswer === $optionUpper) ? 'checked' : '' }} {{ $scoreData ? 'disabled' : '' }}>
                                             
                                             <!-- Container for Badge and Text -->
                                             <div class="flex items-center gap-3 w-full p-1">
@@ -1370,8 +1396,10 @@
                                                 <span class="w-8 h-8 min-w-[2rem] shrink-0 flex items-center justify-center rounded-full text-sm font-bold transition-colors border aspect-square"
                                                     @if($scoreData)
                                                         class="{{ $checked ? ($isCorrect ? 'bg-green-600 text-white border-green-600' : 'bg-red-600 text-white border-red-600') : 'bg-white text-gray-500 border-gray-200' }}"
-                                                    @else
+                                                    @elseif($canSeeAnswerKey)
                                                         :class="showAnswerKey && '{{ $optionUpper }}' === '{{ $question->correct_answer }}' ? 'bg-green-600 text-white border-green-600' : (selected == '{{ $optionUpper }}' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-500 border-gray-200 group-hover:bg-white')"
+                                                    @else
+                                                        :class="selected == '{{ $optionUpper }}' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-500 border-gray-200 group-hover:bg-white'"
                                                     @endif
                                                 >
                                                     {{ $optionUpper }}
@@ -1383,8 +1411,10 @@
                                                     :style="`font-size: ${questionTextSize}px;`"
                                                     @if($scoreData)
                                                         class="{{ $checked ? ($isCorrect ? 'text-green-700' : 'text-red-700') : 'text-gray-600' }}"
-                                                    @else
+                                                    @elseif($canSeeAnswerKey)
                                                         :class="showAnswerKey && '{{ $optionUpper }}' === '{{ $question->correct_answer }}' ? 'text-green-700' : (selected == '{{ $optionUpper }}' ? 'text-red-600' : 'text-gray-600 group-hover:text-gray-900')"
+                                                    @else
+                                                        :class="selected == '{{ $optionUpper }}' ? 'text-red-600' : 'text-gray-600 group-hover:text-gray-900'"
                                                     @endif
                                                 >
                                                     {{ $question->{'option_'.$option} }}
@@ -1401,7 +1431,7 @@
                                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                                     </span>
                                                 @endif
-                                            @else
+                                            @elseif($canSeeAnswerKey)
                                                 <span x-show="showAnswerKey && '{{ $optionUpper }}' === '{{ $question->correct_answer }}'" class="absolute right-3 text-green-500">
                                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                                 </span>
@@ -1459,34 +1489,41 @@
             <div class="bg-white rounded-3xl shadow-lg border border-green-100 p-8 mb-6 relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full blur-3xl -mr-16 -mt-16"></div>
                 <div class="relative z-10 text-center">
-                    <h3 class="text-lg font-bold text-gray-400 mb-2 uppercase tracking-wider">Lesson Score</h3>
+                    <h3 class="text-lg font-bold text-gray-400 mb-2 uppercase tracking-wider">Hasil Penilaian Tes</h3>
                     <div class="flex items-center justify-center gap-2 mb-4">
                         <span class="text-6xl font-black text-gray-800">{{ round($scoreData['score'] ?? 0) }}</span>
                         @if(($scoreData['score'] ?? 0) <= 100)
                         <span class="text-2xl font-bold text-gray-400">/ 100</span>
+                        @else
+                        <span class="text-2xl font-bold text-gray-400">/ 680</span>
                         @endif
                     </div>
                     <div class="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full font-bold text-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        {{ $scoreData['correct_count'] ?? 0 }} Correct Answers
+                        {{ $scoreData['correct_count'] ?? 0 }}/{{ $scoreData['total_questions'] ?? count($questions) }} Soal Benar ({{ round(($scoreData['correct_count'] ?? 0) / max(1, ($scoreData['total_questions'] ?? count($questions))) * 100) }}%)
                     </div>
                     
                     <div class="mt-8 flex justify-center gap-4">
                         <button type="button" onclick="confirmResetAndRetryTest()" class="px-6 py-2.5 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 transition shadow hover:shadow-md flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                            <span>Ulangi Tes</span>
+                            <span>Kerjakan Ulang</span>
                         </button>
                         <a href="{{ $backRoute }}" class="px-6 py-2.5 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition">
-                            Finish Lesson
+                            Selesai
                         </a>
                     </div>
                 </div>
             </div>
             @elseif(count($questions) > 0)
-            <!-- Submit Button -->
-            <div class="flex justify-end mt-2">
-                <button type="submit" class="px-8 py-3 bg-green-600 text-white rounded-xl shadow-lg hover:bg-green-700 font-bold transition transform hover:-translate-y-1">
-                    Submit Answers
+            <!-- Submit & Reset Buttons -->
+            <div class="flex items-center justify-end gap-3 mt-4">
+                <button type="button" onclick="confirmResetAndRetryTest()" class="px-5 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-md font-bold transition transform hover:-translate-y-0.5 flex items-center gap-2" title="Reset semua jawaban dan kerjakan ulang">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    <span>Kerjakan Ulang</span>
+                </button>
+                <button type="submit" class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-lg font-bold transition transform hover:-translate-y-0.5 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span>Submit Answers</span>
                 </button>
             </div>
             @endif
@@ -1511,15 +1548,50 @@
 
         // ===== AUTO-SAVE =====
         const AUTOSAVE_KEY = 'expl_canvas_{{ $number }}';
-        const ANSWERS_AUTOSAVE_KEY = 'toefl_answers_{{ $meeting->id ?? $number }}';
+        const USER_ID = '{{ Auth::id() ?? 0 }}';
+        const ANSWERS_AUTOSAVE_KEY = 'toefl_structure_answers_' + USER_ID + '_{{ $number }}';
         let autoSaveTimer = null;
+        let draftSaveTimeout = null;
 
-        function showAutoSaveIndicator() {
+        let currentAnswers = @json($draftAnswers ?? (object)[]);
+        if (Array.isArray(currentAnswers)) currentAnswers = {};
+        @if($scoreData)
+            currentAnswers = @json($scoreData['user_answers'] ?? (object)[]);
+            if (Array.isArray(currentAnswers)) currentAnswers = {};
+        @endif
+
+        function updateAnsweredCounter() {
+            const answeredCount = Object.values(currentAnswers).filter(v => v !== null && v !== '' && v !== undefined).length;
+            const totalCount = {{ count($questions) }};
+            const badge = document.getElementById('answered-counter-badge');
+            if (badge) {
+                badge.textContent = `${answeredCount}/${totalCount} Terjawab`;
+                if (answeredCount === totalCount && totalCount > 0) {
+                    badge.className = 'inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 transition';
+                } else {
+                    badge.className = 'inline-flex items-center px-3 py-2 rounded-lg text-sm font-semibold bg-white text-slate-700 border border-slate-200 transition';
+                }
+            }
+        }
+
+        function showAutoSaveIndicator(text = 'Tersimpan otomatis') {
             const el = document.getElementById('autosave-indicator');
             if (el) {
+                const textSpan = el.querySelector('.autosave-text') || el;
+                textSpan.textContent = text;
                 el.style.opacity = '1';
                 clearTimeout(el._t);
-                el._t = setTimeout(() => { el.style.opacity = '0'; }, 2000);
+                el._t = setTimeout(() => { el.style.opacity = '0'; }, 2200);
+            }
+            const headerStatus = document.getElementById('header-autosave-status');
+            if (headerStatus) {
+                headerStatus.textContent = text;
+                headerStatus.classList.add('text-emerald-600');
+                clearTimeout(headerStatus._t);
+                headerStatus._t = setTimeout(() => {
+                    headerStatus.textContent = 'Autosave Aktif';
+                    headerStatus.classList.remove('text-emerald-600');
+                }, 2200);
             }
         }
 
@@ -1546,46 +1618,102 @@
         }
 
         // Student Answers Auto-save & Restore
+        window.handleAnswerChange = function(questionId, val) {
+            @if($scoreData)
+                return; // Scored review mode; do not alter answers
+            @endif
+
+            if (!questionId) return;
+            currentAnswers[questionId] = val;
+
+            // 1. Instant local storage save
+            try {
+                localStorage.setItem(ANSWERS_AUTOSAVE_KEY, JSON.stringify(currentAnswers));
+            } catch(e) {}
+
+            showAutoSaveIndicator('Tersimpan otomatis');
+            updateAnsweredCounter();
+
+            // 2. Debounced server-side draft save (600ms)
+            clearTimeout(draftSaveTimeout);
+            draftSaveTimeout = setTimeout(() => {
+                saveDraftToServer();
+            }, 600);
+        };
+
+        function saveDraftToServer() {
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            if (!token) return;
+
+            fetch('{{ route('assignments.toefl-itp.structure.meeting.draft', $number) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ answers: currentAnswers })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showAutoSaveIndicator('Tersimpan di server');
+                }
+            })
+            .catch(err => {
+                console.warn('Draft sync warning:', err);
+            });
+        }
+
         function initAnswersAutoSave() {
             @if($scoreData)
-                // Test is currently in scored/review mode; do NOT clear answers or listen for changes.
+                // Test is currently in scored/review mode; do not restore drafts or listen
                 return;
             @endif
 
             const formContainer = document.getElementById('question-form-container');
             if (!formContainer) return;
 
-            // 1. Restore saved answers from localStorage on page load
+            // Clear draft when submitting form
+            formContainer.addEventListener('submit', function() {
+                try {
+                    localStorage.removeItem(ANSWERS_AUTOSAVE_KEY);
+                } catch(e) {}
+            });
+
+            // 1. Restore saved answers from localStorage if newer or missing from server draft
             try {
                 const raw = localStorage.getItem(ANSWERS_AUTOSAVE_KEY);
                 if (raw) {
                     const saved = JSON.parse(raw);
                     if (saved && typeof saved === 'object') {
+                        let hasNewLocal = false;
                         Object.keys(saved).forEach(questionId => {
                             const val = saved[questionId];
-                            const radio = formContainer.querySelector(`input[type="radio"][name="answers[${questionId}]"][value="${val}"]`);
-                            if (radio) {
-                                radio.checked = true;
-                                radio.dispatchEvent(new Event('change', { bubbles: true }));
-                                radio.dispatchEvent(new Event('input', { bubbles: true }));
-
-                                // Also sync Alpine component model if present
-                                const alpineEl = radio.closest('[x-data]');
-                                if (alpineEl && window.Alpine) {
-                                    const alpineData = Alpine.$data(alpineEl);
+                            if (val && (!currentAnswers[questionId] || currentAnswers[questionId] !== val)) {
+                                currentAnswers[questionId] = val;
+                                hasNewLocal = true;
+                                const item = formContainer.querySelector(`.question-item[data-question-id="${questionId}"]`);
+                                if (item && window.Alpine) {
+                                    const alpineData = Alpine.$data(item);
                                     if (alpineData && 'selected' in alpineData) {
                                         alpineData.selected = val;
                                     }
                                 }
                             }
                         });
+                        if (hasNewLocal) {
+                            saveDraftToServer();
+                        }
                     }
                 }
             } catch (e) {
-                console.warn('Failed to restore saved answers:', e);
+                console.warn('Failed to restore saved answers from localStorage:', e);
             }
 
-            // 2. Listen for any answer changes (radio clicks & written expression selection)
+            updateAnsweredCounter();
+
+            // Fallback native change listener for radio inputs
             formContainer.addEventListener('change', function(e) {
                 const target = e.target;
                 if (!target || !target.name || !target.name.startsWith('answers[')) return;
@@ -1593,28 +1721,25 @@
                 const match = target.name.match(/^answers\[(\d+)\]$/);
                 if (!match) return;
 
-                const questionId = match[1];
+                const questionId = parseInt(match[1], 10);
                 const selectedVal = target.value;
-
-                try {
-                    const raw = localStorage.getItem(ANSWERS_AUTOSAVE_KEY);
-                    const current = raw ? JSON.parse(raw) : {};
-                    current[questionId] = selectedVal;
-                    localStorage.setItem(ANSWERS_AUTOSAVE_KEY, JSON.stringify(current));
-                    showAutoSaveIndicator();
-                } catch (err) {
-                    console.warn('Failed to auto-save answer:', err);
-                }
+                window.handleAnswerChange(questionId, selectedVal);
             });
-
-            // Note: Saved answers are retained upon form submission so reviews stay persistent.
-            // They will only be deleted when the user explicitly clicks "Ulangi Tes".
         }
 
         function confirmResetAndRetryTest() {
-            if (confirm('Apakah Anda yakin ingin mengulangi tes ini? Semua jawaban dan hasil penilaian yang tersimpan akan dihapus.')) {
+            const isScored = {{ !empty($scoreData) ? 'true' : 'false' }};
+            const msg = isScored 
+                ? 'Apakah Anda yakin ingin mengerjakan ulang soal ini? Jawaban dan hasil penilaian sebelumnya akan direset.'
+                : 'Apakah Anda yakin ingin mengosongkan semua jawaban dan mengerjakan ulang soal ini dari awal?';
+
+            if (confirm(msg)) {
+                if (typeof draftSaveTimeout !== 'undefined') {
+                    clearTimeout(draftSaveTimeout);
+                }
                 try {
                     localStorage.removeItem(ANSWERS_AUTOSAVE_KEY);
+                    localStorage.removeItem('toefl_answers_{{ $meeting->id ?? $number }}');
                 } catch (e) {}
 
                 const url = new URL(window.location.href);
