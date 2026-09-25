@@ -31,6 +31,7 @@
         $isAnswerKeyComplete = $totalQuestionCount > 0 && $answerKeyFilledCount === $totalQuestionCount;
     @endphp
     @include('components.impersonation-banner')
+    @include('components.flash-messages')
     <div class="flex min-h-screen">
         @if(Auth::user()->isAdmin())
             @include('components.sidebar-admin')
@@ -54,6 +55,18 @@
                                 <p class="text-blue-600 font-medium">Reading Lesson {{ $meeting->meeting_number }}</p>
                             </div>
                         </div>
+
+                        @if($existingScore)
+                            <div class="flex items-center gap-3">
+                                <span class="px-4 py-2 rounded-full font-bold text-sm bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-sm flex items-center gap-1.5">
+                                    ✓ Skor: {{ round($existingScore->score) }}
+                                </span>
+                                <a href="{{ request()->fullUrlWithQuery(['retry' => 1]) }}" onclick="return confirm('Apakah Anda yakin ingin mengulang latihan ini? Jawaban sebelumnya akan dihapus.')" class="px-4 py-2 rounded-full font-bold text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 shadow-sm transition inline-flex items-center gap-1.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    Kerjakan Ulang
+                                </a>
+                            </div>
+                        @endif
                         
                         <!-- Answer Key Status Chips (Admin/Teacher Only) -->
                         @if(Auth::user()->isAdmin() || Auth::user()->isTeacher())
@@ -62,7 +75,7 @@
                             <button 
                                 onclick="openAnswerKeyStatusModal()"
                                 class="px-4 py-2 rounded-full font-semibold text-sm transition-all cursor-pointer hover:scale-105 shadow-md"
-                                :class="$isAnswerKeyComplete ? 'bg-white text-emerald-700 border border-emerald-300' : 'bg-white text-amber-700 border border-amber-300'"
+                                :class="$isAnswerKeyComplete ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-amber-100 text-amber-700 border border-amber-300'"
                             >
                                 @if($isAnswerKeyComplete)
                                     ✓ Answer Key Ditambahkan
@@ -74,7 +87,7 @@
                             <!-- Count Chip -->
                             <button 
                                 onclick="openAnswerKeyStatusModal()"
-                                class="px-4 py-2 rounded-full font-semibold text-sm bg-white text-blue-700 border border-blue-300 transition-all cursor-pointer hover:scale-105 shadow-md"
+                                class="px-4 py-2 rounded-full font-semibold text-sm bg-blue-100 text-blue-700 border border-blue-300 transition-all cursor-pointer hover:scale-105 shadow-md"
                             >
                                 {{ $answerKeyFilledCount }}/{{ $totalQuestionCount }} Soal
                             </button>
@@ -84,35 +97,94 @@
                 </div>
 
                 <div class="prose max-w-none mb-8">
-                     <div class="bg-white border-l-4 border-yellow-400 p-4 mb-6">
+                     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
                         <p class="font-bold">Directions:</p>
                         <p>Read the passages. Then choose the correct answer for each question.</p>
                      </div>
 
+                    @if($existingScore)
+                        @php
+                            $rScore = $existingScore->score;
+                            $rCorrect = $existingScore->correct_count;
+                            $rTotal = $existingScore->total_questions;
+                            $rColor = $rScore >= 80 ? 'emerald' : ($rScore >= 60 ? 'blue' : 'amber');
+                        @endphp
+                        <div id="scoreReport" class="bg-{{ $rColor }}-50 border-l-4 border-{{ $rColor }}-500 p-6 rounded-r-2xl shadow-sm mb-8">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 mt-1">
+                                        @if($rScore >= 80)
+                                            <svg class="h-8 w-8 text-{{ $rColor }}-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        @elseif($rScore >= 60)
+                                            <svg class="h-8 w-8 text-{{ $rColor }}-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                        @else
+                                            <svg class="h-8 w-8 text-{{ $rColor }}-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                            </svg>
+                                        @endif
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-xl leading-6 font-bold text-{{ $rColor }}-800">
+                                            Hasil Latihan Reading
+                                        </h3>
+                                        <div class="mt-2 text-{{ $rColor }}-700 grid grid-cols-1 md:grid-cols-2 gap-x-8">
+                                            <div class="flex items-baseline gap-3">
+                                                <span class="text-5xl font-extrabold tracking-tight">{{ round($rScore) }}</span>
+                                                <span class="text-sm font-semibold uppercase tracking-wide opacity-80">Score</span>
+                                            </div>
+                                            <div class="flex flex-col justify-center">
+                                                <div class="text-lg font-semibold">Benar {{ $rCorrect }} / {{ $rTotal }} Soal</div>
+                                                <p class="text-sm opacity-90 italic">
+                                                    {{ $rScore >= 80 ? 'Kerja bagus! Pertahankan prestasi Anda.' : ($rScore >= 60 ? 'Bagus! Terus berlatih untuk hasil maksimal.' : 'Perlu latihan lagi. Jangan menyerah!') }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <a href="{{ request()->fullUrlWithQuery(['retry' => 1]) }}" onclick="return confirm('Apakah Anda yakin ingin mengulang latihan ini? Jawaban sebelumnya akan dihapus.')" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-md transition inline-flex items-center gap-2 text-sm">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        Kerjakan Ulang
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                     <form method="POST" action="{{ route('assignments.toefl-itp.reading.submit') }}">
+                        @csrf
+                        <input type="hidden" name="meeting_number" value="{{ $meeting->meeting_number }}">
+
                      @foreach($passages as $passage)
                         <div class="mb-10 p-6 bg-white border border-gray-100 rounded-2xl shadow-sm">
-                            <div class="bg-white p-6 rounded-xl mb-6 text-gray-800 leading-relaxed text-justify relative group" 
+                            <div class="bg-gray-50 p-6 rounded-xl mb-6 text-gray-800 leading-relaxed text-justify relative group" 
                                  x-data="{ 
                                     translateMode: false, 
                                     originalContent: `{{ $passage->content }}`,
                                     passageTranslation: `{{ addslashes($passage->indonesian_translation ?? '') }}`
                                  }"
                             >
-                                <span class="absolute top-0 right-0 bg-white text-blue-600 text-xs font-bold px-2 py-1 rounded-bl-lg rounded-tr-lg">Passage {{ $passage->passage_number }}</span>
+                                <span class="absolute top-0 right-0 bg-blue-100 text-blue-600 text-xs font-bold px-2 py-1 rounded-bl-lg rounded-tr-lg">Passage {{ $passage->passage_number }}</span>
                                 
                                 <!-- Admin Controls -->
                                 @if(Auth::user()->isAdmin())
                                 <div class="absolute top-8 right-2 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity p-2 z-10">
-                                    <button onclick='openEditPassageModal(@json($passage))' class="w-10 h-10 flex items-center justify-center bg-white text-blue-600 rounded-xl hover:bg-blue-200 transition-colors">
+                                    <button onclick='openEditPassageModal(@json($passage))' class="w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded-xl hover:bg-blue-200 transition-colors">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
-                                    <form action="{{ route('assignments.toefl-itp.reading.passage.destroy', $passage->id) }}" method="POST" onsubmit="return confirm('Delete this passage? This will also delete all associated questions.');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="w-10 h-10 flex items-center justify-center bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition-colors">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </button>
-                                    </form>
+                                    <!-- Plain button + JS-built form (not a literal nested <form>) -
+                                         this now sits inside the page's outer answers <form>, and
+                                         nested <form> elements are invalid HTML and silently close
+                                         the outer form early. -->
+                                    <button type="button"
+                                        onclick="if (confirm('Delete this passage? This will also delete all associated questions.')) { const f = document.createElement('form'); f.method = 'POST'; f.action = '{{ route('assignments.toefl-itp.reading.passage.destroy', $passage->id) }}'; f.style.display = 'none'; const token = document.querySelector('meta[name=csrf-token]').getAttribute('content'); f.innerHTML = `<input type='hidden' name='_token' value='${token}'><input type='hidden' name='_method' value='DELETE'>`; document.body.appendChild(f); f.submit(); }"
+                                        class="w-10 h-10 flex items-center justify-center bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
                                 </div>
                                 @endif
 
@@ -138,16 +210,15 @@
                                     <!-- Admin Controls -->
                                     @if(Auth::user()->isAdmin())
                                     <div class="absolute top-0 right-0 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity p-2">
-                                        <button onclick='openEditQuestionModal(@json($question))' class="w-10 h-10 flex items-center justify-center bg-white text-blue-600 rounded-xl hover:bg-blue-200 transition-colors">
+                                        <button onclick='openEditQuestionModal(@json($question))' class="w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded-xl hover:bg-blue-200 transition-colors">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                         </button>
-                                        <form action="{{ route('assignments.toefl-itp.reading.question.destroy', $question->id) }}" method="POST" onsubmit="return confirm('Delete this question?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="w-10 h-10 flex items-center justify-center bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition-colors">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
-                                        </form>
+                                        <!-- Plain button + JS-built form; see passage-delete comment above. -->
+                                        <button type="button"
+                                            onclick="if (confirm('Delete this question?')) { const f = document.createElement('form'); f.method = 'POST'; f.action = '{{ route('assignments.toefl-itp.reading.question.destroy', $question->id) }}'; f.style.display = 'none'; const token = document.querySelector('meta[name=csrf-token]').getAttribute('content'); f.innerHTML = `<input type='hidden' name='_token' value='${token}'><input type='hidden' name='_method' value='DELETE'>`; document.body.appendChild(f); f.submit(); }"
+                                            class="w-10 h-10 flex items-center justify-center bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition-colors">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
                                     </div>
                                     @endif
 
@@ -156,18 +227,26 @@
                                     @endphp
 
                                     <div class="flex gap-4 mb-4">
-                                        <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-white text-gray-600 rounded-lg font-bold text-sm">{{ $question->question_number }}</span>
+                                        <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-600 rounded-lg font-bold text-sm">{{ $question->question_number }}</span>
                                         <div class="flex-1">
                                             <p class="font-medium text-gray-800 inline">{{ $question->question_text }}</p>
                                             
                                             @if(!$hasOptions && $question->question_number <= 23)
                                                 {{-- Textbox for fill-in-the-blank questions (Q1-23) --}}
+                                                @php
+                                                    $userText = $existingScore ? ($existingScore->answers[$question->id] ?? '') : '';
+                                                    $isTextCorrect = $existingScore && strtoupper(trim((string)$userText)) === strtoupper(trim((string)($question->correct_answer ?? '')));
+                                                @endphp
                                                 <input type="text" 
                                                     name="question_{{ $question->id }}" 
-                                                    class="ml-2 w-48 px-3 py-1 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none text-center font-medium inline-block"
+                                                    value="{{ $userText }}"
+                                                    class="ml-2 w-48 px-3 py-1 border-2 {{ $existingScore ? ($isTextCorrect ? 'border-emerald-500 bg-emerald-50 text-emerald-800' : 'border-rose-500 bg-rose-50 text-rose-800') : 'border-gray-300' }} rounded-lg focus:border-red-500 focus:outline-none text-center font-medium inline-block"
                                                     placeholder="____"
                                                     maxlength="100"
                                                 >
+                                                @if($existingScore && !$isTextCorrect && !empty($question->correct_answer))
+                                                    <span class="ml-2 text-xs font-bold text-emerald-700 bg-emerald-100 border border-emerald-300 px-2 py-1 rounded inline-block">Kunci: {{ $question->correct_answer }}</span>
+                                                @endif
                                             @endif
                                         </div>
                                     </div>
@@ -175,29 +254,60 @@
                                     @if($hasOptions)
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 ml-12">
                                         @foreach(['a', 'b', 'c', 'd'] as $opt)
-                                            @php $optionText = $question->{'option_'.$opt}; @endphp
+                                            @php 
+                                                $optionText = $question->{'option_'.$opt}; 
+                                                $upperOpt = strtoupper($opt);
+                                                $correctAns = strtoupper($question->correct_answer ?? '');
+                                                $userAns = $existingScore ? ($existingScore->answers[$question->id] ?? null) : null;
+                                                $isUserChoice = ($userAns === $upperOpt);
+                                                $isCorrectChoice = ($correctAns === $upperOpt);
+                                                
+                                                $labelClass = 'border-gray-100 hover:border-gray-200 bg-white';
+                                                $badgeClass = 'bg-gray-100 text-gray-500 group-hover:bg-gray-200';
+                                                $textClass = 'text-gray-600';
+                                                
+                                                if ($existingScore) {
+                                                    if ($isCorrectChoice) {
+                                                        $labelClass = 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-300 shadow-sm';
+                                                        $badgeClass = 'bg-emerald-600 text-white font-bold';
+                                                        $textClass = 'text-emerald-800 font-bold';
+                                                    } elseif ($isUserChoice && !$isCorrectChoice) {
+                                                        $labelClass = 'border-rose-500 bg-rose-50 ring-2 ring-rose-300 shadow-sm';
+                                                        $badgeClass = 'bg-rose-600 text-white font-bold';
+                                                        $textClass = 'text-rose-800 font-bold';
+                                                    }
+                                                }
+                                            @endphp
                                             @if($optionText)
-                                            <label class="relative flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group"
-                                                :class="selected === '{{ strtoupper($opt) }}' ? 'border-red-500 bg-red-50' : 'border-gray-100 hover:border-gray-200 bg-white'"
+                                            <label class="relative flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group {{ $labelClass }}"
+                                                @if(!$existingScore) :class="selected === '{{ $upperOpt }}' ? 'border-red-500 bg-red-50' : 'border-gray-100 hover:border-gray-200 bg-white'" @endif
                                             >
                                                 <input type="radio" 
                                                     name="question_{{ $question->id }}" 
-                                                    value="{{ strtoupper($opt) }}" 
+                                                    value="{{ $upperOpt }}" 
                                                     class="hidden"
-                                                    x-model="selected"
+                                                    @if($isUserChoice) checked @endif
+                                                    @if(!$existingScore) x-model="selected" @endif
                                                 >
                                                 
                                                 <div class="flex items-center gap-4 w-full">
-                                                    <span class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-200 shrink-0"
-                                                        :class="selected === '{{ strtoupper($opt) }}' ? 'bg-red-600 text-white' : 'bg-white text-gray-500 group-hover:bg-gray-200'"
+                                                    <span class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-200 shrink-0 {{ $badgeClass }}"
+                                                        @if(!$existingScore) :class="selected === '{{ $upperOpt }}' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'" @endif
                                                     >
-                                                        {{ strtoupper($opt) }}
+                                                        {{ $upperOpt }}
                                                     </span>
-                                                    <span class="text-gray-700 font-medium transition-colors duration-200"
-                                                        :class="selected === '{{ strtoupper($opt) }}' ? 'text-red-700' : 'text-gray-600'"
+                                                    <span class="text-gray-700 font-medium transition-colors duration-200 {{ $textClass }}"
+                                                        @if(!$existingScore) :class="selected === '{{ $upperOpt }}' ? 'text-red-700' : 'text-gray-600'" @endif
                                                     >
                                                         {{ $optionText }}
                                                     </span>
+                                                    @if($existingScore)
+                                                        @if($isCorrectChoice)
+                                                            <span class="ml-auto text-xs font-bold text-emerald-700 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full shrink-0">✓ Kunci</span>
+                                                        @elseif($isUserChoice)
+                                                            <span class="ml-auto text-xs font-bold text-rose-700 bg-rose-100 border border-rose-300 px-2 py-0.5 rounded-full shrink-0">✕ Jawaban Anda</span>
+                                                        @endif
+                                                    @endif
                                                 </div>
                                             </label>
                                             @endif
@@ -209,12 +319,19 @@
                             </div>
                         </div>
                      @endforeach
-                </div>
-                
-                <div class="flex justify-end">
-                    <button class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-md hover:bg-blue-700 transition">
-                        Submit Answers
-                    </button>
+
+                        <div class="flex justify-end gap-4 items-center">
+                            @if($existingScore)
+                                <a href="{{ request()->fullUrlWithQuery(['retry' => 1]) }}" onclick="return confirm('Apakah Anda yakin ingin mengulang latihan ini? Jawaban sebelumnya akan dihapus.')" class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-md transition inline-flex items-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    Kerjakan Ulang
+                                </a>
+                            @endif
+                            <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-md hover:bg-blue-700 transition">
+                                {{ $existingScore ? 'Resubmit Answers' : 'Submit Answers' }}
+                            </button>
+                        </div>
+                     </form>
                 </div>
             </div>
         </main>
@@ -563,7 +680,10 @@
                 document.getElementById('def_translation').innerText = 'Error';
             }
         }
+    </script>
 
+    @if(Auth::check() && (Auth::user()->isAdmin() || Auth::user()->isTeacher()))
+    <script>
         // Answer Key Management Functions
         function openAnswerKeyStatusModal() {
             document.getElementById('answerKeyStatusModal').classList.remove('hidden');
@@ -598,7 +718,7 @@
                 // Update status badge
                 const statusBadge = document.getElementById(`status-badge-${questionId}`);
                 if (statusBadge) {
-                    statusBadge.className = 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-white text-emerald-700';
+                    statusBadge.className = 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700';
                     statusBadge.innerHTML = '✓ Terisi';
                 }
                 // Reload page to sync header chips
@@ -622,7 +742,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full border-collapse">
                         <thead>
-                            <tr class="bg-white border-b-2 border-gray-300">
+                            <tr class="bg-gray-100 border-b-2 border-gray-300">
                                 <th class="px-4 py-3 text-left font-bold text-gray-700">No</th>
                                 <th class="px-4 py-3 text-left font-bold text-gray-700">Pertanyaan</th>
                                 <th class="px-4 py-3 text-left font-bold text-gray-700">Answer Key</th>
@@ -640,7 +760,7 @@
                                         $answerKeyValue = $question->correct_answer ?? '';
                                         $isAnswerKeyFilled = !empty($answerKeyValue) && strtoupper($answerKeyValue) !== '';
                                     @endphp
-                                    <tr class="border-b border-gray-200 hover:bg-white transition">
+                                    <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
                                         <td class="px-4 py-3 font-semibold text-gray-800 whitespace-nowrap">{{ $questionNumber }}</td>
                                         <td class="px-4 py-3 text-gray-800 text-sm max-w-xs overflow-hidden text-ellipsis">
                                             {{ $question->question_text }}
@@ -655,7 +775,7 @@
                                             </select>
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            <span id="status-badge-{{ $question->id }}" class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold {{ $isAnswerKeyFilled ? 'bg-white text-emerald-700' : 'bg-white text-amber-700' }}">
+                                            <span id="status-badge-{{ $question->id }}" class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold {{ $isAnswerKeyFilled ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
                                                 {{ $isAnswerKeyFilled ? '✓ Terisi' : '○ Kosong' }}
                                             </span>
                                         </td>
@@ -676,12 +796,13 @@
             </div>
         </div>
     </div>
+    @endif
             <h3 id="def_word" class="text-lg font-bold text-gray-800 mb-1 capitalize">Word</h3>
-            <div class="bg-white text-blue-700 text-sm font-semibold px-3 py-1 rounded-lg inline-block mb-3" id="def_translation">
+            <div class="bg-blue-50 text-blue-700 text-sm font-semibold px-3 py-1 rounded-lg inline-block mb-3" id="def_translation">
                 Translation
             </div>
             
-            <div class="text-left bg-white rounded-lg p-3">
+            <div class="text-left bg-gray-50 rounded-lg p-3">
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Synonyms</p>
                 <p id="def_synonyms" class="text-sm text-gray-700 italic">synonym 1, synonym 2</p>
             </div>

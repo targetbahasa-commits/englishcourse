@@ -890,7 +890,7 @@
                         <span class="text-xs font-bold text-black hidden sm:inline">Terjemah</span>
                     </button>
                     
-                    @if(Auth::user()->isAdmin())
+                    @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher()))
                        @php
                            $hasAudio = isset($material) && filled($material->audio_file);
                            $hasTranscript = isset($material) && (filled($material->transcript_en) || filled($material->transcript_id));
@@ -3795,7 +3795,7 @@
                     <span class="text-xs font-bold text-black hidden sm:inline">Terjemah</span>
                 </button>
 
-                @if(Auth::user()->isAdmin())
+                @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher()))
                     @php
                         $hasAudio = isset($material) && filled($material->audio_file);
                         $hasTranscript = isset($material) && (filled($material->transcript_en) || filled($material->transcript_id));

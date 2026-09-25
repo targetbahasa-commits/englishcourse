@@ -104,6 +104,19 @@
     .answer-label.is-wrong span {
         color: #991b1b !important; /* red-800 */
     }
+
+    /* Teacher/Admin Toggle Reveal Styling */
+    body.reveal-key .answer-label[data-is-correct="true"] {
+        background-color: #dcfce7 !important;
+        border-color: #86efac !important;
+    }
+    body.reveal-key .answer-label[data-is-correct="true"] span {
+        color: #15803d !important;
+        font-weight: 700 !important;
+    }
+    body.reveal-key .answer-label[data-is-correct="false"] {
+        opacity: 0.5;
+    }
 </style>
     @if(isset($set))
         @include('assignments.toefl-itp.listening.partials.audio-player')
@@ -120,7 +133,7 @@
                     <h1 class="text-3xl font-bold text-gray-800">Listening - Meeting {{ $number }}</h1>
                     <div class="flex items-center gap-3 mt-3">
                         <p class="text-gray-600">Complete listening questions</p>
-                        @if(Auth::user()->isAdmin())
+                        @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher()))
                             @php
                                 // Tentukan status kunci jawaban
                                 $statusAnswerKey = false;
@@ -131,7 +144,7 @@
                                     }
                                 }
                             @endphp
-                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $statusAnswerKey ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold {{ $statusAnswerKey ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-rose-100 text-rose-700 border border-rose-200' }}">
                                 <span class="font-bold">{{ $statusAnswerKey ? '✓' : '✕' }}</span> Kunci
                             </span>
                         @endif
@@ -139,12 +152,38 @@
                 </div>
             </div>
             
-            @if(!isset($set))
-                <a href="{{ route('assignments.toefl-itp.listening') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    Back to Meetings
-                </a>
-            @endif
+            <div class="flex items-center gap-3">
+                @if($existingScore || session('score_data'))
+                    @php
+                        $headerScore = session('score_data')['score'] ?? $existingScore->score ?? 0;
+                    @endphp
+                    <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                        ✓ Skor: {{ round($headerScore) }}%
+                    </span>
+                    <a href="{{ request()->fullUrlWithQuery(['retry' => 1]) }}" onclick="return confirm('Apakah Anda yakin ingin mengulang latihan ini? Jawaban sebelumnya akan dihapus.')" class="px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 transition-colors inline-flex items-center gap-1 shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Kerjakan Ulang
+                    </a>
+                @endif
+                @if(isset($set) && auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher()))
+                    {{-- Teacher/Admin Toggle Key Button --}}
+                    <button type="button" id="toggleKeyBtn" onclick="toggleAnswerKey()" 
+                            class="px-3 py-1.5 bg-white text-yellow-700 hover:bg-yellow-200 rounded-lg transition-colors flex items-center gap-1.5 border border-yellow-300 shadow-sm text-xs font-bold" 
+                            title="Toggle Answer Key">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span>Key</span>
+                    </button>
+                @endif
+                @if(!isset($set))
+                    <a href="{{ route('assignments.toefl-itp.listening') }}" class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        Back to Meetings
+                    </a>
+                @endif
+            </div>
         </div>
     </div>
 
@@ -157,7 +196,7 @@
 
     <!-- Existing Score Display -->
     @if($existingScore)
-        <div class="mb-6 p-6 bg-white border border-blue-200 rounded-lg">
+        <div class="mb-6 p-6 bg-blue-50 border border-blue-200 rounded-lg">
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-bold text-blue-900">Previous Score</h3>
@@ -248,6 +287,7 @@
         <form method="POST" action="{{ route('assignments.toefl-itp.listening.meeting.submit', $number) }}" class="space-y-8">
             @csrf
             <input type="hidden" name="set_number" value="{{ $set }}">
+            @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher()))
             <script>
                 window.toeflListeningQuestions = @json($questions->keyBy('id'));
                 window.openEditQuestionById = function(questionId) {
@@ -263,6 +303,7 @@
                     window.dispatchEvent(new CustomEvent('open-edit-question', { detail: question }));
                 };
             </script>
+            @endif
             
             @php
                 $instructionPanel = null;
@@ -300,7 +341,7 @@
             @endphp
 
             @if($instructionPanel)
-                <div class="bg-white border border-amber-200 rounded-lg p-5">
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-5">
                     @if($instructionPanel['focus'] !== '')
                         <p class="text-amber-900"><span class="font-semibold">Focus:</span> {{ $instructionPanel['focus'] }}</p>
                     @endif
@@ -372,12 +413,13 @@
 
         <!-- Submit Button -->            <div class="mt-8 flex flex-col gap-6">
                 {{-- Score Report Section (Bottom) --}}
-                 @if(session('score_data'))
+                 @if(session('score_data') || $existingScore)
                     @php
                         $sData = session('score_data');
-                        $score = $sData['score'];
-                        $correct = $sData['correct_count'];
-                        $total = $sData['total_question'];
+                        $evalAnswers = $sData['user_answers'] ?? ($existingScore->answers ?? []);
+                        $score = $sData['score'] ?? $existingScore->score;
+                        $correct = $sData['correct_count'] ?? collect($questions)->filter(fn($q) => ($evalAnswers[$q->id] ?? null) === $q->correct_answer)->count();
+                        $total = $sData['total_question'] ?? count($questions);
                         
                         // Color Logic
                         if ($score >= 80) {
@@ -423,6 +465,12 @@
                                             <p class="text-sm opacity-90 italic">{{ $scoreMsg }}</p>
                                         </div>
                                     </div>
+                                    <div class="mt-4 flex items-center gap-3">
+                                        <a href="{{ request()->fullUrlWithQuery(['retry' => 1]) }}" onclick="return confirm('Apakah Anda yakin ingin mengulang latihan ini? Jawaban sebelumnya akan dihapus.')" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-sm transition shadow-sm inline-flex items-center gap-1.5">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                            Kerjakan Ulang
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                             <div class="hidden md:block text-{{ $scoreColor }}-200 opacity-20 transform rotate-12">
@@ -443,13 +491,19 @@
                     </script>
                 @endif
             
-            <div class="flex justify-end gap-4">
-            <a href="{{ route('assignments.toefl-itp.listening.meeting', $number) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
+            <div class="flex justify-end gap-4 items-center">
+            <a href="{{ route('assignments.toefl-itp.listening.meeting', $number) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-gray-50 border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
     Back
 </a>
+            @if($existingScore || session('score_data'))
+                <a href="{{ request()->fullUrlWithQuery(['retry' => 1]) }}" onclick="return confirm('Apakah Anda yakin ingin mengulang latihan ini? Jawaban sebelumnya akan dihapus.')" class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg transition-colors duration-200 shadow-md inline-flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Kerjakan Ulang
+                </a>
+            @endif
             <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
                 {{ $existingScore ? 'Resubmit Answers' : 'Submit Answers' }}
             </button>
@@ -477,7 +531,7 @@
         </button>
 
         <!-- Modal Backdrop -->
-        <div x-show="sidebarOpen" 
+        <div x-show="sidebarOpen"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
@@ -485,10 +539,11 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
              class="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+             style="display: none;"
              @click="sidebarOpen = false">
 
             <!-- Modal Panel -->
-            <div x-show="sidebarOpen" 
+            <div x-show="sidebarOpen"
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 scale-95 translate-y-4"
                  x-transition:enter-end="opacity-100 scale-100 translate-y-0"
@@ -496,12 +551,13 @@
                  x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                  x-transition:leave-end="opacity-0 scale-95 translate-y-4"
                  class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+                 style="display: none;"
                  @click.stop>
                 
                 <!-- Modal Header -->
                 <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
                     <h2 class="text-2xl font-bold text-gray-800" x-text="editingQuestion ? 'Edit Question' : 'New Question'"></h2>
-                    <button @click="sidebarOpen = false" class="text-gray-400 hover:text-gray-600 transition p-2 hover:bg-white rounded-full">
+                    <button @click="sidebarOpen = false" class="text-gray-400 hover:text-gray-600 transition p-2 hover:bg-gray-100 rounded-full">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
@@ -518,13 +574,13 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Question Number</label>
-                                <input type="number" name="question_number" x-model="formData.question_number" class="w-full px-4 py-3 rounded-xl border-gray-200 bg-white focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all duration-200" required>
+                                <input type="number" name="question_number" x-model="formData.question_number" class="w-full px-4 py-3 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all duration-200" required>
                             </div>
 
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Audio File (MP3/WAV)</label>
                                 <div class="relative">
-                                    <input type="file" name="audio_file" class="w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-white file:text-blue-700 hover:file:bg-white transition-all cursor-pointer border border-gray-200 rounded-xl">
+                                    <input type="file" name="audio_file" class="w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer border border-gray-200 rounded-xl">
                                 </div>
                                 <p class="mt-2 text-xs text-green-600 font-medium flex items-center gap-1" x-show="editingQuestion && editingQuestion.audio_file">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -536,7 +592,7 @@
                         <!-- Question Text -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Question Text</label>
-                            <textarea name="question_text" x-model="formData.question_text" rows="4" class="w-full px-4 py-3 rounded-xl border-gray-200 bg-white focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all duration-200 font-medium" required placeholder="Type the question content here..."></textarea>
+                            <textarea name="question_text" x-model="formData.question_text" rows="4" class="w-full px-4 py-3 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all duration-200 font-medium" required placeholder="Type the question content here..."></textarea>
                         </div>
 
                         <!-- Options Grid -->
@@ -544,28 +600,28 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Option A</label>
                                 <div class="flex items-center">
-                                    <span class="w-10 h-10 flex items-center justify-center bg-white text-gray-500 font-bold rounded-l-xl border-y border-l border-gray-200">A</span>
+                                    <span class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 font-bold rounded-l-xl border-y border-l border-gray-200">A</span>
                                     <input type="text" name="option_a" x-model="formData.option_a" class="w-full px-4 py-3 rounded-r-xl border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all duration-200" required>
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Option B</label>
                                 <div class="flex items-center">
-                                    <span class="w-10 h-10 flex items-center justify-center bg-white text-gray-500 font-bold rounded-l-xl border-y border-l border-gray-200">B</span>
+                                    <span class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 font-bold rounded-l-xl border-y border-l border-gray-200">B</span>
                                     <input type="text" name="option_b" x-model="formData.option_b" class="w-full px-4 py-3 rounded-r-xl border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all duration-200" required>
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Option C</label>
                                 <div class="flex items-center">
-                                    <span class="w-10 h-10 flex items-center justify-center bg-white text-gray-500 font-bold rounded-l-xl border-y border-l border-gray-200">C</span>
+                                    <span class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 font-bold rounded-l-xl border-y border-l border-gray-200">C</span>
                                     <input type="text" name="option_c" x-model="formData.option_c" class="w-full px-4 py-3 rounded-r-xl border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all duration-200" required>
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Option D</label>
                                 <div class="flex items-center">
-                                    <span class="w-10 h-10 flex items-center justify-center bg-white text-gray-500 font-bold rounded-l-xl border-y border-l border-gray-200">D</span>
+                                    <span class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 font-bold rounded-l-xl border-y border-l border-gray-200">D</span>
                                     <input type="text" name="option_d" x-model="formData.option_d" class="w-full px-4 py-3 rounded-r-xl border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all duration-200" required>
                                 </div>
                             </div>
@@ -578,7 +634,7 @@
                                 @foreach(['A', 'B', 'C', 'D'] as $option)
                                 <label class="cursor-pointer relative">
                                     <input type="radio" name="correct_answer" value="{{ $option }}" x-model="formData.correct_answer" class="peer sr-only">
-                                    <div class="h-12 flex items-center justify-center rounded-xl border-2 border-gray-100 bg-white font-bold text-gray-500 hover:bg-white hover:border-blue-200 peer-checked:border-blue-500 peer-checked:bg-white peer-checked:text-blue-600 transition-all duration-200">
+                                    <div class="h-12 flex items-center justify-center rounded-xl border-2 border-gray-100 bg-white font-bold text-gray-500 hover:bg-gray-50 hover:border-blue-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-600 transition-all duration-200">
                                         {{ $option }}
                                     </div>
                                 </label>
@@ -588,7 +644,7 @@
 
                         <!-- Footer Actions -->
                         <div class="flex gap-4 pt-6 mt-6 border-t border-gray-100">
-                            <button type="button" @click="sidebarOpen = false" class="px-8 py-3 bg-white text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors duration-200">
+                            <button type="button" @click="sidebarOpen = false" class="px-8 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors duration-200">
                                 Cancel
                             </button>
                             <button type="submit" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg shadow-blue-200 hover:shadow-blue-300 transform hover:-translate-y-0.5">
@@ -602,6 +658,21 @@
     @endif
     @endif
 </div>
+<script>
+    window.toggleAnswerKey = function() {
+        document.body.classList.toggle('reveal-key');
+        const btn = document.getElementById('toggleKeyBtn');
+        if(btn) {
+            if (document.body.classList.contains('reveal-key')) {
+                btn.classList.add('bg-yellow-300', 'ring-2', 'ring-yellow-500');
+                btn.classList.remove('bg-white');
+            } else {
+                btn.classList.remove('bg-yellow-300', 'ring-2', 'ring-yellow-500');
+                btn.classList.add('bg-white');
+            }
+        }
+    };
+</script>
 @include('assignments.toefl-itp.listening.partials.admin-modals')
 @include('assignments.toefl-itp.listening.partials.audio-player-scripts')
 @endsection

@@ -40,6 +40,19 @@
     
     
 
+        /* Teacher/Admin Toggle Reveal Styling */
+    body.reveal-key .answer-label[data-is-correct="true"] {
+        background-color: #dcfce7 !important;
+        border-color: #86efac !important;
+    }
+    body.reveal-key .answer-label[data-is-correct="true"] span {
+        color: #15803d !important;
+        font-weight: 700 !important;
+    }
+    body.reveal-key .answer-label[data-is-correct="false"] {
+        opacity: 0.5;
+    }
+
     /* Student Result Feedback Overrides */
     .answer-label.is-correct {
         background-color: #dcfce7 !important; /* green-100 */
@@ -72,7 +85,7 @@
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
                     <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Latihan Soal</h1>
-                    @if(Auth::user()->isAdmin())
+                    @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher()))
                         @php
                             // Tentukan status kunci jawaban
                             $statusAnswerKey = false;
@@ -253,6 +266,19 @@
                         
                         {{-- Custom Audio Player with Skip Controls --}}
                         <div class="flex-1 min-w-[220px] flex items-center gap-1.5 md:gap-3 max-w-3xl">
+                            @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher()))
+                                {{-- Teacher/Admin Toggle Key Button --}}
+                                <button type="button" id="toggleKeyBtn" onclick="toggleAnswerKey()" 
+                                        class="p-2 bg-white text-yellow-700 hover:bg-yellow-200 rounded-lg transition-colors flex-shrink-0 flex items-center gap-2 border border-yellow-300 mr-2" 
+                                        title="Toggle Answer Key">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    <span class="text-xs font-bold hidden md:inline">Key</span>
+                                </button>
+                            @endif
+
                             {{-- Backward 10s Button --}}
                             <button type="button" onclick="skipAudio(-10)" 
                                     class="p-1.5 md:p-2 bg-white hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Mundur 10 detik">
@@ -745,6 +771,20 @@
                             audio.pause();
                             playIcon.classList.remove('hidden');
                             pauseIcon.classList.add('hidden');
+                        }
+                    };
+
+                    window.toggleAnswerKey = function() {
+                        document.body.classList.toggle('reveal-key');
+                        const btn = document.getElementById('toggleKeyBtn');
+                        if(btn) {
+                            if (document.body.classList.contains('reveal-key')) {
+                                btn.classList.add('bg-yellow-300', 'ring-2', 'ring-yellow-500');
+                                btn.classList.remove('bg-white');
+                            } else {
+                                btn.classList.remove('bg-yellow-300', 'ring-2', 'ring-yellow-500');
+                                btn.classList.add('bg-white');
+                            }
                         }
                     };
 

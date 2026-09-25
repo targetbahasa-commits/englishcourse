@@ -48,7 +48,29 @@
                 </div>
                 
                 <div class="flex items-center gap-3">
-                    @if(auth()->check() && auth()->user()->isAdmin())
+                    <!-- Autosave Status Indicator -->
+                    <div id="autosave-status" class="{{ isset($existingResult) ? 'hidden' : 'flex' }} items-center gap-1.5 text-xs text-gray-500 font-medium px-2.5 py-1 rounded-full bg-gray-50 border border-gray-200">
+                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span>Autosave Aktif</span>
+                    </div>
+
+                    <!-- Header Score Badge -->
+                    <div id="header-score-badge" class="{{ isset($existingResult) ? 'flex' : 'hidden' }} items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-full font-bold text-xs shadow-sm">
+                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                        <span id="header-score-text">
+                            @if(isset($existingResult))
+                                Band {{ number_format($existingResult->band_score, 1) }} ({{ $existingResult->correct_count }}/{{ $existingResult->total_questions }})
+                            @endif
+                        </span>
+                    </div>
+
+                    <!-- Header Kerjakan Ulang Button -->
+                    <button type="button" id="header-retry-btn" onclick="confirmResetPractice()" class="{{ isset($existingResult) ? 'inline-flex' : 'hidden' }} items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 border border-rose-200 rounded-lg text-xs font-bold transition shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        <span>Kerjakan Ulang</span>
+                    </button>
+
+                    @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher()))
                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border {{ $hasAnswerKey ? 'bg-white text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200' }}">
                             <span>{{ $hasAnswerKey ? '✓' : '✕' }}</span>
                             <span>{{ $hasAnswerKey ? 'Answer Key Ditambahkan' : 'Answer Key Belum Ada' }}</span>
@@ -336,7 +358,7 @@
                                     @endphp
                                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200/60 p-6 hover:border-blue-300 transition-colors duration-200"
                                          x-data="{ 
-                                            selected: {{ isset($question['sub_questions']) ? '{' . collect($question['sub_questions'])->map(function($sq) { return "'".$sq['id']."': ''"; })->implode(',') . '}' : (isset($question['type']) && $question['type'] === 'checkbox' ? '[]' : 'null') }},
+                                            selected: {{ in_array($question['type'] ?? '', ['checkbox', 'multiple_choice_multiple']) ? '[]' : (isset($question['sub_questions']) ? '{' . collect($question['sub_questions'])->map(function($sq) { return "'".$sq['id']."': ''"; })->implode(',') . '}' : 'null') }},
                                             maxSelect: {{ $maxSelect }},
                                             toggleOption(optKey) {
                                                 if (!Array.isArray(this.selected)) {
@@ -350,6 +372,7 @@
                                                         this.selected.shift();
                                                     }
                                                     this.selected.push(optKey);
+                                                    this.selected.sort();
                                                 }
                                             }
                                          }"
@@ -385,10 +408,10 @@
                                                     $question['start_number'] = $currentBadgeNum - 1;
                                                 @endphp
                                                 
-                                                @if(!$isGroup)
+                                                @if(!$isGroup || in_array($question['type'] ?? '', ['multiple_choice_multiple', 'checkbox']))
                                                 <div class="flex-none pt-0.5">
-                                                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-white text-blue-600 font-bold text-xs ring-1 ring-blue-100">
-                                                        {{ $currentBadgeNum }}
+                                                    <span class="flex items-center justify-center {{ $count > 1 ? 'px-2.5 h-7' : 'w-6 h-6' }} rounded-full bg-white text-blue-600 font-bold text-xs ring-1 ring-blue-100 shadow-sm">
+                                                        {{ $count > 1 ? ($currentBadgeNum . '-' . ($currentBadgeNum + $count - 1)) : $currentBadgeNum }}
                                                     </span>
                                                 </div>
                                                 @endif
@@ -428,19 +451,48 @@
                                                                 $rawText = preg_replace('/Write\s+(TRUE|YES)\s+if\s+the\s+statement.*?,?.*?or\s+NOT\s+GIVEN.*?(passage|this)\.?/si', '', $rawText);
                                                                 $rawText = preg_replace('/^Questions?\s*\d+(–|-)\d+\s*(<br\s*\/?>)?/i', '', $rawText);
                                                             }
+
+                                                            if (($question['type'] ?? '') === 'matching_headings') {
+                                                                $rawText = preg_replace('/(<br\s*\/?>)?\s*(<[^>]+>)?\s*List of [Hh]eadings.*/si', '', $rawText);
+                                                            }
+
+                                                            // Clean instruction for summary_completion / sentence_completion so reconstructed/passage text doesn't leak into header
+                                                            if (in_array($question['type'] ?? '', ['summary_completion', 'sentence_completion'])) {
+                                                                $summaryPatterns = [
+                                                                    '/(.*?on your answer sheet\.?)(.*)$/si',
+                                                                    '/(.*?in boxes \d+[-–]\d+\.?)(.*)$/si',
+                                                                    '/(.*?each answer\.?)(.*)$/si',
+                                                                ];
+                                                                foreach ($summaryPatterns as $sp) {
+                                                                    if (preg_match($sp, $rawText, $sm)) {
+                                                                        $rawText = trim($sm[1]);
+                                                                        break;
+                                                                    }
+                                                                }
+                                                            }
                                                             
-                                                            // Split lines by <br> or newline
-                                                            $lines = array_filter(array_map('trim', preg_split('/<br\s*\/?>|\n/i', $rawText)));
-                                                            $outputHtml = '';
+                                                             // Normalize any split "Questions XX ... <br> ... -YY" so the question range stays unified on one line
+                                                             $rawText = preg_replace('/(Questions?\s*\d+)\s*(?:<\/strong>)?\s*<br\s*\/?>\s*(?:<em>)?\s*[-–]\s*(\d+)/i', '$1-$2</strong><br><em>', $rawText);
+                                                             $rawText = preg_replace('/(Questions?\s*\d+)\s*<br\s*\/?>\s*[-–]\s*(\d+)/i', '$1-$2<br>', $rawText);
+                                                             $rawText = preg_replace('/\s*Advertisements\s*/i', '', $rawText);
+
+                                                             // Split lines by <br> or newline
+                                                             $lines = array_filter(array_map('trim', preg_split('/<br\s*\/?>|\n/i', $rawText)));
+                                                             $outputHtml = '';
                                                             
                                                             foreach ($lines as $lIndex => $lText) {
-                                                                if (preg_match('/^Questions?\s+\d+/i', $lText)) {
-                                                                    $outputHtml .= '<h3 class="text-lg md:text-xl font-bold font-serif text-gray-900 mb-2">' . $lText . '</h3>';
-                                                                } elseif (preg_match('/^(Choose|Write|Do the following|Look at)/i', $lText)) {
-                                                                    $lTextFormatted = preg_replace('/(TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|A–[A-Z]|A-[A-Z])/i', '<strong class="font-bold">$1</strong>', $lText);
+                                                                $cleanLText = strip_tags($lText);
+                                                                if (preg_match('/^Questions?\s+\d+/i', $cleanLText)) {
+                                                                    $outputHtml .= '<h3 class="text-lg md:text-xl font-bold font-serif text-gray-900 mb-2">' . $cleanLText . '</h3>';
+                                                                } elseif (preg_match('/^(Complete|Choose|Write|Do the following|Look at)/i', $cleanLText)) {
+                                                                    $lTextFormatted = preg_replace_callback('/\b(ONE|TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|A–[A-Z]|A-[A-Z])\b/i', function($m) {
+                                                                        return '<strong class="font-bold">' . $m[1] . '</strong>';
+                                                                    }, $cleanLText);
                                                                     $outputHtml .= '<p class="text-base md:text-lg italic text-gray-700 mb-1">' . $lTextFormatted . '</p>';
                                                                 } else {
-                                                                    $lTextFormatted = preg_replace('/Which\s+(TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT)/i', 'Which <strong class="font-bold">$1</strong>', $lText);
+                                                                    $lTextFormatted = preg_replace_callback('/\b(Which\s+(?:TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT)|ONE|TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT)\b/i', function($m) {
+                                                                        return '<strong class="font-bold">' . $m[1] . '</strong>';
+                                                                    }, $cleanLText);
                                                                     $outputHtml .= '<p class="font-semibold text-gray-900 text-base md:text-lg mt-3 mb-2 leading-relaxed">' . $lTextFormatted . '</p>';
                                                                 }
                                                             }
@@ -475,9 +527,7 @@
                                                                 </div>
                                                             </div>
                                                         @endif
-                                                    @if(isset($question['type']) && in_array($question['type'], ['checkbox', 'multiple_choice_multiple']))
-                                                        <p class="text-xs text-blue-500 font-medium mt-1.5 uppercase tracking-wide">Select {{ is_array($question['correct_answer']) ? count($question['correct_answer']) : 'multiple' }} answers</p>
-                                                    @endif
+
                                                 </div>
                                             </div>
                                             <div class="flex gap-2 flex-shrink-0 items-start">
@@ -496,6 +546,7 @@
                                                     isset($question['type']) && $question['type'] === 'diagram_labelling' => 'diagram-labelling',
                                                     isset($question['type']) && in_array($question['type'], ['sentence_completion', 'summary_completion']) => 'summary-sentence-completion',
                                                     isset($question['type']) && in_array($question['type'], ['short_answer_group', 'short_answer']) && isset($question['sub_questions']) => 'short-answer-group',
+                                                    isset($question['type']) && in_array($question['type'], ['multiple_choice_multiple', 'checkbox']) => 'scalar-choice',
                                                     isset($question['sub_questions']) => 'sub-questions-fallback',
                                                     isset($question['type']) && $question['type'] === 'short_answer' => 'scalar-short-answer',
                                                     default => 'scalar-choice',
@@ -513,7 +564,7 @@
 
                     @if($hasAnswerKey)
                         <!-- Evaluation Button -->
-                        <div class="mt-8 mb-12 flex justify-center">
+                        <div class="mt-8 mb-12 flex justify-center {{ isset($existingResult) ? 'hidden' : '' }}" id="eval-button-container">
                             <button type="button" onclick="evaluateIeltsReading()" id="eval-button" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all text-lg flex items-center gap-2 transform hover:scale-105">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 Selesai & Cek Jawaban
@@ -521,27 +572,57 @@
                         </div>
 
                         <!-- Evaluation Summary Box -->
-                        <div id="eval-summary" class="hidden mt-8 mb-12 bg-white rounded-2xl shadow-xl border border-gray-100 p-8 transition-all duration-500">
+                        <div id="eval-summary" class="{{ isset($existingResult) ? '' : 'hidden' }} mt-8 mb-12 bg-white rounded-3xl shadow-xl border border-gray-100 p-8 transition-all duration-500">
                             <div class="text-center mb-6">
-                                <h2 class="text-3xl font-bold text-gray-900 mb-2">Hasil Evaluasi</h2>
-                                <p class="text-gray-500">Berikut adalah analisis jawaban Anda</p>
-                            </div>
-                            <div class="flex justify-center items-center gap-8 mb-8">
-                                <div class="text-center">
-                                    <div class="text-5xl font-bold text-emerald-500 mb-1" id="eval-score">-</div>
-                                    <div class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Total Benar</div>
+                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-3">
+                                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                    Latihan Selesai
                                 </div>
-                                <div class="h-16 w-px bg-gray-200"></div>
-                                <div class="text-center">
-                                    <div class="text-5xl font-bold text-rose-500 mb-1" id="eval-wrong">-</div>
-                                    <div class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Salah/Kosong</div>
+                                <h2 class="text-3xl font-extrabold text-gray-900 mb-1">Hasil Evaluasi</h2>
+                                <p class="text-gray-500 text-sm">Berikut adalah pencapaian dan analisis jawaban Anda</p>
+                            </div>
+
+                            <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-white text-center shadow-lg mb-8 max-w-sm mx-auto">
+                                <span class="text-xs font-bold uppercase tracking-widest text-emerald-100 block mb-1">Perkiraan Band Score</span>
+                                <div class="text-5xl font-black tracking-tight" id="eval-band-score">
+                                    {{ isset($existingResult) ? 'Band ' . number_format($existingResult->band_score, 1) : '-' }}
                                 </div>
                             </div>
-                            <div class="bg-white rounded-xl p-4 text-center">
-                                <p class="text-blue-800 font-medium">Scroll ke atas untuk melihat penjelasan dan perbaikan pada setiap pertanyaan.</p>
+
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8 max-w-lg mx-auto">
+                                <div class="bg-gray-50 border border-gray-200/80 rounded-2xl p-4 text-center">
+                                    <div class="text-3xl font-extrabold text-emerald-600 mb-1" id="eval-score">
+                                        {{ isset($existingResult) ? $existingResult->correct_count : '-' }}
+                                    </div>
+                                    <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">Benar</div>
+                                </div>
+                                <div class="bg-gray-50 border border-gray-200/80 rounded-2xl p-4 text-center">
+                                    <div class="text-3xl font-extrabold text-rose-500 mb-1" id="eval-wrong">
+                                        {{ isset($existingResult) ? ($existingResult->total_questions - $existingResult->correct_count) : '-' }}
+                                    </div>
+                                    <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">Salah / Kosong</div>
+                                </div>
+                                <div class="bg-gray-50 border border-gray-200/80 rounded-2xl p-4 text-center col-span-2 md:col-span-1">
+                                    <div class="text-3xl font-extrabold text-gray-700 mb-1" id="eval-total">
+                                        {{ isset($existingResult) ? $existingResult->total_questions : '-' }}
+                                    </div>
+                                    <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">Total Soal</div>
+                                </div>
                             </div>
-                            <div class="mt-6 text-center">
-                                <button type="button" onclick="window.location.reload()" class="text-gray-500 hover:text-gray-800 font-medium underline">Ulangi Latihan</button>
+
+                            <div class="bg-blue-50 border border-blue-200/60 rounded-2xl p-4 text-center mb-6 max-w-lg mx-auto">
+                                <p class="text-blue-900 text-sm font-medium">Scroll ke atas untuk melihat kunci jawaban dan pembahasan lengkap pada masing-masing nomor.</p>
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                                <button type="button" onclick="confirmResetPractice()" class="w-full sm:w-auto px-6 py-3 bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 font-bold rounded-xl border border-rose-200 shadow-sm transition flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                    Kerjakan Ulang
+                                </button>
+                                <button type="button" onclick="document.getElementById('questions-panel')?.scrollTo({top: 0, behavior: 'smooth'})" class="w-full sm:w-auto px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-bold rounded-xl shadow transition flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                                    Review Jawaban di Atas
+                                </button>
                             </div>
                         </div>
                     @else
@@ -589,6 +670,12 @@
         margin-bottom: 1.25rem !important;
         font-size: 1.05rem !important;
         line-height: 1.65 !important;
+        color: #111827 !important;
+    }
+
+    .passage-content strong,
+    .passage-content b {
+        font-weight: 700 !important;
         color: #111827 !important;
     }
 
@@ -779,138 +866,357 @@
 
 @push('scripts')
 <script>
+    const MATERIAL_ID = {{ $materialId ?? $id ?? 0 }};
+    const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const EXISTING_RESULT = @json($existingResult ?? null);
+    const DRAFT_ANSWERS = @json($draftAnswers ?? null);
+    const ANSWER_KEYS = @json((auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher())) || !empty($existingResult) ? ($answerKeys ?? null) : null);
+    const RETRY_URL = window.location.pathname + '?retry=1';
+    const SUBMIT_URL = "{{ route('assignments.ielts-academic.reading.practice-submit') }}";
+    const DRAFT_URL = "{{ route('assignments.ielts-academic.reading.practice-draft') }}";
+    const STORAGE_KEY = `ielts_reading_draft_${MATERIAL_ID}_{{ auth()->id() ?? 'guest' }}`;
+
+    function confirmResetPractice() {
+        if (confirm('Apakah Anda yakin ingin mengulang latihan ini? Jawaban dan skor Anda sebelumnya akan direset sehingga Anda dapat mengerjakan ulang dari awal.')) {
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (e) {}
+            window.location.href = RETRY_URL;
+        }
+    }
+
+    function checkIsCorrect(correctData, userAnswer) {
+        if (correctData === undefined || correctData === null) return false;
+
+        if (Array.isArray(correctData)) {
+            if (Array.isArray(userAnswer)) {
+                const sortedUser = [...userAnswer].map(x => String(x).trim().toLowerCase()).sort();
+                const sortedCorrect = [...correctData].map(x => String(x).trim().toLowerCase()).sort();
+                return JSON.stringify(sortedUser) === JSON.stringify(sortedCorrect);
+            } else {
+                const userNorm = String(userAnswer || '').trim().toLowerCase();
+                const normalizedCorrect = correctData.map(c => String(c).trim().toLowerCase());
+                return userNorm !== '' && normalizedCorrect.includes(userNorm);
+            }
+        } else {
+            const userNorm = String(userAnswer || '').trim().toLowerCase();
+            if (userNorm === '') return false;
+            const corrStr = String(correctData).trim().toLowerCase();
+            const possible = corrStr.split('/').map(s => s.trim().toLowerCase());
+            return possible.includes(userNorm);
+        }
+    }
+
+    function collectCurrentAnswers() {
+        const allInputs = document.querySelectorAll('[data-qid]');
+        const userAnswers = {};
+
+        allInputs.forEach(input => {
+            const qid = input.getAttribute('data-qid');
+            if (!qid) return;
+
+            if (input.type === 'checkbox') {
+                if (input.checked) {
+                    if (!userAnswers[qid]) userAnswers[qid] = [];
+                    userAnswers[qid].push(input.value);
+                }
+            } else if (input.type === 'radio') {
+                if (input.checked) {
+                    userAnswers[qid] = input.value;
+                }
+            } else if (input.tagName === 'SELECT') {
+                if (input.value !== '') {
+                    userAnswers[qid] = input.value;
+                }
+            } else {
+                if (input.value !== undefined && input.value !== '') {
+                    userAnswers[qid] = input.value;
+                }
+            }
+        });
+        return userAnswers;
+    }
+
+    function restoreAnswers(answers) {
+        if (!answers || typeof answers !== 'object') return;
+
+        Object.keys(answers).forEach(qid => {
+            const val = answers[qid];
+            if (val === null || val === undefined) return;
+
+            const inputs = document.querySelectorAll(`[data-qid="${qid}"]`);
+            inputs.forEach(input => {
+                if (input.type === 'radio') {
+                    if (String(input.value).trim().toLowerCase() === String(val).trim().toLowerCase()) {
+                        input.checked = true;
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                } else if (input.type === 'checkbox') {
+                    const arr = Array.isArray(val) ? val : [val];
+                    if (arr.map(x => String(x).trim().toLowerCase()).includes(String(input.value).trim().toLowerCase())) {
+                        input.checked = true;
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                } else if (input.tagName === 'SELECT') {
+                    input.value = val;
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                } else {
+                    input.value = val;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+
+                // Sync Alpine.js component state if available
+                const alpineEl = input.closest('[x-data]');
+                if (alpineEl && alpineEl._x_dataStack && alpineEl._x_dataStack[0]) {
+                    const stack = alpineEl._x_dataStack[0];
+                    if (stack.selected !== undefined) {
+                        if (Array.isArray(stack.selected)) {
+                            const arr = Array.isArray(val) ? val : [val];
+                            arr.forEach(v => {
+                                if (!stack.selected.includes(v)) stack.selected.push(v);
+                            });
+                        } else if (typeof stack.selected === 'object' && stack.selected !== null) {
+                            stack.selected[qid] = val;
+                        } else {
+                            stack.selected = val;
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    let autosaveTimer = null;
+    function scheduleAutosave() {
+        if (EXISTING_RESULT) return;
+
+        const statusEl = document.getElementById('autosave-status');
+        if (statusEl) {
+            statusEl.innerHTML = `<svg class="w-3.5 h-3.5 text-amber-500 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span class="text-amber-600 font-semibold">Menyimpan...</span>`;
+        }
+
+        const answers = collectCurrentAnswers();
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+        } catch (e) {}
+
+        clearTimeout(autosaveTimer);
+        autosaveTimer = setTimeout(async () => {
+            try {
+                const res = await fetch(DRAFT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        material_id: MATERIAL_ID,
+                        answers: answers
+                    })
+                });
+                if (res.ok && statusEl) {
+                    statusEl.innerHTML = `<svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg><span class="text-emerald-700 font-semibold">Tersimpan</span>`;
+                }
+            } catch (err) {
+                console.warn('Draft save error:', err);
+                if (statusEl) {
+                    statusEl.innerHTML = `<span class="text-gray-400">Tersimpan lokal</span>`;
+                }
+            }
+        }, 1000);
+    }
+
+    function renderEvaluationFeedback(answerKeyData, userAnswers, stats) {
+        if (!answerKeyData || typeof answerKeyData !== 'object') return;
+
+        Object.keys(answerKeyData).forEach(qid => {
+            const ansData = answerKeyData[qid];
+            if (!ansData || ansData.correct === undefined || ansData.correct === null) return;
+
+            const userAnswer = userAnswers[qid] !== undefined ? userAnswers[qid] : null;
+            const isCorrect = checkIsCorrect(ansData.correct, userAnswer);
+
+            const inputs = document.querySelectorAll(`[data-qid="${qid}"]`);
+            if (inputs.length === 0) return;
+
+            // Remove previous feedback
+            document.querySelectorAll(`.eval-feedback-qid-${qid}`).forEach(el => el.remove());
+
+            // Style inputs and labels
+            inputs.forEach(input => {
+                input.setAttribute('disabled', 'true');
+                input.classList.add('cursor-not-allowed', 'opacity-85');
+
+                const label = input.closest('label');
+                if (label) {
+                    label.classList.add('pointer-events-none');
+                    if (input.type === 'radio' || input.type === 'checkbox') {
+                        const val = input.value;
+                        const isThisOptionCorrect = checkIsCorrect(ansData.correct, val);
+                        if (isThisOptionCorrect) {
+                            label.classList.remove('border-gray-200', 'bg-white');
+                            label.classList.add('border-emerald-500', 'bg-emerald-50/70', 'ring-1', 'ring-emerald-500');
+                        } else if (input.checked && !isCorrect) {
+                            label.classList.remove('border-gray-200', 'bg-white');
+                            label.classList.add('border-rose-500', 'bg-rose-50/70', 'ring-1', 'ring-rose-500');
+                        }
+                    }
+                }
+
+                if (input.tagName === 'SELECT' || (input.tagName === 'INPUT' && input.type !== 'radio' && input.type !== 'checkbox' && input.type !== 'hidden')) {
+                    if (isCorrect) {
+                        input.classList.remove('border-gray-300', 'border-gray-200', 'border-rose-500', 'bg-rose-50', 'text-rose-700');
+                        input.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-800');
+                    } else {
+                        input.classList.remove('border-gray-300', 'border-gray-200', 'border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
+                        input.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-800');
+                    }
+                }
+            });
+
+            // Format displayed correct answer
+            let formattedCorrect = '';
+            if (Array.isArray(ansData.correct)) {
+                formattedCorrect = ansData.correct.join(' / ');
+            } else {
+                formattedCorrect = String(ansData.correct);
+            }
+
+            let formattedUser = '';
+            if (userAnswer === null || userAnswer === undefined || userAnswer === '') {
+                formattedUser = '(Tidak dijawab)';
+            } else if (Array.isArray(userAnswer)) {
+                formattedUser = userAnswer.join(', ');
+            } else {
+                formattedUser = String(userAnswer);
+            }
+
+            const feedbackHtml = `
+                <div class="eval-feedback-qid-${qid} mt-2.5 p-3.5 rounded-xl border ${isCorrect ? 'bg-emerald-50/80 border-emerald-200' : 'bg-rose-50/80 border-rose-200'} shadow-sm text-left">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="font-bold text-xs uppercase tracking-wider ${isCorrect ? 'text-emerald-800' : 'text-rose-800'} flex items-center gap-1.5">
+                            ${isCorrect ? '<svg class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> Jawaban Benar' : '<svg class="w-4 h-4 text-rose-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg> Jawaban Salah / Belum Terjawab'}
+                        </span>
+                        ${qid ? `<span class="text-[10px] font-bold text-gray-500 uppercase">Soal ${qid}</span>` : ''}
+                    </div>
+                    ${!isCorrect ? `
+                    <div class="text-xs text-rose-900 mb-1 flex items-center gap-1.5 flex-wrap">
+                        <span class="font-medium text-gray-600">Jawaban Anda:</span>
+                        <span class="font-bold bg-white px-2 py-0.5 rounded border border-rose-200 line-through text-rose-700">${formattedUser}</span>
+                    </div>` : ''}
+                    <div class="text-xs text-emerald-950 mb-1 flex items-center gap-1.5 flex-wrap">
+                        <span class="font-medium text-gray-600">Kunci Jawaban:</span>
+                        <span class="font-bold bg-white px-2 py-0.5 rounded border border-emerald-300 text-emerald-800">${formattedCorrect}</span>
+                    </div>
+                    ${ansData.explanation ? `
+                    <div class="mt-2 pt-2 border-t ${isCorrect ? 'border-emerald-200/60' : 'border-rose-200/60'}">
+                        <span class="font-bold text-[11px] text-gray-500 uppercase tracking-wide block mb-0.5">Penjelasan:</span>
+                        <p class="text-xs text-gray-700 leading-relaxed">${ansData.explanation}</p>
+                    </div>` : ''}
+                </div>
+            `;
+
+            const firstInput = inputs[0];
+            const targetWrapper = firstInput.closest('.multi-sub-feedback-wrapper')
+                || firstInput.closest('td')
+                || firstInput.closest('.flex.items-center.justify-between')
+                || firstInput.closest('.py-3.5')
+                || firstInput.closest('.py-2')
+                || firstInput.closest('.mb-4')
+                || firstInput.parentElement;
+
+            if (targetWrapper) {
+                const div = document.createElement('div');
+                div.innerHTML = feedbackHtml;
+                if (firstInput.closest('td')) {
+                    targetWrapper.appendChild(div);
+                } else {
+                    targetWrapper.parentNode.insertBefore(div, targetWrapper.nextSibling);
+                }
+            }
+        });
+
+        // Update Summary Box
+        const bandEl = document.getElementById('eval-band-score');
+        if (bandEl && stats.band_score !== undefined) {
+            bandEl.innerText = 'Band ' + Number(stats.band_score).toFixed(1);
+        }
+        const scoreEl = document.getElementById('eval-score');
+        if (scoreEl) scoreEl.innerText = stats.correct;
+        const wrongEl = document.getElementById('eval-wrong');
+        if (wrongEl) wrongEl.innerText = stats.total - stats.correct;
+        const totalEl = document.getElementById('eval-total');
+        if (totalEl) totalEl.innerText = stats.total;
+
+        const evalBtnContainer = document.getElementById('eval-button-container');
+        if (evalBtnContainer) evalBtnContainer.classList.add('hidden');
+
+        const summaryBox = document.getElementById('eval-summary');
+        if (summaryBox) {
+            summaryBox.classList.remove('hidden');
+        }
+
+        // Update Top Header
+        const headerScoreBadge = document.getElementById('header-score-badge');
+        const headerScoreText = document.getElementById('header-score-text');
+        const headerRetryBtn = document.getElementById('header-retry-btn');
+        const autosaveStatus = document.getElementById('autosave-status');
+
+        if (headerScoreBadge && headerScoreText) {
+            headerScoreText.innerText = `Band ${Number(stats.band_score).toFixed(1)} (${stats.correct}/${stats.total})`;
+            headerScoreBadge.classList.remove('hidden');
+            headerScoreBadge.classList.add('flex');
+        }
+        if (headerRetryBtn) {
+            headerRetryBtn.classList.remove('hidden');
+            headerRetryBtn.classList.add('inline-flex');
+        }
+        if (autosaveStatus) {
+            autosaveStatus.classList.add('hidden');
+        }
+    }
+
     async function evaluateIeltsReading() {
-        // Prevent multiple clicks
         const evalBtn = document.getElementById('eval-button');
+        if (!evalBtn) return;
         const originalBtnText = evalBtn.innerHTML;
         evalBtn.innerHTML = '<svg class="w-6 h-6 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Mengevaluasi...';
         evalBtn.disabled = true;
 
-        // Collect answers
-        const allInputs = document.querySelectorAll('[data-qid]');
-        const userAnswers = {};
-        
-        allInputs.forEach(input => {
-            const qid = input.getAttribute('data-qid');
-            if (!qid) return;
-            
-            if (input.type === 'checkbox' || input.type === 'radio') {
-                if (input.checked) {
-                    if (input.type === 'radio') {
-                        userAnswers[qid] = input.value;
-                    } else {
-                        if (!userAnswers[qid]) userAnswers[qid] = [];
-                        userAnswers[qid].push(input.value);
-                    }
-                }
-            } else {
-                userAnswers[qid] = input.value;
-            }
-        });
+        const userAnswers = collectCurrentAnswers();
 
         try {
-            const response = await fetch("{{ route('assignments.ielts-academic.reading.practice-submit') }}", {
+            const response = await fetch(SUBMIT_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    material_id: "{{ $material_id ?? '' }}",
+                    material_id: MATERIAL_ID,
                     answers: userAnswers
                 })
             });
 
             if (!response.ok) throw new Error('Network response was not ok');
             const data = await response.json();
-            
-            const answerKeyData = data.answer_key;
-            
-            // Render Feedback
-            Object.keys(answerKeyData).forEach(qid => {
-                const ansData = answerKeyData[qid];
-                if (!ansData.correct) return;
 
-                let userAnswer = userAnswers[qid] || null;
-                let isCorrect = false;
-                
-                // Compare (similar to backend logic for UI rendering purposes)
-                if (Array.isArray(ansData.correct)) {
-                    if (Array.isArray(userAnswer)) {
-                        const sortedUser = [...userAnswer].sort();
-                        const sortedCorrect = [...ansData.correct].sort();
-                        isCorrect = JSON.stringify(sortedUser) === JSON.stringify(sortedCorrect);
-                    } else {
-                        const normalizedCorrect = ansData.correct.map(c => c.toString().trim().toLowerCase());
-                        isCorrect = userAnswer && normalizedCorrect.includes(userAnswer.toString().trim().toLowerCase());
-                    }
-                } else {
-                    const ansStr = (userAnswer || '').toString().trim().toLowerCase();
-                    const corrStr = (ansData.correct || '').toString().trim().toLowerCase();
-                    isCorrect = ansStr === corrStr && ansStr !== '';
-                }
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (e) {}
 
-                // Inject Feedback into UI
-                const inputs = document.querySelectorAll(`[data-qid="${qid}"]`);
-                if (inputs.length === 0) return;
-                const firstInput = inputs[0];
-                
-                const wrapper = firstInput.closest('td') || firstInput.closest('.flex.items-center.justify-between') || firstInput.closest('.pl-10') || firstInput.closest('.mb-4') || firstInput.parentElement;
-                
-                if (wrapper) {
-                    if (isCorrect) {
-                        firstInput.classList.add('border-emerald-500', 'bg-white', 'text-emerald-700');
-                        firstInput.classList.remove('border-gray-300', 'border-gray-200');
-                    } else {
-                        firstInput.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-700');
-                        firstInput.classList.remove('border-gray-300', 'border-gray-200');
-                    }
-
-                    inputs.forEach(i => {
-                        i.setAttribute('disabled', 'true');
-                        i.classList.add('cursor-not-allowed', 'opacity-80');
-                    });
-
-                    const feedbackHtml = `
-                        <div class="mt-3 p-4 rounded-xl border ${isCorrect ? 'bg-white border-emerald-200' : 'bg-rose-50 border-rose-200'} shadow-sm text-left animate-fade-in">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="font-bold text-sm uppercase tracking-wide ${isCorrect ? 'text-emerald-700' : 'text-rose-700'}">
-                                    ${isCorrect ? '✓ Benar' : '✕ Salah'}
-                                </span>
-                            </div>
-                            <div class="text-sm text-gray-800 mb-2">
-                                <span class="font-semibold text-gray-600">Jawaban Benar:</span> 
-                                <span class="font-bold bg-white px-2 py-0.5 rounded border border-gray-200">${Array.isArray(ansData.correct) ? ansData.correct.join(', ') : ansData.correct}</span>
-                            </div>
-                            ${ansData.explanation ? `
-                            <div class="mt-3 pt-3 border-t ${isCorrect ? 'border-emerald-200/60' : 'border-rose-200/60'}">
-                                <div class="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-1">Penjelasan:</div>
-                                <div class="text-sm text-gray-700 leading-relaxed">${ansData.explanation}</div>
-                            </div>
-                            ` : ''}
-                        </div>
-                    `;
-                    
-                    if (firstInput.closest('td')) {
-                        const div = document.createElement('div');
-                        div.innerHTML = feedbackHtml;
-                        wrapper.appendChild(div);
-                    } else {
-                        const div = document.createElement('div');
-                        div.innerHTML = feedbackHtml;
-                        wrapper.parentNode.insertBefore(div, wrapper.nextSibling);
-                    }
-                }
+            renderEvaluationFeedback(data.answer_key, userAnswers, {
+                correct: data.correct,
+                total: data.total,
+                band_score: data.band_score
             });
 
-            // Update summary numbers
-            document.getElementById('eval-score').innerText = data.correct;
-            document.getElementById('eval-wrong').innerText = data.total - data.correct;
-
-            evalBtn.classList.add('hidden');
             const summaryBox = document.getElementById('eval-summary');
-            summaryBox.classList.remove('hidden');
-            summaryBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (summaryBox) {
+                summaryBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
 
         } catch (error) {
             console.error(error);
@@ -919,6 +1225,46 @@
             evalBtn.disabled = false;
         }
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (EXISTING_RESULT) {
+            const userAnswers = EXISTING_RESULT.answers_data || {};
+            restoreAnswers(userAnswers);
+            renderEvaluationFeedback(ANSWER_KEYS, userAnswers, {
+                correct: EXISTING_RESULT.correct_count,
+                total: EXISTING_RESULT.total_questions,
+                band_score: EXISTING_RESULT.band_score
+            });
+        } else {
+            let savedAnswers = DRAFT_ANSWERS;
+            if (!savedAnswers || Object.keys(savedAnswers).length === 0) {
+                try {
+                    const localStr = localStorage.getItem(STORAGE_KEY);
+                    if (localStr) savedAnswers = JSON.parse(localStr);
+                } catch (e) {}
+            }
+            if (savedAnswers && Object.keys(savedAnswers).length > 0) {
+                restoreAnswers(savedAnswers);
+                const statusEl = document.getElementById('autosave-status');
+                if (statusEl) {
+                    statusEl.innerHTML = `<svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg><span class="text-blue-700 font-semibold">Draft dipulihkan</span>`;
+                }
+            }
+
+            // Bind autosave events
+            document.addEventListener('input', (e) => {
+                if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-qid')) {
+                    scheduleAutosave();
+                }
+            });
+
+            document.addEventListener('change', (e) => {
+                if (e.target && (e.target.hasAttribute('data-qid') || e.target.closest('[x-data]'))) {
+                    scheduleAutosave();
+                }
+            });
+        }
+    });
 </script>
 
 <script>

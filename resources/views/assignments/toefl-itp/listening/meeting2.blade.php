@@ -109,7 +109,7 @@
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
                     <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Latihan Soal</h1>
-                    @if(Auth::user()->isAdmin())
+                    @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher()))
                         @php
                             // Tentukan status kunci jawaban
                             $statusAnswerKey = false;
@@ -125,9 +125,23 @@
                         </span>
                     @endif
                 </div>
-                <div class="flex items-center gap-2 px-4 py-1.5 bg-white text-blue-700 rounded-full text-sm font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                    TOEFL Listening
+                <div class="flex items-center gap-2">
+                    @if($existingScore || session('score_data'))
+                        @php
+                            $headerScore = session('score_data')['score'] ?? $existingScore->score ?? 0;
+                        @endphp
+                        <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            ✓ Skor: {{ round($headerScore) }}%
+                        </span>
+                        <a href="{{ request()->fullUrlWithQuery(['retry' => 1]) }}" onclick="return confirm('Apakah Anda yakin ingin mengulang latihan ini? Jawaban sebelumnya akan dihapus.')" class="px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 transition-colors inline-flex items-center gap-1 shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            Kerjakan Ulang
+                        </a>
+                    @endif
+                    <div class="flex items-center gap-2 px-4 py-1.5 bg-white text-blue-700 rounded-full text-sm font-semibold border border-blue-100">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        TOEFL Listening
+                    </div>
                 </div>
             </div>
             
@@ -1062,9 +1076,9 @@
                                         
                                         // Student Result Highlighting
                                         $studentClass = '';
-                                        if (session('score_data')) {
-                                            $userAnswers = session('score_data')['user_answers'];
-                                            $userAns = $userAnswers[$question->id] ?? null;
+                                        $evalAnswers = session('score_data')['user_answers'] ?? ($existingScore->answers ?? null);
+                                        if ($evalAnswers) {
+                                            $userAns = $evalAnswers[$question->id] ?? null;
                                             $correctAns = $question->correct_answer;
                                             
                                             if ($option === $correctAns) {
@@ -1083,8 +1097,8 @@
                                                    name="question_{{ $question->id }}" 
                                                    value="{{ $option }}" 
                                                    class="sr-only peer"
-                                                   @if($existingScore && isset($existingScore->answers[$question->id]) && $existingScore->answers[$question->id] === $option) checked @endif
-                                                   required>
+                                                   @if(isset($evalAnswers[$question->id]) && $evalAnswers[$question->id] === $option) checked @elseif($existingScore && isset($existingScore->answers[$question->id]) && $existingScore->answers[$question->id] === $option) checked @endif
+                                                   @if(!$evalAnswers) required @endif>
                                             
                                             {{-- Visual Bubble --}}
                                             <div class="flex items-center justify-center mr-3 flex-none">
@@ -1140,9 +1154,9 @@
                                         
                                         // Student Result Highlighting
                                         $studentClass = '';
-                                        if (session('score_data')) {
-                                            $userAnswers = session('score_data')['user_answers'];
-                                            $userAns = $userAnswers[$question->id] ?? null;
+                                        $evalAnswers = session('score_data')['user_answers'] ?? ($existingScore->answers ?? null);
+                                        if ($evalAnswers) {
+                                            $userAns = $evalAnswers[$question->id] ?? null;
                                             $correctAns = $question->correct_answer;
                                             
                                             if ($option === $correctAns) {
@@ -1161,8 +1175,8 @@
                                                    name="question_{{ $question->id }}" 
                                                    value="{{ $option }}" 
                                                    class="sr-only peer"
-                                                   @if($existingScore && isset($existingScore->answers[$question->id]) && $existingScore->answers[$question->id] === $option) checked @endif
-                                                   required>
+                                                   @if(isset($evalAnswers[$question->id]) && $evalAnswers[$question->id] === $option) checked @elseif($existingScore && isset($existingScore->answers[$question->id]) && $existingScore->answers[$question->id] === $option) checked @endif
+                                                   @if(!$evalAnswers) required @endif>
                                             
                                             {{-- Visual Bubble --}}
                                             <div class="flex items-center justify-center mr-3 flex-none">
@@ -1187,12 +1201,13 @@
 
             <div class="mt-8 flex flex-col gap-6">
                 {{-- Score Report Section (Bottom) --}}
-                 @if(session('score_data'))
+                 @if(session('score_data') || $existingScore)
                     @php
                         $sData = session('score_data');
-                        $score = $sData['score'];
-                        $correct = $sData['correct_count'];
-                        $total = $sData['total_question'];
+                        $evalAnswers = $sData['user_answers'] ?? ($existingScore->answers ?? []);
+                        $score = $sData['score'] ?? $existingScore->score;
+                        $correct = $sData['correct_count'] ?? (isset($questions) ? collect($questions)->filter(fn($q) => ($evalAnswers[$q->id] ?? null) === $q->correct_answer)->count() : 0);
+                        $total = $sData['total_question'] ?? (isset($questions) ? count($questions) : 0);
                         
                         // Color Logic
                         if ($score >= 80) {
@@ -1238,6 +1253,12 @@
                                             <p class="text-sm opacity-90 italic">{{ $scoreMsg }}</p>
                                         </div>
                                     </div>
+                                    <div class="mt-4 flex items-center gap-3">
+                                        <a href="{{ request()->fullUrlWithQuery(['retry' => 1]) }}" onclick="return confirm('Apakah Anda yakin ingin mengulang latihan ini? Jawaban sebelumnya akan dihapus.')" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-sm transition shadow-sm inline-flex items-center gap-1.5">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                            Kerjakan Ulang
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                             <div class="hidden md:block text-{{ $scoreColor }}-200 opacity-20 transform rotate-12">
@@ -1258,13 +1279,19 @@
                     </script>
                 @endif
             
-            <div class="flex justify-end gap-4">
+            <div class="flex justify-end gap-4 items-center">
                  <a href="{{ route('assignments.toefl-itp.listening.meeting', $number) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
     Back
 </a>
+                @if($existingScore || session('score_data'))
+                    <a href="{{ request()->fullUrlWithQuery(['retry' => 1]) }}" onclick="return confirm('Apakah Anda yakin ingin mengulang latihan ini? Jawaban sebelumnya akan dihapus.')" class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg transition-colors duration-200 shadow-md inline-flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Kerjakan Ulang
+                    </a>
+                @endif
                 <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
                     {{ $existingScore ? 'Resubmit Answers' : 'Submit Answers' }}
                 </button>

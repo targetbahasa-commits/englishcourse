@@ -43,6 +43,19 @@
     /* TOEFL Listening Answer Styling */
     
 
+        /* Teacher/Admin Toggle Reveal Styling */
+    body.reveal-key .answer-label[data-is-correct="true"] {
+        background-color: #dcfce7 !important;
+        border-color: #86efac !important;
+    }
+    body.reveal-key .answer-label[data-is-correct="true"] span {
+        color: #15803d !important;
+        font-weight: 700 !important;
+    }
+    body.reveal-key .answer-label[data-is-correct="false"] {
+        opacity: 0.5;
+    }
+
     /* Student Result Feedback Overrides */
     .answer-label.is-correct {
         background-color: #dcfce7 !important; /* green-100 */
@@ -75,7 +88,7 @@
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
                     <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Latihan Soal</h1>
-                    @if(Auth::user()->isAdmin())
+                    @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher()))
                         @php
                             // Tentukan status kunci jawaban
                             $statusAnswerKey = false;
@@ -91,9 +104,23 @@
                         </span>
                     @endif
                 </div>
-                <div class="flex items-center gap-2 px-4 py-1.5 bg-white text-blue-700 rounded-full text-sm font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                    TOEFL Listening
+                <div class="flex items-center gap-2">
+                    @if($existingScore || session('score_data'))
+                        @php
+                            $headerScore = session('score_data')['score'] ?? $existingScore->score ?? 0;
+                        @endphp
+                        <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            ✓ Skor: {{ round($headerScore) }}%
+                        </span>
+                        <a href="{{ request()->fullUrlWithQuery(['retry' => 1]) }}" onclick="return confirm('Apakah Anda yakin ingin mengulang latihan ini? Jawaban sebelumnya akan dihapus.')" class="px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 transition-colors inline-flex items-center gap-1 shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            Kerjakan Ulang
+                        </a>
+                    @endif
+                    <div class="flex items-center gap-2 px-4 py-1.5 bg-white text-blue-700 rounded-full text-sm font-semibold border border-blue-100">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        TOEFL Listening
+                    </div>
                 </div>
             </div>
             
@@ -256,6 +283,19 @@
                         
                         {{-- Custom Audio Player with Skip Controls --}}
                         <div class="flex-1 min-w-[220px] flex items-center gap-1.5 md:gap-3 max-w-3xl">
+                            @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher()))
+                                {{-- Teacher/Admin Toggle Key Button --}}
+                                <button type="button" id="toggleKeyBtn" onclick="toggleAnswerKey()" 
+                                        class="p-2 bg-white text-yellow-700 hover:bg-yellow-200 rounded-lg transition-colors flex-shrink-0 flex items-center gap-2 border border-yellow-300 mr-2" 
+                                        title="Toggle Answer Key">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    <span class="text-xs font-bold hidden md:inline">Key</span>
+                                </button>
+                            @endif
+
                             {{-- Backward 10s Button --}}
                             <button type="button" onclick="skipAudio(-10)" 
                                     class="p-1.5 md:p-2 bg-white hover:bg-indigo-200 rounded-lg transition-colors flex-shrink-0" title="Mundur 10 detik">
@@ -751,6 +791,20 @@
                         }
                     };
 
+                    window.toggleAnswerKey = function() {
+                        document.body.classList.toggle('reveal-key');
+                        const btn = document.getElementById('toggleKeyBtn');
+                        if(btn) {
+                            if (document.body.classList.contains('reveal-key')) {
+                                btn.classList.add('bg-yellow-300', 'ring-2', 'ring-yellow-500');
+                                btn.classList.remove('bg-white');
+                            } else {
+                                btn.classList.remove('bg-yellow-300', 'ring-2', 'ring-yellow-500');
+                                btn.classList.add('bg-white');
+                            }
+                        }
+                    };
+
                     // Skip audio by seconds
                     window.skipAudio = function(seconds) {
                         if (audio && audio.duration) {
@@ -988,14 +1042,35 @@
                             <div class="flex flex-col gap-2 flex-1">
                                 @foreach(['A' => $question->option_a, 'B' => $question->option_b, 'C' => $question->option_c, 'D' => $question->option_d] as $option => $text)
                                     @if($text !== 'N/A' && $text !== '')
-                                        <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-white rounded-lg px-3 transition-all">
+                                    @php
+                                        $canSeeKey = auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher());
+                                        $isCorrectVal = $canSeeKey ? ($question->correct_answer === $option ? 'true' : 'false') : '';
+                                        
+                                        // Student Result Highlighting
+                                        $studentClass = '';
+                                        $evalAnswers = session('score_data')['user_answers'] ?? ($existingScore->answers ?? null);
+                                        if ($evalAnswers) {
+                                            $userAns = $evalAnswers[$question->id] ?? null;
+                                            $correctAns = $question->correct_answer;
+                                            
+                                            if ($option === $correctAns) {
+                                                // Correct Answer always Green
+                                                $studentClass = 'is-correct'; 
+                                            } elseif ($option === $userAns && $userAns !== $correctAns) {
+                                                // Wrong User Answer Red
+                                                $studentClass = 'is-wrong'; 
+                                            }
+                                        }
+                                    @endphp
+                                    <label class="answer-label flex items-center cursor-pointer group/option w-full py-2 hover:bg-white rounded-lg px-3 transition-all {{ $studentClass }}"
+                                           @if($canSeeKey) data-is-correct="{{ $isCorrectVal }}" @endif>
                                             {{-- Hidden Radio Input --}}
                                             <input type="radio" 
                                                    name="question_{{ $question->id }}" 
                                                    value="{{ $option }}" 
                                                    class="sr-only peer"
-                                                   @if($existingScore && isset($existingScore->answers[$question->id]) && $existingScore->answers[$question->id] === $option) checked @endif
-                                                   required>
+                                                   @if(isset($evalAnswers[$question->id]) && $evalAnswers[$question->id] === $option) checked @elseif($existingScore && isset($existingScore->answers[$question->id]) && $existingScore->answers[$question->id] === $option) checked @endif
+                                                   @if(!$evalAnswers) required @endif>
                                             
                                             {{-- Visual Bubble --}}
                                             <div class="flex items-center justify-center mr-3 flex-none">
@@ -1048,9 +1123,9 @@
                                         
                                         // Student Result Highlighting
                                         $studentClass = '';
-                                        if (session('score_data')) {
-                                            $userAnswers = session('score_data')['user_answers'];
-                                            $userAns = $userAnswers[$question->id] ?? null;
+                                        $evalAnswers = session('score_data')['user_answers'] ?? ($existingScore->answers ?? null);
+                                        if ($evalAnswers) {
+                                            $userAns = $evalAnswers[$question->id] ?? null;
                                             $correctAns = $question->correct_answer;
                                             
                                             if ($option === $correctAns) {
@@ -1069,8 +1144,8 @@
                                                    name="question_{{ $question->id }}" 
                                                    value="{{ $option }}" 
                                                    class="sr-only peer"
-                                                   @if($existingScore && isset($existingScore->answers[$question->id]) && $existingScore->answers[$question->id] === $option) checked @endif
-                                                   required>
+                                                   @if(isset($evalAnswers[$question->id]) && $evalAnswers[$question->id] === $option) checked @elseif($existingScore && isset($existingScore->answers[$question->id]) && $existingScore->answers[$question->id] === $option) checked @endif
+                                                   @if(!$evalAnswers) required @endif>
                                             
                                             {{-- Visual Bubble --}}
                                             <div class="flex items-center justify-center mr-3 flex-none">
@@ -1094,13 +1169,15 @@
             </div>
 
             <div class="mt-8 flex flex-col gap-6">
+                {{-- Score Report Section (Bottom) --}}<div class="mt-8 flex flex-col gap-6">
                 {{-- Score Report Section (Bottom) --}}
-                 @if(session('score_data'))
+                 @if(session('score_data') || $existingScore)
                     @php
                         $sData = session('score_data');
-                        $score = $sData['score'];
-                        $correct = $sData['correct_count'];
-                        $total = $sData['total_question'];
+                        $evalAnswers = $sData['user_answers'] ?? ($existingScore->answers ?? []);
+                        $score = $sData['score'] ?? $existingScore->score;
+                        $correct = $sData['correct_count'] ?? (isset($questions) ? collect($questions)->filter(fn($q) => ($evalAnswers[$q->id] ?? null) === $q->correct_answer)->count() : 0);
+                        $total = $sData['total_question'] ?? (isset($questions) ? count($questions) : 0);
                         
                         // Color Logic
                         if ($score >= 80) {
@@ -1146,78 +1223,11 @@
                                             <p class="text-sm opacity-90 italic">{{ $scoreMsg }}</p>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="hidden md:block text-{{ $scoreColor }}-200 opacity-20 transform rotate-12">
-                                <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- Auto Scroll to Score --}}
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            const scoreReport = document.getElementById('scoreReport');
-                            if(scoreReport) {
-                                scoreReport.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            }
-                        });
-                    </script>
-                @endif
-            
-            <div class="mt-8 flex flex-col gap-6">
-                {{-- Score Report Section (Bottom) --}}
-                 @if(session('score_data'))
-                    @php
-                        $sData = session('score_data');
-                        $score = $sData['score'];
-                        $correct = $sData['correct_count'];
-                        $total = $sData['total_question'];
-                        
-                        // Color Logic
-                        if ($score >= 80) {
-                            $scoreColor = 'green';
-                            $scoreMsg = 'Excellent! Keep it up!';
-                        } elseif ($score >= 60) {
-                            $scoreColor = 'blue';
-                            $scoreMsg = 'Good job! Practice makes perfect.';
-                        } else {
-                            $scoreColor = 'red';
-                            $scoreMsg = 'Keep practicing! You can do better.';
-                        }
-                    @endphp
-                    <div id="scoreReport" class="bg-{{ $scoreColor }}-50 border-l-4 border-{{ $scoreColor }}-500 p-6 rounded-r-lg shadow-sm animate-fade-in-down mb-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0 mt-1">
-                                    @if($score >= 80)
-                                        <svg class="h-8 w-8 text-{{ $scoreColor }}-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    @elseif($score >= 60)
-                                        <svg class="h-8 w-8 text-{{ $scoreColor }}-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                        </svg>
-                                    @else
-                                        <svg class="h-8 w-8 text-{{ $scoreColor }}-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                        </svg>
-                                    @endif
-                                </div>
-                                <div class="ml-4">
-                                    <h3 class="text-xl leading-6 font-bold text-{{ $scoreColor }}-800">
-                                        Hasil Latihan
-                                    </h3>
-                                    <div class="mt-2 text-{{ $scoreColor }}-700 grid grid-cols-1 md:grid-cols-2 gap-x-8">
-                                        <div class="flex items-baseline gap-3">
-                                            <span class="text-5xl font-extrabold tracking-tight">{{ round($score) }}%</span>
-                                            <span class="text-sm font-semibold uppercase tracking-wide opacity-80">Score</span>
-                                        </div>
-                                        <div class="flex flex-col justify-center">
-                                            <div class="text-lg font-semibold">Benar {{ $correct }} / {{ $total }}</div>
-                                            <p class="text-sm opacity-90 italic">{{ $scoreMsg }}</p>
-                                        </div>
+                                    <div class="mt-4 flex items-center gap-3">
+                                        <a href="{{ request()->fullUrlWithQuery(['retry' => 1]) }}" onclick="return confirm('Apakah Anda yakin ingin mengulang latihan ini? Jawaban sebelumnya akan dihapus.')" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-sm transition shadow-sm inline-flex items-center gap-1.5">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                            Kerjakan Ulang
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -1239,13 +1249,19 @@
                     </script>
                 @endif
             
-            <div class="flex justify-end gap-4">
+            <div class="flex justify-end gap-4 items-center">
                  <a href="{{ route('assignments.toefl-itp.listening.meeting', $number) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-xl hover:bg-white border border-gray-200 transition-all font-medium text-sm shadow-sm group">
     <svg class="w-4 h-4 text-gray-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
     Back
 </a>
+                @if($existingScore || session('score_data'))
+                    <a href="{{ request()->fullUrlWithQuery(['retry' => 1]) }}" onclick="return confirm('Apakah Anda yakin ingin mengulang latihan ini? Jawaban sebelumnya akan dihapus.')" class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg transition-colors duration-200 shadow-md inline-flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Kerjakan Ulang
+                    </a>
+                @endif
                 <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
                     {{ $existingScore ? 'Resubmit Answers' : 'Submit Answers' }}
                 </button>
