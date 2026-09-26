@@ -240,6 +240,9 @@ class DatabaseSeeder extends Seeder
             ToeflReadingMeeting10Seeder::class,
             ToeflReadingMeeting11Seeder::class,
             ToeflReadingMeeting12Seeder::class,
+
+            // Grammar Placement Test
+            GrammarPlacementQuestionSeeder::class,
         ]);
     }
 }
