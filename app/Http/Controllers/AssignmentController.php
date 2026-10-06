@@ -78,52 +78,74 @@ class AssignmentController extends Controller
 
     public function index()
     {
-        // Slugs for the 4 Grammar for Writing sub-classes (shown inside the group page)
-        $grammarSubSlugs = [
-            'introductory-grammar-for-writing',
-            'complexity-grammar-for-writing',
-            'proficiency-grammar-for-writing',
-            'fast-track-grammar-for-writing',
-        ];
-
-        // Slugs for the 5 Speaking sub-classes (shown inside the group page)
-        $speakingSubSlugs = [
-            'introductory-speaking',
-            'intermediate-speaking',
-            'advanced-speaking',
-            'proficiency-speaking',
-            'super-speaking',
-        ];
-
-        // Exclude internal/helper programs AND the Grammar/Speaking sub-programs from the main dashboard
+        // "satuan" programs (individual skills/levels like IELTS Academic Reading,
+        // Complexity Grammar for Writing, Introductory Speaking, ...) are only ever
+        // meant to be accessed through their parent "paket" bundle's own page, never
+        // as their own top-level card here. This used to be enforced with a
+        // hardcoded slug blacklist that only listed the online variants - so every
+        // offline clone (created via splitIntoOfflineVariant(), which copies
+        // program_type through from its online parent) slipped past the blacklist
+        // and leaked onto this grid as an extra card. Filtering on program_type
+        // directly covers both online and offline, and any future satuan program
+        // without needing another slug added here.
         $programs = \App\Models\Program::with('classPeriods')
-            ->whereNotIn('slug', array_merge(
-                [
-                    'ielts-academic-listening',
-                    'ielts-academic-reading',
-                    'ielts-academic-writing',
-                    'ielts-academic-speaking',
-                    'ielts-speaking', // sub-program of IELTS Academic, shown inside its own page
-                ],
-                $grammarSubSlugs,
-                $speakingSubSlugs
-            ))
+            ->where('program_type', '!=', 'satuan')
             ->whereRaw('LOWER(name) NOT LIKE ?', ['%mock test%'])
             ->whereRaw('LOWER(slug) NOT LIKE ?', ['%mock%'])
             ->whereRaw('LOWER(slug) NOT LIKE ?', ['%cambridge%'])
             ->where('is_active', true)
             ->get();
 
-        // Add a synthetic "Grammar for Writing" group entry
-        $grammarGroup = new \App\Models\Program([
-            'name' => 'Grammar for Writing',
+        // Add a synthetic "Grammar for Writing" group entry. The 4 real tier
+        // programs (Introductory/Complexity/Proficiency/Fast Track) are satuan and
+        // just got filtered out above, so without this the group would have no
+        // representation at all on this grid.
+        $grammarGroupAttrs = [
             'slug' => 'grammar-for-writing',
             'description' => 'Master the fundamentals of English grammar specifically tailored for academic and professional writing.',
             'color' => 'blue',
             'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>',
             'is_active' => true,
-        ]);
-        $programs->prepend($grammarGroup);
+        ];
+        $programs->prepend(new \App\Models\Program($grammarGroupAttrs + [
+            'name' => 'Grammar for Writing',
+            'delivery_mode' => 'online',
+        ]));
+
+        // The group card above was hardcoded to delivery_mode=online only, so even
+        // though the 4 tiers each have an active Offline sibling (created via
+        // splitIntoOfflineVariant()), there was no "Grammar for Writing" card at
+        // all on the Offline tab to reach them from. Mirror it there too, but only
+        // when at least one offline tier is actually active.
+        $hasActiveOfflineGrammarTier = \App\Models\Program::where('is_active', true)
+            ->where('delivery_mode', 'offline')
+            ->whereIn('slug', [
+                'introductory-grammar-for-writing-offline',
+                'complexity-grammar-for-writing-offline',
+                'proficiency-grammar-for-writing-offline',
+                'fast-track-grammar-for-writing-offline',
+            ])
+            ->exists();
+        if ($hasActiveOfflineGrammarTier) {
+            $programs->prepend(new \App\Models\Program($grammarGroupAttrs + [
+                'name' => 'Grammar for Writing (Offline)',
+                'delivery_mode' => 'offline',
+            ]));
+        }
+
+        // Same problem as Grammar for Writing above: every Speaking level
+        // (First/Second/Third/Fourth/Super Point Speaking) is satuan, so the
+        // whole group was invisible on this grid with no way to reach any of
+        // them ("kelas speaking tidak ada").
+        $programs->prepend(new \App\Models\Program([
+            'slug' => 'speaking',
+            'name' => 'Speaking',
+            'description' => 'Build confident, fluent English speaking skills through structured, level-by-level practice.',
+            'color' => 'orange',
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path>',
+            'is_active' => true,
+            'delivery_mode' => 'online',
+        ]));
 
         $allowedAssignmentProgramSlugs = $this->resolveAllowedAssignmentProgramSlugsForUser(Auth::user());
 
@@ -426,6 +448,12 @@ class AssignmentController extends Controller
                 ->all();
         }
 
+        $finalTestResults = $user
+            ? FinalTestResult::where('user_id', $user->id)
+                ->orderByDesc('completed_at')
+                ->get()
+            : collect();
+
         return view('assignments.final-test.index', compact(
             'primaryPrograms',
             'grammarPrograms',
@@ -437,6 +465,7 @@ class AssignmentController extends Controller
             'userClassPeriodIds',
             'studentFocusedView',
             'studentFinalTestCards',
+            'finalTestResults',
         ));
     }
 
@@ -579,6 +608,22 @@ class AssignmentController extends Controller
         if (!$this->userCanAccessFinalTestBatch($user, $programSettings['class_period_ids'] ?? [], $this->resolveUserClassPeriodIds($user))) {
             return redirect()->route('final-test')
                 ->with('error', 'Batch Anda belum memiliki akses ke final test ini.');
+        }
+
+        if ($user && !$user->isAdmin()) {
+            $attemptCount = FinalTestResult::where('user_id', $user->id)
+                ->where('test_type', $this->finalTestCertificateType($settingsKey))
+                ->count();
+
+            if ($attemptCount >= 3) {
+                $existingResult = FinalTestResult::where('user_id', $user->id)
+                    ->where('test_type', $this->finalTestCertificateType($settingsKey))
+                    ->latest('completed_at')
+                    ->first();
+
+                return redirect()->route('final-test.results.show', $existingResult)
+                    ->with('warning', 'Anda sudah mencapai batas maksimal 3x percobaan untuk Final Test ini.');
+            }
         }
 
         if ($user?->isStudent()) {
@@ -773,12 +818,26 @@ class AssignmentController extends Controller
     {
         $this->authorizeFinalTestResultAccess($result);
 
+        $user = Auth::user();
+
+        if (!$user?->isAdmin() && (float) $result->score < 50) {
+            return back()->with('error', 'Skor Anda belum mencapai batas kelulusan (50). Silakan ulangi Final Test untuk mendapatkan sertifikat.');
+        }
+
+        if (!$user?->isAdmin() && $result->certificate_downloads_count >= 3) {
+            return back()->with('error', 'Anda sudah mencapai batas maksimal 3x download sertifikat untuk hasil ini.');
+        }
+
         $certificate = FreeTestCertificate::where('test_type', $result->test_type)
             ->where('is_active', true)
             ->first();
 
         if (!$certificate) {
             return back()->with('error', 'Sertifikat belum tersedia untuk final test ini.');
+        }
+
+        if (!$user?->isAdmin()) {
+            $result->increment('certificate_downloads_count');
         }
 
         return $this->makeFinalTestCertificatePdf($result, $certificate)
@@ -831,6 +890,60 @@ class AssignmentController extends Controller
         return view('assignments.ielts-general', compact('hasListening', 'hasReading', 'hasWriting', 'hasSpeaking', 'hasFullAccess', 'isClassEnded'));
     }
 
+    /**
+     * SAT hub - 2 sections (Reading & Writing, Math), mirroring the real
+     * Digital SAT structure. Section pages are a structural placeholder for
+     * now (no questions yet) - same "build the shell first, content later"
+     * approach already used for the Kampung Inggris speaking curriculum.
+     */
+    public function sat()
+    {
+        $user = Auth::user();
+        if (!$this->userCanAccessAssignmentProgram($user, 'sat')) {
+            return redirect()->route('assignments.index')->with('error', 'You can only access assignments for your registered program.');
+        }
+
+        $practiceSets = \App\Models\SatReadingWritingMeeting::withCount('questions')
+            ->orderBy('meeting_number')
+            ->get();
+
+        $scoresByMeeting = $user
+            ? \App\Models\SatReadingWritingScore::where('user_id', $user->id)
+                ->get()
+                ->keyBy('meeting_number')
+            : collect();
+
+        $practiceSets->each(function ($set) use ($scoresByMeeting) {
+            $userScore = $scoresByMeeting->get($set->meeting_number);
+            $set->completed = ($userScore !== null);
+            $set->user_score = $userScore ? $userScore->score : null;
+        });
+
+        return view('assignments.sat.index', [
+            'practiceSets' => $practiceSets,
+        ]);
+    }
+
+    public function satReadingWriting()
+    {
+        $user = Auth::user();
+        if (!$this->userCanAccessAssignmentProgram($user, 'sat')) {
+            return redirect()->route('assignments.index')->with('error', 'You can only access assignments for your registered program.');
+        }
+
+        return view('assignments.sat.reading-writing');
+    }
+
+    public function satMath()
+    {
+        $user = Auth::user();
+        if (!$this->userCanAccessAssignmentProgram($user, 'sat')) {
+            return redirect()->route('assignments.index')->with('error', 'You can only access assignments for your registered program.');
+        }
+
+        return view('assignments.sat.math');
+    }
+
     protected function resolveAssignmentProgramSlugFromRequest(Request $request): ?string
     {
         if ($request->routeIs('assignments.toefl-itp*')) {
@@ -847,6 +960,10 @@ class AssignmentController extends Controller
 
         if ($request->routeIs('assignments.ielts-general*')) {
             return 'ielts-general';
+        }
+
+        if ($request->routeIs('assignments.sat*')) {
+            return 'sat';
         }
 
         if ($request->routeIs('assignments.grammar-writing*')) {
@@ -995,6 +1112,22 @@ class AssignmentController extends Controller
         if (!$this->userCanAccessFinalTestBatch($user, $programSettings['class_period_ids'] ?? [], $this->resolveUserClassPeriodIds($user))) {
             return redirect()->route('final-test')
                 ->with('error', 'Batch Anda belum memiliki akses ke final test ini.');
+        }
+
+        if ($user && !$user->isAdmin()) {
+            $attemptCount = FinalTestResult::where('user_id', $user->id)
+                ->where('test_type', $this->finalTestCertificateType($settingsKey))
+                ->count();
+
+            if ($attemptCount >= 3) {
+                $existingResult = FinalTestResult::where('user_id', $user->id)
+                    ->where('test_type', $this->finalTestCertificateType($settingsKey))
+                    ->latest('completed_at')
+                    ->first();
+
+                return redirect()->route('final-test.results.show', $existingResult)
+                    ->with('warning', 'Anda sudah mencapai batas maksimal 3x percobaan untuk Final Test ini.');
+            }
         }
 
         if ($user?->isStudent()) {
@@ -1337,7 +1470,10 @@ class AssignmentController extends Controller
             'grammar-for-speaking',
             'introductory-speaking',
             'intermediate-speaking',
-            'advanced-speaking' => 'speaking',
+            'advanced-speaking',
+            'proficiency-speaking',
+            'super-speaking',
+            'speaking' => 'speaking',
             'pte' => 'pte-academic',
             'ielts-academic-listening', 'ielts-academic-reading', 'ielts-academic-writing', 'ielts-academic-speaking', 'ielts-academic-full-package', 'ielts-academic-all-sections' => 'ielts-academic',
             default => $slug,
@@ -1528,6 +1664,13 @@ class AssignmentController extends Controller
             'direction' => 'Listen and write down the directions or location instructions you hear.',
         ];
 
+        if ($type === 'spelling') {
+            $practice = max(1, min(30, $practice));
+            $practiceAudio = "audio/ielts/listening/warmup/spelling_practice_{$practice}.mp3";
+            $audioFiles['spelling'] = $practiceAudio;
+            $titles['spelling'] = "Spelling Practice - Paket {$practice}";
+        }
+
         if ($type === 'names' && $practice === 2) {
             $practiceAudio = 'audio/ielts/listening/warmup/names_practice_2.mp3';
             $audioFiles['names'] = file_exists(public_path($practiceAudio)) ? $practiceAudio : $audioFiles['names'];
@@ -1543,7 +1686,7 @@ class AssignmentController extends Controller
             'description' => $descriptions[$type] ?? 'Listen to the audio.'
         ];
 
-        return view('assignments.ielts.listening.warmup.' . $type, compact('section'));
+        return view('assignments.ielts.listening.warmup.' . $type, compact('section', 'practice'));
     }
 
     public function uploadIeltsMaterialAudio(Request $request, $id)
@@ -3991,7 +4134,7 @@ return view('assignments.ielts.writing.practice_selection', compact('task', 'mee
             
             try {
                 $client = new \GuzzleHttp\Client();
-                $geminiResponse = $client->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$geminiKey}", [
+                $geminiResponse = $client->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={$geminiKey}", [
                     'headers' => ['Content-Type' => 'application/json'],
                     'json' => $geminiPayload,
                     'timeout' => $timeout
